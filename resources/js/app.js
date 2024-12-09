@@ -31,6 +31,12 @@ createInertiaApp({
               darkModeSelector: 'light',
               cssLayer: false
             }
+        },
+        zIndex: {
+            modal: 1100,        //dialog, drawer
+            overlay: 1000,      //select, popover
+            menu: 1000,         //overlay menus
+            tooltip: 1100       //tooltip
         }
       })
       .component('Head', Head)
