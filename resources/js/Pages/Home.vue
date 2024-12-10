@@ -14,7 +14,7 @@ const visible = ref(false);
       </header>
 
       <section>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <!-- <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br> -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <!-- Card 1 -->
           <div class="bg-white shadow rounded p-6">

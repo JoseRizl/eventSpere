@@ -11,7 +11,8 @@ const sideBarItems = ref([
     {
         label: 'Dashboard',
         icon: 'pi pi-objects-column',
-        route: route('home')
+        route: route('home'),
+        badge: 3
     },
     {
         label: 'Messages',
@@ -131,46 +132,47 @@ const menuBarItems = ref([
 
 <template>
     <div class="bg-gray-100">
-        <div class="flex flex-col md:flex-row h-screen">
+        <div class="flex flex-col md:flex-row ">
 
 
-        <aside class="fixed top-0 left-0 h-screen">
-            <div class="card flex justify-center h-full">
-                <TieredMenu :model="sideBarItems" class="w-full md:w-60 h-16 md:h-full flex-shrink-0 !rounded-none">
-                <template #start>
-                    <span class="inline-flex items-center gap-1 px-2 py-2">
-                        <Avatar image="https://msunaawan.edu.ph/wp-content/uploads/elementor/thumbs/Resized-for-Docs_MSUN-LOGO-1-qukqvmb3wm17j2ukfd3r16tafpfhgujscsqt1iex2g.png" shape="circle" />
-                        <span class="text-xl font-semibold">HRIS</span>
-                    </span>
-                </template>
-                <template #item="{ item, props, hasSubmenu }">
-                    <Link v-if="item.route" v-ripple :href="item.route" class="flex items-center cursor-pointer text-surface-700 dark:text-surface-0 px-4 py-2">
-                        <span :class="item.icon" />
-                        <span class="ml-2">{{ item.label }}</span>
-                        <Badge v-if="item.badge" class="ml-auto" :value="item.badge" />
-                    </Link>
-                    <a v-else v-ripple :href="item.url" :target="item.target" v-bind="props.action">
-                        <span :class="item.icon" />
-                        <span class="ml-2">{{ item.label }}</span>
-                        <span v-if="hasSubmenu" class="pi pi-angle-right ml-auto" />
-                    </a>
-                </template>
-                <!-- <template #submenulabel="{ item }">
-                    <span class="text-primary font-bold">{{ item.label }}</span>
-                </template>-->
+            <aside class="fixed top-0 left-0 h-screen">
+                <div class="card flex justify-center h-full">
+                    <TieredMenu :model="sideBarItems" class="w-full hidden h-16 flex-shrink-0 !rounded-none lg:block lg:w-60  lg:h-full">
+                    <template #start>
+                        <span class="inline-flex items-center gap-1 px-2 py-2">
+                            <Avatar image="https://msunaawan.edu.ph/wp-content/uploads/elementor/thumbs/Resized-for-Docs_MSUN-LOGO-1-qukqvmb3wm17j2ukfd3r16tafpfhgujscsqt1iex2g.png" shape="circle" />
+                            <span class="text-xl font-semibold">HRIS</span>
+                        </span>
+                    </template>
 
-            </TieredMenu>
-            </div>
-        </aside>
+                    <template #item="{ item, props, hasSubmenu }">
+                        <Link v-if="item.route" v-ripple :href="item.route" class="flex items-center cursor-pointer text-surface-700 dark:text-surface-0 px-4 py-2">
+                            <span :class="item.icon" />
+                            <span class="ml-2">{{ item.label }}</span>
+                            <Badge v-if="item.badge" class="ml-auto" :value="item.badge" />
+                        </Link>
+                        <a v-else v-ripple :href="item.url" :target="item.target" v-bind="props.action">
+                            <span :class="item.icon" />
+                            <span class="ml-2">{{ item.label }}</span>
+                            <span v-if="hasSubmenu" class="pi pi-angle-right ml-auto" />
+                        </a>
+                    </template>
+                    <!-- <template #submenulabel="{ item }">
+                        <span class="text-primary font-bold">{{ item.label }}</span>
+                    </template>-->
+
+                </TieredMenu>
+                </div>
+            </aside>
 
 
             <!-- Main Content -->
             <main class="flex-1">
-                <header class="fixed top-0 left-60 right-0 z-[1100]">
+                <header class="fixed top-0 left-0 right-0 z-[1100] lg:left-60">
                     <Menubar :model="menuBarItems" class="w-full md:w-100 !border-l-0 !rounded-none">
-                        <template #start>
+                        <!-- <template #start>
                             <span class="pi pi-bars"></span>
-                        </template>
+                        </template> -->
                         <template #item="{ item, props, hasSubmenu, root }">
                             <a v-ripple class="flex items-center" v-bind="props.action">
                                 <span>{{ item.label }}</span>
@@ -192,7 +194,7 @@ const menuBarItems = ref([
                     <!-- </nav> -->
                 </header>
 
-                <div class="md:mt-12 md:ml-60 px-4 py-4">
+                <div class="md:mt-12 px-4 py-4 lg:ml-60">
                     <slot />
                 </div>
             </main>
