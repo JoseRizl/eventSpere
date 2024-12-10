@@ -1,6 +1,7 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3';
 import TextInput from '../../Components/TextInput.vue';
+import AuthLayout from '../../Layouts/AuthLayout.vue';
 
 
 const form = useForm({
@@ -14,6 +15,8 @@ const submit = () => {
         onError: () => form.reset('password', 'remember')
     })
 }
+
+defineOptions({layout: AuthLayout});
 </script>
 
 <template>
@@ -40,5 +43,5 @@ const submit = () => {
             </div>
         </form>
     </div>
-    
+
 </template>
