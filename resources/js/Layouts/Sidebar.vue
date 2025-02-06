@@ -32,7 +32,7 @@
                 <button v-ripple class="relative overflow-hidden w-full border-0 bg-transparent flex items-start p-2 pl-4 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-none cursor-pointer transition-colors duration-200">
                     <Avatar image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png" class="mr-2" shape="circle" />
                     <span class="inline-flex flex-col items-start">
-                        <span class="font-bold">Amy Elsner</span>
+                        <span class="font-bold">Admin</span>
                         <span class="text-sm">Admin</span>
                     </span>
                 </button>

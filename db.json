@@ -1,0 +1,72 @@
+{
+  "events": [
+    {
+      "id": "a023",
+      "title": "4 A.M. Zumba",
+      "subtitle": "Zumba",
+      "description": "Zumba in 4 am",
+      "category": {
+        "id": "4",
+        "title": "Leisure",
+        "description": "Leisure, relaxation, and enjoyment"
+      },
+      "date": "2024-12-31",
+      "time": "4:00",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "category_id": "0"
+    },
+    {
+      "id": "fbfe",
+      "title": "Foundation Day",
+      "subtitle": "Dation of the found",
+      "description": "Day of the foundation.",
+      "category": {
+        "id": "2",
+        "title": "Commemorative",
+        "description": "Honoring special events"
+      },
+      "date": "2024-12-17",
+      "time": "8:00",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "category_id": "0"
+    }
+  ],
+  "sports": [
+    {
+      "id": "3",
+      "title": "Basketball Tournament",
+      "subtitle": "Sports Event",
+      "description": "Join the tournament and showcase your skills.",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/blue-t-shirt.jpg",
+      "category": {
+        "id": "3",
+        "title": "Sports",
+        "description": "Sporting events and competitions"
+      },
+      "date": "2024-12-23",
+      "time": "15:00"
+    }
+  ],
+  "category": [
+    {
+      "id": "1",
+      "title": "Academic",
+      "description": "Academic events"
+    },
+    {
+      "id": "2",
+      "title": "Commemorative",
+      "description": "Honoring special events"
+    },
+    {
+      "id": "3",
+      "title": "Sports",
+      "description": "Sporting events and competitions"
+    },
+    {
+      "id": "4",
+      "title": "Leisure",
+      "description": "Leisure, relaxation, and enjoyment"
+    }
+  ]
+}

@@ -24,7 +24,7 @@ defineOptions({layout: AuthLayout});
 
     <h1 class="title">Register a new account</h1>
 
-    <div class="w-2/4 mx-auto">
+    <div class="max-w-xl mx-auto">
         <form @submit.prevent="submit">
             <TextInput name="Name" v-model="form.name" :message="form.errors.name"/>
             <TextInput name="Email" type="email" v-model="form.email" :message="form.errors.email"/>

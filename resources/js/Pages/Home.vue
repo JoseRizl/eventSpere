@@ -1,38 +1,69 @@
 <script setup>
-import { ref } from 'vue';
-const visible = ref(false);
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+
+const todaysEvents = ref([]);
+const sportsEvents = ref([]);
+
+onMounted(async () => {
+  try {
+    // Fetch today's events
+    const todayResponse = await axios.get('http://localhost:3000/events');
+    todaysEvents.value = todayResponse.data;
+
+    // Fetch sports events
+    const sportsResponse = await axios.get('http://localhost:3000/sports');
+    sportsEvents.value = sportsResponse.data;
+  } catch (error) {
+    console.error('Error fetching events:', error);
+  }
+});
 </script>
 
 <template>
-    <Head :title="`| ${$page.component}`"/>
+  <div class="flex-1 p-4">
+    <h3 class="title">News and Updates</h3>
 
-    <!-- Main Content -->
-    <main class="flex-1 ">
-      <header class="mb-4 flex justify-between items-center">
-        <h1 class="text-2xl font-bold">Dashboard</h1>
-        <Button label="Add New" icon="pi pi-check" size="small" />
-      </header>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Today's Events Section -->
+      <div>
+        <h2 class="text-lg font-bold">Events</h2>
+        <div v-if="todaysEvents.length > 0" class="space-y-4">
+          <div
+            v-for="(event, index) in todaysEvents"
+            :key="index"
+            class="p-4 border rounded"
+          >
+            <img v-if="event.image" :src="event.image" :alt="event.title" class="mb-2" />
+            <p class="font-semibold">{{ event.title }}</p>
+            <p class="text-sm text-gray-600">{{ event.description }}</p>
+            <!-- Temporary front end-->
+            <Link href="/foundation-day" class="text-blue-500 hover:underline">
+                Read more...
+            </Link>
 
-      <section>
-        <!-- <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br> -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- Card 1 -->
-          <div class="bg-white shadow rounded p-6">
-            <h2 class="text-lg font-semibold mb-2">Users</h2>
-            <p class="text-gray-600">120 Active Users</p>
-          </div>
-          <!-- Card 2 -->
-          <div class="bg-white shadow rounded p-6">
-            <h2 class="text-lg font-semibold mb-2">Revenue</h2>
-            <p class="text-gray-600">$15,000 This Month</p>
-          </div>
-          <!-- Card 3 -->
-          <div class="bg-white shadow rounded p-6">
-            <h2 class="text-lg font-semibold mb-2">Support Tickets</h2>
-            <p class="text-gray-600">23 Open Tickets</p>
           </div>
         </div>
-      </section>
-    </main>
+        <p v-else class="text-gray-500">No events available for today.</p>
+      </div>
 
+      <!-- Sports Section -->
+      <div>
+        <h2 class="text-lg font-bold">Sports</h2>
+        <div v-if="sportsEvents.length > 0" class="space-y-4">
+          <div
+            v-for="(event, index) in sportsEvents"
+            :key="index"
+            class="p-4 border rounded"
+          >
+            <img v-if="event.image" :src="event.image" :alt="event.title" class="mb-2" />
+            <p class="font-semibold">{{ event.title }}</p>
+            <p class="text-sm text-gray-600">{{ event.description }}</p>
+            <a :href="event.link" class="text-blue-500 hover:underline">Read more...</a>
+          </div>
+        </div>
+        <p v-else class="text-gray-500">No sports updates available.</p>
+      </div>
+    </div>
+  </div>
 </template>

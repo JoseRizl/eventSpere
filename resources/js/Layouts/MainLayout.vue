@@ -1,7 +1,6 @@
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { Link, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
-
 // Ref
 const toggleMenu = ref(false);
 const sideBarItems = ref([
@@ -9,48 +8,67 @@ const sideBarItems = ref([
         separator: true
     },
     {
-        label: 'Dashboard',
+        label: 'News and Updates',
         icon: 'pi pi-objects-column',
         route: route('home'),
-        badge: 3
     },
     {
-        label: 'Messages',
-        icon: 'pi pi-inbox',
-        badge: 2
-    },
-    {
-        label: 'File',
-        icon: 'pi pi-file',
+        label: 'Events',
+        icon: 'pi pi-calendar-clock',
         items: [
             {
-                label: 'New',
+                label: 'Create Event',
                 icon: 'pi pi-plus',
+                route: route('event.create')
             },
             {
-                label: 'Open',
-                icon: 'pi pi-folder-open',
-                shortcut: '⌘+O'
-            },
-            {
-                label: 'Print',
-                icon: 'pi pi-print',
-                shortcut: '⌘+P'
+                label: 'Event List',
+                icon: 'pi pi-list',
+                shortcut: '⌘+O',
+                route: route('event.list')
             }
         ]
     },
     {
-        label: 'Edit',
-        icon: 'pi pi-file-edit',
+        label: 'Categories',
+        icon: 'pi pi-palette',
         items: [
             {
-                label: 'Copy',
-                icon: 'pi pi-copy',
+                label: 'Create Category',
+                icon: 'pi pi-plus',
+                route: route('category.create')
+            },
+            {
+                label: 'Category List',
+                icon: 'pi pi-list',
+                shortcut: '⌘+O',
+                route: route('category.list')
+            }
+        ]
+    },
+    {
+        label: 'Task',
+        icon: 'pi pi-check',
+        items: [
+            {
+                label: 'Task List Form',
+                icon: 'pi pi-plus',
+                route: route('task.form')
+            }
+        ]
+    },
+    {
+        label: 'Sports',
+        icon: 'pi pi-ticket',
+        items: [
+            {
+                label: 'Create Bracket',
+                icon: 'pi pi-plus',
                 shortcut: '⌘+C'
             },
             {
-                label: 'Delete',
-                icon: 'pi pi-times',
+                label: 'Brackets',
+                icon: 'pi pi-list',
                 shortcut: '⌘+D'
             }
         ]
@@ -59,74 +77,20 @@ const sideBarItems = ref([
         separator: true
     },
     {
-        label: 'Search',
-        icon: 'pi pi-search',
-        shortcut: '⌘+S'
+        label: 'Log Out',
+        icon: 'pi pi-sign-out',
+        shortcut: '⌘+S',
+        action: () => {
+            logout();
+        },
     },
-    {
-        label: 'Share',
-        icon: 'pi pi-share-alt',
-        items: [
-            {
-                label: 'Slack',
-                icon: 'pi pi-slack',
-                badge: 2
-            },
-            {
-                label: 'Whatsapp',
-                icon: 'pi pi-whatsapp',
-                badge: 3
-            }
-        ]
-    }
+
 ]);
 
-const menuBarItems = ref([
-    {
-        label: 'Home',
-        icon: 'pi pi-home'
-    },
-    {
-        label: 'Features',
-        icon: 'pi pi-star'
-    },
-    {
-        label: 'Projects',
-        icon: 'pi pi-search',
-        items: [
-            {
-                label: 'Components',
-                icon: 'pi pi-bolt'
-            },
-            {
-                label: 'Blocks',
-                icon: 'pi pi-server'
-            },
-            {
-                label: 'UI Kit',
-                icon: 'pi pi-pencil'
-            },
-            {
-                label: 'Templates',
-                icon: 'pi pi-palette',
-                items: [
-                    {
-                        label: 'Apollo',
-                        icon: 'pi pi-palette'
-                    },
-                    {
-                        label: 'Ultima',
-                        icon: 'pi pi-palette'
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        label: 'Contact',
-        icon: 'pi pi-envelope'
-    }
-]);
+const logout = () => {
+    const form = useForm({});
+    form.post(route('logout'));
+};
 
 </script>
 
@@ -141,7 +105,7 @@ const menuBarItems = ref([
                     <template #start>
                         <span class="inline-flex items-center gap-1 px-2 py-2">
                             <Avatar image="https://msunaawan.edu.ph/wp-content/uploads/elementor/thumbs/Resized-for-Docs_MSUN-LOGO-1-qukqvmb3wm17j2ukfd3r16tafpfhgujscsqt1iex2g.png" shape="circle" />
-                            <span class="text-xl font-semibold">HRIS</span>
+                            <span class="text-xl font-semibold">EMS</span>
                         </span>
                     </template>
 
@@ -151,7 +115,7 @@ const menuBarItems = ref([
                             <span class="ml-2">{{ item.label }}</span>
                             <Badge v-if="item.badge" class="ml-auto" :value="item.badge" />
                         </Link>
-                        <a v-else v-ripple :href="item.url" :target="item.target" v-bind="props.action">
+                        <a v-else v-ripple @click="item.action" :href="item.url":target="item.target" v-bind="props.action">
                             <span :class="item.icon" />
                             <span class="ml-2">{{ item.label }}</span>
                             <span v-if="hasSubmenu" class="pi pi-angle-right ml-auto" />

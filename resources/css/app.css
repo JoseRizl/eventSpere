@@ -14,14 +14,14 @@
 }
 
 @layer components {
-    /* input[type="text"],
+    input[type="text"],
     input[type="email"],
     input[type="password"],
-    input[type="search"],
-    input[type="tel"],
+    /*input[type="search"],
+    input[type="tel"],*/
     input[type="url"], textarea {
-        @apply block w-full rounded-md border-0 p-2 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm bg-white;
-    }
+        @apply block w-full rounded-md border-0 p-2 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm bg-white
+    }/*
     label {
         @apply block text-sm font-medium leading-6 text-slate-900 first-letter:capitalize;
     }
@@ -69,5 +69,129 @@
     }
     .round-btn {
         @apply w-8 h-8 overflow-auto rounded-full bg-slate-100 focus:outline-none focus:ring-1 focus:ring-slate-100 focus:ring-offset-2 focus:ring-offset-slate-800;
-    } */
+    }
+
+        /*Login and Register*/
+        .title {
+            @apply my-6 text-center text-2xl font-bold leading-7 text-slate-900;
+        }
+        .text-link {
+            @apply font-semibold text-blue-500 hover:text-blue-600;
+        }
+        .primary-btn {
+            @apply flex w-full justify-center rounded-md bg-blue-900 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:bg-slate-400 disabled:cursor-wait;
+        }
+
+
+      /* Ensure the sidebar and its menus have higher priority */
+    aside, .p-tieredmenu {
+    z-index: 1000 !important; /* Place sidebar above all content */
+    position: relative; /* Creates proper stacking context */
+    }
+    .create-category-wrapper,
+    .create-event-wrapper {
+        display: flex; /* Flexbox for centering */
+        justify-content: center; /* Center horizontally */
+        align-items: flex-start; /* Align to top */
+        padding-top: 2rem; /* Add some padding to avoid touching the very top */
+        min-height: 100vh; /* Full viewport height */
+        background-color: #f8f9fa; /* Optional background color */
+      }
+      .create-category-form,
+      .create-event-form {
+        max-width: 600px; /* Limit maximum width */
+        width: 100%;
+        padding: 2rem;
+        border-radius: 8px;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex; /* Use flexbox for layout */
+        flex-direction: column; /* Stack items vertically */
+        align-items: center; /* Center-align form contents horizontally */
+      }
+      .p-field {
+        margin-bottom: 1.5rem;
+        width: 100%; /* Make fields take the full width of the form */
+      }
+
+      .create-category-form h1 {
+        text-align: center; /* Center align the title */
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+      }
+
+      label {
+        display: block; /* Ensure labels are block elements */
+        margin-bottom: 0.5rem; /* Add spacing below labels */
+        font-weight: bold; /* Make labels bold for clarity */
+      }
+
+      .category-list.event-list-container,
+      .event-list-container {
+        padding: 1rem;
+        font-family: Arial, sans-serif;
+        position: relative; /* Reset stacking context */
+        z-index: 0; /* Ensure it doesn't interfere with sidebar popups */
+      }
+
+      .title {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        font-weight: bold;
+        color: #333;
+        text-align: center;
+      }
+
+      .p-datatable {
+        margin-top: 1rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: relative; /* Reset stacking context */
+        z-index: 0; /* Ensure it doesn't interfere with sidebar popups */
+      }
+
+      .p-datatable th {
+        background-color: #f4f4f4;
+        color: #555;
+        font-weight: 600;
+        text-align: center;
+      }
+
+      .p-datatable-striped tr:nth-child(odd) {
+        background-color: #fafafa;
+      }
+
+      .event-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+      }
+
+      .p-button-rounded {
+        width: 2.5rem;
+        height: 2.5rem;
+      }
+
+      textarea,
+      input,
+      .dropdown {
+        width: 100%; /* Make all inputs, textareas, and dropdowns full width */
+      }
+
+      textarea {
+        resize: none; /* Disable manual resizing of textareas */
+      }
+
+      .mt-3 {
+        margin-top: 1.5rem; /* Add spacing above the button */
+      }
 }
