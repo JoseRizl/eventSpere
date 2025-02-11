@@ -1,7 +1,7 @@
 {
   "events": [
     {
-      "id": "a023",
+      "id": "1",
       "title": "4 A.M. Zumba",
       "subtitle": "Zumba",
       "description": "Zumba in 4 am",
@@ -13,22 +13,40 @@
       "date": "2024-12-31",
       "time": "4:00",
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "category_id": "0"
+      "category_id": "4",
+      "type": "event"
     },
     {
-      "id": "fbfe",
+      "id": "2",
       "title": "Foundation Day",
-      "subtitle": "Dation of the found",
-      "description": "Day of the foundation.",
+      "subtitle": "Day of the foundation.",
+      "description": "Day of the foundation because the gravity of the Earth. ndddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd dddddddddddddddddd",
       "category": {
         "id": "2",
         "title": "Commemorative",
         "description": "Honoring special events"
       },
-      "date": "2024-12-17",
-      "time": "8:00",
+      "date": "2025-06-13",
+      "time": "09:00",
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "category_id": "0"
+      "category_id": "2",
+      "type": "event"
+    },
+    {
+      "id": "d114",
+      "title": "asd",
+      "subtitle": "wooooooooo",
+      "description": "Zhao xiang hao zhong guo\n\nXian zai wo you bing qi lin\n\nWo hen xihuang bing qi lin",
+      "category": {
+        "id": "3",
+        "title": "Sports",
+        "description": "Sporting events and competitions"
+      },
+      "date": "2025-02-12",
+      "time": "00:00",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "category_id": "3",
+      "type": "event"
     }
   ],
   "sports": [
@@ -44,14 +62,16 @@
         "description": "Sporting events and competitions"
       },
       "date": "2024-12-23",
-      "time": "15:00"
+      "time": "03:00",
+      "type": "sport",
+      "category_id": "3"
     }
   ],
   "category": [
     {
       "id": "1",
       "title": "Academic",
-      "description": "Academic events"
+      "description": "Academic event"
     },
     {
       "id": "2",

@@ -104,8 +104,8 @@ const logout = () => {
                     <TieredMenu :model="sideBarItems" class="w-full hidden h-16 flex-shrink-0 !rounded-none lg:block lg:w-60  lg:h-full">
                     <template #start>
                         <span class="inline-flex items-center gap-1 px-2 py-2">
-                            <Avatar image="https://msunaawan.edu.ph/wp-content/uploads/elementor/thumbs/Resized-for-Docs_MSUN-LOGO-1-qukqvmb3wm17j2ukfd3r16tafpfhgujscsqt1iex2g.png" shape="circle" />
-                            <span class="text-xl font-semibold">EMS</span>
+                            <Avatar image="/images/NCSlogo.png" shape="circle" />
+                            <span class="text-xl font-semibold">Event Sphere</span>
                         </span>
                     </template>
 
@@ -149,7 +149,7 @@ const logout = () => {
                             <button v-ripple class="relative overflow-hidden w-full border-0 bg-transparent flex items-start justify-center pl-4 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-none cursor-pointer transition-colors duration-200">
                                 <Avatar image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png" class="mr-2" shape="circle" />
                                 <span class="inline-flex flex-col items-start">
-                                    <span class="font-bold text-xs">Amy Elsner</span>
+                                    <span class="font-bold text-xs">Admin</span>
                                     <span class="text-xs">Admin</span>
                                 </span>
                             </button>
@@ -161,6 +161,7 @@ const logout = () => {
                 <div class="md:mt-12 px-4 py-4 lg:ml-60">
                     <slot />
                 </div>
+
             </main>
 
         </div>

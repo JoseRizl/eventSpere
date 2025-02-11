@@ -1,50 +1,75 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3';
-import TextInput from '../../Components/TextInput.vue';
 import AuthLayout from '../../Layouts/AuthLayout.vue';
-
+import TextInput from '../../Components/TextInput.vue';
 
 const form = useForm({
-    email: null,
-    password: null,
-    remember: null
-})
+    email: '',
+    password: '',
+    remember: false
+});
 
 const submit = () => {
     form.post(route("login"), {
         onError: () => form.reset('password', 'remember')
-    })
-}
+    });
+};
 
-defineOptions({layout: AuthLayout});
+defineOptions({ layout: AuthLayout });
 </script>
 
 <template>
-    <Home title="| Login"/>
+    <div class="min-h-screen flex items-center justify-center bg-white p-4">
+        <div class="w-full max-w-4xl bg-white rounded-lg flex flex-col md:flex-row overflow-hidden">
 
-    <h1 class="title">Login to Your account</h1>
-
-    <div class="max-w-xl mx-auto">
-        <form @submit.prevent="submit">
-            <TextInput name="Email" type="email" v-model="form.email" :message="form.errors.email"/>
-            <TextInput name="Password" type="password" v-model="form.password" :message="form.errors.password"/>
-
-            <div class="flex items-center mb-2">
-                <div class="flex items-center gap-2">
-                    <input id="remember" type="checkbox" v-model="form.remember">
-                    <label for="remember" class="ml-[-12px] mr-12">Remember Me</label>
-                </div>
-
-                <p class="text-slate-600">Don't have an Account?
-                    <Link :href="route('register')" class="text-link">Register</Link>
-                </p>
+            <!-- Left Section (Logo & Branding) -->
+            <div class="md:w-1/2 flex flex-col items-center justify-center text-center p-6 bg-white">
+                <img src="/resources/images/NCSlogo.png" alt="School Logo" class="w-32 md:w-48 mb-4">
+                <h1 class="text-xl md:text-2xl font-bold text-gray-800">EVENT SPHERE</h1>
+                <h2 class="text-lg md:text-xl font-semibold text-gray-700">Event Management System</h2>
             </div>
 
+            <!-- Right Section (Login Form) -->
+            <div class="md:w-1/2 p-6 bg-white">
+                <h1 class="text-xl font-bold mb-4 text-center text-gray-800">Login to Your Account</h1>
 
-            <div class="space-y-3">
-                <button class="primary-btn" :disabled="form.processing">Login</button>
+                <form @submit.prevent="submit" class="space-y-4">
+                    <!-- Email Input -->
+                    <TextInput
+                        name="Email"
+                        type="email"
+                        v-model="form.email"
+                        :message="form.errors.email"
+                    />
+
+                    <!-- Password Input -->
+                    <TextInput
+                        name="Password"
+                        type="password"
+                        v-model="form.password"
+                        :message="form.errors.password"
+                    />
+
+                    <!-- Remember Me & Admin Link -->
+                    <div class="flex items-center justify-between text-sm">
+                        <label class="flex items-center gap-2 text-gray-600">
+                            <input id="remember" type="checkbox" v-model="form.remember" class="rounded">
+                            Remember Me
+                        </label>
+                        <a href="/register" class="text-blue-600 hover:underline">Admin</a>
+                    </div>
+
+                    <!-- Login Button -->
+                    <button
+                        type="submit"
+                        class="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
+                        :disabled="form.processing"
+                    >
+                        Login
+                    </button>
+                </form>
             </div>
-        </form>
+
+        </div>
     </div>
-
 </template>

@@ -40,5 +40,25 @@ export const useCategoryStore = defineStore("category", {
           console.error("Failed to create category:", error);
         }
       },
+
+    // Edit Category //Array so require ug extra
+    async editCategory(updatedCategory) {
+        try {
+          const response = await axios.put(
+            `http://localhost:3000/category/${updatedCategory.id}`,
+            updatedCategory
+          );
+
+          // Find index and update the category in the array
+          const index = this.categories.findIndex((cat) => cat.id === updatedCategory.id);
+          if (index !== -1) {
+            this.categories[index] = response.data; // Update the store
+          }
+
+          alert("Category updated successfully!");
+        } catch (error) {
+          console.error("Error updating category:", error);
+        }
+      }
   },
 });

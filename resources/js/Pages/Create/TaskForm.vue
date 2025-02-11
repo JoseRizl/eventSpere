@@ -63,7 +63,7 @@ const form = ref({ category: null });
             <label for="category">Event</label>
             <Dropdown
               id="category"
-              v-model="selectedCommittee"
+              v-model="selectedEvent"
               :options="events"
               optionLabel="name"
               placeholder="Select Event"

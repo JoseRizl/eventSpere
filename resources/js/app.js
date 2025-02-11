@@ -1,5 +1,7 @@
 import './bootstrap';
 
+import router from './routes'; // Adjust the path to your `router.js` file
+
 import { createApp, h } from 'vue';
 import { createInertiaApp, Head, Link } from '@inertiajs/vue3';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
@@ -40,7 +42,9 @@ createInertiaApp({
     const pinia = createPinia();
 
     app
+      .use(router)
       .use(plugin)
+      .use(createPinia())
       .use(ZiggyVue)
       .use(pinia) // Add Pinia
       .use(PrimeVue, {

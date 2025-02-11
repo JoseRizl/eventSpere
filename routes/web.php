@@ -31,3 +31,7 @@ Route::middleware('guest')->group(function () {
     Route::inertia('/', 'Auth/Login')->name('login');
     Route::post('/', [AuthController::class, 'login']);
 });
+
+Route::get('/{any}', function () {
+    return Inertia::render('App'); // Use a wrapper page like App.vue
+})->where('any', '.*')->middleware('auth');
