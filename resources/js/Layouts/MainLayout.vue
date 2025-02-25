@@ -32,44 +32,28 @@ const sideBarItems = ref([
     {
         label: 'Categories',
         icon: 'pi pi-palette',
-        items: [
-            {
-                label: 'Create Category',
-                icon: 'pi pi-plus',
-                route: route('category.create')
-            },
-            {
-                label: 'Category List',
-                icon: 'pi pi-list',
-                shortcut: '⌘+O',
-                route: route('category.list')
-            }
-        ]
+        route: route('category.list')
     },
     {
         label: 'Task',
         icon: 'pi pi-check',
-        items: [
-            {
-                label: 'Task List Form',
-                icon: 'pi pi-plus',
-                route: route('task.form')
-            }
-        ]
+        route: route('task.form')
     },
     {
         label: 'Sports',
         icon: 'pi pi-ticket',
         items: [
             {
-                label: 'Create Bracket',
+                label: 'Bracket',
                 icon: 'pi pi-plus',
-                shortcut: '⌘+C'
+                shortcut: '⌘+C',
+                route: route('bracket')
             },
             {
-                label: 'Brackets',
+                label: 'Sport Events',
                 icon: 'pi pi-list',
-                shortcut: '⌘+D'
+                shortcut: '⌘+D',
+                route: route('match')
             }
         ]
     },
@@ -160,6 +144,7 @@ const logout = () => {
 
                 <div class="md:mt-12 px-4 py-4 lg:ml-60">
                     <slot />
+                    <!-- <RouterView />-->
                 </div>
 
             </main>

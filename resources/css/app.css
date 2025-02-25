@@ -88,6 +88,18 @@
     z-index: 1000 !important; /* Place sidebar above all content */
     position: relative; /* Creates proper stacking context */
     }
+    .category-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+      .event-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
     .create-category-wrapper,
     .create-event-wrapper {
         display: flex; /* Flexbox for centering */

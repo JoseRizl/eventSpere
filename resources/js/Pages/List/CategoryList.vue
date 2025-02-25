@@ -1,88 +1,188 @@
-<script setup>
-import { useCategoryStore } from "@/stores/categoryStore";
-import { onMounted, ref } from "vue";
+<script>
+import { defineComponent, ref, onMounted } from "vue";
+import axios from "axios";
+import { DataTable, Column, Button, Dialog, InputText, Textarea } from "primevue";
 
-const categoryStore = useCategoryStore();
-const editingRow = ref(null); // Track the row being edited
-const editedCategory = ref({}); // Store edited data
+export default defineComponent({
+  name: "CategoryList",
+  components: {
+    DataTable,
+    Column,
+    Button,
+    Dialog,
+    InputText,
+    Textarea,
+  },
+  setup() {
+    const categories = ref([]);
+    const isEditModalVisible = ref(false);
+    const isCreateModalVisible = ref(false);
+    const selectedCategory = ref(null);
+    const newCategory = ref({ title: "", description: "" });
 
-// Fetch categories when the component mounts
-onMounted(() => {
-  categoryStore.fetchCategories();
+    // Fetch categories on mount
+    onMounted(async () => {
+      await fetchCategories();
+    });
+
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/category");
+        categories.value = response.data;
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    // Open Edit Modal
+    const openEditModal = (category) => {
+      selectedCategory.value = { ...category };
+      isEditModalVisible.value = true;
+    };
+
+    // Save Edited Category
+    const saveEditedCategory = async () => {
+      if (!selectedCategory.value) return;
+
+      try {
+        await axios.put(
+          `http://localhost:3000/category/${selectedCategory.value.id}`,
+          selectedCategory.value
+        );
+
+        // Update the list without reloading
+        const index = categories.value.findIndex((c) => c.id === selectedCategory.value.id);
+        if (index !== -1) categories.value[index] = { ...selectedCategory.value };
+
+        isEditModalVisible.value = false;
+        alert("Category updated successfully!");
+      } catch (error) {
+        console.error("Error updating category:", error);
+        alert("Failed to update the category.");
+      }
+    };
+
+    // Open Create Modal
+    const openCreateModal = () => {
+      newCategory.value = { title: "", description: "" };
+      isCreateModalVisible.value = true;
+    };
+
+    // Create New Category
+    const createCategory = async () => {
+      if (!newCategory.value.title.trim()) {
+        alert("Category name is required.");
+        return;
+      }
+
+      try {
+        const response = await axios.post("http://localhost:3000/category", newCategory.value);
+        categories.value.push(response.data); // Update list instantly
+
+        isCreateModalVisible.value = false;
+        alert("Category created successfully!");
+      } catch (error) {
+        console.error("Error creating category:", error);
+        alert("Failed to create the category.");
+      }
+    };
+
+    // Delete Category
+    const deleteCategory = async (id) => {
+      if (!confirm("Are you sure you want to delete this category?")) return;
+
+      try {
+        await axios.delete(`http://localhost:3000/category/${id}`);
+        categories.value = categories.value.filter((c) => c.id !== id);
+        alert("Category deleted successfully!");
+      } catch (error) {
+        console.error("Error deleting category:", error);
+        alert("Failed to delete the category.");
+      }
+    };
+
+    return {
+      categories,
+      openEditModal,
+      saveEditedCategory,
+      deleteCategory,
+      isEditModalVisible,
+      selectedCategory,
+      isCreateModalVisible,
+      openCreateModal,
+      createCategory,
+      newCategory,
+    };
+  },
 });
-
-// Actions
-const deleteCategory = (id) => {
-  categoryStore.deleteCategory(id);
-};
-
-const startEdit = (category) => {
-  editingRow.value = category.id; // Track which row is being edited
-  editedCategory.value = { ...category }; // Clone category data
-};
-
-const saveEdit = async () => {
-  await categoryStore.editCategory(editedCategory.value); // Send update to store
-  editingRow.value = null; // Exit edit mode
-};
-
-const cancelEdit = () => {
-  editingRow.value = null; // Exit edit mode without saving
-};
 </script>
 
 <template>
   <div class="category-list-container">
+    <div class="category-header">
     <h1 class="title">Category List</h1>
+    <Button label="Create Category" icon="pi pi-plus" class="p-button-success" @click="openCreateModal" />
+    </div>
 
-    <!-- Table to display categories -->
-    <DataTable
-      :value="categoryStore.categories"
-      class="p-datatable-striped"
-      responsiveLayout="scroll"
-    >
-      <Column field="id" header="ID" style="width: 10%" sortable></Column>
 
-      <!-- Editable Category Name Column -->
-      <Column field="title" header="Category Name" style="width: 30%" sortable>
+    <DataTable :value="categories" class="p-datatable-striped">
+      <Column field="title" header="Category Name" style="width:30%;" sortable>
         <template #body="{ data }">
-          <template v-if="editingRow === data.id">
-            <InputText v-model="editedCategory.title" class="p-inputtext-sm" />
-          </template>
-          <template v-else>
-            {{ data.title }}
-          </template>
+          {{ data.title }}
+        </template>
+      </Column>
+      <Column field="description" header="Description" style="width:50%;">
+        <template #body="{ data }">
+          {{ data.description || "No description available" }}
         </template>
       </Column>
 
-      <!-- Editable Description Column -->
-      <Column field="description" header="Description" style="width: 50%">
-        <template #body="{ data }">
-          <template v-if="editingRow === data.id">
-            <InputText v-model="editedCategory.description" class="p-inputtext-sm" />
-          </template>
-          <template v-else>
-            {{ data.description }}
-          </template>
-        </template>
-      </Column>
-
-      <!-- Actions Column -->
-      <Column header="Actions" body-class="text-center">
+      <Column header="Actions" style="width:10%;" body-class="text-center">
         <template #body="{ data }">
           <div class="action-buttons">
-            <!-- Show Save/Cancel if editing, otherwise show Edit/Delete -->
-            <template v-if="editingRow === data.id">
-              <Button icon="pi pi-check" class="p-button-rounded p-button-success" @click="saveEdit" />
-              <Button icon="pi pi-times" class="p-button-rounded p-button-warning" @click="cancelEdit" />
-            </template>
-            <template v-else>
-              <Button icon="pi pi-pen-to-square" class="p-button-rounded p-button-info" @click="startEdit(data)" />
-              <Button icon="pi pi-trash" class="p-button-rounded p-button-danger" @click="deleteCategory(data.id)" />
-            </template>
+            <Button icon="pi pi-pen-to-square" class="p-button-rounded p-button-info" @click="openEditModal(data)" />
+            <Button icon="pi pi-trash" class="p-button-rounded p-button-danger" @click="deleteCategory(data.id)" />
           </div>
         </template>
       </Column>
     </DataTable>
+
+    <!-- Edit Category Modal -->
+    <Dialog v-model:visible="isEditModalVisible" modal header="Edit Category" :style="{ width: '50vw' }">
+      <div class="p-fluid">
+        <div class="p-field">
+          <label for="title">Category Name</label>
+          <InputText id="title" v-model="selectedCategory.title" placeholder="Enter category name" />
+        </div>
+        <div class="p-field">
+          <label for="description">Description</label>
+          <Textarea id="description" v-model="selectedCategory.description" rows="4" placeholder="Enter category description" autoResize />
+        </div>
+      </div>
+
+      <template #footer>
+        <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="isEditModalVisible = false" />
+        <Button label="Save Changes" icon="pi pi-check" class="p-button-primary" @click="saveEditedCategory" />
+      </template>
+    </Dialog>
+
+    <!-- Create Category Modal -->
+    <Dialog v-model:visible="isCreateModalVisible" modal header="Create Category" :style="{ width: '50vw' }">
+      <div class="p-fluid">
+        <div class="p-field">
+          <label for="newTitle">Category Name</label>
+          <InputText id="newTitle" v-model="newCategory.title" placeholder="Enter category name" />
+        </div>
+        <div class="p-field">
+          <label for="newDescription">Description</label>
+          <Textarea id="newDescription" v-model="newCategory.description" rows="4" placeholder="Enter category description" autoResize />
+        </div>
+      </div>
+
+      <template #footer>
+        <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="isCreateModalVisible = false" />
+        <Button label="Create" icon="pi pi-check" class="p-button-primary" @click="createCategory" />
+      </template>
+    </Dialog>
   </div>
 </template>

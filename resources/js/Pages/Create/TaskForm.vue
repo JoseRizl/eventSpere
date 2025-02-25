@@ -1,19 +1,21 @@
 <script setup>
 import { ref } from "vue";
 import Dropdown from "primevue/dropdown";
+import MultiSelect from "primevue/multiselect";
 import Card from "primevue/card";
 import Button from "primevue/button";
 
 // Reactive state for form fields
 const selectedCommittee = ref(null);
 const selectedTask = ref(null);
-const selectedParticipants = ref(null);
+const selectedParticipants = ref([]); // Use array for MultiSelect
+const selectedEvent = ref(null);
 
 // Dropdown options
 const committees = ref([
-  { name: "Committee 1"},
+  { name: "Committee 1" },
   { name: "Committee 2" },
-  { name: "Committee 3"}
+  { name: "Committee 3" }
 ]);
 
 const tasks = ref([
@@ -23,32 +25,36 @@ const tasks = ref([
 ]);
 
 const participants = ref([
-  { name: "All"},
-  { name: "Grade 1"},
-  { name: "Grade 2"},
-  { name: "Grade 3"},
-  { name: "Grade 4"},
-  { name: "Grade 5"},
-  { name: "Grade 6"}
+  { name: "Grade 1" },
+  { name: "Grade 2" },
+  { name: "Grade 3" },
+  { name: "Grade 4" },
+  { name: "Grade 5" },
+  { name: "Grade 6" }
 ]);
 
 const events = ref([
-  { name: "4 A.M. Zumba"},
-  { name: "Foundation Day"},
-  { name: "bbal"}
+  { name: "4 A.M. Zumba" },
+  { name: "Foundation Day" },
+  { name: "bbal" }
 ]);
 
 const submitted = ref(false);
-const form = ref({ category: null });
 
 // Function to handle form submission
-/*const createTask = () => {
+const createTask = () => {
   submitted.value = true;
-  if (!form.value.category) return;
+  if (!selectedEvent.value || !selectedCommittee.value || !selectedTask.value || selectedParticipants.value.length === 0) {
+    console.warn("Please fill all fields.");
+    return;
+  }
   console.log("Form submitted with:", {
-
+    event: selectedEvent.value,
+    committee: selectedCommittee.value,
+    task: selectedTask.value,
+    participants: selectedParticipants.value
   });
-};*/
+};
 </script>
 
 <template>
@@ -58,7 +64,7 @@ const form = ref({ category: null });
 
       <template #content>
         <form @submit.prevent="createTask" class="p-fluid">
-            <!-- Event Dropdown -->
+          <!-- Event Dropdown -->
           <div class="p-field">
             <label for="category">Event</label>
             <Dropdown
@@ -70,6 +76,7 @@ const form = ref({ category: null });
               class="w-full"
             />
           </div>
+
           <!-- Committee Dropdown -->
           <div class="p-field">
             <label for="category">Committee</label>
@@ -96,16 +103,18 @@ const form = ref({ category: null });
             />
           </div>
 
-          <!-- Participants Dropdown -->
+          <!-- Participants MultiSelect (Checkboxes) -->
           <div class="p-field">
             <label for="participants">Participants</label>
-            <Dropdown
+            <MultiSelect
               id="participants"
               v-model="selectedParticipants"
               :options="participants"
               optionLabel="name"
               placeholder="Select Participants"
               class="w-full"
+              display="chip"
+              showToggleAll
             />
           </div>
 

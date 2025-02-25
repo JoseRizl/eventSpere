@@ -41,9 +41,17 @@ const handleFileUpload = (event) => {
 <template>
   <div class="min-h-screen bg-gray-200 py-8 px-4 flex flex-col items-center">
 
-    <!-- Banner Image -->
-    <div class="w-full max-w-4xl bg-white p-6 rounded-lg shadow-md flex justify-center">
-      <img src="/resources/images/NCSlogo.png" alt="Event Banner" class="w-32 md:w-48">
+   <!-- Dynamic Banner Image -->
+   <div class="w-full max-w-4xl bg-white rounded-lg shadow-md overflow-hidden">
+      <img
+        v-if="eventDetails?.image"
+        :src="eventDetails.image"
+        :alt="eventDetails.title"
+        class="w-full h-64 object-cover"
+      />
+      <div v-else class="w-full h-64 bg-gray-300 flex items-center justify-center">
+        <span class="text-gray-500 text-lg">No Image Available</span>
+      </div>
     </div>
 
     <!-- Event Card -->

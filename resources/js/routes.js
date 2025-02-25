@@ -5,7 +5,6 @@ import EventList from './Pages/List/EventList.vue';
 import CreateEvent from './Pages/Create/CreateEvent.vue';
 
 const routes = [
-  { path: '/', name: 'Home', component: Home },
   { path: '/home', name: 'HomeAlias', component: Home },
   { path: '/event-list', name: 'EventList', component: EventList },
   { path: '/create-event', name: 'CreateEvent', component: CreateEvent },

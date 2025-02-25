@@ -15,11 +15,14 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    //temp
+    Route::inertia('/task-form', 'Create/TaskForm')->name('task.form');
+    Route::inertia('/sports', 'Sports/MatchView')->name('match');
+    Route::inertia('/bracket', 'Sports/Bracket')->name('bracket');
+
+    /*temp
     Route::inertia('/foundation-day', 'FoundationDay')->name('foundation.day');
     Route::inertia('/edit-event', 'Create/EditEvent')->name('event.edit');
-    Route::inertia('/edit-category', 'Create/EditCategory')->name('category.edit');
-    Route::inertia('/task-form', 'Create/TaskForm')->name('task.form');
+    Route::inertia('/edit-category', 'Create/EditCategory')->name('category.edit');*/
 });
 
 
