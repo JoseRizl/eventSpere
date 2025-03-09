@@ -52,8 +52,8 @@ onMounted(async () => {
     </div>
 
     <!-- Announcement Banner -->
-    <div class="fixed bottom-0 left-0 right-0 bg-blue-600 text-white p-4 text-center">
-      <p class="text-sm">🚀 Exciting Announcement: Stay tuned for upcoming events and updates! 🎉</p>
+    <div class="fixed bottom-0 left-0 right-0 bg-blue-600 text-white p-4 text-center ml-10">
+      <p class="text-sm">🚀 Announcement: Reymar 1000 nimo 🎉</p>
     </div>
 
   </div>

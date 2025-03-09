@@ -1,17 +1,15 @@
 <script setup>
 import { ref } from "vue";
-import Dropdown from "primevue/dropdown";
-import MultiSelect from "primevue/multiselect";
+import AutoComplete from "primevue/autocomplete";
 import Card from "primevue/card";
 import Button from "primevue/button";
 
 // Reactive state for form fields
 const selectedCommittee = ref(null);
 const selectedTask = ref(null);
-const selectedParticipants = ref([]); // Use array for MultiSelect
 const selectedEvent = ref(null);
 
-// Dropdown options
+// Options
 const committees = ref([
   { name: "Committee 1" },
   { name: "Committee 2" },
@@ -24,15 +22,6 @@ const tasks = ref([
   { name: "Budget Management", value: "budget_management" }
 ]);
 
-const participants = ref([
-  { name: "Grade 1" },
-  { name: "Grade 2" },
-  { name: "Grade 3" },
-  { name: "Grade 4" },
-  { name: "Grade 5" },
-  { name: "Grade 6" }
-]);
-
 const events = ref([
   { name: "4 A.M. Zumba" },
   { name: "Foundation Day" },
@@ -41,10 +30,47 @@ const events = ref([
 
 const submitted = ref(false);
 
+// Filtered search results
+const filteredEvents = ref([]);
+const filteredCommittees = ref([]);
+const filteredTasks = ref([]);
+
+// Filtering logic for search
+const searchEvent = (event) => {
+  filteredEvents.value = events.value.filter((e) =>
+    e.name.toLowerCase().includes(event.query.toLowerCase())
+  );
+};
+
+// Show all suggestions on focus
+const showAllEvents = () => {
+  filteredEvents.value = [...events.value];
+};
+
+const searchCommittee = (event) => {
+  filteredCommittees.value = committees.value.filter((c) =>
+    c.name.toLowerCase().includes(event.query.toLowerCase())
+  );
+};
+
+const showAllCommittees = () => {
+  filteredCommittees.value = [...committees.value];
+};
+
+const searchTask = (event) => {
+  filteredTasks.value = tasks.value.filter((t) =>
+    t.name.toLowerCase().includes(event.query.toLowerCase())
+  );
+};
+
+const showAllTasks = () => {
+  filteredTasks.value = [...tasks.value];
+};
+
 // Function to handle form submission
 const createTask = () => {
   submitted.value = true;
-  if (!selectedEvent.value || !selectedCommittee.value || !selectedTask.value || selectedParticipants.value.length === 0) {
+  if (!selectedEvent.value || !selectedCommittee.value || !selectedTask.value) {
     console.warn("Please fill all fields.");
     return;
   }
@@ -52,7 +78,6 @@ const createTask = () => {
     event: selectedEvent.value,
     committee: selectedCommittee.value,
     task: selectedTask.value,
-    participants: selectedParticipants.value
   });
 };
 </script>
@@ -64,57 +89,48 @@ const createTask = () => {
 
       <template #content>
         <form @submit.prevent="createTask" class="p-fluid">
-          <!-- Event Dropdown -->
+          <!-- Event Search Bar -->
           <div class="p-field">
-            <label for="category">Event</label>
-            <Dropdown
-              id="category"
+            <label for="event">Event</label>
+            <AutoComplete
+              id="event"
               v-model="selectedEvent"
-              :options="events"
+              :suggestions="filteredEvents"
+              @complete="searchEvent"
+              @focus="showAllEvents"
               optionLabel="name"
-              placeholder="Select Event"
+              placeholder="Search for an Event"
               class="w-full"
             />
           </div>
 
-          <!-- Committee Dropdown -->
+          <!-- Committee Search Bar -->
           <div class="p-field">
-            <label for="category">Committee</label>
-            <Dropdown
-              id="category"
+            <label for="committee">Committee</label>
+            <AutoComplete
+              id="committee"
               v-model="selectedCommittee"
-              :options="committees"
+              :suggestions="filteredCommittees"
+              @complete="searchCommittee"
+              @focus="showAllCommittees"
               optionLabel="name"
-              placeholder="Assign Committee"
+              placeholder="Search for a Committee"
               class="w-full"
             />
           </div>
 
-          <!-- Task Dropdown -->
+          <!-- Task Search Bar -->
           <div class="p-field">
             <label for="task">Task</label>
-            <Dropdown
+            <AutoComplete
               id="task"
               v-model="selectedTask"
-              :options="tasks"
+              :suggestions="filteredTasks"
+              @complete="searchTask"
+              @focus="showAllTasks"
               optionLabel="name"
-              placeholder="Assign Task"
+              placeholder="Search for a Task"
               class="w-full"
-            />
-          </div>
-
-          <!-- Participants MultiSelect (Checkboxes) -->
-          <div class="p-field">
-            <label for="participants">Participants</label>
-            <MultiSelect
-              id="participants"
-              v-model="selectedParticipants"
-              :options="participants"
-              optionLabel="name"
-              placeholder="Select Participants"
-              class="w-full"
-              display="chip"
-              showToggleAll
             />
           </div>
 

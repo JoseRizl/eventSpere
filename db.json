@@ -53,36 +53,15 @@
       "date": "2025-02-20",
       "time": "8:00",
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "category_id": "2",
+      "category_id": "1",
       "type": "event",
-      "startDate": "2025-02-20",
-      "endDate": "2025-02-20",
+      "startDate": "2024-02-22",
+      "endDate": "2024-02-23",
       "startTime": "7:30",
       "endTime": "9:00"
     }
   ],
-  "sports": [
-    {
-      "id": "3",
-      "title": "Basketball Tournaments",
-      "subtitle": "Sports Event",
-      "description": "Join the tournament and showcase your skills.",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/blue-t-shirt.jpg",
-      "category": {
-        "id": "3",
-        "title": "Sports",
-        "description": "Sporting events and competitions"
-      },
-      "date": "2025-02-27T16:00:00.000Z",
-      "time": "03:00",
-      "type": "sport",
-      "category_id": "3",
-      "startDate": "2025-02-21",
-      "endDate": "2025-02-21",
-      "startTime": "15:00",
-      "endTime": "16:00"
-    }
-  ],
+  "sports": [],
   "category": [
     {
       "id": "1",
@@ -105,33 +84,52 @@
       "description": "Leisure, relaxation, and enjoyment"
     }
   ],
-    "matches": [
+  "matches": [
     {
-     "id": 1,
-     "name": "Basketball",
-     "type": "single-elimination",
-     "team": { "name": "Team A", "score": 0 },
-     "team2": { "name": "Team B", "score": 0 },
+      "id": "1",
+      "name": "Basketball",
+      "type": "single-elimination",
+      "team": {
+        "name": "Team A",
+        "score": 3,
+        "wins": 1
+      },
+      "team2": {
+        "name": "Team B",
+        "score": 0
+      },
+      "completed": true,
+      "winner": "Team A"
+    },
+    {
+      "id": "2",
+      "name": "Football",
+      "type": "double-elimination",
+      "team": {
+        "name": "Team X",
+        "score": 0
+      },
+      "team2": {
+        "name": "Team Y",
+        "score": 0
+      },
       "completed": false,
       "winner": ""
     },
     {
-     "id": 2,
-     "name": "Football",
-     "type": "double-elimination",
-     "team": { "name": "Team X", "score": 0 },
-     "team2": { "name": "Team Y", "score": 0 },
+      "id": "3",
+      "name": "Jolen",
+      "type": "round-robin",
+      "team": {
+        "name": "Team 1",
+        "score": 0
+      },
+      "team2": {
+        "name": "Team 2",
+        "score": 0
+      },
       "completed": false,
-      "winner": ""
-    },
-    {
-     "id": 3,
-     "name": "Jolen",
-     "type": "round-robin",
-     "team": { "name": "Team 1", "score": 0 },
-     "team2": { "name": "Team 2", "score": 0 },
-     "completed": false,
       "winner": ""
     }
-    ]
+  ]
 }
