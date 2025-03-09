@@ -37,12 +37,12 @@
       "type": "event",
       "startDate": "2025-02-18",
       "endDate": "2025-02-18",
-      "startTime": "8:00",
-      "endTime": "9:30"
+      "startTime": "08:00",
+      "endTime": "10:00"
     },
     {
       "id": "7ee1",
-      "title": "Long Quiz ni Sir Batoto",
+      "title": "Long Quiz ni Sir Batotos",
       "subtitle": "agay",
       "description": "123 Merry Chrismtas",
       "category": {
@@ -59,6 +59,32 @@
       "endDate": "2024-02-23",
       "startTime": "7:30",
       "endTime": "9:00"
+    },
+    {
+      "id": "24c7",
+      "title": "exam ",
+      "subtitle": "peb",
+      "description": "1233",
+      "category": "1",
+      "startDate": "2025-03-11",
+      "endDate": "2025-03-11",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "type": "event",
+      "category_id": "1",
+      "startTime": "07:00",
+      "endTime": "08:00"
+    },
+    {
+      "id": "8831",
+      "title": "asd",
+      "subtitle": "Day of the foundation.",
+      "description": "",
+      "category_id": "3",
+      "startDate": "2025-03-09T16:00:00.000Z",
+      "endDate": "2025-03-17T16:00:00.000Z",
+      "startTime": "07:00",
+      "endTime": "10:00pm",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg"
     }
   ],
   "sports": [],
