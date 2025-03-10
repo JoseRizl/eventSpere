@@ -18,7 +18,8 @@
       "startDate": "2025-02-10",
       "endDate": "2025-02-18",
       "startTime": "4:00",
-      "endTime": "4:30"
+      "endTime": "4:30",
+      "archived": false
     },
     {
       "id": "2",
@@ -38,7 +39,8 @@
       "startDate": "2025-02-18",
       "endDate": "2025-02-18",
       "startTime": "08:00",
-      "endTime": "10:00"
+      "endTime": "10:00",
+      "archived": false
     },
     {
       "id": "7ee1",
@@ -57,22 +59,9 @@
       "type": "event",
       "startDate": "2024-02-22",
       "endDate": "2024-02-23",
-      "startTime": "7:30",
-      "endTime": "9:00"
-    },
-    {
-      "id": "24c7",
-      "title": "exam ",
-      "subtitle": "peb",
-      "description": "1233",
-      "category": "1",
-      "startDate": "2025-03-11",
-      "endDate": "2025-03-11",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "type": "event",
-      "category_id": "1",
-      "startTime": "07:00",
-      "endTime": "08:00"
+      "startTime": "07:30",
+      "endTime": "09:00",
+      "archived": false
     },
     {
       "id": "8831",
@@ -84,9 +73,26 @@
       "endDate": "2025-03-17T16:00:00.000Z",
       "startTime": "07:00",
       "endTime": "10:00pm",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg"
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "type": "event",
+      "archived": false
+    },
+    {
+      "id": "d01f",
+      "title": "archived",
+      "subtitle": "archived y",
+      "description": "Archived ni bay",
+      "category_id": "5e80",
+      "startDate": "2025-04-29T16:00:00.000Z",
+      "endDate": "2025-04-30T16:00:00.000Z",
+      "startTime": "01:00",
+      "endTime": "02:00",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": true,
+      "type": "event"
     }
   ],
+  "archived": [],
   "sports": [],
   "category": [
     {

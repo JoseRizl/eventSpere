@@ -42,7 +42,7 @@
           <template #body="{ data }">
             <div class="action-buttons">
               <Button icon="pi pi-pencil" class="p-button-rounded p-button-info" @click="editEvent(data)" />
-              <Button icon="pi pi-trash" class="p-button-rounded p-button-danger" @click="deleteEvent(data)" />
+              <Button icon="pi pi-trash" class="p-button-rounded p-button-danger" @click="archiveEvent(data)" />
             </div>
           </template>
         </Column>
@@ -253,20 +253,25 @@
   }
 };
 
-    const deleteEvent = async (event) => {
-        if (!confirm(`Are you sure you want to delete "${event.title}"?`)) return;
+const archiveEvent = async (event) => {
+  if (!confirm(`Are you sure you want to archive "${event.title}"?`)) return;
 
-        try {
-            const collection = event.type === "sport" ? "sports" : "events";
-            await axios.delete(`http://localhost:3000/${collection}/${event.id}`);
+  try {
+    // Update the event's `archived` status on the server
+    await axios.put(`http://localhost:3000/events/${event.id}`, {
+      ...event,
+      archived: true, // Ensure the `archived` flag is set to true
+    });
 
-            combinedEvents.value = combinedEvents.value.filter(e => e.id !== event.id);
-            alert("Event deleted successfully!");
-        } catch (error) {
-            console.error("Error deleting event:", error);
-            alert("Failed to delete the event.");
-            }
-        };
+    // Remove the archived event from the local list
+    combinedEvents.value = combinedEvents.value.filter(e => e.id !== event.id);
+    alert("Event archived successfully!");
+  } catch (error) {
+    console.error("Error archiving event:", error);
+    alert("Failed to archive the event.");
+  }
+};
+
 
       return {
         combinedEvents,
@@ -275,7 +280,7 @@
         editEvent,
         saveEditedEvent,
         isEditModalVisible,
-        deleteEvent,
+        archiveEvent,
         selectedEvent,
         categories,
       };

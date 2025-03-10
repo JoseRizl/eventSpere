@@ -60,6 +60,7 @@ const sideBarItems = ref([
     {
         label: 'Archive',
         icon: 'pi pi-folder',
+        route: route('archive')
     },
     {
         separator: true

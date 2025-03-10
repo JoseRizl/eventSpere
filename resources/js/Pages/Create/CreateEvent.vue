@@ -112,6 +112,7 @@
     startTime: "",
     endTime: "",
     image: "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg", // Default image
+    archived:false,
   });
 
   const submitted = ref(false);
@@ -168,6 +169,7 @@
         startTime: "",
         endTime: "",
         image: "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+        archived: false,
       });
 
       submitted.value = false;

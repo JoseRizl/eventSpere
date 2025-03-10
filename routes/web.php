@@ -9,6 +9,7 @@ Route::middleware('auth')->group(function () {
 
     Route::inertia('/event-list', 'List/EventList')->name('event.list');
     Route::inertia('/category-list', 'List/CategoryList')->name('category.list');
+    Route::inertia('/archive', 'List/Archive')->name('archive');
 
     Route::inertia('/create-category', 'Create/CreateCategory')->name('category.create');
     Route::inertia('/create-event', 'Create/CreateEvent')->name('event.create');
