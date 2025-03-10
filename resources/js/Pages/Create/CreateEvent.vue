@@ -41,11 +41,11 @@
             <div class="p-field p-grid">
               <div class="p-col-6">
                 <label for="startDate">Start Date</label>
-                <Calendar id="startDate" v-model="form.startDate" dateFormat="yy-mm-dd" showIcon />
+                <Calendar id="startDate" v-model="form.startDate" dateFormat="MM-dd-yy" showIcon />
               </div>
               <div class="p-col-6">
                 <label for="endDate">End Date</label>
-                <Calendar id="endDate" v-model="form.endDate" dateFormat="yy-mm-dd" showIcon />
+                <Calendar id="endDate" v-model="form.endDate" dateFormat="MM-dd-yy" showIcon />
               </div>
             </div>
 
@@ -154,6 +154,7 @@
         startTime: formatTime(form.startTime),
         endTime: formatTime(form.endTime),
         image: form.image || "https://example.com/default-image.jpg",
+        archived: false,
       };
 
       await eventStore.createEvent(payload);

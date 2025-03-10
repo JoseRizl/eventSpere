@@ -42,7 +42,7 @@
           <template #body="{ data }">
             <div class="action-buttons">
               <Button icon="pi pi-pencil" class="p-button-rounded p-button-info" @click="editEvent(data)" />
-              <Button icon="pi pi-trash" class="p-button-rounded p-button-danger" @click="archiveEvent(data)" />
+              <Button icon="pi pi-folder" class="p-button-rounded p-button-danger" @click="archiveEvent(data)" />
             </div>
           </template>
         </Column>
@@ -80,11 +80,11 @@
           <div class="p-field p-grid">
             <div class="p-col-6">
               <label for="startDate">Start Date</label>
-              <Calendar id="startDate" v-model="selectedEvent.startDate" dateFormat="yy-mm-dd" showIcon />
+              <Calendar id="startDate" v-model="selectedEvent.startDate" dateFormat="MM-dd-yy" showIcon />
             </div>
             <div class="p-col-6">
               <label for="endDate">End Date</label>
-              <Calendar id="endDate" v-model="selectedEvent.endDate" dateFormat="yy-mm-dd" showIcon />
+              <Calendar id="endDate" v-model="selectedEvent.endDate" dateFormat="MM-dd-yy" showIcon />
             </div>
           </div>
 
@@ -168,7 +168,9 @@
             axios.get("http://localhost:3000/category"),
           ]);
 
-          events.value = eventsResponse.data.map(event => ({
+          events.value = eventsResponse.data
+          .filter(event => !event.archived) // Exclude archived events
+          .map(event => ({
             ...event,
             type: "event",
             category_id: event.category?.id || event.category_id,
@@ -192,7 +194,7 @@
 
       // Format date and time display
       const formatDateTime = (date, time) => {
-        const formattedDate = date ? format(new Date(date), "yyyy-MM-dd") : "N/A";
+        const formattedDate = date ? format(new Date(date), "MMM-dd-yyyy") : "No date";
         const formattedTime = time ? time.padStart(5, "0") : "00:00";
         return { date: formattedDate, time: formattedTime };
       };
@@ -207,9 +209,14 @@
 
       // Open Edit Modal
       const editEvent = (event) => {
-        selectedEvent.value = { ...event };
+        selectedEvent.value = {
+            ...event,
+            startDate: event.startDate ? new Date(event.startDate) : null,
+            endDate: event.endDate ? new Date(event.endDate) : null
+        };
         isEditModalVisible.value = true;
-      };
+       };
+
 
       // Save Edited Event
       const saveEditedEvent = async () => {
@@ -230,10 +237,10 @@
     await axios.put(`http://localhost:3000/${collection}/${selectedEvent.value.id}`, {
       ...selectedEvent.value,
       startDate: selectedEvent.value.startDate
-        ? format(new Date(selectedEvent.value.startDate), "yyyy-MM-dd")
+        ? format(new Date(selectedEvent.value.startDate), "MMM-dd-yyyy")
         : null,
       endDate: selectedEvent.value.endDate
-        ? format(new Date(selectedEvent.value.endDate), "yyyy-MM-dd")
+        ? format(new Date(selectedEvent.value.endDate), "MMM-dd-yyyy")
         : null,
       startTime: startTimeFormatted,
       endTime: endTimeFormatted,

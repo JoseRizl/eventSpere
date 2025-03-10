@@ -86,7 +86,7 @@
 
       // Format date and time display
       const formatDateTime = (date, time) => {
-        const formattedDate = date ? format(new Date(date), "yyyy-MM-dd") : "N/A";
+        const formattedDate = date ? format(new Date(date), "MMM-dd-yyyy") : "No date";
         const formattedTime = time ? time.padStart(5, "0") : "00:00";
         return { date: formattedDate, time: formattedTime };
       };

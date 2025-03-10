@@ -1,23 +1,29 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import { ref, onMounted } from "vue";
+import axios from "axios";
+import { format } from "date-fns";
 
 const allNews = ref([]);
 
 onMounted(async () => {
   try {
     // Fetch both events and sports as one array
-    const eventsResponse = await axios.get('http://localhost:3000/events');
-    const sportsResponse = await axios.get('http://localhost:3000/sports');
+    const eventsResponse = await axios.get("http://localhost:3000/events");
+    const sportsResponse = await axios.get("http://localhost:3000/sports");
 
     // Combine data into one array
-    allNews.value = [...eventsResponse.data, ...sportsResponse.data];
+    allNews.value = [...eventsResponse.data, ...sportsResponse.data].map((news) => ({
+      ...news,
+      formattedDate: news.startDate ? format(new Date(news.startDate), "MMMM dd, yyyy") : "No date",
+    }));
+
     console.log(allNews.value);
   } catch (error) {
-    console.error('Error fetching news:', error);
+    console.error("Error fetching news:", error);
   }
 });
 </script>
+
 
 <template>
   <div class="min-h-screen flex flex-col items-center bg-gray-100 py-8 px-4">
@@ -43,7 +49,7 @@ onMounted(async () => {
         </div>
         <p class="font-semibold text-center">{{ news.title }}</p>
         <p class="text-sm text-gray-600 text-center">{{ news.subtitle }}</p>
-        <p class="text-xs text-gray-500 text-center mt-1">{{ news.date }}</p>
+        <p class="text-xs text-gray-500 text-center mt-1">{{ news.formattedDate }}</p>
 
         <!-- Read More Button (Still inside the card) -->
         <div class="flex justify-center mt-2">
