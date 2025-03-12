@@ -11,11 +11,13 @@ onMounted(async () => {
     const eventsResponse = await axios.get("http://localhost:3000/events");
     const sportsResponse = await axios.get("http://localhost:3000/sports");
 
-    // Combine data into one array
-    allNews.value = [...eventsResponse.data, ...sportsResponse.data].map((news) => ({
-      ...news,
-      formattedDate: news.startDate ? format(new Date(news.startDate), "MMMM dd, yyyy") : "No date",
-    }));
+    // Combine data into one array and filter out archived events
+    allNews.value = [...eventsResponse.data, ...sportsResponse.data]
+      .filter(news => !news.archived) // Filter out archived events
+      .map((news) => ({
+        ...news,
+        formattedDate: news.startDate ? format(new Date(news.startDate), "MMMM dd, yyyy") : "No date",
+      }));
 
     console.log(allNews.value);
   } catch (error) {
@@ -23,7 +25,6 @@ onMounted(async () => {
   }
 });
 </script>
-
 
 <template>
   <div class="min-h-screen flex flex-col items-center bg-gray-100 py-8 px-4">
