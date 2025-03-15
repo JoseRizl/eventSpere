@@ -43,27 +43,6 @@
       "archived": false
     },
     {
-      "id": "7ee1",
-      "title": "Long Quiz ni Sir Batotos",
-      "subtitle": "agay",
-      "description": "123 Merry Chrismtas",
-      "category": {
-        "id": "1",
-        "title": "Academics",
-        "description": "Academic events"
-      },
-      "date": "2025-02-20",
-      "time": "8:00",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "category_id": "1",
-      "type": "event",
-      "startDate": "2024-02-22",
-      "endDate": "2024-02-23",
-      "startTime": "07:30",
-      "endTime": "09:00",
-      "archived": false
-    },
-    {
       "id": "fc33",
       "title": "dili archived",
       "subtitle": "!archived",
@@ -75,20 +54,6 @@
       "endTime": "09:00",
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
       "archived": false,
-      "type": "event"
-    },
-    {
-      "id": "67da",
-      "title": "archived ong",
-      "subtitle": "archived",
-      "description": "324",
-      "category_id": "5e80",
-      "startDate": "2025-03-25T16:00:00.000Z",
-      "endDate": "2025-03-27T16:00:00.000Z",
-      "startTime": "01:00",
-      "endTime": "09:00",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": true,
       "type": "event"
     },
     {

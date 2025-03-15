@@ -41,7 +41,7 @@
         <Column header="Actions" style="width:10%;" body-class="text-center">
           <template #body="{ data }">
             <div class="action-buttons">
-              <Button icon="pi pi-pencil" class="p-button-rounded p-button-info" @click="editEvent(data)" />
+              <Button icon="pi pi-pen-to-square" class="p-button-rounded p-button-info" @click="editEvent(data)" />
               <Button icon="pi pi-folder" class="p-button-rounded p-button-danger" @click="archiveEvent(data)" />
             </div>
           </template>

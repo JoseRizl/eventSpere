@@ -42,7 +42,7 @@
           <template #body="{ data }">
             <div class="action-buttons">
               <Button icon="pi pi-undo" class="p-button-rounded p-button-success" @click="restoreEvent(data)" />
-              <!---<Button icon="pi pi-trash" class="p-button-rounded p-button-danger" @click="deleteEventPermanently(data)" /> -->
+              <Button icon="pi pi-trash" class="p-button-rounded p-button-danger" @click="deleteEventPermanently(data)" />
             </div>
           </template>
         </Column>
