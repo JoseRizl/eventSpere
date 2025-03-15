@@ -104,6 +104,34 @@
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
       "archived": true,
       "type": "event"
+    },
+    {
+      "id": "75db",
+      "title": "asd",
+      "subtitle": "Day of the foundation.",
+      "description": "213",
+      "category_id": "3",
+      "startDate": "2025-03-10T16:00:00.000Z",
+      "endDate": "2025-03-11T16:00:00.000Z",
+      "startTime": "05:00",
+      "endTime": "07:00",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": true,
+      "type": "event"
+    },
+    {
+      "id": "cd02",
+      "title": "Foundation Day Parade",
+      "subtitle": "",
+      "description": "Parade in celebration of the 54th founding anniversary of MSU Naawan.",
+      "category_id": "2",
+      "startDate": "Mar-18-2025",
+      "endDate": "Mar-18-2025",
+      "startTime": "06:00",
+      "endTime": "07:00",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": false,
+      "type": "event"
     }
   ],
   "sports": [],

@@ -63,9 +63,9 @@ onMounted(async () => {
       </router-link>
     </div>
 
-    <!-- Announcement Banner -->
+    <!-- Announcement Banner
     <div class="fixed bottom-0 left-0 right-0 bg-blue-600 text-white p-4 text-center ml-10">
       <p class="text-sm">🚀 Announcement: Reymar 1000 nimo 🎉</p>
-    </div>
+    </div> -->
   </div>
 </template>
