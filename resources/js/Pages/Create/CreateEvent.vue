@@ -4,6 +4,7 @@
         <template #title>Create Event</template>
         <template #content>
           <form @submit.prevent="createEvent" class="p-fluid">
+
             <!-- Event Title -->
             <div class="p-field">
               <label for="title">Event Title</label>
@@ -16,10 +17,31 @@
               <small v-if="!form.title && submitted" class="p-error">Title is required.</small>
             </div>
 
-            <!-- Event Subtitle -->
+            <!-- Event Tags -->
             <div class="p-field">
-              <label for="subtitle">Event Subtitle (Optional)</label>
-              <InputText id="subtitle" v-model="form.subtitle" placeholder="Enter event subtitle" />
+              <label for="tags">Tags</label>
+              <MultiSelect
+                id="tags"
+                v-model="selectedTags"
+                :options="tags"
+                optionLabel="name"
+                optionValue="id"
+                placeholder="Select tags"
+              />
+              <div class="tag-creation">
+                <InputText
+                  v-model="newTag.name"
+                  placeholder="New tag name"
+                  class="p-mr-2"
+                />
+                <ColorPicker v-model="newTag.color" />
+                <Button
+                  label="Add Tag"
+                  icon="pi pi-plus"
+                  class="p-button-success p-button-sm"
+                  @click="addTag"
+                />
+              </div>
             </div>
 
             <!-- Event Category Dropdown -->
@@ -37,7 +59,7 @@
               <small v-if="!form.category && submitted" class="p-error">Category is required.</small>
             </div>
 
-            <!-- Start Date & End Date -->
+            <!-- Start & End Dates -->
             <div class="p-field p-grid">
               <div class="p-col-6">
                 <label for="startDate">Start Date</label>
@@ -49,7 +71,7 @@
               </div>
             </div>
 
-            <!-- Start Time & End Time -->
+            <!-- Start & End Times -->
             <div class="p-field p-grid">
               <div class="p-col-6">
                 <label for="startTime">Start Time</label>
@@ -60,7 +82,6 @@
                   @blur="form.startTime = formatTime(form.startTime)"
                   :class="{ 'p-invalid': !form.startTime && submitted }"
                 />
-                <small v-if="!form.startTime && submitted" class="p-error">Start time is required.</small>
               </div>
               <div class="p-col-6">
                 <label for="endTime">End Time</label>
@@ -71,18 +92,28 @@
                   @blur="form.endTime = formatTime(form.endTime)"
                   :class="{ 'p-invalid': !form.endTime && submitted }"
                 />
-                <small v-if="!form.endTime && submitted" class="p-error">End time is required.</small>
               </div>
             </div>
 
             <!-- Event Description -->
             <div class="p-field">
               <label for="description">Description</label>
-              <Textarea id="description" v-model="form.description" rows="4" placeholder="Enter event description" autoResize />
+              <Textarea
+                id="description"
+                v-model="form.description"
+                rows="4"
+                placeholder="Enter event description"
+                autoResize
+              />
             </div>
 
             <!-- Submit Button -->
-            <Button type="submit" label="Create Event" icon="pi pi-check" class="p-button-success mt-3" />
+            <Button
+              type="submit"
+              label="Create Event"
+              icon="pi pi-check"
+              class="p-button-success mt-3"
+            />
           </form>
         </template>
       </Card>
@@ -98,32 +129,43 @@
   const categoryStore = useCategoryStore();
   const eventStore = useEventStore();
 
-  // Categories
+  // Categories & Tags
   const categories = ref([]);
+  const tags = ref([]);
+  const selectedTags = ref([]);
+  const newTag = reactive({ name: "", color: "#000000" });
 
   // Form data
   const form = reactive({
     title: "",
-    subtitle: "",
     description: "",
-    category: null, // Stores category ID
+    category: null,
     startDate: "",
     endDate: "",
     startTime: "",
     endTime: "",
-    image: "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg", // Default image
-    archived:false,
+    image: "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+    archived: false,
+    tags: [],
   });
 
   const submitted = ref(false);
 
-  // Fetch categories on mount
+  // Fetch data on mount
   onMounted(async () => {
     await categoryStore.fetchCategories();
-    categories.value = categoryStore.categories;
+    await eventStore.fetchTags();
+
+    // Restored original category handling logic
+    categories.value = categoryStore.categories.map(category => ({
+      id: category.id,
+      title: category.title || "Uncategorized"
+    }));
+
+    tags.value = eventStore.tags;
   });
 
-  // Helper function to ensure valid HH:mm format
+  // Format Time Helper
   const formatTime = (time) => {
     if (!time) return "00:00";
     const parts = time.split(":");
@@ -132,52 +174,57 @@
     return `${hours}:${minutes}`;
   };
 
-  // Form submission handler
+  // Add a new tag
+  const addTag = async () => {
+    if (!newTag.name.trim()) {
+      alert("Tag name is required.");
+      return;
+    }
+
+    const newTagData = { id: tags.value.length + 1, ...newTag };
+
+    await eventStore.addTag(newTagData);
+    newTag.name = "";
+    newTag.color = "#000000";
+  };
+
+  // Create Event
   const createEvent = async () => {
     submitted.value = true;
 
-    // Simple validation
     if (!form.title || !form.category || !form.startDate || !form.endDate || !form.startTime || !form.endTime) {
       alert("Please fill out the required fields.");
       return;
     }
 
-    try {
-      // Prepare payload
-      const payload = {
-        title: form.title,
-        subtitle: form.subtitle,
-        description: form.description,
-        category_id: form.category, // Ensure correct category mapping
-        startDate: form.startDate,
-        endDate: form.endDate,
-        startTime: formatTime(form.startTime),
-        endTime: formatTime(form.endTime),
-        image: form.image || "https://example.com/default-image.jpg",
-        archived: false,
-      };
+    const payload = { ...form, tags: selectedTags.value };
+    await eventStore.createEvent(payload);
 
-      await eventStore.createEvent(payload);
+    // Reset form
+    Object.assign(form, {
+      title: "",
+      description: "",
+      category: null,
+      startDate: "",
+      endDate: "",
+      startTime: "",
+      endTime: "",
+      image: "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      archived: false,
+      tags: [],
+    });
 
-      // Reset form
-      Object.assign(form, {
-        title: "",
-        subtitle: "",
-        description: "",
-        category: null,
-        startDate: "",
-        endDate: "",
-        startTime: "",
-        endTime: "",
-        image: "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-        archived: false,
-      });
-
-      submitted.value = false;
-      alert("Event created successfully!");
-    } catch (error) {
-      console.error("Error creating event:", error);
-      alert("Failed to create the event.");
-    }
+    selectedTags.value = [];
+    submitted.value = false;
+    alert("Event created successfully!");
   };
   </script>
+
+  <style scoped>
+  .tag-creation {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  </style>

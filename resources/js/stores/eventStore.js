@@ -7,6 +7,7 @@ export const useEventStore = defineStore("event", {
     events: [],
     archivedEvents: [],
     categories: [],
+    tags: [],
   }),
 
   getters: {
@@ -15,6 +16,7 @@ export const useEventStore = defineStore("event", {
   },
 
   actions: {
+    // Fetch Events
     async fetchEvents() {
       try {
         const [eventsResponse, archivedResponse] = await Promise.all([
@@ -38,6 +40,7 @@ export const useEventStore = defineStore("event", {
       }
     },
 
+    // Fetch Categories
     async fetchCategories() {
       try {
         const response = await axios.get("http://localhost:3000/categories");
@@ -47,6 +50,7 @@ export const useEventStore = defineStore("event", {
       }
     },
 
+    // Create Event
     async createEvent(eventData) {
       try {
         const response = await axios.post("http://localhost:3000/events", eventData);
@@ -57,6 +61,7 @@ export const useEventStore = defineStore("event", {
       }
     },
 
+    // Archive Event
     async archiveEvent(event) {
       try {
         await axios.delete(`http://localhost:3000/events/${event.id}`);
@@ -69,6 +74,7 @@ export const useEventStore = defineStore("event", {
       }
     },
 
+    // Restore Event
     async restoreEvent(event) {
       try {
         await axios.delete(`http://localhost:3000/archived/${event.id}`);
@@ -81,12 +87,32 @@ export const useEventStore = defineStore("event", {
       }
     },
 
+    // Permanently Delete Event
     async deleteEventPermanently(event) {
       try {
         await axios.delete(`http://localhost:3000/archived/${event.id}`);
         this.archivedEvents = this.archivedEvents.filter(e => e.id !== event.id);
       } catch (error) {
         console.error("Error deleting event permanently:", error);
+      }
+    },
+
+    // TAG SYSTEM
+    async fetchTags() {
+      try {
+        const response = await axios.get("http://localhost:3000/tags");
+        this.tags = response.data;
+      } catch (error) {
+        console.error("Error fetching tags:", error);
+      }
+    },
+
+    async addTag(newTag) {
+      try {
+        const response = await axios.post("http://localhost:3000/tags", newTag);
+        this.tags.push(response.data);
+      } catch (error) {
+        console.error("Error adding tag:", error);
       }
     },
   },

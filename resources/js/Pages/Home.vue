@@ -49,7 +49,9 @@ onMounted(async () => {
           <img v-if="news.image" :src="news.image" :alt="news.title" class="h-full w-full object-cover rounded">
         </div>
         <p class="font-semibold text-center">{{ news.title }}</p>
-        <p class="text-sm text-gray-600 text-center">{{ news.subtitle }}</p>
+        <p class="description text-sm text-gray-600 text-center">
+        {{ news.description }}
+        </p>
         <p class="text-xs text-gray-500 text-center mt-1">{{ news.formattedDate }}</p>
 
         <!-- Read More Button (Still inside the card) -->

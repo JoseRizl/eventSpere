@@ -19,7 +19,14 @@
       "endDate": "2025-02-18",
       "startTime": "4:00",
       "endTime": "4:30",
-      "archived": false
+      "archived": false,
+      "tags": [
+        {
+          "id": 3,
+          "name": "Workshop",
+          "color": "#3357FF"
+        }
+      ]
     },
     {
       "id": "2",
@@ -40,7 +47,14 @@
       "endDate": "2025-02-18",
       "startTime": "08:00",
       "endTime": "10:00",
-      "archived": false
+      "archived": false,
+      "tags": [
+        {
+          "id": 1,
+          "name": "Foundation Day",
+          "color": "#FF5733"
+        }
+      ]
     },
     {
       "id": "fc33",
@@ -53,7 +67,7 @@
       "startTime": "00:00",
       "endTime": "09:00",
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": false,
+      "archived": true,
       "type": "event"
     },
     {
@@ -96,7 +110,97 @@
       "endTime": "07:00",
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
       "archived": false,
-      "type": "event"
+      "type": "event",
+      "tags": [
+        {
+          "id": 1,
+          "name": "Foundation Day",
+          "color": "#FF5733"
+        }
+      ]
+    },
+    {
+      "id": "1100",
+      "title": "Jolen Tournemt",
+      "description": "Naawan Central School 2048th annual Jolen Tournament with 42397490174921948$ prize pool sponsored by Dr. Edsel Lorejo and Senior Sofware Engineer Bryan Jethro Panganiban Salazar",
+      "category_id": "3",
+      "startDate": "2025-03-23T16:00:00.000Z",
+      "endDate": "2025-03-24T16:00:00.000Z",
+      "startTime": "00:00",
+      "endTime": "02:00",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": false,
+      "tags": [
+        {
+          "id": 4,
+          "name": "Jolen Tournament",
+          "color": "#000000"
+        }
+      ]
+    },
+    {
+      "id": "69a9",
+      "title": "test",
+      "description": "12",
+      "category": "3",
+      "startDate": "2025-03-03T16:00:00.000Z",
+      "endDate": "2025-03-02T16:00:00.000Z",
+      "startTime": "05:00",
+      "endTime": "10:00",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": true,
+      "tags": [
+        {
+          "id": 3,
+          "name": "Workshop",
+          "color": "#3357FF"
+        }
+      ],
+      "type": "event",
+      "category_id": "3"
+    },
+    {
+      "id": "e5ad",
+      "title": "Besktebal",
+      "description": "wqe",
+      "category": "3",
+      "startDate": "2025-03-23T16:00:00.000Z",
+      "endDate": "2025-03-24T16:00:00.000Z",
+      "startTime": "07:00",
+      "endTime": "08:00",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": false,
+      "tags": [
+        null
+      ],
+      "category_id": "3"
+    }
+  ],
+  "tags": [
+    {
+      "id": "1",
+      "name": "Foundation Day",
+      "color": "#FF5733"
+    },
+    {
+      "id": "2",
+      "name": "Tournament",
+      "color": "#33FF57"
+    },
+    {
+      "id": "3",
+      "name": "Workshop",
+      "color": "#3357FF"
+    },
+    {
+      "id": "4",
+      "name": "Jolen Tournament",
+      "color": "#000000"
+    },
+    {
+      "id": 5,
+      "name": "test",
+      "color": "#000000"
     }
   ],
   "sports": [],

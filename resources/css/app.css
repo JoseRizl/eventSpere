@@ -226,4 +226,14 @@
         color: #666;
         margin-top: 20px;
       }
+
+      .description {
+        display: -webkit-box;       /* Enables multi-line ellipsis */
+        -webkit-line-clamp: 3;      /* Limits text to 3 lines */
+        -webkit-box-orient: vertical;
+        overflow: hidden;           /* Ensures overflowed text is hidden */
+        text-overflow: ellipsis;    /* Adds '...' for overflow */
+        max-height: 4.5em;          /* Adjust height based on your font size */
+        line-height: 1.5em;         /* Ensures consistent line spacing */
+      }
 }

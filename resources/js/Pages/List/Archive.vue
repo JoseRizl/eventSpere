@@ -12,7 +12,13 @@
           </template>
         </Column>
 
-        <Column field="subtitle" header="Subtitle" style="width:15%;" />
+        <Column field="description" header="Description" style="width:15%;">
+          <template #body="{ data }">
+            <div class="description">
+              {{ data.description }}
+            </div>
+          </template>
+        </Column>
 
         <Column header="Category" style="width:15%;">
           <template #body="{ data }">
@@ -48,7 +54,7 @@
         </Column>
       </DataTable>
     </div>
-  </template>
+</template>
 
   <script>
   import { defineComponent, ref, onMounted, computed } from "vue";
