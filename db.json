@@ -13,20 +13,17 @@
       "date": "2024-12-31",
       "time": "4:00",
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "category_id": "4",
+      "category_id": "3",
       "type": "event",
-      "startDate": "2025-02-10",
-      "endDate": "2025-02-18",
-      "startTime": "4:00",
-      "endTime": "4:30",
+      "startDate": "Feb-10-2025",
+      "endDate": "Feb-18-2025",
+      "startTime": "04:00",
+      "endTime": "04:30",
       "archived": false,
       "tags": [
-        {
-          "id": 3,
-          "name": "Workshop",
-          "color": "#3357FF"
-        }
-      ]
+        null
+      ],
+      "tagsString": "Workshop"
     },
     {
       "id": "2",
@@ -55,48 +52,6 @@
           "color": "#FF5733"
         }
       ]
-    },
-    {
-      "id": "fc33",
-      "title": "dili archived",
-      "subtitle": "!archived",
-      "description": "Archived no",
-      "category_id": "1",
-      "startDate": "2025-03-24T16:00:00.000Z",
-      "endDate": "2025-03-26T16:00:00.000Z",
-      "startTime": "00:00",
-      "endTime": "09:00",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": true,
-      "type": "event"
-    },
-    {
-      "id": "5ef6",
-      "title": "sample#369",
-      "subtitle": "date tarong",
-      "description": "",
-      "category_id": "2",
-      "startDate": "Mar-11-2025",
-      "endDate": "Mar-12-2025",
-      "startTime": "05:00",
-      "endTime": "07:00",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": true,
-      "type": "event"
-    },
-    {
-      "id": "75db",
-      "title": "asd",
-      "subtitle": "Day of the foundation.",
-      "description": "213",
-      "category_id": "3",
-      "startDate": "2025-03-10T16:00:00.000Z",
-      "endDate": "2025-03-11T16:00:00.000Z",
-      "startTime": "05:00",
-      "endTime": "07:00",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": true,
-      "type": "event"
     },
     {
       "id": "cd02",
@@ -139,41 +94,83 @@
       ]
     },
     {
-      "id": "69a9",
-      "title": "test",
-      "description": "12",
-      "category": "3",
-      "startDate": "2025-03-03T16:00:00.000Z",
-      "endDate": "2025-03-02T16:00:00.000Z",
-      "startTime": "05:00",
-      "endTime": "10:00",
+      "id": "4c5d",
+      "title": "43",
+      "description": "234",
+      "category": "2",
+      "startDate": "Mar-10-2025",
+      "endDate": "Mar-24-2025",
+      "startTime": "16:00",
+      "endTime": "08:00",
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
       "archived": true,
       "tags": [
-        {
-          "id": 3,
-          "name": "Workshop",
-          "color": "#3357FF"
-        }
+        "1"
       ],
       "type": "event",
-      "category_id": "3"
+      "category_id": "1"
     },
     {
-      "id": "e5ad",
-      "title": "Besktebal",
-      "description": "wqe",
+      "id": "513f",
+      "title": "d",
+      "description": "sadsadasd",
+      "category": "2",
+      "startDate": "2025-03-02T16:00:00.000Z",
+      "endDate": "2025-03-23T16:00:00.000Z",
+      "startTime": "00:00",
+      "endTime": "10:00pm",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": true,
+      "tags": [
+        "1"
+      ],
+      "type": "event"
+    },
+    {
+      "id": "42b4",
+      "title": "xz",
+      "description": "",
+      "category_id": "3",
+      "startDate": "Mar-03-2025",
+      "endDate": "Mar-31-2025",
+      "startTime": "00:00",
+      "endTime": "10:00pm",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": true,
+      "tags": [],
       "category": "3",
-      "startDate": "2025-03-23T16:00:00.000Z",
-      "endDate": "2025-03-24T16:00:00.000Z",
-      "startTime": "07:00",
-      "endTime": "08:00",
+      "type": "event"
+    },
+    {
+      "id": "753c",
+      "title": "sdf",
+      "description": "sfasfasfasf",
+      "category": "2",
+      "startDate": "Mar-03-2025",
+      "endDate": "Mar-31-2025",
+      "startTime": "00:00",
+      "endTime": "10:00pm",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": false,
+      "tags": [],
+      "category_id": "3",
+      "type": "event"
+    },
+    {
+      "id": "2420",
+      "title": "Parade",
+      "description": "213",
+      "category": "2",
+      "startDate": "2025-03-16T16:00:00.000Z",
+      "endDate": "2025-03-17T16:00:00.000Z",
+      "startTime": "001:00",
+      "endTime": "00:00",
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
       "archived": false,
       "tags": [
-        null
+        "1"
       ],
-      "category_id": "3"
+      "category_id": "2"
     }
   ],
   "tags": [
@@ -198,7 +195,7 @@
       "color": "#000000"
     },
     {
-      "id": 5,
+      "id": "5",
       "name": "test",
       "color": "#000000"
     }

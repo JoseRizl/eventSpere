@@ -284,21 +284,17 @@ const archiveEvent = async (event) => {
     alert("Failed to archive the event.");
   }
 };
-
-
-      return {
-        combinedEvents,
-        categoryMap,
-        formatDateTime,
-        editEvent,
-        saveEditedEvent,
-        isEditModalVisible,
-        archiveEvent,
-        selectedEvent,
-        categories,
-      };
+     return {
+     combinedEvents,
+     categoryMap,
+     formatDateTime,
+     editEvent,
+     saveEditedEvent,
+     isEditModalVisible,
+     archiveEvent,
+     selectedEvent,
+     categories,
+     };
     },
-  });
-  </script>
-
-
+ });
+ </script>

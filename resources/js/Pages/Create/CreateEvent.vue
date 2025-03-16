@@ -197,7 +197,17 @@
       return;
     }
 
-    const payload = { ...form, tags: selectedTags.value };
+    const payload = { ...form,
+     tags: selectedTags.value,
+     title: form.title,
+     description: form.description,
+     category_id: form.category, // Ensure correct category mapping
+     startDate: form.startDate,
+     endDate: form.endDate,
+     startTime: formatTime(form.startTime),
+     endTime: formatTime(form.endTime),
+     image: form.image || "https://example.com/default-image.jpg",
+     archived: false, };
     await eventStore.createEvent(payload);
 
     // Reset form
