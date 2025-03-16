@@ -2,6 +2,7 @@
 import { ref, onMounted } from "vue";
 import axios from "axios";
 import { format } from "date-fns";
+import { Link, router } from '@inertiajs/vue3';
 
 const allNews = ref([]);
 
@@ -38,12 +39,13 @@ onMounted(async () => {
 
     <!-- News Grid (Merged Events & Sports) -->
     <div class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-      <router-link
+        <Link
         v-for="(news, index) in allNews"
         :key="index"
-        :to="`/events/${news.id}`"
+        :href="route('event.details', { id: news.id })"
         class="p-4 border rounded-lg shadow-sm bg-white block hover:shadow-lg hover:scale-105 transform transition duration-200 ease-in-out"
-      >
+        >
+
         <!-- Placeholder Image -->
         <div class="h-40 bg-gray-300 rounded mb-2 flex items-center justify-center overflow-hidden">
           <img v-if="news.image" :src="news.image" :alt="news.title" class="h-full w-full object-cover rounded">
@@ -62,7 +64,7 @@ onMounted(async () => {
             Read more
           </span>
         </div>
-      </router-link>
+      </Link>
     </div>
 
     <!-- Announcement Banner

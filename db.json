@@ -1,176 +1,69 @@
 {
   "events": [
     {
-      "id": "1",
-      "title": "4 A.M. Zumba",
-      "subtitle": "Zumbas",
-      "description": "Zumba in 4 am",
-      "category": {
-        "id": "4",
-        "title": "Leisure",
-        "description": "Leisure, relaxation, and enjoyment"
-      },
-      "date": "2024-12-31",
-      "time": "4:00",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "category_id": "3",
-      "type": "event",
-      "startDate": "Feb-10-2025",
-      "endDate": "Feb-18-2025",
-      "startTime": "04:00",
-      "endTime": "04:30",
-      "archived": false,
-      "tags": [
-        null
-      ],
-      "tagsString": "Workshop"
-    },
-    {
-      "id": "2",
-      "title": "Foundation Day",
-      "subtitle": "Day of the foundation.",
-      "description": "Day of the foundation because the gravity of the Earth.",
-      "category": {
-        "id": "2",
-        "title": "Commemorative",
-        "description": "Honoring special events"
-      },
-      "date": "2025-02-09",
-      "time": "09:00",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "category_id": "2",
-      "type": "event",
-      "startDate": "2025-02-18",
-      "endDate": "2025-02-18",
-      "startTime": "08:00",
-      "endTime": "10:00",
-      "archived": false,
-      "tags": [
-        {
-          "id": 1,
-          "name": "Foundation Day",
-          "color": "#FF5733"
-        }
-      ]
-    },
-    {
-      "id": "cd02",
-      "title": "Foundation Day Parade",
-      "subtitle": "",
-      "description": "Parade in celebration of the 54th founding anniversary of MSU Naawan.",
-      "category_id": "2",
-      "startDate": "Mar-18-2025",
-      "endDate": "Mar-18-2025",
-      "startTime": "06:00",
-      "endTime": "07:00",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": false,
-      "type": "event",
-      "tags": [
-        {
-          "id": 1,
-          "name": "Foundation Day",
-          "color": "#FF5733"
-        }
-      ]
-    },
-    {
-      "id": "1100",
-      "title": "Jolen Tournemt",
-      "description": "Naawan Central School 2048th annual Jolen Tournament with 42397490174921948$ prize pool sponsored by Dr. Edsel Lorejo and Senior Sofware Engineer Bryan Jethro Panganiban Salazar",
-      "category_id": "3",
-      "startDate": "2025-03-23T16:00:00.000Z",
-      "endDate": "2025-03-24T16:00:00.000Z",
-      "startTime": "00:00",
-      "endTime": "02:00",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": false,
-      "tags": [
-        {
-          "id": 4,
-          "name": "Jolen Tournament",
-          "color": "#000000"
-        }
-      ]
-    },
-    {
-      "id": "4c5d",
-      "title": "43",
-      "description": "234",
-      "category": "2",
-      "startDate": "Mar-10-2025",
-      "endDate": "Mar-24-2025",
-      "startTime": "16:00",
-      "endTime": "08:00",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": true,
-      "tags": [
-        "1"
-      ],
-      "type": "event",
-      "category_id": "1"
-    },
-    {
-      "id": "513f",
-      "title": "d",
-      "description": "sadsadasd",
-      "category": "2",
-      "startDate": "2025-03-02T16:00:00.000Z",
-      "endDate": "2025-03-23T16:00:00.000Z",
-      "startTime": "00:00",
-      "endTime": "10:00pm",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": true,
-      "tags": [
-        "1"
-      ],
-      "type": "event"
-    },
-    {
-      "id": "42b4",
-      "title": "xz",
-      "description": "",
-      "category_id": "3",
-      "startDate": "Mar-03-2025",
-      "endDate": "Mar-31-2025",
-      "startTime": "00:00",
-      "endTime": "10:00pm",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": true,
-      "tags": [],
-      "category": "3",
-      "type": "event"
-    },
-    {
-      "id": "753c",
-      "title": "sdf",
-      "description": "sfasfasfasf",
-      "category": "2",
-      "startDate": "Mar-03-2025",
-      "endDate": "Mar-31-2025",
-      "startTime": "00:00",
-      "endTime": "10:00pm",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": false,
-      "tags": [],
-      "category_id": "3",
-      "type": "event"
-    },
-    {
-      "id": "2420",
+      "id": "f697",
       "title": "Parade",
-      "description": "213",
+      "description": "69th Foundation day parade in the Honor of Sir Seled Jolero and Sryan Balazar ",
       "category": "2",
       "startDate": "2025-03-16T16:00:00.000Z",
       "endDate": "2025-03-17T16:00:00.000Z",
-      "startTime": "001:00",
-      "endTime": "00:00",
+      "startTime": "08:00",
+      "endTime": "08:30",
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
       "archived": false,
       "tags": [
         "1"
       ],
       "category_id": "2"
+    },
+    {
+      "id": "fbe4",
+      "title": "Basketball",
+      "description": "Basketball suiiii",
+      "category": "3",
+      "startDate": "2025-03-26T16:00:00.000Z",
+      "endDate": "2025-03-27T16:00:00.000Z",
+      "startTime": "08:00",
+      "endTime": "09:00",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": false,
+      "tags": [
+        "2"
+      ],
+      "category_id": "3"
+    },
+    {
+      "id": "783a",
+      "title": "exam ",
+      "description": "Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy ",
+      "category": "1",
+      "startDate": "2025-03-24T16:00:00.000Z",
+      "endDate": "2025-03-25T16:00:00.000Z",
+      "startTime": "08:00",
+      "endTime": "09:00",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": false,
+      "tags": [
+        "1"
+      ],
+      "category_id": "1"
+    },
+    {
+      "id": "d8b9",
+      "title": "4 A.M. Zumba",
+      "description": "Zumbas",
+      "category": "4",
+      "startDate": "2025-03-26T16:00:00.000Z",
+      "endDate": "2025-03-26T16:00:00.000Z",
+      "startTime": "04:00am",
+      "endTime": "04:30am",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": true,
+      "tags": [
+        "2"
+      ],
+      "category_id": "4",
+      "type": "event"
     }
   ],
   "tags": [
@@ -181,7 +74,7 @@
     },
     {
       "id": "2",
-      "name": "Tournament",
+      "name": "Palakasan",
       "color": "#33FF57"
     },
     {
@@ -226,6 +119,55 @@
       "id": "5e80",
       "title": "way klase",
       "description": "woooo"
+    }
+  ],
+  "brackets": [
+    {
+      "id": 1742128800494,
+      "name": "Basketball",
+      "type": "single",
+      "bracket": [
+        [
+          [
+            {
+              "name": "Player 1",
+              "score": 0,
+              "completed": false
+            },
+            {
+              "name": "Player 2",
+              "score": 0,
+              "completed": false
+            }
+          ],
+          [
+            {
+              "name": "Player 3",
+              "score": 0,
+              "completed": false
+            },
+            {
+              "name": "Player 4",
+              "score": 0,
+              "completed": false
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "name": "Player 1",
+              "score": 0,
+              "completed": false
+            },
+            {
+              "name": "Player 2",
+              "score": 0,
+              "completed": false
+            }
+          ]
+        ]
+      ]
     }
   ],
   "matches": [

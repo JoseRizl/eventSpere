@@ -20,10 +20,10 @@ Route::middleware('auth')->group(function () {
     Route::inertia('/sports', 'Sports/MatchView')->name('match');
     Route::inertia('/bracket', 'Sports/Bracket')->name('bracket');
 
-    /*temp
-    Route::inertia('/foundation-day', 'FoundationDay')->name('foundation.day');
-    Route::inertia('/edit-event', 'Create/EditEvent')->name('event.edit');
-    Route::inertia('/edit-category', 'Create/EditCategory')->name('category.edit');*/
+    Route::inertia('/events/{id}', 'Events/EventDetails')->name('event.details');
+    Route::inertia('/sports/{id}', 'Sports/SportsDetails')->name('sports.details');
+
+
 });
 
 
