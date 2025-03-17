@@ -3,6 +3,8 @@ import { Link, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 // Ref
 const toggleMenu = ref(false);
+const menuBarItems = ref([]);
+
 const sideBarItems = ref([
     {
         separator: true
