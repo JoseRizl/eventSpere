@@ -5,17 +5,26 @@ import InputText from "primevue/inputtext";
 import Dropdown from "primevue/dropdown";
 import Button from "primevue/button";
 
+// Reactive State
 const bracketName = ref("");
 const numberOfPlayers = ref();
 const matchType = ref("");
-const bracket = ref([]);
-const showDialog = ref(false); // Dialog visibility control
+const brackets = ref([]);
+const showDialog = ref(false);
+const currentMatchIndex = ref(0);
 
-// Options for participants and bracket type
+const calculateSpacing = (roundIdx, matchIdx) => {
+  const baseSpacing = 80; // Increased base spacing for clarity
+  const totalMatches = Math.pow(2, roundIdx);
+  return (matchIdx % 2 === 0) ? baseSpacing / totalMatches : baseSpacing;
+};
+
+
+// Options
 const participantOptions = [4, 8, 16, 32];
 const bracketTypeOptions = ["single", "double"];
 
-// Show dialog and reset fields
+// Open Dialog for Bracket Creation
 const openDialog = () => {
   bracketName.value = "";
   numberOfPlayers.value = null;
@@ -30,15 +39,15 @@ const createBracket = () => {
     return;
   }
 
-  generateBracket();
-  showDialog.value = false; // Close dialog after setup
+  const newBracket = generateBracket();
+  brackets.value.push({ name: bracketName.value, type: matchType.value, matches: newBracket });
+  showDialog.value = false;
 };
 
-// Generate bracket with editable placeholders
 const generateBracket = () => {
   const players = Array.from({ length: numberOfPlayers.value }, (_, i) => ({
     name: `Player ${i + 1}`,
-    score: 0, // Initial score
+    score: 0,
   }));
 
   let rounds = Math.log2(players.length);
@@ -46,188 +55,234 @@ const generateBracket = () => {
 
   for (let i = 0; i < rounds; i++) {
     let roundMatches = [];
+
     for (let j = 0; j < players.length / Math.pow(2, i); j += 2) {
       roundMatches.push([
-        { ...players[j], completed: false }, // Track match status
+        { ...players[j], completed: false },
         { ...players[j + 1], completed: false },
       ]);
     }
+
     generatedBracket.push(roundMatches);
   }
 
-  bracket.value = generatedBracket;
+  return generatedBracket;
 };
 
-// Edit participant names in place
-const editParticipant = (roundIdx, matchIdx, teamIdx) => {
+// Edit Participant Names
+const editParticipant = (bracketIdx, roundIdx, matchIdx, teamIdx) => {
   const newName = prompt("Enter new participant name:");
   if (newName) {
-    bracket.value[roundIdx][matchIdx][teamIdx].name = newName;
-  }
-};
-
-// Score Controls
-const increaseScore = (roundIdx, matchIdx, teamIdx) => {
-  if (!bracket.value[roundIdx][matchIdx].completed) {
-    bracket.value[roundIdx][matchIdx][teamIdx].score++;
-  }
-};
-
-const decreaseScore = (roundIdx, matchIdx, teamIdx) => {
-  if (!bracket.value[roundIdx][matchIdx].completed) {
-    if (bracket.value[roundIdx][matchIdx][teamIdx].score > 0) {
-      bracket.value[roundIdx][matchIdx][teamIdx].score--;
-    }
+    brackets.value[bracketIdx].matches[roundIdx][matchIdx][teamIdx].name = newName;
   }
 };
 
 // Conclude Match Logic
-const concludeMatch = (roundIdx, matchIdx) => {
-  const match = bracket.value[roundIdx][matchIdx];
+const concludeMatch = (bracketIdx, roundIdx, matchIdx) => {
+  const match = brackets.value[bracketIdx].matches[roundIdx][matchIdx];
   const winner = match[0].score >= match[1].score ? match[0] : match[1];
 
-  match.completed = true; // Lock match scores after conclusion
+  match.completed = true;
 
-  if (bracket.value[roundIdx + 1]) {
-    bracket.value[roundIdx + 1][Math.floor(matchIdx / 2)][matchIdx % 2] = {
+  if (brackets.value[bracketIdx].matches[roundIdx + 1]) {
+    const nextRoundIdx = Math.floor(matchIdx / 2);
+
+    // Correct Position Logic
+    const nextMatchPos = matchIdx % 2 === 0 ? 0 : 1;
+
+    brackets.value[bracketIdx].matches[roundIdx + 1][nextRoundIdx][nextMatchPos] = {
       ...winner,
-      score: 0, // Reset score when moving to the next round
+      score: 0,
       completed: false
     };
   } else {
     alert(`Winner: ${winner.name}`);
   }
 };
+
+
+// Improved Navigation Logic
+const showNextMatch = (bracketIdx) => {
+  const totalMatches = brackets.value[bracketIdx].matches.flat().length;
+  if (currentMatchIndex.value < totalMatches - 1) {
+    currentMatchIndex.value++;
+  }
+};
+
+const showPreviousMatch = (bracketIdx) => {
+  if (currentMatchIndex.value > 0) {
+    currentMatchIndex.value--;
+  }
+};
+
+const currentMatch = (bracketIdx) => {
+  const flatBracket = brackets.value[bracketIdx].matches.flat();
+  return flatBracket[currentMatchIndex.value];
+};
+
+// Improved Spacing Logic
+const spacing = (roundIdx) => 40 * Math.pow(2, roundIdx);
 </script>
 
 <template>
-  <div class="container">
-    <aside class="options">
-      <h1>PureBracket</h1>
+    <div class="container">
+      <!-- Create Bracket Button -->
+      <button class="create-button" @click="openDialog">Create Bracket</button>
 
-      <h3>Step 1: Create the Bracket</h3>
-      <button @click="openDialog">Create Bracket</button>
+      <!-- Bracket Display Section -->
+      <div v-for="(bracket, bracketIdx) in brackets" :key="bracketIdx" class="bracket-section">
+        <div class="bracket-wrapper">
+          <h2>{{ bracket.name }} ({{ bracket.type }})</h2>
 
-      <h3 v-if="bracketName">Bracket Name: {{ bracketName }}</h3>
-      <h3 v-if="matchType">Type: {{ matchType }}</h3>
+          <div class="bracket">
+            <div v-for="(round, roundIdx) in bracket.matches" :key="roundIdx"
+            :class="['round', `round-${roundIdx + 1}`]">
+              <h3>Round {{ roundIdx + 1 }}</h3>
 
-      <section id="projectInfoSection">
-        <h3>Project Info</h3>
-        <p>
-          PureBracket is released under the MIT Open Source License. Check out the repo on
-          <a href="https://github.com/tmose1106/PureBracket">GitHub</a>.
-        </p>
-      </section>
-    </aside>
-
-    <!-- Bracket Display -->
-    <main class="bracket" v-if="bracket.length">
-      <div v-for="(round, index) in bracket" :key="index" class="round">
-        <h3>Round {{ index + 1 }}</h3>
-
-        <div v-for="(match, idx) in round" :key="idx" class="match">
-          <!-- Player 1 -->
-          <div class="player">
-            <button
-              @click="increaseScore(index, idx, 0)"
-              :disabled="match.completed"
-            >+</button>
-            <span @click="editParticipant(index, idx, 0)" class="editable">
-              {{ match[0].name }} ({{ match[0].score }})
-            </span>
-            <button
-              @click="decreaseScore(index, idx, 0)"
-              :disabled="match.completed"
-            >-</button>
+              <!-- Matches Display -->
+              <div
+                v-for="(match, matchIdx) in round"
+                :key="matchIdx"
+                class="match"
+                >
+                <div class="player-box">
+                    <span @click="editParticipant(bracketIdx, roundIdx, matchIdx, 0)" class="editable">
+                    {{ match[0].name }} | {{ match[0].score }}
+                    </span>
+                    <hr />
+                    <span @click="editParticipant(bracketIdx, roundIdx, matchIdx, 1)" class="editable">
+                    {{ match[1].name }} | {{ match[1].score }}
+                    </span>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <!-- Score and Conclude Section -->
-          <div class="score-box">
-            <span>Score: {{ match[0].score }} - {{ match[1].score }}</span>
-            <button
-              class="conclude-btn"
-              @click="concludeMatch(index, idx)"
-              :disabled="match.completed"
-            >
-              {{ match.completed ? "Finished" : "End" }}
-            </button>
-          </div>
+          <!-- Navigation & Matchup Box -->
+          <div class="navigation-and-matchup">
+            <!-- Navigation Controls -->
+            <div class="navigation-controls">
+              <button
+                @click="showPreviousMatch(bracketIdx)"
+                :disabled="currentMatchIndex === 0"
+              >
+                Previous
+              </button>
 
-          <!-- Player 2 -->
-          <div class="player">
-            <button
-              @click="increaseScore(index, idx, 1)"
-              :disabled="match.completed"
-            >+</button>
-            <span @click="editParticipant(index, idx, 1)" class="editable">
-              {{ match[1].name }} ({{ match[1].score }})
-            </span>
-            <button
-              @click="decreaseScore(index, idx, 1)"
-              :disabled="match.completed"
-            >-</button>
+              <button
+                @click="showNextMatch(bracketIdx)"
+                :disabled="currentMatchIndex === brackets[bracketIdx].matches.flat().length - 1"
+              >
+                Next
+              </button>
+            </div>
+
+            <!-- Current Match Display -->
+            <div v-if="currentMatch(bracketIdx)" class="match-card centered">
+              <div class="match-content">
+                <!-- Left Team -->
+                <div class="team blue">
+                  <button
+                    class="score-btn"
+                    @click="increaseScore(bracketIdx, 0, currentMatchIndex, 0)"
+                    :disabled="currentMatch(bracketIdx).completed"
+                  >
+                    +
+                  </button>
+                  <span class="score">{{ currentMatch(bracketIdx)[0].score }}</span>
+                  <button
+                    class="score-btn"
+                    @click="decreaseScore(bracketIdx, 0, currentMatchIndex, 0)"
+                    :disabled="currentMatch(bracketIdx).completed"
+                  >
+                    -
+                  </button>
+                  <span class="team-name">{{ currentMatch(bracketIdx)[0].name }}</span>
+                </div>
+
+                <span class="vs">VS</span>
+
+                <!-- Right Team -->
+                <div class="team red">
+                  <button
+                    class="score-btn"
+                    @click="increaseScore(bracketIdx, 0, currentMatchIndex, 1)"
+                    :disabled="currentMatch(bracketIdx).completed"
+                  >
+                    +
+                  </button>
+                  <span class="score">{{ currentMatch(bracketIdx)[1].score }}</span>
+                  <button
+                    class="score-btn"
+                    @click="decreaseScore(bracketIdx, 0, currentMatchIndex, 1)"
+                    :disabled="currentMatch(bracketIdx).completed"
+                  >
+                    -
+                  </button>
+                  <span class="team-name">{{ currentMatch(bracketIdx)[1].name }}</span>
+                </div>
+              </div>
+
+              <!-- Conclude Match Button -->
+              <button
+                class="match-over"
+                @click="concludeMatch(bracketIdx, 0, currentMatchIndex)"
+                v-if="!currentMatch(bracketIdx).completed"
+              >
+                Completed
+              </button>
+
+              <!-- Completed Match Display -->
+              <span v-else class="completed-text">
+                Match Completed - Winner:
+                {{ currentMatch(bracketIdx)[0].score >= currentMatch(bracketIdx)[1].score
+                ? currentMatch(bracketIdx)[0].name
+                : currentMatch(bracketIdx)[1].name }}
+              </span>
+            </div>
           </div>
         </div>
       </div>
-    </main>
 
-    <!-- PrimeVue Dialog for Setup -->
-    <Dialog v-model:visible="showDialog" header="Bracket Setup" modal :style="{ width: '400px' }">
-      <div class="dialog-content">
-        <div class="p-field">
-          <label for="bracketName">Bracket Name:</label>
-          <InputText v-model="bracketName" placeholder="Enter bracket name" />
+      <!-- Dialog for Bracket Setup -->
+      <Dialog v-model:visible="showDialog" header="Bracket Setup" modal :style="{ width: '400px' }">
+        <div class="dialog-content">
+          <div class="p-field">
+            <label for="bracketName">Bracket Name:</label>
+            <InputText v-model="bracketName" placeholder="Enter bracket name" />
+          </div>
+
+          <div class="p-field">
+            <label for="numberOfPlayers">Number of Participants:</label>
+            <Dropdown
+              v-model="numberOfPlayers"
+              :options="participantOptions"
+              placeholder="Select participants"
+            />
+          </div>
+
+          <div class="p-field">
+            <label for="matchType">Bracket Type:</label>
+            <Dropdown
+              v-model="matchType"
+              :options="bracketTypeOptions"
+              placeholder="Select bracket type"
+            />
+          </div>
+
+          <Button label="Create Bracket" class="p-button-success" @click="createBracket" />
         </div>
-
-        <div class="p-field">
-          <label for="numberOfPlayers">Number of Participants:</label>
-          <Dropdown
-            v-model="numberOfPlayers"
-            :options="participantOptions"
-            placeholder="Select participants"
-          />
-        </div>
-
-        <div class="p-field">
-          <label for="matchType">Bracket Type:</label>
-          <Dropdown
-            v-model="matchType"
-            :options="bracketTypeOptions"
-            placeholder="Select bracket type"
-          />
-        </div>
-
-        <Button
-          label="Create Bracket"
-          class="p-button-success"
-          @click="createBracket"
-        />
-      </div>
-    </Dialog>
-  </div>
-</template>
+      </Dialog>
+    </div>
+  </template>
 
 <style scoped>
-/* Main container */
+/* Container & General Styling */
 .container {
-  display: flex;
-  height: 100vh;
-  z-index: 0;
-}
-
-/* Sidebar */
-.options {
-  width: 30%;
   padding: 20px;
-  background: #1e293b;
-  color: white;
 }
 
-.options h1 {
-  margin-bottom: 15px;
-}
-
-.options button {
+.create-button {
   background: #007bff;
   color: white;
   padding: 10px 15px;
@@ -236,98 +291,211 @@ const concludeMatch = (roundIdx, matchIdx) => {
   cursor: pointer;
   font-size: 1rem;
   font-weight: bold;
-  transition: background 0.3s ease-in-out;
+  margin-bottom: 20px;
 }
 
-.options button:hover {
-  background: #0056b3;
+/* Bracket Wrapper */
+.bracket-wrapper {
+  background-color: #f0f0f0;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 20px;
 }
 
-/* Bracket Section */
+/* Bracket Layout */
 .bracket {
-  width: 70%;
-  padding: 20px;
-  background: #d1d5db;
   display: flex;
-  gap: 30px;
-  overflow-x: auto;
+  gap: 40px;
+  align-items: flex-start;
+  justify-content: center;
 }
 
 .round {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  align-items: center;
+  align-items: center; /* Added for better visual balance */
+  gap: 20px; /* Increased gap for improved spacing */
+  position: relative;
+}
+
+/* Match Box Design */
+.match {
+  background: #fff;
+  border: 2px solid #007bff;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+  width: 150px; /* Match size */
+  margin: 10px 0px; /* Spacing between matches */
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* New Match Box Content Layout */
+.match-content {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-align: left;
+  padding: 5px 10px;
+  border-top: 2px solid #007bff;
+}
+
+.match-content .player-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+  padding: 5px;
+  font-weight: bold;
+}
+
+/* Editable Players */
+.editable {
+  cursor: pointer;
+  color: #007bff;
+  transition: color 0.2s ease-in-out;
+}
+
+.editable:hover {
+  color: #0056b3;
+}
+
+/* Match Lines */
+.match::before,
+.match::after {
+  content: "";
+  position: absolute;
+  width: 40px; /* Ensure the lines extend properly */
+  height: 2px; /* Consistent thickness */
+  background-color: #007bff;
+  display: block; /* Ensure lines are visible */
+}
+
+.match::before {
+  top: 50%;
+  right: 100%;
+  transform: translateY(-50%);
+}
+
+.match::after {
+  top: 50%;
+  left: 100%;
+  transform: translateY(-50%);
+}
+
+.round .match {
+  margin-top: 0; /* Remove fixed margins */
+}
+
+/* Balanced Line Design (Pairs only) */
+.round .match:nth-child(even)::before {
+  top: -25px; /* Line leads upward */
+}
+
+.round .match:nth-child(odd)::before {
+  bottom: -25px; /* Line leads downward */
+}
+
+/* Remove Line for Final Round */
+.round:last-child .match::after {
+  display: none;
+}
+
+.bracket {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start; /* Aligns rounds at the top */
+  justify-content: center;
+}
+
+.round {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Creates balanced gaps in early rounds */
   position: relative;
 }
 
 .match {
-  background: white;
-  padding: 10px;
-  border-radius: 5px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  min-width: 200px;
   position: relative;
-  border: 2px solid #007bff;
+  margin: 10px 0; /* Consistent spacing */
 }
 
-.match .vs {
-  font-weight: bold;
-  color: #1e293b;
-}
+.round-1 .match { margin-top: 0; }
+.round-2 .match { margin-top: 40px; }
+.round-3 .match { margin-top: 80px; }
 
-.editable {
-  cursor: pointer;
-  color: #007bff;
-  text-decoration: underline;
-}
-
-/* Connecting lines */
-.round::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -15px;
-  width: 2px;
-  background: #007bff;
-}
-
-/* Dialog Content */
-.dialog-content {
+/* Navigation & Matchup Section */
+.navigation-and-matchup {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 15px;
 }
 
-.p-field label {
-  font-weight: bold;
+.navigation-controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
 }
 
-/* Score Box */
-.score-box {
-  background: #f3f4f6;
-  padding: 5px 10px;
-  border: 2px solid #007bff;
-  border-radius: 5px;
-  text-align: center;
-  margin: 5px 0;
-}
-
-.score-box button {
-  background: #ff9800;
+.navigation-controls button {
+  background-color: #007bff;
+  color: #fff;
+  padding: 5px 15px;
   border: none;
-  color: white;
-  padding: 3px 8px;
-  border-radius: 4px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.navigation-controls button:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+
+/* Matchup Box */
+.match-card {
+  background: #f8f9fa;
+  border: 2px solid #007bff;
+  border-radius: 8px;
+  padding: 15px;
+  max-width: 300px;
+}
+
+/* Improved Button Design */
+.score-btn {
+  background-color: #4caf50;
+  margin: 0 3px; /* Improved spacing between score controls */
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
-  margin-top: 5px;
 }
 
-.score-box button:hover {
-  background: #f57c00;
+.score-btn:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+
+/* Score Display */
+.score-display {
+  background-color: #e3f2fd;
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-weight: bold;
+  display: inline-block;
+}
+
+/* Match Over Button */
+.match-over {
+  background-color: #ff4757;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 5px;
 }
 </style>
