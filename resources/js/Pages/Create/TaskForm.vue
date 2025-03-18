@@ -1,19 +1,29 @@
 <script setup>
 import { ref } from "vue";
-import AutoComplete from "primevue/autocomplete";
+import Dropdown from "primevue/dropdown";
 import Card from "primevue/card";
 import Button from "primevue/button";
 
 // Reactive state for form fields
-const selectedCommittee = ref(null);
-const selectedTask = ref(null);
 const selectedEvent = ref(null);
+
+// List of task entries
+const tasksList = ref([
+  { committee: null, employee: null, task: null }
+]);
 
 // Options
 const committees = ref([
-  { name: "Committee 1" },
-  { name: "Committee 2" },
-  { name: "Committee 3" }
+  { name: "Committee 1", id: 1 },
+  { name: "Committee 2", id: 2 },
+  { name: "Committee 3", id: 3 }
+]);
+
+const employees = ref([
+  { name: "Alice", committeeId: 1 },
+  { name: "Bob", committeeId: 1 },
+  { name: "Charlie", committeeId: 2 },
+  { name: "Dave", committeeId: 3 },
 ]);
 
 const tasks = ref([
@@ -28,56 +38,30 @@ const events = ref([
   { name: "bbal" }
 ]);
 
-const submitted = ref(false);
+// Filter employees based on selected committee
+const getFilteredEmployees = (committee) =>
+  employees.value.filter((employee) => employee.committeeId === committee?.id);
 
-// Filtered search results
-const filteredEvents = ref([]);
-const filteredCommittees = ref([]);
-const filteredTasks = ref([]);
-
-// Filtering logic for search
-const searchEvent = (event) => {
-  filteredEvents.value = events.value.filter((e) =>
-    e.name.toLowerCase().includes(event.query.toLowerCase())
-  );
-};
-
-// Show all suggestions on focus
-const showAllEvents = () => {
-  filteredEvents.value = [...events.value];
-};
-
-const searchCommittee = (event) => {
-  filteredCommittees.value = committees.value.filter((c) =>
-    c.name.toLowerCase().includes(event.query.toLowerCase())
-  );
-};
-
-const showAllCommittees = () => {
-  filteredCommittees.value = [...committees.value];
-};
-
-const searchTask = (event) => {
-  filteredTasks.value = tasks.value.filter((t) =>
-    t.name.toLowerCase().includes(event.query.toLowerCase())
-  );
-};
-
-const showAllTasks = () => {
-  filteredTasks.value = [...tasks.value];
+// Add new task entry
+const addTask = () => {
+  tasksList.value.push({ committee: null, employee: null, task: null });
 };
 
 // Function to handle form submission
+const submitted = ref(false);
 const createTask = () => {
   submitted.value = true;
-  if (!selectedEvent.value || !selectedCommittee.value || !selectedTask.value) {
+
+  if (!selectedEvent.value || tasksList.value.some(task =>
+    !task.committee || !task.employee || !task.task
+  )) {
     console.warn("Please fill all fields.");
     return;
   }
+
   console.log("Form submitted with:", {
     event: selectedEvent.value,
-    committee: selectedCommittee.value,
-    task: selectedTask.value,
+    tasks: tasksList.value
   });
 };
 </script>
@@ -89,53 +73,89 @@ const createTask = () => {
 
       <template #content>
         <form @submit.prevent="createTask" class="p-fluid">
-          <!-- Event Search Bar -->
+          <!-- Event Dropdown -->
           <div class="p-field">
             <label for="event">Event</label>
-            <AutoComplete
+            <Dropdown
               id="event"
               v-model="selectedEvent"
-              :suggestions="filteredEvents"
-              @complete="searchEvent"
-              @focus="showAllEvents"
+              :options="events"
               optionLabel="name"
-              placeholder="Search for an Event"
+              placeholder="Select an Event"
+              filter
               class="w-full"
             />
           </div>
 
-          <!-- Committee Search Bar -->
-          <div class="p-field">
-            <label for="committee">Committee</label>
-            <AutoComplete
-              id="committee"
-              v-model="selectedCommittee"
-              :suggestions="filteredCommittees"
-              @complete="searchCommittee"
-              @focus="showAllCommittees"
-              optionLabel="name"
-              placeholder="Search for a Committee"
-              class="w-full"
-            />
-          </div>
+          <!-- Task Entries -->
+          <div v-if="selectedEvent">
+            <div
+              v-for="(taskEntry, index) in tasksList"
+              :key="index"
+              class="border p-3 mb-3 rounded-md bg-gray-100"
+            >
+              <h3 class="mb-2">Task {{ index + 1 }}</h3>
 
-          <!-- Task Search Bar -->
-          <div class="p-field">
-            <label for="task">Task</label>
-            <AutoComplete
-              id="task"
-              v-model="selectedTask"
-              :suggestions="filteredTasks"
-              @complete="searchTask"
-              @focus="showAllTasks"
-              optionLabel="name"
-              placeholder="Search for a Task"
-              class="w-full"
+              <!-- Committee Dropdown -->
+              <div class="p-field">
+                <label :for="'committee-' + index">Committee</label>
+                <Dropdown
+                  :id="'committee-' + index"
+                  v-model="taskEntry.committee"
+                  :options="committees"
+                  optionLabel="name"
+                  placeholder="Select a Committee"
+                  filter
+                  class="w-full"
+                />
+              </div>
+
+              <!-- Employee Dropdown (Filtered) -->
+              <div v-if="taskEntry.committee" class="p-field">
+                <label :for="'employee-' + index">Employee</label>
+                <Dropdown
+                  :id="'employee-' + index"
+                  v-model="taskEntry.employee"
+                  :options="getFilteredEmployees(taskEntry.committee)"
+                  optionLabel="name"
+                  placeholder="Select an Employee"
+                  filter
+                  class="w-full"
+                />
+              </div>
+
+              <!-- Task Dropdown -->
+              <div v-if="taskEntry.employee" class="p-field">
+                <label :for="'task-' + index">Task</label>
+                <Dropdown
+                  :id="'task-' + index"
+                  v-model="taskEntry.task"
+                  :options="tasks"
+                  optionLabel="name"
+                  placeholder="Select a Task"
+                  filter
+                  class="w-full"
+                />
+              </div>
+            </div>
+
+            <!-- Add Another Task Button -->
+            <Button
+              type="button"
+              label="Add Another Task"
+              icon="pi pi-plus"
+              class="p-button-secondary"
+              @click="addTask"
             />
           </div>
 
           <!-- Submit Button -->
-          <Button type="submit" label="Submit" icon="pi pi-check" class="p-button-success" />
+          <Button
+            type="submit"
+            label="Submit"
+            icon="pi pi-check"
+            class="p-button-success mt-3"
+          />
         </form>
       </template>
     </Card>
