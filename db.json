@@ -3,10 +3,10 @@
     {
       "id": "f697",
       "title": "Parade",
-      "description": "69th Foundation day parade in the Honor of Sir Seled Jolero and Sryan Balazar ",
+      "description": "69th Foundation day parade in the Honor of Sir Seled Jolero and Sryan Balazar from Iligan, Subsaharan Africa",
       "category": "2",
-      "startDate": "2025-03-16T16:00:00.000Z",
-      "endDate": "2025-03-17T16:00:00.000Z",
+      "startDate": "Mar-17-2025",
+      "endDate": "Mar-18-2025",
       "startTime": "08:00",
       "endTime": "08:30",
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
@@ -14,15 +14,23 @@
       "tags": [
         "1"
       ],
-      "category_id": "2"
+      "category_id": "2",
+      "type": "event",
+      "mappedTags": [
+        {
+          "id": "1",
+          "name": "Foundation Day",
+          "color": "#FF5733"
+        }
+      ]
     },
     {
       "id": "fbe4",
       "title": "Basketball",
-      "description": "Basketball suiiii",
+      "description": "Tournament of basket and the ball",
       "category": "3",
-      "startDate": "2025-03-26T16:00:00.000Z",
-      "endDate": "2025-03-27T16:00:00.000Z",
+      "startDate": "Mar-27-2025",
+      "endDate": "Mar-28-2025",
       "startTime": "08:00",
       "endTime": "09:00",
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
@@ -30,23 +38,39 @@
       "tags": [
         "2"
       ],
-      "category_id": "3"
+      "category_id": "3",
+      "type": "event",
+      "mappedTags": [
+        {
+          "id": "2",
+          "name": "Palakasan",
+          "color": "#33FF57"
+        }
+      ]
     },
     {
       "id": "783a",
-      "title": "exam ",
-      "description": "Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy ",
+      "title": "54th Annual Jolen Tournament",
+      "description": "Annual jolen Tournemnt hosted by his excellency boloqiy lorem ipsum yeay break it down yo",
       "category": "1",
-      "startDate": "2025-03-24T16:00:00.000Z",
-      "endDate": "2025-03-25T16:00:00.000Z",
+      "startDate": "Mar-25-2025",
+      "endDate": "Mar-26-2025",
       "startTime": "08:00",
       "endTime": "09:00",
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
       "archived": false,
       "tags": [
-        "1"
+        "4"
       ],
-      "category_id": "1"
+      "category_id": "3",
+      "type": "event",
+      "mappedTags": [
+        {
+          "id": "2",
+          "name": "Palakasan",
+          "color": "#33FF57"
+        }
+      ]
     },
     {
       "id": "d8b9",
@@ -64,6 +88,30 @@
       ],
       "category_id": "4",
       "type": "event"
+    },
+    {
+      "id": "9cf6",
+      "title": "Duterte Speech",
+      "description": "wwwwwwww",
+      "category": "2",
+      "startDate": "May-20-2025",
+      "endDate": "Mar-25-2025",
+      "startTime": "04:00am",
+      "endTime": "04:30am",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": false,
+      "tags": [
+        "1"
+      ],
+      "category_id": "1",
+      "type": "event",
+      "mappedTags": [
+        {
+          "id": "1",
+          "name": "Foundation Day",
+          "color": "#FF5733"
+        }
+      ]
     }
   ],
   "tags": [
@@ -79,17 +127,12 @@
     },
     {
       "id": "3",
-      "name": "Workshop",
+      "name": "General Assembly",
       "color": "#3357FF"
     },
     {
       "id": "4",
       "name": "Jolen Tournament",
-      "color": "#000000"
-    },
-    {
-      "id": "5",
-      "name": "test",
       "color": "#000000"
     }
   ],

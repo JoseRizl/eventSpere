@@ -124,6 +124,7 @@
   import { useCategoryStore } from "@/stores/categoryStore";
   import { useEventStore } from "@/stores/eventStore";
   import { ref, reactive, onMounted } from "vue";
+  import { router } from '@inertiajs/vue3';
 
   // Stores
   const categoryStore = useCategoryStore();
@@ -227,6 +228,9 @@
     selectedTags.value = [];
     submitted.value = false;
     alert("Event created successfully!");
+
+    // Navigate to Event List
+    router.get(route('event.list')); // Redirect to EventList.vue
   };
   </script>
 

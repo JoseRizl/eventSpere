@@ -19,10 +19,10 @@ const refreshComponent = () => {
     console.log('[REFRESH] Key incremented to:', key.value);
 };
 
-defineExpose({ refreshComponent });
+//defineExpose({ refreshComponent });
 
-const fetchEventDetails = async (forceRefresh = false) => {
-    console.log(`Fetching data... (Force Refresh: ${forceRefresh})`);
+const fetchEventDetails = async () => {
+    //console.log(`Fetching data... (Force Refresh: ${forceRefresh})`);
 
   isLoading.value = true; // ✅ Start loading
 
@@ -72,7 +72,7 @@ const fetchEventDetails = async (forceRefresh = false) => {
     }
 
     relatedEvents.value = combinedData.filter(event => event.id !== id);
-    refreshComponent(); // ✅ Ensures UI refreshes immediately after data updates
+    //refreshComponent(); // ✅ Ensures UI refreshes immediately after data updates
 
 
   } catch (error) {
@@ -93,9 +93,9 @@ onMounted( async () => {
 
 
 // ✅ Watch for route changes to refresh data
-watch(() => vueRoute.params.id, () => {
+/*watch(() => vueRoute.params.id, () => {
     fetchEventDetails();
-}, { immediate: true });
+}, { immediate: true });*/
 
 // Handle file upload
 const handleFileUpload = (event) => {
