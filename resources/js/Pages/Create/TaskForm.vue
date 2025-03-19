@@ -1,15 +1,17 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import Dropdown from "primevue/dropdown";
 import Card from "primevue/card";
 import Button from "primevue/button";
+import axios from "axios";
+import { Textarea } from "primevue";
 
 // Reactive state for form fields
 const selectedEvent = ref(null);
 
 // List of task entries
 const tasksList = ref([
-  { committee: null, employee: null, task: null }
+  { committee: null, employee: null, task: "" }
 ]);
 
 // Options
@@ -32,11 +34,18 @@ const tasks = ref([
   { name: "Budget Management", value: "budget_management" }
 ]);
 
-const events = ref([
-  { name: "4 A.M. Zumba" },
-  { name: "Foundation Day" },
-  { name: "bbal" }
-]);
+const events = ref([]); // Changed to an empty ref for dynamic fetching
+
+
+// Fetch events from `db.json` on mount
+onMounted(async () => {
+  try {
+    const response = await axios.get("http://localhost:3000/events");
+    events.value = response.data.filter(event => !event.archived);
+  } catch (error) {
+    console.error("Error fetching events:", error);
+  }
+});
 
 // Filter employees based on selected committee
 const getFilteredEmployees = (committee) =>
@@ -44,7 +53,7 @@ const getFilteredEmployees = (committee) =>
 
 // Add new task entry
 const addTask = () => {
-  tasksList.value.push({ committee: null, employee: null, task: null });
+  tasksList.value.push({ committee: null, employee: null, task: "" });
 };
 
 // Function to handle form submission
@@ -80,7 +89,7 @@ const createTask = () => {
               id="event"
               v-model="selectedEvent"
               :options="events"
-              optionLabel="name"
+              optionLabel="title"
               placeholder="Select an Event"
               filter
               class="w-full"
@@ -124,19 +133,17 @@ const createTask = () => {
                 />
               </div>
 
-              <!-- Task Dropdown -->
-              <div v-if="taskEntry.employee" class="p-field">
-                <label :for="'task-' + index">Task</label>
-                <Dropdown
-                  :id="'task-' + index"
-                  v-model="taskEntry.task"
-                  :options="tasks"
-                  optionLabel="name"
-                  placeholder="Select a Task"
-                  filter
-                  class="w-full"
-                />
-              </div>
+              <!-- Task Textbox -->
+            <div v-if="taskEntry.employee" class="p-field">
+            <label :for="'task-' + index">Task</label>
+            <Textarea
+                :id="'task-' + index"
+                v-model="taskEntry.task"
+                placeholder="Enter Task"
+                class="w-full"
+            />
+            </div>
+
             </div>
 
             <!-- Add Another Task Button -->

@@ -9,6 +9,17 @@
               <img v-if="data.image" :src="data.image" alt="Event Image" class="event-icon" />
               <span>{{ data.title }}</span>
             </div>
+
+            <!-- Tags DIsplay-->
+             <div class="tags-container">
+                <span
+                    v-for="tag in data.mappedTags"
+                    :key="tag.id"
+                    class="tag"
+                    :style="{ backgroundColor: tag.color || '#800080' }">
+                    {{ tag.name }}
+                </span>
+             </div>
           </template>
         </Column>
 
@@ -63,11 +74,25 @@
             <InputText id="title" v-model="selectedEvent.title" placeholder="Enter event title" />
           </div>
 
-          <!-- Event Subtitle -->
+          <!-- Tags Selection -->
+        <div class="p-field">
+        <label for="tags">Tags</label>
+            <MultiSelect
+                id="tags"
+                v-model="selectedEvent.tags"
+                :options="tags"
+                optionLabel="name"
+                optionValue="id"
+                placeholder="Select tags"
+                display="chip"
+            />
+        </div>
+
+          <!-- Event Subtitle
           <div class="p-field">
             <label for="subtitle">Event Subtitle (Optional)</label>
             <InputText id="subtitle" v-model="selectedEvent.subtitle" placeholder="Enter event subtitle" />
-          </div>
+          </div> -->
 
           <!-- Event Category Dropdown -->
           <div class="p-field">
@@ -117,7 +142,6 @@
         />
         </div>
 
-
           <!-- Event Description -->
           <div class="p-field">
             <label for="description">Description</label>
@@ -165,14 +189,21 @@
       const combinedEvents = ref([]);
       const isEditModalVisible = ref(false);
       const selectedEvent = ref(null);
+      const tags = ref([]);
 
       onMounted(async () => {
         try {
-          const [eventsResponse, sportsResponse, categoriesResponse] = await Promise.all([
+          const [eventsResponse, sportsResponse, categoriesResponse, tagsResponse] = await Promise.all([
             axios.get("http://localhost:3000/events"),
             axios.get("http://localhost:3000/sports"),
             axios.get("http://localhost:3000/category"),
+            axios.get("http://localhost:3000/tags"),
           ]);
+
+          const tagsMap = tagsResponse.data.reduce((map, tag) => {
+            map[tag.id] = tag;
+            return map;
+        }, {});
 
           events.value = eventsResponse.data
           .filter(event => !event.archived) // Exclude archived events
@@ -180,15 +211,22 @@
             ...event,
             type: "event",
             category_id: event.category?.id || event.category_id,
+            mappedTags: Array.isArray(event.tags)
+      ? event.tags.map(tagId => tagsMap[tagId] || { id: tagId, name: "Unknown Tag" })
+      : []
           }));
 
           sports.value = sportsResponse.data.map(sport => ({
             ...sport,
             type: "sport",
             category_id: sport.category?.id || sport.category_id,
+            mappedTags: sport.tags.map(tagId => tagsMap[tagId]) // Map tag details
           }));
 
           categories.value = categoriesResponse.data;
+
+          //Tags value for multiselect
+          tags.value = tagsResponse.data;
 
           combinedEvents.value = [...events.value, ...sports.value].sort((a, b) => {
             return new Date(a.startDate || "1970-01-01") - new Date(b.startDate || "1970-01-01");
@@ -217,6 +255,12 @@
       const editEvent = (event) => {
         selectedEvent.value = {
             ...event,
+            tags: Array.isArray(event.tags)
+            ? event.tags.map(tagId => {
+                const foundTag = tags.value.find(tag => tag.id === tagId);
+                return foundTag ? foundTag.id : null;
+            }).filter(Boolean)
+            : [], // Ensure tags is an array or defaults to an empty array
             startDate: event.startDate ? new Date(event.startDate) : null,
             endDate: event.endDate ? new Date(event.endDate) : null
         };
@@ -227,6 +271,10 @@
       // Save Edited Event
       const saveEditedEvent = async () => {
   if (!selectedEvent.value) return;
+
+  // Confirmation Prompt
+  const isConfirmed = confirm(`Are you sure you want to save changes to "${selectedEvent.value.title}"?`);
+    if (!isConfirmed) return;
 
   try {
     const collection = selectedEvent.value.type === "sport" ? "sports" : "events";
@@ -242,6 +290,7 @@
 
     await axios.put(`http://localhost:3000/${collection}/${selectedEvent.value.id}`, {
       ...selectedEvent.value,
+      tags: selectedEvent.value.tags, // Correct: Directly save tag IDs
       startDate: selectedEvent.value.startDate
         ? format(new Date(selectedEvent.value.startDate), "MMM-dd-yyyy")
         : null,
@@ -253,10 +302,18 @@
     });
 
     // Update the local event list instantly
-    const index = combinedEvents.value.findIndex(e => e.id === selectedEvent.value.id);
-    if (index !== -1) {
-      combinedEvents.value[index] = { ...selectedEvent.value };
-    }
+    // Refresh the event list to reflect updated tags
+const updatedEventsResponse = await axios.get("http://localhost:3000/events");
+combinedEvents.value = updatedEventsResponse.data
+    .filter(event => !event.archived)
+    .map(event => ({
+        ...event,
+        type: "event",
+        category_id: event.category?.id || event.category_id,
+        mappedTags: Array.isArray(event.tags)
+            ? event.tags.map(tagId => tags.value.find(tag => tag.id === tagId) || { id: tagId, name: "Unknown Tag" })
+            : []
+    }));
 
     isEditModalVisible.value = false;
     alert("Event updated successfully!");
@@ -294,6 +351,7 @@ const archiveEvent = async (event) => {
      archiveEvent,
      selectedEvent,
      categories,
+     tags,
      };
     },
  });
