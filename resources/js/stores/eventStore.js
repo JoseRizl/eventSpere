@@ -109,6 +109,10 @@ export const useEventStore = defineStore("event", {
 
     async addTag(newTag) {
       try {
+        // Ensure color includes a #
+        if (!newTag.color.startsWith("#")) {
+        newTag.color = "#" + newTag.color;
+      }
         const response = await axios.post("http://localhost:3000/tags", newTag);
         this.tags.push(response.data);
       } catch (error) {

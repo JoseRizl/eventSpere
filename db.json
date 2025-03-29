@@ -21,8 +21,8 @@
       "title": "Basketball",
       "description": "Basketball suiiii",
       "category": "3",
-      "startDate": "2025-03-26T16:00:00.000Z",
-      "endDate": "2025-03-27T16:00:00.000Z",
+      "startDate": "Mar-27-2025",
+      "endDate": "Mar-28-2025",
       "startTime": "08:00",
       "endTime": "09:00",
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
@@ -30,40 +30,145 @@
       "tags": [
         "2"
       ],
-      "category_id": "3"
+      "category_id": "3",
+      "type": "event",
+      "mappedTags": [
+        {
+          "id": "2",
+          "name": "Palakasan",
+          "color": "#33FF57"
+        },
+        {
+          "id": 6,
+          "name": "Graduation",
+          "color": "#9e369e"
+        },
+        {
+          "id": "5",
+          "name": "test",
+          "color": "#000000"
+        }
+      ]
     },
     {
       "id": "783a",
-      "title": "exam ",
-      "description": "Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy Exam kapuy ",
+      "title": "Google Play Gift Card",
+      "description": "Why did you redeem it? Why did you do it? Ma'am why did you do this?",
       "category": "1",
-      "startDate": "2025-03-24T16:00:00.000Z",
-      "endDate": "2025-03-25T16:00:00.000Z",
+      "startDate": "Mar-25-2025",
+      "endDate": "Mar-26-2025",
       "startTime": "08:00",
-      "endTime": "09:00",
+      "endTime": "06:00",
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": false,
+      "archived": true,
       "tags": [
-        "1"
+        "3"
       ],
-      "category_id": "1"
+      "category_id": "4",
+      "type": "event",
+      "mappedTags": [
+        {
+          "id": "3",
+          "name": "Buwan ng Wika",
+          "color": "#3357FF"
+        }
+      ]
     },
     {
-      "id": "d8b9",
-      "title": "4 A.M. Zumba",
-      "description": "Zumbas",
-      "category": "4",
-      "startDate": "2025-03-26T16:00:00.000Z",
-      "endDate": "2025-03-26T16:00:00.000Z",
+      "id": "ad90",
+      "title": "Archived",
+      "description": "Kung makita ni outside sa archive, naay problema.",
+      "category": "1",
+      "startDate": "2025-03-23T16:00:00.000Z",
+      "endDate": "2025-03-25T16:00:00.000Z",
       "startTime": "04:00am",
       "endTime": "04:30am",
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
       "archived": true,
       "tags": [
-        "2"
+        "5"
       ],
-      "category_id": "4",
-      "type": "event"
+      "category_id": "1",
+      "type": "event",
+      "mappedTags": [
+        {
+          "id": "5",
+          "name": "test",
+          "color": "#000000"
+        }
+      ]
+    },
+    {
+      "id": "6af1",
+      "title": "🧢stone",
+      "description": "Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod ",
+      "category": "1",
+      "startDate": "Jul-12-2024",
+      "endDate": "Apr-24-2026",
+      "startTime": "04:00pm",
+      "endTime": "05:00pm",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": false,
+      "tags": [
+        "2",
+        8,
+        7
+      ],
+      "category_id": "1",
+      "type": "event",
+      "mappedTags": [
+        {
+          "id": "2",
+          "name": "Palakasan",
+          "color": "#33FF57"
+        }
+      ]
+    },
+    {
+      "id": "d62d",
+      "title": "🤣",
+      "description": "Gradute",
+      "category": "2",
+      "startDate": "2025-06-12T16:00:00.000Z",
+      "endDate": "2025-06-12T16:00:00.000Z",
+      "startTime": "08:00",
+      "endTime": "12:00",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": false,
+      "tags": [
+        6
+      ],
+      "category_id": "2"
+    },
+    {
+      "id": "f14c",
+      "title": "cxzcx",
+      "description": "dsaas",
+      "category": "5e80",
+      "startDate": "Mar-25-2025",
+      "endDate": "Mar-26-2025",
+      "startTime": "04:00am",
+      "endTime": "00:00",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": true,
+      "tags": [
+        "5",
+        "6"
+      ],
+      "category_id": "5e80",
+      "type": "event",
+      "mappedTags": [
+        {
+          "id": "5",
+          "name": "test",
+          "color": "#000000"
+        },
+        {
+          "id": "6",
+          "name": "Graduation",
+          "color": "#9e369e"
+        }
+      ]
     }
   ],
   "tags": [
@@ -79,7 +184,7 @@
     },
     {
       "id": "3",
-      "name": "Workshop",
+      "name": "Buwan ng Wika",
       "color": "#3357FF"
     },
     {
@@ -88,9 +193,9 @@
       "color": "#000000"
     },
     {
-      "id": "5",
-      "name": "test",
-      "color": "#000000"
+      "id": "6",
+      "name": "Graduation",
+      "color": "#9e369e"
     }
   ],
   "sports": [],
@@ -123,7 +228,7 @@
   ],
   "brackets": [
     {
-      "id": 1742128800494,
+      "id": "1742128800494",
       "name": "Basketball",
       "type": "single",
       "bracket": [
