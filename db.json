@@ -110,35 +110,34 @@
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
       "archived": false,
       "tags": [
-        "2",
-        8,
-        7
+        "2"
       ],
       "category_id": "1",
       "type": "event",
-      "mappedTags": [
-        {
-          "id": "2",
-          "name": "Palakasan",
-          "color": "#33FF57"
-        }
-      ]
+      "mappedTags": []
     },
     {
       "id": "d62d",
       "title": "🤣",
       "description": "Gradute",
       "category": "2",
-      "startDate": "2025-06-12T16:00:00.000Z",
-      "endDate": "2025-06-12T16:00:00.000Z",
+      "startDate": "Jun-13-2025",
+      "endDate": "Jun-13-2025",
       "startTime": "08:00",
       "endTime": "12:00",
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
       "archived": false,
       "tags": [
-        6
+        "6"
       ],
-      "category_id": "2"
+      "category_id": "2",
+      "type": "event",
+      "mappedTags": [
+        {
+          "id": 6,
+          "name": "Unknown Tag"
+        }
+      ]
     },
     {
       "id": "f14c",
@@ -321,6 +320,23 @@
       },
       "completed": false,
       "winner": ""
+    }
+  ],
+  "announcements": [
+    {
+      "id": 1,
+      "message": "🚨 Important Update: System Maintenance on March 30.",
+      "timestamp": "2025-03-29T12:00:00Z"
+    },
+    {
+      "id": 2,
+      "message": "📢 Event registration closes this Friday!",
+      "timestamp": "2025-03-28T15:30:00Z"
+    },
+    {
+      "id": "18cb",
+      "message": "Ugma, sa inyong skelahan, walay clase 🎉",
+      "timestamp": "2025-03-31T03:52:13.554Z"
     }
   ]
 }
