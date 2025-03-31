@@ -83,6 +83,10 @@
         }
 
 
+        html {
+            overflow-y: scroll;
+          }
+
       /* Ensure the sidebar and its menus have higher priority */
     aside, .p-tieredmenu {
     z-index: 1000 !important; /* Place sidebar above all content */
