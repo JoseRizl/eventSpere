@@ -114,7 +114,20 @@
       ],
       "category_id": "1",
       "type": "event",
-      "mappedTags": []
+      "mappedTags": [
+        {
+          "id": "2",
+          "name": "Palakasan",
+          "color": "#33FF57"
+        }
+      ],
+      "tasks": [
+        {
+          "committee": null,
+          "employee": null,
+          "task": ""
+        }
+      ]
     },
     {
       "id": "d62d",
@@ -324,12 +337,12 @@
   ],
   "announcements": [
     {
-      "id": 1,
+      "id": "1",
       "message": "🚨 Important Update: System Maintenance on March 30.",
       "timestamp": "2025-03-29T12:00:00Z"
     },
     {
-      "id": 2,
+      "id": "2",
       "message": "📢 Event registration closes this Friday!",
       "timestamp": "2025-03-28T15:30:00Z"
     },
@@ -337,6 +350,96 @@
       "id": "18cb",
       "message": "Ugma, sa inyong skelahan, walay clase 🎉",
       "timestamp": "2025-03-31T03:52:13.554Z"
+    }
+  ],
+  "committees": [
+    {
+      "id": "1",
+      "name": "Logistics"
+    },
+    {
+      "id": "2",
+      "name": "Sports"
+    },
+    {
+      "id": "3",
+      "name": "Catering"
+    },
+    {
+      "id": "4",
+      "name": "Entertainment"
+     }
+  ],
+  "employees": [
+    {
+      "id": "1",
+      "name": "Glene",
+      "committeeId": 1
+    },
+    {
+      "id": "2",
+      "name": "Miko",
+      "committeeId": 2
+    },
+    {
+      "id": "3",
+      "name": "Uvuvwevwevwe Onyetenyevwe Ubwemubwem Ossas",
+      "committeeId": 3
+    },
+    {
+      "id": "4",
+      "name": "",
+      "committeeId": 4
+    },
+    {
+      "id": "5",
+      "name": "Kim Jong Un",
+      "committeeId": 1
+      },
+    {
+      "id": "6",
+      "name": "Melvin",
+      "committeeId": 2
+    },
+    {
+      "id": "7",
+      "name": "Lee Ar",
+      "committeeId": 3
+    },
+    {
+      "id": "8",
+      "name": "Jungkook",
+      "committeeId": 4
+    },
+    {
+      "id": "9",
+      "name": "Bryan",
+      "committeeId": 1
+    },
+    {
+      "id": "10",
+      "name": "Edsel",
+      "committeeId": 2
+    },
+    {
+      "id": "11",
+      "name": "Sonny Jihns",
+      "committeeId": 3
+    },
+    {
+      "id": "12",
+      "name": "No Kum-sok",
+      "committeeId": 4
+    },
+    {
+      "id": "13",
+      "name": "Xi Jinping",
+      "committeeId": 1
+    },
+    {
+      "id": "14",
+      "name": "clock clock clack clock",
+      "committeeId": 2
     }
   ]
 }

@@ -63,7 +63,57 @@
             </div>
           </template>
         </Column>
+
+        <Column header="Tasks" style="width:15%;" body-class="text-center">
+        <template #body="{ data }">
+            <Button icon="pi pi-list" class="p-button-rounded p-button-warning" @click="openTaskModal(data)" />
+        </template>
+        </Column>
+
       </DataTable>
+
+      <Dialog v-model:visible="isTaskModalVisible" modal header="Assign Tasks" :style="{ width: '50vw' }">
+  <div class="p-fluid">
+    <div class="p-field">
+      <label>Event</label>
+      <InputText v-model="selectedEvent.title" disabled />
+    </div>
+
+    <!-- Task Entries -->
+    <div v-for="(taskEntry, index) in taskAssignments" :key="index" class="p-field">
+      <h3>Task {{ index + 1 }}</h3>
+
+      <!-- Committee Selection -->
+      <div class="p-field">
+        <label>Committee</label>
+        <Dropdown v-model="taskEntry.committee" :options="committees" optionLabel="name" placeholder="Select Committee" @change="updateEmployees(index)" />
+      </div>
+
+      <!-- Employee Selection -->
+      <div class="p-field">
+        <label>Employee</label>
+        <Dropdown v-model="taskEntry.employee" :options="filteredEmployees[index]" optionLabel="name" placeholder="Select Employee" />
+      </div>
+
+      <!-- Task Description -->
+      <div class="p-field">
+        <label>Task</label>
+        <Textarea v-model="taskEntry.task" rows="2" placeholder="Enter task details" />
+      </div>
+
+      <!-- Remove Task Button -->
+      <Button icon="pi pi-trash" class="p-button-danger p-button-text" @click="removeTask(index)" />
+    </div>
+
+    <!-- Add Task Button -->
+    <Button label="Add Task" icon="pi pi-plus" class="p-button-secondary" @click="addTask" />
+  </div>
+
+  <template #footer>
+    <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="isTaskModalVisible = false" />
+    <Button label="Save Tasks" icon="pi pi-check" class="p-button-primary" @click="saveTaskAssignments" />
+  </template>
+</Dialog>
 
       <!-- Edit Event Modal -->
       <Dialog v-model:visible="isEditModalVisible" modal header="Edit Event" :style="{ width: '50vw' }">
@@ -190,14 +240,21 @@
       const isEditModalVisible = ref(false);
       const selectedEvent = ref(null);
       const tags = ref([]);
+      const committees = ref([]);
+      const filteredEmployees = ref([]);
+      const isTaskModalVisible = ref(false);
+      const taskAssignments = ref([]);
+      const employees = ref([]);
 
       onMounted(async () => {
         try {
-          const [eventsResponse, sportsResponse, categoriesResponse, tagsResponse] = await Promise.all([
+          const [eventsResponse, sportsResponse, categoriesResponse, tagsResponse, committeesResponse, employeesResponse] = await Promise.all([
             axios.get("http://localhost:3000/events"),
             axios.get("http://localhost:3000/sports"),
             axios.get("http://localhost:3000/category"),
             axios.get("http://localhost:3000/tags"),
+            axios.get("http://localhost:3000/committees"),
+            axios.get("http://localhost:3000/employees")
           ]);
 
           const tagsMap = tagsResponse.data.reduce((map, tag) => {
@@ -228,6 +285,9 @@
           //Tags value for multiselect
           tags.value = tagsResponse.data;
 
+          committees.value = committeesResponse.data;
+          employees.value = employeesResponse.data;
+
           combinedEvents.value = [...events.value, ...sports.value].sort((a, b) => {
             return new Date(a.startDate || "1970-01-01") - new Date(b.startDate || "1970-01-01");
           });
@@ -235,6 +295,53 @@
           console.error("Error fetching data:", error);
         }
       });
+
+       // Open Task Modal
+    const openTaskModal = (event) => {
+      selectedEvent.value = event;
+      taskAssignments.value = event.tasks ? [...event.tasks] : [{ committee: null, employee: null, task: "" }];
+      filteredEmployees.value = taskAssignments.value.map(() => []);
+      isTaskModalVisible.value = true;
+    };
+
+    // Add a new task entry
+    const addTask = () => {
+      taskAssignments.value.push({ committee: null, employee: null, task: "" });
+      filteredEmployees.value.push([]);
+    };
+
+    // Remove task entry
+    const removeTask = (index) => {
+      taskAssignments.value.splice(index, 1);
+      filteredEmployees.value.splice(index, 1);
+    };
+
+    // Update filtered employees when committee changes
+    const updateEmployees = (index) => {
+    const selectedCommittee = taskAssignments.value[index].committee;
+
+    // Convert committeeId to the same type for comparison
+    filteredEmployees.value[index] = employees.value.filter(emp =>
+        Number(emp.committeeId) === Number(selectedCommittee?.id)
+    );
+    };
+
+    // Save Task Assignments
+    const saveTaskAssignments = async () => {
+      try {
+        await axios.put(`http://localhost:3000/events/${selectedEvent.value.id}`, {
+          ...selectedEvent.value,
+          tasks: taskAssignments.value
+        });
+
+        isTaskModalVisible.value = false;
+        alert("Tasks assigned successfully!");
+      } catch (error) {
+        console.error("Error saving tasks:", error);
+        alert("Failed to save tasks.");
+      }
+    };
+
 
       // Format date and time display
       const formatDateTime = (date, time) => {
@@ -352,6 +459,16 @@ const archiveEvent = async (event) => {
      selectedEvent,
      categories,
      tags,
+     isTaskModalVisible,
+     taskAssignments,
+     committees,
+     employees,
+     filteredEmployees,
+     openTaskModal,
+     addTask,
+     removeTask,
+     updateEmployees,
+     saveTaskAssignments,
      };
     },
  });
