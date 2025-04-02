@@ -86,13 +86,13 @@
       <!-- Committee Selection -->
       <div class="p-field">
         <label>Committee</label>
-        <Dropdown v-model="taskEntry.committee" :options="committees" optionLabel="name" placeholder="Select Committee" @change="updateEmployees(index)" />
+        <Dropdown v-model="taskEntry.committee" :options="committees" optionLabel="name" placeholder="Select Committee" filter @change="updateEmployees(index)" />
       </div>
 
       <!-- Employee Selection -->
       <div class="p-field">
         <label>Employee</label>
-        <Dropdown v-model="taskEntry.employee" :options="filteredEmployees[index]" optionLabel="name" placeholder="Select Employee" />
+        <Dropdown v-model="taskEntry.employee" :options="filteredEmployees[index]" optionLabel="name" placeholder="Select Employee" filter/>
       </div>
 
       <!-- Task Description -->
@@ -102,7 +102,7 @@
       </div>
 
       <!-- Remove Task Button -->
-      <Button icon="pi pi-trash" class="p-button-danger p-button-text" @click="removeTask(index)" />
+      <Button icon="pi pi-trash" class="p-button-danger p-button-text" @click="deleteTask(index)" />
     </div>
 
     <!-- Add Task Button -->
@@ -300,7 +300,10 @@
     const openTaskModal = (event) => {
       selectedEvent.value = event;
       taskAssignments.value = event.tasks ? [...event.tasks] : [{ committee: null, employee: null, task: "" }];
-      filteredEmployees.value = taskAssignments.value.map(() => []);
+      // Populate filteredEmployees based on already selected committees
+      filteredEmployees.value = taskAssignments.value.map(task =>
+        employees.value.filter(emp => Number(emp.committeeId) === Number(task.committee?.id))
+      );
       isTaskModalVisible.value = true;
     };
 
@@ -310,11 +313,32 @@
       filteredEmployees.value.push([]);
     };
 
-    // Remove task entry
-    const removeTask = (index) => {
-      taskAssignments.value.splice(index, 1);
-      filteredEmployees.value.splice(index, 1);
+    const deleteTask = async (index, taskEntry) => {
+  if (!confirm(`Are you sure you want to delete this task?`)) return;
+
+  try {
+    taskAssignments.value.splice(index, 1); // Remove from local UI
+
+    const updatedEvent = {
+      ...selectedEvent.value,
+      tasks: [...taskAssignments.value]
     };
+
+    await axios.put(`http://localhost:3000/events/${selectedEvent.value.id}`, updatedEvent);
+
+    // Update local event data
+    const eventIndex = combinedEvents.value.findIndex(event => event.id === selectedEvent.value.id);
+    if (eventIndex !== -1) {
+      combinedEvents.value[eventIndex].tasks = [...taskAssignments.value];
+    }
+
+    alert("Task deleted successfully!");
+  } catch (error) {
+    console.error("Error deleting task:", error);
+    alert("Failed to delete task.");
+  }
+};
+
 
     // Update filtered employees when committee changes
     const updateEmployees = (index) => {
@@ -328,11 +352,19 @@
 
     // Save Task Assignments
     const saveTaskAssignments = async () => {
-      try {
-        await axios.put(`http://localhost:3000/events/${selectedEvent.value.id}`, {
-          ...selectedEvent.value,
-          tasks: taskAssignments.value
-        });
+        try {
+        const updatedEvent = {
+        ...selectedEvent.value,
+        tasks: taskAssignments.value
+        };
+
+        await axios.put(`http://localhost:3000/events/${selectedEvent.value.id}`, updatedEvent);
+
+        // Find the index of the event in combinedEvents and update it
+        const index = combinedEvents.value.findIndex(event => event.id === selectedEvent.value.id);
+        if (index !== -1) {
+        combinedEvents.value[index].tasks = [...taskAssignments.value];
+        }
 
         isTaskModalVisible.value = false;
         alert("Tasks assigned successfully!");
@@ -466,7 +498,7 @@ const archiveEvent = async (event) => {
      filteredEmployees,
      openTaskModal,
      addTask,
-     removeTask,
+     deleteTask,
      updateEmployees,
      saveTaskAssignments,
      };

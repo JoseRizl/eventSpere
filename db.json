@@ -14,7 +14,29 @@
       "tags": [
         "1"
       ],
-      "category_id": "2"
+      "category_id": "2",
+      "type": "event",
+      "mappedTags": [
+        {
+          "id": "1",
+          "name": "Foundation Day",
+          "color": "#FF5733"
+        }
+      ],
+      "tasks": [
+        {
+          "committee": {
+            "id": "1",
+            "name": "Logistics"
+          },
+          "employee": {
+            "id": "9",
+            "name": "Bryan",
+            "committeeId": 1
+          },
+          "task": "Tig bira sa sakyanan"
+        }
+      ]
     },
     {
       "id": "fbe4",
@@ -37,16 +59,20 @@
           "id": "2",
           "name": "Palakasan",
           "color": "#33FF57"
-        },
+        }
+      ],
+      "tasks": [
         {
-          "id": 6,
-          "name": "Graduation",
-          "color": "#9e369e"
-        },
-        {
-          "id": "5",
-          "name": "test",
-          "color": "#000000"
+          "committee": {
+            "id": "3",
+            "name": "Catering"
+          },
+          "employee": {
+            "id": "3",
+            "name": "Uvuvwevwevwe Onyetenyevwe Ubwemubwem Ossas",
+            "committeeId": 3
+          },
+          "task": "Dala sa snack"
         }
       ]
     },
@@ -123,9 +149,16 @@
       ],
       "tasks": [
         {
-          "committee": null,
-          "employee": null,
-          "task": ""
+          "committee": {
+            "id": "1",
+            "name": "Logistics"
+          },
+          "employee": {
+            "id": "1",
+            "name": "Glene",
+            "committeeId": 1
+          },
+          "task": "Defence 🥋"
         }
       ]
     },
@@ -368,7 +401,7 @@
     {
       "id": "4",
       "name": "Entertainment"
-     }
+    }
   ],
   "employees": [
     {
@@ -395,7 +428,7 @@
       "id": "5",
       "name": "Kim Jong Un",
       "committeeId": 1
-      },
+    },
     {
       "id": "6",
       "name": "Melvin",
