@@ -49,7 +49,7 @@ const createBracket = () => {
 
 const generateBracket = () => {
   const players = Array.from({ length: numberOfPlayers.value }, (_, i) => ({
-    name: `Player ${i + 1}`,
+    name: `Player ${i + 1}`,  // Default names for first round
     score: 0,
   }));
 
@@ -59,10 +59,21 @@ const generateBracket = () => {
   for (let i = 0; i < rounds; i++) {
     let roundMatches = [];
 
+    // For the first round, use preset names
+    const isFirstRound = i === 0;
+
     for (let j = 0; j < players.length / Math.pow(2, i); j += 2) {
       roundMatches.push([
-        { ...players[j], completed: false },
-        { ...players[j + 1], completed: false },
+        {
+          ...players[j],
+          completed: false,
+          name: isFirstRound ? `Player ${j + 1}` : "", // Set preset names only in the first round, empty for others
+        },
+        {
+          ...players[j + 1],
+          completed: false,
+          name: isFirstRound ? `Player ${j + 2}` : "", // Set preset names only in the first round, empty for others
+        },
       ]);
     }
 
