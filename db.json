@@ -180,38 +180,47 @@
       "type": "event",
       "mappedTags": [
         {
-          "id": 6,
-          "name": "Unknown Tag"
+          "id": "6",
+          "name": "Graduation",
+          "color": "#9e369e"
+        }
+      ],
+      "tasks": [
+        {
+          "committee": {
+            "id": "2",
+            "name": "Sports"
+          },
+          "employee": {
+            "id": "14",
+            "name": "clock clock clack clock",
+            "committeeId": 2
+          },
+          "task": "My name is 🗣️🗣️🗣️"
         }
       ]
     },
     {
-      "id": "f14c",
-      "title": "cxzcx",
-      "description": "dsaas",
-      "category": "5e80",
-      "startDate": "Mar-25-2025",
-      "endDate": "Mar-26-2025",
-      "startTime": "04:00am",
+      "id": "0332",
+      "title": "wwwoo",
+      "description": "dsasaaa",
+      "category": "2",
+      "startDate": "2025-04-28T16:00:00.000Z",
+      "endDate": "2025-04-29T16:00:00.000Z",
+      "startTime": "12:00",
       "endTime": "00:00",
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
       "archived": true,
       "tags": [
-        "5",
-        "6"
+        "1"
       ],
-      "category_id": "5e80",
+      "category_id": "2",
       "type": "event",
       "mappedTags": [
         {
-          "id": "5",
-          "name": "test",
-          "color": "#000000"
-        },
-        {
-          "id": "6",
-          "name": "Graduation",
-          "color": "#9e369e"
+          "id": "1",
+          "name": "Foundation Day",
+          "color": "#FF5733"
         }
       ]
     }

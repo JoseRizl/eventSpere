@@ -118,6 +118,19 @@
         </template>
       </Card>
     </div>
+
+    <Dialog v-model:visible="successModal" header="Success" modal :closable="false">
+    <div class="p-d-flex p-ai-center p-jc-center">
+        <i class="pi pi-check-circle" style="font-size: 2rem; color: green;"></i>
+        <p class="p-ml-3">Event created successfully!</p>
+    </div>
+
+    <template #footer>
+        <Button label="OK" icon="pi pi-times" class="p-button-text" @click="successModal = false" />
+        <Button label="Go to Events" icon="pi pi-list" class="p-button-success" @click="router.get(route('event.list'))" />
+    </template>
+    </Dialog>
+
   </template>
 
   <script setup>
@@ -135,6 +148,7 @@
   const tags = ref([]);
   const selectedTags = ref([]);
   const newTag = reactive({ name: "", color: "#000000" });
+  const successModal = ref(false);
 
   // Form data
   const form = reactive({
@@ -227,10 +241,11 @@
 
     selectedTags.value = [];
     submitted.value = false;
-    alert("Event created successfully!");
+    // Show success modal instead of alert
+    successModal.value = true;
 
     // Navigate to Event List
-    router.get(route('event.list')); // Redirect to EventList.vue
+    //router.get(route('event.list')); // Redirect to EventList.vue
   };
   </script>
 

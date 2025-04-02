@@ -90,7 +90,7 @@
       </div>
 
       <!-- Employee Selection -->
-      <div class="p-field">
+      <div v-if="taskEntry.committee" class="p-field">
         <label>Employee</label>
         <Dropdown v-model="taskEntry.employee" :options="filteredEmployees[index]" optionLabel="name" placeholder="Select Employee" filter/>
       </div>
@@ -205,6 +205,15 @@
         </template>
       </Dialog>
     </div>
+
+    <Dialog v-model:visible="isConfirmModalVisible" modal header="Confirmation" :style="{ width: '30vw' }">
+    <p>{{ confirmMessage }}</p>
+    <template #footer>
+        <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="cancelConfirmation" />
+        <Button label="Confirm" icon="pi pi-check" class="p-button-primary" @click="confirmAction" />
+    </template>
+    </Dialog>
+
   </template>
 
   <script>
