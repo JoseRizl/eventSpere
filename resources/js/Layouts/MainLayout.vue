@@ -37,27 +37,9 @@ const sideBarItems = ref([
         route: route('category.list')
     },
     {
-        label: 'Task',
-        icon: 'pi pi-check',
-        route: route('task.form')
-    },
-    {
         label: 'Sports',
         icon: 'pi pi-ticket',
-        items: [
-            {
-                label: 'Bracket',
-                icon: 'pi pi-plus',
-                shortcut: '⌘+C',
-                route: route('bracket')
-            },
-            {
-                label: 'Sport Events',
-                icon: 'pi pi-list',
-                shortcut: '⌘+D',
-                route: route('match')
-            }
-        ]
+        route: route('bracket')
     },
     {
         label: 'Archive',

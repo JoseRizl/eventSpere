@@ -127,7 +127,7 @@
     {
       "id": "6af1",
       "title": "🧢stone",
-      "description": "Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod Sakit akong likod ",
+      "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
       "category": "1",
       "startDate": "Jul-12-2024",
       "endDate": "Apr-24-2026",
@@ -159,6 +159,18 @@
             "committeeId": 1
           },
           "task": "Defence 🥋"
+        },
+        {
+          "committee": {
+            "id": "1",
+            "name": "Logistics"
+          },
+          "employee": {
+            "id": "9",
+            "name": "Bryan",
+            "committeeId": 1
+          },
+          "task": "sasssdsdd"
         }
       ]
     },
@@ -387,11 +399,6 @@
       "id": "2",
       "message": "📢 Event registration closes this Friday!",
       "timestamp": "2025-03-28T15:30:00Z"
-    },
-    {
-      "id": "18cb",
-      "message": "Ugma, sa inyong skelahan, walay clase 🎉",
-      "timestamp": "2025-03-31T03:52:13.554Z"
     }
   ],
   "committees": [
