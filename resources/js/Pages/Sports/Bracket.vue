@@ -1,8 +1,8 @@
 <script setup>
-import { ref } from "vue";
+import { ref, nextTick, watch } from "vue";
 import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
-import Dropdown from "primevue/dropdown";
+import Select from "primevue/select";
 import Button from "primevue/button";
 import { computed } from "vue";
 
@@ -13,15 +13,11 @@ const matchType = ref("");
 const brackets = ref([]);
 const showDialog = ref(false);
 const currentMatchIndex = ref(0);
+const lines = ref([]);
 
 // Game Number Indicator
 const currentGameNumber = computed(() => `Game ${currentMatchIndex.value + 1}`);
 
-/*const calculateSpacing = (roundIdx, matchIdx) => {
-  const baseSpacing = 80; // Increased base spacing for clarity
-  const totalMatches = Math.pow(2, roundIdx);
-  return (matchIdx % 2 === 0) ? baseSpacing / totalMatches : baseSpacing;
-};*/
 
 // Options
 const participantOptions = [4, 8, 16, 32];
@@ -211,6 +207,67 @@ const navigateToMatch = (bracketIdx, roundIdx, matchIdx) => {
   currentMatchIndex.value = accumulatedMatches + matchIdx;
 };
 
+// Update lines dynamically using SVG
+const updateLines = () => {
+  lines.value = [];
+
+  nextTick(() => {
+    const container = document.querySelector('.bracket');
+    if (!container) return;
+
+  const containerRect = container.getBoundingClientRect();
+    for (let round = 0; round < brackets.value[0].matches.length - 1; round++) {
+      const current = brackets.value[0].matches[round];
+      const next = brackets.value[0].matches[round + 1];
+
+      current.forEach((match, i) => {
+        const fromEl = document.getElementById(`match-${round}-${i}`);
+        const toEl = document.getElementById(`match-${round + 1}-${Math.floor(i / 2)}`);
+
+        if (!fromEl || !toEl) return;
+
+        const fromRect = fromEl.getBoundingClientRect();
+        const toRect = toEl.getBoundingClientRect();
+
+        // Convert to positions relative to the container
+        const fromCenterY = fromRect.top - containerRect.top + fromRect.height / 2;
+        const toCenterY = toRect.top - containerRect.top + toRect.height / 2;
+
+        // Calculate container-relative X positions
+        const fromRightX = fromRect.right - containerRect.left;
+        const toLeftX = toRect.left - containerRect.left;
+        const midX = (fromRightX + toLeftX) / 2;
+
+        lines.value.push({
+        x1: fromRightX,
+        y1: fromCenterY,
+        x2: midX,
+        y2: fromCenterY,
+        });
+
+        lines.value.push({
+        x1: midX,
+        y1: fromCenterY,
+        x2: midX,
+        y2: toCenterY,
+        });
+
+        lines.value.push({
+        x1: midX,
+        y1: toCenterY,
+        x2: toLeftX,
+        y2: toCenterY,
+        });
+
+
+      });
+    }
+  });
+};
+
+// Call updateLines whenever the component is updated
+watch([brackets, currentMatchIndex], updateLines);
+
 </script>
 
 <template>
@@ -225,6 +282,19 @@ const navigateToMatch = (bracketIdx, roundIdx, matchIdx) => {
           <h2>{{ bracket.name }} ({{ bracket.type }})</h2>
 
           <div class="bracket">
+            <svg class="connection-lines">
+              <line
+                v-for="(line, i) in lines"
+                :key="i"
+                :x1="line.x1"
+                :y1="line.y1"
+                :x2="line.x2"
+                :y2="line.y2"
+                stroke="black"
+                stroke-width="2"
+              />
+            </svg>
+
             <div v-for="(round, roundIdx) in bracket.matches" :key="roundIdx"
             :class="['round', `round-${roundIdx + 1}`]">
               <h3>Round {{ roundIdx + 1 }}</h3>
@@ -233,6 +303,7 @@ const navigateToMatch = (bracketIdx, roundIdx, matchIdx) => {
               <div
                 v-for="(match, matchIdx) in round"
                 :key="matchIdx"
+                :id="`match-${roundIdx}-${matchIdx}`"
                 :class="['match', { 'highlight': isCurrentMatch(bracketIdx, roundIdx, matchIdx) }]"
                 @click="navigateToMatch(bracketIdx, roundIdx, matchIdx)"
                 >
@@ -356,7 +427,7 @@ const navigateToMatch = (bracketIdx, roundIdx, matchIdx) => {
 
           <div class="p-field">
             <label for="numberOfPlayers">Number of Participants:</label>
-            <Dropdown
+            <Select
               v-model="numberOfPlayers"
               :options="participantOptions"
               placeholder="Select participants"
@@ -365,7 +436,7 @@ const navigateToMatch = (bracketIdx, roundIdx, matchIdx) => {
 
           <div class="p-field">
             <label for="matchType">Bracket Type:</label>
-            <Dropdown
+            <Select
               v-model="matchType"
               :options="bracketTypeOptions"
               placeholder="Select bracket type"
@@ -476,17 +547,6 @@ const navigateToMatch = (bracketIdx, roundIdx, matchIdx) => {
     color: #0056b3;
   }
 
-  /* Match Lines */
-  .match::before,
-  .match::after {
-    content: "";
-    position: absolute;
-    width: 5px; /* Ensure the lines extend properly */
-    height: 20px; /* Consistent thickness */
-    background-color: #007bff;
-    display: block; /* Ensure lines are visible */
-  }
-
   .match::before {
     top: 50%;
     right: 100%;
@@ -514,25 +574,7 @@ const navigateToMatch = (bracketIdx, roundIdx, matchIdx) => {
   }
 
   /* Rightward line*/
-  .round-4 .match:nth-child(n+2)::after,
-  .round-3 .match:nth-child(n+2)::after,
-  .round-2 .match:nth-child(n+2)::after,
-  .round-1 .match:nth-child(n+2)::after {
-    content: "";
-    width: 45px;  /* Extended for better spacing */
-    height: 2px;
-    background-color: #007bff;
-    position: absolute;
-    top: 50%;
-    right: 100%;
-    transform: translateY(-50%);
-  }
 
-  /* Line Offsets for Each Round */
-  .round-1 .match::before { height: 30px; }  /* Smaller vertical spacing */
-  .round-2 .match::before { height: 60px; }
-  .round-3 .match::before { height: 130px; }
-  .round-4 .match::before { height: 260px; }
 
   /* Remove Line for Final Round */
   .round:last-child .match::after {
@@ -544,6 +586,7 @@ const navigateToMatch = (bracketIdx, roundIdx, matchIdx) => {
     gap: 40px;
     align-items: flex-start; /* Aligns rounds at the top */
     justify-content: center;
+    position: relative;
   }
 
   .round {
@@ -690,4 +733,13 @@ const navigateToMatch = (bracketIdx, roundIdx, matchIdx) => {
             background-color: lightsalmon;  /* Light Green Background */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle Shadow */
           }
+
+.connection-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
 </style>
