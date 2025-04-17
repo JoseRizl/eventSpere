@@ -14,6 +14,7 @@ const brackets = ref([]);
 const showDialog = ref(false);
 const currentMatchIndex = ref(0);
 const lines = ref([]);
+const expandedBrackets = ref([]); // Track expanded state of each bracket
 
 // Game Number Indicator
 const currentGameNumber = computed(() => `Game ${currentMatchIndex.value + 1}`);
@@ -31,6 +32,16 @@ const openDialog = () => {
   showDialog.value = true;
 };
 
+// Toggle bracket visibility
+const toggleBracket = (bracketIdx) => {
+  if (expandedBrackets.value[bracketIdx]) {
+    expandedBrackets.value[bracketIdx] = false; // Hide the current bracket if it's already open
+  } else {
+    expandedBrackets.value = expandedBrackets.value.map((expanded, idx) => idx === bracketIdx);
+    updateLines(bracketIdx); // Load SVG lines only for the expanded bracket
+  }
+};
+
 // Create Bracket
 const createBracket = () => {
   if (!bracketName.value || !numberOfPlayers.value || !matchType.value) {
@@ -46,6 +57,7 @@ const createBracket = () => {
     currentMatchIndex: 0, // Add currentMatchIndex for each bracket
     lines: [], // Initialize lines for each bracket
   });
+  expandedBrackets.value.push(false); // Initialize expanded state
   showDialog.value = false;
 
   // Call updateLines for the newly created bracket
@@ -126,30 +138,58 @@ const decreaseScore = (bracketIdx, teamIdx) => {
   }
 };
 
-// Update concludeMatch to use the helper function
+// Function to conclude a match with confirmation
 const concludeMatch = (bracketIdx) => {
   const { roundIdx, matchIdx } = getRoundAndMatchIndices(bracketIdx, currentMatchIndex.value);
   const match = brackets.value[bracketIdx].matches[roundIdx][matchIdx];
 
-  // Determine Winner
-  const winner = match[0].score >= match[1].score ? match[0] : match[1];
+  // Show confirmation dialog
+  if (confirm('Are you sure you want to conclude this match?')) {
+    // Determine Winner
+    const winner = match[0].score >= match[1].score ? match[0] : match[1];
 
-  match[0].completed = true;
-  match[1].completed = true;
-  match.completed = true; // Mark match as completed
+    match[0].completed = true;
+    match[1].completed = true;
+    match.completed = true; // Mark match as completed
 
-  // Advance Winner to Next Round
-  if (brackets.value[bracketIdx].matches[roundIdx + 1]) {
-    const nextRoundIdx = Math.floor(matchIdx / 2); // Correct positioning logic
-    const nextMatchPos = matchIdx % 2 === 0 ? 0 : 1;
+    // Advance Winner to Next Round
+    if (brackets.value[bracketIdx].matches[roundIdx + 1]) {
+      const nextRoundIdx = Math.floor(matchIdx / 2); // Correct positioning logic
+      const nextMatchPos = matchIdx % 2 === 0 ? 0 : 1;
 
-    brackets.value[bracketIdx].matches[roundIdx + 1][nextRoundIdx][nextMatchPos] = {
-      ...winner,
-      score: 0,
-      completed: false,
-    };
-  } else {
-    alert(`Winner: ${winner.name}`);
+      brackets.value[bracketIdx].matches[roundIdx + 1][nextRoundIdx][nextMatchPos] = {
+        ...winner,
+        score: 0,
+        completed: false,
+      };
+    } else {
+      alert(`Winner: ${winner.name}`);
+    }
+  }
+};
+
+// Function to undo a concluded match with confirmation
+const undoConcludeMatch = (bracketIdx) => {
+  const { roundIdx, matchIdx } = getRoundAndMatchIndices(bracketIdx, currentMatchIndex.value);
+  const match = brackets.value[bracketIdx].matches[roundIdx][matchIdx];
+
+  // Show confirmation dialog
+  if (confirm('Are you sure you want to undo this match completion?')) {
+    match[0].completed = false;
+    match[1].completed = false;
+    match.completed = false;
+
+    // Remove the winner from the next round
+    if (brackets.value[bracketIdx].matches[roundIdx + 1]) {
+      const nextRoundIdx = Math.floor(matchIdx / 2);
+      const nextMatchPos = matchIdx % 2 === 0 ? 0 : 1;
+
+      brackets.value[bracketIdx].matches[roundIdx + 1][nextRoundIdx][nextMatchPos] = {
+        name: '',
+        score: 0,
+        completed: false,
+      };
+    }
   }
 };
 
@@ -296,140 +336,145 @@ const removeBracket = (bracketIdx) => {
       <div v-for="(bracket, bracketIdx) in brackets" :key="bracketIdx" class="bracket-section">
         <div class="bracket-wrapper">
           <h2>{{ bracket.name }} ({{ bracket.type }})</h2>
+          <button @click="toggleBracket(bracketIdx)" class="toggle-button">
+            {{ expandedBrackets[bracketIdx] ? 'Hide Bracket' : 'Show Bracket' }}
+          </button>
           <button @click="removeBracket(bracketIdx)" class="delete-button">Delete Bracket</button>
 
-          <div class="bracket">
-            <svg class="connection-lines">
-              <line
-                v-for="(line, i) in lines"
-                :key="i"
-                :x1="line.x1"
-                :y1="line.y1"
-                :x2="line.x2"
-                :y2="line.y2"
-                stroke="black"
-                stroke-width="2"
-              />
-            </svg>
+          <div v-if="expandedBrackets[bracketIdx]">
+            <div class="bracket">
+              <svg class="connection-lines">
+                <line
+                  v-for="(line, i) in lines"
+                  :key="i"
+                  :x1="line.x1"
+                  :y1="line.y1"
+                  :x2="line.x2"
+                  :y2="line.y2"
+                  stroke="black"
+                  stroke-width="2"
+                />
+              </svg>
 
-            <div v-for="(round, roundIdx) in bracket.matches" :key="roundIdx"
-            :class="['round', `round-${roundIdx + 1}`]">
-              <h3>Round {{ roundIdx + 1 }}</h3>
+              <div v-for="(round, roundIdx) in bracket.matches" :key="roundIdx"
+              :class="['round', `round-${roundIdx + 1}`]">
+                <h3>Round {{ roundIdx + 1 }}</h3>
 
-              <!-- Matches Display -->
-              <div
-                v-for="(match, matchIdx) in round"
-                :key="matchIdx"
-                :id="`match-${roundIdx}-${matchIdx}`"
-                :class="['match', { 'highlight': isCurrentMatch(bracketIdx, roundIdx, matchIdx) }]"
-                @click="navigateToMatch(bracketIdx, roundIdx, matchIdx)"
-                >
-                <div class="player-box">
-                    <span @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 0)" class="editable">
-                    {{ match[0].name || 'TBD' }} | {{ match[0].score }}
-                    </span>
-                    <hr />
-                    <span @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 1)" class="editable">
-                    {{ match[1].name || 'TBD' }} | {{ match[1].score }}
-                    </span>
+                <!-- Matches Display -->
+                <div
+                  v-for="(match, matchIdx) in round"
+                  :key="matchIdx"
+                  :id="`match-${roundIdx}-${matchIdx}`"
+                  :class="['match', { 'highlight': isCurrentMatch(bracketIdx, roundIdx, matchIdx) }]"
+                  @click="navigateToMatch(bracketIdx, roundIdx, matchIdx)"
+                  >
+                  <div class="player-box">
+                      <span @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 0)" class="editable">
+                      {{ match[0].name || 'TBD' }} | {{ match[0].score }}
+                      </span>
+                      <hr />
+                      <span @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 1)" class="editable">
+                      {{ match[1].name || 'TBD' }} | {{ match[1].score }}
+                      </span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Navigation & Matchup Box -->
-          <div class="navigation-and-matchup">
-            <!-- Navigation Controls -->
-            <div class="navigation-controls">
-              <button
-                @click="showPreviousMatch(bracketIdx)"
-                :disabled="currentMatchIndex === 0"
-              >
-                Previous
-              </button>
+            <!-- Navigation & Matchup Box -->
+            <div class="navigation-and-matchup">
+              <!-- Navigation Controls -->
+              <div class="navigation-controls">
+                <button
+                  @click="showPreviousMatch(bracketIdx)"
+                  :disabled="currentMatchIndex === 0"
+                >
+                  Previous
+                </button>
 
-              <button
-                @click="showNextMatch(bracketIdx)"
-                :disabled="currentMatchIndex === brackets[bracketIdx].matches.flat().length - 1"
-              >
-                Next
-              </button>
+                <button
+                  @click="showNextMatch(bracketIdx)"
+                  :disabled="currentMatchIndex === brackets[bracketIdx].matches.flat().length - 1"
+                >
+                  Next
+                </button>
+              </div>
+
+              <!-- Current Match Display -->
+              <div v-if="currentMatch(bracketIdx)" class="match-card styled">
+                <!-- Sport Tag with Correct Round Counter -->
+                <div class="sport-tag">
+                {{ bracket.name }} - Round {{ getCurrentRound(bracketIdx) }}
+                </div>
+
+                <div class="match-content">
+                  <!-- Left Team -->
+                  <div class="team blue">
+                    <button
+                      class="score-btn"
+                      @click="increaseScore(bracketIdx, 0)"
+                      :disabled="currentMatch(bracketIdx).completed"
+                    >
+                      +
+                    </button>
+
+                    <div class="score-display">
+                      {{ currentMatch(bracketIdx)[0]?.score.toString().padStart(3, '0') }}
+                    </div>
+
+                    <button
+                      class="score-btn"
+                      @click="decreaseScore(bracketIdx, 0)"
+                      :disabled="currentMatch(bracketIdx).completed"
+                    >
+                      -
+                    </button>
+
+                    <span class="team-name">{{ currentMatch(bracketIdx)[0]?.name || 'TBD' }}</span>
+                  </div>
+
+                  <span class="vs">VS</span>
+
+                  <!-- Right Team -->
+                  <div class="team red">
+                    <button
+                      class="score-btn"
+                      @click="increaseScore(bracketIdx, 1)"
+                      :disabled="currentMatch(bracketIdx).completed"
+                    >
+                      +
+                    </button>
+
+                    <div class="score-display">
+                      {{ currentMatch(bracketIdx)[1]?.score.toString().padStart(3, '0') }}
+                    </div>
+
+                    <button
+                      class="score-btn"
+                      @click="decreaseScore(bracketIdx, 1)"
+                      :disabled="currentMatch(bracketIdx).completed"
+                    >
+                      -
+                    </button>
+
+                    <span class="team-name">{{ currentMatch(bracketIdx)[1]?.name || 'TBD' }}</span>
+                  </div>
+                </div>
+
+                <!-- Dynamic Button/Label -->
+                <div v-if="currentMatch(bracketIdx).completed" class="completed-text" @click="undoConcludeMatch(bracketIdx)">
+                Completed
+                </div>
+
+                <button
+                v-else
+                @click="concludeMatch(bracketIdx)"
+                class="match-over"
+                >
+                End Match
+                </button>
+              </div>
             </div>
-
-<!-- Current Match Display -->
-<div v-if="currentMatch(bracketIdx)" class="match-card styled">
-  <!-- Sport Tag with Correct Round Counter -->
-  <div class="sport-tag">
-  {{ bracket.name }} - Round {{ getCurrentRound(bracketIdx) }}
-  </div>
-
-  <div class="match-content">
-    <!-- Left Team -->
-    <div class="team blue">
-      <button
-        class="score-btn"
-        @click="increaseScore(bracketIdx, 0)"
-        :disabled="currentMatch(bracketIdx).completed"
-      >
-        +
-      </button>
-
-      <div class="score-display">
-        {{ currentMatch(bracketIdx)[0]?.score.toString().padStart(3, '0') }}
-      </div>
-
-      <button
-        class="score-btn"
-        @click="decreaseScore(bracketIdx, 0)"
-        :disabled="currentMatch(bracketIdx).completed"
-      >
-        -
-      </button>
-
-      <span class="team-name">{{ currentMatch(bracketIdx)[0]?.name || 'TBD' }}</span>
-    </div>
-
-    <span class="vs">VS</span>
-
-    <!-- Right Team -->
-    <div class="team red">
-      <button
-        class="score-btn"
-        @click="increaseScore(bracketIdx, 1)"
-        :disabled="currentMatch(bracketIdx).completed"
-      >
-        +
-      </button>
-
-      <div class="score-display">
-        {{ currentMatch(bracketIdx)[1]?.score.toString().padStart(3, '0') }}
-      </div>
-
-      <button
-        class="score-btn"
-        @click="decreaseScore(bracketIdx, 1)"
-        :disabled="currentMatch(bracketIdx).completed"
-      >
-        -
-      </button>
-
-      <span class="team-name">{{ currentMatch(bracketIdx)[1]?.name || 'TBD' }}</span>
-    </div>
-</div>
-
-    <!-- Dynamic Button/Label -->
-    <div v-if="currentMatch(bracketIdx).completed" class="completed-text">
-    Completed
-    </div>
-
-    <button
-    v-else
-    @click="concludeMatch(bracketIdx)"
-    class="match-over"
-    >
-    End Match
-    </button>
-    </div>
           </div>
         </div>
       </div>
@@ -484,6 +529,10 @@ const removeBracket = (bracketIdx) => {
     font-size: 1rem;
     font-weight: bold;
     margin-bottom: 20px;
+  }
+
+  .create-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
   }
 
   .bracket-wrapper {
@@ -542,13 +591,31 @@ const removeBracket = (bracketIdx) => {
     padding: 0 15px;
   }
 
-  .completed-text {
-    display: inline-block;
-    background-color: #008000;
-    color: #fff;
-    padding: 5px 15px;
+  .match-over, .completed-text {
+    width: 100%;
+    padding: 5px 10px;
     border-radius: 5px;
     font-weight: bold;
+    text-align: center;
+  }
+
+  .match-over {
+    background-color: #ff4757;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-top: 5px;
+  }
+
+  .completed-text {
+    background-color: #008000;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .completed-text:hover {
+    background-color: #006400;
   }
 
   /* Editable Players */
@@ -643,6 +710,10 @@ const removeBracket = (bracketIdx) => {
     cursor: not-allowed;
   }
 
+  .navigation-controls button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+  }
+
   /* Matchup Box */
   .match-card {
     text-align: center;
@@ -732,12 +803,6 @@ const removeBracket = (bracketIdx) => {
           background-color: #d70000;
         }
 
-        .completed-text {
-          font-weight: bold;
-          color: #6b7280; /* Gray text */
-          margin-top: 10px;
-        }
-
         .match.highlight {
             border: 2px solid black; /* Border for Highlight */
             background-color: lightgray;  /* Background */
@@ -761,5 +826,28 @@ const removeBracket = (bracketIdx) => {
   border-radius: 5px;
   cursor: pointer;
   margin-bottom: 10px;
+}
+
+.delete-button:hover {
+  background-color: #e63946;
+
+}
+
+.match-over:hover {
+  background-color: #e63946; /* Lighter red on hover */
+}
+
+.toggle-button {
+  background-color: #007bff;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.toggle-button:hover {
+  background-color: #0056b3;
 }
 </style>
