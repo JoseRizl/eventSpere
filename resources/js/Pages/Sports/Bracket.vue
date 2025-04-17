@@ -39,8 +39,17 @@ const createBracket = () => {
   }
 
   const newBracket = generateBracket();
-  brackets.value.push({ name: bracketName.value, type: matchType.value, matches: newBracket });
+  brackets.value.push({
+    name: bracketName.value,
+    type: matchType.value,
+    matches: newBracket,
+    currentMatchIndex: 0, // Add currentMatchIndex for each bracket
+    lines: [], // Initialize lines for each bracket
+  });
   showDialog.value = false;
+
+  // Call updateLines for the newly created bracket
+  updateLines(brackets.value.length - 1);
 };
 
 const generateBracket = () => {
@@ -268,6 +277,13 @@ const updateLines = () => {
 // Call updateLines whenever the component is updated
 watch([brackets, currentMatchIndex], updateLines);
 
+// Function to remove a bracket
+const removeBracket = (bracketIdx) => {
+  if (confirm('Are you sure you want to delete this bracket?')) {
+    brackets.value.splice(bracketIdx, 1);
+  }
+};
+
 </script>
 
 <template>
@@ -280,6 +296,7 @@ watch([brackets, currentMatchIndex], updateLines);
       <div v-for="(bracket, bracketIdx) in brackets" :key="bracketIdx" class="bracket-section">
         <div class="bracket-wrapper">
           <h2>{{ bracket.name }} ({{ bracket.type }})</h2>
+          <button @click="removeBracket(bracketIdx)" class="delete-button">Delete Bracket</button>
 
           <div class="bracket">
             <svg class="connection-lines">
@@ -369,7 +386,7 @@ watch([brackets, currentMatchIndex], updateLines);
         -
       </button>
 
-      <span class="team-name">{{ currentMatch(bracketIdx)[0]?.name }}</span>
+      <span class="team-name">{{ currentMatch(bracketIdx)[0]?.name || 'TBD' }}</span>
     </div>
 
     <span class="vs">VS</span>
@@ -396,7 +413,7 @@ watch([brackets, currentMatchIndex], updateLines);
         -
       </button>
 
-      <span class="team-name">{{ currentMatch(bracketIdx)[1]?.name }}</span>
+      <span class="team-name">{{ currentMatch(bracketIdx)[1]?.name || 'TBD' }}</span>
     </div>
 </div>
 
@@ -453,7 +470,7 @@ watch([brackets, currentMatchIndex], updateLines);
 /** Bracket*/
 
       /* Container & General Styling */
-      .container {
+    .container {
     padding: 20px;
   }
 
@@ -469,7 +486,6 @@ watch([brackets, currentMatchIndex], updateLines);
     margin-bottom: 20px;
   }
 
-  /* Bracket Wrapper */
   .bracket-wrapper {
     background-color: #f0f0f0;
     padding: 15px;
@@ -477,7 +493,6 @@ watch([brackets, currentMatchIndex], updateLines);
     margin-bottom: 20px;
   }
 
-  /* Match Box Design */
   .match {
     background: #fff;
     position: relative;
@@ -573,9 +588,6 @@ watch([brackets, currentMatchIndex], updateLines);
       transform: translateY(-50%); /* Aligns perfectly */
   }
 
-  /* Rightward line*/
-
-
   /* Remove Line for Final Round */
   .round:last-child .match::after {
     display: none;
@@ -667,8 +679,6 @@ watch([brackets, currentMatchIndex], updateLines);
     margin: 5px 0;
   }
 
-
-  /* Match Over Button */
   .match-over {
     background-color: #ff4757;
     color: white;
@@ -729,8 +739,8 @@ watch([brackets, currentMatchIndex], updateLines);
         }
 
         .match.highlight {
-            border: 2px solid black; /* Green Border for Highlight */
-            background-color: lightsalmon;  /* Light Green Background */
+            border: 2px solid black; /* Border for Highlight */
+            background-color: lightgray;  /* Background */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle Shadow */
           }
 
@@ -741,5 +751,15 @@ watch([brackets, currentMatchIndex], updateLines);
   width: 100%;
   height: 100%;
   pointer-events: none;
+}
+
+.delete-button {
+  background-color: #ff4757;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 10px;
 }
 </style>
