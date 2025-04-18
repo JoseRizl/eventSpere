@@ -15,6 +15,7 @@ const showDialog = ref(false);
 const currentMatchIndex = ref(0);
 const lines = ref([]);
 const expandedBrackets = ref([]); // Track expanded state of each bracket
+const activeBracketIdx = ref(null);
 
 // Game Number Indicator
 const currentGameNumber = computed(() => `Game ${currentMatchIndex.value + 1}`);
@@ -213,7 +214,20 @@ const isCurrentMatch = (bracketIdx, roundIdx, matchIdx) => {
 };
 
 // Improved Navigation Logic
+const navigateToMatch = (bracketIdx, roundIdx, matchIdx) => {
+  activeBracketIdx.value = bracketIdx;
+  const bracket = brackets.value[bracketIdx];
+  let accumulatedMatches = 0;
+
+  for (let i = 0; i < roundIdx; i++) {
+    accumulatedMatches += bracket.matches[i].length;
+  }
+
+  currentMatchIndex.value = accumulatedMatches + matchIdx;
+};
+
 const showNextMatch = (bracketIdx) => {
+  activeBracketIdx.value = bracketIdx;
   const totalMatches = brackets.value[bracketIdx].matches.flat().length;
   if (currentMatchIndex.value < totalMatches - 1) {
     currentMatchIndex.value++;
@@ -221,6 +235,7 @@ const showNextMatch = (bracketIdx) => {
 };
 
 const showPreviousMatch = (bracketIdx) => {
+  activeBracketIdx.value = bracketIdx;
   if (currentMatchIndex.value > 0) {
     currentMatchIndex.value--;
   }
@@ -240,20 +255,6 @@ const currentMatch = (bracketIdx) => {
   }
 
   return null; // Fallback
-};
-
-// Add 'TBD' to empty brackets and enable clicking on a match to navigate to it
-
-// Navigate to a specific match
-const navigateToMatch = (bracketIdx, roundIdx, matchIdx) => {
-  const bracket = brackets.value[bracketIdx];
-  let accumulatedMatches = 0;
-
-  for (let i = 0; i < roundIdx; i++) {
-    accumulatedMatches += bracket.matches[i].length;
-  }
-
-  currentMatchIndex.value = accumulatedMatches + matchIdx;
 };
 
 // Update lines dynamically using SVG
@@ -297,7 +298,11 @@ const updateLines = (bracketIdx) => {
 };
 
 // Call updateLines whenever the component is updated
-watch([brackets, currentMatchIndex], updateLines);
+watch(currentMatchIndex, () => {
+  if (activeBracketIdx.value !== null) {
+    updateLines(activeBracketIdx.value);
+  }
+});
 
 // Function to remove a bracket
 const removeBracket = (bracketIdx) => {
@@ -305,6 +310,12 @@ const removeBracket = (bracketIdx) => {
     brackets.value.splice(bracketIdx, 1);
   }
 };
+
+watch(() => brackets.value.length, (newLength, oldLength) => {
+  if (newLength > oldLength) {
+    updateLines(newLength - 1);
+  }
+});
 
 </script>
 
