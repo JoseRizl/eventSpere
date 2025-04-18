@@ -341,54 +341,6 @@
       ]
     }
   ],
-  "matches": [
-    {
-      "id": "1",
-      "name": "Basketball",
-      "type": "single-elimination",
-      "team": {
-        "name": "Team A",
-        "score": 3,
-        "wins": 1
-      },
-      "team2": {
-        "name": "Team B",
-        "score": 0
-      },
-      "completed": true,
-      "winner": "Team A"
-    },
-    {
-      "id": "2",
-      "name": "Football",
-      "type": "double-elimination",
-      "team": {
-        "name": "Team X",
-        "score": 0
-      },
-      "team2": {
-        "name": "Team Y",
-        "score": 0
-      },
-      "completed": false,
-      "winner": ""
-    },
-    {
-      "id": "3",
-      "name": "Jolen",
-      "type": "round-robin",
-      "team": {
-        "name": "Team 1",
-        "score": 0
-      },
-      "team2": {
-        "name": "Team 2",
-        "score": 0
-      },
-      "completed": false,
-      "winner": ""
-    }
-  ],
   "announcements": [
     {
       "id": "1",

@@ -310,9 +310,19 @@ const removeBracket = (bracketIdx) => {
 
 <template>
     <div class="container">
-        <div class="title">Ongoing Games</div>
-      <!-- Create Bracket Button -->
-      <button class="create-button" @click="openDialog">Create Bracket</button>
+        <div class="header">
+          <h1 class="title">Ongoing Games</h1>
+          <button class="create-button" @click="openDialog">Create Bracket</button>
+        </div>
+
+      <!-- Display message when no brackets are created -->
+      <div v-if="brackets.length === 0" class="no-brackets-message">
+        <div class="icon-and-title">
+          <i class="pi pi-info-circle" style="font-size: 1.5rem; color: #007bff; margin-right: 10px;"></i>
+          <h2 class="no-brackets-title">No Brackets Created Yet</h2>
+        </div>
+        <p class="no-brackets-text">Click the "Create Bracket" button above to start a new tournament.</p>
+      </div>
 
       <!-- Bracket Display Section -->
       <div v-for="(bracket, bracketIdx) in brackets" :key="bracketIdx" class="bracket-section">
@@ -831,5 +841,46 @@ const removeBracket = (bracketIdx) => {
 
 .toggle-button:hover {
   background-color: #0056b3;
+}
+
+.no-brackets-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.icon-and-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.no-brackets-title {
+  color: #333;
+  margin: 0;
+}
+
+.no-brackets-text {
+  color: #555;
+  margin: 5px 0 0 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
 }
 </style>
