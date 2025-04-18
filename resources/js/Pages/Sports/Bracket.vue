@@ -54,7 +54,7 @@ const createBracket = () => {
     name: bracketName.value,
     type: matchType.value,
     matches: newBracket,
-    currentMatchIndex: 0, // Add currentMatchIndex for each bracket
+    currentMatchIndex: 0,
     lines: [], // Initialize lines for each bracket
   });
   expandedBrackets.value.push(false); // Initialize expanded state
@@ -257,17 +257,18 @@ const navigateToMatch = (bracketIdx, roundIdx, matchIdx) => {
 };
 
 // Update lines dynamically using SVG
-const updateLines = () => {
-  lines.value = [];
+const updateLines = (bracketIdx) => {
+  const bracket = brackets.value[bracketIdx];
+  bracket.lines = []; // Reset lines for the specific bracket
 
   nextTick(() => {
     const container = document.querySelector('.bracket');
     if (!container) return;
 
-  const containerRect = container.getBoundingClientRect();
-    for (let round = 0; round < brackets.value[0].matches.length - 1; round++) {
-      const current = brackets.value[0].matches[round];
-      const next = brackets.value[0].matches[round + 1];
+    const containerRect = container.getBoundingClientRect();
+    for (let round = 0; round < bracket.matches.length - 1; round++) {
+      const current = bracket.matches[round];
+      const next = bracket.matches[round + 1];
 
       current.forEach((match, i) => {
         const fromEl = document.getElementById(`match-${round}-${i}`);
@@ -278,37 +279,18 @@ const updateLines = () => {
         const fromRect = fromEl.getBoundingClientRect();
         const toRect = toEl.getBoundingClientRect();
 
-        // Convert to positions relative to the container
         const fromCenterY = fromRect.top - containerRect.top + fromRect.height / 2;
         const toCenterY = toRect.top - containerRect.top + toRect.height / 2;
 
-        // Calculate container-relative X positions
         const fromRightX = fromRect.right - containerRect.left;
         const toLeftX = toRect.left - containerRect.left;
         const midX = (fromRightX + toLeftX) / 2;
 
-        lines.value.push({
-        x1: fromRightX,
-        y1: fromCenterY,
-        x2: midX,
-        y2: fromCenterY,
-        });
-
-        lines.value.push({
-        x1: midX,
-        y1: fromCenterY,
-        x2: midX,
-        y2: toCenterY,
-        });
-
-        lines.value.push({
-        x1: midX,
-        y1: toCenterY,
-        x2: toLeftX,
-        y2: toCenterY,
-        });
-
-
+        bracket.lines.push(
+          { x1: fromRightX, y1: fromCenterY, x2: midX, y2: fromCenterY },
+          { x1: midX, y1: fromCenterY, x2: midX, y2: toCenterY },
+          { x1: midX, y1: toCenterY, x2: toLeftX, y2: toCenterY }
+        );
       });
     }
   });
@@ -345,7 +327,7 @@ const removeBracket = (bracketIdx) => {
             <div class="bracket">
               <svg class="connection-lines">
                 <line
-                  v-for="(line, i) in lines"
+                  v-for="(line, i) in bracket.lines"
                   :key="i"
                   :x1="line.x1"
                   :y1="line.y1"

@@ -1,8 +1,8 @@
 <script setup>
-import { ref, onMounted, watch, defineExpose } from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import { format } from 'date-fns';
-import { useRoute } from 'vue-router';
+import { format } from 'date-fns'; // Import date formatting library
+import { useRoute } from 'vue-router'; // ✅ Correct import for Vue Router
 
 const vueRoute = useRoute();
 const eventDetails = ref(null);
@@ -10,92 +10,48 @@ const relatedEvents = ref([]);
 const selectedFiles = ref([]);
 const categories = ref([]);
 const tags = ref([]);
-const isLoading = ref(true); // ✅ Loading state to manage when to display content
-const key = ref(0);
 
-const refreshComponent = () => {
-    console.log(`Component refreshed at key: ${key.value}`);
-    key.value++;
-    console.log('[REFRESH] Key incremented to:', key.value);
-};
-
-defineExpose({ refreshComponent });
-
-const fetchEventDetails = async (forceRefresh = false) => {
-    console.log(`Fetching data... (Force Refresh: ${forceRefresh})`);
-
-  isLoading.value = true; // ✅ Start loading
-
-    // 🚨 Clear all reactive data before refilling it
-  eventDetails.value = null;
-  relatedEvents.value = [];
-  categories.value = [];
-  tags.value = [];
-
+onMounted(async () => {
   try {
     const id = vueRoute.params.id;
 
-     // 🚨 Add timestamp to prevent cached data
-     const timestamp = new Date().getTime();
-
+    // Fetch data
     const [eventsResponse, sportsResponse, categoriesResponse, tagsResponse] = await Promise.all([
-      axios.get(`http://localhost:3000/events?ts=${timestamp}`, {
-      headers: {
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-    }
-     }),
-      axios.get(`http://localhost:3000/sports?ts=${timestamp}`),
-      axios.get(`http://localhost:3000/category?ts=${timestamp}`),
-      axios.get(`http://localhost:3000/tags?ts=${timestamp}`)
+      axios.get('http://localhost:3000/events'),
+      axios.get('http://localhost:3000/sports'),
+      axios.get('http://localhost:3000/category'),
+      axios.get('http://localhost:3000/tags')
     ]);
 
+    // Store data for reference
     categories.value = categoriesResponse.data;
     tags.value = tagsResponse.data;
 
+    // Combine event sources
     const combinedData = [...eventsResponse.data, ...sportsResponse.data];
 
+    // Find the matching event
     const foundEvent = combinedData.find(event => event.id === id);
-
     if (foundEvent) {
-        console.log('[DATA FOUND]', foundEvent);
-        eventDetails.value = { ...foundEvent };
-      foundEvent.startDate = format(new Date(foundEvent.startDate), 'MMM-dd-yyyy');
-      foundEvent.endDate = format(new Date(foundEvent.endDate), 'MMM-dd-yyyy');
+      // Format Dates to MMM-dd-yy
+      foundEvent.startDate = format(new Date(foundEvent.startDate), 'MMM-dd-yy');
+      foundEvent.endDate = format(new Date(foundEvent.endDate), 'MMM-dd-yy');
 
+      // Map tags for display
       foundEvent.tags = foundEvent.tags.map(tagId =>
         tags.value.find(tag => tag.id.toString() === tagId.toString()) || { name: 'Unknown', color: '#e0e7ff' }
       );
 
-      eventDetails.value = { ...foundEvent }; // 🚨 Force reactivity update
+      eventDetails.value = foundEvent;
     }
 
+    // Filter related events excluding the current event
     relatedEvents.value = combinedData.filter(event => event.id !== id);
-    refreshComponent(); // ✅ Ensures UI refreshes immediately after data updates
-
 
   } catch (error) {
     console.error('Error fetching event details:', error);
-  }finally {
-    isLoading.value = false; // ✅ Ensure loading state ends after data fetch
   }
-};
-
-// ✅ Initial fetch on mount
-onMounted( async () => {
-    await fetchEventDetails(true); // Force fresh data
-
-    setTimeout(() => {
-  fetchEventDetails(true);  // ✅ Ensure fresh data
-}, 1000); // Increased delay
 });
-
-
-// ✅ Watch for route changes to refresh data
-watch(() => vueRoute.params.id, () => {
-    fetchEventDetails();
-}, { immediate: true });
 
 // Handle file upload
 const handleFileUpload = (event) => {
@@ -109,15 +65,8 @@ const getCategoryTitle = (categoryId) => {
 };
 </script>
 
-
 <template>
-<div :key="key">
   <div class="min-h-screen bg-gray-200 py-8 px-4 flex flex-col items-center">
-
-    <!-- Loading Indicator -->
-    <div v-if="isLoading" class="text-center text-xl font-semibold py-8">
-      Loading event details...
-    </div>
 
     <!-- Dynamic Banner Image -->
     <div class="w-full max-w-4xl bg-white rounded-lg shadow-md overflow-hidden">
@@ -206,6 +155,5 @@ const getCategoryTitle = (categoryId) => {
       </div>
     </div>
   </div>
-</div>
 </template>
 
