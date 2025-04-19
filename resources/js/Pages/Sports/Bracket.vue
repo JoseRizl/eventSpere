@@ -598,7 +598,7 @@ const cancelDeleteBracket = () => {
 
           <div class="p-field">
             <label for="numberOfPlayers">Number of Participants:</label>
-            <InputText v-model="numberOfPlayers" type="number" min="1" placeholder="Recommended: 2, 4, 8, 16, 32" />
+            <InputText v-model="numberOfPlayers" type="number" min="1" placeholder="4, 8, 16, 32" />
           </div>
 
           <div class="p-field">
@@ -1015,6 +1015,8 @@ const cancelDeleteBracket = () => {
 .no-brackets-title {
   color: #333;
   margin: 0;
+  font-size: 1.5rem; /* Match the icon size */
+  font-weight: bold;
 }
 
 .no-brackets-text {
