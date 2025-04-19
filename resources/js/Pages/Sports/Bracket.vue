@@ -16,6 +16,10 @@ const currentMatchIndex = ref(0);
 const lines = ref([]);
 const expandedBrackets = ref([]); // Track expanded state of each bracket
 const activeBracketIdx = ref(null);
+const showWinnerDialog = ref(false);
+const winnerMessage = ref("");
+const showConfirmDialog = ref(false);
+let pendingBracketIdx = null; // To store the bracket index for the pending confirmation
 
 // Game Number Indicator
 const currentGameNumber = computed(() => `Game ${currentMatchIndex.value + 1}`);
@@ -36,10 +40,19 @@ const openDialog = () => {
 // Toggle bracket visibility
 const toggleBracket = (bracketIdx) => {
   if (expandedBrackets.value[bracketIdx]) {
-    expandedBrackets.value[bracketIdx] = false; // Hide the current bracket if it's already open
+    expandedBrackets.value[bracketIdx] = false;
   } else {
     expandedBrackets.value = expandedBrackets.value.map((expanded, idx) => idx === bracketIdx);
-    updateLines(bracketIdx); // Load SVG lines only for the expanded bracket
+    updateLines(bracketIdx);
+
+    // Check if a winner has been decided
+    const lastRound = brackets.value[bracketIdx].matches[brackets.value[bracketIdx].matches.length - 1];
+    const finalMatch = lastRound[0];
+    if (finalMatch[0].completed && finalMatch[1].completed) {
+      const winner = finalMatch[0].score >= finalMatch[1].score ? finalMatch[0] : finalMatch[1];
+      winnerMessage.value = `Winner: ${winner.name}`;
+      showWinnerDialog.value = true;
+    }
   }
 };
 
@@ -173,58 +186,41 @@ const decreaseScore = (bracketIdx, teamIdx) => {
 
 // Function to conclude a match with confirmation
 const concludeMatch = (bracketIdx) => {
-  const { roundIdx, matchIdx } = getRoundAndMatchIndices(bracketIdx, currentMatchIndex.value);
-  const match = brackets.value[bracketIdx].matches[roundIdx][matchIdx];
+  pendingBracketIdx = bracketIdx;
+  showConfirmDialog.value = true;
+};
 
-  // Check if one of the participants is a BYE
-  const isByeMatch = match[0].name === "BYE" || match[1].name === "BYE";
+const confirmEndMatch = () => {
+  if (pendingBracketIdx !== null) {
+    const { roundIdx, matchIdx } = getRoundAndMatchIndices(pendingBracketIdx, currentMatchIndex.value);
+    const match = brackets.value[pendingBracketIdx].matches[roundIdx][matchIdx];
 
-  if (isByeMatch) {
-    // Automatically determine the winner
-    const winner = match[0].name === "BYE" ? match[1] : match[0];
-
+    const winner = match[0].score >= match[1].score ? match[0] : match[1];
     match[0].completed = true;
     match[1].completed = true;
-    match.completed = true; // Mark match as completed
+    match.completed = true;
 
-    // Advance Winner to Next Round
-    if (brackets.value[bracketIdx].matches[roundIdx + 1]) {
-      const nextRoundIdx = Math.floor(matchIdx / 2); // Correct positioning logic
+    if (brackets.value[pendingBracketIdx].matches[roundIdx + 1]) {
+      const nextRoundIdx = Math.floor(matchIdx / 2);
       const nextMatchPos = matchIdx % 2 === 0 ? 0 : 1;
 
-      brackets.value[bracketIdx].matches[roundIdx + 1][nextRoundIdx][nextMatchPos] = {
+      brackets.value[pendingBracketIdx].matches[roundIdx + 1][nextRoundIdx][nextMatchPos] = {
         ...winner,
         score: 0,
         completed: false,
       };
     } else {
-      alert(`Winner: ${winner.name}`);
+      winnerMessage.value = `Winner: ${winner.name}`;
+      showWinnerDialog.value = true;
     }
-  } else {
-    // Show confirmation dialog for regular matches
-    if (confirm('Are you sure you want to conclude this match?')) {
-      // Determine Winner
-      const winner = match[0].score >= match[1].score ? match[0] : match[1];
-
-      match[0].completed = true;
-      match[1].completed = true;
-      match.completed = true; // Mark match as completed
-
-      // Advance Winner to Next Round
-      if (brackets.value[bracketIdx].matches[roundIdx + 1]) {
-        const nextRoundIdx = Math.floor(matchIdx / 2); // Correct positioning logic
-        const nextMatchPos = matchIdx % 2 === 0 ? 0 : 1;
-
-        brackets.value[bracketIdx].matches[roundIdx + 1][nextRoundIdx][nextMatchPos] = {
-          ...winner,
-          score: 0,
-          completed: false,
-        };
-      } else {
-        alert(`Winner: ${winner.name}`);
-      }
-    }
+    showConfirmDialog.value = false;
+    pendingBracketIdx = null;
   }
+};
+
+const cancelEndMatch = () => {
+  showConfirmDialog.value = false;
+  pendingBracketIdx = null;
 };
 
 // Function to undo a concluded match with confirmation
@@ -586,6 +582,21 @@ const calculateByes = (numPlayers) => {
           </div>
 
           <Button label="Create Bracket" class="p-button-success" @click="createBracket" />
+        </div>
+      </Dialog>
+
+      <Dialog v-model:visible="showWinnerDialog" header="Winner!" modal dismissableMask>
+        <p>{{ winnerMessage }}</p>
+      </Dialog>
+
+      <Dialog v-model:visible="showConfirmDialog" header="Confirm End Match" modal>
+        <div class="confirmation-content">
+          <i class="pi pi-question-circle" style="font-size: 2rem; color: #007bff;"></i>
+          <p>Are you sure you want to conclude this match?</p>
+          <div class="confirmation-buttons">
+            <Button label="Yes" icon="pi pi-check" class="p-button-success" @click="confirmEndMatch" />
+            <Button label="No" icon="pi pi-times" class="p-button-secondary" @click="cancelEndMatch" />
+          </div>
         </div>
       </Dialog>
     </div>
@@ -986,5 +997,42 @@ const calculateByes = (numPlayers) => {
 
 .facing-bye {
   color: #28a745; /* Green color for players facing a BYE */
+}
+
+.bracket-wrapper h2 {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.round h3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #555;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.p-dialog .p-dialog-content p {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #28a745; /* Green color for winner text */
+  text-align: center;
+  margin: 20px 0;
+}
+
+.confirmation-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.confirmation-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
 }
 </style>
