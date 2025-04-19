@@ -20,6 +20,9 @@ const showWinnerDialog = ref(false);
 const winnerMessage = ref("");
 const showConfirmDialog = ref(false);
 let pendingBracketIdx = null; // To store the bracket index for the pending confirmation
+const showMissingFieldsDialog = ref(false);
+const showDeleteConfirmDialog = ref(false);
+const deleteBracketIdx = ref(null);
 
 // Game Number Indicator
 const currentGameNumber = computed(() => `Game ${currentMatchIndex.value + 1}`);
@@ -27,7 +30,7 @@ const currentGameNumber = computed(() => `Game ${currentMatchIndex.value + 1}`);
 
 // Options
 const participantOptions = [4, 8, 16, 32];
-const bracketTypeOptions = ["single", "double"];
+const bracketTypeOptions = ["Single Elimination", "Double Elimination"];
 
 // Open Dialog for Bracket Creation
 const openDialog = () => {
@@ -59,7 +62,7 @@ const toggleBracket = (bracketIdx) => {
 // Create Bracket
 const createBracket = () => {
   if (!bracketName.value || !numberOfPlayers.value || !matchType.value) {
-    alert("Please fill out all fields.");
+    showMissingFieldsDialog.value = true;
     return;
   }
 
@@ -360,9 +363,8 @@ watch(currentMatchIndex, () => {
 
 // Function to remove a bracket
 const removeBracket = (bracketIdx) => {
-  if (confirm('Are you sure you want to delete this bracket?')) {
-    brackets.value.splice(bracketIdx, 1);
-  }
+  deleteBracketIdx.value = bracketIdx;
+  showDeleteConfirmDialog.value = true;
 };
 
 watch(() => brackets.value.length, (newLength, oldLength) => {
@@ -374,6 +376,31 @@ watch(() => brackets.value.length, (newLength, oldLength) => {
 const calculateByes = (numPlayers) => {
   const nextPowerOfTwo = Math.pow(2, Math.ceil(Math.log2(numPlayers)));
   return nextPowerOfTwo - numPlayers;
+};
+
+const isFinalRound = (bracketIdx, roundIdx) => {
+  return roundIdx === brackets.value[bracketIdx].matches.length - 1;
+};
+
+const isSemifinalRound = (bracketIdx, roundIdx) => {
+  return roundIdx === brackets.value[bracketIdx].matches.length - 2;
+};
+
+const isQuarterfinalRound = (bracketIdx, roundIdx) => {
+  return roundIdx === brackets.value[bracketIdx].matches.length - 3;
+};
+
+const confirmDeleteBracket = () => {
+  if (deleteBracketIdx.value !== null) {
+    brackets.value.splice(deleteBracketIdx.value, 1);
+    deleteBracketIdx.value = null;
+  }
+  showDeleteConfirmDialog.value = false;
+};
+
+const cancelDeleteBracket = () => {
+  showDeleteConfirmDialog.value = false;
+  deleteBracketIdx.value = null;
 };
 
 </script>
@@ -420,7 +447,9 @@ const calculateByes = (numPlayers) => {
 
               <div v-for="(round, roundIdx) in bracket.matches" :key="roundIdx"
               :class="['round', `round-${roundIdx + 1}`]">
-                <h3>Round {{ roundIdx + 1 }}</h3>
+                <h3>
+                  {{ isFinalRound(bracketIdx, roundIdx) ? 'Final Round' : isSemifinalRound(bracketIdx, roundIdx) ? 'Semifinal' : isQuarterfinalRound(bracketIdx, roundIdx) ? 'Quarterfinal' : `Round ${roundIdx + 1}` }}
+                </h3>
 
                 <!-- Matches Display -->
                 <div
@@ -569,7 +598,7 @@ const calculateByes = (numPlayers) => {
 
           <div class="p-field">
             <label for="numberOfPlayers">Number of Participants:</label>
-            <InputText v-model="numberOfPlayers" type="number" min="1" placeholder="Enter number of participants" />
+            <InputText v-model="numberOfPlayers" type="number" min="1" placeholder="Recommended: 2, 4, 8, 16, 32" />
           </div>
 
           <div class="p-field">
@@ -581,7 +610,9 @@ const calculateByes = (numPlayers) => {
             />
           </div>
 
-          <Button label="Create Bracket" class="p-button-success" @click="createBracket" />
+          <div class="button-container">
+            <Button label="Create Bracket" class="p-button-success" @click="createBracket" />
+          </div>
         </div>
       </Dialog>
 
@@ -596,6 +627,27 @@ const calculateByes = (numPlayers) => {
           <div class="confirmation-buttons">
             <Button label="Yes" icon="pi pi-check" class="p-button-success" @click="confirmEndMatch" />
             <Button label="No" icon="pi pi-times" class="p-button-secondary" @click="cancelEndMatch" />
+          </div>
+        </div>
+      </Dialog>
+
+      <Dialog v-model:visible="showMissingFieldsDialog" header="Missing Fields" modal>
+        <div class="dialog-content centered">
+          <i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: #ff4757;"></i>
+          <p>Please fill out all fields.</p>
+          <div class="button-container">
+            <Button label="OK" class="p-button-danger" @click="showMissingFieldsDialog = false" />
+          </div>
+        </div>
+      </Dialog>
+
+      <Dialog v-model:visible="showDeleteConfirmDialog" header="Confirm Deletion" modal>
+        <div class="confirmation-content">
+          <i class="pi pi-question-circle" style="font-size: 2rem; color: #007bff;"></i>
+          <p>Are you sure you want to delete this bracket?</p>
+          <div class="confirmation-buttons">
+            <Button label="Yes" icon="pi pi-check" class="p-button-success" @click="confirmDeleteBracket" />
+            <Button label="No" icon="pi pi-times" class="p-button-secondary" @click="cancelDeleteBracket" />
           </div>
         </div>
       </Dialog>
@@ -1033,6 +1085,19 @@ const calculateByes = (numPlayers) => {
 .confirmation-buttons {
   display: flex;
   gap: 10px;
+  margin-top: 20px;
+}
+
+.centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
   margin-top: 20px;
 }
 </style>
