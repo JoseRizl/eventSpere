@@ -66,40 +66,65 @@ const createBracket = () => {
 };
 
 const generateBracket = () => {
-  const players = Array.from({ length: numberOfPlayers.value }, (_, i) => ({
-    name: `Player ${i + 1}`,  // Default names for first round
+  const numPlayers = numberOfPlayers.value;
+  const totalSlots = Math.pow(2, Math.ceil(Math.log2(numPlayers)));
+  const totalByes = totalSlots - numPlayers;
+
+  // Create arrays for players and BYEs
+  const players = Array.from({ length: numPlayers }, (_, i) => ({
+    name: `Player ${i + 1}`,
     score: 0,
+    completed: false,
+  }));
+  const byes = Array.from({ length: totalByes }, () => ({
+    name: "BYE",
+    score: 0,
+    completed: false,
   }));
 
-  let rounds = Math.log2(players.length);
-  let generatedBracket = [];
+  // Initialize slots array
+  const slots = Array(totalSlots).fill(null);
 
-  for (let i = 0; i < rounds; i++) {
-    let roundMatches = [];
-
-    // For the first round, use preset names
-    const isFirstRound = i === 0;
-
-    for (let j = 0; j < players.length / Math.pow(2, i); j += 2) {
-      roundMatches.push([
-        {
-          ...players[j],
-          completed: false,
-          name: isFirstRound ? `Player ${j + 1}` : "", // Set preset names only in the first round, empty for others
-        },
-        {
-          ...players[j + 1],
-          completed: false,
-          name: isFirstRound ? `Player ${j + 2}` : "", // Set preset names only in the first round, empty for others
-        },
-      ]);
+  // 3. Alternate BYEs and Participants
+  let byeIndex = 0;
+  for (let i = 0; i < totalSlots; i += 2) {
+    if (byeIndex < byes.length) {
+      slots[i] = byes[byeIndex++];
     }
-
-    generatedBracket.push(roundMatches);
   }
 
-  return generatedBracket;
+  // 4. Fill remaining slots with players
+  let playerIndex = 0;
+  for (let i = 0; i < totalSlots; i++) {
+    if (!slots[i] && playerIndex < players.length) {
+      slots[i] = players[playerIndex++];
+    }
+  }
+
+  // 5. Pair into matches
+  const firstRound = [];
+  for (let i = 0; i < totalSlots; i += 2) {
+    firstRound.push([slots[i], slots[i + 1]]);
+  }
+
+  // 6. Build empty placeholders for later rounds
+  const rounds = [firstRound];
+  let prevMatches = firstRound;
+  while (prevMatches.length > 1) {
+    const nextMatches = Array.from(
+      { length: Math.ceil(prevMatches.length / 2) },
+      () => [
+        { name: "TBD", score: 0, completed: false },
+        { name: "TBD", score: 0, completed: false },
+      ]
+    );
+    rounds.push(nextMatches);
+    prevMatches = nextMatches;
+  }
+
+  return rounds;
 };
+
 
 // Edit Participant Names
 const editParticipant = (bracketIdx, roundIdx, matchIdx, teamIdx) => {
@@ -144,10 +169,12 @@ const concludeMatch = (bracketIdx) => {
   const { roundIdx, matchIdx } = getRoundAndMatchIndices(bracketIdx, currentMatchIndex.value);
   const match = brackets.value[bracketIdx].matches[roundIdx][matchIdx];
 
-  // Show confirmation dialog
-  if (confirm('Are you sure you want to conclude this match?')) {
-    // Determine Winner
-    const winner = match[0].score >= match[1].score ? match[0] : match[1];
+  // Check if one of the participants is a BYE
+  const isByeMatch = match[0].name === "BYE" || match[1].name === "BYE";
+
+  if (isByeMatch) {
+    // Automatically determine the winner
+    const winner = match[0].name === "BYE" ? match[1] : match[0];
 
     match[0].completed = true;
     match[1].completed = true;
@@ -165,6 +192,30 @@ const concludeMatch = (bracketIdx) => {
       };
     } else {
       alert(`Winner: ${winner.name}`);
+    }
+  } else {
+    // Show confirmation dialog for regular matches
+    if (confirm('Are you sure you want to conclude this match?')) {
+      // Determine Winner
+      const winner = match[0].score >= match[1].score ? match[0] : match[1];
+
+      match[0].completed = true;
+      match[1].completed = true;
+      match.completed = true; // Mark match as completed
+
+      // Advance Winner to Next Round
+      if (brackets.value[bracketIdx].matches[roundIdx + 1]) {
+        const nextRoundIdx = Math.floor(matchIdx / 2); // Correct positioning logic
+        const nextMatchPos = matchIdx % 2 === 0 ? 0 : 1;
+
+        brackets.value[bracketIdx].matches[roundIdx + 1][nextRoundIdx][nextMatchPos] = {
+          ...winner,
+          score: 0,
+          completed: false,
+        };
+      } else {
+        alert(`Winner: ${winner.name}`);
+      }
     }
   }
 };
@@ -317,6 +368,11 @@ watch(() => brackets.value.length, (newLength, oldLength) => {
   }
 });
 
+const calculateByes = (numPlayers) => {
+  const nextPowerOfTwo = Math.pow(2, Math.ceil(Math.log2(numPlayers)));
+  return nextPowerOfTwo - numPlayers;
+};
+
 </script>
 
 <template>
@@ -372,12 +428,26 @@ watch(() => brackets.value.length, (newLength, oldLength) => {
                   @click="navigateToMatch(bracketIdx, roundIdx, matchIdx)"
                   >
                   <div class="player-box">
-                      <span @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 0)" class="editable">
-                      {{ match[0].name || 'TBD' }} | {{ match[0].score }}
+                      <span
+                        @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 0)"
+                        :class="{
+                          editable: true,
+                          winner: match[0].completed && match[0].score >= match[1].score,
+                          loser: match[0].completed && match[0].score < match[1].score
+                        }"
+                      >
+                        {{ match[0].name || 'TBD' }} | {{ match[0].score }}
                       </span>
                       <hr />
-                      <span @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 1)" class="editable">
-                      {{ match[1].name || 'TBD' }} | {{ match[1].score }}
+                      <span
+                        @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 1)"
+                        :class="{
+                          editable: true,
+                          winner: match[1].completed && match[1].score >= match[0].score,
+                          loser: match[1].completed && match[1].score < match[0].score
+                        }"
+                      >
+                        {{ match[1].name || 'TBD' }} | {{ match[1].score }}
                       </span>
                   </div>
                 </div>
@@ -492,11 +562,7 @@ watch(() => brackets.value.length, (newLength, oldLength) => {
 
           <div class="p-field">
             <label for="numberOfPlayers">Number of Participants:</label>
-            <Select
-              v-model="numberOfPlayers"
-              :options="participantOptions"
-              placeholder="Select participants"
-            />
+            <InputText v-model="numberOfPlayers" type="number" min="1" placeholder="Enter number of participants" />
           </div>
 
           <div class="p-field">
@@ -893,5 +959,13 @@ watch(() => brackets.value.length, (newLength, oldLength) => {
   font-size: 1.5rem;
   font-weight: bold;
   color: #333;
+}
+
+.winner {
+  color: #28a745; /* Green for winner */
+}
+
+.loser {
+  color: #dc3545; /* Red for loser */
 }
 </style>
