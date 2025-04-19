@@ -79,7 +79,7 @@ const generateBracket = () => {
   const byes = Array.from({ length: totalByes }, () => ({
     name: "BYE",
     score: 0,
-    completed: false,
+    completed: true, // Mark BYE as completed
   }));
 
   // Initialize slots array
@@ -104,7 +104,14 @@ const generateBracket = () => {
   // 5. Pair into matches
   const firstRound = [];
   for (let i = 0; i < totalSlots; i += 2) {
-    firstRound.push([slots[i], slots[i + 1]]);
+    const match = [slots[i], slots[i + 1]];
+    firstRound.push(match);
+
+    // Automatically conclude matches with a BYE
+    if (match[0].name === "BYE" || match[1].name === "BYE") {
+      const winner = match[0].name === "BYE" ? match[1] : match[0];
+      winner.completed = true; // Mark the winner as completed
+    }
   }
 
   // 6. Build empty placeholders for later rounds
@@ -433,7 +440,9 @@ const calculateByes = (numPlayers) => {
                         :class="{
                           editable: true,
                           winner: match[0].completed && match[0].score >= match[1].score,
-                          loser: match[0].completed && match[0].score < match[1].score
+                          loser: match[0].completed && match[0].score < match[1].score,
+                          'bye-text': match[0].name === 'BYE',
+                          'facing-bye': match[1].name === 'BYE'
                         }"
                       >
                         {{ match[0].name || 'TBD' }} | {{ match[0].score }}
@@ -444,7 +453,9 @@ const calculateByes = (numPlayers) => {
                         :class="{
                           editable: true,
                           winner: match[1].completed && match[1].score >= match[0].score,
-                          loser: match[1].completed && match[1].score < match[0].score
+                          loser: match[1].completed && match[1].score < match[0].score,
+                          'bye-text': match[1].name === 'BYE',
+                          'facing-bye': match[0].name === 'BYE'
                         }"
                       >
                         {{ match[1].name || 'TBD' }} | {{ match[1].score }}
@@ -967,5 +978,13 @@ const calculateByes = (numPlayers) => {
 
 .loser {
   color: #dc3545; /* Red for loser */
+}
+
+.bye-text {
+  color: #dc3545; /* Red color for BYE text */
+}
+
+.facing-bye {
+  color: #28a745; /* Green color for players facing a BYE */
 }
 </style>

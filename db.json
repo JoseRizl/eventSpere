@@ -294,10 +294,10 @@
   ],
   "brackets": [
     {
-      "id": "1742128800494",
-      "name": "Basketball",
+      "id": "0354",
+      "name": "123123",
       "type": "single",
-      "bracket": [
+      "matches": [
         [
           [
             {
@@ -322,23 +322,75 @@
               "score": 0,
               "completed": false
             }
+          ],
+          [
+            {
+              "name": "Player 5",
+              "score": 0,
+              "completed": false
+            },
+            {
+              "name": "Player 6",
+              "score": 0,
+              "completed": false
+            }
+          ],
+          [
+            {
+              "name": "Player 7",
+              "score": 0,
+              "completed": false
+            },
+            {
+              "name": "Player 8",
+              "score": 0,
+              "completed": false
+            }
           ]
         ],
         [
           [
             {
-              "name": "Player 1",
+              "name": "TBD",
               "score": 0,
               "completed": false
             },
             {
-              "name": "Player 2",
+              "name": "TBD",
+              "score": 0,
+              "completed": false
+            }
+          ],
+          [
+            {
+              "name": "TBD",
+              "score": 0,
+              "completed": false
+            },
+            {
+              "name": "TBD",
+              "score": 0,
+              "completed": false
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "name": "TBD",
+              "score": 0,
+              "completed": false
+            },
+            {
+              "name": "TBD",
               "score": 0,
               "completed": false
             }
           ]
         ]
-      ]
+      ],
+      "currentMatchIndex": 0,
+      "lines": []
     }
   ],
   "announcements": [
