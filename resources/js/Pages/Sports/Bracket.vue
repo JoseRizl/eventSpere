@@ -29,7 +29,6 @@ const currentGameNumber = computed(() => `Game ${currentMatchIndex.value + 1}`);
 
 
 // Options
-const participantOptions = [4, 8, 16, 32];
 const bracketTypeOptions = ["Single Elimination", "Double Elimination"];
 
 // Open Dialog for Bracket Creation
@@ -103,11 +102,11 @@ const generateBracket = () => {
 
   // 3. Alternate BYEs and Participants
   let byeIndex = 0;
-  for (let i = 0; i < totalSlots; i += 2) {
+  for (let i = totalSlots-2; i >=0; i-=2) {
     if (byeIndex < byes.length) {
-      slots[i] = byes[byeIndex++];
+      slots[i + 1] = byes[byeIndex++];
     }
-  }
+}
 
   // 4. Fill remaining slots with players
   let playerIndex = 0;
