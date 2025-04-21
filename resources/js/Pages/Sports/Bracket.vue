@@ -29,7 +29,7 @@ const currentGameNumber = computed(() => `Game ${currentMatchIndex.value + 1}`);
 
 
 // Options
-const bracketTypeOptions = ["Single Elimination", "Double Elimination"];
+const bracketTypeOptions = ["Single Elimination", "Single Elimination Pt. 2"];
 
 // Open Dialog for Bracket Creation
 const openDialog = () => {

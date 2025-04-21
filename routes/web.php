@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EventController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
 
 Route::middleware('auth')->group(function () {
     Route::inertia('/home', 'Home')->name('home');
@@ -20,9 +22,7 @@ Route::middleware('auth')->group(function () {
     Route::inertia('/sports', 'Sports/MatchView')->name('match');
     Route::inertia('/bracket', 'Sports/Bracket')->name('bracket');
 
-    Route::inertia('/events/{id}', 'Events/EventDetails')->name('event.details');
-    Route::inertia('/sports/{id}', 'Sports/SportsDetails')->name('sports.details');
-
+    Route::get('/events/{id}', [EventController::class, 'show'])->name('event.details');
 
 });
 

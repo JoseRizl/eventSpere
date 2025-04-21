@@ -1,69 +1,49 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
-import { format } from 'date-fns'; // Import date formatting library
-import { useRoute } from 'vue-router'; // ✅ Correct import for Vue Router
+import { ref, watch } from 'vue';
+import { usePage } from '@inertiajs/vue3';
+import { format } from 'date-fns';
 
-const vueRoute = useRoute();
-const eventDetails = ref(null);
-const relatedEvents = ref([]);
+// Get data from Inertia page props
+const { props } = usePage();
+const eventDetails = ref(props.event);
+const relatedEvents = ref(props.relatedEvents || []);
+const categories = ref(props.categories || []);
+const tags = ref(props.tags || []);
 const selectedFiles = ref([]);
-const categories = ref([]);
-const tags = ref([]);
 
-onMounted(async () => {
-  try {
-    const id = vueRoute.params.id;
-
-    // Fetch data
-    const [eventsResponse, sportsResponse, categoriesResponse, tagsResponse] = await Promise.all([
-      axios.get('http://localhost:3000/events'),
-      axios.get('http://localhost:3000/sports'),
-      axios.get('http://localhost:3000/category'),
-      axios.get('http://localhost:3000/tags')
-    ]);
-
-    // Store data for reference
-    categories.value = categoriesResponse.data;
-    tags.value = tagsResponse.data;
-
-    // Combine event sources
-    const combinedData = [...eventsResponse.data, ...sportsResponse.data];
-
-    // Find the matching event
-    const foundEvent = combinedData.find(event => event.id === id);
-    if (foundEvent) {
-      // Format Dates to MMM-dd-yy
-      foundEvent.startDate = format(new Date(foundEvent.startDate), 'MMM-dd-yy');
-      foundEvent.endDate = format(new Date(foundEvent.endDate), 'MMM-dd-yy');
-
-      // Map tags for display
-      foundEvent.tags = foundEvent.tags.map(tagId =>
-        tags.value.find(tag => tag.id.toString() === tagId.toString()) || { name: 'Unknown', color: '#e0e7ff' }
-      );
-
-      eventDetails.value = foundEvent;
-    }
-
-    // Filter related events excluding the current event
-    relatedEvents.value = combinedData.filter(event => event.id !== id);
-
-  } catch (error) {
-    console.error('Error fetching event details:', error);
+// Format dates and process tags when component mounts or props change
+watch(() => props.event, (newEvent) => {
+  if (newEvent) {
+    eventDetails.value = {
+      ...newEvent,
+      startDate: format(new Date(newEvent.startDate), 'MMM-dd-yy'),
+      endDate: format(new Date(newEvent.endDate), 'MMM-dd-yy'),
+      tags: newEvent.tags?.map(tagId =>
+        tags.value.find(tag => tag.id.toString() === tagId.toString()) ||
+        { name: 'Unknown', color: '#e0e7ff' }
+      ) || []
+    };
   }
-});
+}, { immediate: true });
+
+// Watch for related events updates
+watch(() => props.relatedEvents, (newRelated) => {
+  relatedEvents.value = newRelated || [];
+}, { immediate: true });
+
+// Category title display helper
+const getCategoryTitle = (categoryId) => {
+  const category = categories.value.find(cat => cat.id === categoryId);
+  return category ? category.title : 'Unknown Category';
+};
 
 // Handle file upload
 const handleFileUpload = (event) => {
   selectedFiles.value = [...selectedFiles.value, ...event.target.files];
 };
-
-// Get Category Title
-const getCategoryTitle = (categoryId) => {
-  const category = categories.value.find(cat => cat.id === categoryId);
-  return category ? category.title : 'Unknown Category';
-};
 </script>
+
+
 
 <template>
   <div class="min-h-screen bg-gray-200 py-8 px-4 flex flex-col items-center">
@@ -107,20 +87,23 @@ const getCategoryTitle = (categoryId) => {
       <div class="flex justify-between mt-4">
         <!-- Left: Event Details -->
         <div class="text-left text-sm space-y-2 flex-1">
-          <p><strong>Start Date:</strong> {{ eventDetails.startDate }}</p>
-          <p><strong>End Date:</strong> {{ eventDetails.endDate }}</p>
-          <p><strong>Start Time:</strong> {{ eventDetails.startTime }}</p>
-          <p><strong>End Time:</strong> {{ eventDetails.endTime }}</p>
-          <p><strong>Category:</strong> {{ getCategoryTitle(eventDetails.category_id) }}</p>
-          <p><strong>Participants:</strong> All</p>
+          <p><strong>Start Date:</strong> {{ eventDetails.startDate }}, {{ eventDetails.startTime }}</p>
+          <p><strong>End Date:</strong> {{ eventDetails.endDate }}, {{ eventDetails.endTime }}</p>
+          <p><strong>Category:</strong> {{ getCategoryTitle(eventDetails.category_id) }}</p
 
-          <!-- Committee Section -->
+          <!--  Committee section -->
           <div class="border-t pt-4">
             <h2 class="font-semibold">Committee:</h2>
             <div class="pl-4">
-              <p>Glin Mike: Speaker</p>
+                <p
+                v-for="(taskItem, index) in eventDetails.tasks || []"
+                :key="index"
+                >
+                {{ taskItem.employee.name }} ({{ taskItem.committee.name }}): {{ taskItem.task }}
+                </p>
             </div>
-          </div>
+        </div>
+
         </div>
 
         <!-- Right: Image Upload -->
@@ -141,7 +124,7 @@ const getCategoryTitle = (categoryId) => {
         <Link
         v-for="(event, index) in relatedEvents.slice(0, 5)"
         :key="index"
-        :href="route(event.category_id === '3' ? 'sports.details' : 'event.details', { id: event.id })"
+        :href="route('event.details', { id: event.id })"
         class="min-w-[120px] bg-gray-300 p-2 rounded text-center hover:bg-gray-400 transition"
         >
         <div class="h-16 w-24 bg-gray-200 flex items-center justify-center rounded mb-2 overflow-hidden">

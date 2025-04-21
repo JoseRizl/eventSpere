@@ -119,5 +119,21 @@ export const useEventStore = defineStore("event", {
         console.error("Error adding tag:", error);
       }
     },
+
+    async fetchEventById(id) {
+        try {
+          let response = await axios.get(`http://localhost:3000/events/${id}`);
+          return response.data;
+        } catch (e) {
+          try {
+            let response = await axios.get(`http://localhost:3000/sports/${id}`);
+            return response.data;
+          } catch (err) {
+            console.error("Event not found in both endpoints", err);
+            return null;
+          }
+        }
+      }
+
   },
 });

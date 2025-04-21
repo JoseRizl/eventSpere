@@ -124,7 +124,7 @@ const deleteAnnouncement = async () => {
         v-for="(news, index) in allNews"
         :key="index"
         :href="route('event.details', { id: news.id })"
-        :preserve-state="false"
+        preserve-scroll
         class="p-4 border rounded-lg shadow-sm bg-white block hover:shadow-lg hover:scale-105 transform transition duration-200 ease-in-out"
       >
         <div
