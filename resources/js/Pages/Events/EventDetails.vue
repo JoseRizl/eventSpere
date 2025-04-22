@@ -1,6 +1,6 @@
 <script setup>
-import { ref } from 'vue';
-import { parse, format } from 'date-fns';
+import { ref, computed } from 'vue';
+import { parse, format, parseISO, isValid } from 'date-fns';
 import { usePage, router } from '@inertiajs/vue3';
 
 // Inertia props
@@ -8,6 +8,8 @@ const { props } = usePage();
 const categories = ref(props.categories || []);
 const tags = ref(props.tags || []);
 const saving = ref(false);
+const showSaveConfirmDialog = ref(false);
+const showSuccessDialog = ref(false);
 
 const eventDetails = ref({
   ...props.event,
@@ -42,7 +44,7 @@ const saveChanges = () => {
       saving.value = false;
     },
     onSuccess: () => {
-      alert('Event updated successfully!');
+      showSuccessDialog.value = true;
       editMode.value = false;
     }
   });
@@ -58,6 +60,29 @@ const formatDisplayTime = (timeString) => {
   const parsed = parse(timeString, 'HH:mm', new Date());
   return format(parsed, 'hh:mm a'); // 04:00 PM
 };
+
+
+const formattedStartDate = computed({
+  get() {
+    if (!eventDetails.value.startDate) return '';
+    const date = parseISO(eventDetails.value.startDate);
+    return isValid(date) ? format(date, 'yyyy-MM-dd') : '';
+  },
+  set(value) {
+    eventDetails.value.startDate = value;
+  }
+});
+
+const formattedEndDate = computed({
+  get() {
+    if (!eventDetails.value.endDate) return '';
+    const date = parseISO(eventDetails.value.endDate);
+    return isValid(date) ? format(date, 'yyyy-MM-dd') : '';
+  },
+  set(value) {
+    eventDetails.value.endDate = value;
+  }
+});
 </script>
 
 <template>
@@ -75,24 +100,23 @@ const formatDisplayTime = (timeString) => {
         </div>
       </div>
 
-    <!-- Edit Toggle Button -->
-    <div class="flex justify-end max-w-2xl w-full mt-4">
-    <button @click="toggleEdit" class="px-4 py-2 rounded bg-gray-600 text-white hover:bg-gray-700">
-        {{ editMode ? 'Cancel Edit' : 'Edit Event' }}
-    </button>
-    </div>
-
-
       <div v-if="eventDetails" class="bg-white shadow-md rounded-lg p-6 max-w-2xl w-full mt-6 flex flex-col space-y-4">
         <!-- Title -->
-        <div>
-          <input
+        <div class="flex justify-between items-center">
+            <input
             v-if="editMode"
             v-model="eventDetails.title"
             class="text-xl font-bold border-b w-full"
             placeholder="Event Title"
-          />
-          <h1 v-else class="text-xl font-bold">{{ eventDetails.title }}</h1>
+            />
+            <h1 v-else class="text-xl font-bold">{{ eventDetails.title }}</h1>
+
+            <button
+            @click="toggleEdit"
+            class="px-4 py-2 rounded bg-gray-600 text-white hover:bg-gray-700 ml-4"
+            >
+            {{ editMode ? 'Cancel' : 'Edit Event' }}
+            </button>
         </div>
 
         <!-- Description -->
@@ -153,9 +177,9 @@ const formatDisplayTime = (timeString) => {
         <!-- Dates and Times -->
         <div class="grid grid-cols-2 gap-4 text-sm">
           <template v-if="editMode">
-            <input type="date" v-model="eventDetails.startDate" class="border p-2 rounded" />
+            <input type="date" v-model="formattedStartDate" class="border p-2 rounded" />
             <input type="time" v-model="eventDetails.startTime" class="border p-2 rounded" />
-            <input type="date" v-model="eventDetails.endDate" class="border p-2 rounded" />
+            <input type="date" v-model="formattedEndDate" class="border p-2 rounded" />
             <input type="time" v-model="eventDetails.endTime" class="border p-2 rounded" />
           </template>
           <template v-else>
@@ -206,13 +230,41 @@ const formatDisplayTime = (timeString) => {
 
         <!-- Save Button -->
         <button
-          v-if="editMode"
-          @click="saveChanges"
-          class="mt-4 self-end bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+            v-if="editMode"
+            @click="showSaveConfirmDialog = true"
+            class="mt-4 self-end bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
         >
-          Save Changes
+            Save Changes
         </button>
       </div>
+    </div>
+
+    <!-- Confirm Save Changes Dialog -->
+    <div v-if="showSaveConfirmDialog" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+        <h2 class="text-lg font-semibold mb-2">Save Changes?</h2>
+        <p class="text-sm text-gray-600 mb-4">Are you sure you want to save your changes?</p>
+        <div class="flex justify-end gap-2">
+        <button @click="showSaveConfirmDialog = false" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
+        <button
+            @click="() => { showSaveConfirmDialog = false; saveChanges(); }"
+            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+            Yes, Save
+        </button>
+        </div>
+    </div>
+    </div>
+
+    <!-- Success Message Dialog -->
+    <div v-if="showSuccessDialog" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+        <h2 class="text-lg font-semibold text-green-700 mb-2">Success!</h2>
+        <p class="text-sm text-gray-700 mb-4">The event was updated successfully.</p>
+        <div class="flex justify-end">
+        <button @click="showSuccessDialog = false" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Close</button>
+        </div>
+    </div>
     </div>
 
     <!-- Loading Dialog -->
