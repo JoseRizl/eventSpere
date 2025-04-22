@@ -1,505 +1,436 @@
 {
-    "events": [
+  "events": [
+    {
+      "id": "f697",
+      "title": "Parade",
+      "description": "69th Foundation day parade in the Honor of Sir Seled Jolero and Sryan Balazar",
+      "category": "2",
+      "startDate": "Apr-04-2024",
+      "endDate": "May-05-2025",
+      "startTime": "08:00",
+      "endTime": "08:30",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": false,
+      "tags": [
+        "1"
+      ],
+      "category_id": "2",
+      "type": "event",
+      "mappedTags": [
         {
-            "id": "f697",
-            "title": "Parade",
-            "description": "69th Foundation day parade in the Honor of Sir Seled Jolero and Sryan Balazar",
-            "category": "2",
-            "startDate": "2024-04-04",
-            "endDate": "2025-05-05",
-            "startTime": "08:00",
-            "endTime": "08:30",
-            "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
-            "archived": false,
-            "tags": [
-                "1",
-                "3"
-            ],
-            "category_id": "2",
-            "type": "event",
-            "mappedTags": [
-                {
-                    "id": "1",
-                    "name": "Foundation Day",
-                    "color": "#FF5733"
-                }
-            ],
-            "tasks": [
-                {
-                    "committee": {
-                        "id": "1",
-                        "name": "Logistics"
-                    },
-                    "employee": {
-                        "id": "9",
-                        "name": "Bryan",
-                        "committeeId": 1
-                    },
-                    "task": "Tig bira sa sakyanan"
-                }
-            ],
-            "schedules": [
-                {
-                    "time": "07:30",
-                    "activity": "Tubil sa sakyanan \ud83d\ude97"
-                }
-            ]
-        },
-        {
-            "id": "fbe4",
-            "title": "Basketball",
-            "description": "Basketball suiiii",
-            "category": "3",
-            "startDate": "Mar-27-2025",
-            "endDate": "Mar-28-2025",
-            "startTime": "08:00",
-            "endTime": "09:00",
-            "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
-            "archived": false,
-            "tags": [
-                "2"
-            ],
-            "category_id": "3",
-            "type": "event",
-            "mappedTags": [
-                {
-                    "id": "2",
-                    "name": "Palakasan",
-                    "color": "#33FF57"
-                }
-            ],
-            "tasks": [
-                {
-                    "committee": {
-                        "id": "3",
-                        "name": "Catering"
-                    },
-                    "employee": {
-                        "id": "3",
-                        "name": "Uvuvwevwevwe Onyetenyevwe Ubwemubwem Ossas",
-                        "committeeId": 3
-                    },
-                    "task": "Dala sa snack"
-                }
-            ]
-        },
-        {
-            "id": "783a",
-            "title": "Google Play Gift Card",
-            "description": "Why did you redeem it? Why did you do it? Ma'am why did you do this?",
-            "category": "1",
-            "startDate": "Mar-25-2025",
-            "endDate": "Mar-26-2025",
-            "startTime": "08:00",
-            "endTime": "06:00",
-            "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
-            "archived": true,
-            "tags": [
-                "3"
-            ],
-            "category_id": "4",
-            "type": "event",
-            "mappedTags": [
-                {
-                    "id": "3",
-                    "name": "Buwan ng Wika",
-                    "color": "#3357FF"
-                }
-            ]
-        },
-        {
-            "id": "ad90",
-            "title": "Archived",
-            "description": "Kung makita ni outside sa archive, naay problema.",
-            "category": "1",
-            "startDate": "2025-03-23T16:00:00.000Z",
-            "endDate": "2025-03-25T16:00:00.000Z",
-            "startTime": "04:00am",
-            "endTime": "04:30am",
-            "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
-            "archived": true,
-            "tags": [
-                "5"
-            ],
-            "category_id": "1",
-            "type": "event",
-            "mappedTags": [
-                {
-                    "id": "5",
-                    "name": "test",
-                    "color": "#000000"
-                }
-            ]
-        },
-        {
-            "id": "6af1",
-            "title": "\ud83e\udde2stone",
-            "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-            "category": "1",
-            "startDate": "Jul-12-2024",
-            "endDate": "Apr-24-2026",
-            "startTime": "04:00pm",
-            "endTime": "05:00pm",
-            "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
-            "archived": false,
-            "tags": [
-                "2"
-            ],
-            "category_id": "1",
-            "type": "event",
-            "mappedTags": [
-                {
-                    "id": "2",
-                    "name": "Palakasan",
-                    "color": "#33FF57"
-                }
-            ],
-            "tasks": [
-                {
-                    "committee": {
-                        "id": "1",
-                        "name": "Logistics"
-                    },
-                    "employee": {
-                        "id": "1",
-                        "name": "Glene",
-                        "committeeId": 1
-                    },
-                    "task": "Defence \ud83e\udd4b"
-                },
-                {
-                    "committee": {
-                        "id": "1",
-                        "name": "Logistics"
-                    },
-                    "employee": {
-                        "id": "9",
-                        "name": "Bryan",
-                        "committeeId": 1
-                    },
-                    "task": "sasssdsdd"
-                }
-            ]
-        },
-        {
-            "id": "d62d",
-            "title": "\ud83e\udd23",
-            "description": "Gradute",
-            "category": "2",
-            "startDate": "Jun-13-2025",
-            "endDate": "Jun-13-2025",
-            "startTime": "08:00",
-            "endTime": "12:00",
-            "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
-            "archived": false,
-            "tags": [
-                "6"
-            ],
-            "category_id": "2",
-            "type": "event",
-            "mappedTags": [
-                {
-                    "id": "6",
-                    "name": "Graduation",
-                    "color": "#9e369e"
-                }
-            ],
-            "tasks": [
-                {
-                    "committee": {
-                        "id": "2",
-                        "name": "Sports"
-                    },
-                    "employee": {
-                        "id": "14",
-                        "name": "clock clock clack clock",
-                        "committeeId": 2
-                    },
-                    "task": "My name is \ud83d\udde3\ufe0f\ud83d\udde3\ufe0f\ud83d\udde3\ufe0f"
-                }
-            ]
-        },
-        {
-            "id": "0332",
-            "title": "wwwoo",
-            "description": "dsasaaa",
-            "category": "2",
-            "startDate": "2025-04-28T16:00:00.000Z",
-            "endDate": "2025-04-29T16:00:00.000Z",
-            "startTime": "12:00",
-            "endTime": "00:00",
-            "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
-            "archived": true,
-            "tags": [
-                "1"
-            ],
-            "category_id": "2",
-            "type": "event",
-            "mappedTags": [
-                {
-                    "id": "1",
-                    "name": "Foundation Day",
-                    "color": "#FF5733"
-                }
-            ]
+          "id": "1",
+          "name": "Foundation Day",
+          "color": "#FF5733"
         }
-    ],
-    "tags": [
+      ],
+      "tasks": [
         {
-            "id": "1",
-            "name": "Foundation Day",
-            "color": "#FF5733"
-        },
-        {
-            "id": "2",
-            "name": "Palakasan",
-            "color": "#33FF57"
-        },
-        {
-            "id": "3",
-            "name": "Buwan ng Wika",
-            "color": "#3357FF"
-        },
-        {
-            "id": "4",
-            "name": "Jolen Tournament",
-            "color": "#000000"
-        },
-        {
-            "id": "6",
-            "name": "Graduation",
-            "color": "#9e369e"
-        }
-    ],
-    "sports": [],
-    "category": [
-        {
-            "id": "1",
-            "title": "Academics",
-            "description": "Academic events"
-        },
-        {
-            "id": "2",
-            "title": "Commemorative",
-            "description": "Honoring special events"
-        },
-        {
-            "id": "3",
-            "title": "Sports",
-            "description": "Sporting events and competitions"
-        },
-        {
-            "id": "4",
-            "title": "Leisure",
-            "description": "Leisure, relaxation, and enjoyment"
-        },
-        {
-            "id": "5e80",
-            "title": "way klase",
-            "description": "woooo"
-        }
-    ],
-    "brackets": [
-        {
-            "id": "0354",
-            "name": "123123",
-            "type": "single",
-            "matches": [
-                [
-                    [
-                        {
-                            "name": "Player 1",
-                            "score": 0,
-                            "completed": false
-                        },
-                        {
-                            "name": "Player 2",
-                            "score": 0,
-                            "completed": false
-                        }
-                    ],
-                    [
-                        {
-                            "name": "Player 3",
-                            "score": 0,
-                            "completed": false
-                        },
-                        {
-                            "name": "Player 4",
-                            "score": 0,
-                            "completed": false
-                        }
-                    ],
-                    [
-                        {
-                            "name": "Player 5",
-                            "score": 0,
-                            "completed": false
-                        },
-                        {
-                            "name": "Player 6",
-                            "score": 0,
-                            "completed": false
-                        }
-                    ],
-                    [
-                        {
-                            "name": "Player 7",
-                            "score": 0,
-                            "completed": false
-                        },
-                        {
-                            "name": "Player 8",
-                            "score": 0,
-                            "completed": false
-                        }
-                    ]
-                ],
-                [
-                    [
-                        {
-                            "name": "TBD",
-                            "score": 0,
-                            "completed": false
-                        },
-                        {
-                            "name": "TBD",
-                            "score": 0,
-                            "completed": false
-                        }
-                    ],
-                    [
-                        {
-                            "name": "TBD",
-                            "score": 0,
-                            "completed": false
-                        },
-                        {
-                            "name": "TBD",
-                            "score": 0,
-                            "completed": false
-                        }
-                    ]
-                ],
-                [
-                    [
-                        {
-                            "name": "TBD",
-                            "score": 0,
-                            "completed": false
-                        },
-                        {
-                            "name": "TBD",
-                            "score": 0,
-                            "completed": false
-                        }
-                    ]
-                ]
-            ],
-            "currentMatchIndex": 0,
-            "lines": []
-        }
-    ],
-    "announcements": [
-        {
-            "id": "1",
-            "message": "\ud83d\udea8 Important Update: System Maintenance on March 30.",
-            "timestamp": "2025-03-29T12:00:00Z"
-        },
-        {
-            "id": "2",
-            "message": "\ud83d\udce2 Event registration closes this Friday!",
-            "timestamp": "2025-03-28T15:30:00Z"
-        }
-    ],
-    "committees": [
-        {
+          "committee": {
             "id": "1",
             "name": "Logistics"
-        },
-        {
-            "id": "2",
-            "name": "Sports"
-        },
-        {
-            "id": "3",
-            "name": "Catering"
-        },
-        {
-            "id": "4",
-            "name": "Entertainment"
-        }
-    ],
-    "employees": [
-        {
-            "id": "1",
-            "name": "Glene",
-            "committeeId": 1
-        },
-        {
-            "id": "2",
-            "name": "Miko",
-            "committeeId": 2
-        },
-        {
-            "id": "3",
-            "name": "Uvuvwevwevwe Onyetenyevwe Ubwemubwem Ossas",
-            "committeeId": 3
-        },
-        {
-            "id": "4",
-            "name": "",
-            "committeeId": 4
-        },
-        {
-            "id": "5",
-            "name": "Kim Jong Un",
-            "committeeId": 1
-        },
-        {
-            "id": "6",
-            "name": "Melvin",
-            "committeeId": 2
-        },
-        {
-            "id": "7",
-            "name": "Lee Ar",
-            "committeeId": 3
-        },
-        {
-            "id": "8",
-            "name": "Jungkook",
-            "committeeId": 4
-        },
-        {
+          },
+          "employee": {
             "id": "9",
             "name": "Bryan",
             "committeeId": 1
-        },
+          },
+          "task": "Tig bira sa sakyanan"
+        }
+      ],
+      "schedules": [
         {
-            "id": "10",
-            "name": "Edsel",
-            "committeeId": 2
-        },
+          "time": "07:30",
+          "activity": "Tubil sa sakyanan 🚗"
+        }
+      ]
+    },
+    {
+      "id": "fbe4",
+      "title": "Basketball",
+      "description": "Basketball suiiii",
+      "category": "3",
+      "startDate": "Mar-27-2025",
+      "endDate": "Mar-28-2025",
+      "startTime": "08:00",
+      "endTime": "09:00",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": false,
+      "tags": [
+        "2"
+      ],
+      "category_id": "3",
+      "type": "event",
+      "mappedTags": [
         {
-            "id": "11",
-            "name": "Sonny Jihns",
+          "id": "2",
+          "name": "Palakasan",
+          "color": "#33FF57"
+        }
+      ],
+      "tasks": [
+        {
+          "committee": {
+            "id": "3",
+            "name": "Catering"
+          },
+          "employee": {
+            "id": "3",
+            "name": "Uvuvwevwevwe Onyetenyevwe Ubwemubwem Ossas",
             "committeeId": 3
-        },
+          },
+          "task": "Dala sa snack"
+        }
+      ]
+    },
+    {
+      "id": "ad90",
+      "title": "Archived",
+      "description": "Kung makita ni outside sa archive, naay problema.",
+      "category": "1",
+      "startDate": "2025-03-23T16:00:00.000Z",
+      "endDate": "2025-03-25T16:00:00.000Z",
+      "startTime": "04:00am",
+      "endTime": "04:30am",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": true,
+      "tags": [
+        "5"
+      ],
+      "category_id": "1",
+      "type": "event",
+      "mappedTags": [
         {
-            "id": "12",
-            "name": "No Kum-sok",
-            "committeeId": 4
-        },
+          "id": "5",
+          "name": "test",
+          "color": "#000000"
+        }
+      ]
+    },
+    {
+      "id": "d62d",
+      "title": "🤣",
+      "description": "Gradute",
+      "category": "2",
+      "startDate": "Jun-13-2025",
+      "endDate": "Jun-13-2025",
+      "startTime": "08:00",
+      "endTime": "12:00",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": false,
+      "tags": [
+        "6"
+      ],
+      "category_id": "2",
+      "type": "event",
+      "mappedTags": [
         {
-            "id": "13",
-            "name": "Xi Jinping",
-            "committeeId": 1
-        },
+          "id": "6",
+          "name": "Graduation",
+          "color": "#9e369e"
+        }
+      ],
+      "tasks": [
         {
+          "committee": {
+            "id": "2",
+            "name": "Sports"
+          },
+          "employee": {
             "id": "14",
             "name": "clock clock clack clock",
             "committeeId": 2
+          },
+          "task": "My name is 🗣️🗣️🗣️"
         }
-    ]
+      ]
+    },
+    {
+      "id": "2066",
+      "title": "Time",
+      "description": "Oras na para mag palit ka ug relo",
+      "category": "1",
+      "startDate": "Apr-29-2025",
+      "endDate": "Apr-30-2025",
+      "startTime": "19:08",
+      "endTime": "21:00",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": false,
+      "tags": [
+        "4",
+        "2"
+      ],
+      "category_id": "1",
+      "type": "event",
+      "mappedTags": [
+        {
+          "id": "4",
+          "name": "Jolen Tournament",
+          "color": "#000000"
+        },
+        {
+          "id": "2",
+          "name": "Palakasan",
+          "color": "#33FF57"
+        }
+      ]
+    }
+  ],
+  "tags": [
+    {
+      "id": "1",
+      "name": "Foundation Day",
+      "color": "#FF5733"
+    },
+    {
+      "id": "2",
+      "name": "Palakasan",
+      "color": "#33FF57"
+    },
+    {
+      "id": "3",
+      "name": "Buwan ng Wika",
+      "color": "#3357FF"
+    },
+    {
+      "id": "4",
+      "name": "Jolen Tournament",
+      "color": "#000000"
+    },
+    {
+      "id": "6",
+      "name": "Graduation",
+      "color": "#9e369e"
+    }
+  ],
+  "sports": [],
+  "category": [
+    {
+      "id": "1",
+      "title": "Academics",
+      "description": "Academic events"
+    },
+    {
+      "id": "2",
+      "title": "Commemorative",
+      "description": "Honoring special events"
+    },
+    {
+      "id": "3",
+      "title": "Sports",
+      "description": "Sporting events and competitions"
+    },
+    {
+      "id": "4",
+      "title": "Leisure",
+      "description": "Leisure, relaxation, and enjoyment"
+    },
+    {
+      "id": "5e80",
+      "title": "way klase",
+      "description": "woooo"
+    }
+  ],
+  "brackets": [
+    {
+      "id": "0354",
+      "name": "123123",
+      "type": "single",
+      "matches": [
+        [
+          [
+            {
+              "name": "Player 1",
+              "score": 0,
+              "completed": false
+            },
+            {
+              "name": "Player 2",
+              "score": 0,
+              "completed": false
+            }
+          ],
+          [
+            {
+              "name": "Player 3",
+              "score": 0,
+              "completed": false
+            },
+            {
+              "name": "Player 4",
+              "score": 0,
+              "completed": false
+            }
+          ],
+          [
+            {
+              "name": "Player 5",
+              "score": 0,
+              "completed": false
+            },
+            {
+              "name": "Player 6",
+              "score": 0,
+              "completed": false
+            }
+          ],
+          [
+            {
+              "name": "Player 7",
+              "score": 0,
+              "completed": false
+            },
+            {
+              "name": "Player 8",
+              "score": 0,
+              "completed": false
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "name": "TBD",
+              "score": 0,
+              "completed": false
+            },
+            {
+              "name": "TBD",
+              "score": 0,
+              "completed": false
+            }
+          ],
+          [
+            {
+              "name": "TBD",
+              "score": 0,
+              "completed": false
+            },
+            {
+              "name": "TBD",
+              "score": 0,
+              "completed": false
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "name": "TBD",
+              "score": 0,
+              "completed": false
+            },
+            {
+              "name": "TBD",
+              "score": 0,
+              "completed": false
+            }
+          ]
+        ]
+      ],
+      "currentMatchIndex": 0,
+      "lines": []
+    }
+  ],
+  "announcements": [
+    {
+      "id": "1",
+      "message": "🚨 Important Update: System Maintenance on March 30.",
+      "timestamp": "2025-03-29T12:00:00Z"
+    },
+    {
+      "id": "2",
+      "message": "📢 Event registration closes this Friday!",
+      "timestamp": "2025-03-28T15:30:00Z"
+    }
+  ],
+  "committees": [
+    {
+      "id": "1",
+      "name": "Logistics"
+    },
+    {
+      "id": "2",
+      "name": "Sports"
+    },
+    {
+      "id": "3",
+      "name": "Catering"
+    },
+    {
+      "id": "4",
+      "name": "Entertainment"
+    }
+  ],
+  "employees": [
+    {
+      "id": "1",
+      "name": "Glene",
+      "committeeId": 1
+    },
+    {
+      "id": "2",
+      "name": "Miko",
+      "committeeId": 2
+    },
+    {
+      "id": "3",
+      "name": "Uvuvwevwevwe Onyetenyevwe Ubwemubwem Ossas",
+      "committeeId": 3
+    },
+    {
+      "id": "4",
+      "name": "",
+      "committeeId": 4
+    },
+    {
+      "id": "5",
+      "name": "Kim Jong Un",
+      "committeeId": 1
+    },
+    {
+      "id": "6",
+      "name": "Melvin",
+      "committeeId": 2
+    },
+    {
+      "id": "7",
+      "name": "Lee Ar",
+      "committeeId": 3
+    },
+    {
+      "id": "8",
+      "name": "Jungkook",
+      "committeeId": 4
+    },
+    {
+      "id": "9",
+      "name": "Bryan",
+      "committeeId": 1
+    },
+    {
+      "id": "10",
+      "name": "Edsel",
+      "committeeId": 2
+    },
+    {
+      "id": "11",
+      "name": "Sonny Jihns",
+      "committeeId": 3
+    },
+    {
+      "id": "12",
+      "name": "No Kum-sok",
+      "committeeId": 4
+    },
+    {
+      "id": "13",
+      "name": "Xi Jinping",
+      "committeeId": 1
+    },
+    {
+      "id": "14",
+      "name": "clock clock clack clock",
+      "committeeId": 2
+    }
+  ]
 }

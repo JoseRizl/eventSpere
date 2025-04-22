@@ -138,12 +138,6 @@
             />
         </div>
 
-          <!-- Event Subtitle
-          <div class="p-field">
-            <label for="subtitle">Event Subtitle (Optional)</label>
-            <InputText id="subtitle" v-model="selectedEvent.subtitle" placeholder="Enter event subtitle" />
-          </div> -->
-
           <!-- Event Category Dropdown -->
           <div class="p-field">
             <label for="category">Category</label>
@@ -169,11 +163,10 @@
             </div>
           </div>
 
-          <!-- Start Time & End Time -->
           <!-- Start Time -->
         <div class="p-field">
         <label for="startTime">Start Time</label>
-        <InputText
+        <input type="time"
             id="startTime"
             v-model="selectedEvent.startTime"
             placeholder="HH:mm"
@@ -184,7 +177,7 @@
         <!-- End Time -->
         <div class="p-field">
         <label for="endTime">End Time</label>
-        <InputText
+        <input type="time"
             id="endTime"
             v-model="selectedEvent.endTime"
             placeholder="HH:mm"
@@ -219,7 +212,7 @@
   <script>
   import { defineComponent, ref, onMounted, computed } from "vue";
   import axios from "axios";
-  import { format } from "date-fns";
+  import { parse, format } from "date-fns";
   import DataTable from "primevue/datatable";
   import Column from "primevue/column";
   import Button from "primevue/button";
@@ -254,6 +247,10 @@
       const isTaskModalVisible = ref(false);
       const taskAssignments = ref([]);
       const employees = ref([]);
+      const isConfirmModalVisible = ref(false);
+      const confirmMessage = ref('');
+      const confirmAction = ref(() => {});
+      const cancelConfirmation = ref(() => {});
 
       onMounted(async () => {
         try {
@@ -386,10 +383,24 @@
 
       // Format date and time display
       const formatDateTime = (date, time) => {
-        const formattedDate = date ? format(new Date(date), "MMM-dd-yyyy") : "No date";
-        const formattedTime = time ? time.padStart(5, "0") : "00:00";
+        const formattedDate = date ? format(new Date(date), 'MMM-dd-yyyy') : 'No date';
+        let formattedTime = '00:00';
+
+        if (time) {
+            try {
+            // First pad the time to ensure HH:mm format
+            const paddedTime = time.padStart(5, '0');
+            // Then parse and format to 12-hour format with AM/PM
+            const parsedTime = parse(paddedTime, 'HH:mm', new Date());
+            formattedTime = format(parsedTime, 'hh:mm a'); // e.g. "04:00 PM"
+            } catch (e) {
+            console.error('Error formatting time:', e);
+            formattedTime = time.padStart(5, '0'); // Fallback to original format if parsing fails
+            }
+        }
+
         return { date: formattedDate, time: formattedTime };
-      };
+       };
 
       // Map category_id to category title
       const categoryMap = computed(() =>
@@ -418,59 +429,65 @@
 
       // Save Edited Event
       const saveEditedEvent = async () => {
-  if (!selectedEvent.value) return;
+        if (!selectedEvent.value) return;
 
-  // Confirmation Prompt
-  const isConfirmed = confirm(`Are you sure you want to save changes to "${selectedEvent.value.title}"?`);
-    if (!isConfirmed) return;
+            // Set up confirmation modal instead of using confirm()
+            confirmMessage.value = `Are you sure you want to save changes to "${selectedEvent.value.title}"?`;
+        isConfirmModalVisible.value = true;
 
-  try {
-    const collection = selectedEvent.value.type === "sport" ? "sports" : "events";
+        confirmAction.value = async () => {
+            try {
+            const collection = selectedEvent.value.type === "sport" ? "sports" : "events";
 
-    // Ensure startTime and endTime are in HH:mm format
-    const startTimeFormatted = selectedEvent.value.startTime
-      ? selectedEvent.value.startTime.padStart(5, "0") // Ensure format HH:mm
-      : "00:00";
+            // Ensure startTime and endTime are in HH:mm format
+            const startTimeFormatted = selectedEvent.value.startTime
+            ? selectedEvent.value.startTime.padStart(5, "0") // Ensure format HH:mm
+            : "00:00";
 
-    const endTimeFormatted = selectedEvent.value.endTime
-      ? selectedEvent.value.endTime.padStart(5, "0")
-      : "00:00";
+            const endTimeFormatted = selectedEvent.value.endTime
+            ? selectedEvent.value.endTime.padStart(5, "0")
+            : "00:00";
 
-    await axios.put(`http://localhost:3000/${collection}/${selectedEvent.value.id}`, {
-      ...selectedEvent.value,
-      tags: selectedEvent.value.tags, // Correct: Directly save tag IDs
-      startDate: selectedEvent.value.startDate
-        ? format(new Date(selectedEvent.value.startDate), "MMM-dd-yyyy")
-        : null,
-      endDate: selectedEvent.value.endDate
-        ? format(new Date(selectedEvent.value.endDate), "MMM-dd-yyyy")
-        : null,
-      startTime: startTimeFormatted,
-      endTime: endTimeFormatted,
-    });
+            await axios.put(`http://localhost:3000/${collection}/${selectedEvent.value.id}`, {
+            ...selectedEvent.value,
+            tags: selectedEvent.value.tags, // Correct: Directly save tag IDs
+            startDate: selectedEvent.value.startDate
+                ? format(new Date(selectedEvent.value.startDate), "MMM-dd-yyyy")
+                : null,
+            endDate: selectedEvent.value.endDate
+                ? format(new Date(selectedEvent.value.endDate), "MMM-dd-yyyy")
+                : null,
+            startTime: startTimeFormatted,
+            endTime: endTimeFormatted,
+            });
 
-    // Update the local event list instantly
-    // Refresh the event list to reflect updated tags
-const updatedEventsResponse = await axios.get("http://localhost:3000/events");
-combinedEvents.value = updatedEventsResponse.data
-    .filter(event => !event.archived)
-    .map(event => ({
-        ...event,
-        type: "event",
-        category_id: event.category?.id || event.category_id,
-        mappedTags: Array.isArray(event.tags)
-            ? event.tags.map(tagId => tags.value.find(tag => tag.id === tagId) || { id: tagId, name: "Unknown Tag" })
-            : []
-    }));
+            // Update the local event list instantly
+            // Refresh the event list to reflect updated tags
+        const updatedEventsResponse = await axios.get("http://localhost:3000/events");
+        combinedEvents.value = updatedEventsResponse.data
+            .filter(event => !event.archived)
+            .map(event => ({
+                ...event,
+                type: "event",
+                category_id: event.category?.id || event.category_id,
+                mappedTags: Array.isArray(event.tags)
+                    ? event.tags.map(tagId => tags.value.find(tag => tag.id === tagId) || { id: tagId, name: "Unknown Tag" })
+                    : []
+            }));
 
-    isEditModalVisible.value = false;
-    alert("Event updated successfully!");
-  } catch (error) {
-    console.error("Error updating event:", error);
-    alert("Failed to update the event.");
-  }
-};
+            isEditModalVisible.value = false;
+            isConfirmModalVisible.value = false;
+            alert("Event updated successfully!");
+        } catch (error) {
+            console.error("Error updating event:", error);
+            alert("Failed to update the event.");
+        }
+        };
 
+        cancelConfirmation.value = () => {
+            isConfirmModalVisible.value = false;
+        };
+    };
 const archiveEvent = async (event) => {
   if (!confirm(`Are you sure you want to archive "${event.title}"?`)) return;
 
@@ -510,6 +527,10 @@ const archiveEvent = async (event) => {
      deleteTask,
      updateEmployees,
      saveTaskAssignments,
+     isConfirmModalVisible,
+     confirmMessage,
+     confirmAction,
+     cancelConfirmation,
      };
     },
  });

@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue';
+import { parse, format } from 'date-fns';
 import { usePage, router } from '@inertiajs/vue3';
 
 // Inertia props
@@ -47,6 +48,16 @@ const saveChanges = () => {
   });
 };
 
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  return format(new Date(dateString), 'MMM-dd-yyyy');
+};
+
+const formatDisplayTime = (timeString) => {
+  if (!timeString) return '';
+  const parsed = parse(timeString, 'HH:mm', new Date());
+  return format(parsed, 'hh:mm a'); // 04:00 PM
+};
 </script>
 
 <template>
@@ -127,16 +138,16 @@ const saveChanges = () => {
                 </template>
             </MultiSelect>
             </div>
-          <div v-else>
-            <span
-              v-for="tag in tags.filter(t => eventDetails.tags.includes(t.id))"
-              :key="tag.id"
-              :style="{ backgroundColor: tag.color, color: '#fff' }"
-              class="text-xs py-1 px-2 rounded mr-2"
-            >
-              {{ tag.name }}
-            </span>
-          </div>
+            <div v-else class="flex gap-2 flex-wrap">
+                <span
+                v-for="tag in eventDetails.tags"
+                :key="tag.id"
+                :style="{ backgroundColor: tag.color, color: '#fff' }"
+                class="text-xs py-1 px-2 rounded mr-2"
+                >
+                {{ tag.name }}
+                </span>
+            </div>
         </div>
 
         <!-- Dates and Times -->
@@ -148,8 +159,8 @@ const saveChanges = () => {
             <input type="time" v-model="eventDetails.endTime" class="border p-2 rounded" />
           </template>
           <template v-else>
-            <p><strong>Start:</strong> {{ eventDetails.startDate }} {{ eventDetails.startTime }}</p>
-            <p><strong>End:</strong> {{ eventDetails.endDate }} {{ eventDetails.endTime }}</p>
+            <p><strong>Start:</strong> {{ formatDate(eventDetails.startDate) }}, {{ formatDisplayTime(eventDetails.startTime) }}</p>
+            <p><strong>End:</strong> {{ formatDate(eventDetails.endDate) }}, {{ formatDisplayTime(eventDetails.endTime) }}</p>
           </template>
         </div>
 

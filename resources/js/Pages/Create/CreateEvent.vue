@@ -75,7 +75,7 @@
             <div class="p-field p-grid">
               <div class="p-col-6">
                 <label for="startTime">Start Time</label>
-                <InputText
+                <input type = "time"
                   id="startTime"
                   v-model="form.startTime"
                   placeholder="HH:mm"
@@ -85,7 +85,7 @@
               </div>
               <div class="p-col-6">
                 <label for="endTime">End Time</label>
-                <InputText
+                <input type= "time"
                   id="endTime"
                   v-model="form.endTime"
                   placeholder="HH:mm"
