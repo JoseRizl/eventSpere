@@ -23,6 +23,7 @@ Route::middleware('auth')->group(function () {
     Route::inertia('/bracket', 'Sports/Bracket')->name('bracket');
 
     Route::get('/events/{id}', [EventController::class, 'show'])->name('event.details');
+    Route::post('/events/{id}/update', [EventController::class, 'update'])->name('event.update');
 
 });
 

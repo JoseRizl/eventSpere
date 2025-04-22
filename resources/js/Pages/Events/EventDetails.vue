@@ -1,142 +1,218 @@
 <script setup>
-import { ref, watch } from 'vue';
-import { usePage } from '@inertiajs/vue3';
-import { format } from 'date-fns';
+import { ref } from 'vue';
+import { usePage, router } from '@inertiajs/vue3';
 
-// Get data from Inertia page props
+// Inertia props
 const { props } = usePage();
-const eventDetails = ref(props.event);
-const relatedEvents = ref(props.relatedEvents || []);
 const categories = ref(props.categories || []);
 const tags = ref(props.tags || []);
-const selectedFiles = ref([]);
+const saving = ref(false);
 
-// Format dates and process tags when component mounts or props change
-watch(() => props.event, (newEvent) => {
-  if (newEvent) {
-    eventDetails.value = {
-      ...newEvent,
-      startDate: format(new Date(newEvent.startDate), 'MMM-dd-yy'),
-      endDate: format(new Date(newEvent.endDate), 'MMM-dd-yy'),
-      tags: newEvent.tags?.map(tagId =>
-        tags.value.find(tag => tag.id.toString() === tagId.toString()) ||
-        { name: 'Unknown', color: '#e0e7ff' }
-      ) || []
-    };
-  }
-}, { immediate: true });
+const eventDetails = ref({
+  ...props.event,
+  schedules: props.event.schedules || [],
+  tags: props.event.tags?.map(tag => {
+  if (typeof tag === 'object') return tag;
+  return props.tags.find(t => t.id === tag);
+}) || []
 
-// Watch for related events updates
-watch(() => props.relatedEvents, (newRelated) => {
-  relatedEvents.value = newRelated || [];
-}, { immediate: true });
+});
 
-// Category title display helper
-const getCategoryTitle = (categoryId) => {
-  const category = categories.value.find(cat => cat.id === categoryId);
-  return category ? category.title : 'Unknown Category';
+// Edit mode toggle
+const editMode = ref(false);
+const toggleEdit = () => {
+  editMode.value = !editMode.value;
 };
 
-// Handle file upload
-const handleFileUpload = (event) => {
-  selectedFiles.value = [...selectedFiles.value, ...event.target.files];
+// Methods
+const addSchedule = () => {
+  eventDetails.value.schedules.push({ time: '', activity: '' });
 };
+
+const removeSchedule = (index) => {
+  eventDetails.value.schedules.splice(index, 1);
+};
+
+const saveChanges = () => {
+  saving.value = true;
+  router.post(`/events/${eventDetails.value.id}/update`, eventDetails.value, {
+    preserveScroll: true,
+    onFinish: () => {
+      saving.value = false;
+    },
+    onSuccess: () => {
+      alert('Event updated successfully!');
+      editMode.value = false;
+    }
+  });
+};
+
 </script>
 
-
-
 <template>
-  <div class="min-h-screen bg-gray-200 py-8 px-4 flex flex-col items-center">
-
-    <!-- Dynamic Banner Image -->
-    <div class="w-full max-w-4xl bg-white rounded-lg shadow-md overflow-hidden">
-      <img
-        v-if="eventDetails?.image"
-        :src="eventDetails.image"
-        :alt="eventDetails.title"
-        class="w-full h-64 object-cover"
-      />
-      <div v-else class="w-full h-64 bg-gray-300 flex items-center justify-center">
-        <span class="text-gray-500 text-lg">No Image Available</span>
+    <div class="min-h-screen bg-gray-200 py-8 px-4 flex flex-col items-center">
+      <!-- Dynamic Banner Image -->
+      <div class="w-full max-w-4xl bg-white rounded-lg shadow-md overflow-hidden">
+        <img
+          v-if="eventDetails?.image"
+          :src="eventDetails.image"
+          :alt="eventDetails.title"
+          class="w-full h-64 object-cover"
+        />
+        <div v-else class="w-full h-64 bg-gray-300 flex items-center justify-center">
+          <span class="text-gray-500 text-lg">No Image Available</span>
+        </div>
       </div>
+
+    <!-- Edit Toggle Button -->
+    <div class="flex justify-end max-w-2xl w-full mt-4">
+    <button @click="toggleEdit" class="px-4 py-2 rounded bg-gray-600 text-white hover:bg-gray-700">
+        {{ editMode ? 'Cancel Edit' : 'Edit Event' }}
+    </button>
     </div>
 
-    <!-- Event Card -->
-    <div v-if="eventDetails" class="bg-white shadow-md rounded-lg p-6 max-w-2xl w-full mt-6 flex flex-col">
 
-      <!-- Title, Tags & Description (Centered) -->
-      <div class="text-center">
-        <h1 class="text-2xl font-bold">{{ eventDetails.title }}</h1>
-
-        <!-- Tags Display -->
-        <div class="flex justify-center gap-2 mt-2">
-          <span
-            v-for="(tag, index) in eventDetails.tags"
-            :key="index"
-            :style="{ backgroundColor: tag.color, color: '#fff' }"
-            class="text-xs py-1 px-3 rounded-lg"
-          >
-            {{ tag.name }}
-          </span>
+      <div v-if="eventDetails" class="bg-white shadow-md rounded-lg p-6 max-w-2xl w-full mt-6 flex flex-col space-y-4">
+        <!-- Title -->
+        <div>
+          <input
+            v-if="editMode"
+            v-model="eventDetails.title"
+            class="text-xl font-bold border-b w-full"
+            placeholder="Event Title"
+          />
+          <h1 v-else class="text-xl font-bold">{{ eventDetails.title }}</h1>
         </div>
 
-        <p class="text-gray-800 mt-3">{{ eventDetails.description }}</p>
-      </div>
+        <!-- Description -->
+        <div>
+          <textarea
+            v-if="editMode"
+            v-model="eventDetails.description"
+            class="w-full border rounded p-2"
+            placeholder="Event Description"
+          />
+          <p v-else class="text-gray-700 whitespace-pre-line">{{ eventDetails.description }}</p>
+        </div>
 
-      <!-- Event Details & Image Upload -->
-      <div class="flex justify-between mt-4">
-        <!-- Left: Event Details -->
-        <div class="text-left text-sm space-y-2 flex-1">
-          <p><strong>Start Date:</strong> {{ eventDetails.startDate }}, {{ eventDetails.startTime }}</p>
-          <p><strong>End Date:</strong> {{ eventDetails.endDate }}, {{ eventDetails.endTime }}</p>
-          <p><strong>Category:</strong> {{ getCategoryTitle(eventDetails.category_id) }}</p
-
-          <!--  Committee section -->
-          <div class="border-t pt-4">
-            <h2 class="font-semibold">Committee:</h2>
-            <div class="pl-4">
-                <p
-                v-for="(taskItem, index) in eventDetails.tasks || []"
-                :key="index"
+        <!-- Tags -->
+        <div class="flex gap-2 flex-wrap">
+            <div v-if="editMode" class="w-full">
+            <MultiSelect
+                v-model="eventDetails.tags"
+                :options="tags"
+                optionLabel="name"
+                optionValue="id"
+                display="chip"
+                placeholder="Select tags"
+                class="w-full"
+            >
+                <template #option="slotProps">
+                <div class="flex items-center gap-2">
+                    <span
+                    class="inline-block rounded px-2 py-1 text-xs text-white"
+                    :style="{ backgroundColor: slotProps.option.color }"
+                    >
+                    {{ slotProps.option.name }}
+                    </span>
+                </div>
+                </template>
+                <template #chip="slotProps">
+                <div
+                    class="px-2 py-1 rounded text-white text-xs"
+                    :style="{ backgroundColor: slotProps.value.color }"
                 >
-                {{ taskItem.employee.name }} ({{ taskItem.committee.name }}): {{ taskItem.task }}
-                </p>
+                    {{ slotProps.value.name }}
+                </div>
+                </template>
+            </MultiSelect>
             </div>
+          <div v-else>
+            <span
+              v-for="tag in tags.filter(t => eventDetails.tags.includes(t.id))"
+              :key="tag.id"
+              :style="{ backgroundColor: tag.color, color: '#fff' }"
+              class="text-xs py-1 px-2 rounded mr-2"
+            >
+              {{ tag.name }}
+            </span>
+          </div>
         </div>
 
+        <!-- Dates and Times -->
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <template v-if="editMode">
+            <input type="date" v-model="eventDetails.startDate" class="border p-2 rounded" />
+            <input type="time" v-model="eventDetails.startTime" class="border p-2 rounded" />
+            <input type="date" v-model="eventDetails.endDate" class="border p-2 rounded" />
+            <input type="time" v-model="eventDetails.endTime" class="border p-2 rounded" />
+          </template>
+          <template v-else>
+            <p><strong>Start:</strong> {{ eventDetails.startDate }} {{ eventDetails.startTime }}</p>
+            <p><strong>End:</strong> {{ eventDetails.endDate }} {{ eventDetails.endTime }}</p>
+          </template>
         </div>
 
-        <!-- Right: Image Upload -->
-        <div class="flex flex-col items-center space-y-4 min-h-[150px] justify-end">
-          <label class="cursor-pointer flex flex-col items-center p-4 bg-gray-100 rounded-lg w-32">
-            <input type="file" class="hidden" @change="handleFileUpload" accept="image/*">
-            <img src="/resources/images/Clip-icon.png" alt="Attach" class="h-10 w-10">
-            <span class="text-sm text-gray-600">Add Image</span>
-          </label>
+        <!-- Category -->
+        <div>
+          <select v-if="editMode" v-model="eventDetails.category_id" class="border rounded p-2">
+            <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+              {{ cat.title }}
+            </option>
+          </select>
+          <p v-else>
+            <strong>Category:</strong> {{ categories.find(c => c.id === eventDetails.category_id)?.title }}
+          </p>
         </div>
-      </div>
-    </div>
 
-    <!-- Related Events Section -->
-    <div v-if="relatedEvents.length" class="bg-white shadow-md rounded-lg p-4 mt-6 max-w-3xl w-full">
-      <h2 class="text-lg font-semibold mb-3">Related Events</h2>
-      <div class="flex overflow-x-auto space-x-2">
-        <Link
-        v-for="(event, index) in relatedEvents.slice(0, 5)"
-        :key="index"
-        :href="route('event.details', { id: event.id })"
-        class="min-w-[120px] bg-gray-300 p-2 rounded text-center hover:bg-gray-400 transition"
+        <!-- Committee -->
+        <div>
+          <h2 class="font-semibold mb-1">Committee:</h2>
+          <div class="space-y-1 pl-4 text-sm">
+            <p v-for="(taskItem, index) in eventDetails.tasks || []" :key="index">
+              {{ taskItem.employee.name }} ({{ taskItem.committee.name }}): {{ taskItem.task }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Schedules -->
+        <div>
+          <h2 class="font-semibold mb-1">Event Schedules:</h2>
+          <div v-if="editMode">
+            <div v-for="(schedule, i) in eventDetails.schedules" :key="i" class="flex items-center gap-2 mb-2">
+              <input v-model="schedule.time" type="time" class="border p-1 rounded w-32" />
+              <input v-model="schedule.activity" type="text" placeholder="Activity" class="border p-1 rounded flex-1" />
+              <button @click="removeSchedule(i)" class="text-red-500">✕</button>
+            </div>
+            <button @click="addSchedule" class="text-blue-500 text-sm mt-2">+ Add Schedule</button>
+          </div>
+          <ul v-else class="list-disc pl-5 space-y-1 text-sm text-gray-700">
+            <li v-for="(schedule, i) in eventDetails.schedules" :key="i">
+              {{ schedule.time }} - {{ schedule.activity }}
+            </li>
+          </ul>
+        </div>
+
+        <!-- Save Button -->
+        <button
+          v-if="editMode"
+          @click="saveChanges"
+          class="mt-4 self-end bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
         >
-        <div class="h-16 w-24 bg-gray-200 flex items-center justify-center rounded mb-2 overflow-hidden">
-            <img v-if="event.image" :src="event.image" :alt="event.title" class="h-full w-full object-cover">
-            <span v-else class="text-xs text-gray-500">No Image</span>
-        </div>
-        <p class="text-sm text-black font-semibold">{{ event.title }}</p>
-        </Link>
-
-        <button class="text-blue-500 text-sm">More</button>
+          Save Changes
+        </button>
       </div>
     </div>
-  </div>
-</template>
 
+    <!-- Loading Dialog -->
+    <div v-if="saving" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 shadow-lg flex items-center gap-3">
+            <svg class="animate-spin w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+            </svg>
+            <span class="text-gray-700 font-medium">Saving changes...</span>
+        </div>
+    </div>
+
+  </template>
