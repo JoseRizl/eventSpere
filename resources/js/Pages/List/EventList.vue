@@ -155,11 +155,11 @@
           <div class="p-field p-grid">
             <div class="p-col-6">
               <label for="startDate">Start Date</label>
-              <Calendar id="startDate" v-model="selectedEvent.startDate" dateFormat="MM-dd-yy" showIcon />
+              <DatePicker id="startDate" v-model="selectedEvent.startDate" dateFormat="MM-dd-yy" showIcon />
             </div>
             <div class="p-col-6">
               <label for="endDate">End Date</label>
-              <Calendar id="endDate" v-model="selectedEvent.endDate" dateFormat="MM-dd-yy" showIcon />
+              <DatePicker id="endDate" v-model="selectedEvent.endDate" dateFormat="MM-dd-yy" showIcon />
             </div>
           </div>
 
@@ -218,7 +218,7 @@
   import Button from "primevue/button";
   import Dialog from "primevue/dialog";
   import InputText from "primevue/inputtext";
-  import Calendar from "primevue/calendar";
+  import DatePicker from 'primevue/datepicker';
   import Dropdown from "primevue/dropdown";
   import Textarea from "primevue/textarea";
 
@@ -230,7 +230,7 @@
       Button,
       Dialog,
       InputText,
-      Calendar,
+      DatePicker,
       Dropdown,
       Textarea,
     },

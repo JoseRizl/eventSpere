@@ -5,26 +5,33 @@
             "title": "Parade",
             "description": "69th Foundation day parade in the Honor of Sir Seled Jolero and Sryan Balazar",
             "category": "2",
-            "startDate": "Apr-04-2024",
-            "endDate": "May-05-2025",
+            "startDate": "2025-10-07",
+            "endDate": "2025-11-07",
             "startTime": "08:00",
             "endTime": "08:30",
             "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
             "archived": false,
             "tags": [
-                {
-                    "id": "1",
-                    "name": "Foundation Day",
-                    "color": "#FF5733"
-                }
+                "1"
             ],
             "category_id": "2",
             "type": "event",
             "mappedTags": [
                 {
-                    "id": "1",
-                    "name": "Foundation Day",
-                    "color": "#FF5733"
+                    "id": {
+                        "id": "1",
+                        "name": "Foundation Day",
+                        "color": "#FF5733"
+                    },
+                    "name": "Unknown Tag"
+                },
+                {
+                    "id": {
+                        "id": "2",
+                        "name": "Palakasan",
+                        "color": "#33FF57"
+                    },
+                    "name": "Unknown Tag"
                 }
             ],
             "tasks": [
@@ -53,18 +60,14 @@
             "title": "Basketball",
             "description": "Basketball suiiii",
             "category": "3",
-            "startDate": "Mar-27-2025",
-            "endDate": "Mar-28-2025",
+            "startDate": "Apr-22-2025",
+            "endDate": "Apr-24-2025",
             "startTime": "08:00",
             "endTime": "09:00",
             "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
             "archived": false,
             "tags": [
-                {
-                    "id": "2",
-                    "name": "Palakasan",
-                    "color": "#33FF57"
-                }
+                "2"
             ],
             "category_id": "3",
             "type": "event",
@@ -132,19 +135,18 @@
             "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
             "archived": false,
             "tags": [
-                {
-                    "id": "6",
-                    "name": "Graduation",
-                    "color": "#9e369e"
-                }
+                "6"
             ],
             "category_id": "2",
             "type": "event",
             "mappedTags": [
                 {
-                    "id": "6",
-                    "name": "Graduation",
-                    "color": "#9e369e"
+                    "id": {
+                        "id": "6",
+                        "name": "Graduation",
+                        "color": "#9e369e"
+                    },
+                    "name": "Unknown Tag"
                 }
             ],
             "tasks": [
@@ -173,28 +175,34 @@
             "title": "Time",
             "description": "Oras na para mag palit ka ug relo",
             "category": "1",
-            "startDate": "Apr-29-2025",
-            "endDate": "Apr-30-2025",
+            "startDate": "2025-04-29",
+            "endDate": "2025-04-30",
             "startTime": "19:08",
             "endTime": "21:00",
             "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
             "archived": false,
             "tags": [
-                "4",
-                "2"
+                "3",
+                "4"
             ],
             "category_id": "1",
             "type": "event",
             "mappedTags": [
                 {
-                    "id": "4",
-                    "name": "Jolen Tournament",
-                    "color": "#000000"
+                    "id": {
+                        "id": "4",
+                        "name": "Jolen Tournament",
+                        "color": "#000000"
+                    },
+                    "name": "Unknown Tag"
                 },
                 {
-                    "id": "2",
-                    "name": "Palakasan",
-                    "color": "#33FF57"
+                    "id": {
+                        "id": "2",
+                        "name": "Palakasan",
+                        "color": "#33FF57"
+                    },
+                    "name": "Unknown Tag"
                 }
             ],
             "tasks": [
@@ -210,7 +218,8 @@
                     },
                     "task": "Palit relo"
                 }
-            ]
+            ],
+            "schedules": []
         }
     ],
     "tags": [

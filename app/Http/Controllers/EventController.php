@@ -32,15 +32,18 @@ class EventController extends Controller
 
         foreach ($data['events'] as &$event) {
             if ($event['id'] == $id) {
-                $event['title'] = $request->input('title');
-                $event['description'] = $request->input('description');
-                $event['startDate'] = $request->input('startDate');
-                $event['startTime'] = $request->input('startTime');
-                $event['endDate'] = $request->input('endDate');
-                $event['endTime'] = $request->input('endTime');
-                $event['category_id'] = $request->input('category_id');
-                $event['tags'] = $request->input('tags');
-                $event['schedules'] = $request->input('schedules', []);
+                $event = [
+                    ...$event,
+                    'title' => $request->input('title'),
+                    'description' => $request->input('description'),
+                    'startDate' => $request->input('startDate'),
+                    'endDate' => $request->input('endDate'),
+                    'startTime' => $request->input('startTime'),
+                    'endTime' => $request->input('endTime'),
+                    'category_id' => $request->input('category_id'),
+                    'tags' => $request->input('tags', []),
+                    'schedules' => $request->input('schedules', [])
+                ];
                 break;
             }
         }

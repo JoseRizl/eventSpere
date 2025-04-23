@@ -10,15 +10,31 @@ const tags = ref(props.tags || []);
 const saving = ref(false);
 const showSaveConfirmDialog = ref(false);
 const showSuccessDialog = ref(false);
+const removeTag = (tagToRemove) => {
+  normalizedTags.value = normalizedTags.value.filter(tag => tag.id !== tagToRemove.id);
+};
+
 
 const eventDetails = ref({
-  ...props.event,
+    ...props.event,
   schedules: props.event.schedules || [],
   tags: props.event.tags?.map(tag => {
-  if (typeof tag === 'object') return tag;
-  return props.tags.find(t => t.id === tag);
-}) || []
+    // Handle both cases: when tag is an object or just an ID
+    const tagObj = typeof tag === 'object' ? tag : props.tags.find(t => t.id === tag);
+    return tagObj || { id: tag, name: 'Unknown Tag', color: '#cccccc' };
+  }) || []
+});
 
+const normalizedTags = computed({
+  get() {
+    return eventDetails.value.tags;
+  },
+  set(newTags) {
+    eventDetails.value.tags = newTags.map(tag => {
+      if (typeof tag === 'object') return tag;
+      return tags.value.find(t => t.id === tag) || { id: tag, name: 'Unknown Tag', color: '#cccccc' };
+    });
+  }
 });
 
 // Edit mode toggle
@@ -38,7 +54,22 @@ const removeSchedule = (index) => {
 
 const saveChanges = () => {
   saving.value = true;
-  router.post(`/events/${eventDetails.value.id}/update`, eventDetails.value, {
+
+    // Prepare payload with consistent tag format
+    const payload = {
+    ...eventDetails.value,
+    // Convert tags to just IDs for storage
+    tags: eventDetails.value.tags.map(tag => tag.id),
+    // Ensure other fields are properly formatted
+    startDate: formattedStartDate.value,
+    endDate: formattedEndDate.value,
+    schedules: eventDetails.value.schedules.map(s => ({
+      time: s.time.padStart(5, '0'),
+      activity: s.activity
+    }))
+  };
+
+  router.post(`/events/${eventDetails.value.id}/update`, payload, {
     preserveScroll: true,
     onFinish: () => {
       saving.value = false;
@@ -46,13 +77,9 @@ const saveChanges = () => {
     onSuccess: () => {
       showSuccessDialog.value = true;
       editMode.value = false;
+      router.reload({ only: ['event'] });
     }
   });
-};
-
-const formatDate = (dateString) => {
-  if (!dateString) return '';
-  return format(new Date(dateString), 'MMM-dd-yyyy');
 };
 
 const formatDisplayTime = (timeString) => {
@@ -62,27 +89,63 @@ const formatDisplayTime = (timeString) => {
 };
 
 
+// Replace your existing date-related functions with these:
+
+const formatDisplayDate = (dateString) => {
+  if (!dateString) return '';
+  try {
+    // Try parsing as ISO format first (yyyy-MM-dd)
+    let date = parseISO(dateString);
+    if (!isValid(date)) {
+      // If that fails, try parsing as MMM-dd-yyyy format
+      date = parse(dateString, 'MMM-dd-yyyy', new Date());
+    }
+    return isValid(date) ? format(date, 'MMMM-dd-yyyy') : 'Invalid Date';
+  } catch {
+    return 'Invalid Date';
+  }
+};
+
+const formatDateForInput = (dateString) => {
+  if (!dateString) return '';
+  try {
+    // Try parsing as ISO format first (yyyy-MM-dd)
+    let date = parseISO(dateString);
+    if (!isValid(date)) {
+      // If that fails, try parsing as MMM-dd-yyyy format
+      date = parse(dateString, 'MMMM-dd-yyyy', new Date());
+    }
+    return isValid(date) ? format(date, 'yyyy-MM-dd') : '';
+  } catch {
+    return '';
+  }
+};
+
 const formattedStartDate = computed({
   get() {
-    if (!eventDetails.value.startDate) return '';
-    const date = parseISO(eventDetails.value.startDate);
-    return isValid(date) ? format(date, 'yyyy-MM-dd') : '';
+    return formatDateForInput(eventDetails.value.startDate);
   },
   set(value) {
-    eventDetails.value.startDate = value;
+    const date = parseISO(value);
+    eventDetails.value.startDate = isValid(date)
+      ? format(date, 'MMMM-dd-yyyy')
+      : value;
   }
 });
 
 const formattedEndDate = computed({
   get() {
-    if (!eventDetails.value.endDate) return '';
-    const date = parseISO(eventDetails.value.endDate);
-    return isValid(date) ? format(date, 'yyyy-MM-dd') : '';
+    return formatDateForInput(eventDetails.value.endDate);
   },
   set(value) {
-    eventDetails.value.endDate = value;
+    const date = parseISO(value);
+    eventDetails.value.endDate = isValid(date)
+      ? format(date, 'MMMM-dd-yyyy')
+      : value;
   }
 });
+
+
 </script>
 
 <template>
@@ -133,34 +196,34 @@ const formattedEndDate = computed({
         <!-- Tags -->
         <div class="flex gap-2 flex-wrap">
             <div v-if="editMode" class="w-full">
-            <MultiSelect
-                v-model="eventDetails.tags"
+                <MultiSelect
+                v-model="normalizedTags"
                 :options="tags"
                 optionLabel="name"
                 optionValue="id"
                 display="chip"
                 placeholder="Select tags"
                 class="w-full"
-            >
-                <template #option="slotProps">
-                <div class="flex items-center gap-2">
-                    <span
-                    class="inline-block rounded px-2 py-1 text-xs text-white"
-                    :style="{ backgroundColor: slotProps.option.color }"
-                    >
-                    {{ slotProps.option.name }}
-                    </span>
-                </div>
-                </template>
-                <template #chip="slotProps">
-                <div
-                    class="px-2 py-1 rounded text-white text-xs"
-                    :style="{ backgroundColor: slotProps.value.color }"
                 >
-                    {{ slotProps.value.name }}
+
+            <!-- Selected Chip Template -->
+            <template #chip="slotProps">
+                <div
+                class="flex items-center gap-2 px-2 py-1 rounded text-white text-xs"
+                :style="{ backgroundColor: slotProps.value.color }"
+                >
+                {{ slotProps.value.name }}
+                <button
+                    type="button"
+                    class="text-white hover:text-gray-200"
+                    @click.stop="removeTag(slotProps.value)"
+                >
+                    ✕
+                </button>
                 </div>
-                </template>
+            </template>
             </MultiSelect>
+
             </div>
             <div v-else class="flex gap-2 flex-wrap">
                 <span
@@ -183,8 +246,8 @@ const formattedEndDate = computed({
             <input type="time" v-model="eventDetails.endTime" class="border p-2 rounded" />
           </template>
           <template v-else>
-            <p><strong>Start:</strong> {{ formatDate(eventDetails.startDate) }}, {{ formatDisplayTime(eventDetails.startTime) }}</p>
-            <p><strong>End:</strong> {{ formatDate(eventDetails.endDate) }}, {{ formatDisplayTime(eventDetails.endTime) }}</p>
+            <p><strong>Start:</strong> {{ formatDisplayDate(eventDetails.startDate) }}, {{ formatDisplayTime(eventDetails.startTime) }}</p>
+            <p><strong>End:</strong> {{ formatDisplayDate(eventDetails.endDate) }}, {{ formatDisplayTime(eventDetails.endTime) }}</p>
           </template>
         </div>
 
