@@ -1,16 +1,17 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, normalizeClass } from 'vue';
 import { parse, format, parseISO, isValid } from 'date-fns';
 import { usePage, router } from '@inertiajs/vue3';
 import DatePicker from 'primevue/datepicker';
 
 // Inertia props
 const { props } = usePage();
-const categories = ref(props.categories || []);
+//const categories = ref(props.categories || []);
 const tags = ref(props.tags || []);
 const saving = ref(false);
 const showSaveConfirmDialog = ref(false);
 const showSuccessDialog = ref(false);
+const errorMessage = ref(null);
 const removeTag = (tagToRemove) => {
   normalizedTags.value = normalizedTags.value.filter(tag => tag.id !== tagToRemove.id);
 };
@@ -55,6 +56,14 @@ const removeSchedule = (index) => {
 
 const saveChanges = () => {
   saving.value = true;
+  errorMessage.value = null;
+
+    // Date validation
+    if (!validateDates()) {
+    saving.value = false;
+    errorMessage.value = "End date cannot be earlier than start date";
+    return; // Stop execution
+  }
 
     // Prepare payload with consistent tag format
     const payload = {
@@ -75,6 +84,10 @@ const saveChanges = () => {
     onFinish: () => {
       saving.value = false;
     },
+    onError: (errors) => {
+        saving.value = false;
+        errorMessage.value = errors.message || 'Failed to save event';
+    },
     onSuccess: () => {
       showSuccessDialog.value = true;
       editMode.value = false;
@@ -90,7 +103,14 @@ const formatDisplayTime = (timeString) => {
 };
 
 
-// Replace your existing date-related functions with these:
+// Date-related functions
+
+const validateDates = () => {
+  if (startDateModel.value && endDateModel.value) {
+    return startDateModel.value < endDateModel.value;
+  }
+  return true; // Skip validation if either date is empty
+};
 
 const formatDisplayDate = (dateString) => {
   if (!dateString) return '';
@@ -291,6 +311,11 @@ const formattedEndDate = computed(() => {
             </template>
         </div>
 
+        <!-- Error Message -->
+        <div v-if="errorMessage" class="text-red-500 text-sm mt-2">
+            {{ errorMessage }}
+        </div>
+
         <!-- Category -->
 
 
@@ -371,5 +396,28 @@ const formattedEndDate = computed(() => {
             <span class="text-gray-700 font-medium">Saving changes...</span>
         </div>
     </div>
+
+    <!-- Error Dialog -->
+    <Dialog
+    v-model:visible="showErrorDialog"
+    modal
+    header="Error"
+    :style="{ width: '400px' }"
+    >
+    <div class="flex items-center gap-3">
+        <i class="pi pi-exclamation-triangle text-red-500 text-2xl"></i>
+        <span>{{ errorDialogMessage }}</span>
+    </div>
+    <template #footer>
+        <Button
+        label="OK"
+        icon="pi pi-check"
+        @click="showErrorDialog = false"
+        class="p-button-text"
+        />
+    </template>
+    </Dialog>
+
+
 
   </template>

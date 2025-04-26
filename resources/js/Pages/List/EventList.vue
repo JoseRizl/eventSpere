@@ -163,6 +163,11 @@
             </div>
           </div>
 
+        <div v-if="dateError" class="p-field text-red-500 text-sm mt-1">
+        <i class="pi pi-exclamation-triangle mr-1"></i>
+        {{ dateError }}
+        </div>
+
           <!-- Start Time -->
         <div class="p-field">
         <label for="startTime">Start Time</label>
@@ -170,6 +175,7 @@
             id="startTime"
             v-model="selectedEvent.startTime"
             placeholder="HH:mm"
+            :class="{ 'p-invalid': dateError && dateError.includes('end') }"
             @blur="selectedEvent.startTime = selectedEvent.startTime.padStart(5, '0')"
         />
         </div>
@@ -235,6 +241,7 @@
       Textarea,
     },
     setup() {
+      const dateError = ref("");
       const events = ref([]);
       const sports = ref([]);
       const categories = ref([]);
@@ -251,6 +258,16 @@
       const confirmMessage = ref('');
       const confirmAction = ref(() => {});
       const cancelConfirmation = ref(() => {});
+
+      const validateEventDates = () => {
+        if (new Date(selectedEvent.value.startDate) > new Date(selectedEvent.value.endDate)) {
+            dateError.value = "End date must be after start date";
+            return false;
+        }
+
+        dateError.value = null;
+        return true;
+        };
 
       onMounted(async () => {
         try {
@@ -428,66 +445,78 @@
 
 
       // Save Edited Event
-      const saveEditedEvent = async () => {
-        if (!selectedEvent.value) return;
+const saveEditedEvent = async () => {
+  if (!selectedEvent.value) return;
+  dateError.value = "";
 
-            // Set up confirmation modal instead of using confirm()
-            confirmMessage.value = `Are you sure you want to save changes to "${selectedEvent.value.title}"?`;
-        isConfirmModalVisible.value = true;
+  // Validate that end date is not earlier than start date
+  if (selectedEvent.value.startDate && selectedEvent.value.endDate) {
+    const start = new Date(selectedEvent.value.startDate);
+    const end = new Date(selectedEvent.value.endDate);
+    if (end < start) {
+        dateError.value = "End date cannot be before start date.";
+      return;
+    }
+  }
 
-        confirmAction.value = async () => {
-            try {
-            const collection = selectedEvent.value.type === "sport" ? "sports" : "events";
+  // Set up confirmation modal instead of using confirm()
+  confirmMessage.value = `Are you sure you want to save changes to "${selectedEvent.value.title}"?`;
+  isConfirmModalVisible.value = true;
 
-            // Ensure startTime and endTime are in HH:mm format
-            const startTimeFormatted = selectedEvent.value.startTime
-            ? selectedEvent.value.startTime.padStart(5, "0") // Ensure format HH:mm
-            : "00:00";
+  confirmAction.value = async () => {
+    try {
+      const collection = selectedEvent.value.type === "sport" ? "sports" : "events";
 
-            const endTimeFormatted = selectedEvent.value.endTime
-            ? selectedEvent.value.endTime.padStart(5, "0")
-            : "00:00";
+      // Ensure startTime and endTime are in HH:mm format
+      const startTimeFormatted = selectedEvent.value.startTime
+        ? selectedEvent.value.startTime.padStart(5, "0") // Ensure format HH:mm
+        : "00:00";
 
-            await axios.put(`http://localhost:3000/${collection}/${selectedEvent.value.id}`, {
-            ...selectedEvent.value,
-            tags: selectedEvent.value.tags, // Correct: Directly save tag IDs
-            startDate: selectedEvent.value.startDate
-                ? format(new Date(selectedEvent.value.startDate), "MMM-dd-yyyy")
-                : null,
-            endDate: selectedEvent.value.endDate
-                ? format(new Date(selectedEvent.value.endDate), "MMM-dd-yyyy")
-                : null,
-            startTime: startTimeFormatted,
-            endTime: endTimeFormatted,
-            });
+      const endTimeFormatted = selectedEvent.value.endTime
+        ? selectedEvent.value.endTime.padStart(5, "0")
+        : "00:00";
 
-            // Update the local event list instantly
-            // Refresh the event list to reflect updated tags
-        const updatedEventsResponse = await axios.get("http://localhost:3000/events");
-        combinedEvents.value = updatedEventsResponse.data
-            .filter(event => !event.archived)
-            .map(event => ({
-                ...event,
-                type: "event",
-                category_id: event.category?.id || event.category_id,
-                mappedTags: Array.isArray(event.tags)
-                    ? event.tags.map(tagId => tags.value.find(tag => tag.id === tagId) || { id: tagId, name: "Unknown Tag" })
-                    : []
-            }));
+      await axios.put(`http://localhost:3000/${collection}/${selectedEvent.value.id}`, {
+        ...selectedEvent.value,
+        tags: selectedEvent.value.tags, // Correct: Directly save tag IDs
+        startDate: selectedEvent.value.startDate
+          ? format(new Date(selectedEvent.value.startDate), "MMM-dd-yyyy")
+          : null,
+        endDate: selectedEvent.value.endDate
+          ? format(new Date(selectedEvent.value.endDate), "MMM-dd-yyyy")
+          : null,
+        startTime: startTimeFormatted,
+        endTime: endTimeFormatted,
+      });
 
-            isEditModalVisible.value = false;
-            isConfirmModalVisible.value = false;
-            alert("Event updated successfully!");
-        } catch (error) {
-            console.error("Error updating event:", error);
-            alert("Failed to update the event.");
-        }
-        };
+      // Update the local event list instantly
+      const updatedEventsResponse = await axios.get("http://localhost:3000/events");
+      combinedEvents.value = updatedEventsResponse.data
+        .filter(event => !event.archived)
+        .map(event => ({
+          ...event,
+          type: "event",
+          category_id: event.category?.id || event.category_id,
+          mappedTags: Array.isArray(event.tags)
+            ? event.tags.map(tagId => tags.value.find(tag => tag.id === tagId) || { id: tagId, name: "Unknown Tag" })
+            : []
+        }));
 
-        cancelConfirmation.value = () => {
-            isConfirmModalVisible.value = false;
-        };
-    };
+      isEditModalVisible.value = false;
+      isConfirmModalVisible.value = false;
+      alert("Event updated successfully!");
+    } catch (error) {
+      console.error("Error updating event:", error);
+      alert("Failed to update the event.");
+    }
+  };
+
+  cancelConfirmation.value = () => {
+    isConfirmModalVisible.value = false;
+  };
+};
+
+
 const archiveEvent = async (event) => {
   if (!confirm(`Are you sure you want to archive "${event.title}"?`)) return;
 
@@ -531,6 +560,7 @@ const archiveEvent = async (event) => {
      confirmMessage,
      confirmAction,
      cancelConfirmation,
+     dateError,
      };
     },
  });
