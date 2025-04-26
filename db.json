@@ -5,10 +5,10 @@
             "title": "Parade",
             "description": "69th Foundation day parade in the Honor of Sir Seled Jolero and Sryan Balazar",
             "category": "2",
-            "startDate": "2025-10-07",
-            "endDate": "2025-11-07",
+            "startDate": "May-07-2025",
+            "endDate": "May-11-2025",
             "startTime": "08:00",
-            "endTime": "08:30",
+            "endTime": "08:15",
             "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
             "archived": false,
             "tags": [
@@ -52,6 +52,10 @@
                 {
                     "time": "07:30",
                     "activity": "Tubil sa sakyanan \ud83d\ude97"
+                },
+                {
+                    "time": "08:00",
+                    "activity": "Start Event"
                 }
             ]
         },

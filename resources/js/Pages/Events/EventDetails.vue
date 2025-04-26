@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import { parse, format, parseISO, isValid } from 'date-fns';
 import { usePage, router } from '@inertiajs/vue3';
+import DatePicker from 'primevue/datepicker';
 
 // Inertia props
 const { props } = usePage();
@@ -106,46 +107,46 @@ const formatDisplayDate = (dateString) => {
   }
 };
 
-const formatDateForInput = (dateString) => {
-  if (!dateString) return '';
+const formatDateForPicker = (dateString) => {
+  if (!dateString) return null;
   try {
     // Try parsing as ISO format first (yyyy-MM-dd)
     let date = parseISO(dateString);
     if (!isValid(date)) {
       // If that fails, try parsing as MMM-dd-yyyy format
-      date = parse(dateString, 'MMMM-dd-yyyy', new Date());
+      date = parse(dateString, 'MMM-dd-yyyy', new Date());
     }
-    return isValid(date) ? format(date, 'yyyy-MM-dd') : '';
+    return isValid(date) ? date : null;
   } catch {
-    return '';
+    return null;
   }
 };
 
-const formattedStartDate = computed({
+const startDateModel = computed({
   get() {
-    return formatDateForInput(eventDetails.value.startDate);
+    return formatDateForPicker(eventDetails.value.startDate);
   },
   set(value) {
-    const date = parseISO(value);
-    eventDetails.value.startDate = isValid(date)
-      ? format(date, 'MMMM-dd-yyyy')
-      : value;
+    eventDetails.value.startDate = value ? format(value, 'MMMM-dd-yyyy') : '';
   }
 });
 
-const formattedEndDate = computed({
+const endDateModel = computed({
   get() {
-    return formatDateForInput(eventDetails.value.endDate);
+    return formatDateForPicker(eventDetails.value.endDate);
   },
   set(value) {
-    const date = parseISO(value);
-    eventDetails.value.endDate = isValid(date)
-      ? format(date, 'MMMM-dd-yyyy')
-      : value;
+    eventDetails.value.endDate = value ? format(value, 'MMMM-dd-yyyy') : '';
   }
 });
 
+const formattedStartDate = computed(() => {
+  return startDateModel.value ? format(startDateModel.value, 'MMMM-dd-yyyy') : '';
+});
 
+const formattedEndDate = computed(() => {
+  return endDateModel.value ? format(endDateModel.value, 'MMMM-dd-yyyy') : '';
+});
 </script>
 
 <template>
@@ -239,29 +240,59 @@ const formattedEndDate = computed({
 
         <!-- Dates and Times -->
         <div class="grid grid-cols-2 gap-4 text-sm">
-          <template v-if="editMode">
-            <input type="date" v-model="formattedStartDate" class="border p-2 rounded" />
-            <input type="time" v-model="eventDetails.startTime" class="border p-2 rounded" />
-            <input type="date" v-model="formattedEndDate" class="border p-2 rounded" />
-            <input type="time" v-model="eventDetails.endTime" class="border p-2 rounded" />
-          </template>
-          <template v-else>
-            <p><strong>Start:</strong> {{ formatDisplayDate(eventDetails.startDate) }}, {{ formatDisplayTime(eventDetails.startTime) }}</p>
-            <p><strong>End:</strong> {{ formatDisplayDate(eventDetails.endDate) }}, {{ formatDisplayTime(eventDetails.endTime) }}</p>
-          </template>
+            <template v-if="editMode">
+            <!-- Start Date -->
+            <div class="flex flex-col">
+                <label class="text-sm font-medium mb-1">Start Date</label>
+                <DatePicker
+                v-model="startDateModel"
+                dateFormat="MM-dd-yy"
+                showIcon
+                class="w-full"
+                />
+            </div>
+
+            <!-- Start Time -->
+            <div class="flex flex-col">
+                <label class="text-sm font-medium mb-1">Start Time</label>
+                <input
+                type="time"
+                v-model="eventDetails.startTime"
+                class="border p-2 rounded"
+                />
+            </div>
+
+            <!-- End Date -->
+            <div class="flex flex-col">
+                <label class="text-sm font-medium mb-1">End Date</label>
+                <DatePicker
+                v-model="endDateModel"
+                dateFormat="MM-dd-yy"
+                showIcon
+                class="w-full"
+                />
+            </div>
+
+            <!-- End Time -->
+            <div class="flex flex-col">
+                <label class="text-sm font-medium mb-1">End Time</label>
+                <input
+                type="time"
+                v-model="eventDetails.endTime"
+                class="border p-2 rounded"
+                />
+            </div>
+            </template>
+            <template v-else>
+                <p><strong>Start Date:</strong> {{ formatDisplayDate(eventDetails.startDate) }}</p>
+                <p><strong>End Date:</strong> {{ formatDisplayDate(eventDetails.endDate) }}</p>
+                <p><strong>Start Time:</strong>  {{ formatDisplayTime(eventDetails.startTime) }}</p>
+                <p><strong>End Time:</strong>  {{ formatDisplayTime(eventDetails.endTime) }}</p>
+            </template>
         </div>
 
         <!-- Category -->
-        <div>
-          <select v-if="editMode" v-model="eventDetails.category_id" class="border rounded p-2">
-            <option v-for="cat in categories" :key="cat.id" :value="cat.id">
-              {{ cat.title }}
-            </option>
-          </select>
-          <p v-else>
-            <strong>Category:</strong> {{ categories.find(c => c.id === eventDetails.category_id)?.title }}
-          </p>
-        </div>
+
 
         <!-- Committee -->
         <div>
