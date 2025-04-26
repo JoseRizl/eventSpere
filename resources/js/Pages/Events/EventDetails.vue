@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, normalizeClass } from 'vue';
+import { ref, computed } from 'vue';
 import { parse, format, parseISO, isValid } from 'date-fns';
 import { usePage, router } from '@inertiajs/vue3';
 import DatePicker from 'primevue/datepicker';
@@ -305,8 +305,8 @@ const formattedEndDate = computed(() => {
             </template>
             <template v-else>
                 <p><strong>Start Date:</strong> {{ formatDisplayDate(eventDetails.startDate) }}</p>
-                <p><strong>End Date:</strong> {{ formatDisplayDate(eventDetails.endDate) }}</p>
                 <p><strong>Start Time:</strong>  {{ formatDisplayTime(eventDetails.startTime) }}</p>
+                <p><strong>End Date:</strong> {{ formatDisplayDate(eventDetails.endDate) }}</p>
                 <p><strong>End Time:</strong>  {{ formatDisplayTime(eventDetails.endTime) }}</p>
             </template>
         </div>
@@ -331,7 +331,7 @@ const formattedEndDate = computed(() => {
 
         <!-- Schedules -->
         <div>
-          <h2 class="font-semibold mb-1">Event Schedules:</h2>
+          <h2 class="font-semibold mb-1">Event Schedules</h2>
           <div v-if="editMode">
             <div v-for="(schedule, i) in eventDetails.schedules" :key="i" class="flex items-center gap-2 mb-2">
               <input v-model="schedule.time" type="time" class="border p-1 rounded w-32" />
@@ -417,7 +417,5 @@ const formattedEndDate = computed(() => {
         />
     </template>
     </Dialog>
-
-
 
   </template>
