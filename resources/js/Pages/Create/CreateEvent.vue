@@ -17,6 +17,16 @@
               <small v-if="!form.title && submitted" class="p-error">Title is required.</small>
             </div>
 
+            <!-- Venue -->
+            <div class="p-field">
+            <label for="venue">Venue</label>
+            <InputText
+                id="venue"
+                v-model="form.venue"
+                placeholder="Enter venue (e.g., Conference Room A)"
+            />
+            </div>
+
             <!-- Event Tags -->
             <div class="p-field">
               <label for="tags">Tags</label>
@@ -153,6 +163,7 @@
   // Form data
   const form = reactive({
     title: "",
+    venue: "",
     description: "",
     category: null,
     startDate: "",
@@ -207,13 +218,14 @@
   const createEvent = async () => {
     submitted.value = true;
 
-    if (!form.title || !form.category || !form.startDate || !form.endDate || !form.startTime || !form.endTime) {
+    if (!form.title || !form.category || !form.startDate || !form.startTime) {
       alert("Please fill out the required fields.");
       return;
     }
 
     const payload = { ...form,
      tags: selectedTags.value,
+     venue: form.venue,
      title: form.title,
      description: form.description,
      category_id: form.category, // Ensure correct category mapping

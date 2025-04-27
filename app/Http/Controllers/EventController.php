@@ -15,6 +15,7 @@ class EventController extends Controller
         $data = json_decode($json, true);
 
         $event = collect($data['events'])->firstWhere('id', $id);
+        $event['venue'] = $event['venue'] ?? null;
         $related = collect($data['events'])->where('id', '!=', $id)->take(5);
 
         return Inertia::render('Events/EventDetails', [
@@ -36,6 +37,7 @@ class EventController extends Controller
                     ...$event,
                     'title' => $request->input('title'),
                     'description' => $request->input('description'),
+                    'venue' => $request->input('venue'),
                     'startDate' => $request->input('startDate'),
                     'endDate' => $request->input('endDate'),
                     'startTime' => $request->input('startTime'),

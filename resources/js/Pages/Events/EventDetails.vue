@@ -19,8 +19,9 @@ const removeTag = (tagToRemove) => {
 
 const eventDetails = ref({
     ...props.event,
-  schedules: props.event.schedules || [],
-  tags: props.event.tags?.map(tag => {
+    venue: props.event.venue || '',
+    schedules: props.event.schedules || [],
+    tags: props.event.tags?.map(tag => {
     // Handle both cases: when tag is an object or just an ID
     const tagObj = typeof tag === 'object' ? tag : props.tags.find(t => t.id === tag);
     return tagObj || { id: tag, name: 'Unknown Tag', color: '#cccccc' };
@@ -212,6 +213,19 @@ const formattedEndDate = computed(() => {
             placeholder="Event Description"
           />
           <p v-else class="text-gray-700 whitespace-pre-line">{{ eventDetails.description }}</p>
+        </div>
+
+        <!-- Venue -->
+        <div>
+        <input
+            v-if="editMode"
+            v-model="eventDetails.venue"
+            class="w-full border rounded p-2"
+            placeholder="Enter venue (e.g., Conference Room A)"
+        />
+        <p v-else>
+            <strong>Venue:</strong> {{ eventDetails.venue || 'Not specified' }}
+        </p>
         </div>
 
         <!-- Tags -->

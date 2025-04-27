@@ -18,20 +18,9 @@
             "type": "event",
             "mappedTags": [
                 {
-                    "id": {
-                        "id": "1",
-                        "name": "Foundation Day",
-                        "color": "#FF5733"
-                    },
-                    "name": "Unknown Tag"
-                },
-                {
-                    "id": {
-                        "id": "2",
-                        "name": "Palakasan",
-                        "color": "#33FF57"
-                    },
-                    "name": "Unknown Tag"
+                    "id": "1",
+                    "name": "Foundation Day",
+                    "color": "#FF5733"
                 }
             ],
             "tasks": [
@@ -57,7 +46,8 @@
                     "time": "08:00",
                     "activity": "Start Event"
                 }
-            ]
+            ],
+            "venue": "Dalan \ud83d\udee3\ufe0f"
         },
         {
             "id": "fbe4",
@@ -101,7 +91,8 @@
                     "time": "08:00",
                     "activity": "Basketbal"
                 }
-            ]
+            ],
+            "venue": "Kort"
         },
         {
             "id": "ad90",
@@ -145,12 +136,9 @@
             "type": "event",
             "mappedTags": [
                 {
-                    "id": {
-                        "id": "6",
-                        "name": "Graduation",
-                        "color": "#9e369e"
-                    },
-                    "name": "Unknown Tag"
+                    "id": "6",
+                    "name": "Graduation",
+                    "color": "#9e369e"
                 }
             ],
             "tasks": [
@@ -172,7 +160,8 @@
                     "time": "08:00",
                     "activity": "Opening Ceremony"
                 }
-            ]
+            ],
+            "venue": "Steds"
         },
         {
             "id": "2066",
@@ -224,6 +213,23 @@
                 }
             ],
             "schedules": []
+        },
+        {
+            "id": "e2b2",
+            "title": "Ambak",
+            "venue": "Tulay",
+            "description": "Kapuy",
+            "category": "2",
+            "startDate": "2025-04-28T16:00:00.000Z",
+            "endDate": "2025-04-28T16:00:00.000Z",
+            "startTime": "04:12",
+            "endTime": "12:34",
+            "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
+            "archived": false,
+            "tags": [
+                "4"
+            ],
+            "category_id": "2"
         }
     ],
     "tags": [
