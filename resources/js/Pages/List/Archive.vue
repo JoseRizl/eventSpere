@@ -20,10 +20,12 @@
           </template>
         </Column>
 
-        <Column header="Category" style="width:15%;">
-          <template #body="{ data }">
-            {{ categoryMap[data.category_id] || "Uncategorized" }}
-          </template>
+        <Column field="venue" header="Venue" style="width:15%;" sortable>
+        <template #body="{ data }">
+            <div class="venue">
+            {{ data.venue || "No venue specified" }}
+            </div>
+        </template>
         </Column>
 
         <Column header="Start Date & Time" style="width:20%;" sortable>

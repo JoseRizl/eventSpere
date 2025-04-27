@@ -41,7 +41,9 @@ export default defineComponent({
 
     // Check if a category is in use
     const isCategoryInUse = (categoryId) => {
-      return events.value.some((event) => event.category_id === categoryId);
+      return events.value.some(
+        (event) => event.category_id === categoryId && event.archived ==false
+      );
     };
 
     // Open Edit Modal
