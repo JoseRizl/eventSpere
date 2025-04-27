@@ -154,13 +154,14 @@ export default defineComponent({
                 icon="pi pi-pen-to-square"
                 class="p-button-rounded p-button-info"
                 @click="openEditModal(data)"
+                v-tooltip.top="'Event Category'"
               />
               <Button
                 icon="pi pi-trash"
                 class="p-button-rounded p-button-danger"
                 @click="deleteCategory(data.id)"
                 :disabled="isCategoryInUse(data.id)"
-                v-tooltip="isCategoryInUse(data.id) ? 'Category is in use and cannot be deleted' : ''"
+                v-tooltip.top="isCategoryInUse(data.id) ? 'Category is in use and cannot be deleted' : 'Delete Category'"
               />
             </div>
           </template>

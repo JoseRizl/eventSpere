@@ -58,15 +58,15 @@
         <Column header="Actions" style="width:10%;" body-class="text-center">
           <template #body="{ data }">
             <div class="action-buttons">
-              <Button icon="pi pi-pen-to-square" class="p-button-rounded p-button-info" @click="editEvent(data)" />
-              <Button icon="pi pi-folder" class="p-button-rounded p-button-danger" @click="archiveEvent(data)" />
+              <Button icon="pi pi-pen-to-square" class="p-button-rounded p-button-info" @click="editEvent(data)" v-tooltip.top="'Edit Event'"/>
+              <Button icon="pi pi-folder" class="p-button-rounded p-button-danger" @click="archiveEvent(data)" v-tooltip.top="'Archive Event'"/>
             </div>
           </template>
         </Column>
 
         <Column header="Tasks" style="width:15%;" body-class="text-center">
         <template #body="{ data }">
-            <Button icon="pi pi-list" class="p-button-rounded p-button-warning" @click="openTaskModal(data)" />
+            <Button icon="pi pi-list" class="p-button-rounded p-button-warning" @click="openTaskModal(data)" v-tooltip.top="'Manage Tasks'"/>
         </template>
         </Column>
 
@@ -102,7 +102,7 @@
       </div>
 
       <!-- Remove Task Button -->
-      <Button icon="pi pi-trash" class="p-button-danger p-button-text" @click="deleteTask(index)" />
+      <Button icon="pi pi-trash" class="p-button-danger p-button-text" @click="deleteTask(index)" v-tooltip.top="'Delete Task'"/>
     </div>
 
     <!-- Add Task Button -->

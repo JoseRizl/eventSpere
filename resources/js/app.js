@@ -16,6 +16,7 @@ import 'primeicons/primeicons.css';
   import Textarea from "primevue/textarea";
   import Button from "primevue/button";
   import Checkbox from "primevue/checkbox";
+  import Tooltip from "primevue/tooltip";
 
 // Pinia
 import { createPinia } from 'pinia';
@@ -47,6 +48,7 @@ createInertiaApp({
       .use(createPinia())
       .use(ZiggyVue)
       .use(pinia) // Add Pinia
+      .directive('tooltip', Tooltip)
       .use(PrimeVue, {
         theme: {
           preset: Aura,
@@ -70,6 +72,7 @@ createInertiaApp({
       .component('Textarea', Textarea)
       .component('Button', Button)
       .component('Checkbox', Checkbox) // Register Checkbox
+      .component('Tooltip', Tooltip)
       .mount(el);
 
     // Axios Base URL (for JSON Server)

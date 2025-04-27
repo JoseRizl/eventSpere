@@ -238,6 +238,7 @@ const formattedEndDate = computed(() => {
                     type="button"
                     class="text-white hover:text-gray-200"
                     @click.stop="removeTag(slotProps.value)"
+                    v-tooltip.top="'Remove Tag'"
                 >
                     ✕
                 </button>
