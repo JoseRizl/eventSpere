@@ -23,6 +23,11 @@ const showUpcomingEvents = ref(loadToggleState('showUpcomingEvents', true));
 watch(showEventsThisMonth, (val) => saveToggleState('showEventsThisMonth', val));
 watch(showOngoingEvents, (val) => saveToggleState('showOngoingEvents', val));
 watch(showUpcomingEvents, (val) => saveToggleState('showUpcomingEvents', val));
+const showLatestBanner = ref(true);
+
+const latestAnnouncement = computed(() =>
+  store.announcements.length ? store.announcements[store.announcements.length - 1] : null
+);
 
 
 const ongoingEvents = computed(() =>
@@ -136,6 +141,7 @@ function saveToggleState(key, value) {
       <button
         @click="toggleAnnouncements"
         class="p-3 rounded-full bg-blue-500 text-white hover:bg-blue-600 shadow-md"
+        v-tooltip="'Announcements'"
       >
         🔔
       </button>
@@ -150,7 +156,7 @@ function saveToggleState(key, value) {
         <!-- Add Announcement Section -->
         <div class="flex items-center gap-2 mb-2">
           <InputText v-model="newAnnouncement" placeholder="wen, wer, wat" class="w-full"/>
-          <Button icon="pi pi-plus" class="p-button-success" @click="confirmAdd"/>
+          <Button icon="pi pi-plus" class="p-button-success" @click="confirmAdd" v-tooltip.top="'Create Announcement'"/>
         </div>
 
         <ul v-if="store.announcements.length">
@@ -172,12 +178,27 @@ function saveToggleState(key, value) {
     </div>
 
     <!-- Logo Section -->
-    <div class="w-full max-w-4xl bg-white p-6 rounded-lg shadow-md flex justify-center">
+    <div class="w-full max-w-5xl bg-white p-6 rounded-lg shadow-md flex justify-center">
       <img src="/resources/images/NCSlogo.png" alt="School Logo" class="w-32 md:w-48" />
     </div>
 
     <!-- News and Update Title -->
     <h1 class="text-2xl font-bold mt-6 text-center">News and Updates</h1>
+
+    <div v-if="latestAnnouncement && showLatestBanner"
+    class="mt-4 mb-6 w-full max-w-5xl bg-purple-100 border-l-4 border-purple-500 text-purple-700 p-4 relative rounded shadow"
+    >
+    <strong class="block font-semibold mb-1">📣 Latest Announcement</strong>
+    <p>{{ latestAnnouncement.message }}</p>
+    <button
+     @click="showLatestBanner = false"
+     class="absolute top-6 right-2 text-purple-700 hover:text-purple-900 text-2xl leading-none"
+     aria-label="Close"
+    >
+     &times;
+    </button>
+    </div>
+
 
     <!-- Ongoing Events -->
     <div v-if="ongoingEvents.length" class="w-full max-w-5xl mt-12">
