@@ -32,7 +32,7 @@ const sideBarItems = ref([
         ]
     },
     {
-        label: 'Categories',
+        label: 'Categories/Tags',
         icon: 'pi pi-palette',
         route: route('category.list')
     },

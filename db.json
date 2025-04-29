@@ -225,6 +225,31 @@
         "4"
       ],
       "category_id": "2"
+    },
+    {
+      "id": "1b35",
+      "title": "f",
+      "venue": "d",
+      "description": "1",
+      "category": "3",
+      "startDate": "2025-03-31T16:00:00.000Z",
+      "endDate": "2025-04-02T16:00:00.000Z",
+      "startTime": "02:11",
+      "endTime": "23:34",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": true,
+      "tags": [
+        "6"
+      ],
+      "category_id": "3",
+      "type": "event",
+      "mappedTags": [
+        {
+          "id": "6",
+          "name": "Graduation",
+          "color": "#9e369e"
+        }
+      ]
     }
   ],
   "tags": [

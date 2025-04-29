@@ -38,20 +38,6 @@
                 optionValue="id"
                 placeholder="Select tags"
               />
-              <div class="tag-creation">
-                <InputText
-                  v-model="newTag.name"
-                  placeholder="New tag name"
-                  class="p-mr-2"
-                />
-                <ColorPicker v-model="newTag.color" />
-                <Button
-                  label="Add Tag"
-                  icon="pi pi-plus"
-                  class="p-button-success p-button-sm"
-                  @click="addTag"
-                />
-              </div>
             </div>
 
             <!-- Event Category Dropdown -->
@@ -157,7 +143,6 @@
   const categories = ref([]);
   const tags = ref([]);
   const selectedTags = ref([]);
-  const newTag = reactive({ name: "", color: "#000000" });
   const successModal = ref(false);
 
   // Form data
@@ -198,20 +183,6 @@
     const hours = parts[0].padStart(2, "0");
     const minutes = parts[1]?.padStart(2, "0") || "00";
     return `${hours}:${minutes}`;
-  };
-
-  // Add a new tag
-  const addTag = async () => {
-    if (!newTag.name.trim()) {
-      alert("Tag name is required.");
-      return;
-    }
-
-    const newTagData = { id: tags.value.length + 1, ...newTag };
-
-    await eventStore.addTag(newTagData);
-    newTag.name = "";
-    newTag.color = "#000000";
   };
 
   // Create Event
@@ -256,8 +227,6 @@
     // Show success modal instead of alert
     successModal.value = true;
 
-    // Navigate to Event List
-    //router.get(route('event.list')); // Redirect to EventList.vue
   };
   </script>
 
