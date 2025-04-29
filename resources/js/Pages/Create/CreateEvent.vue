@@ -134,6 +134,7 @@
   import { useEventStore } from "@/stores/eventStore";
   import { ref, reactive, onMounted } from "vue";
   import { router } from '@inertiajs/vue3';
+  import { format } from 'date-fns';
 
   // Stores
   const categoryStore = useCategoryStore();
@@ -194,14 +195,18 @@
       return;
     }
 
+      // Format dates before creating payload
+    const formattedStartDate = form.startDate ? format(new Date(form.startDate), 'MMM-dd-yyyy') : null;
+    const formattedEndDate = form.endDate ? format(new Date(form.endDate), 'MMM-dd-yyyy') : null;
+
     const payload = { ...form,
      tags: selectedTags.value,
      venue: form.venue,
      title: form.title,
      description: form.description,
-     category_id: form.category, // Ensure correct category mapping
-     startDate: form.startDate,
-     endDate: form.endDate,
+     category_id: form.category,
+     startDate: formatDate(form.startDate),
+     endDate: formatDate(form.endDate),
      startTime: formatTime(form.startTime),
      endTime: formatTime(form.endTime),
      image: form.image || "https://example.com/default-image.jpg",
@@ -224,10 +229,17 @@
 
     selectedTags.value = [];
     submitted.value = false;
-    // Show success modal instead of alert
     successModal.value = true;
 
   };
+
+  function formatDate(date) {
+  const d = new Date(date);
+  const options = { year: 'numeric', month: 'short', day: '2-digit' };
+  const parts = d.toLocaleDateString('en-US', options).replace(',', '').split(' ');
+  return `${parts[0]}-${parts[1]}-${parts[2]}`;
+}
+
   </script>
 
   <style scoped>
