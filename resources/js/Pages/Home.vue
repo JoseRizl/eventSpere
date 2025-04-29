@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import axios from "axios";
 import { format } from "date-fns";
 import { Link, router } from "@inertiajs/vue3";
@@ -7,6 +7,7 @@ import { useAnnouncementStore } from "../stores/announcementStore";
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
+import { isSameMonth, isWithinInterval, parse } from "date-fns";
 
 const allNews = ref([]);
 const store = useAnnouncementStore();
@@ -15,6 +16,56 @@ const newAnnouncement = ref("");
 const showAddModal = ref(false);
 const showDeleteModal = ref(false);
 const selectedAnnouncementId = ref(null);
+const now = new Date();
+const showEventsThisMonth = ref(loadToggleState('showEventsThisMonth', true));
+const showOngoingEvents = ref(loadToggleState('showOngoingEvents', true));
+const showUpcomingEvents = ref(loadToggleState('showUpcomingEvents', true));
+watch(showEventsThisMonth, (val) => saveToggleState('showEventsThisMonth', val));
+watch(showOngoingEvents, (val) => saveToggleState('showOngoingEvents', val));
+watch(showUpcomingEvents, (val) => saveToggleState('showUpcomingEvents', val));
+
+
+const ongoingEvents = computed(() =>
+  allNews.value.filter((news) => {
+    const start = typeof news.startDate === 'string' && news.startDate.includes('-')
+  ? parse(news.startDate, "MMM-dd-yyyy", new Date())
+  : new Date(news.startDate);
+
+  const end = news.endDate
+  ? (news.endDate.includes('-')
+      ? parse(news.endDate, "MMM-dd-yyyy", new Date())
+      : new Date(news.endDate))
+  : start;
+
+    return isWithinInterval(now, { start, end });
+  })
+);
+
+const eventsThisMonth = computed(() =>
+  allNews.value.filter((news) => {
+    const start = typeof news.startDate === 'string' && news.startDate.includes('-')
+  ? parse(news.startDate, "MMM-dd-yyyy", new Date())
+  : new Date(news.startDate);
+
+    const end = news.endDate
+  ? (news.endDate.includes('-')
+      ? parse(news.endDate, "MMM-dd-yyyy", new Date())
+      : new Date(news.endDate))
+  : start;
+
+    return isSameMonth(start, now) && !(isWithinInterval(now, { start, end }));
+  })
+);
+
+const upcomingEvents = computed(() =>
+  allNews.value.filter((news) => {
+    const start = typeof news.startDate === 'string' && news.startDate.includes('-')
+  ? parse(news.startDate, "MMM-dd-yyyy", new Date())
+  : new Date(news.startDate);
+
+    return start > now && !isSameMonth(start, now);
+  })
+);
 
 // Fetch announcements and news
 onMounted(async () => {
@@ -66,6 +117,16 @@ const deleteAnnouncement = async () => {
   await store.removeAnnouncement(selectedAnnouncementId.value);
   showDeleteModal.value = false;
 };
+
+function loadToggleState(key, defaultValue) {
+  const saved = localStorage.getItem(key);
+  return saved !== null ? JSON.parse(saved) : defaultValue;
+}
+
+function saveToggleState(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
 </script>
 
 <template>
@@ -118,33 +179,95 @@ const deleteAnnouncement = async () => {
     <!-- News and Update Title -->
     <h1 class="text-2xl font-bold mt-6 text-center">News and Updates</h1>
 
-    <!-- News Grid (Merged Events & Sports) -->
-    <div class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-      <Link
-        v-for="(news, index) in allNews"
-        :key="index"
+    <!-- Ongoing Events -->
+    <div v-if="ongoingEvents.length" class="w-full max-w-5xl mt-12">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Ongoing Events</h2>
+            <Button
+            size="small"
+            icon="pi pi-chevron-down"
+            :label="showOngoingEvents ? 'Hide' : 'Show'"
+            @click="showOngoingEvents = !showOngoingEvents"
+            />
+        </div>
+        <div v-if="showOngoingEvents" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Link
+            v-for="(news, index) in ongoingEvents"
+            :key="'ongoing-' + index"
+            :href="route('event.details', { id: news.id })"
+            preserve-scroll
+            class="p-4 border rounded-lg shadow-sm bg-white block hover:shadow-lg hover:scale-105 transition"
+            >
+            <div class="h-40 bg-gray-300 rounded mb-2 flex items-center justify-center overflow-hidden">
+                <img v-if="news.image" :src="news.image" class="h-full w-full object-cover rounded" />
+            </div>
+            <p class="font-semibold text-center">{{ news.title }}</p>
+            <p class="text-sm text-gray-600 text-center">{{ news.description }}</p>
+            <p class="text-xs text-gray-500 text-center mt-1">{{ news.formattedDate }}</p>
+            </Link>
+        </div>
+    </div>
+
+   <!-- Events This Month -->
+   <div v-if="eventsThisMonth.length" class="w-full max-w-5xl mt-8">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold">Events This Month</h2>
+        <Button
+        size="small"
+        icon="pi pi-chevron-down"
+        :label="showEventsThisMonth ? 'Hide' : 'Show'"
+        @click="showEventsThisMonth = !showEventsThisMonth"
+        />
+    </div>
+        <div v-if="showEventsThisMonth" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Link
+            v-for="(news, index) in eventsThisMonth"
+            :key="'month-' + index"
+            :href="route('event.details', { id: news.id })"
+            preserve-scroll
+            class="p-4 border rounded-lg shadow-sm bg-white block hover:shadow-lg hover:scale-105 transition"
+            >
+            <div class="h-40 bg-gray-300 rounded mb-2 flex items-center justify-center overflow-hidden">
+                <img v-if="news.image" :src="news.image" class="h-full w-full object-cover rounded" />
+            </div>
+            <p class="font-semibold text-center">{{ news.title }}</p>
+            <p class="text-sm text-gray-600 text-center">{{ news.description }}</p>
+            <p class="text-xs text-gray-500 text-center mt-1">{{ news.formattedDate }}</p>
+            </Link>
+        </div>
+        </div>
+    <p v-else class="text-center text-gray-500">No events this month.</p>
+
+    <!-- Upcoming Events -->
+    <div v-if="upcomingEvents.length" class="w-full max-w-5xl mt-12">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Upcoming Events</h2>
+            <Button
+            size="small"
+            icon="pi pi-chevron-down"
+            :label="showUpcomingEvents ? 'Hide' : 'Show'"
+            @click="showUpcomingEvents = !showUpcomingEvents"
+            />
+    </div>
+    <div v-if="showUpcomingEvents" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Link
+        v-for="(news, index) in upcomingEvents"
+        :key="'upcoming-' + index"
         :href="route('event.details', { id: news.id })"
         preserve-scroll
-        class="p-4 border rounded-lg shadow-sm bg-white block hover:shadow-lg hover:scale-105 transform transition duration-200 ease-in-out"
-      >
-        <div
-          class="h-40 bg-gray-300 rounded mb-2 flex items-center justify-center overflow-hidden"
+        class="p-4 border rounded-lg shadow-sm bg-white block hover:shadow-lg hover:scale-105 transition"
         >
-          <img v-if="news.image" :src="news.image" :alt="news.title" class="h-full w-full object-cover rounded" />
+        <div class="h-40 bg-gray-300 rounded mb-2 flex items-center justify-center overflow-hidden">
+            <img v-if="news.image" :src="news.image" class="h-full w-full object-cover rounded" />
         </div>
         <p class="font-semibold text-center">{{ news.title }}</p>
-        <p class="description text-sm text-gray-600 text-center">
-          {{ news.description }}
-        </p>
+        <p class="text-sm text-gray-600 text-center">{{ news.description }}</p>
         <p class="text-xs text-gray-500 text-center mt-1">{{ news.formattedDate }}</p>
-
-        <div class="flex justify-center mt-2">
-          <span class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 cursor-pointer">
-            Read more
-          </span>
+        </Link>
         </div>
-      </Link>
     </div>
+    <p v-else class="text-center text-gray-500">No upcoming events.</p>
+
 
     <!-- Add Announcement Confirmation Modal -->
     <Dialog v-model:visible="showAddModal" header="Confirm Add" modal>
