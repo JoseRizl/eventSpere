@@ -122,7 +122,7 @@ const formatDisplayDate = (dateString) => {
       // If that fails, try parsing as MMM-dd-yyyy format
       date = parse(dateString, 'MMM-dd-yyyy', new Date());
     }
-    return isValid(date) ? format(date, 'MMMM-dd-yyyy') : 'Invalid Date';
+    return isValid(date) ? format(date, 'MMM-dd-yyyy') : 'Invalid Date';
   } catch {
     return 'Invalid Date';
   }
@@ -148,8 +148,8 @@ const startDateModel = computed({
     return formatDateForPicker(eventDetails.value.startDate);
   },
   set(value) {
-    eventDetails.value.startDate = value ? format(value, 'MMMM-dd-yyyy') : '';
-  }
+  eventDetails.value.startDate = value ? value.toISOString() : '';
+}
 });
 
 const endDateModel = computed({
@@ -157,16 +157,16 @@ const endDateModel = computed({
     return formatDateForPicker(eventDetails.value.endDate);
   },
   set(value) {
-    eventDetails.value.endDate = value ? format(value, 'MMMM-dd-yyyy') : '';
-  }
+  eventDetails.value.endDate = value ? value.toISOString() : '';
+}
 });
 
 const formattedStartDate = computed(() => {
-  return startDateModel.value ? format(startDateModel.value, 'MMMM-dd-yyyy') : '';
+  return startDateModel.value ? format(startDateModel.value, 'MMM-dd-yyyy') : '';
 });
 
 const formattedEndDate = computed(() => {
-  return endDateModel.value ? format(endDateModel.value, 'MMMM-dd-yyyy') : '';
+  return endDateModel.value ? format(endDateModel.value, 'MMM-dd-yyyy') : '';
 });
 </script>
 
