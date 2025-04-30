@@ -661,22 +661,6 @@ const cancelDeleteBracket = () => {
     padding: 20px;
   }
 
-  .create-button {
-    background: #007bff;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: bold;
-    margin-bottom: 20px;
-  }
-
-  .create-button:hover {
-    background-color: #0056b3; /* Darker blue on hover */
-  }
-
   .bracket-wrapper {
     background-color: #f0f0f0;
     padding: 15px;

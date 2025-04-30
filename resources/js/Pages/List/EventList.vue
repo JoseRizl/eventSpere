@@ -2,12 +2,7 @@
     <div class="event-list-container">
         <div class="flex justify-content-between align-items-center mb-4">
         <h1 class="title">Event List</h1>
-        <Button
-          label="Create Event"
-          icon="pi pi-plus"
-          class="p-button-primary"
-          @click="openCreateModal"
-        />
+        <button class="create-button" @click="openCreateModal">Create Bracket</button>
       </div>
 
       <DataTable :value="combinedEvents" class="p-datatable-striped">

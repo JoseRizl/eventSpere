@@ -181,12 +181,7 @@ export default defineComponent({
           class="p-button-secondary"
           @click="toggleView"
         />
-        <Button
-          :label="`Create ${showTags ? 'Tag' : 'Category'}`"
-          icon="pi pi-plus"
-          class="p-button-success"
-          @click="openCreateModal"
-        />
+        <button class="create-button" @click="openCreateModal">Create Bracket</button>
       </div>
     </div>
 
