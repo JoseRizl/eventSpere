@@ -1,6 +1,14 @@
 <template>
     <div class="event-list-container">
-      <h1 class="title">Event List</h1>
+        <div class="flex justify-content-between align-items-center mb-4">
+        <h1 class="title">Event List</h1>
+        <Button
+          label="Create Event"
+          icon="pi pi-plus"
+          class="p-button-primary"
+          @click="openCreateModal"
+        />
+      </div>
 
       <DataTable :value="combinedEvents" class="p-datatable-striped">
         <Column field="title" header="Event Name" style="width:20%;" sortable>
@@ -13,7 +21,7 @@
             <!-- Tags DIsplay-->
              <div class="tags-container">
                 <span
-                    v-for="tag in data.mappedTags"
+                    v-for="tag in data.tags"
                     :key="tag.id"
                     class="tag"
                     :style="{ backgroundColor: tag.color || '#800080' }">
@@ -123,6 +131,100 @@
   </template>
 </Dialog>
 
+<!-- Create Event Modal-->
+<Dialog v-model:visible="isCreateModalVisible" modal header="Create Event" :style="{ width: '50vw' }">
+        <div class="p-fluid">
+          <!-- Event Title -->
+          <div class="p-field">
+            <label for="title">Event Title</label>
+            <InputText id="title" v-model="newEvent.title" placeholder="Enter event title" />
+          </div>
+
+          <!-- Tags Selection -->
+          <div class="p-field">
+            <label for="tags">Tags</label>
+            <MultiSelect
+              id="tags"
+              v-model="newEvent.tags"
+              :options="tags"
+              optionLabel="name"
+              placeholder="Select tags"
+              display="chip"
+            />
+          </div>
+
+          <!-- Venue -->
+          <div class="p-field">
+            <label for="venue">Venue</label>
+            <InputText id="venue" v-model="newEvent.venue" placeholder="Enter event venue (e.g., Main Hall, Stadium)" />
+          </div>
+
+          <!-- Event Category Dropdown -->
+          <div class="p-field">
+            <label for="category">Category</label>
+            <Dropdown
+              id="category"
+              v-model="newEvent.category_id"
+              :options="categories"
+              optionLabel="title"
+              optionValue="id"
+              placeholder="Select a category"
+            />
+          </div>
+
+          <!-- Start Date & End Date -->
+          <div class="p-field p-grid">
+            <div class="p-col-6">
+              <label for="startDate">Start Date</label>
+              <DatePicker id="startDate" v-model="newEvent.startDate" dateFormat="MM-dd-yy" showIcon />
+            </div>
+            <div class="p-col-6">
+              <label for="endDate">End Date</label>
+              <DatePicker id="endDate" v-model="newEvent.endDate" dateFormat="MM-dd-yy" showIcon />
+            </div>
+          </div>
+
+          <div v-if="dateError" class="p-field text-red-500 text-sm mt-1">
+            <i class="pi pi-exclamation-triangle mr-1"></i>
+            {{ dateError }}
+          </div>
+
+          <!-- Start Time -->
+          <div class="p-field">
+            <label for="startTime">Start Time</label>
+            <input type="time"
+              id="startTime"
+              v-model="newEvent.startTime"
+              placeholder="HH:mm"
+              :class="{ 'p-invalid': dateError && dateError.includes('end') }"
+              @blur="newEvent.startTime = newEvent.startTime.padStart(5, '0')"
+            />
+          </div>
+
+          <!-- End Time -->
+          <div class="p-field">
+            <label for="endTime">End Time</label>
+            <input type="time"
+              id="endTime"
+              v-model="newEvent.endTime"
+              placeholder="HH:mm"
+              @blur="newEvent.endTime = newEvent.endTime.padStart(5, '0')"
+            />
+          </div>
+
+          <!-- Event Description -->
+          <div class="p-field">
+            <label for="description">Description</label>
+            <Textarea id="description" v-model="newEvent.description" rows="4" placeholder="Enter event description" autoResize />
+          </div>
+        </div>
+
+        <template #footer>
+          <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="isCreateModalVisible = false" />
+          <Button label="Create Event" icon="pi pi-check" class="p-button-primary" @click="createEvent" />
+        </template>
+      </Dialog>
+
       <!-- Edit Event Modal -->
       <Dialog v-model:visible="isEditModalVisible" modal header="Edit Event" :style="{ width: '50vw' }">
         <div class="p-fluid">
@@ -140,7 +242,6 @@
                 v-model="selectedEvent.tags"
                 :options="tags"
                 optionLabel="name"
-                optionValue="id"
                 placeholder="Select tags"
                 display="chip"
             />
@@ -272,6 +373,92 @@
       const confirmMessage = ref('');
       const confirmAction = ref(() => {});
       const cancelConfirmation = ref(() => {});
+      const isCreateModalVisible = ref(false);
+      const newEvent = ref({
+        title: "",
+        description: "",
+        venue: "",
+        category_id: null,
+        startDate: null,
+        endDate: null,
+        startTime: "00:00",
+        endTime: "00:00",
+        tags: [],
+        image: "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+        archived: false
+      });
+
+      const openCreateModal = () => {
+        newEvent.value = {
+          title: "",
+          description: "",
+          venue: "",
+          category_id: null,
+          startDate: null,
+          endDate: null,
+          startTime: "00:00",
+          endTime: "00:00",
+          tags: [],
+          image: "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+          archived: false
+        };
+        isCreateModalVisible.value = true;
+        dateError.value = "";
+      };
+
+      const createEvent = async () => {
+        if (!newEvent.value.title) {
+          alert("Please enter an event title");
+          return;
+        }
+
+        if (newEvent.value.startDate && newEvent.value.endDate) {
+          const start = new Date(newEvent.value.startDate);
+          const end = new Date(newEvent.value.endDate);
+          if (end < start) {
+            dateError.value = "End date cannot be before start date.";
+            return;
+          }
+        }
+
+        try {
+            const payload = {
+            ...newEvent.value,
+            tags: Array.isArray(newEvent.value.tags)
+                ? newEvent.value.tags.map(tag => ({
+                    id: tag.id,
+                    name: tag.name,
+                    color: tag.color
+                    // include other tag properties as needed
+                }))
+                : [],
+            startDate: newEvent.value.startDate
+                ? format(new Date(newEvent.value.startDate), "MMM-dd-yyyy")
+                : null,
+            endDate: newEvent.value.endDate
+                ? format(new Date(newEvent.value.endDate), "MMM-dd-yyyy")
+                : null,
+            startTime: newEvent.value.startTime.padStart(5, "0"),
+            endTime: newEvent.value.endTime.padStart(5, "0"),
+            archived: false
+            };
+
+            const response = await axios.post("http://localhost:3000/events", payload);
+
+                // Add the new event to the local list
+                const createdEvent = {
+            ...response.data,
+            type: "event"
+            };
+
+            combinedEvents.value = [createdEvent, ...combinedEvents.value];
+            isCreateModalVisible.value = false;
+            alert("Event created successfully!");
+        } catch (error) {
+            console.error("Error creating event:", error);
+            alert("Failed to create the event.");
+        }
+      };
 
       const validateEventDates = () => {
         if (new Date(selectedEvent.value.startDate) > new Date(selectedEvent.value.endDate)) {
@@ -299,23 +486,12 @@
             return map;
         }, {});
 
-          events.value = eventsResponse.data
-          .filter(event => !event.archived) // Exclude archived events
-          .map(event => ({
+        events.value = eventsResponse.data
+        .filter(event => !event.archived) // Exclude archived events
+        .map(event => ({
             ...event,
-            type: "event",
             category_id: event.category?.id || event.category_id,
-            mappedTags: Array.isArray(event.tags)
-      ? event.tags.map(tagId => tagsMap[tagId] || { id: tagId, name: "Unknown Tag" })
-      : []
-          }));
-
-          sports.value = sportsResponse.data.map(sport => ({
-            ...sport,
-            type: "sport",
-            category_id: sport.category?.id || sport.category_id,
-            mappedTags: sport.tags.map(tagId => tagsMap[tagId]) // Map tag details
-          }));
+        }));
 
           categories.value = categoriesResponse.data;
 
@@ -447,90 +623,80 @@
             ...event,
             venue: event.venue || "",
             tags: Array.isArray(event.tags)
-            ? event.tags.map(tagId => {
-                const foundTag = tags.value.find(tag => tag.id === tagId);
-                return foundTag ? foundTag.id : null;
-            }).filter(Boolean)
-            : [], // Ensure tags is an array or defaults to an empty array
+            ? event.tags // Use the tag objects directly
+            : [],
             startDate: event.startDate ? new Date(event.startDate) : null,
             endDate: event.endDate ? new Date(event.endDate) : null
         };
         isEditModalVisible.value = true;
-       };
+        };
 
 
       // Save Edited Event
-const saveEditedEvent = async () => {
-  if (!selectedEvent.value) return;
-  dateError.value = "";
+        const saveEditedEvent = async () => {
+        if (!selectedEvent.value) return;
+        dateError.value = "";
 
-  // Validate that end date is not earlier than start date
-  if (selectedEvent.value.startDate && selectedEvent.value.endDate) {
-    const start = new Date(selectedEvent.value.startDate);
-    const end = new Date(selectedEvent.value.endDate);
-    if (end < start) {
-        dateError.value = "End date cannot be before start date.";
-      return;
-    }
-  }
+        // Validate that end date is not earlier than start date
+        if (selectedEvent.value.startDate && selectedEvent.value.endDate) {
+            const start = new Date(selectedEvent.value.startDate);
+            const end = new Date(selectedEvent.value.endDate);
+            if (end < start) {
+                dateError.value = "End date cannot be before start date.";
+            return;
+            }
+        }
 
-  // Set up confirmation modal instead of using confirm()
-  confirmMessage.value = `Are you sure you want to save changes to "${selectedEvent.value.title}"?`;
-  isConfirmModalVisible.value = true;
+        // Set up confirmation modal instead of using confirm()
+        confirmMessage.value = `Are you sure you want to save changes to "${selectedEvent.value.title}"?`;
+        isConfirmModalVisible.value = true;
 
-  confirmAction.value = async () => {
-    try {
-      const collection = selectedEvent.value.type === "sport" ? "sports" : "events";
+        confirmAction.value = async () => {
+            try {
+            const collection = selectedEvent.value.type === "sport" ? "sports" : "events";
 
-      // Ensure startTime and endTime are in HH:mm format
-      const startTimeFormatted = selectedEvent.value.startTime
-        ? selectedEvent.value.startTime.padStart(5, "0") // Ensure format HH:mm
-        : "00:00";
+            // Ensure startTime and endTime are in HH:mm format
+            const startTimeFormatted = selectedEvent.value.startTime
+                ? selectedEvent.value.startTime.padStart(5, "0") // Ensure format HH:mm
+                : "00:00";
 
-      const endTimeFormatted = selectedEvent.value.endTime
-        ? selectedEvent.value.endTime.padStart(5, "0")
-        : "00:00";
+            const endTimeFormatted = selectedEvent.value.endTime
+                ? selectedEvent.value.endTime.padStart(5, "0")
+                : "00:00";
 
-      await axios.put(`http://localhost:3000/${collection}/${selectedEvent.value.id}`, {
-        ...selectedEvent.value,
-        venue: selectedEvent.value.venue,
-        tags: selectedEvent.value.tags, // Correct: Directly save tag IDs
-        startDate: selectedEvent.value.startDate
-          ? format(new Date(selectedEvent.value.startDate), "MMM-dd-yyyy")
-          : null,
-        endDate: selectedEvent.value.endDate
-          ? format(new Date(selectedEvent.value.endDate), "MMM-dd-yyyy")
-          : null,
-        startTime: startTimeFormatted,
-        endTime: endTimeFormatted,
-      });
+            await axios.put(`http://localhost:3000/${collection}/${selectedEvent.value.id}`, {
+                ...selectedEvent.value,
+                venue: selectedEvent.value.venue,
+                tags: selectedEvent.value.tags, // Send the full tag objects directly
+                startDate: selectedEvent.value.startDate
+                ? format(new Date(selectedEvent.value.startDate), "MMM-dd-yyyy")
+                : null,
+                endDate: selectedEvent.value.endDate
+                ? format(new Date(selectedEvent.value.endDate), "MMM-dd-yyyy")
+                : null,
+                startTime: startTimeFormatted,
+                endTime: endTimeFormatted,
+            });
 
-      // Update the local event list instantly
-      const updatedEventsResponse = await axios.get("http://localhost:3000/events");
-      combinedEvents.value = updatedEventsResponse.data
-        .filter(event => !event.archived)
-        .map(event => ({
-          ...event,
-          type: "event",
-          category_id: event.category?.id || event.category_id,
-          mappedTags: Array.isArray(event.tags)
-            ? event.tags.map(tagId => tags.value.find(tag => tag.id === tagId) || { id: tagId, name: "Unknown Tag" })
-            : []
-        }));
+            // Update local state - NO mappedTags needed
+            const index = combinedEvents.value.findIndex(e => e.id === selectedEvent.value.id);
+            if (index !== -1) {
+            combinedEvents.value[index] = selectedEvent.value;
+            }
 
-      isEditModalVisible.value = false;
-      isConfirmModalVisible.value = false;
-      alert("Event updated successfully!");
-    } catch (error) {
-      console.error("Error updating event:", error);
-      alert("Failed to update the event.");
-    }
-  };
+            isEditModalVisible.value = false;
+            isConfirmModalVisible.value = false;
+            alert("Event updated successfully!");
+        } catch (error) {
+            console.error("Error updating event:", error);
+            alert("Failed to update the event.");
+        }
+        };
 
-  cancelConfirmation.value = () => {
-    isConfirmModalVisible.value = false;
-  };
-};
+        cancelConfirmation.value = () => {
+            isConfirmModalVisible.value = false;
+        };
+        };
 
 
 const archiveEvent = async (event) => {
@@ -577,6 +743,10 @@ const archiveEvent = async (event) => {
      confirmAction,
      cancelConfirmation,
      dateError,
+     isCreateModalVisible,
+        newEvent,
+        openCreateModal,
+        createEvent
      };
     },
  });
@@ -586,5 +756,11 @@ const archiveEvent = async (event) => {
 .venue {
   font-weight: 500;
   color: var(--primary-color);
+}
+
+.flex.justify-content-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>

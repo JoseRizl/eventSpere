@@ -1,5 +1,5 @@
 <script>
-import { defineComponent, ref, onMounted } from "vue";
+import { defineComponent, ref, onMounted, computed } from "vue";
 import axios from "axios";
 import { DataTable, Column, Button, Dialog, InputText, Textarea } from "primevue";
 
@@ -23,6 +23,15 @@ export default defineComponent({
     const newItem = ref({ title: "", description: "", color: "#800080" });
     const showTags = ref(false); // Toggle between categories and tags
 
+    const normalizedEvents = computed(() => {
+  return events.value.map(event => ({
+    ...event,
+    tags: Array.isArray(event.tags)
+      ? event.tags.map(tag => typeof tag === 'object' ? tag.id : tag)
+      : []
+  }));
+});
+
     // Fetch data on mount
     onMounted(async () => {
       await fetchData();
@@ -45,16 +54,16 @@ export default defineComponent({
 
     // Check if an item is in use
     const isItemInUse = (id) => {
-      if (showTags.value) {
-        return events.value.some(event =>
-          Array.isArray(event.tags) ? event.tags.includes(id) : false
-        );
-      } else {
-        return events.value.some(event =>
-          event.category_id === id && event.archived === false
-        );
-      }
-    };
+  if (showTags.value) {
+    return normalizedEvents.value.some(event =>
+      Array.isArray(event.tags) ? event.tags.includes(id) : false
+    );
+  } else {
+    return normalizedEvents.value.some(event =>
+      event.category_id === id && event.archived === false
+    );
+  }
+};
 
     // Open Edit Modal
     const openEditModal = (item) => {

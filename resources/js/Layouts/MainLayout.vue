@@ -17,19 +17,7 @@ const sideBarItems = ref([
     {
         label: 'Events',
         icon: 'pi pi-calendar-clock',
-        items: [
-            {
-                label: 'Create Event',
-                icon: 'pi pi-plus',
-                route: route('event.create')
-            },
-            {
-                label: 'Event List',
-                icon: 'pi pi-list',
-                shortcut: '⌘+O',
-                route: route('event.list')
-            }
-        ]
+        route: route('event.list'),
     },
     {
         label: 'Categories/Tags',

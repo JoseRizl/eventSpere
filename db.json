@@ -12,17 +12,14 @@
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
       "archived": false,
       "tags": [
-        "1"
-      ],
-      "category_id": "2",
-      "type": "event",
-      "mappedTags": [
         {
           "id": "1",
           "name": "Foundation Day",
           "color": "#FF5733"
         }
       ],
+      "category_id": "2",
+      "type": "event",
       "tasks": [
         {
           "committee": {
@@ -61,17 +58,14 @@
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
       "archived": false,
       "tags": [
-        "2"
-      ],
-      "category_id": "3",
-      "type": "event",
-      "mappedTags": [
         {
           "id": "2",
           "name": "Palakasan",
           "color": "#33FF57"
         }
       ],
+      "category_id": "3",
+      "type": "event",
       "tasks": [
         {
           "committee": {
@@ -106,17 +100,14 @@
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
       "archived": true,
       "tags": [
-        "5"
-      ],
-      "category_id": "1",
-      "type": "event",
-      "mappedTags": [
         {
           "id": "5",
           "name": "test",
           "color": "#000000"
         }
-      ]
+      ],
+      "category_id": "1",
+      "type": "event"
     },
     {
       "id": "d62d",
@@ -130,17 +121,14 @@
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
       "archived": false,
       "tags": [
-        "6"
-      ],
-      "category_id": "2",
-      "type": "event",
-      "mappedTags": [
         {
           "id": "6",
           "name": "Graduation",
           "color": "#9e369e"
         }
       ],
+      "category_id": "2",
+      "type": "event",
       "tasks": [
         {
           "committee": {
@@ -175,23 +163,14 @@
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
       "archived": false,
       "tags": [
-        "3",
-        "4"
-      ],
-      "category_id": "1",
-      "type": "event",
-      "mappedTags": [
-        {
-          "id": "3",
-          "name": "Buwan ng Wika",
-          "color": "#3357FF"
-        },
         {
           "id": "4",
           "name": "Jolen Tournament",
           "color": "#000000"
         }
       ],
+      "category_id": "1",
+      "type": "event",
       "tasks": [
         {
           "committee": {
@@ -222,42 +201,19 @@
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
       "archived": false,
       "tags": [
-        "4"
+        {
+          "id": "1",
+          "name": "Foundation Day",
+          "color": "#FF5733"
+        },
+        {
+          "id": "2",
+          "name": "Palakasan",
+          "color": "#33FF57"
+        }
       ],
       "category_id": "2",
-      "type": "event",
-      "mappedTags": [
-        {
-          "id": "4",
-          "name": "Jolen Tournament",
-          "color": "#000000"
-        }
-      ]
-    },
-    {
-      "id": "1b35",
-      "title": "f",
-      "venue": "d",
-      "description": "1",
-      "category": "3",
-      "startDate": "2025-03-31T16:00:00.000Z",
-      "endDate": "2025-04-02T16:00:00.000Z",
-      "startTime": "02:11",
-      "endTime": "23:34",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": true,
-      "tags": [
-        "6"
-      ],
-      "category_id": "3",
-      "type": "event",
-      "mappedTags": [
-        {
-          "id": "6",
-          "name": "Graduation",
-          "color": "#9e369e"
-        }
-      ]
+      "type": "event"
     },
     {
       "id": "be13",
@@ -272,18 +228,15 @@
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
       "archived": false,
       "tags": [
-        "2"
-      ],
-      "category_id": "3",
-      "schedules": [],
-      "type": "event",
-      "mappedTags": [
         {
           "id": "2",
           "name": "Palakasan",
           "color": "#33FF57"
         }
-      ]
+      ],
+      "category_id": "3",
+      "schedules": [],
+      "type": "event"
     },
     {
       "id": "50ad",
@@ -298,11 +251,15 @@
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
       "archived": false,
       "tags": [
-        "6"
+        {
+          "id": "3",
+          "name": "Buwan ng Wika",
+          "color": "#3357FF"
+        }
       ],
       "category_id": "4",
       "type": "event",
-      "mappedTags": []
+      "schedules": []
     },
     {
       "id": "24f0",
@@ -311,23 +268,45 @@
       "description": "Nagtuo ang alimango na galupad ang isda?",
       "category": "2",
       "startDate": "Apr-16-2025",
-      "endDate": "Apr-30-2025",
+      "endDate": "May-01-2025",
       "startTime": "01:00",
-      "endTime": "00:00",
+      "endTime": "23:00",
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
       "archived": false,
       "tags": [
-        "1"
+        {
+          "id": "3",
+          "name": "Buwan ng Wika",
+          "color": "#3357FF"
+        },
+        {
+          "id": "4",
+          "name": "Jolen Tournament",
+          "color": "#000000"
+        },
+        {
+          "id": "6",
+          "name": "Graduation",
+          "color": "#9e369e"
+        }
       ],
       "category_id": "2",
       "type": "event",
-      "mappedTags": [
+      "tasks": [
         {
-          "id": "1",
-          "name": "Foundation Day",
-          "color": "#FF5733"
+          "committee": {
+            "id": "3",
+            "name": "Catering"
+          },
+          "employee": {
+            "id": "11",
+            "name": "Sonny Jihns",
+            "committeeId": 3
+          },
+          "task": "Overthink"
         }
-      ]
+      ],
+      "schedules": []
     },
     {
       "id": "109e",
@@ -342,9 +321,136 @@
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
       "archived": false,
       "tags": [
-        "1"
+        {
+          "id": "1",
+          "name": "Foundation Day",
+          "color": "#FF5733"
+        }
       ],
-      "category_id": "2"
+      "category_id": "2",
+      "type": "event"
+    },
+    {
+      "id": "dc9c",
+      "title": "qw",
+      "description": "1",
+      "venue": "Kort",
+      "category_id": "2",
+      "startDate": "May-07-2025",
+      "endDate": "May-14-2025",
+      "startTime": "01:00",
+      "endTime": "00:00",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "tags": [
+        {
+          "id": "1",
+          "name": "Foundation Day",
+          "color": "#FF5733"
+        }
+      ],
+      "type": "event",
+      "schedules": [],
+      "archived": true
+    },
+    {
+      "id": "bdc6",
+      "title": "qw2",
+      "venue": "Steds",
+      "description": "12 53 12 34 21 32 41 24 34 31",
+      "category": "1",
+      "startDate": "May-01-2025",
+      "endDate": "May-03-2025",
+      "startTime": "12:12",
+      "endTime": "00:12",
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": true,
+      "tags": [
+        {
+          "id": "3",
+          "name": "Buwan ng Wika",
+          "color": "#3357FF"
+        },
+        {
+          "id": "4",
+          "name": "Jolen Tournament",
+          "color": "#000000"
+        }
+      ],
+      "category_id": "1",
+      "type": "event"
+    },
+    {
+      "id": "4131",
+      "title": "123",
+      "description": "1",
+      "venue": null,
+      "category_id": "1",
+      "startDate": "Apr-08-2025",
+      "endDate": "May-08-2025",
+      "startTime": "00:00",
+      "endTime": "00:00",
+      "tags": [
+        {
+          "id": "4",
+          "name": "Jolen Tournament",
+          "color": "#000000"
+        }
+      ],
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": true,
+      "type": "event",
+      "schedules": []
+    },
+    {
+      "id": "58fe",
+      "title": "Pneumono­ultra­micro­scopic­silico­volcano­coniosis",
+      "description": "It is the longest word in the English language published in a popular dictionary, Oxford Dictionaries, which defines it as \"an artificial long word said to mean a lung disease caused by inhaling very fine ash and sand dust",
+      "venue": null,
+      "category_id": "2",
+      "startDate": "Apr-24-2025",
+      "endDate": "May-14-2025",
+      "startTime": "00:00",
+      "endTime": "00:00",
+      "tags": [
+        {
+          "id": "3",
+          "name": "Buwan ng Wika",
+          "color": "#3357FF"
+        }
+      ],
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": false,
+      "schedules": [
+        {
+          "time": "00:05",
+          "activity": "activity 1"
+        }
+      ]
+    },
+    {
+      "id": "ca43",
+      "title": "New",
+      "description": "Bag o ",
+      "venue": "Dalan",
+      "category_id": "2",
+      "startDate": "2025-04-16T16:00:00.000Z",
+      "endDate": null,
+      "startTime": "12:00",
+      "endTime": "00:00",
+      "tags": [
+        {
+          "id": "3",
+          "name": "Buwan ng Wika",
+          "color": "#3357FF"
+        },
+        {
+          "id": "4",
+          "name": "Jolen Tournament",
+          "color": "#000000"
+        }
+      ],
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": true
     }
   ],
   "tags": [

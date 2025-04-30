@@ -69,9 +69,11 @@ const saveChanges = () => {
     // Prepare payload with consistent tag format
     const payload = {
     ...eventDetails.value,
-    // Convert tags to just IDs for storage
-    tags: eventDetails.value.tags.map(tag => tag.id),
-    // Ensure other fields are properly formatted
+    tags: eventDetails.value.tags.map(tag => ({
+      id: tag.id,
+      name: tag.name,
+      color: tag.color
+    })),
     startDate: formattedStartDate.value,
     endDate: formattedEndDate.value,
     schedules: eventDetails.value.schedules.map(s => ({
@@ -108,7 +110,7 @@ const formatDisplayTime = (timeString) => {
 
 const validateDates = () => {
   if (startDateModel.value && endDateModel.value) {
-    return startDateModel.value < endDateModel.value;
+    return startDateModel.value <= endDateModel.value;
   }
   return true; // Skip validation if either date is empty
 };
