@@ -449,7 +449,28 @@
         }
       ],
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": false
+      "archived": true
+    },
+    {
+      "id": "0237",
+      "title": "NewTag",
+      "description": "New tag",
+      "venue": "",
+      "category_id": "2",
+      "startDate": "May-28-2025",
+      "endDate": "May-29-2025",
+      "startTime": "00:00",
+      "endTime": "23:00",
+      "tags": [
+        {
+          "id": "4",
+          "name": "Jolen Tournament",
+          "color": "#000000"
+        }
+      ],
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": false,
+      "createdAt": "2025-05-01T10:33:27.181Z"
     }
   ],
   "tags": [

@@ -417,7 +417,8 @@
                 : null,
             startTime: newEvent.value.startTime.padStart(5, "0"),
             endTime: newEvent.value.endTime.padStart(5, "0"),
-            archived: false
+            archived: false,
+            createdAt: new Date().toISOString(),
             };
 
             const response = await axios.post("http://localhost:3000/events", payload);

@@ -48,11 +48,14 @@ const ongoingEvents = computed(() => {
   return events.sort((a, b) => getEventStartDate(a) - getEventStartDate(b));
 });
 
-// Add these to your script setup
-const isNewEvent = (eventDate) => {
+const isNewEvent = (event) => {
+  if (!event?.createdAt) return false; // Safely check if createdAt exists
+
   const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-  return new Date(eventDate) > oneWeekAgo;
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7); // 7 days ago
+
+  const createdAtDate = new Date(event.createdAt);
+  return createdAtDate > oneWeekAgo;
 };
 
 const getUpcomingTag = (eventDate) => {
@@ -260,6 +263,12 @@ function saveToggleState(key, value) {
                 <img v-if="event.image" :src="event.image" class="h-full w-full object-cover" alt="Event image"/>
                 <span v-else class="text-gray-500">No image</span>
                 </div>
+                <Tag
+                v-if="isNewEvent(event)"
+                value="NEW"
+                severity="success"
+                class="absolute top-2 right-2 z-10"
+                />
             </template>
             <template #title>
                 <h3 class="text-lg font-medium overflow-hidden h-12 line-clamp-2">
@@ -330,6 +339,12 @@ function saveToggleState(key, value) {
                 <img v-if="event.image" :src="event.image" class="h-full w-full object-cover" alt="Event image"/>
                 <span v-else class="text-gray-500">No image</span>
                 </div>
+                <Tag
+                v-if="isNewEvent(event)"
+                value="NEW"
+                severity="success"
+                class="absolute top-2 right-2 z-10"
+                />
             </template>
             <template #title>
                 <h3 class="text-lg font-medium overflow-hidden h-12 line-clamp-2">
@@ -402,10 +417,10 @@ function saveToggleState(key, value) {
                 <img v-if="event.image" :src="event.image" class="h-full w-full object-cover" alt="Event image"/>
                 <span v-else class="text-gray-500">No image</span>
                 <Tag
-                    v-if="isNewEvent(event.date)"
+                    v-if="isNewEvent(event)"
                     value="NEW"
                     severity="success"
-                    class="absolute top-2 right-2"
+                    class="absolute top-2 right-2 z-10"
                 />
                 </div>
             </template>
@@ -420,8 +435,8 @@ function saveToggleState(key, value) {
                 <div class="text-sm text-gray-500 overflow-hidden h-6 line-clamp-1">
                 <span class="text-xs text-gray-500">{{ event.formattedDate }}</span>
                 <Tag
-                    :value="getUpcomingTag(event.date)"
-                    :severity="getUpcomingSeverity(event.date)"
+                    :value="getUpcomingTag(event.startDate)"
+                    :severity="getUpcomingSeverity(event.starDate)"
                     class="text-xs"
                 />
                 </div>
