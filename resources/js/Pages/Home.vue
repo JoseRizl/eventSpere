@@ -48,6 +48,30 @@ const ongoingEvents = computed(() => {
   return events.sort((a, b) => getEventStartDate(a) - getEventStartDate(b));
 });
 
+// Add these to your script setup
+const isNewEvent = (eventDate) => {
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  return new Date(eventDate) > oneWeekAgo;
+};
+
+const getUpcomingTag = (eventDate) => {
+  const daysDiff = Math.floor((new Date(eventDate) - new Date()) / (1000 * 60 * 60 * 24));
+
+  if (daysDiff < 7) return 'Soon';
+  if (daysDiff < 14) return 'Next Week';
+  if (daysDiff < 30) return 'This Month';
+  return 'Upcoming';
+};
+
+const getUpcomingSeverity = (eventDate) => {
+  const daysDiff = Math.floor((new Date(eventDate) - new Date()) / (1000 * 60 * 60 * 24));
+
+  if (daysDiff < 3) return 'danger';
+  if (daysDiff < 7) return 'warning';
+  return 'info';
+};
+
 const eventsThisMonth = computed(() => {
   const events = allNews.value.filter((news) => {
     const start = getEventStartDate(news);
@@ -201,38 +225,74 @@ function saveToggleState(key, value) {
     </button>
     </div>
 
-
     <!-- Ongoing Events -->
     <div v-if="ongoingEvents.length" class="w-full max-w-5xl mt-12">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold">Ongoing Events</h2>
-            <Button
-            size="small"
-            icon="pi pi-chevron-down"
-            :label="showOngoingEvents ? 'Hide' : 'Show'"
-            @click="showOngoingEvents = !showOngoingEvents"
-            />
-        </div>
-        <div v-if="showOngoingEvents" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Link
-            v-for="(news, index) in ongoingEvents"
-            :key="'ongoing-' + index"
-            :href="route('event.details', { id: news.id })"
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold">Ongoing Events</h2>
+        <Button
+        size="small"
+        icon="pi pi-chevron-down"
+        :label="showOngoingEvents ? 'Hide' : 'Show'"
+        @click="showOngoingEvents = !showOngoingEvents"
+        />
+    </div>
+    <div v-if="showOngoingEvents" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div
+        v-for="(event, index) in ongoingEvents"
+        :key="'ongoing-' + index"
+        class="group relative h-full"
+        >
+        <Link
+            :href="route('event.details', { id: event.id })"
             preserve-scroll
-            class="p-4 border rounded-lg shadow-sm bg-white block hover:shadow-lg hover:scale-105 transition"
-            >
-            <div class="h-40 bg-gray-300 rounded mb-2 flex items-center justify-center overflow-hidden">
-                <img v-if="news.image" :src="news.image" class="h-full w-full object-cover rounded" />
+            class="block h-full"
+        >
+        <Card class="h-full flex flex-col justify-between min-h-[340px]">
+            <template #header>
+                <div class="h-40 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden">
+                <img v-if="event.image" :src="event.image" class="h-full w-full object-cover" alt="Event image"/>
+                <span v-else class="text-gray-500">No image</span>
+                </div>
+            </template>
+            <template #title>
+                <h3 class="text-lg font-medium overflow-hidden h-12 line-clamp-2">
+                    {{ event.title }}
+                </h3>
+            </template>
+
+            <template #subtitle>
+                <div
+                class="text-sm text-gray-500 overflow-hidden h-6 line-clamp-1">
+                {{ event.formattedDate }}
             </div>
-            <p class="font-semibold text-center">{{ news.title }}</p>
-            <p class="text-sm text-gray-600 text-center">{{ news.description }}</p>
-            <p class="text-xs text-gray-500 text-center mt-1">{{ news.formattedDate }}</p>
-            </Link>
+            </template>
+
+            <template #content>
+            <div class="flex-1 mb-4 overflow-hidden h-[calc(2*1.5rem)]">
+                <p class="text-sm text-gray-600 line-clamp-2">
+                {{ event.description }}
+                </p>
+            </div>
+            </template>
+
+            <template #footer>
+                <div class="flex justify-end mt-2 z-20">
+                <Button
+                label="Read More"
+                icon="pi pi-info-circle"
+                class="p-button-text p-button-sm"
+                @click.stop="$inertia.visit(route('event.details', { id: event.id }))"
+                />
+                </div>
+            </template>
+            </Card>
+        </Link>
         </div>
     </div>
+    </div>
 
-   <!-- Events This Month -->
-   <div v-if="eventsThisMonth.length" class="w-full max-w-5xl mt-8">
+    <!-- Events This Month -->
+    <div v-if="eventsThisMonth.length" class="w-full max-w-5xl mt-8">
     <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-semibold">Events This Month</h2>
         <Button
@@ -242,55 +302,140 @@ function saveToggleState(key, value) {
         @click="showEventsThisMonth = !showEventsThisMonth"
         />
     </div>
-        <div v-if="showEventsThisMonth" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Link
-            v-for="(news, index) in eventsThisMonth"
-            :key="'month-' + index"
-            :href="route('event.details', { id: news.id })"
+    <div v-if="showEventsThisMonth" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div
+        v-for="(event, index) in eventsThisMonth"
+        :key="'month-' + index"
+        class="group relative h-full"
+        >
+        <Link
+            :href="route('event.details', { id: event.id })"
             preserve-scroll
-            class="p-4 border rounded-lg shadow-sm bg-white block hover:shadow-lg hover:scale-105 transition"
-            >
-            <div class="h-40 bg-gray-300 rounded mb-2 flex items-center justify-center overflow-hidden">
-                <img v-if="news.image" :src="news.image" class="h-full w-full object-cover rounded" />
+            class="block h-full"
+        >
+        <Card class="h-full flex flex-col justify-between min-h-[340px]">
+            <template #header>
+                <div class="h-40 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden">
+                <img v-if="event.image" :src="event.image" class="h-full w-full object-cover" alt="Event image"/>
+                <span v-else class="text-gray-500">No image</span>
+                </div>
+            </template>
+            <template #title>
+                <h3 class="text-lg font-medium overflow-hidden h-12 line-clamp-2">
+                    {{ event.title }}
+                </h3>
+            </template>
+
+            <template #subtitle>
+            <div class="overflow-hidden h-6 line-clamp-1">
+                <span class="text-sm text-gray-500">{{ event.formattedDate }}</span>
             </div>
-            <p class="font-semibold text-center">{{ news.title }}</p>
-            <p class="text-sm text-gray-600 text-center">{{ news.description }}</p>
-            <p class="text-xs text-gray-500 text-center mt-1">{{ news.formattedDate }}</p>
-            </Link>
+            <Tag value="This Month" severity="info" class="text-xs mt-1"/>
+            </template>
+
+            <template #content>
+            <div class="flex-1 mb-4 overflow-hidden h-[calc(2*1.5rem)]">
+                <p class="text-sm text-gray-600 line-clamp-2">
+                {{ event.description }}
+                </p>
+            </div>
+            </template>
+
+            <template #footer>
+                <div class="flex justify-end mt-2 z-20">
+                    <Button
+                    label="Read More"
+                    icon="pi pi-info-circle"
+                    class="p-button-text p-button-sm"
+                    @click.stop="$inertia.visit(route('event.details', { id: event.id }))"
+                    />
+                </div>
+            </template>
+            </Card>
+        </Link>
         </div>
-        </div>
+    </div>
+    </div>
     <p v-else class="text-center text-gray-500">No events this month.</p>
 
     <!-- Upcoming Events -->
     <div v-if="upcomingEvents.length" class="w-full max-w-5xl mt-12">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold">Upcoming Events</h2>
-            <Button
-            size="small"
-            icon="pi pi-chevron-down"
-            :label="showUpcomingEvents ? 'Hide' : 'Show'"
-            @click="showUpcomingEvents = !showUpcomingEvents"
-            />
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold">Upcoming Events</h2>
+        <Button
+        size="small"
+        icon="pi pi-chevron-down"
+        :label="showUpcomingEvents ? 'Hide' : 'Show'"
+        @click="showUpcomingEvents = !showUpcomingEvents"
+        />
     </div>
+
     <div v-if="showUpcomingEvents" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Link
-        v-for="(news, index) in upcomingEvents"
+        <div
+        v-for="(event, index) in upcomingEvents"
         :key="'upcoming-' + index"
-        :href="route('event.details', { id: news.id })"
-        preserve-scroll
-        class="p-4 border rounded-lg shadow-sm bg-white block hover:shadow-lg hover:scale-105 transition"
+        class="group relative h-full"
         >
-        <div class="h-40 bg-gray-300 rounded mb-2 flex items-center justify-center overflow-hidden">
-            <img v-if="news.image" :src="news.image" class="h-full w-full object-cover rounded" />
-        </div>
-        <p class="font-semibold text-center">{{ news.title }}</p>
-        <p class="text-sm text-gray-600 text-center">{{ news.description }}</p>
-        <p class="text-xs text-gray-500 text-center mt-1">{{ news.formattedDate }}</p>
+        <Link
+            :href="route('event.details', { id: event.id })"
+            preserve-scroll
+            class="block h-full"
+        >
+            <Card class="h-full flex flex-col justify-between min-h-[340px]">
+            <template #header>
+                <div class="h-40 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden">
+                <img v-if="event.image" :src="event.image" class="h-full w-full object-cover" alt="Event image"/>
+                <span v-else class="text-gray-500">No image</span>
+                <Tag
+                    v-if="isNewEvent(event.date)"
+                    value="NEW"
+                    severity="success"
+                    class="absolute top-2 right-2"
+                />
+                </div>
+            </template>
+
+            <template #title>
+                <h3 class="text-lg font-medium overflow-hidden h-12 line-clamp-2">
+                {{ event.title }}
+                </h3>
+            </template>
+
+            <template #subtitle>
+                <div class="text-sm text-gray-500 overflow-hidden h-6 line-clamp-1">
+                <span class="text-xs text-gray-500">{{ event.formattedDate }}</span>
+                <Tag
+                    :value="getUpcomingTag(event.date)"
+                    :severity="getUpcomingSeverity(event.date)"
+                    class="text-xs"
+                />
+                </div>
+            </template>
+
+            <template #content>
+            <div class="flex-1 mb-4 overflow-hidden h-[calc(2*1.5rem)]">
+                <p class="text-sm text-gray-600 line-clamp-2">
+                {{ event.description }}
+                </p>
+            </div>
+            </template>
+
+            <template #footer>
+                <div class="flex justify-end mt-2 z-20">
+                    <Button
+                    label="Read More"
+                    icon="pi pi-info-circle"
+                    class="p-button-text p-button-sm"
+                    @click.stop="$inertia.visit(route('event.details', { id: event.id }))"
+                    />
+                </div>
+            </template>
+            </Card>
         </Link>
         </div>
     </div>
+    </div>
     <p v-else class="text-center text-gray-500">No upcoming events.</p>
-
 
     <!-- Add Announcement Confirmation Modal -->
     <Dialog v-model:visible="showAddModal" header="Confirm Add" modal>
@@ -312,3 +457,13 @@ function saveToggleState(key, value) {
     </Dialog>
   </div>
 </template>
+
+<style scoped>
+.z-20 {
+  z-index: 20;
+}
+
+.h-40 {
+  height: 10rem;
+}
+</style>

@@ -174,7 +174,7 @@ const formattedEndDate = computed(() => {
 <template>
     <div class="min-h-screen bg-gray-200 py-8 px-4 flex flex-col items-center">
       <!-- Dynamic Banner Image -->
-      <div class="w-full max-w-4xl bg-white rounded-lg shadow-md overflow-hidden">
+      <div class="w-full max-w-2xl bg-white rounded-lg shadow-md overflow-hidden">
         <img
           v-if="eventDetails?.image"
           :src="eventDetails.image"

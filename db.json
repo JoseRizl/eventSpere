@@ -111,7 +111,7 @@
         },
         {
             "id": "d62d",
-            "title": "\ud83e\udd23",
+            "title": "Title",
             "description": "Gradute",
             "category": "2",
             "startDate": "May-13-2025",
@@ -424,6 +424,10 @@
                 {
                     "time": "00:05",
                     "activity": "activity 1"
+                },
+                {
+                    "time": "01:11",
+                    "activity": "activity 2"
                 }
             ]
         }
