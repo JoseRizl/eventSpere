@@ -436,7 +436,7 @@ function saveToggleState(key, value) {
                 <span class="text-xs text-gray-500">{{ event.formattedDate }}</span>
                 <Tag
                     :value="getUpcomingTag(event.startDate)"
-                    :severity="getUpcomingSeverity(event.starDate)"
+                    :severity="getUpcomingSeverity(event.startDate)"
                     class="text-xs"
                 />
                 </div>
