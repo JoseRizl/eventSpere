@@ -4,9 +4,6 @@ import axios from "axios";
 import { format } from "date-fns";
 import { Link, router } from "@inertiajs/vue3";
 import { useAnnouncementStore } from "../stores/announcementStore";
-import Dialog from 'primevue/dialog';
-import Button from 'primevue/button';
-import InputText from 'primevue/inputtext';
 import { isSameMonth, isWithinInterval, parse } from "date-fns";
 
 const allNews = ref([]);

@@ -2,7 +2,6 @@
 import { ref, computed } from 'vue';
 import { parse, format, parseISO, isValid } from 'date-fns';
 import { usePage, router } from '@inertiajs/vue3';
-import DatePicker from 'primevue/datepicker';
 
 // Inertia props
 const { props } = usePage();

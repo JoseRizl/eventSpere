@@ -329,27 +329,9 @@
   import { defineComponent, ref, onMounted, computed } from "vue";
   import axios from "axios";
   import { parse, format } from "date-fns";
-  import DataTable from "primevue/datatable";
-  import Column from "primevue/column";
-  import Button from "primevue/button";
-  import Dialog from "primevue/dialog";
-  import InputText from "primevue/inputtext";
-  import DatePicker from 'primevue/datepicker';
-  import Dropdown from "primevue/dropdown";
-  import Textarea from "primevue/textarea";
 
   export default defineComponent({
     name: "EventList",
-    components: {
-      DataTable,
-      Column,
-      Button,
-      Dialog,
-      InputText,
-      DatePicker,
-      Dropdown,
-      Textarea,
-    },
     setup() {
       const dateError = ref("");
       const events = ref([]);

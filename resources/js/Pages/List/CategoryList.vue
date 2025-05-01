@@ -1,18 +1,9 @@
 <script>
 import { defineComponent, ref, onMounted, computed } from "vue";
 import axios from "axios";
-import { DataTable, Column, Button, Dialog, InputText, Textarea } from "primevue";
 
 export default defineComponent({
   name: "CategoryList",
-  components: {
-    DataTable,
-    Column,
-    Button,
-    Dialog,
-    InputText,
-    Textarea,
-  },
   setup() {
     const categories = ref([]);
     const tags = ref([]);

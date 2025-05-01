@@ -1,10 +1,6 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import Dropdown from "primevue/dropdown";
-import Card from "primevue/card";
-import Button from "primevue/button";
 import axios from "axios";
-import { Textarea } from "primevue";
 
 // Reactive state for form fields
 const selectedEvent = ref(null);

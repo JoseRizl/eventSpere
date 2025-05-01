@@ -17,6 +17,12 @@ import 'primeicons/primeicons.css';
   import Button from "primevue/button";
   import Checkbox from "primevue/checkbox";
   import Tooltip from "primevue/tooltip";
+  import DatePicker from 'primevue/datepicker';
+  import DataTable from 'primevue/datatable';
+  import Column from 'primevue/column';
+  import Dialog from 'primevue/dialog';
+  import Dropdown from 'primevue/dropdown';
+
 
 // Pinia
 import { createPinia } from 'pinia';
@@ -73,6 +79,12 @@ createInertiaApp({
       .component('Button', Button)
       .component('Checkbox', Checkbox) // Register Checkbox
       .component('Tooltip', Tooltip)
+      .component('DatePicker', DatePicker)
+      .component('DataTable', DataTable)
+      .component('Column', Column)
+      .component('Dialog', Dialog)
+      .component('Dropdown', Dropdown)
+
       .mount(el);
 
     // Axios Base URL (for JSON Server)

@@ -62,17 +62,8 @@
   import { defineComponent, ref, onMounted, computed } from "vue";
   import axios from "axios";
   import { format } from "date-fns";
-  import DataTable from "primevue/datatable";
-  import Column from "primevue/column";
-  import Button from "primevue/button";
-
   export default defineComponent({
     name: "Archive",
-    components: {
-      DataTable,
-      Column,
-      Button,
-    },
     setup() {
       const archivedEvents = ref([]);
       const categories = ref([]);
