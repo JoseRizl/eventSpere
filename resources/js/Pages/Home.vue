@@ -26,48 +26,53 @@ const latestAnnouncement = computed(() =>
   store.announcements.length ? store.announcements[store.announcements.length - 1] : null
 );
 
+const getEventStartDate = (news) => {
+  return typeof news.startDate === 'string' && news.startDate.includes('-')
+    ? parse(news.startDate, "MMM-dd-yyyy", new Date())
+    : new Date(news.startDate);
+};
 
-const ongoingEvents = computed(() =>
-  allNews.value.filter((news) => {
-    const start = typeof news.startDate === 'string' && news.startDate.includes('-')
-  ? parse(news.startDate, "MMM-dd-yyyy", new Date())
-  : new Date(news.startDate);
-
-  const end = news.endDate
-  ? (news.endDate.includes('-')
-      ? parse(news.endDate, "MMM-dd-yyyy", new Date())
-      : new Date(news.endDate))
-  : start;
+const ongoingEvents = computed(() => {
+  const events = allNews.value.filter((news) => {
+    const start = getEventStartDate(news);
+    const end = news.endDate
+      ? (news.endDate.includes('-')
+          ? parse(news.endDate, "MMM-dd-yyyy", new Date())
+          : new Date(news.endDate))
+      : start;
 
     return isWithinInterval(now, { start, end });
-  })
-);
+  });
 
-const eventsThisMonth = computed(() =>
-  allNews.value.filter((news) => {
-    const start = typeof news.startDate === 'string' && news.startDate.includes('-')
-  ? parse(news.startDate, "MMM-dd-yyyy", new Date())
-  : new Date(news.startDate);
+  // Sort by start date (ascending)
+  return events.sort((a, b) => getEventStartDate(a) - getEventStartDate(b));
+});
 
+const eventsThisMonth = computed(() => {
+  const events = allNews.value.filter((news) => {
+    const start = getEventStartDate(news);
     const end = news.endDate
-  ? (news.endDate.includes('-')
-      ? parse(news.endDate, "MMM-dd-yyyy", new Date())
-      : new Date(news.endDate))
-  : start;
+      ? (news.endDate.includes('-')
+          ? parse(news.endDate, "MMM-dd-yyyy", new Date())
+          : new Date(news.endDate))
+      : start;
 
     return isSameMonth(start, now) && !(isWithinInterval(now, { start, end }));
-  })
-);
+  });
 
-const upcomingEvents = computed(() =>
-  allNews.value.filter((news) => {
-    const start = typeof news.startDate === 'string' && news.startDate.includes('-')
-  ? parse(news.startDate, "MMM-dd-yyyy", new Date())
-  : new Date(news.startDate);
+  // Sort by start date (ascending)
+  return events.sort((a, b) => getEventStartDate(a) - getEventStartDate(b));
+});
 
+const upcomingEvents = computed(() => {
+  const events = allNews.value.filter((news) => {
+    const start = getEventStartDate(news);
     return start > now && !isSameMonth(start, now);
-  })
-);
+  });
+
+  // Sort by start date (ascending)
+  return events.sort((a, b) => getEventStartDate(a) - getEventStartDate(b));
+});
 
 // Fetch announcements and news
 onMounted(async () => {
