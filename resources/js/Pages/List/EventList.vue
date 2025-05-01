@@ -529,7 +529,6 @@
   }
 };
 
-
     // Update filtered employees when committee changes
     const updateEmployees = (index) => {
     const selectedCommittee = taskAssignments.value[index].committee;
@@ -674,7 +673,6 @@
             isConfirmModalVisible.value = false;
         };
         };
-
 
 const archiveEvent = async (event) => {
   if (!confirm(`Are you sure you want to archive "${event.title}"?`)) return;

@@ -56,8 +56,15 @@ const isNewEvent = (eventDate) => {
 };
 
 const getUpcomingTag = (eventDate) => {
-  const daysDiff = Math.floor((new Date(eventDate) - new Date()) / (1000 * 60 * 60 * 24));
+  if (!eventDate) return 'Upcoming';
 
+  const eventDateObj = new Date(eventDate);
+  if (isNaN(eventDateObj.getTime())) return 'Upcoming';
+
+  const daysDiff = Math.floor((eventDateObj - new Date()) / (1000 * 60 * 60 * 24));
+
+  if (daysDiff < 0) return 'Today';
+  if (daysDiff < 3) return 'Very Soon';
   if (daysDiff < 7) return 'Soon';
   if (daysDiff < 14) return 'Next Week';
   if (daysDiff < 30) return 'This Month';
@@ -261,10 +268,14 @@ function saveToggleState(key, value) {
             </template>
 
             <template #subtitle>
-                <div
-                class="text-sm text-gray-500 overflow-hidden h-6 line-clamp-1">
+                <div class="text-sm text-gray-500 overflow-hidden h-6 line-clamp-1">
                 {{ event.formattedDate }}
-            </div>
+                </div>
+                <Tag
+                :value="getUpcomingTag(event.startDate)"
+                :severity="getUpcomingSeverity(event.startDate)"
+                class="text-xs"
+                />
             </template>
 
             <template #content>
@@ -278,7 +289,7 @@ function saveToggleState(key, value) {
             <template #footer>
                 <div class="flex justify-end mt-2 z-20">
                 <Button
-                label="Read More"
+                label="Event Details"
                 icon="pi pi-info-circle"
                 class="p-button-text p-button-sm"
                 @click.stop="$inertia.visit(route('event.details', { id: event.id }))"
@@ -330,7 +341,11 @@ function saveToggleState(key, value) {
             <div class="overflow-hidden h-6 line-clamp-1">
                 <span class="text-sm text-gray-500">{{ event.formattedDate }}</span>
             </div>
-            <Tag value="This Month" severity="info" class="text-xs mt-1"/>
+            <Tag
+            :value="getUpcomingTag(event.startDate)"
+            :severity="getUpcomingSeverity(event.startDate)"
+            class="text-xs"
+            />
             </template>
 
             <template #content>
@@ -344,7 +359,7 @@ function saveToggleState(key, value) {
             <template #footer>
                 <div class="flex justify-end mt-2 z-20">
                     <Button
-                    label="Read More"
+                    label="Event Details"
                     icon="pi pi-info-circle"
                     class="p-button-text p-button-sm"
                     @click.stop="$inertia.visit(route('event.details', { id: event.id }))"
@@ -423,7 +438,7 @@ function saveToggleState(key, value) {
             <template #footer>
                 <div class="flex justify-end mt-2 z-20">
                     <Button
-                    label="Read More"
+                    label="Event Details"
                     icon="pi pi-info-circle"
                     class="p-button-text p-button-sm"
                     @click.stop="$inertia.visit(route('event.details', { id: event.id }))"
