@@ -1,5 +1,5 @@
 <script>
-import { defineComponent, ref, onMounted, computed } from "vue";
+import { defineComponent, ref, onMounted, computed, watch } from "vue";
 import axios from "axios";
 
 export default defineComponent({
@@ -12,7 +12,7 @@ export default defineComponent({
     const isCreateModalVisible = ref(false);
     const selectedItem = ref(null);
     const newItem = ref({ title: "", description: "", color: "#800080" });
-    const showTags = ref(false); // Toggle between categories and tags
+    const showTags = ref(localStorage.getItem("showTags") === "true");
 
     const normalizedEvents = computed(() => {
   return events.value.map(event => ({
@@ -139,7 +139,12 @@ export default defineComponent({
     // Toggle between categories and tags
     const toggleView = () => {
       showTags.value = !showTags.value;
+      localStorage.setItem("showTags", showTags.value);
     };
+
+    watch(showTags, (newVal) => {
+        localStorage.setItem("showTags", newVal);
+    });
 
     return {
       categories,
