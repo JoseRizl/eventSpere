@@ -51,7 +51,6 @@ createInertiaApp({
     app
       .use(router)
       .use(plugin)
-      .use(createPinia())
       .use(ZiggyVue)
       .use(pinia) // Add Pinia
       .directive('tooltip', Tooltip)
