@@ -214,6 +214,30 @@
           </div>
         </div>
 
+        <div class="p-field">
+        <label for="image">Event Image (SVG)</label>
+        <div class="flex align-items-center gap-2">
+            <input
+            type="file"
+            id="image"
+            accept="image/*"
+            @change="handleImageUpload"
+            class="p-inputtext"
+            />
+            <Button
+            v-if="newEvent.image && newEvent.image !== defaultImage"
+            icon="pi pi-times"
+            class="p-button-rounded p-button-danger p-button-text"
+            @click="removeImage(false)"
+            v-tooltip.top="'Remove image'"
+            />
+        </div>
+        <small class="p-text-secondary">Leave empty to use default image</small>
+        <div v-if="newEvent.image" class="mt-2">
+            <img :src="newEvent.image" alt="Preview" class="preview-image" />
+        </div>
+        </div>
+
         <template #footer>
           <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="isCreateModalVisible = false" />
           <Button label="Create Event" icon="pi pi-check" class="p-button-primary" @click="createEvent" />
@@ -278,7 +302,6 @@
         {{ dateError }}
         </div>
 
-          <!-- Start Time -->
         <div class="p-field">
         <label for="startTime">Start Time</label>
         <input type="time"
@@ -290,7 +313,6 @@
         />
         </div>
 
-        <!-- End Time -->
         <div class="p-field">
         <label for="endTime">End Time</label>
         <input type="time"
@@ -301,11 +323,34 @@
         />
         </div>
 
-          <!-- Event Description -->
           <div class="p-field">
             <label for="description">Description</label>
             <Textarea id="description" v-model="selectedEvent.description" rows="4" placeholder="Enter event description" autoResize />
           </div>
+        </div>
+
+        <div class="p-field">
+        <label for="image">Event Image (SVG)</label>
+        <div class="flex align-items-center gap-2">
+            <input
+            type="file"
+            id="image"
+            accept="image/*"
+            @change="handleEditImageUpload"
+            class="p-inputtext"
+            />
+            <Button
+            v-if="selectedEvent.image && selectedEvent.image !== defaultImage"
+            icon="pi pi-times"
+            class="p-button-rounded p-button-danger p-button-text"
+            @click="removeImage(true)"
+            v-tooltip.top="'Remove image'"
+            />
+        </div>
+        <small class="p-text-secondary">Leave empty to use default image</small>
+        <div v-if="selectedEvent.image" class="mt-2">
+            <img :src="selectedEvent.image" alt="Preview" class="preview-image" />
+        </div>
         </div>
 
         <template #footer>
@@ -351,6 +396,8 @@
       const confirmAction = ref(() => {});
       const cancelConfirmation = ref(() => {});
       const isCreateModalVisible = ref(false);
+      const defaultImage = "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg";
+
       const newEvent = ref({
         title: "",
         description: "",
@@ -398,15 +445,26 @@
           }
         }
 
+        let finalImage = newEvent.value.image;
+        if (newEvent.value.image.startsWith('blob:')) {
+        const response = await fetch(newEvent.value.image);
+        const blob = await response.blob();
+        finalImage = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+        });
+        }
+
         try {
             const payload = {
             ...newEvent.value,
+            image: finalImage || defaultImage,
             tags: Array.isArray(newEvent.value.tags)
                 ? newEvent.value.tags.map(tag => ({
                     id: tag.id,
                     name: tag.name,
                     color: tag.color
-                    // include other tag properties as needed
                 }))
                 : [],
             startDate: newEvent.value.startDate
@@ -437,6 +495,145 @@
             alert("Failed to create the event.");
         }
       };
+
+
+        const handleEditImageUpload = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = async () => {
+            // Compression and SVG conversion logic (same as create)
+            const MAX_SIZE = 800;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height && width > MAX_SIZE) {
+                height *= MAX_SIZE / width;
+                width = MAX_SIZE;
+            } else if (height > MAX_SIZE) {
+                width *= MAX_SIZE / height;
+                height = MAX_SIZE;
+            }
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const compressedData = canvas.toDataURL('image/jpeg', 0.7);
+            const svgContent = `
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    width="${width}"
+                    height="${height}">
+                <image href="${compressedData}"
+                        width="100%"
+                        height="100%"/>
+                </svg>`;
+
+            const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
+            const svgUrl = URL.createObjectURL(svgBlob);
+            selectedEvent.value.image = svgUrl;
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+        };
+
+        async function toDataURL(maybeFileOrUrl) {
+        if (typeof maybeFileOrUrl === "string" &&
+            maybeFileOrUrl.startsWith("data:")) {
+            return maybeFileOrUrl;
+        }
+        if (typeof maybeFileOrUrl === "string" &&
+            maybeFileOrUrl.startsWith("blob:")) {
+            // Convert blob: URL → DataURL
+            const resp = await fetch(maybeFileOrUrl);
+            const blob = await resp.blob();
+            return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onerror = reject;
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+            });
+        }
+        if (maybeFileOrUrl instanceof File) {
+            // Convert File object → DataURL
+            return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onerror = reject;
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(maybeFileOrUrl);
+            });
+        }
+        // Fallback default
+        return defaultImage;
+        }
+
+      const handleImageUpload = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = async () => {
+            // Compression setup
+            const MAX_SIZE = 800;
+            let width = img.width;
+            let height = img.height;
+
+            // Calculate new dimensions
+            if (width > height && width > MAX_SIZE) {
+                height *= MAX_SIZE / width;
+                width = MAX_SIZE;
+            } else if (height > MAX_SIZE) {
+                width *= MAX_SIZE / height;
+                height = MAX_SIZE;
+            }
+
+            // Create canvas for compression
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Get compressed data
+            const compressedData = canvas.toDataURL('image/jpeg', 0.7);
+
+            // Create SVG wrapper
+            const svgContent = `
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    width="${width}"
+                    height="${height}">
+                <image href="${compressedData}"
+                        width="100%"
+                        height="100%"/>
+                </svg>`;
+
+            // Create final SVG blob
+            const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
+            const svgUrl = URL.createObjectURL(svgBlob);
+            newEvent.value.image = svgUrl;
+            };
+            img.src = e.target.result;
+        };
+
+        reader.readAsDataURL(file);
+        };
+
+        const removeImage = (isEdit = false) => {
+        const target = isEdit ? selectedEvent.value : newEvent.value;
+
+        if (target.image && target.image.startsWith('blob:')) {
+            URL.revokeObjectURL(target.image); // Clean up memory
+        }
+        target.image = defaultImage;
+        };
 
       const validateEventDates = () => {
         if (new Date(selectedEvent.value.startDate) > new Date(selectedEvent.value.endDate)) {
@@ -505,30 +702,30 @@
     };
 
     const deleteTask = async (index, taskEntry) => {
-  if (!confirm(`Are you sure you want to delete this task?`)) return;
+        if (!confirm(`Are you sure you want to delete this task?`)) return;
 
-  try {
-    taskAssignments.value.splice(index, 1); // Remove from local UI
+        try {
+            taskAssignments.value.splice(index, 1); // Remove from local UI
 
-    const updatedEvent = {
-      ...selectedEvent.value,
-      tasks: [...taskAssignments.value]
+            const updatedEvent = {
+            ...selectedEvent.value,
+            tasks: [...taskAssignments.value]
+            };
+
+            await axios.put(`http://localhost:3000/events/${selectedEvent.value.id}`, updatedEvent);
+
+            // Update local event data
+            const eventIndex = combinedEvents.value.findIndex(event => event.id === selectedEvent.value.id);
+            if (eventIndex !== -1) {
+            combinedEvents.value[eventIndex].tasks = [...taskAssignments.value];
+            }
+
+            alert("Task deleted successfully!");
+        } catch (error) {
+            console.error("Error deleting task:", error);
+            alert("Failed to delete task.");
+        }
     };
-
-    await axios.put(`http://localhost:3000/events/${selectedEvent.value.id}`, updatedEvent);
-
-    // Update local event data
-    const eventIndex = combinedEvents.value.findIndex(event => event.id === selectedEvent.value.id);
-    if (eventIndex !== -1) {
-      combinedEvents.value[eventIndex].tasks = [...taskAssignments.value];
-    }
-
-    alert("Task deleted successfully!");
-  } catch (error) {
-    console.error("Error deleting task:", error);
-    alert("Failed to delete task.");
-  }
-};
 
     // Update filtered employees when committee changes
     const updateEmployees = (index) => {
@@ -540,7 +737,6 @@
     );
     };
 
-    // Save Task Assignments
     const saveTaskAssignments = async () => {
         try {
         const updatedEvent = {
@@ -550,7 +746,6 @@
 
         await axios.put(`http://localhost:3000/events/${selectedEvent.value.id}`, updatedEvent);
 
-        // Find the index of the event in combinedEvents and update it
         const index = combinedEvents.value.findIndex(event => event.id === selectedEvent.value.id);
         if (index !== -1) {
         combinedEvents.value[index].tasks = [...taskAssignments.value];
@@ -572,11 +767,9 @@
 
         if (time) {
             try {
-            // First pad the time to ensure HH:mm format
             const paddedTime = time.padStart(5, '0');
-            // Then parse and format to 12-hour format with AM/PM
             const parsedTime = parse(paddedTime, 'HH:mm', new Date());
-            formattedTime = format(parsedTime, 'hh:mm a'); // e.g. "04:00 PM"
+            formattedTime = format(parsedTime, 'hh:mm a');
             } catch (e) {
             console.error('Error formatting time:', e);
             formattedTime = time.padStart(5, '0'); // Fallback to original format if parsing fails
@@ -603,28 +796,29 @@
             ? event.tags // Use the tag objects directly
             : [],
             startDate: event.startDate ? new Date(event.startDate) : null,
-            endDate: event.endDate ? new Date(event.endDate) : null
+            endDate: event.endDate ? new Date(event.endDate) : null,
+            image: event.image || defaultImage
         };
         isEditModalVisible.value = true;
         };
 
 
       // Save Edited Event
-        const saveEditedEvent = async () => {
+      const saveEditedEvent = async () => {
         if (!selectedEvent.value) return;
         dateError.value = "";
 
-        // Validate that end date is not earlier than start date
+        // Validate dates
         if (selectedEvent.value.startDate && selectedEvent.value.endDate) {
             const start = new Date(selectedEvent.value.startDate);
             const end = new Date(selectedEvent.value.endDate);
             if (end < start) {
-                dateError.value = "End date cannot be before start date.";
+            dateError.value = "End date cannot be before start date.";
             return;
             }
         }
 
-        // Set up confirmation modal instead of using confirm()
+        // Set up confirmation modal
         confirmMessage.value = `Are you sure you want to save changes to "${selectedEvent.value.title}"?`;
         isConfirmModalVisible.value = true;
 
@@ -632,67 +826,99 @@
             try {
             const collection = selectedEvent.value.type === "sport" ? "sports" : "events";
 
-            // Ensure startTime and endTime are in HH:mm format
-            const startTimeFormatted = selectedEvent.value.startTime
-                ? selectedEvent.value.startTime.padStart(5, "0") // Ensure format HH:mm
-                : "00:00";
+            // Handle image data properly
+            let finalImage = selectedEvent.value.image;
 
-            const endTimeFormatted = selectedEvent.value.endTime
-                ? selectedEvent.value.endTime.padStart(5, "0")
-                : "00:00";
+            // Only process if it's a new blob image
+            if (selectedEvent.value.image.startsWith('blob:')) {
+                try {
+                const response = await fetch(selectedEvent.value.image);
+                const blob = await response.blob();
+                finalImage = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onerror = reject;
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.readAsDataURL(blob);
+                });
+                } catch (error) {
+                console.error("Image conversion failed:", error);
+                finalImage = defaultImage;
+                }
+            } else if (!selectedEvent.value.image) {
+                // Handle case where image was removed
+                finalImage = defaultImage;
+            }
 
-            await axios.put(`http://localhost:3000/${collection}/${selectedEvent.value.id}`, {
+            // Prepare payload - ensure we're not sending Vue reactive proxies
+            const payload = JSON.parse(JSON.stringify({
                 ...selectedEvent.value,
-                venue: selectedEvent.value.venue,
-                tags: selectedEvent.value.tags, // Send the full tag objects directly
+                image: finalImage,
+                tags: Array.isArray(selectedEvent.value.tags)
+                ? selectedEvent.value.tags
+                : [],
                 startDate: selectedEvent.value.startDate
                 ? format(new Date(selectedEvent.value.startDate), "MMM-dd-yyyy")
                 : null,
                 endDate: selectedEvent.value.endDate
                 ? format(new Date(selectedEvent.value.endDate), "MMM-dd-yyyy")
                 : null,
-                startTime: startTimeFormatted,
-                endTime: endTimeFormatted,
+                startTime: selectedEvent.value.startTime?.padStart(5, "0") || "00:00",
+                endTime: selectedEvent.value.endTime?.padStart(5, "0") || "00:00",
+            }));
+
+            // Debug: log the payload to verify image is included
+            console.log("Saving payload:", {
+                ...payload,
+                image: payload.image ? "IMAGE_DATA_PRESENT" : "NO_IMAGE_DATA"
             });
 
-            // Update local state - NO mappedTags needed
+            // Update server
+            await axios.put(`http://localhost:3000/${collection}/${selectedEvent.value.id}`, payload);
+
+            // Update local state
             const index = combinedEvents.value.findIndex(e => e.id === selectedEvent.value.id);
             if (index !== -1) {
-            combinedEvents.value[index] = selectedEvent.value;
+                combinedEvents.value.splice(index, 1, {
+                ...selectedEvent.value,
+                image: finalImage,
+                });
             }
 
+            // Close modals
             isEditModalVisible.value = false;
             isConfirmModalVisible.value = false;
             alert("Event updated successfully!");
-        } catch (error) {
+            } catch (error) {
             console.error("Error updating event:", error);
             alert("Failed to update the event.");
-        }
+            }
         };
 
         cancelConfirmation.value = () => {
             isConfirmModalVisible.value = false;
         };
+    };
+
+
+        const archiveEvent = async (event) => {
+            if (!confirm(`Are you sure you want to archive "${event.title}"?`)) return;
+
+            try {
+                // Update the event's `archived` status on the server
+                await axios.put(`http://localhost:3000/events/${event.id}`, {
+                ...event,
+                archived: true, // Ensure the `archived` flag is set to true
+                });
+
+                // Remove the archived event from the local list
+                combinedEvents.value = combinedEvents.value.filter(e => e.id !== event.id);
+                alert("Event archived successfully!");
+            } catch (error) {
+                console.error("Error archiving event:", error);
+                alert("Failed to archive the event.");
+            }
         };
 
-const archiveEvent = async (event) => {
-  if (!confirm(`Are you sure you want to archive "${event.title}"?`)) return;
-
-  try {
-    // Update the event's `archived` status on the server
-    await axios.put(`http://localhost:3000/events/${event.id}`, {
-      ...event,
-      archived: true, // Ensure the `archived` flag is set to true
-    });
-
-    // Remove the archived event from the local list
-    combinedEvents.value = combinedEvents.value.filter(e => e.id !== event.id);
-    alert("Event archived successfully!");
-  } catch (error) {
-    console.error("Error archiving event:", error);
-    alert("Failed to archive the event.");
-  }
-};
      return {
      combinedEvents,
      categoryMap,
@@ -720,23 +946,14 @@ const archiveEvent = async (event) => {
      cancelConfirmation,
      dateError,
      isCreateModalVisible,
-        newEvent,
-        openCreateModal,
-        createEvent
+     newEvent,
+     openCreateModal,
+     createEvent,
+     handleImageUpload,
+     handleEditImageUpload,
+     removeImage,
+     defaultImage
      };
     },
  });
  </script>
-
-<style scoped>
-.venue {
-  font-weight: 500;
-  color: var(--primary-color);
-}
-
-.flex.justify-content-between {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-</style>
