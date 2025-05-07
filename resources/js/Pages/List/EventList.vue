@@ -497,51 +497,51 @@
       };
 
 
-        const handleEditImageUpload = (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
+      const handleEditImageUpload = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const img = new Image();
-            img.onload = async () => {
-            // Compression and SVG conversion logic (same as create)
-            const MAX_SIZE = 800;
-            let width = img.width;
-            let height = img.height;
+  // Clean up previous blob URL if exists
+  if (selectedEvent.value.image && selectedEvent.value.image.startsWith('blob:')) {
+    URL.revokeObjectURL(selectedEvent.value.image);
+  }
 
-            if (width > height && width > MAX_SIZE) {
-                height *= MAX_SIZE / width;
-                width = MAX_SIZE;
-            } else if (height > MAX_SIZE) {
-                width *= MAX_SIZE / height;
-                height = MAX_SIZE;
-            }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX_SIZE = 800;
+      let width = img.width;
+      let height = img.height;
 
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = width;
-            canvas.height = height;
-            ctx.drawImage(img, 0, 0, width, height);
+      if (width > height && width > MAX_SIZE) {
+        height *= MAX_SIZE / width;
+        width = MAX_SIZE;
+      } else if (height > MAX_SIZE) {
+        width *= MAX_SIZE / height;
+        height = MAX_SIZE;
+      }
 
-            const compressedData = canvas.toDataURL('image/jpeg', 0.7);
-            const svgContent = `
-                <svg xmlns="http://www.w3.org/2000/svg"
-                    width="${width}"
-                    height="${height}">
-                <image href="${compressedData}"
-                        width="100%"
-                        height="100%"/>
-                </svg>`;
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = width;
+      canvas.height = height;
+      ctx.drawImage(img, 0, 0, width, height);
 
-            const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
-            const svgUrl = URL.createObjectURL(svgBlob);
-            selectedEvent.value.image = svgUrl;
-            };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-        };
+      // Convert directly to data URL instead of SVG wrapper
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+      selectedEvent.value.image = dataUrl;
+    };
+    img.onerror = () => {
+      selectedEvent.value.image = defaultImage;
+    };
+    img.src = e.target.result;
+  };
+  reader.onerror = () => {
+    selectedEvent.value.image = defaultImage;
+  };
+  reader.readAsDataURL(file);
+};
 
         async function toDataURL(maybeFileOrUrl) {
         if (typeof maybeFileOrUrl === "string" &&
@@ -828,10 +828,14 @@
 
             // Handle image data properly
             let finalImage = selectedEvent.value.image;
+            const oldImageUrl = selectedEvent.value.image;
 
             // Only process if it's a new blob image
-            if (selectedEvent.value.image.startsWith('blob:')) {
+            if (selectedEvent.value.image && selectedEvent.value.image.startsWith('blob:')) {
                 try {
+                    if (oldImageUrl && oldImageUrl.startsWith('blob:')) {
+                    URL.revokeObjectURL(oldImageUrl);
+                }
                 const response = await fetch(selectedEvent.value.image);
                 const blob = await response.blob();
                 finalImage = await new Promise((resolve, reject) => {
@@ -952,7 +956,8 @@
      handleImageUpload,
      handleEditImageUpload,
      removeImage,
-     defaultImage
+     defaultImage,
+     toDataURL,
      };
     },
  });
