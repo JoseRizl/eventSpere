@@ -97,13 +97,13 @@
       <!-- Committee Selection -->
       <div class="p-field">
         <label>Committee</label>
-        <Dropdown v-model="taskEntry.committee" :options="committees" optionLabel="name" placeholder="Select Committee" filter @change="updateEmployees(index)" />
+        <Select v-model="taskEntry.committee" :options="committees" optionLabel="name" placeholder="Select Committee" filter @change="updateEmployees(index)" />
       </div>
 
       <!-- Employee Selection -->
       <div v-if="taskEntry.committee" class="p-field">
         <label>Employee</label>
-        <Dropdown v-model="taskEntry.employee" :options="filteredEmployees[index]" optionLabel="name" placeholder="Select Employee" filter/>
+        <Select v-model="taskEntry.employee" :options="filteredEmployees[index]" optionLabel="name" placeholder="Select Employee" filter/>
       </div>
 
       <!-- Task Description -->
@@ -157,7 +157,7 @@
           <!-- Event Category Dropdown -->
           <div class="p-field">
             <label for="category">Category</label>
-            <Dropdown
+            <Select
               id="category"
               v-model="newEvent.category_id"
               :options="categories"
@@ -180,9 +180,9 @@
           </div>
 
           <div v-if="dateError" class="p-field text-red-500 text-sm mt-1">
-            <i class="pi pi-exclamation-triangle mr-1"></i>
-            {{ dateError }}
-          </div>
+        <i class="pi pi-exclamation-triangle mr-1"></i>
+        {{ dateError }}
+        </div>
 
           <!-- Start Time -->
           <div class="p-field">
@@ -275,7 +275,7 @@
           <!-- Event Category Dropdown -->
           <div class="p-field">
             <label for="category">Category</label>
-            <Dropdown
+            <Select
               id="category"
               v-model="selectedEvent.category_id"
               :options="categories"
@@ -374,11 +374,15 @@
   import { defineComponent, ref, onMounted, computed } from "vue";
   import axios from "axios";
   import { parse, format } from "date-fns";
+import { Select } from "primevue";
 
   export default defineComponent({
     name: "EventList",
     setup() {
       const dateError = ref("");
+      const resetErrors = () => {
+        dateError.value = "";
+        };
       const events = ref([]);
       const sports = ref([]);
       const categories = ref([]);
@@ -431,18 +435,34 @@
       };
 
       const createEvent = async () => {
-        if (!newEvent.value.title) {
-          alert("Please enter an event title");
-          return;
+        resetErrors();
+
+        // Validate title
+        if (!newEvent.value.title.trim()) {
+            alert("Please enter a valid event title");
+            return;
         }
 
+        // Validate dates
         if (newEvent.value.startDate && newEvent.value.endDate) {
-          const start = new Date(newEvent.value.startDate);
-          const end = new Date(newEvent.value.endDate);
-          if (end < start) {
-            dateError.value = "End date cannot be before start date.";
+            const start = new Date(newEvent.value.startDate);
+            const end = new Date(newEvent.value.endDate);
+
+            // Block if end date is BEFORE start date (allows same-day) and if end date is in the past
+            if (end < start) {
+            dateError.value = "End date cannot be before start date";
             return;
-          }
+            }
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            if (end < today && start < today) {
+            dateError.value = "Event cannot be entirely in the past";
+            return;
+            }
+            if (end < start) {
+            dateError.value = "End date cannot be before start date";
+            return;
+            }
         }
 
         let finalImage = newEvent.value.image;
@@ -498,50 +518,50 @@
 
 
       const handleEditImageUpload = (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
+        const file = event.target.files[0];
+        if (!file) return;
 
-  // Clean up previous blob URL if exists
-  if (selectedEvent.value.image && selectedEvent.value.image.startsWith('blob:')) {
-    URL.revokeObjectURL(selectedEvent.value.image);
-  }
+        // Clean up previous blob URL if exists
+        if (selectedEvent.value.image && selectedEvent.value.image.startsWith('blob:')) {
+            URL.revokeObjectURL(selectedEvent.value.image);
+        }
 
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const img = new Image();
-    img.onload = () => {
-      const MAX_SIZE = 800;
-      let width = img.width;
-      let height = img.height;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+            const MAX_SIZE = 800;
+            let width = img.width;
+            let height = img.height;
 
-      if (width > height && width > MAX_SIZE) {
-        height *= MAX_SIZE / width;
-        width = MAX_SIZE;
-      } else if (height > MAX_SIZE) {
-        width *= MAX_SIZE / height;
-        height = MAX_SIZE;
-      }
+            if (width > height && width > MAX_SIZE) {
+                height *= MAX_SIZE / width;
+                width = MAX_SIZE;
+            } else if (height > MAX_SIZE) {
+                width *= MAX_SIZE / height;
+                height = MAX_SIZE;
+            }
 
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      canvas.width = width;
-      canvas.height = height;
-      ctx.drawImage(img, 0, 0, width, height);
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
 
-      // Convert directly to data URL instead of SVG wrapper
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-      selectedEvent.value.image = dataUrl;
-    };
-    img.onerror = () => {
-      selectedEvent.value.image = defaultImage;
-    };
-    img.src = e.target.result;
-  };
-  reader.onerror = () => {
-    selectedEvent.value.image = defaultImage;
-  };
-  reader.readAsDataURL(file);
-};
+            // Convert directly to data URL instead of SVG wrapper
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+            selectedEvent.value.image = dataUrl;
+            };
+            img.onerror = () => {
+            selectedEvent.value.image = defaultImage;
+            };
+            img.src = e.target.result;
+        };
+        reader.onerror = () => {
+            selectedEvent.value.image = defaultImage;
+        };
+        reader.readAsDataURL(file);
+        };
 
         async function toDataURL(maybeFileOrUrl) {
         if (typeof maybeFileOrUrl === "string" &&
@@ -802,23 +822,39 @@
         isEditModalVisible.value = true;
         };
 
-
       // Save Edited Event
       const saveEditedEvent = async () => {
         if (!selectedEvent.value) return;
-        dateError.value = "";
+        resetErrors();
+
+        // 1. Validate title
+        if (!selectedEvent.value.title.trim()) {
+            alert("Please enter a valid event title");
+            return;
+        }
 
         // Validate dates
         if (selectedEvent.value.startDate && selectedEvent.value.endDate) {
             const start = new Date(selectedEvent.value.startDate);
             const end = new Date(selectedEvent.value.endDate);
+
             if (end < start) {
-            dateError.value = "End date cannot be before start date.";
+            dateError.value = "End date cannot be before start date";
+            return;
+            }
+
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            if (end < today && start < today) {
+            dateError.value = "Event cannot be entirely in the past";
+            return;
+            }
+            if (end < start) {
+            dateError.value = "End date cannot be before start date";
             return;
             }
         }
 
-        // Set up confirmation modal
         confirmMessage.value = `Are you sure you want to save changes to "${selectedEvent.value.title}"?`;
         isConfirmModalVisible.value = true;
 

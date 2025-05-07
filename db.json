@@ -303,28 +303,6 @@
       "type": "event"
     },
     {
-      "id": "dc9c",
-      "title": "qw",
-      "description": "1",
-      "venue": "Kort",
-      "category_id": "2",
-      "startDate": "May-07-2025",
-      "endDate": "May-14-2025",
-      "startTime": "01:00",
-      "endTime": "00:00",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "tags": [
-        {
-          "id": "1",
-          "name": "Foundation Day",
-          "color": "#FF5733"
-        }
-      ],
-      "type": "event",
-      "schedules": [],
-      "archived": true
-    },
-    {
       "id": "bdc6",
       "title": "qw2",
       "venue": "Steds",
@@ -350,28 +328,6 @@
       ],
       "category_id": "1",
       "type": "event"
-    },
-    {
-      "id": "4131",
-      "title": "123",
-      "description": "1",
-      "venue": null,
-      "category_id": "1",
-      "startDate": "Apr-08-2025",
-      "endDate": "May-08-2025",
-      "startTime": "00:00",
-      "endTime": "00:00",
-      "tags": [
-        {
-          "id": "4",
-          "name": "Jolen Tournament",
-          "color": "#000000"
-        }
-      ],
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": true,
-      "type": "event",
-      "schedules": []
     },
     {
       "id": "58fe",
@@ -421,7 +377,7 @@
         }
       ],
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": true
+      "archived": false
     },
     {
       "id": "0237",
@@ -459,22 +415,6 @@
       "archived": false,
       "createdAt": "2025-05-04T08:58:14.587Z",
       "type": "event"
-    },
-    {
-      "id": "7ac9",
-      "title": "c",
-      "description": "d",
-      "venue": "",
-      "category_id": null,
-      "startDate": "May-13-2025",
-      "endDate": null,
-      "startTime": "00:00",
-      "endTime": "00:00",
-      "tags": [],
-      "image": "data:image/svg+xml;base64,CiAgICAgICAgPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgICAgICAgICAgICB3aWR0aD0iMTQ2IgogICAgICAgICAgICAgaGVpZ2h0PSI5NSI+CiAgICAgICAgICA8aW1hZ2UgaHJlZj0iZGF0YTppbWFnZS9qcGVnO2Jhc2U2NCwvOWovNEFBUVNrWkpSZ0FCQVFBQUFRQUJBQUQvNGdIWVNVTkRYMUJTVDBaSlRFVUFBUUVBQUFISUFBQUFBQVF3QUFCdGJuUnlVa2RDSUZoWldpQUg0QUFCQUFFQUFBQUFBQUJoWTNOd0FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFRQUE5dFlBQVFBQUFBRFRMUUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBbGtaWE5qQUFBQThBQUFBQ1J5V0ZsYUFBQUJGQUFBQUJSbldGbGFBQUFCS0FBQUFCUmlXRmxhQUFBQlBBQUFBQlIzZEhCMEFBQUJVQUFBQUJSeVZGSkRBQUFCWkFBQUFDaG5WRkpEQUFBQlpBQUFBQ2hpVkZKREFBQUJaQUFBQUNoamNISjBBQUFCakFBQUFEeHRiSFZqQUFBQUFBQUFBQUVBQUFBTVpXNVZVd0FBQUFnQUFBQWNBSE1BVWdCSEFFSllXVm9nQUFBQUFBQUFiNklBQURqMUFBQURrRmhaV2lBQUFBQUFBQUJpbVFBQXQ0VUFBQmphV0ZsYUlBQUFBQUFBQUNTZ0FBQVBoQUFBdHM5WVdWb2dBQUFBQUFBQTl0WUFBUUFBQUFEVExYQmhjbUVBQUFBQUFBUUFBQUFDWm1ZQUFQS25BQUFOV1FBQUU5QUFBQXBiQUFBQUFBQUFBQUJ0YkhWakFBQUFBQUFBQUFFQUFBQU1aVzVWVXdBQUFDQUFBQUFjQUVjQWJ3QnZBR2NBYkFCbEFDQUFTUUJ1QUdNQUxnQWdBRElBTUFBeEFEYi8yd0JEQUFvSEJ3Z0hCZ29JQ0FnTENnb0xEaGdRRGcwTkRoMFZGaEVZSXg4bEpDSWZJaUVtS3pjdkppazBLU0VpTUVFeE5EazdQajQrSlM1RVNVTThTRGM5UGp2LzJ3QkRBUW9MQ3c0TkRod1FFQnc3S0NJb096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenYvd0FBUkNBQmZBSklEQVNJQUFoRUJBeEVCLzhRQUd3QUFBZ0lEQVFBQUFBQUFBQUFBQUFBQUFBWUVCUUVEQndML3hBQkdFQUFCQXdNQ0F3UUdCd1FGRFFBQUFBQUJBZ01FQUFVUkVpRUdNVUVUVVdHQkJ4UWljWkdoTWpaQ1VyR3l3UlVqTTNOVGRKTEMwUllYSkNaeWdwT2lvOUxoOFBML3hBQWFBUUFDQXdFQkFBQUFBQUFBQUFBQUFBQUFBZ0VEQkFVRy84UUFLQkVBQXdBQ0FRTUVBZ0VGQUFBQUFBQUFBQUVDQXhFaEJCSXhFeUpCVVRKaGNRVVVnWkdoLzlvQURBTUJBQUlSQXhFQVB3RHMxRkZGQUJSV00xbWdBb3JGRkFCVUdWZDRrUWxLbGxheDlsTzlhcjFMY2p4Z2hyT3R6TzQ2RHJTdXBLd2NxQjg2d2RUMVR4dnRueVYzZXVFTVk0amk1L2hPWThxbVJycEVsWUNIUUZIN0t0alNkWHNOdURjSk5aWjYzSnZua1JaR1BWRkxOdnZUMFpRWmtBdUk1ZUlwaFlmYmtOaGJTdFFOZExGbmpLdVBKYk5KbTJpdFQ4bG1NalU2c0ovRTFSVHVJSFZFdHhrOW1QdkhuUmx6eGpYdVlPa3ZJd0tVbEl5cFFBOFRRbGFWREtWQlE4RFNPNCs2NnJVNDRwUjd5Y212VE1sNWhldHR4U1QzZzFqL0FMOWIvSGdyOVg5RHhSVUMxWEVUMmZhd0hFZlNBL0dwOWRDTFZ6M0l0VDN5Wm9vb3B5UW9vb29BNHI2UzdqT2pjWnZ0TVRIMmtkazM3S0hTQjlIdUJyclZqVXBkZ3Q2MUtLbEtpdGtrbkpKMGl1TytsTDY3di95bS93QXRkaHNIMWV0djlWYS9LS3o0Mzc2TTJKKytqbVBwVnUweHZpaG1MRmxQdEpiakp5bHR3cHlva25wNFlyZDZKYnJLa1h1YkdreW5uZ3FPRnBEamhWZ2hRRzJmZlZaeEtUZFBTeDJJM0hyTFRROGdrSDlhMGVqZVNtQnhza09IU2xUYnFENURQOTJxdTdXVGY3S3U1K3J2OW16MGtUNXJIRzB4cG1aSWJRRXQ0U2gxUUE5aFBRR3FoVS9pYXdPc3V2eUpiUWRTRm9TOHNxUTRQY2NnMUs5SWJwa2NZeVhpQU5iYlp3UDlnVmM4ZkQvVnkxNTVoUXgvd3huOUtxcXQxL0lsY3Vuc1lMTGNFWFdCRnVDVUJBYy9pSTZKVURoUTkzWHpybDc5NXVUejdyeVowb0pVc3EyZFZnWlB2cHk0VWVNYmdTVy8vUjl1b2YyQmo1MG94WXhYdzNjSklHemI3Q2MrOEwvd3FxSjAzb0tiYVIwR3pTM0pYQ1VlUVhGRndSSEFWazVWbE9vWnozN0NremhTOVRXK0pZU1hwMGhiYnEreVVsVHBJT29hUnNUM2tVeThJdTlwd1U4anF6MjZmSXB6K3BybnJDM0dYVVNFQTVhV2xXZTQ1eVB3cVo0YkNtMXBqZngxYzNoS2dyaFQzQTJwaFc3THBDU1F0UVBJODlzVmRXRzh0M0MxdE5yRHFKRWR0RGF3L3NwdzZBUW9kNFBmUzZ1M00zSnUycENBbGlNMDRsMEoyMUtMcTFENGdnK2RTSXdTMWY1U1VBSlNJN0JBSElZS2grQXByeHBweXpxOU4wTlpmZlhoK0N3dTNGWXRLNFFYR0RpWkIvZUVMM1FuVmpJSFdySk41WVhIVkliankxdEFFbFFZSXdCejUrNnFHZGI0bDJiYUR4S2tvNUZDc2RUdFV5MXBXKzE2aytvcFlNaGE5Qkc2eHF5RTU3aWQvR3FyeFIycHBmeVg5VC9UNmhPNThFL2dqaW1WY3VOWkVKRFJFSUpVbEFMWjFwd0J1cnUzcnA5Sy9DdG9peDVzbTROUmtOdU9qQzFwR0NzazVQOEE3NDAwVjBlbmE5Tk9WcEdLZkJtaWlpdEF3VVVVVUFjTjlLWDEzZjhBNVRmNWE3RFlQcTdidjZxMStRVng3MHBmWGQvK1UzK1d1dDIxL3dCVjRRaXlEdDJVQkMvZzJEV2JIK2RHYkgrZEhJN00rbWI2VXpLWHVqMXgxM0k2QWFqK2xSTFdCRDlJZ2IraWtUVnRlUkpUK3RWMWp2SnN0M0Z3TWNTRkFLR2txMDdrWXpuem9YZFBXK0tFM1hzZ3pybEplMEE1MCswRHo2MW1iMlp1NWY4QVNmeDU5YVhzZjBUWDVCVlpjcjNQdTRZUk5mMUlqcDB0cENRa0pHQU00SE03RGZ3cTE0L1RvNHRrSjdtMngveUNybmp1TXgvazdibjBzdHBkUXBDQXBLUUNVbHNuQjh3S1R4d0RUYlpLdURjYTJlanR4dUU4SG1Wc3BDWGh0MmlsTEdvNDZkUmpwaXFLMXg5Zm81dks4Ym1RMmVYM2NmOEFmV2d5MS81dHd3cFdjM0lvU081SVJxUHpQenJSQjRsRVBocVRadlVrcjlZS2oyeGNJeG5IVEhUVFVwYUpiVy84Rjd3SzluaCs4TVorZ0NzZWFGRCs3U3phSXhsd3JvMGtaVTNGN1lmN3Eway9JbXJuZ1IzQXZESFZVSlMvN1A4QTlWSDRHVWhOM2xkb2tLUXFDNmxTVDFCd01mT3BTSmlYYm1WODhGaERMc2FESEMybkZxVzJrSzdKQTlrNEF5ZkxId3JZdUUyaFRqeFd0UzNBbEt5VHpDU2NENW1wbEFTRnJTZzc2MUJPTytwZGNIdW94eml4cGZDUmlWSFMzUGZESDdwT0FBbEkyQnh6cldoeDcxa0RzMXRvUWNoeklJWDRZNWovQU1WT3VLTkUwN1kxcEJIajBxTlNRL2FSZzkrR1h2NE9vV2d0S3RVZGJJOWxhQXJ6UFA1MU5wZTRNbGR0YVZNRTdzcklIdU8vNDVwaHJwUnJ0V2p6ZWFQVHlPZm96UlJSVGxRVVVVVUFjTTlLWDEzZi9sTi9scXdlOUtBYzRZVlprV3RTRm1KNnQyM2I4dlowNXhwL1dtSGlEaGVIZStMSGxYRHQyRlBPSWFqdUNPb3RyQWJCK2xuR2NoUThxcTJ1Q0xNSDNDR0pNcU9oS3dYVk5yYVNGaFlUc3JQdGZhK0ZZN1ZTM1M4R056YXB0ZklzOEVXcUZjcGN3em82WDIyV1FVcFVTQUZGUTMySTZacUx4aGI0MXN2Nm1vYklaWlUwaGFVQWtnWkcvUHhCcDlnMm1CYUVQZnMrTVdsT2dhaVZsV2Nad056NDFGWFliYmZveTU5MG12TnlZa1pDbjBtR1VsSU9kaHY3VytSbXNtT3UrbWsrQlBUMnRmSW9jYnZDUnhGMjQ1T1JXRi9GcEpyM3hIeFNpOVc2SkNaaXFaUXhwVXRTbFpLbEJPbmJ1SFA0MWZTckxiWkxxSEp5SkRiRFNGTitzaU9zcTBJU2tJeWpPMjJkL0Nwa25oVzAyT2VscU4vcHNwQ20xRks0aFVsS1ZIbVRxd05zbmwwcTE2YWRKOEloelQzeUpsempPd09HTFV5N2xLcExqc3JTZVlTZEtVbnowazAwMlBodTFTZUdZN2tpQ2hjbDloYXUxS2xBNXlyVDF4dHRVMjUydURlN3MyTG90NWxJUzIweTRoaFMwa3FVZGlRY0RjajQxYnVXNlJZbVVJYktKa0tLTkhhTXA5cG5IUmFjazQ4UjM3anJTdnVxRmNES09kL0J6Zmd0NE5YaVFqUDhXRElSL3dCTW45S2cyQ1dtSGVHeTR2czIzRUtiS2p5Qk9NWjhNL3BUdFpPSHJLSTZya0pqc1o5aU4yenFUR1VRRXFCU2RPL3REY2phdlVheVdWaHhjdHkybzB3bmRiTHJqU215b0JBM1VnazV3U2NlNm5ibUpUWStGdkZjMzlNbytJcnFxMUFzWlcxSVFwQ2xKSTMwWkJQeXBuc3Y3R2pPMjZaZUxnaHBVOUFYR2JWc0FDT2FqOWtiNHljWlBLcE0yM3hYM0c1RjFqeFdwTGpZS0k2SWZyRHdSMEt5VGhQdStacmJibzhXM3I5UmhTYmJiRXlDVlBCK0NHMXJBQndCbFJTb0E5T2xXeEV2OGpwWk92elpkcDhKL1EwM2ZoK0pkb2FHU094VTF1MDRnYnA3L2VEU01yaFM3TTN1WXpIVWlZMmhwcFN0S3RKU282dHNIcmdBK1lwMmdTRnI0ZWF1VWg5eFN2VisyY0xlMmZaeWNDbFNRaFZwdktiM0l2TStMSnVDQTRxT3kycDZPQVFBTTVPa2tBRGxqbFY5UkRRWXVzeVlWcWZCY2NIdzVNU1pOUStnb0tBbEswbnZPNCtSK2RObGM3dDRVaTV5K0lJUEVhWkJXNjBsNk1rcTByS2xCS2lwdFI5ZzR4Z2p1cm9sTkNTV2tWNU16elc3Wm1paWluRUNpaWlnQlZ1VjExMzVFZVM2eEdqd0pLWEFWSldWdWZ1K21CakdWNDU5S2dydVN4YjM3ZTFQZ0ZsYW5DaGFrdkJRQ2xGUU95ZVl6VHZSU09kclRGY25PV1V3a1QzVzREeGVaUkhhQ2xhbEVGejJ0UkdyeXJkcmFhY2tva3BjOVZteCt3ZGNhVHFVeVFTVXF4MUc1ejVVeDNlenJjV1pFWVpKM1VqOVJWS0ljblZwRERtZTdTYTVHUlhqemR5UlE1YVpBWDZxKzBXWk43dDZtRmpTNTJDVnFkVW5xQWpvVDU0cVV0MWMrZkptbGxUUWZLVXR0cStrRUpHQm54TzV4MHpWekJzRHF5RnlpVUQ3bzVtcjFpS3pHUnBhYlNrZTdjK2RYemdySk90ZHFHVU4vbzU4NDZnM0ZMRWlWSGl0TXJaZEtuUXJVckM5UkNjREgyZm5XWk1zTTM1YzIwM09PVnlwQi9oaFpWcDA4bHBJMGtlejc5OWpUOUloc1NrRkxyWVBpTmlQT2xxNVd0MkNyVUNWdEhrci9HaTRyQkdwVzE5a1ZEbEZUTWwyeEZydWExeFJBdUVtUG9LRUVscDQ1emxIY2NubHNmZnpyMUtaOVlqT3M2dEpjU1VnOXhyWlJXSEptZVRXL2dSdlpxdU1obTVLZGVjbE5XK1ZJWkRUN1VwS3V6SkFJMUljRzJOK1IrVlNMU2xDSEFoLzluM05LVTZVTVFiZUZhdHRpWERoSXJ4bkZPRm9jN1MyTW51R240VnY2WEw2bFBhNUhqbGtWdGlUYnVFU3lBRXlXSVJBQ1Bhd29JMkE3OTZXR25seFdrSXMxN21SbVdtMEJZbFJWUE1Fa2Nnb2pLVDRjcWZxSzZEblpjNTJJYVUrdk5MUytxMnpya2xTVENkdDdKMXRyQitrdFdNQURiUGhtbndjcU5xS0V0QWxvelJSUlREQlJSUlFBVVVVVUFGWXJORkFCUlJSUUJpdkxyU0hteTI0a0tTb1lJTmU2eFVOYkFWYm5hSElheTQwQ3RrOWZ1KytxeW53Z0VZSXptcStSWTRiNnRRU1d5ZnVWemMzUmJlOGYraW1zZjBLWUdUVGhhR1ZNVzVwSzlpUm40MXFqV09KSGNDenFjSTVhdVZXVldkTDAxWW4zVU5FYTVabWlpaXQ1WUZGRkZBQlJSUlFCLy9aIgogICAgICAgICAgICAgICAgIHdpZHRoPSIxMDAlIgogICAgICAgICAgICAgICAgIGhlaWdodD0iMTAwJSIvPgogICAgICAgIDwvc3ZnPg==",
-      "archived": false,
-      "createdAt": "2025-05-04T08:59:10.932Z",
-      "schedules": []
     },
     {
       "id": "f2d0",
@@ -530,24 +470,44 @@
       "endTime": "00:00",
       "tags": [],
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": false,
+      "archived": true,
       "createdAt": "2025-05-07T00:00:07.020Z"
     },
     {
-      "id": "216e",
-      "title": "pllllllll",
+      "id": "a236",
+      "title": "fds",
+      "description": "",
+      "venue": "",
+      "category_id": "1",
+      "startDate": "May-07-2025",
+      "endDate": "May-08-2025",
+      "startTime": "00:00",
+      "endTime": "00:00",
+      "tags": [
+        {
+          "id": "1",
+          "name": "Foundation Day",
+          "color": "#FF5733"
+        }
+      ],
+      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+      "archived": true,
+      "createdAt": "2025-05-07T01:00:22.932Z"
+    },
+    {
+      "id": "7ea0",
+      "title": "dsa",
       "description": "",
       "venue": "",
       "category_id": null,
-      "startDate": null,
-      "endDate": null,
+      "startDate": "2025-05-05T16:00:00.000Z",
+      "endDate": "2025-05-06T16:00:00.000Z",
       "startTime": "00:00",
       "endTime": "00:00",
       "tags": [],
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": false,
-      "createdAt": "2025-05-07T00:14:30.364Z",
-      "type": "event"
+      "archived": true,
+      "createdAt": "2025-05-07T01:03:15.619Z"
     }
   ],
   "tags": [

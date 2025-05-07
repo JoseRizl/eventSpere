@@ -68,7 +68,7 @@ const getUpcomingTag = (eventDate) => {
 
   if (daysDiff < 0) return 'Today';
   if (daysDiff < 3) return 'Very Soon';
-  if (daysDiff < 7) return 'Soon';
+  if (daysDiff < 7) return 'This Week';
   if (daysDiff < 14) return 'Next Week';
   if (daysDiff < 30) return 'This Month';
   return 'Upcoming';
