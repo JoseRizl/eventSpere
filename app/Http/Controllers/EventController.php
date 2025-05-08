@@ -10,34 +10,35 @@ use Illuminate\Support\Facades\File;
 class EventController extends Controller
 {
     public function show($id)
-    {
-        $json = File::get(base_path('db.json'));
-        $data = json_decode($json, true);
+{
+    $json = File::get(base_path('db.json'));
+    $data = json_decode($json, true);
 
-        $event = collect($data['events'])->firstWhere('id', $id);
-        $event['venue'] = $event['venue'] ?? null;
+    $event = collect($data['events'])->firstWhere('id', $id);
+    $event['venue'] = $event['venue'] ?? null;
 
-        // Get current event's tag IDs
-        $currentTagIds = collect($event['tags'])->pluck('id')->toArray();
+    // Get current event's tag IDs
+    $currentTagIds = collect($event['tags'])->pluck('id')->toArray();
 
-        // Filter related events to only those sharing at least one tag
-        $relatedEvents = collect($data['events'])
-            ->where('id', '!=', $id)
-            ->filter(function ($relatedEvent) use ($currentTagIds) {
-                $relatedTagIds = collect($relatedEvent['tags'])->pluck('id')->toArray();
-                return count(array_intersect($currentTagIds, $relatedTagIds)) > 0;
-            })
-            ->take(6)
-            ->values()
-            ->toArray();
+    // Filter related events to only those sharing at least one tag AND not archived
+    $relatedEvents = collect($data['events'])
+        ->where('id', '!=', $id)
+        ->where('archived', false) // Add this line to exclude archived events
+        ->filter(function ($relatedEvent) use ($currentTagIds) {
+            $relatedTagIds = collect($relatedEvent['tags'])->pluck('id')->toArray();
+            return count(array_intersect($currentTagIds, $relatedTagIds)) > 0;
+        })
+        ->take(5)
+        ->values()
+        ->toArray();
 
-        return Inertia::render('Events/EventDetails', [
-            'event' => $event,
-            'categories' => $data['categories'] ?? [],
-            'tags' => $data['tags'] ?? [],
-            'relatedEvents' => $relatedEvents,
-        ]);
-    }
+    return Inertia::render('Events/EventDetails', [
+        'event' => $event,
+        'categories' => $data['categories'] ?? [],
+        'tags' => $data['tags'] ?? [],
+        'relatedEvents' => $relatedEvents,
+    ]);
+}
 
     public function update(Request $request, $id)
     {
