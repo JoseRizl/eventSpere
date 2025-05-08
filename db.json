@@ -1,776 +1,781 @@
 {
-  "events": [
-    {
-      "id": "f697",
-      "title": "Parade",
-      "description": "69th Foundation day parade in the Honor of Sir Seled Jolero and Sryan Balazar",
-      "category": "2",
-      "startDate": "May-07-2025",
-      "endDate": "May-11-2025",
-      "startTime": "08:00",
-      "endTime": "08:15",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": false,
-      "tags": [
+    "events": [
         {
-          "id": "1",
-          "name": "Foundation Day",
-          "color": "#FF5733"
-        }
-      ],
-      "category_id": "2",
-      "type": "event",
-      "tasks": [
-        {
-          "committee": {
-            "id": "1",
-            "name": "Logistics"
-          },
-          "employee": {
-            "id": "9",
-            "name": "Bryan",
-            "committeeId": 1
-          },
-          "task": "Tig bira sa sakyanan"
-        }
-      ],
-      "schedules": [
-        {
-          "time": "07:30",
-          "activity": "Tubil sa sakyanan 🚗"
+            "id": "f697",
+            "title": "Parade",
+            "description": "69th Foundation day parade in the Honor of Sir Seled Jolero and Sryan Balazar",
+            "category": "2",
+            "startDate": "May-07-2025",
+            "endDate": "May-11-2025",
+            "startTime": "08:00",
+            "endTime": "08:15",
+            "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
+            "archived": false,
+            "tags": [
+                {
+                    "id": "1",
+                    "name": "Foundation Day",
+                    "color": "#FF5733"
+                }
+            ],
+            "category_id": "2",
+            "type": "event",
+            "tasks": [
+                {
+                    "committee": {
+                        "id": "1",
+                        "name": "Logistics"
+                    },
+                    "employee": {
+                        "id": "9",
+                        "name": "Bryan",
+                        "committeeId": 1
+                    },
+                    "task": "Tig bira sa sakyanan"
+                }
+            ],
+            "schedules": [
+                {
+                    "time": "07:30",
+                    "activity": "Tubil sa sakyanan \ud83d\ude97"
+                },
+                {
+                    "time": "08:00",
+                    "activity": "Start Event"
+                }
+            ],
+            "venue": "Dalan \ud83d\udee3\ufe0f"
         },
         {
-          "time": "08:00",
-          "activity": "Start Event"
-        }
-      ],
-      "venue": "Dalan 🛣️"
-    },
-    {
-      "id": "fbe4",
-      "title": "Basketball",
-      "description": "Basketball ",
-      "category": "3",
-      "startDate": "Jun-02-2025",
-      "endDate": "Jun-02-2025",
-      "startTime": "08:00",
-      "endTime": "09:00",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": false,
-      "tags": [
+            "id": "fbe4",
+            "title": "Basketball",
+            "description": "Basketball ",
+            "category": "3",
+            "startDate": "Jun-02-2025",
+            "endDate": "Jun-02-2025",
+            "startTime": "08:00",
+            "endTime": "09:00",
+            "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
+            "archived": false,
+            "tags": [
+                {
+                    "id": "2",
+                    "name": "Palakasan",
+                    "color": "#33FF57"
+                }
+            ],
+            "category_id": "3",
+            "type": "event",
+            "tasks": [
+                {
+                    "committee": {
+                        "id": "1",
+                        "name": "Logistics"
+                    },
+                    "employee": {
+                        "id": "1",
+                        "name": "Glene",
+                        "committeeId": 1
+                    },
+                    "task": "Dala sa snack"
+                }
+            ],
+            "schedules": [
+                {
+                    "time": "08:00",
+                    "activity": "Basketbal"
+                }
+            ],
+            "venue": "Kort"
+        },
         {
-          "id": "2",
-          "name": "Palakasan",
-          "color": "#33FF57"
-        }
-      ],
-      "category_id": "3",
-      "type": "event",
-      "tasks": [
+            "id": "ad90",
+            "title": "Archived",
+            "description": "Kung makita ni outside sa archive, naay problema.",
+            "category": "1",
+            "startDate": "Apr-29-2025",
+            "endDate": "Apr-30-2025",
+            "startTime": "04:00am",
+            "endTime": "04:30am",
+            "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
+            "archived": true,
+            "tags": [
+                {
+                    "id": "5",
+                    "name": "test",
+                    "color": "#000000"
+                }
+            ],
+            "category_id": "1",
+            "type": "event"
+        },
         {
-          "committee": {
+            "id": "d62d",
+            "title": "Titles",
+            "description": "Gradute",
+            "category": "2",
+            "startDate": "May-13-2025",
+            "endDate": "May-13-2025",
+            "startTime": "08:00",
+            "endTime": "12:00",
+            "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
+            "archived": false,
+            "tags": [
+                {
+                    "id": "6",
+                    "name": "Graduation",
+                    "color": "#9e369e"
+                }
+            ],
+            "category_id": "2",
+            "type": "event",
+            "tasks": [
+                {
+                    "committee": {
+                        "id": "2",
+                        "name": "Sports"
+                    },
+                    "employee": {
+                        "id": "14",
+                        "name": "clock clock clack clock",
+                        "committeeId": 2
+                    },
+                    "task": "My name is \ud83d\udde3\ufe0f\ud83d\udde3\ufe0f\ud83d\udde3\ufe0f"
+                }
+            ],
+            "schedules": [
+                {
+                    "time": "08:00",
+                    "activity": "Opening Ceremony"
+                }
+            ],
+            "venue": "Steds"
+        },
+        {
+            "id": "2066",
+            "title": "Time",
+            "description": "Oras na para mag palit ka ug relo",
+            "category": "1",
+            "startDate": "Jun-11-2025",
+            "endDate": "Jun-11-2025",
+            "startTime": "19:08",
+            "endTime": "21:00",
+            "image": "data:image\/svg+xml;base64,CiAgICAgICAgICAgICAgICA8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIKICAgICAgICAgICAgICAgICAgICB3aWR0aD0iMTEzIgogICAgICAgICAgICAgICAgICAgIGhlaWdodD0iNzciPgogICAgICAgICAgICAgICAgPGltYWdlIGhyZWY9ImRhdGE6aW1hZ2UvanBlZztiYXNlNjQsLzlqLzRBQVFTa1pKUmdBQkFRQUFBUUFCQUFELzRnSFlTVU5EWDFCU1QwWkpURVVBQVFFQUFBSElBQUFBQUFRd0FBQnRiblJ5VWtkQ0lGaFpXaUFINEFBQkFBRUFBQUFBQUFCaFkzTndBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBUUFBOXRZQUFRQUFBQURUTFFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQWxrWlhOakFBQUE4QUFBQUNSeVdGbGFBQUFCRkFBQUFCUm5XRmxhQUFBQktBQUFBQlJpV0ZsYUFBQUJQQUFBQUJSM2RIQjBBQUFCVUFBQUFCUnlWRkpEQUFBQlpBQUFBQ2huVkZKREFBQUJaQUFBQUNoaVZGSkRBQUFCWkFBQUFDaGpjSEowQUFBQmpBQUFBRHh0YkhWakFBQUFBQUFBQUFFQUFBQU1aVzVWVXdBQUFBZ0FBQUFjQUhNQVVnQkhBRUpZV1ZvZ0FBQUFBQUFBYjZJQUFEajFBQUFEa0ZoWldpQUFBQUFBQUFCaW1RQUF0NFVBQUJqYVdGbGFJQUFBQUFBQUFDU2dBQUFQaEFBQXRzOVlXVm9nQUFBQUFBQUE5dFlBQVFBQUFBRFRMWEJoY21FQUFBQUFBQVFBQUFBQ1ptWUFBUEtuQUFBTldRQUFFOUFBQUFwYkFBQUFBQUFBQUFCdGJIVmpBQUFBQUFBQUFBRUFBQUFNWlc1VlV3QUFBQ0FBQUFBY0FFY0Fid0J2QUdjQWJBQmxBQ0FBU1FCdUFHTUFMZ0FnQURJQU1BQXhBRGIvMndCREFBb0hCd2dIQmdvSUNBZ0xDZ29MRGhnUURnME5EaDBWRmhFWUl4OGxKQ0lmSWlFbUt6Y3ZKaWswS1NFaU1FRXhORGs3UGo0K0pTNUVTVU04U0RjOVBqdi8yd0JEQVFvTEN3NE5EaHdRRUJ3N0tDSW9PenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3p2L3dBQVJDQUJOQUhFREFTSUFBaEVCQXhFQi84UUFHd0FCQUFJREFRRUFBQUFBQUFBQUFBQUFBQUlIQXdVR0FRVC94QUEzRUFBQkF3RUZCZ1FDQ1FVQUFBQUFBQUFBQVFJREJBVUdFUk9SRWlFeVFWTnhKREZSc1VOaUZCVWlNMEp5Z2JMQlVtRnpvZEgveEFBYUFRRUFBd0VCQVFBQUFBQUFBQUFBQUFBQUFnTUZCQUVHLzhRQUpCRUFBZ0lDQVFRQ0F3RUFBQUFBQUFBQUFBRUNBd1FSQlJJaE1VRVRnVkZod1hILzJnQU1Bd0VBQWhFREVRQS9BTGp5WXVtM1FaTVhUYm9UQUJESmk2YmRCa3hkTnVoTUFFTW1McHQwR1RGMDI2RWxYQkZVNVNHOWs4VmRJMnBqYTZIYVZFMkV3VnUvL1pkWFRPM2ZUNktMc2l1bHJyOW5VNU1YVGJvTW1McHQwTWRMVndWa0tTd1NJOXErbkl6bFRUVDB5NU5OYlJESmk2YmRCa3hkTnVoTUhoNlF5WXVtM1FaTVhUYm9UQUJESmk2YmRCa3hkTnVoTUFHUEppNmJkQVpBQUFBQUFBQWVPNFY3RlgxTC9GUy9uZDdsb080VjdGVTFML0ZUZm5kN210eGkyNWZSajhxdHFQMmJxNjlaSkRiTVVUWExzVFl0Y242Ymp2U3RydU94dCtrVDUxOWxPNnE3YW9xR3FiVHp5SzE3a3h4d3hSTzVEUHJidVNpdStpWEgyUmhRM042V3o3d1Fqa1pLeEh4dmE5cStTdFhGRkptWWEza0FBQUFBQUFBQUFBQUFBQThkd3IyS2hxNWZHVGIvQUlqdmN0MTNBdllwZXNsOGJQditJNzNOdmlGdHorak01Q08xRTNkMkpOcThkR256cjdLZFBlK2orNnJHcDhqdjRPT3VuTGplZWhUNTEvYXBaOW8wYVY5RExUS3VDdlRjdm92STl6cC9GbFFsK3Y2eW1xajVjV2NGNTlmNmNIUldsVldlL2FwNVZhbk5xNzBYOURzckd0cU8xSTFhNU5pZHZFM2t2OTBPUXFySXJxTnk1c0R0bFB4TjNvWkxMbGRTMWtVelZ3d2R2N2N5dkpqWGJIcVhreU1US3Z4cmxDZStuMm1kK0R4RnhSRjlUMHh6N0FBQUFBQUFBQUFBQUFpN2dYc1VUV3pZVjFSL2xkN2w3bFBYcXV0WFVkdFZEcVdOWllaSHE5cUo1cGp2TnJpTEl4bktNbjVPRE4xMHBzamM2WGF2WlFKNnZYOXFsdDF0b1V0bndyTFV5b3hxZVNjMTdJVkpkNnk2NnpyUmh0R1haamRDcXF4aXBpcXFxS20vVTJsbzFNMVhJNlNlUnozTHpWVHB6Y2RYM3BwOWtqa3J6STFSY1k5MlpieTN6cmE1ajZhaHhwb0YzSzVPTnlkK1JwcnAxbFErMG0yZEk1MGpKT0RGY1Zhdi9EQlVNVjd0bHFLcXI1SWgyRnlMb3owZFY5YlY3TXQyemhER3ZtbVBOU3k2TkZHTTFyWDQvT3lLakxKbHFYZitIZE5UQnFKNkllZ0h6QnVBQUFBQUFBQUFBQUFBK0swYk5pdENMQnk3TWplRi9vZmFDVVpPTDJpRTRSbkZ4a3RvNHFyc1d2aFZVK2p1a1QrcU5NY1Q0NDd1Mm5XeWJLVTZ4TjV2bCt5aWZ5V0NEdFdkWWw0UndMamFsTGUzbzB0ajNZb2JLd2xWcVQxSE9SeWVYWk9SdWdEam5aS3g5VW50bWhDRVlMVVVBQVFKQUFBQUFBSC8yUT09IgogICAgICAgICAgICAgICAgICAgICAgICB3aWR0aD0iMTAwJSIKICAgICAgICAgICAgICAgICAgICAgICAgaGVpZ2h0PSIxMDAlIi8+CiAgICAgICAgICAgICAgICA8L3N2Zz4=",
+            "archived": false,
+            "tags": [
+                {
+                    "id": "4",
+                    "name": "Jolen Tournament",
+                    "color": "#000000"
+                }
+            ],
+            "category_id": "1",
+            "type": "event",
+            "tasks": [
+                {
+                    "committee": {
+                        "id": "4",
+                        "name": "Entertainment"
+                    },
+                    "employee": {
+                        "id": "8",
+                        "name": "Jungkook",
+                        "committeeId": 4
+                    },
+                    "task": "Palit relo"
+                }
+            ],
+            "schedules": [],
+            "venue": ""
+        },
+        {
+            "id": "e2b2",
+            "title": "Ambak",
+            "venue": "Tulay",
+            "description": "Kapuy",
+            "category": "2",
+            "startDate": "Apr-29-2025",
+            "endDate": "Apr-29-2025",
+            "startTime": "04:12",
+            "endTime": "12:34",
+            "image": "data:image\/svg+xml;base64,CiAgICAgICAgPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgICAgICAgICAgICB3aWR0aD0iMTE0IgogICAgICAgICAgICAgaGVpZ2h0PSI3MyI+CiAgICAgICAgICA8aW1hZ2UgaHJlZj0iZGF0YTppbWFnZS9qcGVnO2Jhc2U2NCwvOWovNEFBUVNrWkpSZ0FCQVFBQUFRQUJBQUQvNGdIWVNVTkRYMUJTVDBaSlRFVUFBUUVBQUFISUFBQUFBQVF3QUFCdGJuUnlVa2RDSUZoWldpQUg0QUFCQUFFQUFBQUFBQUJoWTNOd0FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFRQUE5dFlBQVFBQUFBRFRMUUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBbGtaWE5qQUFBQThBQUFBQ1J5V0ZsYUFBQUJGQUFBQUJSbldGbGFBQUFCS0FBQUFCUmlXRmxhQUFBQlBBQUFBQlIzZEhCMEFBQUJVQUFBQUJSeVZGSkRBQUFCWkFBQUFDaG5WRkpEQUFBQlpBQUFBQ2hpVkZKREFBQUJaQUFBQUNoamNISjBBQUFCakFBQUFEeHRiSFZqQUFBQUFBQUFBQUVBQUFBTVpXNVZVd0FBQUFnQUFBQWNBSE1BVWdCSEFFSllXVm9nQUFBQUFBQUFiNklBQURqMUFBQURrRmhaV2lBQUFBQUFBQUJpbVFBQXQ0VUFBQmphV0ZsYUlBQUFBQUFBQUNTZ0FBQVBoQUFBdHM5WVdWb2dBQUFBQUFBQTl0WUFBUUFBQUFEVExYQmhjbUVBQUFBQUFBUUFBQUFDWm1ZQUFQS25BQUFOV1FBQUU5QUFBQXBiQUFBQUFBQUFBQUJ0YkhWakFBQUFBQUFBQUFFQUFBQU1aVzVWVXdBQUFDQUFBQUFjQUVjQWJ3QnZBR2NBYkFCbEFDQUFTUUJ1QUdNQUxnQWdBRElBTUFBeEFEYi8yd0JEQUFvSEJ3Z0hCZ29JQ0FnTENnb0xEaGdRRGcwTkRoMFZGaEVZSXg4bEpDSWZJaUVtS3pjdkppazBLU0VpTUVFeE5EazdQajQrSlM1RVNVTThTRGM5UGp2LzJ3QkRBUW9MQ3c0TkRod1FFQnc3S0NJb096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenYvd0FBUkNBQkpBSElEQVNJQUFoRUJBeEVCLzhRQUd3QUJBUUFDQXdFQUFBQUFBQUFBQUFBQUFBRUVCUU1HQndML3hBQTBFQUFCQkFFQ0F3VUdCQWNBQUFBQUFBQUJBQUlEQkFVR0VSSVRNUlFoUVZHQkJ4VWlRbkdoSXlWaHNUSkVVb0tSd2RIL3hBQVlBUUVCQVFFQkFBQUFBQUFBQUFBQUFBQUFBUUlEQmYvRUFDUVJBQUlDQWdFQ0J3RUFBQUFBQUFBQUFBQUJBaEVoTVFNU1FRUVRJMUZoa2ZEeC85b0FEQU1CQUFJUkF4RUFQd0QyWkZFUUZSUkVCVVVSQVZGRVFGUlJFQlVVUkFWRkVRRlJSRUFSRmc1cTlZeHVKc1hhMVh0VDRXOGZLRHRpNERyc3FsYm9HY2l3TUxscStjeEZmSTFqK0hNM2ZieGFmRUg2RllGRFV2dlBVMTNGVkszSFhvdEhPdGNYY0huNVFQRS84V3ZMbG5HdGxwbStSWWVQeXRIS3NsZFJzc25FTHpHOHQrVnc4RTk3VWZldnVydERlMmN2bWNyeDRmTlRwbGRVS1ptSXNhL2tLdUxwdnVYWm13d1I3Y1QzZEJ1ZGx4V016anF0Q0s5UGJqanJ6TkRvM3VQOFlJM0d3NmxGRnZLUW96a1dtYnF2RWNiR3l6dnJpUTdNZlBFNWpYZXBHeTJzczhVTURwNVpHc2lhM2ljOG51QTg5MGNaTGFGTTVFV2loMVJIZWFaTWJqcmwySHdtWXdOWTc2RTlWejBOUlVyMTAwSENTcmRhT0xzOWh2QzRqekhuNkxUNDVyc0tadGtXbXlXb1k4ZnFERzRmczc1SkwvRnM5cDdtQURyOWx1Vm1VSlJTYjdocWdpSXNrQ2hBSUlJM0JWUkFlVzVQSlhmWjNsTWxqYWtENWFtVmFaY2NCMGptSjJMZnYreTNYWnpvYjJkVEV1NHNoWUh4dVBXU2VUdSszN0JjbXZ1SDN2cGZpQVA1ai9wY2VvNjB1cDliNC9DYlRNb1VHT3RXSldidDNmMGFBZk1iai9KWG9KOVNqS1d0djVvNjdwc3hOTDBYYU0xUld4Y3JqeWN2VUQ5M0grWWFOM0QxQlAyWFBldTFjZDdXUll0UExHSEc3YmhwUGZ4RHlYM3JUVEVzT0hibHFGdTlZdTR5UnRpRnNzeGs3Z1J4YkEvcDMraStNYmFma2ZhVld5QXJ5TWlteFhWelNBMTI0SmI5VlZKVDlTN3cwLzM3UTNrK3RmYWh4ZDNSV1Jyd3psMGoydDRRWTNENWg1aGEvU2UyYzFrTzFmSEJoc2ZBeXZHN29IR05wTHR2UHZYWlBhSkUrWFEyU2ppamRJOXpXZ05hTnlmakMwZU5xV05ONWFubnhYbGt4K1JvUXN0OHRoTG9IaGpRQ1IxMjdnbkU0dmhhV0htdnBDTmRKM25JVUsrVG9UVTdVYlpJcFdGcEJDOGZpekYzSmFheGVtNXBYdWE3S3VxeVBKNzN4TTJJYVQvZDlsNlZrTlcwSTZUL0FIYzgzcmIya1F3UU5Mbk9kNGIrUStxNmpKb2JJWS9SMU96RXptWmFwY04rV05wMzR1TFlPWVBvQVBVTFBocWhqa3hiWDlFTWJQU29ZWTY4TElZbUJrY2JRMXJSMEFDNlo3VVllejRLdG1vRHk3bU90UnZqa2IxMmNlRWo2ZDRQb3V4WXZVV055dE5rOGRtTmp0dmppa2R3dVlmRUVGZFkxbk9kV1NWZE00ZHduNDUyeVhKMmQ3SVkybmZZbnB2djRmb3VQREdVZVpPV0syWmltcFpNeUw4MjE3ajdwR3dyNHZtN2VUcEQzZmJkZHZXbXhWS0tMTVhiRVVzTDJDT0tCcldPM2N3TUhSM2wxVzVYUGxsYlM5a1NUQ0lpNUdRaUlnTU85aWFPU2xyUzI0R3l2cXY1a0pQeU84MW1JaXR2UUNJaWdDSWlBZ2FBZHdBRlVSQVlkakU0NjFKeko2TmVSNTZ1ZEdDVDZybnIxcTlXUGwxNEk0V2YweHREUjlseW9yYnFnWWRMRlVjZExZbHFWMnhQdFA1a3BIek84MW1JaU50N0FSRVVBVFpWRUJOazJWUkFUWk5sVVFFMlRaVkVCTmsyVlJBVFpObFVRRTJUWlZFQk5rVlJBZi9aIgogICAgICAgICAgICAgICAgIHdpZHRoPSIxMDAlIgogICAgICAgICAgICAgICAgIGhlaWdodD0iMTAwJSIvPgogICAgICAgIDwvc3ZnPg==",
+            "archived": false,
+            "tags": [
+                {
+                    "id": "2",
+                    "name": "Palakasan",
+                    "color": "#33FF57"
+                }
+            ],
+            "category_id": "2",
+            "type": "event"
+        },
+        {
+            "id": "be13",
+            "title": "Karun",
+            "venue": "32",
+            "description": "adsa sadsa as das d asdasd  asd sad",
+            "category": "3",
+            "startDate": "May-02-2025",
+            "endDate": "May-03-2025",
+            "startTime": "22:28",
+            "endTime": "22:30",
+            "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
+            "archived": false,
+            "tags": [
+                {
+                    "id": "2",
+                    "name": "Palakasan",
+                    "color": "#33FF57"
+                }
+            ],
+            "category_id": "3",
+            "schedules": [],
+            "type": "event"
+        },
+        {
+            "id": "24f0",
+            "title": "Mag over think",
+            "venue": "Sainyo",
+            "description": "Nagtuo ang alimango na galupad ang isda?",
+            "category": "2",
+            "startDate": "May-07-2025",
+            "endDate": "May-09-2025",
+            "startTime": "01:00",
+            "endTime": "23:00",
+            "image": "data:image\/svg+xml;base64,CiAgICAgICAgPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgICAgICAgICAgICB3aWR0aD0iNzEiCiAgICAgICAgICAgICBoZWlnaHQ9IjY2Ij4KICAgICAgICAgIDxpbWFnZSBocmVmPSJkYXRhOmltYWdlL2pwZWc7YmFzZTY0LC85ai80QUFRU2taSlJnQUJBUUFBQVFBQkFBRC80Z0hZU1VORFgxQlNUMFpKVEVVQUFRRUFBQUhJQUFBQUFBUXdBQUJ0Ym5SeVVrZENJRmhaV2lBSDRBQUJBQUVBQUFBQUFBQmhZM053QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQVFBQTl0WUFBUUFBQUFEVExRQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFsa1pYTmpBQUFBOEFBQUFDUnlXRmxhQUFBQkZBQUFBQlJuV0ZsYUFBQUJLQUFBQUJSaVdGbGFBQUFCUEFBQUFCUjNkSEIwQUFBQlVBQUFBQlJ5VkZKREFBQUJaQUFBQUNoblZGSkRBQUFCWkFBQUFDaGlWRkpEQUFBQlpBQUFBQ2hqY0hKMEFBQUJqQUFBQUR4dGJIVmpBQUFBQUFBQUFBRUFBQUFNWlc1VlV3QUFBQWdBQUFBY0FITUFVZ0JIQUVKWVdWb2dBQUFBQUFBQWI2SUFBRGoxQUFBRGtGaFpXaUFBQUFBQUFBQmltUUFBdDRVQUFCamFXRmxhSUFBQUFBQUFBQ1NnQUFBUGhBQUF0czlZV1ZvZ0FBQUFBQUFBOXRZQUFRQUFBQURUTFhCaGNtRUFBQUFBQUFRQUFBQUNabVlBQVBLbkFBQU5XUUFBRTlBQUFBcGJBQUFBQUFBQUFBQnRiSFZqQUFBQUFBQUFBQUVBQUFBTVpXNVZVd0FBQUNBQUFBQWNBRWNBYndCdkFHY0FiQUJsQUNBQVNRQnVBR01BTGdBZ0FESUFNQUF4QURiLzJ3QkRBQW9IQndnSEJnb0lDQWdMQ2dvTERoZ1FEZzBORGgwVkZoRVlJeDhsSkNJZklpRW1LemN2SmlrMEtTRWlNRUV4TkRrN1BqNCtKUzVFU1VNOFNEYzlQanYvMndCREFRb0xDdzRORGh3UUVCdzdLQ0lvT3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096di93QUFSQ0FCQ0FFY0RBU0lBQWhFQkF4RUIvOFFBSEFBQUFRVUJBUUVBQUFBQUFBQUFBQUFBQUFNRUJRWUhBUUlJLzhRQU9CQUFBUU1EQVFVRUNBTUpBQUFBQUFBQUFRSURCQUFGRVJJR0V5RXhRUWRSWVhFVUZTSkNnWkhCMFNOU29SWXlNMkp5Z3JHeXd2L0VBQmNCQUFNQkFBQUFBQUFBQUFBQUFBQUFBQUFCQWdQL3hBQWRFUUVCQUFNQUF3RUJBQUFBQUFBQUFBQUFBUUlSTVJJaFFRTlIvOW9BREFNQkFBSVJBeEVBUHdETksxK04yUzdQUGx4UHB0eDFJVmpnNjN5Nkg5eXNoclNkbHUwRkRNaGlQTVZwV2hJYlZyT05TZW54cWtaWFJScnN5dEhycGNGMlRPQ0JuU1F0R1QxL0xYSGV6ZXh0V2xVd3laNVdsZWtqZUl4L3BWOW1CcDl5TmRvcWd0QUkxbFBkVENhakVPNVErcVR2RWp3cG84cXFhdXpTeXk3ZDZUYlpjNWJpZUsyMXVJSkh5U0tyam15Y1J0d29VNUlIOXcrMVdxRGNYNERvY1pXVW51NzZlVEhZRjFhM3ZzeDVIVWU2by9TcTFwUGxmNm94MlhoQldDNi80ZTBQdFhoelptSWtaUzQvOHg5cW4zVUZCSVZqSTVFVndZVW1ucUR5cW1YYTN0UWQxdWxMSlhxenFJUExIaDQwVS8ycFFFcWpZNjYvcFJVWHJiRzdpQXF3enRrWmQ0a3R5YmFsS2xrQkxqYWVCU2UveU5WNnQ1L1pOcDVJZWl1bGgwQUZMaU9TeFNneWhQWit4WEt3V05zcWQzNUtQeG1GbmdmTHhwQis3UnBqUWt4VmtxWi9DZVFybmpwbnZwUjdacS9PamRxdUpLUDZ6WGxyWVZVWmhha1NqdjFENEh6cXZUTzQxV3pqZUtTT1FQRHlwckplRWR0U2xqMlFjbnlwMU5qdlcrU1daQ2REcWVRUHZDbTd1aVhISUhVWUk2MWJQV3FpMzd5aUc1aVNNc3I0b2RUL0FJTkt4N2hCa0hYR2xJSjZwMVVuYUxERXVNdDZGUGs3cEtrbmQ2dVdycFVlZXpDK291ZTZhUUN6cTRPaFhERlRhdVRibTFLMHI5Rndmei84MFU5MjR0RVN6TTJ5TXcvdlhnaGUrSU9RRDdPUHJSVTNyWEhpcFY5RTJseVZieUljeEowZTR2bVBLdm5hdnBTMFhCRnhnb2R5Q3NEQ3g0MGp2VWp3eFhEaXVhaFNNcDV4cGxUamFOWlR4MDk5STFDN1F5UFdET09ZUjlUVFhabUhDdXJTNHo2eTNKSEZEZzVud1BmVFBiQzhOM0s0aGFVcVFFZ0p3cm5VTEZtdXczMHV0S0tWSk9RUldrbnBqZXJQZHRqSjZWYnhqUzRSMVNjWitGUUVtNVhtM2d4RnlubXdQY0tzNHFRbWJhWE9TenU5NEVER0NVakJOVng5MVRxeXRhaVZIcWFKTDlGMThSZDNmZWZXMnA1d3JQSEdmaFJYbTVuSmIrUDBvcWIxcGp3d3JWckxmRjJ5U2s4UzJyZ29lRlpUVjVYY0lTWHdSTVlLVmR6ZzRmclR4bTBmcGJOYWE1R25OUzJRNjBzS1NhSHBCUWtuU1ZEd3JLcmJ0V20xU1FwRXB0eG9uQzBid2NhdUN0cWJOT2hCVGQ1aXNMSXlOYjZVa0h4Qk5UWnBjdTRnOXFiZERlZFhLaXVoQ3p4VTBvWU9hcURpaWc2VmNENDFhWm0xRHJPb0dWYlpPT1N3OGc1L1dxbmNMdjZlK1hYWEc4L3lrQVZVcUxIa3JwTlN3YVFWSlJqK0luNTAxZGw2anBiNjlUVmJMUW5LQktBT21lSHlvcEY3R0VnS0NqeHljMFZuZXRjZUVxS0tLREZGRkZBRkZGRkFGRkZGQUZGRkZBZi8yUT09IgogICAgICAgICAgICAgICAgIHdpZHRoPSIxMDAlIgogICAgICAgICAgICAgICAgIGhlaWdodD0iMTAwJSIvPgogICAgICAgIDwvc3ZnPg==",
+            "archived": false,
+            "tags": [
+                {
+                    "id": "3",
+                    "name": "Buwan ng Wika",
+                    "color": "#3357FF"
+                },
+                {
+                    "id": "4",
+                    "name": "Jolen Tournament",
+                    "color": "#000000"
+                },
+                {
+                    "id": "6",
+                    "name": "Graduation",
+                    "color": "#9e369e"
+                }
+            ],
+            "category_id": "2",
+            "type": "event",
+            "tasks": [
+                {
+                    "committee": {
+                        "id": "3",
+                        "name": "Catering"
+                    },
+                    "employee": {
+                        "id": "11",
+                        "name": "Sonny Jihns",
+                        "committeeId": 3
+                    },
+                    "task": "Overthink"
+                }
+            ],
+            "schedules": [
+                {
+                    "time": "01:30",
+                    "activity": "Start"
+                }
+            ]
+        },
+        {
+            "id": "109e",
+            "title": "Date",
+            "venue": "Calendar",
+            "description": "Sakto na date format",
+            "category": "2",
+            "startDate": "Apr-30-2025",
+            "endDate": "Apr-30-2025",
+            "startTime": "19:00",
+            "endTime": "00:00",
+            "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
+            "archived": true,
+            "tags": [
+                {
+                    "id": "1",
+                    "name": "Foundation Day",
+                    "color": "#FF5733"
+                }
+            ],
+            "category_id": "2",
+            "type": "event"
+        },
+        {
+            "id": "bdc6",
+            "title": "qw2",
+            "venue": "Steds",
+            "description": "12 53 12 34 21 32 41 24 34 31",
+            "category": "1",
+            "startDate": "May-01-2025",
+            "endDate": "May-03-2025",
+            "startTime": "12:12",
+            "endTime": "00:12",
+            "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
+            "archived": true,
+            "tags": [
+                {
+                    "id": "3",
+                    "name": "Buwan ng Wika",
+                    "color": "#3357FF"
+                },
+                {
+                    "id": "4",
+                    "name": "Jolen Tournament",
+                    "color": "#000000"
+                }
+            ],
+            "category_id": "1",
+            "type": "event"
+        },
+        {
+            "id": "58fe",
+            "title": "Pneumono\u00adultra\u00admicro\u00adscopic\u00adsilico\u00advolcano\u00adconiosis",
+            "description": "It is the longest word in the English language published in a popular dictionary, Oxford Dictionaries, which defines it as \"an artificial long word said to mean a lung disease caused by inhaling very fine ash and sand dust",
+            "venue": "",
+            "category_id": "2",
+            "startDate": "May-30-2025",
+            "endDate": "May-30-2025",
+            "startTime": "00:00",
+            "endTime": "00:00",
+            "tags": [
+                {
+                    "id": "3",
+                    "name": "Buwan ng Wika",
+                    "color": "#3357FF"
+                }
+            ],
+            "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
+            "archived": false,
+            "schedules": [
+                {
+                    "time": "00:05",
+                    "activity": "activity 1"
+                },
+                {
+                    "time": "01:11",
+                    "activity": "activity 2"
+                }
+            ]
+        },
+        {
+            "id": "ee74",
+            "title": "New2",
+            "description": "Severity tag",
+            "venue": "Philippines",
+            "category_id": "1",
+            "startDate": "Jun-30-2025",
+            "endDate": "Jul-01-2025",
+            "startTime": "00:00",
+            "endTime": "23:00",
+            "tags": [
+                {
+                    "id": "1",
+                    "name": "Foundation Day",
+                    "color": "#FF5733"
+                }
+            ],
+            "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
+            "archived": false
+        },
+        {
+            "id": "0237",
+            "title": "NewTag",
+            "description": "New tag",
+            "venue": "",
+            "category_id": "2",
+            "startDate": "May-28-2025",
+            "endDate": "May-29-2025",
+            "startTime": "00:00",
+            "endTime": "23:00",
+            "tags": [
+                {
+                    "id": "4",
+                    "name": "Jolen Tournament",
+                    "color": "#000000"
+                }
+            ],
+            "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
+            "archived": false,
+            "createdAt": "2025-05-01T10:33:27.181Z"
+        },
+        {
+            "id": "d190",
+            "title": "Laban Lungs Official Deployment",
+            "description": "Project By Edseld Loreho",
+            "venue": "",
+            "category_id": null,
+            "startDate": "May-30-2025",
+            "endDate": "May-30-2025",
+            "startTime": "00:00",
+            "endTime": "00:00",
+            "tags": [],
+            "image": "data:image\/jpeg;base64,\/9j\/4AAQSkZJRgABAQAAAQABAAD\/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb\/2wBDAAoHBwgHBgoICAgLCgoLDhgQDg0NDh0VFhEYIx8lJCIfIiEmKzcvJik0KSEiMEExNDk7Pj4+JS5ESUM8SDc9Pjv\/2wBDAQoLCw4NDhwQEBw7KCIoOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozv\/wAARCABfAJIDASIAAhEBAxEB\/8QAGwAAAgIDAQAAAAAAAAAAAAAAAAYEBQEDBwL\/xABGEAABAwMCAwQGBwQFDQAAAAABAgMEAAUREiEGMUETUWGBBxQicZGhMjZCUrGywRUjM3NTdJLC0RYXJCZygpOio9Lh8PL\/xAAaAQACAwEBAAAAAAAAAAAAAAAAAgEDBAUG\/8QAKBEAAwACAQMEAgEFAAAAAAAAAAECAxEhBBIxEyJBUTJhcQUUgZGh\/9oADAMBAAIRAxEAPwDs1FFFABRWM1mgAorFFABUGVd4kQlKllax9lO9ar1LcjxghrOtzO46DrSupKwcqB86wdT1TxvtnyV3euEMY4ji5\/hOY8qmRrpElYCHQFH7KtjSdXsNuDcJNZZ63JvnkRZGPVFLNvvT0ZQZkAuI5eIphYfbkNhbStQNdLFnjKuPJbNJm2itT8lmMjU6sJ\/E1RTuIHVEtxk9mPvHnRlzxjXuYOkvIwKUlIypQA8TQlaVDKVBQ8DSO4+66rU44pR7ycmvTMl5hettxST3g1j\/AL9b\/Hgr9X9DxRUC1XET2fawHEfSA\/Gp9dCLVz3ItT3yZooopyQooooA4r6S7jOjcZvtMTH2kdk37KHSB9HuBrrVjUpdgt61KKlKitkknJJ0iuO+lL67v\/ym\/wAtdhsH1etv9Va\/KKz4376M2J++jmPpVu0xvihmLFlPtJbjJyltwpyoknp4Yrd6JbrKkXubGkynngqOFpDjhVghQG2ffVZxKTdPSx2I3HrLTQ8gkH9a0ejeSmBxskOHSlTbqD5DP92qu7WTf7Ku5+rv9mz0kT5rHG0xpmZIbQEt4Sh1QA9hPQGqhU\/iawOsuvyJbQdSFoS8sqQ4Pccg1K9IbpkcYyXiANbbZwP9gVc8fD\/Vy155hQx\/wxn9Kqqt1\/IlcunsYLLcEXWBFuCUBAc\/iI6JUDhQ93Xzrl795uTz7ryZ0oJUsq2dVgZPvpy4UeMbgSW\/\/R9uof2Bj50oxYxXw3cJIGzb7Cc+8L\/wqqJ03oKbaR0GzS3JXCUeQXFFwRHAVk5VlOoZz37CkzhS9TW+JYSXp0hbbq+yUlTpIOoaRsT3kUy8Iu9pwU8jqz26fIpz+prnrC3GXUSEA5aWlWe45yPwqZ4bCm1pjfx1c3hKgrhT3A2phW7LpCSQtQPI89sVdWG8t3C1tNrDqJEdtDaw\/spw6AQod4PfS6u3M3Ju2pCAliM04l0J21KLq1D4gg+dSIwS1f5SUAJSI7BAHIYKh+Aprxppyzq9N0NZffXh+Cwu3FYtK4QXGDiZB\/eEL3QnVjIHWrJN5YXHVIbjy1tAElQYIwBz5+6qGdb4l2baDxKko5FCsdTtUy1pW+16k+opYMha9BG6xqyE57id\/GqrxR2ppfyX9T\/T6hO58E\/gjimVcuNZEJDREIJUlALZ1pwBuru3rp9K\/Ctoix5sm4NRkNuOjC1pGCsk5P8A7400V0ena9NOVpGKfBmiiitAwUUUUAcN9KX13f8A5Tf5a7DYPq7bv6q1+QVx70pfXd\/+U3+Wut21\/wBV4QiyDt2UBC\/g2DWbH+dGbH+dHI7M+mb6UzKXuj1x13I6Aaj+lRLWBD9Igb+ikTVteRJT+tV1jvJst3FwMcSFAKGkq07kYznzoXdPW+KE3XsgzrlJe0A50+0Dz61mb2Zu5f8ASfx59aXsf0TX5BVZcr3Pu4YRNf1Ijp0tpCQkJGAM4HM7Dfwq14\/To4tkJ7m2x\/yCrnjuMx\/k7bn0stpdQpCApKQCUlsnB8wKTxwDTbZKuDca2ejtxuE8HmVspCXht2ilLGo46dRjpiqK1x9fo5vK8bmQ2eX3cf8AfWgy1\/5twwpWc3IoSO5IRqPzPzrRB4lEPhqTZvUkr9YKj2xcIxnHTHTTUpaJbW\/8F7wK9nh+8MZ+gCseaFD+7SzaIxlwro0kZU3F7Yf7q0k\/ImrngR3AvDHVUJS\/7P8A9VH4GUhN3ldokKQqC6lST1BwMfOpSJiXbmV88FhDLsaDHC2nFqW2kK7JA9k4AyfLHwrYuE2hTjxWtS3AlKyTzCScD5mplASFrSg761BOO+pdcHuoxzixpfCRiVHS3PfDH7pOAAlI2BxzrWhx71kDs1toQchzIIX4Y5j\/AMVOuKNE07Y1pBHj0qNSQ\/aRg9+GXv4OoWgtKtUdbI9laArzPP51Npe4MldtaVME7srIHuO\/45phrpRrtWjzeaPTyOfozRRRTlQUUUUAcM9KX13f\/lN\/lqwe9KAc4YVZkWtSFmJ6t23b8vZ05xp\/WmHiDheHe+LHlXDt2FPOIajuCOotrAbB+lnGchQ8qq2uCLMH3CGJMqOhKwXVNraSFhYTsrPtfa+FY7VS3S8GNzaptfIs8EWqFcpcwzo6X22WQUpUSAFFQ32I6ZqLxhb41sv6mobIZZU0haUAkgZG\/PxBp9g2mBaEPfs+MWlOgaiVlWcZwNz41FXYbbfoy590mvNyYkZCn0mGUlIOdhv7W+RmsmOu+mk+BPT2tfIocbvCRxF245ORWF\/FpJr3xHxSi9W6JCZiqZQxpUtSlZKlBOnbuHP41fSrLbZLqHJyJDbDSFN+siOsq0ISkIyjO22d\/CpknhW02OelqN\/pspCm1FK4hUlKVHmTqwNsnl0q16adJ8IhzT3yJlzjOwOGLUy7lKpLjsrSeYSdKUnz0k002Phu1SeGY7kiChcl9hau1KlA5yrT1xttU252uDe7s2Lot5lIS20y4hhS0kqUdiQcDcj41buW6RYmUIbKJkKKNHaMp9pnHRack48R37jrSvuqFcDKOd\/Bzfgt4NXiQjP8WDIR\/wBMn9Kg2CWmHeGy4vs23EKbKjyBOMZ8M\/pTtZOHrKI6rkJjsZ9iN2zqTGUQEqBSdO\/tDcjavUayWVhxcty2o0wndbLrjSmyoBA3Ugk5wSce6nbmJTY+FvFc39Mo+Irqq1AsZW1IQpClJI30ZBPypnsv7GjO26ZeLghpU9AXGbVsACOaj9kb4ycZPKpM23xX3G5F1jxWpLjYKI6IfrDwR0KyThPu+Zrbbo8W3r9RhSbbbEyCVPB+CG1rABwBlRSoA9OlWxEv8jpZOvzZdp8J\/Q03fh+JdoaGSOxU1u04gbp7\/eDSMrhS7M3uYzHUiY2hppStKtJSo6tsHrgA+Yp2gSFr4eauUh9xSvV+2cLe2fZycClSQhVpvKb3IvM+LJuCA4qOy2p6OAQAM5OkkADljlV9RDQYusyYVqfBccHw5MSZNQ+goKAlK0nvO4+R+dNlc7t4Ui5y+IIPEaZBW60l6Mkq0rKlBKiptR9g4xgjurolNCSWkV5MzzW7ZmiiinECiiigBVuV1135EeS6xGjwJKXAVJWVufu+mBjGV459KgruSxb37e1PgFlanChakvBQClFQOyeYzTvRSOdrTFcnOWUwkT3W4DxeZRHaClalEFz2tRGryrdraackokpc9Vmx+wdcaTqUyQSUqx1G5z5Ux3ezrcWZEYZJ3Uj9RVKIcnVpDDme7Sa5GRXjzdyRQ5aZAX6q+0WZN7t6mFjS52CVqdUnqAjoT54qUt1c+fJmllTQfKUttq+kEJGBnxO5x0zVzBsDqyFyiUD7o5mr1iKzGRpabSke7c+dXzgrJOtdqGUN\/o5846g3FLEiVHitMrZdKnQrUrC9RCcDH2fnWZMsM35c203OOVypB\/hhZVp08lpI0kez799jT9IhsSkFLrYPiNiPOlq5Wt2CrUCVtHkr\/Gi4rBGpW19kVDlFTMl2xFrua1xRAuEmPoKEElp45zlHccnlsffzr1KZ9YjOs6tJcSUg9xrZRWHJmeTW\/gRvZquMhm5KdeclNW+VIZDT7UpKuzJAI1IcG2N+R+VSLSlCHAh\/9n3NKU6UMQbeFattiXDhIrxnFOFoc7S2MnuGn4Vv6XL6lPa5HjlkVtiTbuESyAEyWIRACPawoI2A796WGnlxWkIs17mRmWm0BYlRVPMEkcgojKT4cqfqK6DnZc52IaU+vNLS+q2zrklSTCdt7J1trB+ktWMADbPhmnwcqNqKEtAlozRRRTDBRRRQAUUUUAFYrNFABRRRQBivLrSHmy24kKSoYINe6xUNbAVbnaHIay40Ctk9fu++qynwgEYIzmq+RY4b6tQSWyfuVzc3Rbe8f+imsf0KYGTThaGVMW5pK9iRn41qjWOJHcCzqcI5auVWVWdL01Yn3UNEa5Zmiiit5YFFFFABRRRQB\/\/Z",
+            "archived": false,
+            "createdAt": "2025-05-04T08:58:14.587Z",
+            "type": "event"
+        },
+        {
+            "id": "f2d0",
+            "title": "Lssa",
+            "description": "",
+            "venue": "",
+            "category_id": "1",
+            "startDate": "May-04-2025",
+            "endDate": null,
+            "startTime": "12:00",
+            "endTime": "00:00",
+            "tags": [
+                {
+                    "id": "3",
+                    "name": "Buwan ng Wika",
+                    "color": "#3357FF"
+                }
+            ],
+            "image": "data:image\/svg+xml;base64,CiAgICAgICAgPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgICAgICAgICAgICB3aWR0aD0iMTE2IgogICAgICAgICAgICAgaGVpZ2h0PSI3NiI+CiAgICAgICAgICA8aW1hZ2UgaHJlZj0iZGF0YTppbWFnZS9qcGVnO2Jhc2U2NCwvOWovNEFBUVNrWkpSZ0FCQVFBQUFRQUJBQUQvNGdIWVNVTkRYMUJTVDBaSlRFVUFBUUVBQUFISUFBQUFBQVF3QUFCdGJuUnlVa2RDSUZoWldpQUg0QUFCQUFFQUFBQUFBQUJoWTNOd0FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFRQUE5dFlBQVFBQUFBRFRMUUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBbGtaWE5qQUFBQThBQUFBQ1J5V0ZsYUFBQUJGQUFBQUJSbldGbGFBQUFCS0FBQUFCUmlXRmxhQUFBQlBBQUFBQlIzZEhCMEFBQUJVQUFBQUJSeVZGSkRBQUFCWkFBQUFDaG5WRkpEQUFBQlpBQUFBQ2hpVkZKREFBQUJaQUFBQUNoamNISjBBQUFCakFBQUFEeHRiSFZqQUFBQUFBQUFBQUVBQUFBTVpXNVZVd0FBQUFnQUFBQWNBSE1BVWdCSEFFSllXVm9nQUFBQUFBQUFiNklBQURqMUFBQURrRmhaV2lBQUFBQUFBQUJpbVFBQXQ0VUFBQmphV0ZsYUlBQUFBQUFBQUNTZ0FBQVBoQUFBdHM5WVdWb2dBQUFBQUFBQTl0WUFBUUFBQUFEVExYQmhjbUVBQUFBQUFBUUFBQUFDWm1ZQUFQS25BQUFOV1FBQUU5QUFBQXBiQUFBQUFBQUFBQUJ0YkhWakFBQUFBQUFBQUFFQUFBQU1aVzVWVXdBQUFDQUFBQUFjQUVjQWJ3QnZBR2NBYkFCbEFDQUFTUUJ1QUdNQUxnQWdBRElBTUFBeEFEYi8yd0JEQUFvSEJ3Z0hCZ29JQ0FnTENnb0xEaGdRRGcwTkRoMFZGaEVZSXg4bEpDSWZJaUVtS3pjdkppazBLU0VpTUVFeE5EazdQajQrSlM1RVNVTThTRGM5UGp2LzJ3QkRBUW9MQ3c0TkRod1FFQnc3S0NJb096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenYvd0FBUkNBQk1BSFFEQVNJQUFoRUJBeEVCLzhRQUd3QUJBUUFDQXdFQUFBQUFBQUFBQUFBQUFBSUVCZ0VGQndQL3hBQXdFQUFDQWdFQkJ3RUdCZ01BQUFBQUFBQUJBZ0FERVFRRkVoTWhNVktSQmhVaVFXRnhnVEpDVVdKeW9ZS3gwZi9FQUJjQkFRRUJBUUFBQUFBQUFBQUFBQUFBQUFBRUJRUC94QUFrRVFFQUFRTUVBZ0VGQUFBQUFBQUFBQUFBQXdFQ0JCRVRJVEVTSWhSQlVXR0JzZi9hQUF3REFRQUNFUU1SQUQ4QTlqNGFEOGkrSnp3MDdGOFNvZ1R3MDdGOFJ3MDdGOFNvZ1R3MDdGOFJ3MDdGOFNvZ1R3MDdGOFJ3MDdGOFNvZ1R3MDdGOFJ3MDdGOFNvZ1R3MDdGOFJ3MDdGOFNvZ1R3MDdGOFJ3MDdGOFNvZ1FhcXorUVJMaUFpSWdJaUlDZFJ0amJpYk9EVjE3cHRBeXpNZmRRZlA5VDhwMnRqaXV0blBSUVRQTHRzYXA5WHJLNjNiQXNJc2MvTnYrREFrMlJMV08zanRkaFk5SnIvYnFqdHRkdGZhNlZEVk9tc2Frak8rcml0UjlsR1I5ekoyZDZ1dld4VmE5K2Y1ZFFReW4vTEFJKzgyL1o5ZWtwRm1ncG9DclVveU9HUUdCK1o2bWFCNmkyYWFkcXNkTnBuUmJTMkVDWUdRY1pBL1E5WlBQYkpEVGM4bHVOSkJrVnJGVzNUN1BSZEJyNnRvVWNSQVZaVGgwYnFwbVZORjlJYTZ4ZFRYWFlUa0UwUG40akJLK01FZmViMUs0Wk55enladVZEc3lWdElpSjJURVJFQkVSQVJFUUVSRUNMazRsTHAzS1JQS2RzMFBUcVVaaGozUWgrVEx5UDhBcWVzelg5dituaHJnOTFGWXNMYzNxenVrbnVVL0EvWGtaTGxSVmt0NGFPQmtVaHY5dXFzcXZXTmQ2WEdyUWtzTlB2NFU4eVFPWS9xYUZxZHJIVUt4Ylc2am5uQ0NzQS9UT1ozbEZUVWFhblNQdE45RndReWtXMU1yRUU5TWRENW1EWDZlWFVhdmMwdWRYV3A5M2NRb3Ava3g2ZmJKbWJsUWZJdXR1MDVweDlQNDdZc20xTGRiV3oxMTcvSDdmZjBkcEhiVTFPYys5WWJUL0ZRUm43ay8xTittQnNyWmE3T3BPU0h1Zkcrd0dBQU9nQStBRXo1cXdSN2RtaUxMbXBOTFc2aEVSTzZVaUlnSWlJQ0lpQW1Eck5iZlJxNmROcDlPdHoyVnZZZDZ6ZHdGS2o5RDNUT21KcXRBbXF1cnVOdHRUMXF5QTFzQmtNUVNPbjdSQW1qYTJrdTAzSE5tNEF5b3dJL0N6WUFIOWlUN1kwcHRwVUY5eTRIZGRrWmQ0NVhHQVJ6enZmQ1NkaWFRNFVHeGF3eU1hdzNKaXVNRStCT2ZZK25JcTNyTG1OR2VDeGJuWDA2SEh5Z2ZMMndVemJxdE90ZWwzM1VXaDk0amR6ekl4KzA5TXpMdTJocGFINGJPeGZsN2lJek1jL0lBbjRUNCt4dE0yOExYdHRySmNpdDI5MEZzNTZmVStZWFk5UzJjVWFqVWNYa0JadkRJQUJHT21QakFrN1pyS2xhazM3K0thaFhuSFBlS2drNDVkQ1pWZTJOT0s4MzJWNzRZZ2loamNCakdTY0Rsakl6bnBtYyt4OUtOOHJ2bzFqbXdzcmM5L09kNzY4L0VrN0dvSlpqZGNiSHp2MmJ3eXdJQUlQTEdNS1BFRHNGWU1vWlRrRVpCSHhuTWxFV3RGUlJoVkdBSlVCRVJBUkVRRVJFQkVSQVJFUUVSRUJFUkFSRVFFUkVCRVJBLy85az0iCiAgICAgICAgICAgICAgICAgd2lkdGg9IjEwMCUiCiAgICAgICAgICAgICAgICAgaGVpZ2h0PSIxMDAlIi8+CiAgICAgICAgPC9zdmc+",
+            "archived": false,
+            "createdAt": "2025-05-04T10:17:04.241Z"
+        },
+        {
+            "id": "7324",
+            "title": "Seminar",
+            "description": "Meeting",
+            "venue": "Room",
+            "category_id": null,
+            "startDate": "May-08-2025",
+            "endDate": "May-08-2025",
+            "startTime": "03:00",
+            "endTime": "12:00",
+            "tags": [
+                {
+                    "id": "4",
+                    "name": "Jolen Tournament",
+                    "color": "#000000"
+                }
+            ],
+            "image": "data:image\/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20viewBox%3D%220%200%20115%2077%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20width%3D%22115%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20height%3D%2277%22%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3Cimage%20href%3D%22data%3Aimage%2Fwebp%3Bbase64%2CUklGRrAGAABXRUJQVlA4WAoAAAAgAAAAcgAATAAASUNDUMgBAAAAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADZWUDggwgQAANAZAJ0BKnMATQA%2BUSKORaOhoRILNig4BQS0gAtr3wB2Ed8PiV8%2F%2BwHINiKdlf5L8hPyg56fUl4gN53q9%2FlfJW%2BY%2F7fwmtTK6q5B6gB%2BS%2F%2Bx%2BQHvy%2F7HnF%2Bnf%2Bn%2FePgO%2Fl39h%2F3329cgAVn6nDWkEWUm3IBlhIn03jJrxSJxK0KUpnmHDi9VElaswMvS5fmkaKmdJn2gvt5kD69yDlvGVJwBRSGBfRoou2a2W1fnWyvkTXBNqQV8qox0cwPLqR9uGr%2FFC2qEzTz82yqgR1O5tNejtpZVwQgAAP7%2FIsrQbN8I2f47Mr1jY%2B1RoUmOwSHDJS1lrkPcz2cUAoFRQdD6Yn5pIoxb%2F%2BZmpKjiuL4rtUy%2F%2FN36EjK%2F45%2FXS607FQ3dddcWtIWQAqMRaiALCLOqBq6oGw1NvXCRXz%2ByNH6NY9bqMjIREHVudn0Rm8GwSH1bglIpayIHR6wDLinwWPpiz8evVVttwYib3K9aOH%2F%2FzRPhYv3H%2Bwj4x2%2BWpPrXHfR%2BOVlmng9WJXv7L%2BPigcuubwKQ8zM7P%2BbBlpVhv9fmLP4Gb4ErIfbjh%2FbQ0BNwD8WHPlvcn1etqMbhHLDUNtPiMjNlxRcZmjatrABuy60H%2FG1NnHoWl9V2DmxpK4wrdpkssVirN3AYvUjsShbGL%2Fs2fbIJLGgobcb39d4yXtAp78sXqJX6i00H299IRKow4d3yngi60R9olX%2BQjCYUQqd7H75sNlRQ%2FPHj7mmiwOJxmDsDArNdyOAevI5n%2BxoK9%2Fpe%2FSrE9h161bWKNRzJRrnQdJaxLpxhkSkq%2B7Z0n3peXxhaniObwuzr0SZoRMnDvbkipWEO6%2BsDLXbffuZTBxBTOyMYJVJMA%2BvfRAmaxZZ4IC%2FmXXM%2BUWBSa%2FWML9Tf0UZ0joaNEnDE%2F6UWMDrBQ4YdozSZN1BtWUuc5vfspb39kZ0n4u9JgFm5v%2FnE4ouTeqn%2Fn5AAMV7qbOntp1eJl9R9RtsQiMIifAMq5gtck1alFjM9VRqZrB9VahgCCPvhMY7Chl9JJuhuRq%2FM%2F0wz87PrkZPXqHP3kn2BHLZ%2B5jZ9CiYeCqzwu4sYIHxjFLYlsxm1aOnJ8SibtpVv2frZXUX%2FDX8xPOSl7o3r%2FjVPs%2B0kwV5ni0z1aMaLU3CYdUgYMiX%2FWBG0Huj6CNNKbnGzy47%2FMVJnK6E9fGqpzI59FdN1fwqpRIEleb3y%2F%2FNNr4v8%2Fd7VWcGwbIVAtkFjamWYihRTiNh0EtyAU0%2FHZRZ3tC6V6g%2FvOSBZuJVbkQ%2BU4F7veNOgPsn5gbLiMCzCivaKfWasIE%2BUyhQG8O1Jy3M88Lilb3zOVuCuq8UmHp3m88VShWZ%2FPCHEKDaK0j9I5JYcXlVQsTnlPcz6dmRrvvLqpA5XPcIhhnVkca6LCNaZfSZs3k2AmRtirJ8dCLtm5u2auU37AfkG597jfRiheCfOKVzh0OBusnpskg9QvpjZ%2F9V6v%2FvV903ZnUeKOfWZEMbVeFa1Ue03GViu68eWJjhZtcuHuGvqlO3iPLeOaRJvYvxuvkfwp4Y1fcPTx%2F5fRLdPvBzyON07Bw42L0tGfn7fHkwXFYSuDfR8E28Up5S35tFO06mjSap36%2FcEP3phPlhnvIQNLOAAAA%3D%3D%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20width%3D%22100%25%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20height%3D%22100%25%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20preserveAspectRatio%3D%22xMidYMid%20meet%22%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3C%2Fsvg%3E",
+            "archived": false,
+            "createdAt": "2025-05-06T23:58:20.693Z"
+        },
+        {
+            "id": "deee",
+            "title": "wwsdasdaaaa",
+            "description": "",
+            "venue": "",
+            "category_id": null,
+            "startDate": "May-14-2025",
+            "endDate": null,
+            "startTime": "00:00",
+            "endTime": "00:00",
+            "tags": [],
+            "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
+            "archived": true,
+            "createdAt": "2025-05-07T00:00:07.020Z"
+        },
+        {
+            "id": "a236",
+            "title": "fds",
+            "description": "",
+            "venue": "",
+            "category_id": "1",
+            "startDate": "May-07-2025",
+            "endDate": "May-08-2025",
+            "startTime": "00:00",
+            "endTime": "00:00",
+            "tags": [
+                {
+                    "id": "1",
+                    "name": "Foundation Day",
+                    "color": "#FF5733"
+                }
+            ],
+            "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
+            "archived": true,
+            "createdAt": "2025-05-07T01:00:22.932Z"
+        },
+        {
+            "id": "7ea0",
+            "title": "dsa",
+            "description": "",
+            "venue": "",
+            "category_id": null,
+            "startDate": "2025-05-05T16:00:00.000Z",
+            "endDate": "2025-05-06T16:00:00.000Z",
+            "startTime": "00:00",
+            "endTime": "00:00",
+            "tags": [],
+            "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
+            "archived": true,
+            "createdAt": "2025-05-07T01:03:15.619Z"
+        }
+    ],
+    "tags": [
+        {
+            "id": "1",
+            "name": "Foundation Day",
+            "color": "#FF5733"
+        },
+        {
+            "id": "2",
+            "name": "Palakasan",
+            "color": "#33FF57"
+        },
+        {
+            "id": "3",
+            "name": "Buwan ng Wika",
+            "color": "#3357FF"
+        },
+        {
+            "id": "4",
+            "name": "Jolen Tournament",
+            "color": "#000000"
+        },
+        {
+            "id": "6",
+            "name": "Graduation",
+            "color": "#9e369e"
+        }
+    ],
+    "sports": [],
+    "category": [
+        {
+            "id": "1",
+            "title": "Academics",
+            "description": "Academic events"
+        },
+        {
+            "id": "2",
+            "title": "Commemorative",
+            "description": "Honoring special events"
+        },
+        {
+            "id": "3",
+            "title": "Sports",
+            "description": "Sporting events and competitions"
+        },
+        {
+            "id": "4",
+            "title": "Leisure",
+            "description": "Leisure, relaxation, and enjoyment"
+        },
+        {
+            "id": "5e80",
+            "title": "way klase",
+            "description": "woooo"
+        }
+    ],
+    "brackets": [
+        {
+            "id": "0354",
+            "name": "123123",
+            "type": "single",
+            "matches": [
+                [
+                    [
+                        {
+                            "name": "Player 1",
+                            "score": 0,
+                            "completed": false
+                        },
+                        {
+                            "name": "Player 2",
+                            "score": 0,
+                            "completed": false
+                        }
+                    ],
+                    [
+                        {
+                            "name": "Player 3",
+                            "score": 0,
+                            "completed": false
+                        },
+                        {
+                            "name": "Player 4",
+                            "score": 0,
+                            "completed": false
+                        }
+                    ],
+                    [
+                        {
+                            "name": "Player 5",
+                            "score": 0,
+                            "completed": false
+                        },
+                        {
+                            "name": "Player 6",
+                            "score": 0,
+                            "completed": false
+                        }
+                    ],
+                    [
+                        {
+                            "name": "Player 7",
+                            "score": 0,
+                            "completed": false
+                        },
+                        {
+                            "name": "Player 8",
+                            "score": 0,
+                            "completed": false
+                        }
+                    ]
+                ],
+                [
+                    [
+                        {
+                            "name": "TBD",
+                            "score": 0,
+                            "completed": false
+                        },
+                        {
+                            "name": "TBD",
+                            "score": 0,
+                            "completed": false
+                        }
+                    ],
+                    [
+                        {
+                            "name": "TBD",
+                            "score": 0,
+                            "completed": false
+                        },
+                        {
+                            "name": "TBD",
+                            "score": 0,
+                            "completed": false
+                        }
+                    ]
+                ],
+                [
+                    [
+                        {
+                            "name": "TBD",
+                            "score": 0,
+                            "completed": false
+                        },
+                        {
+                            "name": "TBD",
+                            "score": 0,
+                            "completed": false
+                        }
+                    ]
+                ]
+            ],
+            "currentMatchIndex": 0,
+            "lines": []
+        }
+    ],
+    "announcements": [
+        {
+            "id": "1",
+            "message": "\ud83d\udea8 Important Update: System Maintenance on March 30.",
+            "timestamp": "2025-03-29T12:00:00Z"
+        },
+        {
+            "id": "2",
+            "message": "\ud83d\udce2 Event registration closes this Friday!",
+            "timestamp": "2025-03-28T15:30:00Z"
+        },
+        {
+            "id": "a50e",
+            "message": "\ud83d\ude2d Unsay problema nimo?",
+            "timestamp": "2025-05-04T10:07:09.015Z"
+        }
+    ],
+    "committees": [
+        {
             "id": "1",
             "name": "Logistics"
-          },
-          "employee": {
+        },
+        {
+            "id": "2",
+            "name": "Sports"
+        },
+        {
+            "id": "3",
+            "name": "Catering"
+        },
+        {
+            "id": "4",
+            "name": "Entertainment"
+        }
+    ],
+    "employees": [
+        {
             "id": "1",
             "name": "Glene",
             "committeeId": 1
-          },
-          "task": "Dala sa snack"
-        }
-      ],
-      "schedules": [
+        },
         {
-          "time": "08:00",
-          "activity": "Basketbal"
-        }
-      ],
-      "venue": "Kort"
-    },
-    {
-      "id": "ad90",
-      "title": "Archived",
-      "description": "Kung makita ni outside sa archive, naay problema.",
-      "category": "1",
-      "startDate": "Apr-29-2025",
-      "endDate": "Apr-30-2025",
-      "startTime": "04:00am",
-      "endTime": "04:30am",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": true,
-      "tags": [
-        {
-          "id": "5",
-          "name": "test",
-          "color": "#000000"
-        }
-      ],
-      "category_id": "1",
-      "type": "event"
-    },
-    {
-      "id": "d62d",
-      "title": "Titles",
-      "description": "Gradute",
-      "category": "2",
-      "startDate": "May-13-2025",
-      "endDate": "May-13-2025",
-      "startTime": "08:00",
-      "endTime": "12:00",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": false,
-      "tags": [
-        {
-          "id": "6",
-          "name": "Graduation",
-          "color": "#9e369e"
-        }
-      ],
-      "category_id": "2",
-      "type": "event",
-      "tasks": [
-        {
-          "committee": {
             "id": "2",
-            "name": "Sports"
-          },
-          "employee": {
-            "id": "14",
-            "name": "clock clock clack clock",
+            "name": "Miko",
             "committeeId": 2
-          },
-          "task": "My name is 🗣️🗣️🗣️"
-        }
-      ],
-      "schedules": [
+        },
         {
-          "time": "08:00",
-          "activity": "Opening Ceremony"
-        }
-      ],
-      "venue": "Steds"
-    },
-    {
-      "id": "2066",
-      "title": "Time",
-      "description": "Oras na para mag palit ka ug relo",
-      "category": "1",
-      "startDate": "Jun-11-2025",
-      "endDate": "Jun-11-2025",
-      "startTime": "19:08",
-      "endTime": "21:00",
-      "image": "data:image/svg+xml;base64,CiAgICAgICAgICAgICAgICA8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIKICAgICAgICAgICAgICAgICAgICB3aWR0aD0iMTEzIgogICAgICAgICAgICAgICAgICAgIGhlaWdodD0iNzciPgogICAgICAgICAgICAgICAgPGltYWdlIGhyZWY9ImRhdGE6aW1hZ2UvanBlZztiYXNlNjQsLzlqLzRBQVFTa1pKUmdBQkFRQUFBUUFCQUFELzRnSFlTVU5EWDFCU1QwWkpURVVBQVFFQUFBSElBQUFBQUFRd0FBQnRiblJ5VWtkQ0lGaFpXaUFINEFBQkFBRUFBQUFBQUFCaFkzTndBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBUUFBOXRZQUFRQUFBQURUTFFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQWxrWlhOakFBQUE4QUFBQUNSeVdGbGFBQUFCRkFBQUFCUm5XRmxhQUFBQktBQUFBQlJpV0ZsYUFBQUJQQUFBQUJSM2RIQjBBQUFCVUFBQUFCUnlWRkpEQUFBQlpBQUFBQ2huVkZKREFBQUJaQUFBQUNoaVZGSkRBQUFCWkFBQUFDaGpjSEowQUFBQmpBQUFBRHh0YkhWakFBQUFBQUFBQUFFQUFBQU1aVzVWVXdBQUFBZ0FBQUFjQUhNQVVnQkhBRUpZV1ZvZ0FBQUFBQUFBYjZJQUFEajFBQUFEa0ZoWldpQUFBQUFBQUFCaW1RQUF0NFVBQUJqYVdGbGFJQUFBQUFBQUFDU2dBQUFQaEFBQXRzOVlXVm9nQUFBQUFBQUE5dFlBQVFBQUFBRFRMWEJoY21FQUFBQUFBQVFBQUFBQ1ptWUFBUEtuQUFBTldRQUFFOUFBQUFwYkFBQUFBQUFBQUFCdGJIVmpBQUFBQUFBQUFBRUFBQUFNWlc1VlV3QUFBQ0FBQUFBY0FFY0Fid0J2QUdjQWJBQmxBQ0FBU1FCdUFHTUFMZ0FnQURJQU1BQXhBRGIvMndCREFBb0hCd2dIQmdvSUNBZ0xDZ29MRGhnUURnME5EaDBWRmhFWUl4OGxKQ0lmSWlFbUt6Y3ZKaWswS1NFaU1FRXhORGs3UGo0K0pTNUVTVU04U0RjOVBqdi8yd0JEQVFvTEN3NE5EaHdRRUJ3N0tDSW9PenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3p2L3dBQVJDQUJOQUhFREFTSUFBaEVCQXhFQi84UUFHd0FCQUFJREFRRUFBQUFBQUFBQUFBQUFBQUlIQXdVR0FRVC94QUEzRUFBQkF3RUZCZ1FDQ1FVQUFBQUFBQUFBQVFJREJBVUdFUk9SRWlFeVFWTnhKREZSc1VOaUZCVWlNMEp5Z2JMQlVtRnpvZEgveEFBYUFRRUFBd0VCQVFBQUFBQUFBQUFBQUFBQUFnTUZCQUVHLzhRQUpCRUFBZ0lDQVFRQ0F3RUFBQUFBQUFBQUFBRUNBd1FSQlJJaE1VRVRnVkZod1hILzJnQU1Bd0VBQWhFREVRQS9BTGp5WXVtM1FaTVhUYm9UQUJESmk2YmRCa3hkTnVoTUFFTW1McHQwR1RGMDI2RWxYQkZVNVNHOWs4VmRJMnBqYTZIYVZFMkV3VnUvL1pkWFRPM2ZUNktMc2l1bHJyOW5VNU1YVGJvTW1McHQwTWRMVndWa0tTd1NJOXErbkl6bFRUVDB5NU5OYlJESmk2YmRCa3hkTnVoTUhoNlF5WXVtM1FaTVhUYm9UQUJESmk2YmRCa3hkTnVoTUFHUEppNmJkQVpBQUFBQUFBQWVPNFY3RlgxTC9GUy9uZDdsb080VjdGVTFML0ZUZm5kN210eGkyNWZSajhxdHFQMmJxNjlaSkRiTVVUWExzVFl0Y242Ymp2U3RydU94dCtrVDUxOWxPNnE3YW9xR3FiVHp5SzE3a3h4d3hSTzVEUHJidVNpdStpWEgyUmhRM042V3o3d1Fqa1pLeEh4dmE5cStTdFhGRkptWWEza0FBQUFBQUFBQUFBQUFBQThkd3IyS2hxNWZHVGIvQUlqdmN0MTNBdllwZXNsOGJQditJNzNOdmlGdHorak01Q08xRTNkMkpOcThkR256cjdLZFBlK2orNnJHcDhqdjRPT3VuTGplZWhUNTEvYXBaOW8wYVY5RExUS3VDdlRjdm92STl6cC9GbFFsK3Y2eW1xajVjV2NGNTlmNmNIUldsVldlL2FwNVZhbk5xNzBYOURzckd0cU8xSTFhNU5pZHZFM2t2OTBPUXFySXJxTnk1c0R0bFB4TjNvWkxMbGRTMWtVelZ3d2R2N2N5dkpqWGJIcVhreU1US3Z4cmxDZStuMm1kK0R4RnhSRjlUMHh6N0FBQUFBQUFBQUFBQUFpN2dYc1VUV3pZVjFSL2xkN2w3bFBYcXV0WFVkdFZEcVdOWllaSHE5cUo1cGp2TnJpTEl4bktNbjVPRE4xMHBzamM2WGF2WlFKNnZYOXFsdDF0b1V0bndyTFV5b3hxZVNjMTdJVkpkNnk2NnpyUmh0R1haamRDcXF4aXBpcXFxS20vVTJsbzFNMVhJNlNlUnozTHpWVHB6Y2RYM3BwOWtqa3J6STFSY1k5MlpieTN6cmE1ajZhaHhwb0YzSzVPTnlkK1JwcnAxbFErMG0yZEk1MGpKT0RGY1Zhdi9EQlVNVjd0bHFLcXI1SWgyRnlMb3owZFY5YlY3TXQyemhER3ZtbVBOU3k2TkZHTTFyWDQvT3lLakxKbHFYZitIZE5UQnFKNkllZ0h6QnVBQUFBQUFBQUFBQUFBK0swYk5pdENMQnk3TWplRi9vZmFDVVpPTDJpRTRSbkZ4a3RvNHFyc1d2aFZVK2p1a1QrcU5NY1Q0NDd1Mm5XeWJLVTZ4TjV2bCt5aWZ5V0NEdFdkWWw0UndMamFsTGUzbzB0ajNZb2JLd2xWcVQxSE9SeWVYWk9SdWdEam5aS3g5VW50bWhDRVlMVVVBQVFKQUFBQUFBSC8yUT09IgogICAgICAgICAgICAgICAgICAgICAgICB3aWR0aD0iMTAwJSIKICAgICAgICAgICAgICAgICAgICAgICAgaGVpZ2h0PSIxMDAlIi8+CiAgICAgICAgICAgICAgICA8L3N2Zz4=",
-      "archived": false,
-      "tags": [
+            "id": "3",
+            "name": "Uvuvwevwevwe Onyetenyevwe Ubwemubwem Ossas",
+            "committeeId": 3
+        },
         {
-          "id": "4",
-          "name": "Jolen Tournament",
-          "color": "#000000"
-        }
-      ],
-      "category_id": "1",
-      "type": "event",
-      "tasks": [
-        {
-          "committee": {
             "id": "4",
-            "name": "Entertainment"
-          },
-          "employee": {
+            "name": "",
+            "committeeId": 4
+        },
+        {
+            "id": "5",
+            "name": "Kim Jong Un",
+            "committeeId": 1
+        },
+        {
+            "id": "6",
+            "name": "Melvin",
+            "committeeId": 2
+        },
+        {
+            "id": "7",
+            "name": "Lee Ar",
+            "committeeId": 3
+        },
+        {
             "id": "8",
             "name": "Jungkook",
             "committeeId": 4
-          },
-          "task": "Palit relo"
-        }
-      ],
-      "schedules": [],
-      "venue": ""
-    },
-    {
-      "id": "e2b2",
-      "title": "Ambak",
-      "venue": "Tulay",
-      "description": "Kapuy",
-      "category": "2",
-      "startDate": "Apr-29-2025",
-      "endDate": "Apr-29-2025",
-      "startTime": "04:12",
-      "endTime": "12:34",
-      "image": "data:image/svg+xml;base64,CiAgICAgICAgPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgICAgICAgICAgICB3aWR0aD0iMTE0IgogICAgICAgICAgICAgaGVpZ2h0PSI3MyI+CiAgICAgICAgICA8aW1hZ2UgaHJlZj0iZGF0YTppbWFnZS9qcGVnO2Jhc2U2NCwvOWovNEFBUVNrWkpSZ0FCQVFBQUFRQUJBQUQvNGdIWVNVTkRYMUJTVDBaSlRFVUFBUUVBQUFISUFBQUFBQVF3QUFCdGJuUnlVa2RDSUZoWldpQUg0QUFCQUFFQUFBQUFBQUJoWTNOd0FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFRQUE5dFlBQVFBQUFBRFRMUUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBbGtaWE5qQUFBQThBQUFBQ1J5V0ZsYUFBQUJGQUFBQUJSbldGbGFBQUFCS0FBQUFCUmlXRmxhQUFBQlBBQUFBQlIzZEhCMEFBQUJVQUFBQUJSeVZGSkRBQUFCWkFBQUFDaG5WRkpEQUFBQlpBQUFBQ2hpVkZKREFBQUJaQUFBQUNoamNISjBBQUFCakFBQUFEeHRiSFZqQUFBQUFBQUFBQUVBQUFBTVpXNVZVd0FBQUFnQUFBQWNBSE1BVWdCSEFFSllXVm9nQUFBQUFBQUFiNklBQURqMUFBQURrRmhaV2lBQUFBQUFBQUJpbVFBQXQ0VUFBQmphV0ZsYUlBQUFBQUFBQUNTZ0FBQVBoQUFBdHM5WVdWb2dBQUFBQUFBQTl0WUFBUUFBQUFEVExYQmhjbUVBQUFBQUFBUUFBQUFDWm1ZQUFQS25BQUFOV1FBQUU5QUFBQXBiQUFBQUFBQUFBQUJ0YkhWakFBQUFBQUFBQUFFQUFBQU1aVzVWVXdBQUFDQUFBQUFjQUVjQWJ3QnZBR2NBYkFCbEFDQUFTUUJ1QUdNQUxnQWdBRElBTUFBeEFEYi8yd0JEQUFvSEJ3Z0hCZ29JQ0FnTENnb0xEaGdRRGcwTkRoMFZGaEVZSXg4bEpDSWZJaUVtS3pjdkppazBLU0VpTUVFeE5EazdQajQrSlM1RVNVTThTRGM5UGp2LzJ3QkRBUW9MQ3c0TkRod1FFQnc3S0NJb096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenYvd0FBUkNBQkpBSElEQVNJQUFoRUJBeEVCLzhRQUd3QUJBUUFDQXdFQUFBQUFBQUFBQUFBQUFBRUVCUU1HQndML3hBQTBFQUFCQkFFQ0F3VUdCQWNBQUFBQUFBQUJBQUlEQkFVR0VSSVRNUlFoUVZHQkJ4VWlRbkdoSXlWaHNUSkVVb0tSd2RIL3hBQVlBUUVCQVFFQkFBQUFBQUFBQUFBQUFBQUFBUUlEQmYvRUFDUVJBQUlDQWdFQ0J3RUFBQUFBQUFBQUFBQUJBaEVoTVFNU1FRUVRJMUZoa2ZEeC85b0FEQU1CQUFJUkF4RUFQd0QyWkZFUUZSUkVCVVVSQVZGRVFGUlJFQlVVUkFWRkVRRlJSRUFSRmc1cTlZeHVKc1hhMVh0VDRXOGZLRHRpNERyc3FsYm9HY2l3TUxscStjeEZmSTFqK0hNM2ZieGFmRUg2RllGRFV2dlBVMTNGVkszSFhvdEhPdGNYY0huNVFQRS84V3ZMbG5HdGxwbStSWWVQeXRIS3NsZFJzc25FTHpHOHQrVnc4RTk3VWZldnVydERlMmN2bWNyeDRmTlRwbGRVS1ptSXNhL2tLdUxwdnVYWm13d1I3Y1QzZEJ1ZGx4V016anF0Q0s5UGJqanJ6TkRvM3VQOFlJM0d3NmxGRnZLUW96a1dtYnF2RWNiR3l6dnJpUTdNZlBFNWpYZXBHeTJzczhVTURwNVpHc2lhM2ljOG51QTg5MGNaTGFGTTVFV2loMVJIZWFaTWJqcmwySHdtWXdOWTc2RTlWejBOUlVyMTAwSENTcmRhT0xzOWh2QzRqekhuNkxUNDVyc0tadGtXbXlXb1k4ZnFERzRmczc1SkwvRnM5cDdtQURyOWx1Vm1VSlJTYjdocWdpSXNrQ2hBSUlJM0JWUkFlVzVQSlhmWjNsTWxqYWtENWFtVmFaY2NCMGptSjJMZnYreTNYWnpvYjJkVEV1NHNoWUh4dVBXU2VUdSszN0JjbXZ1SDN2cGZpQVA1ai9wY2VvNjB1cDliNC9DYlRNb1VHT3RXSldidDNmMGFBZk1iai9KWG9KOVNqS1d0djVvNjdwc3hOTDBYYU0xUld4Y3JqeWN2VUQ5M0grWWFOM0QxQlAyWFBldTFjZDdXUll0UExHSEc3YmhwUGZ4RHlYM3JUVEVzT0hibHFGdTlZdTR5UnRpRnNzeGs3Z1J4YkEvcDMraStNYmFma2ZhVld5QXJ5TWlteFhWelNBMTI0SmI5VlZKVDlTN3cwLzM3UTNrK3RmYWh4ZDNSV1Jyd3psMGoydDRRWTNENWg1aGEvU2UyYzFrTzFmSEJoc2ZBeXZHN29IR05wTHR2UHZYWlBhSkUrWFEyU2ppamRJOXpXZ05hTnlmakMwZU5xV05ONWFubnhYbGt4K1JvUXN0OHRoTG9IaGpRQ1IxMjdnbkU0dmhhV0htdnBDTmRKM25JVUsrVG9UVTdVYlpJcFdGcEJDOGZpekYzSmFheGVtNXBYdWE3S3VxeVBKNzN4TTJJYVQvZDlsNlZrTlcwSTZUL0FIYzgzcmIya1F3UU5Mbk9kNGIrUStxNmpKb2JJWS9SMU96RXptWmFwY04rV05wMzR1TFlPWVBvQVBVTFBocWhqa3hiWDlFTWJQU29ZWTY4TElZbUJrY2JRMXJSMEFDNlo3VVllejRLdG1vRHk3bU90UnZqa2IxMmNlRWo2ZDRQb3V4WXZVV055dE5rOGRtTmp0dmppa2R3dVlmRUVGZFkxbk9kV1NWZE00ZHduNDUyeVhKMmQ3SVkybmZZbnB2djRmb3VQREdVZVpPV0syWmltcFpNeUw4MjE3ajdwR3dyNHZtN2VUcEQzZmJkZHZXbXhWS0tMTVhiRVVzTDJDT0tCcldPM2N3TUhSM2wxVzVYUGxsYlM5a1NUQ0lpNUdRaUlnTU85aWFPU2xyUzI0R3l2cXY1a0pQeU84MW1JaXR2UUNJaWdDSWlBZ2FBZHdBRlVSQVlkakU0NjFKeko2TmVSNTZ1ZEdDVDZybnIxcTlXUGwxNEk0V2YweHREUjlseW9yYnFnWWRMRlVjZExZbHFWMnhQdFA1a3BIek84MW1JaU50N0FSRVVBVFpWRUJOazJWUkFUWk5sVVFFMlRaVkVCTmsyVlJBVFpObFVRRTJUWlZFQk5rVlJBZi9aIgogICAgICAgICAgICAgICAgIHdpZHRoPSIxMDAlIgogICAgICAgICAgICAgICAgIGhlaWdodD0iMTAwJSIvPgogICAgICAgIDwvc3ZnPg==",
-      "archived": false,
-      "tags": [
-        {
-          "id": "2",
-          "name": "Palakasan",
-          "color": "#33FF57"
-        }
-      ],
-      "category_id": "2",
-      "type": "event"
-    },
-    {
-      "id": "be13",
-      "title": "Karun",
-      "venue": "32",
-      "description": "adsa sadsa as das d asdasd  asd sad",
-      "category": "3",
-      "startDate": "May-02-2025",
-      "endDate": "May-03-2025",
-      "startTime": "22:28",
-      "endTime": "22:30",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": false,
-      "tags": [
-        {
-          "id": "2",
-          "name": "Palakasan",
-          "color": "#33FF57"
-        }
-      ],
-      "category_id": "3",
-      "schedules": [],
-      "type": "event"
-    },
-    {
-      "id": "24f0",
-      "title": "Mag over think",
-      "venue": "Sainyo",
-      "description": "Nagtuo ang alimango na galupad ang isda?",
-      "category": "2",
-      "startDate": "May-07-2025",
-      "endDate": "May-09-2025",
-      "startTime": "01:00",
-      "endTime": "23:00",
-      "image": "data:image/svg+xml;base64,CiAgICAgICAgPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgICAgICAgICAgICB3aWR0aD0iNzEiCiAgICAgICAgICAgICBoZWlnaHQ9IjY2Ij4KICAgICAgICAgIDxpbWFnZSBocmVmPSJkYXRhOmltYWdlL2pwZWc7YmFzZTY0LC85ai80QUFRU2taSlJnQUJBUUFBQVFBQkFBRC80Z0hZU1VORFgxQlNUMFpKVEVVQUFRRUFBQUhJQUFBQUFBUXdBQUJ0Ym5SeVVrZENJRmhaV2lBSDRBQUJBQUVBQUFBQUFBQmhZM053QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQVFBQTl0WUFBUUFBQUFEVExRQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFsa1pYTmpBQUFBOEFBQUFDUnlXRmxhQUFBQkZBQUFBQlJuV0ZsYUFBQUJLQUFBQUJSaVdGbGFBQUFCUEFBQUFCUjNkSEIwQUFBQlVBQUFBQlJ5VkZKREFBQUJaQUFBQUNoblZGSkRBQUFCWkFBQUFDaGlWRkpEQUFBQlpBQUFBQ2hqY0hKMEFBQUJqQUFBQUR4dGJIVmpBQUFBQUFBQUFBRUFBQUFNWlc1VlV3QUFBQWdBQUFBY0FITUFVZ0JIQUVKWVdWb2dBQUFBQUFBQWI2SUFBRGoxQUFBRGtGaFpXaUFBQUFBQUFBQmltUUFBdDRVQUFCamFXRmxhSUFBQUFBQUFBQ1NnQUFBUGhBQUF0czlZV1ZvZ0FBQUFBQUFBOXRZQUFRQUFBQURUTFhCaGNtRUFBQUFBQUFRQUFBQUNabVlBQVBLbkFBQU5XUUFBRTlBQUFBcGJBQUFBQUFBQUFBQnRiSFZqQUFBQUFBQUFBQUVBQUFBTVpXNVZVd0FBQUNBQUFBQWNBRWNBYndCdkFHY0FiQUJsQUNBQVNRQnVBR01BTGdBZ0FESUFNQUF4QURiLzJ3QkRBQW9IQndnSEJnb0lDQWdMQ2dvTERoZ1FEZzBORGgwVkZoRVlJeDhsSkNJZklpRW1LemN2SmlrMEtTRWlNRUV4TkRrN1BqNCtKUzVFU1VNOFNEYzlQanYvMndCREFRb0xDdzRORGh3UUVCdzdLQ0lvT3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096di93QUFSQ0FCQ0FFY0RBU0lBQWhFQkF4RUIvOFFBSEFBQUFRVUJBUUVBQUFBQUFBQUFBQUFBQUFNRUJRWUhBUUlJLzhRQU9CQUFBUU1EQVFVRUNBTUpBQUFBQUFBQUFRSURCQUFGRVJJR0V5RXhRUWRSWVhFVUZTSkNnWkhCMFNOU29SWXlNMkp5Z3JHeXd2L0VBQmNCQUFNQkFBQUFBQUFBQUFBQUFBQUFBQUFCQWdQL3hBQWRFUUVCQUFNQUF3RUJBQUFBQUFBQUFBQUFBUUlSTVJJaFFRTlIvOW9BREFNQkFBSVJBeEVBUHdETksxK04yUzdQUGx4UHB0eDFJVmpnNjN5Nkg5eXNoclNkbHUwRkRNaGlQTVZwV2hJYlZyT05TZW54cWtaWFJScnN5dEhycGNGMlRPQ0JuU1F0R1QxL0xYSGV6ZXh0V2xVd3laNVdsZWtqZUl4L3BWOW1CcDl5TmRvcWd0QUkxbFBkVENhakVPNVErcVR2RWp3cG84cXFhdXpTeXk3ZDZUYlpjNWJpZUsyMXVJSkh5U0tyam15Y1J0d29VNUlIOXcrMVdxRGNYNERvY1pXVW51NzZlVEhZRjFhM3ZzeDVIVWU2by9TcTFwUGxmNm94MlhoQldDNi80ZTBQdFhoelptSWtaUzQvOHg5cW4zVUZCSVZqSTVFVndZVW1ucUR5cW1YYTN0UWQxdWxMSlhxenFJUExIaDQwVS8ycFFFcWpZNjYvcFJVWHJiRzdpQXF3enRrWmQ0a3R5YmFsS2xrQkxqYWVCU2UveU5WNnQ1L1pOcDVJZWl1bGgwQUZMaU9TeFNneWhQWit4WEt3V05zcWQzNUtQeG1GbmdmTHhwQis3UnBqUWt4VmtxWi9DZVFybmpwbnZwUjdacS9PamRxdUpLUDZ6WGxyWVZVWmhha1NqdjFENEh6cXZUTzQxV3pqZUtTT1FQRHlwckplRWR0U2xqMlFjbnlwMU5qdlcrU1daQ2REcWVRUHZDbTd1aVhISUhVWUk2MWJQV3FpMzd5aUc1aVNNc3I0b2RUL0FJTkt4N2hCa0hYR2xJSjZwMVVuYUxERXVNdDZGUGs3cEtrbmQ2dVdycFVlZXpDK291ZTZhUUN6cTRPaFhERlRhdVRibTFLMHI5Rndmei84MFU5MjR0RVN6TTJ5TXcvdlhnaGUrSU9RRDdPUHJSVTNyWEhpcFY5RTJseVZieUljeEowZTR2bVBLdm5hdnBTMFhCRnhnb2R5Q3NEQ3g0MGp2VWp3eFhEaXVhaFNNcDV4cGxUamFOWlR4MDk5STFDN1F5UFdET09ZUjlUVFhabUhDdXJTNHo2eTNKSEZEZzVud1BmVFBiQzhOM0s0aGFVcVFFZ0p3cm5VTEZtdXczMHV0S0tWSk9RUldrbnBqZXJQZHRqSjZWYnhqUzRSMVNjWitGUUVtNVhtM2d4RnlubXdQY0tzNHFRbWJhWE9TenU5NEVER0NVakJOVng5MVRxeXRhaVZIcWFKTDlGMThSZDNmZWZXMnA1d3JQSEdmaFJYbTVuSmIrUDBvcWIxcGp3d3JWckxmRjJ5U2s4UzJyZ29lRlpUVjVYY0lTWHdSTVlLVmR6ZzRmclR4bTBmcGJOYWE1R25OUzJRNjBzS1NhSHBCUWtuU1ZEd3JLcmJ0V20xU1FwRXB0eG9uQzBid2NhdUN0cWJOT2hCVGQ1aXNMSXlOYjZVa0h4Qk5UWnBjdTRnOXFiZERlZFhLaXVoQ3p4VTBvWU9hcURpaWc2VmNENDFhWm0xRHJPb0dWYlpPT1N3OGc1L1dxbmNMdjZlK1hYWEc4L3lrQVZVcUxIa3JwTlN3YVFWSlJqK0luNTAxZGw2anBiNjlUVmJMUW5LQktBT21lSHlvcEY3R0VnS0NqeHljMFZuZXRjZUVxS0tLREZGRkZBRkZGRkFGRkZGQUZGRkZBZi8yUT09IgogICAgICAgICAgICAgICAgIHdpZHRoPSIxMDAlIgogICAgICAgICAgICAgICAgIGhlaWdodD0iMTAwJSIvPgogICAgICAgIDwvc3ZnPg==",
-      "archived": false,
-      "tags": [
-        {
-          "id": "3",
-          "name": "Buwan ng Wika",
-          "color": "#3357FF"
         },
         {
-          "id": "4",
-          "name": "Jolen Tournament",
-          "color": "#000000"
+            "id": "9",
+            "name": "Bryan",
+            "committeeId": 1
         },
         {
-          "id": "6",
-          "name": "Graduation",
-          "color": "#9e369e"
-        }
-      ],
-      "category_id": "2",
-      "type": "event",
-      "tasks": [
+            "id": "10",
+            "name": "Edsel",
+            "committeeId": 2
+        },
         {
-          "committee": {
-            "id": "3",
-            "name": "Catering"
-          },
-          "employee": {
             "id": "11",
             "name": "Sonny Jihns",
             "committeeId": 3
-          },
-          "task": "Overthink"
-        }
-      ],
-      "schedules": []
-    },
-    {
-      "id": "109e",
-      "title": "Date",
-      "venue": "Calendar",
-      "description": "Sakto na date format",
-      "category": "2",
-      "startDate": "Apr-30-2025",
-      "endDate": "Apr-30-2025",
-      "startTime": "19:00",
-      "endTime": "00:00",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": true,
-      "tags": [
-        {
-          "id": "1",
-          "name": "Foundation Day",
-          "color": "#FF5733"
-        }
-      ],
-      "category_id": "2",
-      "type": "event"
-    },
-    {
-      "id": "bdc6",
-      "title": "qw2",
-      "venue": "Steds",
-      "description": "12 53 12 34 21 32 41 24 34 31",
-      "category": "1",
-      "startDate": "May-01-2025",
-      "endDate": "May-03-2025",
-      "startTime": "12:12",
-      "endTime": "00:12",
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": true,
-      "tags": [
-        {
-          "id": "3",
-          "name": "Buwan ng Wika",
-          "color": "#3357FF"
         },
         {
-          "id": "4",
-          "name": "Jolen Tournament",
-          "color": "#000000"
-        }
-      ],
-      "category_id": "1",
-      "type": "event"
-    },
-    {
-      "id": "58fe",
-      "title": "Pneumono­ultra­micro­scopic­silico­volcano­coniosis",
-      "description": "It is the longest word in the English language published in a popular dictionary, Oxford Dictionaries, which defines it as \"an artificial long word said to mean a lung disease caused by inhaling very fine ash and sand dust",
-      "venue": "",
-      "category_id": "2",
-      "startDate": "May-30-2025",
-      "endDate": "May-30-2025",
-      "startTime": "00:00",
-      "endTime": "00:00",
-      "tags": [
-        {
-          "id": "3",
-          "name": "Buwan ng Wika",
-          "color": "#3357FF"
-        }
-      ],
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": false,
-      "schedules": [
-        {
-          "time": "00:05",
-          "activity": "activity 1"
+            "id": "12",
+            "name": "No Kum-sok",
+            "committeeId": 4
         },
         {
-          "time": "01:11",
-          "activity": "activity 2"
-        }
-      ]
-    },
-    {
-      "id": "ee74",
-      "title": "New2",
-      "description": "Severity tag",
-      "venue": "Philippines",
-      "category_id": "1",
-      "startDate": "Jun-30-2025",
-      "endDate": "Jul-01-2025",
-      "startTime": "00:00",
-      "endTime": "23:00",
-      "tags": [
+            "id": "13",
+            "name": "Xi Jinping",
+            "committeeId": 1
+        },
         {
-          "id": "1",
-          "name": "Foundation Day",
-          "color": "#FF5733"
+            "id": "14",
+            "name": "clock clock clack clock",
+            "committeeId": 2
         }
-      ],
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": false
-    },
-    {
-      "id": "0237",
-      "title": "NewTag",
-      "description": "New tag",
-      "venue": "",
-      "category_id": "2",
-      "startDate": "May-28-2025",
-      "endDate": "May-29-2025",
-      "startTime": "00:00",
-      "endTime": "23:00",
-      "tags": [
-        {
-          "id": "4",
-          "name": "Jolen Tournament",
-          "color": "#000000"
-        }
-      ],
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": false,
-      "createdAt": "2025-05-01T10:33:27.181Z"
-    },
-    {
-      "id": "d190",
-      "title": "Laban Lungs Official Deployment",
-      "description": "Project By Edseld Loreho",
-      "venue": "",
-      "category_id": null,
-      "startDate": "May-30-2025",
-      "endDate": "May-30-2025",
-      "startTime": "00:00",
-      "endTime": "00:00",
-      "tags": [],
-      "image": "data:image/jpeg;base64,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",
-      "archived": false,
-      "createdAt": "2025-05-04T08:58:14.587Z",
-      "type": "event"
-    },
-    {
-      "id": "f2d0",
-      "title": "Lssa",
-      "description": "",
-      "venue": "",
-      "category_id": "1",
-      "startDate": "May-04-2025",
-      "endDate": null,
-      "startTime": "12:00",
-      "endTime": "00:00",
-      "tags": [
-        {
-          "id": "3",
-          "name": "Buwan ng Wika",
-          "color": "#3357FF"
-        }
-      ],
-      "image": "data:image/svg+xml;base64,CiAgICAgICAgPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgICAgICAgICAgICB3aWR0aD0iMTE2IgogICAgICAgICAgICAgaGVpZ2h0PSI3NiI+CiAgICAgICAgICA8aW1hZ2UgaHJlZj0iZGF0YTppbWFnZS9qcGVnO2Jhc2U2NCwvOWovNEFBUVNrWkpSZ0FCQVFBQUFRQUJBQUQvNGdIWVNVTkRYMUJTVDBaSlRFVUFBUUVBQUFISUFBQUFBQVF3QUFCdGJuUnlVa2RDSUZoWldpQUg0QUFCQUFFQUFBQUFBQUJoWTNOd0FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFRQUE5dFlBQVFBQUFBRFRMUUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBbGtaWE5qQUFBQThBQUFBQ1J5V0ZsYUFBQUJGQUFBQUJSbldGbGFBQUFCS0FBQUFCUmlXRmxhQUFBQlBBQUFBQlIzZEhCMEFBQUJVQUFBQUJSeVZGSkRBQUFCWkFBQUFDaG5WRkpEQUFBQlpBQUFBQ2hpVkZKREFBQUJaQUFBQUNoamNISjBBQUFCakFBQUFEeHRiSFZqQUFBQUFBQUFBQUVBQUFBTVpXNVZVd0FBQUFnQUFBQWNBSE1BVWdCSEFFSllXVm9nQUFBQUFBQUFiNklBQURqMUFBQURrRmhaV2lBQUFBQUFBQUJpbVFBQXQ0VUFBQmphV0ZsYUlBQUFBQUFBQUNTZ0FBQVBoQUFBdHM5WVdWb2dBQUFBQUFBQTl0WUFBUUFBQUFEVExYQmhjbUVBQUFBQUFBUUFBQUFDWm1ZQUFQS25BQUFOV1FBQUU5QUFBQXBiQUFBQUFBQUFBQUJ0YkhWakFBQUFBQUFBQUFFQUFBQU1aVzVWVXdBQUFDQUFBQUFjQUVjQWJ3QnZBR2NBYkFCbEFDQUFTUUJ1QUdNQUxnQWdBRElBTUFBeEFEYi8yd0JEQUFvSEJ3Z0hCZ29JQ0FnTENnb0xEaGdRRGcwTkRoMFZGaEVZSXg4bEpDSWZJaUVtS3pjdkppazBLU0VpTUVFeE5EazdQajQrSlM1RVNVTThTRGM5UGp2LzJ3QkRBUW9MQ3c0TkRod1FFQnc3S0NJb096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenYvd0FBUkNBQk1BSFFEQVNJQUFoRUJBeEVCLzhRQUd3QUJBUUFDQXdFQUFBQUFBQUFBQUFBQUFBSUVCZ0VGQndQL3hBQXdFQUFDQWdFQkJ3RUdCZ01BQUFBQUFBQUJBZ0FERVFRRkVoTWhNVktSQmhVaVFXRnhnVEpDVVdKeW9ZS3gwZi9FQUJjQkFRRUJBUUFBQUFBQUFBQUFBQUFBQUFBRUJRUC94QUFrRVFFQUFRTUVBZ0VGQUFBQUFBQUFBQUFBQXdFQ0JCRVRJVEVTSWhSQlVXR0JzZi9hQUF3REFRQUNFUU1SQUQ4QTlqNGFEOGkrSnp3MDdGOFNvZ1R3MDdGOFJ3MDdGOFNvZ1R3MDdGOFJ3MDdGOFNvZ1R3MDdGOFJ3MDdGOFNvZ1R3MDdGOFJ3MDdGOFNvZ1R3MDdGOFJ3MDdGOFNvZ1R3MDdGOFJ3MDdGOFNvZ1FhcXorUVJMaUFpSWdJaUlDZFJ0amJpYk9EVjE3cHRBeXpNZmRRZlA5VDhwMnRqaXV0blBSUVRQTHRzYXA5WHJLNjNiQXNJc2MvTnYrREFrMlJMV08zanRkaFk5SnIvYnFqdHRkdGZhNlZEVk9tc2Frak8rcml0UjlsR1I5ekoyZDZ1dld4VmE5K2Y1ZFFReW4vTEFJKzgyL1o5ZWtwRm1ncG9DclVveU9HUUdCK1o2bWFCNmkyYWFkcXNkTnBuUmJTMkVDWUdRY1pBL1E5WlBQYkpEVGM4bHVOSkJrVnJGVzNUN1BSZEJyNnRvVWNSQVZaVGgwYnFwbVZORjlJYTZ4ZFRYWFlUa0UwUG40akJLK01FZmViMUs0Wk55enladVZEc3lWdElpSjJURVJFQkVSQVJFUUVSRUNMazRsTHAzS1JQS2RzMFBUcVVaaGozUWgrVEx5UDhBcWVzelg5dituaHJnOTFGWXNMYzNxenVrbnVVL0EvWGtaTGxSVmt0NGFPQmtVaHY5dXFzcXZXTmQ2WEdyUWtzTlB2NFU4eVFPWS9xYUZxZHJIVUt4Ylc2am5uQ0NzQS9UT1ozbEZUVWFhblNQdE45RndReWtXMU1yRUU5TWRENW1EWDZlWFVhdmMwdWRYV3A5M2NRb3Ava3g2ZmJKbWJsUWZJdXR1MDVweDlQNDdZc20xTGRiV3oxMTcvSDdmZjBkcEhiVTFPYys5WWJUL0ZRUm43ay8xTittQnNyWmE3T3BPU0h1Zkcrd0dBQU9nQStBRXo1cXdSN2RtaUxMbXBOTFc2aEVSTzZVaUlnSWlJQ0lpQW1Eck5iZlJxNmROcDlPdHoyVnZZZDZ6ZHdGS2o5RDNUT21KcXRBbXF1cnVOdHRUMXF5QTFzQmtNUVNPbjdSQW1qYTJrdTAzSE5tNEF5b3dJL0N6WUFIOWlUN1kwcHRwVUY5eTRIZGRrWmQ0NVhHQVJ6enZmQ1NkaWFRNFVHeGF3eU1hdzNKaXVNRStCT2ZZK25JcTNyTG1OR2VDeGJuWDA2SEh5Z2ZMMndVemJxdE90ZWwzM1VXaDk0amR6ekl4KzA5TXpMdTJocGFINGJPeGZsN2lJek1jL0lBbjRUNCt4dE0yOExYdHRySmNpdDI5MEZzNTZmVStZWFk5UzJjVWFqVWNYa0JadkRJQUJHT21QakFrN1pyS2xhazM3K0thaFhuSFBlS2drNDVkQ1pWZTJOT0s4MzJWNzRZZ2loamNCakdTY0Rsakl6bnBtYyt4OUtOOHJ2bzFqbXdzcmM5L09kNzY4L0VrN0dvSlpqZGNiSHp2MmJ3eXdJQUlQTEdNS1BFRHNGWU1vWlRrRVpCSHhuTWxFV3RGUlJoVkdBSlVCRVJBUkVRRVJFQkVSQVJFUUVSRUJFUkFSRVFFUkVCRVJBLy85az0iCiAgICAgICAgICAgICAgICAgd2lkdGg9IjEwMCUiCiAgICAgICAgICAgICAgICAgaGVpZ2h0PSIxMDAlIi8+CiAgICAgICAgPC9zdmc+",
-      "archived": false,
-      "createdAt": "2025-05-04T10:17:04.241Z"
-    },
-    {
-      "id": "7324",
-      "title": "Seminar",
-      "description": "Meeting",
-      "venue": "Room",
-      "category_id": null,
-      "startDate": "May-08-2025",
-      "endDate": "May-08-2025",
-      "startTime": "03:00",
-      "endTime": "12:00",
-      "tags": [
-        {
-          "id": "4",
-          "name": "Jolen Tournament",
-          "color": "#000000"
-        }
-      ],
-      "image": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20viewBox%3D%220%200%20115%2077%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20width%3D%22115%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20height%3D%2277%22%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3Cimage%20href%3D%22data%3Aimage%2Fwebp%3Bbase64%2CUklGRrAGAABXRUJQVlA4WAoAAAAgAAAAcgAATAAASUNDUMgBAAAAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADZWUDggwgQAANAZAJ0BKnMATQA%2BUSKORaOhoRILNig4BQS0gAtr3wB2Ed8PiV8%2F%2BwHINiKdlf5L8hPyg56fUl4gN53q9%2FlfJW%2BY%2F7fwmtTK6q5B6gB%2BS%2F%2Bx%2BQHvy%2F7HnF%2Bnf%2Bn%2FePgO%2Fl39h%2F3329cgAVn6nDWkEWUm3IBlhIn03jJrxSJxK0KUpnmHDi9VElaswMvS5fmkaKmdJn2gvt5kD69yDlvGVJwBRSGBfRoou2a2W1fnWyvkTXBNqQV8qox0cwPLqR9uGr%2FFC2qEzTz82yqgR1O5tNejtpZVwQgAAP7%2FIsrQbN8I2f47Mr1jY%2B1RoUmOwSHDJS1lrkPcz2cUAoFRQdD6Yn5pIoxb%2F%2BZmpKjiuL4rtUy%2F%2FN36EjK%2F45%2FXS607FQ3dddcWtIWQAqMRaiALCLOqBq6oGw1NvXCRXz%2ByNH6NY9bqMjIREHVudn0Rm8GwSH1bglIpayIHR6wDLinwWPpiz8evVVttwYib3K9aOH%2F%2FzRPhYv3H%2Bwj4x2%2BWpPrXHfR%2BOVlmng9WJXv7L%2BPigcuubwKQ8zM7P%2BbBlpVhv9fmLP4Gb4ErIfbjh%2FbQ0BNwD8WHPlvcn1etqMbhHLDUNtPiMjNlxRcZmjatrABuy60H%2FG1NnHoWl9V2DmxpK4wrdpkssVirN3AYvUjsShbGL%2Fs2fbIJLGgobcb39d4yXtAp78sXqJX6i00H299IRKow4d3yngi60R9olX%2BQjCYUQqd7H75sNlRQ%2FPHj7mmiwOJxmDsDArNdyOAevI5n%2BxoK9%2Fpe%2FSrE9h161bWKNRzJRrnQdJaxLpxhkSkq%2B7Z0n3peXxhaniObwuzr0SZoRMnDvbkipWEO6%2BsDLXbffuZTBxBTOyMYJVJMA%2BvfRAmaxZZ4IC%2FmXXM%2BUWBSa%2FWML9Tf0UZ0joaNEnDE%2F6UWMDrBQ4YdozSZN1BtWUuc5vfspb39kZ0n4u9JgFm5v%2FnE4ouTeqn%2Fn5AAMV7qbOntp1eJl9R9RtsQiMIifAMq5gtck1alFjM9VRqZrB9VahgCCPvhMY7Chl9JJuhuRq%2FM%2F0wz87PrkZPXqHP3kn2BHLZ%2B5jZ9CiYeCqzwu4sYIHxjFLYlsxm1aOnJ8SibtpVv2frZXUX%2FDX8xPOSl7o3r%2FjVPs%2B0kwV5ni0z1aMaLU3CYdUgYMiX%2FWBG0Huj6CNNKbnGzy47%2FMVJnK6E9fGqpzI59FdN1fwqpRIEleb3y%2F%2FNNr4v8%2Fd7VWcGwbIVAtkFjamWYihRTiNh0EtyAU0%2FHZRZ3tC6V6g%2FvOSBZuJVbkQ%2BU4F7veNOgPsn5gbLiMCzCivaKfWasIE%2BUyhQG8O1Jy3M88Lilb3zOVuCuq8UmHp3m88VShWZ%2FPCHEKDaK0j9I5JYcXlVQsTnlPcz6dmRrvvLqpA5XPcIhhnVkca6LCNaZfSZs3k2AmRtirJ8dCLtm5u2auU37AfkG597jfRiheCfOKVzh0OBusnpskg9QvpjZ%2F9V6v%2FvV903ZnUeKOfWZEMbVeFa1Ue03GViu68eWJjhZtcuHuGvqlO3iPLeOaRJvYvxuvkfwp4Y1fcPTx%2F5fRLdPvBzyON07Bw42L0tGfn7fHkwXFYSuDfR8E28Up5S35tFO06mjSap36%2FcEP3phPlhnvIQNLOAAAA%3D%3D%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20width%3D%22100%25%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20height%3D%22100%25%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20preserveAspectRatio%3D%22xMidYMid%20meet%22%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3C%2Fsvg%3E",
-      "archived": false,
-      "createdAt": "2025-05-06T23:58:20.693Z"
-    },
-    {
-      "id": "deee",
-      "title": "wwsdasdaaaa",
-      "description": "",
-      "venue": "",
-      "category_id": null,
-      "startDate": "May-14-2025",
-      "endDate": null,
-      "startTime": "00:00",
-      "endTime": "00:00",
-      "tags": [],
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": true,
-      "createdAt": "2025-05-07T00:00:07.020Z"
-    },
-    {
-      "id": "a236",
-      "title": "fds",
-      "description": "",
-      "venue": "",
-      "category_id": "1",
-      "startDate": "May-07-2025",
-      "endDate": "May-08-2025",
-      "startTime": "00:00",
-      "endTime": "00:00",
-      "tags": [
-        {
-          "id": "1",
-          "name": "Foundation Day",
-          "color": "#FF5733"
-        }
-      ],
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": true,
-      "createdAt": "2025-05-07T01:00:22.932Z"
-    },
-    {
-      "id": "7ea0",
-      "title": "dsa",
-      "description": "",
-      "venue": "",
-      "category_id": null,
-      "startDate": "2025-05-05T16:00:00.000Z",
-      "endDate": "2025-05-06T16:00:00.000Z",
-      "startTime": "00:00",
-      "endTime": "00:00",
-      "tags": [],
-      "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-      "archived": true,
-      "createdAt": "2025-05-07T01:03:15.619Z"
-    }
-  ],
-  "tags": [
-    {
-      "id": "1",
-      "name": "Foundation Day",
-      "color": "#FF5733"
-    },
-    {
-      "id": "2",
-      "name": "Palakasan",
-      "color": "#33FF57"
-    },
-    {
-      "id": "3",
-      "name": "Buwan ng Wika",
-      "color": "#3357FF"
-    },
-    {
-      "id": "4",
-      "name": "Jolen Tournament",
-      "color": "#000000"
-    },
-    {
-      "id": "6",
-      "name": "Graduation",
-      "color": "#9e369e"
-    }
-  ],
-  "sports": [],
-  "category": [
-    {
-      "id": "1",
-      "title": "Academics",
-      "description": "Academic events"
-    },
-    {
-      "id": "2",
-      "title": "Commemorative",
-      "description": "Honoring special events"
-    },
-    {
-      "id": "3",
-      "title": "Sports",
-      "description": "Sporting events and competitions"
-    },
-    {
-      "id": "4",
-      "title": "Leisure",
-      "description": "Leisure, relaxation, and enjoyment"
-    },
-    {
-      "id": "5e80",
-      "title": "way klase",
-      "description": "woooo"
-    }
-  ],
-  "brackets": [
-    {
-      "id": "0354",
-      "name": "123123",
-      "type": "single",
-      "matches": [
-        [
-          [
-            {
-              "name": "Player 1",
-              "score": 0,
-              "completed": false
-            },
-            {
-              "name": "Player 2",
-              "score": 0,
-              "completed": false
-            }
-          ],
-          [
-            {
-              "name": "Player 3",
-              "score": 0,
-              "completed": false
-            },
-            {
-              "name": "Player 4",
-              "score": 0,
-              "completed": false
-            }
-          ],
-          [
-            {
-              "name": "Player 5",
-              "score": 0,
-              "completed": false
-            },
-            {
-              "name": "Player 6",
-              "score": 0,
-              "completed": false
-            }
-          ],
-          [
-            {
-              "name": "Player 7",
-              "score": 0,
-              "completed": false
-            },
-            {
-              "name": "Player 8",
-              "score": 0,
-              "completed": false
-            }
-          ]
-        ],
-        [
-          [
-            {
-              "name": "TBD",
-              "score": 0,
-              "completed": false
-            },
-            {
-              "name": "TBD",
-              "score": 0,
-              "completed": false
-            }
-          ],
-          [
-            {
-              "name": "TBD",
-              "score": 0,
-              "completed": false
-            },
-            {
-              "name": "TBD",
-              "score": 0,
-              "completed": false
-            }
-          ]
-        ],
-        [
-          [
-            {
-              "name": "TBD",
-              "score": 0,
-              "completed": false
-            },
-            {
-              "name": "TBD",
-              "score": 0,
-              "completed": false
-            }
-          ]
-        ]
-      ],
-      "currentMatchIndex": 0,
-      "lines": []
-    }
-  ],
-  "announcements": [
-    {
-      "id": "1",
-      "message": "🚨 Important Update: System Maintenance on March 30.",
-      "timestamp": "2025-03-29T12:00:00Z"
-    },
-    {
-      "id": "2",
-      "message": "📢 Event registration closes this Friday!",
-      "timestamp": "2025-03-28T15:30:00Z"
-    },
-    {
-      "id": "a50e",
-      "message": "😭 Unsay problema nimo?",
-      "timestamp": "2025-05-04T10:07:09.015Z"
-    }
-  ],
-  "committees": [
-    {
-      "id": "1",
-      "name": "Logistics"
-    },
-    {
-      "id": "2",
-      "name": "Sports"
-    },
-    {
-      "id": "3",
-      "name": "Catering"
-    },
-    {
-      "id": "4",
-      "name": "Entertainment"
-    }
-  ],
-  "employees": [
-    {
-      "id": "1",
-      "name": "Glene",
-      "committeeId": 1
-    },
-    {
-      "id": "2",
-      "name": "Miko",
-      "committeeId": 2
-    },
-    {
-      "id": "3",
-      "name": "Uvuvwevwevwe Onyetenyevwe Ubwemubwem Ossas",
-      "committeeId": 3
-    },
-    {
-      "id": "4",
-      "name": "",
-      "committeeId": 4
-    },
-    {
-      "id": "5",
-      "name": "Kim Jong Un",
-      "committeeId": 1
-    },
-    {
-      "id": "6",
-      "name": "Melvin",
-      "committeeId": 2
-    },
-    {
-      "id": "7",
-      "name": "Lee Ar",
-      "committeeId": 3
-    },
-    {
-      "id": "8",
-      "name": "Jungkook",
-      "committeeId": 4
-    },
-    {
-      "id": "9",
-      "name": "Bryan",
-      "committeeId": 1
-    },
-    {
-      "id": "10",
-      "name": "Edsel",
-      "committeeId": 2
-    },
-    {
-      "id": "11",
-      "name": "Sonny Jihns",
-      "committeeId": 3
-    },
-    {
-      "id": "12",
-      "name": "No Kum-sok",
-      "committeeId": 4
-    },
-    {
-      "id": "13",
-      "name": "Xi Jinping",
-      "committeeId": 1
-    },
-    {
-      "id": "14",
-      "name": "clock clock clack clock",
-      "committeeId": 2
-    }
-  ]
+    ]
 }

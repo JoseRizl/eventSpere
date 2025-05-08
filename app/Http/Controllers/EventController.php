@@ -16,13 +16,26 @@ class EventController extends Controller
 
         $event = collect($data['events'])->firstWhere('id', $id);
         $event['venue'] = $event['venue'] ?? null;
-        $related = collect($data['events'])->where('id', '!=', $id)->take(5);
+
+        // Get current event's tag IDs
+        $currentTagIds = collect($event['tags'])->pluck('id')->toArray();
+
+        // Filter related events to only those sharing at least one tag
+        $relatedEvents = collect($data['events'])
+            ->where('id', '!=', $id)
+            ->filter(function ($relatedEvent) use ($currentTagIds) {
+                $relatedTagIds = collect($relatedEvent['tags'])->pluck('id')->toArray();
+                return count(array_intersect($currentTagIds, $relatedTagIds)) > 0;
+            })
+            ->take(6)
+            ->values()
+            ->toArray();
 
         return Inertia::render('Events/EventDetails', [
             'event' => $event,
-            'relatedEvents' => $related,
             'categories' => $data['categories'] ?? [],
-            'tags' => $data['tags'] ?? []
+            'tags' => $data['tags'] ?? [],
+            'relatedEvents' => $relatedEvents,
         ]);
     }
 
