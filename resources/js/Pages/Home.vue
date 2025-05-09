@@ -58,15 +58,27 @@ const isNewEvent = (event) => {
   return createdAtDate > oneWeekAgo;
 };
 
-const getUpcomingTag = (eventDate) => {
-  if (!eventDate) return 'Upcoming';
+const getUpcomingTag = (startDate, endDate) => {
+  if (!startDate) return 'Upcoming';
 
-  const eventDateObj = new Date(eventDate);
-  if (isNaN(eventDateObj.getTime())) return 'Upcoming';
+  const startDateObj = new Date(startDate);
+  const endDateObj = endDate ? new Date(endDate) : startDateObj;
 
-  const daysDiff = Math.floor((eventDateObj - new Date()) / (1000 * 60 * 60 * 24));
+  if (isNaN(startDateObj.getTime())) return 'Upcoming';
 
-  if (daysDiff < 0) return 'Today';
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Normalize to start of day for comparison
+
+  // Check if event has ended (end date is in the past)
+  if (endDateObj < today) return 'Ended';
+
+  // Check if event is ongoing (today is between start and end dates)
+  if (startDateObj <= today && today <= endDateObj) return 'Ongoing';
+
+  // For future events, calculate days until start
+  const daysDiff = Math.floor((startDateObj - today) / (1000 * 60 * 60 * 24));
+
+  if (daysDiff === 0) return 'Today';
   if (daysDiff < 3) return 'Very Soon';
   if (daysDiff < 7) return 'This Week';
   if (daysDiff < 14) return 'Next Week';
@@ -74,8 +86,17 @@ const getUpcomingTag = (eventDate) => {
   return 'Upcoming';
 };
 
-const getUpcomingSeverity = (eventDate) => {
-  const daysDiff = Math.floor((new Date(eventDate) - new Date()) / (1000 * 60 * 60 * 24));
+const getUpcomingSeverity = (startDate, endDate) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const startDateObj = new Date(startDate);
+  const endDateObj = endDate ? new Date(endDate) : startDateObj;
+
+  if (endDateObj < today) return null; // No severity for ended events
+  if (startDateObj <= today && today <= endDateObj) return 'success'; // Ongoing
+
+  const daysDiff = Math.floor((startDateObj - today) / (1000 * 60 * 60 * 24));
 
   if (daysDiff < 3) return 'danger';
   if (daysDiff < 7) return 'warning';
@@ -281,8 +302,8 @@ function saveToggleState(key, value) {
                 {{ event.formattedDate }}
                 </div>
                 <Tag
-                :value="getUpcomingTag(event.startDate)"
-                :severity="getUpcomingSeverity(event.startDate)"
+                :value="getUpcomingTag(event.startDate, event.endDate)"
+                :severity="getUpcomingSeverity(event.startDate, event.endDate)"
                 class="text-xs"
                 />
             </template>
@@ -357,8 +378,8 @@ function saveToggleState(key, value) {
                 <span class="text-sm text-gray-500">{{ event.formattedDate }}</span>
             </div>
             <Tag
-            :value="getUpcomingTag(event.startDate)"
-            :severity="getUpcomingSeverity(event.startDate)"
+            :value="getUpcomingTag(event.startDate, event.endDate)"
+            :severity="getUpcomingSeverity(event.startDate, event.endDate)"
             class="text-xs"
             />
             </template>
@@ -435,9 +456,9 @@ function saveToggleState(key, value) {
                 <div class="text-sm text-gray-500 overflow-hidden h-6 line-clamp-1">
                 <span class="text-xs text-gray-500">{{ event.formattedDate }}</span>
                 <Tag
-                    :value="getUpcomingTag(event.startDate)"
-                    :severity="getUpcomingSeverity(event.startDate)"
-                    class="text-xs"
+                :value="getUpcomingTag(event.startDate, event.endDate)"
+                :severity="getUpcomingSeverity(event.startDate, event.endDate)"
+                class="text-xs"
                 />
                 </div>
             </template>
