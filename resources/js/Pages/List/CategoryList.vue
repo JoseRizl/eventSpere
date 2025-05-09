@@ -177,7 +177,7 @@ export default defineComponent({
           class="p-button-secondary"
           @click="toggleView"
         />
-        <button class="create-button" @click="openCreateModal">Create Bracket</button>
+        <button class="create-button" @click="openCreateModal">Create</button>
       </div>
     </div>
 
