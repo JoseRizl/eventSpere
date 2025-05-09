@@ -22,6 +22,7 @@ import 'primeicons/primeicons.css';
   import Column from 'primevue/column';
   import Dialog from 'primevue/dialog';
   import Dropdown from 'primevue/dropdown';
+  import Select from 'primevue/select';
 
 
 // Pinia
@@ -83,6 +84,7 @@ createInertiaApp({
       .component('Column', Column)
       .component('Dialog', Dialog)
       .component('Dropdown', Dropdown)
+      .component('Select', Select)
 
       .mount(el);
 

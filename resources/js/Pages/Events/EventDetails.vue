@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { parse, format, parseISO, isValid } from 'date-fns';
 import { usePage, router } from '@inertiajs/vue3';
 
@@ -11,12 +11,20 @@ const saving = ref(false);
 const showSaveConfirmDialog = ref(false);
 const showSuccessDialog = ref(false);
 const errorMessage = ref(null);
+const showErrorDialog = ref(false);
+const errorDialogMessage = ref('');
+const committees = ref(props.committees || []);
+const employees = ref(props.employees || []);
+const filteredEmployees = ref([]);
 const relatedEvents = ref(props.relatedEvents || []);
+const showDeleteTaskConfirm = ref(false);
+const taskToDelete = ref(null);
+const showDeleteScheduleConfirm = ref(false);
+const scheduleToDelete = ref(null);
 
 const removeTag = (tagToRemove) => {
   normalizedTags.value = normalizedTags.value.filter(tag => tag.id !== tagToRemove.id);
 };
-
 
 const eventDetails = ref({
     ...props.event,
@@ -47,50 +55,140 @@ const toggleEdit = () => {
   editMode.value = !editMode.value;
 };
 
+// Add this near your other initialization code
+onMounted(() => {
+  // Ensure tasks have proper committee/employee references
+  if (eventDetails.value.tasks) {
+    filteredEmployees.value = eventDetails.value.tasks.map(task => {
+      // Find matching committee in committees list
+      if (task.committee?.id) {
+        task.committee = committees.value.find(c => c.id == task.committee.id) || task.committee;
+      }
+
+      // Find matching employee in employees list
+      if (task.employee?.id) {
+        task.employee = employees.value.find(e => e.id == task.employee.id) || task.employee;
+      }
+
+      // Return filtered employees for this task
+      return task.committee?.id
+        ? employees.value.filter(e => e.committeeId == task.committee.id)
+        : [];
+    });
+  } else {
+    eventDetails.value.tasks = [];
+    filteredEmployees.value = [];
+  }
+});
+
+if (!eventDetails.value.tasks) {
+  eventDetails.value.tasks = [];
+}
+
+const updateFilteredEmployees = (index) => {
+  const task = eventDetails.value.tasks[index];
+  if (task.committee) {
+    task.committee = committees.value.find(c => c.id == task.committee.id) || task.committee;
+    filteredEmployees.value[index] = employees.value.filter(emp =>
+      emp.committeeId == task.committee.id
+    );
+  } else {
+    filteredEmployees.value[index] = [];
+  }
+  // Reset employee selection when committee changes
+  task.employee = null;
+};
+
 // Methods
+const addCommitteeTask = () => {
+  eventDetails.value.tasks.push({
+    committee: null,
+    employee: null,
+    task: ''
+  });
+  filteredEmployees.value.push([]);
+};
+
+const promptDeleteTask = (index) => {
+  taskToDelete.value = index;
+  showDeleteTaskConfirm.value = true;
+};
+
+const confirmDeleteTask = () => {
+  eventDetails.value.tasks.splice(taskToDelete.value, 1);
+  filteredEmployees.value.splice(taskToDelete.value, 1);
+  showDeleteTaskConfirm.value = false;
+  taskToDelete.value = null;
+};
+
 const addSchedule = () => {
   eventDetails.value.schedules.push({ time: '', activity: '' });
 };
+const promptDeleteSchedule = (index) => {
+  scheduleToDelete.value = index;
+  showDeleteScheduleConfirm.value = true;
+};
 
-const removeSchedule = (index) => {
-  eventDetails.value.schedules.splice(index, 1);
+const confirmDeleteSchedule = () => {
+  eventDetails.value.schedules.splice(scheduleToDelete.value, 1);
+  showDeleteScheduleConfirm.value = false;
+  scheduleToDelete.value = null;
 };
 
 const saveChanges = () => {
   saving.value = true;
   errorMessage.value = null;
+  showErrorDialog.value = false;
 
-    // Date validation
-    if (!validateDates()) {
+  // Validate dates and times
+  if (!validateDates() || !validateTimes()) {
     saving.value = false;
-    errorMessage.value = "End date cannot be earlier than start date";
-    return; // Stop execution
+    errorMessage.value = !validateDates()
+      ? "End date cannot be earlier than start date"
+      : "End time must be after start time";
+    showErrorDialog.value = true;
+    errorDialogMessage.value = errorMessage.value;
+    return;
   }
 
-    // Prepare payload with consistent tag format
-    const payload = {
-    ...eventDetails.value,
+  // Create clean payload without Vue internals
+  const payload = {
+    id: eventDetails.value.id,
+    title: eventDetails.value.title,
+    description: eventDetails.value.description,
+    venue: eventDetails.value.venue,
+    startDate: eventDetails.value.startDate, // Already in MMM-DD-YYYY format
+    endDate: eventDetails.value.endDate,     // Already in MMM-DD-YYYY format
+    startTime: eventDetails.value.startTime,
+    endTime: eventDetails.value.endTime,
+    category_id: eventDetails.value.category?.id || null,
     tags: eventDetails.value.tags.map(tag => ({
       id: tag.id,
       name: tag.name,
       color: tag.color
     })),
-    startDate: formattedStartDate.value,
-    endDate: formattedEndDate.value,
     schedules: eventDetails.value.schedules.map(s => ({
       time: s.time.padStart(5, '0'),
       activity: s.activity
+    })),
+    tasks: eventDetails.value.tasks.map(task => ({
+      committee: task.committee ? { id: task.committee.id } : null,
+      employee: task.employee ? { id: task.employee.id } : null,
+      task: task.task
     }))
   };
 
+  // Debug: log the payload before sending
+  console.log('Sending payload:', payload);
+
   router.post(`/events/${eventDetails.value.id}/update`, payload, {
     preserveScroll: true,
-    onFinish: () => {
-      saving.value = false;
-    },
+    onFinish: () => saving.value = false,
     onError: (errors) => {
-        saving.value = false;
-        errorMessage.value = errors.message || 'Failed to save event';
+      saving.value = false;
+      errorMessage.value = errors.message || 'Failed to save event';
+      showErrorDialog.value = true;
+      errorDialogMessage.value = JSON.stringify(errors, null, 2);
     },
     onSuccess: () => {
       showSuccessDialog.value = true;
@@ -110,10 +208,18 @@ const formatDisplayTime = (timeString) => {
 // Date-related functions
 
 const validateDates = () => {
-  if (startDateModel.value && endDateModel.value) {
-    return startDateModel.value <= endDateModel.value;
+  try {
+    const start = parse(eventDetails.value.startDate, 'MMM-dd-yyyy', new Date());
+    const end = parse(eventDetails.value.endDate, 'MMM-dd-yyyy', new Date());
+    return isValid(start) && isValid(end) && start <= end;
+  } catch {
+    return false;
   }
-  return true; // Skip validation if either date is empty
+};
+
+const validateTimes = () => {
+  if (!eventDetails.value.startTime || !eventDetails.value.endTime) return true;
+  return eventDetails.value.startTime < eventDetails.value.endTime;
 };
 
 const formatDisplayDate = (dateString) => {
@@ -148,20 +254,22 @@ const formatDateForPicker = (dateString) => {
 
 const startDateModel = computed({
   get() {
-    return formatDateForPicker(eventDetails.value.startDate);
+    const date = parse(eventDetails.value.startDate, 'MMM-dd-yyyy', new Date());
+    return isValid(date) ? date : null;
   },
   set(value) {
-  eventDetails.value.startDate = value ? value.toISOString() : '';
-}
+    eventDetails.value.startDate = value ? format(value, 'MMM-dd-yyyy') : '';
+  }
 });
 
 const endDateModel = computed({
   get() {
-    return formatDateForPicker(eventDetails.value.endDate);
+    const date = parse(eventDetails.value.endDate, 'MMM-dd-yyyy', new Date());
+    return isValid(date) ? date : null;
   },
   set(value) {
-  eventDetails.value.endDate = value ? value.toISOString() : '';
-}
+    eventDetails.value.endDate = value ? format(value, 'MMM-dd-yyyy') : '';
+  }
 });
 
 const formattedStartDate = computed(() => {
@@ -338,14 +446,87 @@ const formattedEndDate = computed(() => {
             </div>
 
             <!-- Committee -->
-            <div>
-              <h2 class="font-semibold mb-1">Committee:</h2>
-              <div class="space-y-1 pl-4 text-sm">
-                <p v-for="(taskItem, index) in eventDetails.tasks || []" :key="index">
-                  {{ taskItem.employee.name }} ({{ taskItem.committee.name }}): {{ taskItem.task }}
-                </p>
-              </div>
-            </div>
+  <div>
+    <h2 class="font-semibold mb-1">Committee:</h2>
+    <div v-if="editMode">
+      <div v-for="(taskItem, index) in eventDetails.tasks" :key="index" class="space-y-2 mb-4 p-3 border rounded">
+        <!-- Committee Selection -->
+        <div class="p-field">
+          <label class="block text-sm font-medium mb-1">Committee</label>
+          <Select
+  v-model="taskItem.committee"
+  :options="committees"
+  optionLabel="name"
+  placeholder="Select Committee"
+  class="w-full"
+  @change="updateFilteredEmployees(index)"
+>
+  <template #option="slotProps">
+    <div>{{ slotProps.option.name }}</div>
+  </template>
+  <template #value="slotProps">
+    <div v-if="slotProps.value">{{ slotProps.value.name }}</div>
+    <span v-else>{{ slotProps.placeholder }}</span>
+  </template>
+</Select>
+        </div>
+
+        <!-- Employee Selection (only shows if committee is selected) -->
+        <div v-if="taskItem.committee" class="p-field">
+          <label class="block text-sm font-medium mb-1">Employee</label>
+          <Select
+  v-model="taskItem.employee"
+  :options="filteredEmployees[index]"
+  optionLabel="name"
+  placeholder="Select Employee"
+  class="w-full"
+  :disabled="!taskItem.committee"
+>
+  <template #option="slotProps">
+    <div>{{ slotProps.option.name }}</div>
+  </template>
+  <template #value="slotProps">
+    <div v-if="slotProps.value">{{ slotProps.value.name }}</div>
+    <span v-else>{{ slotProps.placeholder }}</span>
+  </template>
+</Select>
+        </div>
+
+        <!-- Task Description -->
+        <div class="p-field">
+          <label class="block text-sm font-medium mb-1">Task</label>
+          <input
+            v-model="taskItem.task"
+            type="text"
+            placeholder="Enter task details"
+            class="w-full border rounded p-2"
+          />
+        </div>
+
+        <!-- Remove Task Button -->
+        <button
+          @click="promptDeleteTask(index)"
+          class="text-red-500 hover:text-red-700 text-sm flex items-center"
+        >
+          <i class="pi pi-trash mr-1"></i> Remove Task
+        </button>
+      </div>
+
+      <button
+        @click="addCommitteeTask"
+        class="text-blue-500 hover:text-blue-700 text-sm flex items-center mt-2"
+      >
+        <i class="pi pi-plus mr-1"></i> Add Committee Task
+      </button>
+    </div>
+    <div v-else class="space-y-1 pl-4 text-sm">
+      <p v-for="(taskItem, index) in eventDetails.tasks" :key="index">
+        {{ taskItem.employee?.name || 'No employee selected' }}
+        ({{ taskItem.committee?.name || 'No committee selected' }}):
+        {{ taskItem.task || 'No task specified' }}
+      </p>
+    </div>
+  </div>
 
             <!-- Schedules -->
             <div>
@@ -354,7 +535,7 @@ const formattedEndDate = computed(() => {
                 <div v-for="(schedule, i) in eventDetails.schedules" :key="i" class="flex items-center gap-2 mb-2">
                   <input v-model="schedule.time" type="time" class="border p-1 rounded w-32" />
                   <input v-model="schedule.activity" type="text" placeholder="Activity" class="border p-1 rounded flex-1" />
-                  <button @click="removeSchedule(i)" class="text-red-500">✕</button>
+                  <button @click="promptDeleteSchedule(i)" class="text-red-500">✕</button>
                 </div>
                 <button @click="addSchedule" class="text-blue-500 text-sm mt-2">+ Add Schedule</button>
               </div>
@@ -483,4 +664,38 @@ const formattedEndDate = computed(() => {
         </template>
       </Dialog>
     </div>
+
+    <!-- Delete Task Confirmation Dialog -->
+<div v-if="showDeleteTaskConfirm" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+  <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+    <h2 class="text-lg font-semibold mb-2">Delete Task?</h2>
+    <p class="text-sm text-gray-600 mb-4">Are you sure you want to delete this task?</p>
+    <div class="flex justify-end gap-2">
+      <button @click="showDeleteTaskConfirm = false" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
+      <button
+        @click="confirmDeleteTask"
+        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+      >
+        Yes
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Schedule Confirmation Dialog -->
+<div v-if="showDeleteScheduleConfirm" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+  <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+    <h2 class="text-lg font-semibold mb-2">Delete Schedule?</h2>
+    <p class="text-sm text-gray-600 mb-4">Are you sure you want to delete this schedule item?</p>
+    <div class="flex justify-end gap-2">
+      <button @click="showDeleteScheduleConfirm = false" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
+      <button
+        @click="confirmDeleteSchedule"
+        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+      >
+        Yes
+      </button>
+    </div>
+  </div>
+</div>
   </template>

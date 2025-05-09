@@ -13,9 +13,7 @@
             "archived": false,
             "tags": [
                 {
-                    "id": "1",
-                    "name": "Foundation Day",
-                    "color": "#FF5733"
+                    "id": "1"
                 }
             ],
             "category_id": "2",
@@ -23,25 +21,18 @@
             "tasks": [
                 {
                     "committee": {
-                        "id": "1",
-                        "name": "Logistics"
+                        "id": 1
                     },
                     "employee": {
-                        "id": "9",
-                        "name": "Bryan",
-                        "committeeId": 1
+                        "id": "9"
                     },
-                    "task": "Tig bira sa sakyanan"
+                    "task": "Tig bira sa sakyanans"
                 }
             ],
             "schedules": [
                 {
                     "time": "07:30",
                     "activity": "Tubil sa sakyanan \ud83d\ude97"
-                },
-                {
-                    "time": "08:00",
-                    "activity": "Start Event"
                 }
             ],
             "venue": "Dalan \ud83d\udee3\ufe0f"
@@ -513,6 +504,27 @@
             "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
             "archived": true,
             "createdAt": "2025-05-07T01:03:15.619Z"
+        },
+        {
+            "id": "9148",
+            "title": "Palakasan Day 1",
+            "description": "Spor",
+            "venue": "Naawn",
+            "category_id": "2",
+            "startDate": "May-28-2025",
+            "endDate": null,
+            "startTime": "08:00",
+            "endTime": "16:00",
+            "tags": [
+                {
+                    "id": "2",
+                    "name": "Palakasan",
+                    "color": "#33FF57"
+                }
+            ],
+            "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
+            "archived": false,
+            "createdAt": "2025-05-09T00:09:46.343Z"
         }
     ],
     "tags": [
@@ -690,19 +702,19 @@
     ],
     "committees": [
         {
-            "id": "1",
+            "id": 1,
             "name": "Logistics"
         },
         {
-            "id": "2",
+            "id": 2,
             "name": "Sports"
         },
         {
-            "id": "3",
+            "id": 3,
             "name": "Catering"
         },
         {
-            "id": "4",
+            "id": 4,
             "name": "Entertainment"
         }
     ],
