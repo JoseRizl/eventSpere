@@ -697,7 +697,7 @@ import { Select } from "primevue";
           employees.value = employeesResponse.data;
 
           combinedEvents.value = [...events.value, ...sports.value].sort((a, b) => {
-            return new Date(a.startDate || "1970-01-01") - new Date(b.startDate || "1970-01-01");
+            return new Date(b.startDate || "1970-01-01") - new Date(a.startDate || "1970-01-01");
           });
         } catch (error) {
           console.error("Error fetching data:", error);

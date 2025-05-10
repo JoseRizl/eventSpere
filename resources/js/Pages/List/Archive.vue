@@ -75,7 +75,9 @@
             axios.get("http://localhost:3000/category"),
             ]);
 
-            archivedEvents.value = eventsResponse.data;
+            archivedEvents.value = eventsResponse.data.sort((a, b) => {
+                return new Date(b.startDate || "1970-01-01") - new Date(a.startDate || "1970-01-01");
+            });
             categories.value = categoriesResponse.data;
         } catch (error) {
             console.error("Error fetching archived events or categories:", error);
