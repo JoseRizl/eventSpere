@@ -126,8 +126,8 @@
   </template>
 </Dialog>
 
-<!-- Create Event Modal-->
-<Dialog v-model:visible="isCreateModalVisible" modal header="Create Event" :style="{ width: '50vw' }">
+    <!-- Create Event Modal-->
+    <Dialog v-model:visible="isCreateModalVisible" modal header="Create Event" :style="{ width: '50vw' }">
         <div class="p-fluid">
           <!-- Event Title -->
           <div class="p-field">
@@ -167,45 +167,58 @@
             />
           </div>
 
-          <!-- Start Date & End Date -->
-          <div class="p-field p-grid">
-            <div class="p-col-6">
-              <label for="startDate">Start Date</label>
-              <DatePicker id="startDate" v-model="newEvent.startDate" dateFormat="MM-dd-yy" showIcon />
+          <!-- Start & End DateTime -->
+        <div class="p-field grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Start -->
+        <div class="flex flex-col">
+            <label for="startDate" class="mb-1 font-semibold">Start</label>
+            <div class="flex items-center gap-2">
+            <DatePicker
+                id="startDate"
+                v-model="newEvent.startDate"
+                dateFormat="MM-dd-yy"
+                showIcon
+                class="w-full"
+            />
+            <input
+                type="time"
+                id="startTime"
+                v-model="newEvent.startTime"
+                placeholder="HH:mm"
+                class="p-inputtext p-component w-36"
+                @blur="newEvent.startTime = newEvent.startTime.padStart(5, '0')"
+            />
             </div>
-            <div class="p-col-6">
-              <label for="endDate">End Date</label>
-              <DatePicker id="endDate" v-model="newEvent.endDate" dateFormat="MM-dd-yy" showIcon />
-            </div>
-          </div>
-
-          <div v-if="dateError" class="p-field text-red-500 text-sm mt-1">
-        <i class="pi pi-exclamation-triangle mr-1"></i>
-        {{ dateError }}
         </div>
 
-          <!-- Start Time -->
-          <div class="p-field">
-            <label for="startTime">Start Time</label>
-            <input type="time"
-              id="startTime"
-              v-model="newEvent.startTime"
-              placeholder="HH:mm"
-              :class="{ 'p-invalid': dateError && dateError.includes('end') }"
-              @blur="newEvent.startTime = newEvent.startTime.padStart(5, '0')"
+        <!-- End -->
+        <div class="flex flex-col">
+            <label for="endDate" class="mb-1 font-semibold">End</label>
+            <div class="flex items-center gap-2">
+            <DatePicker
+                id="endDate"
+                v-model="newEvent.endDate"
+                dateFormat="MM-dd-yy"
+                showIcon
+                class="w-full"
             />
-          </div>
+            <input
+                type="time"
+                id="endTime"
+                v-model="newEvent.endTime"
+                placeholder="HH:mm"
+                class="p-inputtext p-component w-36"
+                @blur="newEvent.endTime = newEvent.endTime.padStart(5, '0')"
+            />
+            </div>
+        </div>
+        </div>
 
-          <!-- End Time -->
-          <div class="p-field">
-            <label for="endTime">End Time</label>
-            <input type="time"
-              id="endTime"
-              v-model="newEvent.endTime"
-              placeholder="HH:mm"
-              @blur="newEvent.endTime = newEvent.endTime.padStart(5, '0')"
-            />
-          </div>
+        <!-- Error Message -->
+        <div v-if="dateError" class="text-red-500 text-sm mt-2 flex items-center">
+        <i class="pi pi-exclamation-triangle mr-2"></i>
+        {{ dateError }}
+        </div>
 
           <!-- Event Description -->
           <div class="p-field">
@@ -215,7 +228,7 @@
         </div>
 
         <div class="p-field">
-        <label for="image">Event Image (SVG)</label>
+        <label for="image">Event Image</label>
         <div class="flex align-items-center gap-2">
             <input
             type="file"
@@ -285,43 +298,46 @@
             />
           </div>
 
-          <!-- Start Date & End Date -->
-          <div class="p-field p-grid">
-            <div class="p-col-6">
-              <label for="startDate">Start Date</label>
-              <DatePicker id="startDate" v-model="selectedEvent.startDate" dateFormat="MM-dd-yy" showIcon />
+        <div class="p-field grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Start Date & Time -->
+        <div class="flex flex-col">
+            <label for="startDate" class="mb-1 font-semibold">Start</label>
+            <div class="flex items-center gap-2">
+            <DatePicker id="startDate" v-model="selectedEvent.startDate" dateFormat="MM-dd-yy" showIcon class="w-full" />
+            <input
+                type="time"
+                id="startTime"
+                v-model="selectedEvent.startTime"
+                placeholder="HH:mm"
+                class="p-inputtext p-component w-36"
+                @blur="selectedEvent.startTime = selectedEvent.startTime.padStart(5, '0')"
+            />
             </div>
-            <div class="p-col-6">
-              <label for="endDate">End Date</label>
-              <DatePicker id="endDate" v-model="selectedEvent.endDate" dateFormat="MM-dd-yy" showIcon />
-            </div>
-          </div>
+        </div>
 
-        <div v-if="dateError" class="p-field text-red-500 text-sm mt-1">
-        <i class="pi pi-exclamation-triangle mr-1"></i>
+        <!-- End Date & Time -->
+        <div class="flex flex-col">
+            <label for="endDate" class="mb-1 font-semibold">End</label>
+            <div class="flex items-center gap-2">
+            <DatePicker id="endDate" v-model="selectedEvent.endDate" dateFormat="MM-dd-yy" showIcon class="w-full" />
+            <input
+                type="time"
+                id="endTime"
+                v-model="selectedEvent.endTime"
+                placeholder="HH:mm"
+                class="p-inputtext p-component w-36"
+                @blur="selectedEvent.endTime = selectedEvent.endTime.padStart(5, '0')"
+            />
+            </div>
+        </div>
+        </div>
+
+        <!-- Error Display -->
+        <div v-if="dateError" class="text-red-500 text-sm mt-2 flex items-center">
+        <i class="pi pi-exclamation-triangle mr-2"></i>
         {{ dateError }}
         </div>
 
-        <div class="p-field">
-        <label for="startTime">Start Time</label>
-        <input type="time"
-            id="startTime"
-            v-model="selectedEvent.startTime"
-            placeholder="HH:mm"
-            :class="{ 'p-invalid': dateError && dateError.includes('end') }"
-            @blur="selectedEvent.startTime = selectedEvent.startTime.padStart(5, '0')"
-        />
-        </div>
-
-        <div class="p-field">
-        <label for="endTime">End Time</label>
-        <input type="time"
-            id="endTime"
-            v-model="selectedEvent.endTime"
-            placeholder="HH:mm"
-            @blur="selectedEvent.endTime = selectedEvent.endTime.padStart(5, '0')"
-        />
-        </div>
 
           <div class="p-field">
             <label for="description">Description</label>
@@ -330,7 +346,7 @@
         </div>
 
         <div class="p-field">
-        <label for="image">Event Image (SVG)</label>
+        <label for="image">Event Image</label>
         <div class="flex align-items-center gap-2">
             <input
             type="file"
@@ -347,7 +363,7 @@
             v-tooltip.top="'Remove image'"
             />
         </div>
-        <small class="p-text-secondary">Leave empty to use default image</small>
+        <small class="p-text-secondary">Leave empty to keep current image</small>
         <div v-if="selectedEvent.image" class="mt-2">
             <img :src="selectedEvent.image" alt="Preview" class="preview-image" />
         </div>
