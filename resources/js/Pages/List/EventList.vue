@@ -73,16 +73,17 @@
               <span>{{ data.title }}</span>
             </div>
 
-            <!-- Tags DIsplay-->
-             <div class="tags-container">
-                <span
-                    v-for="tag in data.tags"
-                    :key="tag.id"
-                    class="tag"
-                    :style="{ backgroundColor: tag.color || '#800080' }">
-                    {{ tag.name }}
-                </span>
-             </div>
+            <!-- Tags Display -->
+            <div class="tags-container">
+            <span
+                v-for="tag in getEventTags(data.tags)"
+                :key="tag.id"
+                class="tag"
+                :style="{ backgroundColor: tag.color || '#800080' }"
+            >
+                {{ tag.name }}
+            </span>
+            </div>
           </template>
         </Column>
 
@@ -516,7 +517,7 @@ import { Select } from "primevue";
         dateError.value = "";
       };
 
-      const createEvent = async () => {
+     const createEvent = async () => {
         resetErrors();
 
         // Validate title
@@ -532,61 +533,67 @@ import { Select } from "primevue";
 
             // Block if end date is BEFORE start date (allows same-day) and if end date is in the past
             if (end < start) {
-            dateError.value = "End date cannot be before start date";
-            return;
+                dateError.value = "End date cannot be before start date";
+                return;
             }
             const now = new Date();
             const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             if (end < today && start < today) {
-            dateError.value = "Event cannot be entirely in the past";
-            return;
+                dateError.value = "Event cannot be entirely in the past";
+                return;
             }
             if (end < start) {
-            dateError.value = "End date cannot be before start date";
-            return;
+                dateError.value = "End date cannot be before start date";
+                return;
             }
         }
 
         let finalImage = newEvent.value.image;
         if (newEvent.value.image.startsWith('blob:')) {
-        const response = await fetch(newEvent.value.image);
-        const blob = await response.blob();
-        finalImage = await new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.readAsDataURL(blob);
-        });
+            const response = await fetch(newEvent.value.image);
+            const blob = await response.blob();
+            finalImage = await new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(blob);
+            });
         }
 
         try {
+            // Normalize tags to store only IDs
+            const normalizedTags = Array.isArray(newEvent.value.tags)
+                ? newEvent.value.tags.map(tag => {
+                    // If tag is already just an ID, return it
+                    if (typeof tag === 'string' || typeof tag === 'number') {
+                        return tag;
+                    }
+                    // If tag is an object with id, return the id
+                    return tag.id || tag;
+                })
+                : [];
+
             const payload = {
-            ...newEvent.value,
-            image: finalImage || defaultImage,
-            tags: Array.isArray(newEvent.value.tags)
-                ? newEvent.value.tags.map(tag => ({
-                    id: tag.id,
-                    name: tag.name,
-                    color: tag.color
-                }))
-                : [],
-            startDate: newEvent.value.startDate
-                ? format(new Date(newEvent.value.startDate), "MMM-dd-yyyy")
-                : null,
-            endDate: newEvent.value.endDate
-                ? format(new Date(newEvent.value.endDate), "MMM-dd-yyyy")
-                : null,
-            startTime: newEvent.value.startTime.padStart(5, "0"),
-            endTime: newEvent.value.endTime.padStart(5, "0"),
-            archived: false,
-            createdAt: new Date().toISOString(),
+                ...newEvent.value,
+                image: finalImage || defaultImage,
+                tags: normalizedTags, // Store only tag IDs
+                startDate: newEvent.value.startDate
+                    ? format(new Date(newEvent.value.startDate), "MMM-dd-yyyy")
+                    : null,
+                endDate: newEvent.value.endDate
+                    ? format(new Date(newEvent.value.endDate), "MMM-dd-yyyy")
+                    : null,
+                startTime: newEvent.value.startTime.padStart(5, "0"),
+                endTime: newEvent.value.endTime.padStart(5, "0"),
+                archived: false,
+                createdAt: new Date().toISOString(),
             };
 
             const response = await axios.post("http://localhost:3000/events", payload);
 
-                // Add the new event to the local list
-                const createdEvent = {
-            ...response.data,
-            type: "event"
+            // Add the new event to the local list
+            const createdEvent = {
+                ...response.data,
+                type: "event"
             };
 
             combinedEvents.value = [createdEvent, ...combinedEvents.value];
@@ -596,7 +603,7 @@ import { Select } from "primevue";
             console.error("Error creating event:", error);
             alert("Failed to create the event.");
         }
-      };
+    };
 
 
       const handleEditImageUpload = (event) => {
@@ -737,15 +744,26 @@ import { Select } from "primevue";
         target.image = defaultImage;
         };
 
-      const validateEventDates = () => {
-        if (new Date(selectedEvent.value.startDate) > new Date(selectedEvent.value.endDate)) {
-            dateError.value = "End date must be after start date";
-            return false;
-        }
+      const normalizedTags = computed(() => {
+        return tags.value.reduce((map, tag) => {
+            map[tag.id] = tag;
+            return map;
+        }, {});
+        });
 
-        dateError.value = null;
-        return true;
-        };
+    const getEventTags = (eventTags) => {
+    if (!eventTags || !eventTags.length) return [];
+
+    // If tags are already objects, return them directly
+    if (typeof eventTags[0] === 'object') {
+        return eventTags;
+    }
+
+    // If tags are IDs, map them to their full objects
+    return eventTags
+        .map(tagId => normalizedTags.value[tagId])
+        .filter(tag => tag); // Filter out any undefined tags
+    };
 
       onMounted(async () => {
         try {
@@ -890,22 +908,31 @@ import { Select } from "primevue";
       );
 
       // Open Edit Modal
-      const editEvent = (event) => {
+    const editEvent = (event) => {
+        // Convert tag IDs to full tag objects if needed
+        const normalizedTags = Array.isArray(event.tags)
+            ? event.tags.map(tag => {
+                // If tag is already an object, return it
+                if (typeof tag === 'object' && tag !== null) {
+                    return tag;
+                }
+                // If tag is an ID, find the corresponding tag object
+                return tags.value.find(t => t.id === tag || t.id === tag.id);
+            }).filter(Boolean) // Remove any undefined entries
+            : [];
+
         selectedEvent.value = {
             ...event,
             venue: event.venue || "",
-            tags: Array.isArray(event.tags)
-            ? event.tags // Use the tag objects directly
-            : [],
+            tags: normalizedTags, // Use normalized tags
             startDate: event.startDate ? new Date(event.startDate) : null,
             endDate: event.endDate ? new Date(event.endDate) : null,
             image: event.image || defaultImage
         };
         isEditModalVisible.value = true;
-        };
+    };
 
-      // Save Edited Event
-      const saveEditedEvent = async () => {
+    const saveEditedEvent = async () => {
         if (!selectedEvent.value) return;
         resetErrors();
 
@@ -921,19 +948,15 @@ import { Select } from "primevue";
             const end = new Date(selectedEvent.value.endDate);
 
             if (end < start) {
-            dateError.value = "End date cannot be before start date";
-            return;
+                dateError.value = "End date cannot be before start date";
+                return;
             }
 
             const now = new Date();
             const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             if (end < today && start < today) {
-            dateError.value = "Event cannot be entirely in the past";
-            return;
-            }
-            if (end < start) {
-            dateError.value = "End date cannot be before start date";
-            return;
+                dateError.value = "Event cannot be entirely in the past";
+                return;
             }
         }
 
@@ -942,77 +965,76 @@ import { Select } from "primevue";
 
         confirmAction.value = async () => {
             try {
-            const collection = selectedEvent.value.type === "sport" ? "sports" : "events";
+                const collection = selectedEvent.value.type === "sport" ? "sports" : "events";
 
-            // Handle image data properly
-            let finalImage = selectedEvent.value.image;
-            const oldImageUrl = selectedEvent.value.image;
+                // Handle image data properly
+                let finalImage = selectedEvent.value.image;
+                const oldImageUrl = selectedEvent.value.image;
 
-            // Only process if it's a new blob image
-            if (selectedEvent.value.image && selectedEvent.value.image.startsWith('blob:')) {
-                try {
-                    if (oldImageUrl && oldImageUrl.startsWith('blob:')) {
-                    URL.revokeObjectURL(oldImageUrl);
+                // Only process if it's a new blob image
+                if (selectedEvent.value.image && selectedEvent.value.image.startsWith('blob:')) {
+                    try {
+                        if (oldImageUrl && oldImageUrl.startsWith('blob:')) {
+                            URL.revokeObjectURL(oldImageUrl);
+                        }
+                        const response = await fetch(selectedEvent.value.image);
+                        const blob = await response.blob();
+                        finalImage = await new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onerror = reject;
+                            reader.onloadend = () => resolve(reader.result);
+                            reader.readAsDataURL(blob);
+                        });
+                    } catch (error) {
+                        console.error("Image conversion failed:", error);
+                        finalImage = defaultImage;
+                    }
+                } else if (!selectedEvent.value.image) {
+                    // Handle case where image was removed
+                    finalImage = defaultImage;
                 }
-                const response = await fetch(selectedEvent.value.image);
-                const blob = await response.blob();
-                finalImage = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onerror = reject;
-                    reader.onloadend = () => resolve(reader.result);
-                    reader.readAsDataURL(blob);
-                });
-                } catch (error) {
-                console.error("Image conversion failed:", error);
-                finalImage = defaultImage;
+
+                // Normalize tags to store only IDs
+                const normalizedTags = Array.isArray(selectedEvent.value.tags)
+                    ? selectedEvent.value.tags.map(tag => tag?.id || tag)
+                    : [];
+
+                // Prepare payload
+                const payload = {
+                    ...selectedEvent.value,
+                    image: finalImage,
+                    tags: normalizedTags, // Store only tag IDs
+                    startDate: selectedEvent.value.startDate
+                        ? format(new Date(selectedEvent.value.startDate), "MMM-dd-yyyy")
+                        : null,
+                    endDate: selectedEvent.value.endDate
+                        ? format(new Date(selectedEvent.value.endDate), "MMM-dd-yyyy")
+                        : null,
+                    startTime: selectedEvent.value.startTime?.padStart(5, "0") || "00:00",
+                    endTime: selectedEvent.value.endTime?.padStart(5, "0") || "00:00",
+                };
+
+                // Update server
+                await axios.put(`http://localhost:3000/${collection}/${selectedEvent.value.id}`, payload);
+
+                // Update local state with full tag objects for display
+                const index = combinedEvents.value.findIndex(e => e.id === selectedEvent.value.id);
+                if (index !== -1) {
+                    combinedEvents.value.splice(index, 1, {
+                        ...selectedEvent.value,
+                        image: finalImage,
+                        // Keep full tag objects in local state for display
+                        tags: selectedEvent.value.tags
+                    });
                 }
-            } else if (!selectedEvent.value.image) {
-                // Handle case where image was removed
-                finalImage = defaultImage;
-            }
 
-            // Prepare payload - ensure we're not sending Vue reactive proxies
-            const payload = JSON.parse(JSON.stringify({
-                ...selectedEvent.value,
-                image: finalImage,
-                tags: Array.isArray(selectedEvent.value.tags)
-                ? selectedEvent.value.tags
-                : [],
-                startDate: selectedEvent.value.startDate
-                ? format(new Date(selectedEvent.value.startDate), "MMM-dd-yyyy")
-                : null,
-                endDate: selectedEvent.value.endDate
-                ? format(new Date(selectedEvent.value.endDate), "MMM-dd-yyyy")
-                : null,
-                startTime: selectedEvent.value.startTime?.padStart(5, "0") || "00:00",
-                endTime: selectedEvent.value.endTime?.padStart(5, "0") || "00:00",
-            }));
-
-            // Debug: log the payload to verify image is included
-            console.log("Saving payload:", {
-                ...payload,
-                image: payload.image ? "IMAGE_DATA_PRESENT" : "NO_IMAGE_DATA"
-            });
-
-            // Update server
-            await axios.put(`http://localhost:3000/${collection}/${selectedEvent.value.id}`, payload);
-
-            // Update local state
-            const index = combinedEvents.value.findIndex(e => e.id === selectedEvent.value.id);
-            if (index !== -1) {
-                combinedEvents.value.splice(index, 1, {
-                ...selectedEvent.value,
-                image: finalImage,
-                });
-            }
-
-            // Close modals
-            isEditModalVisible.value = false;
-            isConfirmModalVisible.value = false;
-            alert("Event updated successfully!");
+                // Close modals
+                isEditModalVisible.value = false;
+                isConfirmModalVisible.value = false;
+                alert("Event updated successfully!");
             } catch (error) {
-            console.error("Error updating event:", error);
-            alert("Failed to update the event.");
+                console.error("Error updating event:", error);
+                alert("Failed to update the event.");
             }
         };
 
@@ -1162,6 +1184,7 @@ import { Select } from "primevue";
      toggleDateFilter,
      clearDateFilter,
      filterByDate,
+     getEventTags,
      };
     },
  });
