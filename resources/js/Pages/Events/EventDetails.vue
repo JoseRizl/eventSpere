@@ -22,6 +22,14 @@ const taskToDelete = ref(null);
 const showDeleteScheduleConfirm = ref(false);
 const scheduleToDelete = ref(null);
 
+// Create a map of tags for quick lookup
+const tagsMap = computed(() => {
+  return tags.value.reduce((map, tag) => {
+    map[tag.id] = tag;
+    return map;
+  }, {});
+});
+
 const removeTag = (tagToRemove) => {
   normalizedTags.value = normalizedTags.value.filter(tag => tag.id !== tagToRemove.id);
 };
@@ -31,10 +39,13 @@ const eventDetails = ref({
     venue: props.event.venue || '',
     schedules: props.event.schedules || [],
     tags: props.event.tags?.map(tag => {
-    // Handle both cases: when tag is an object or just an ID
-    const tagObj = typeof tag === 'object' ? tag : props.tags.find(t => t.id === tag);
-    return tagObj || { id: tag, name: 'Unknown Tag', color: '#cccccc' };
-  }) || []
+      // Handle both cases: when tag is an object or just an ID
+      if (typeof tag === 'object' && tag !== null) {
+        return tag;
+      }
+      // If it's just an ID, find the corresponding tag object
+      return tagsMap.value[tag] || { id: tag, name: 'Unknown Tag', color: '#cccccc' };
+    }) || []
 });
 
 const normalizedTags = computed({
@@ -43,8 +54,11 @@ const normalizedTags = computed({
   },
   set(newTags) {
     eventDetails.value.tags = newTags.map(tag => {
-      if (typeof tag === 'object') return tag;
-      return tags.value.find(t => t.id === tag) || { id: tag, name: 'Unknown Tag', color: '#cccccc' };
+      if (typeof tag === 'object' && tag !== null) {
+        return tag;
+      }
+      // If it's just an ID, find the corresponding tag object
+      return tagsMap.value[tag] || { id: tag, name: 'Unknown Tag', color: '#cccccc' };
     });
   }
 });
@@ -157,16 +171,13 @@ const saveChanges = () => {
     title: eventDetails.value.title,
     description: eventDetails.value.description,
     venue: eventDetails.value.venue,
-    startDate: eventDetails.value.startDate, // Already in MMM-DD-YYYY format
-    endDate: eventDetails.value.endDate,     // Already in MMM-DD-YYYY format
+    startDate: eventDetails.value.startDate,
+    endDate: eventDetails.value.endDate,
     startTime: eventDetails.value.startTime,
     endTime: eventDetails.value.endTime,
     category_id: eventDetails.value.category?.id || null,
-    tags: eventDetails.value.tags.map(tag => ({
-      id: tag.id,
-      name: tag.name,
-      color: tag.color
-    })),
+    // Only send tag IDs to the database
+    tags: eventDetails.value.tags.map(tag => tag.id),
     schedules: eventDetails.value.schedules.map(s => ({
       time: s.time.padStart(5, '0'),
       activity: s.activity
@@ -278,6 +289,19 @@ const formattedStartDate = computed(() => {
 
 const formattedEndDate = computed(() => {
   return endDateModel.value ? format(endDateModel.value, 'MMM-dd-yyyy') : '';
+});
+
+// Normalize related events tags
+const normalizedRelatedEvents = computed(() => {
+  return relatedEvents.value.map(event => ({
+    ...event,
+    tags: (event.tags || []).map(tag => {
+      if (typeof tag === 'object' && tag !== null) {
+        return tag;
+      }
+      return tagsMap.value[tag] || { id: tag, name: 'Unknown Tag', color: '#cccccc' };
+    })
+  }));
 });
 </script>
 
@@ -562,9 +586,9 @@ const formattedEndDate = computed(() => {
           <div class="bg-white shadow-md rounded-lg p-4 sticky top-4">
             <h3 class="font-bold text-lg mb-4">Related Events</h3>
 
-            <div v-if="relatedEvents.length > 0" class="space-y-4">
+            <div v-if="normalizedRelatedEvents.length > 0" class="space-y-4">
               <div
-                v-for="event in relatedEvents"
+                v-for="event in normalizedRelatedEvents"
                 :key="event.id"
                 class="cursor-pointer hover:bg-gray-50 rounded p-2 transition-colors"
                 @click="router.visit(`/events/${event.id}`)"
@@ -584,7 +608,7 @@ const formattedEndDate = computed(() => {
                     </p>
                     <div class="flex flex-wrap gap-1 mt-1">
                       <span
-                        v-for="tag in event.tags?.slice(0, 2) || []"
+                        v-for="tag in event.tags?.slice(0, 2)"
                         :key="tag.id"
                         class="text-xs px-1.5 py-0.5 rounded"
                         :style="{ backgroundColor: tag.color, color: '#fff' }"

@@ -23,15 +23,27 @@ class EventController extends Controller
     $event = collect($data['events'])->firstWhere('id', $id);
     $event['venue'] = $event['venue'] ?? null;
 
+    // Normalize tags to ensure they are all objects
+    $event['tags'] = collect($event['tags'] ?? [])->map(function($tag) use ($data) {
+        if (is_array($tag) && isset($tag['id'])) {
+            return $tag;
+        }
+        // If it's just an ID, find the corresponding tag object
+        $tagObj = collect($data['tags'])->firstWhere('id', $tag);
+        return $tagObj ?? ['id' => $tag, 'name' => 'Unknown Tag', 'color' => '#cccccc'];
+    })->values()->toArray();
+
     // Get current event's tag IDs
     $currentTagIds = collect($event['tags'])->pluck('id')->toArray();
 
     // Filter related events to only those sharing at least one tag AND not archived
     $relatedEvents = collect($data['events'])
         ->where('id', '!=', $id)
-        ->where('archived', false) // Add this line to exclude archived events
+        ->where('archived', false)
         ->filter(function ($relatedEvent) use ($currentTagIds) {
-            $relatedTagIds = collect($relatedEvent['tags'])->pluck('id')->toArray();
+            $relatedTagIds = collect($relatedEvent['tags'])->map(function($tag) {
+                return is_array($tag) ? $tag['id'] : $tag;
+            })->toArray();
             return count(array_intersect($currentTagIds, $relatedTagIds)) > 0;
         })
         ->take(5)
@@ -99,7 +111,7 @@ public function update(Request $request, $id)
             }
         }],
         'tags' => 'nullable|array',
-        'tags.*.id' => ['required', Rule::in($validTagIds)],
+        'tags.*' => ['required', Rule::in($validTagIds)],
         'schedules' => 'nullable|array',
         'schedules.*.time' => 'required|date_format:H:i',
         'schedules.*.activity' => 'required|string|max:255',
@@ -117,11 +129,11 @@ public function update(Request $request, $id)
                 'title' => $validated['title'],
                 'description' => $validated['description'],
                 'venue' => $validated['venue'],
-                'startDate' => $validated['startDate'], // Keeps original MMM-DD-YYYY format
-                'endDate' => $validated['endDate'],     // Keeps original MMM-DD-YYYY format
+                'startDate' => $validated['startDate'],
+                'endDate' => $validated['endDate'],
                 'startTime' => $validated['startTime'],
                 'endTime' => $validated['endTime'],
-                'tags' => $validated['tags'] ?? [],
+                'tags' => $validated['tags'] ?? [], // Store only tag IDs
                 'schedules' => $validated['schedules'] ?? [],
                 'tasks' => $validated['tasks'] ?? []
             ];
