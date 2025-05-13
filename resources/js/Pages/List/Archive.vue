@@ -1,8 +1,28 @@
 <template>
     <div class="archive-container">
-      <h1 class="title">Archived Events</h1>
+      <h1 class="title text-center mb-4">Archived Events</h1>
 
-      <DataTable :value="archivedEvents" class="p-datatable-striped">
+      <div class="search-container mb-4">
+        <div class="p-input-icon-left">
+          <i class="pi pi-search" />
+          <InputText
+            v-model="searchQuery"
+            placeholder="Search archived events..."
+            class="w-full"
+          />
+        </div>
+      </div>
+
+      <!-- No Results Message -->
+      <div v-if="searchQuery && filteredEvents.length === 0" class="no-results-message">
+        <div class="icon-and-title">
+          <i class="pi pi-search" style="font-size: 1.5rem; color: #007bff; margin-right: 10px;"></i>
+          <h2 class="no-results-title">No Archived Events Found</h2>
+        </div>
+        <p class="no-results-text">No archived events match your search criteria. Try adjusting your search terms.</p>
+      </div>
+
+      <DataTable v-else :value="filteredEvents" class="p-datatable-striped">
         <Column field="title" header="Event Name" style="width:20%;" sortable>
           <template #body="{ data }">
             <div class="flex items-center gap-2">
@@ -67,6 +87,31 @@
     setup() {
       const archivedEvents = ref([]);
       const categories = ref([]);
+      const searchQuery = ref("");
+
+      // Add computed property for filtered events
+      const filteredEvents = computed(() => {
+        if (!searchQuery.value) return archivedEvents.value;
+
+        const query = searchQuery.value.toLowerCase().trim();
+        return archivedEvents.value.filter(event => {
+          if (!event) return false;
+
+          const title = event.title?.toLowerCase() || '';
+          const description = event.description?.toLowerCase() || '';
+          const venue = event.venue?.toLowerCase() || '';
+          const category = categoryMap.value[event.category_id]?.toLowerCase() || '';
+          const tags = event.tags?.map(tag => tag?.name?.toLowerCase() || '').filter(Boolean) || [];
+
+          return (
+            title.includes(query) ||
+            description.includes(query) ||
+            venue.includes(query) ||
+            category.includes(query) ||
+            tags.some(tag => tag.includes(query))
+          );
+        });
+      });
 
     onMounted(async () => {
         try {
@@ -139,6 +184,8 @@
         formatDateTime,
         restoreEvent,
         deleteEventPermanently,
+        searchQuery,
+        filteredEvents,
       };
     },
   });
@@ -147,6 +194,67 @@
   <style scoped>
   .archive-container {
     padding: 20px;
+  }
+
+  .search-container {
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .search-container .p-input-icon-left {
+    position: relative;
+    width: 100%;
+  }
+
+  .search-container .p-input-icon-left i {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+  }
+
+  .search-container .p-input-icon-left .p-inputtext {
+    width: 100%;
+    padding-left: 2.5rem;
+  }
+
+  .no-results-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .icon-and-title {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .no-results-title {
+    color: #333;
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+
+  .no-results-text {
+    color: #555;
+    margin: 5px 0 0 0;
+  }
+
+  @media (max-width: 768px) {
+    .search-container .p-input-icon-left {
+      max-width: 100%;
+    }
   }
   </style>
 

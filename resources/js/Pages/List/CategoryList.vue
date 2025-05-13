@@ -13,15 +13,33 @@ export default defineComponent({
     const selectedItem = ref(null);
     const newItem = ref({ title: "", description: "", color: "#800080" });
     const showTags = ref(localStorage.getItem("showTags") === "true");
+    const searchQuery = ref("");
 
     const normalizedEvents = computed(() => {
-  return events.value.map(event => ({
-    ...event,
-    tags: Array.isArray(event.tags)
-      ? event.tags.map(tag => typeof tag === 'object' ? tag.id : tag)
-      : []
-  }));
-});
+      return events.value.map(event => ({
+        ...event,
+        tags: Array.isArray(event.tags)
+          ? event.tags.map(tag => typeof tag === 'object' ? tag.id : tag)
+          : []
+      }));
+    });
+
+    // Add computed property for filtered items
+    const filteredItems = computed(() => {
+      const items = showTags.value ? tags.value : categories.value;
+      if (!searchQuery.value) return items;
+
+      const query = searchQuery.value.toLowerCase().trim();
+      return items.filter(item => {
+        if (showTags.value) {
+          return item.name?.toLowerCase().includes(query) ||
+                 item.color?.toLowerCase().includes(query);
+        } else {
+          return item.title?.toLowerCase().includes(query) ||
+                 item.description?.toLowerCase().includes(query);
+        }
+      });
+    });
 
     // Fetch data on mount
     onMounted(async () => {
@@ -45,16 +63,16 @@ export default defineComponent({
 
     // Check if an item is in use
     const isItemInUse = (id) => {
-  if (showTags.value) {
-    return normalizedEvents.value.some(event =>
-      Array.isArray(event.tags) ? event.tags.includes(id) : false
-    );
-  } else {
-    return normalizedEvents.value.some(event =>
-      event.category_id === id && event.archived === false
-    );
-  }
-};
+      if (showTags.value) {
+        return normalizedEvents.value.some(event =>
+          Array.isArray(event.tags) ? event.tags.includes(id) : false
+        );
+      } else {
+        return normalizedEvents.value.some(event =>
+          event.category_id === id && event.archived === false
+        );
+      }
+    };
 
     // Open Edit Modal
     const openEditModal = (item) => {
@@ -143,13 +161,15 @@ export default defineComponent({
     };
 
     watch(showTags, (newVal) => {
-        localStorage.setItem("showTags", newVal);
+      localStorage.setItem("showTags", newVal);
     });
 
     return {
       categories,
       tags,
       showTags,
+      searchQuery,
+      filteredItems,
       openEditModal,
       saveEditedItem,
       deleteItem,
@@ -168,8 +188,19 @@ export default defineComponent({
 
 <template>
   <div class="category-list-container">
+    <h1 class="title text-center mb-4">{{ showTags ? 'Tag' : 'Category' }} List</h1>
+
     <div class="category-header">
-      <h1 class="title">{{ showTags ? 'Tag' : 'Category' }} List</h1>
+      <div class="search-container">
+        <div class="p-input-icon-left">
+          <i class="pi pi-search" />
+          <InputText
+            v-model="searchQuery"
+            :placeholder="`Search ${showTags ? 'tags' : 'categories'}...`"
+            class="w-full"
+          />
+        </div>
+      </div>
       <div class="flex gap-2">
         <Button
           :label="showTags ? 'Show Categories' : 'Show Tags'"
@@ -181,7 +212,16 @@ export default defineComponent({
       </div>
     </div>
 
-    <DataTable :value="showTags ? tags : categories" class="p-datatable-striped">
+    <!-- No Results Message -->
+    <div v-if="searchQuery && filteredItems.length === 0" class="no-results-message">
+      <div class="icon-and-title">
+        <i class="pi pi-search" style="font-size: 1.5rem; color: #007bff; margin-right: 10px;"></i>
+        <h2 class="no-results-title">No {{ showTags ? 'Tags' : 'Categories' }} Found</h2>
+      </div>
+      <p class="no-results-text">No {{ showTags ? 'tags' : 'categories' }} match your search criteria. Try adjusting your search terms.</p>
+    </div>
+
+    <DataTable v-else :value="filteredItems" class="p-datatable-striped">
       <Column field="title" :header="showTags ? 'Tag Name' : 'Category Name'" style="width:30%;" sortable>
         <template #body="{ data }">
           <div v-if="showTags" class="flex items-center gap-2">
@@ -322,5 +362,83 @@ export default defineComponent({
   display: flex;
   gap: 0.5rem;
   justify-content: center;
+}
+
+.search-container {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 400px;
+}
+
+.search-container .p-input-icon-left {
+  position: relative;
+  width: 100%;
+}
+
+.search-container .p-input-icon-left i {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+}
+
+.search-container .p-input-icon-left .p-inputtext {
+  width: 100%;
+  padding-left: 2.5rem;
+}
+
+.create-button {
+  background: #7e0bc1;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  margin: 0;
+  height: 40px;
+}
+
+.create-button:hover {
+  background-color: #6800b3e9;
+}
+
+.no-results-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.icon-and-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.no-results-title {
+  color: #333;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.no-results-text {
+  color: #555;
+  margin: 5px 0 0 0;
+}
+
+@media (max-width: 768px) {
+  .search-container .p-input-icon-left {
+    max-width: 100%;
+  }
 }
 </style>

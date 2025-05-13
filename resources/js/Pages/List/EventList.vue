@@ -1,11 +1,71 @@
 <template>
     <div class="event-list-container">
-        <div class="flex justify-content-between align-items-center mb-4">
+        <div class="flex justify-content-center align-items-center mb-4">
         <h1 class="title">Event List</h1>
+      </div>
+
+      <!-- Add Search Bar -->
+      <div class="search-container mb-4">
+        <div class="search-wrapper">
+          <div class="p-input-icon-left">
+            <i class="pi pi-search" />
+            <InputText v-model="searchQuery" placeholder="Search events..." class="w-full" />
+          </div>
+          <Button
+            icon="pi pi-calendar"
+            class="p-button-outlined date-filter-btn"
+            @click="toggleDateFilter"
+            :class="{ 'p-button-primary': showDateFilter }"
+            v-tooltip.top="'Filter by date'"
+          />
+        </div>
         <button class="create-button" @click="openCreateModal">Add Event</button>
       </div>
 
-      <DataTable :value="combinedEvents" class="p-datatable-striped">
+      <!-- Date Filter Calendar - Moved outside search-wrapper -->
+      <div v-if="showDateFilter" class="date-filter-container">
+        <div class="date-range-wrapper">
+          <div class="date-input-group">
+            <label>From:</label>
+            <DatePicker
+              v-model="dateRange.from"
+              dateFormat="MM-dd-yy"
+              :showIcon="true"
+              placeholder="Start date"
+              @date-select="filterByDate"
+              class="date-filter-calendar"
+            />
+          </div>
+          <div class="date-input-group">
+            <label>To:</label>
+            <DatePicker
+              v-model="dateRange.to"
+              dateFormat="MM-dd-yy"
+              :showIcon="true"
+              placeholder="End date"
+              @date-select="filterByDate"
+              class="date-filter-calendar"
+            />
+          </div>
+        </div>
+        <Button
+          icon="pi pi-times"
+          class="p-button-text p-button-rounded clear-date-btn"
+          @click="clearDateFilter"
+          v-tooltip.top="'Clear date filter'"
+        />
+      </div>
+
+      <!-- No Results Message -->
+      <div v-if="searchQuery && filteredEvents.length === 0" class="no-results-message">
+        <div class="icon-and-title">
+          <i class="pi pi-search" style="font-size: 1.5rem; color: #007bff; margin-right: 10px;"></i>
+          <h2 class="no-results-title">No Events Found</h2>
+        </div>
+        <p class="no-results-text">No events match your search criteria. Try adjusting your search terms.</p>
+      </div>
+
+      <DataTable v-else :value="filteredEvents" class="p-datatable-striped">
         <Column field="title" header="Event Name" style="width:20%;" sortable>
           <template #body="{ data }">
             <div class="flex items-center gap-2">
@@ -389,7 +449,7 @@
   <script>
   import { defineComponent, ref, onMounted, computed } from "vue";
   import axios from "axios";
-  import { parse, format } from "date-fns";
+  import { parse, format, isWithinInterval } from "date-fns";
 import { Select } from "primevue";
 
   export default defineComponent({
@@ -417,6 +477,12 @@ import { Select } from "primevue";
       const cancelConfirmation = ref(() => {});
       const isCreateModalVisible = ref(false);
       const defaultImage = "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg";
+      const searchQuery = ref("");
+      const showDateFilter = ref(false);
+      const dateRange = ref({
+        from: null,
+        to: null
+      });
 
       const newEvent = ref({
         title: "",
@@ -709,7 +775,7 @@ import { Select } from "primevue";
           //Tags value for multiselect
           tags.value = tagsResponse.data;
 
-          committees.value = committeesResponse.data;
+          committees.value = committeesResponse.value;
           employees.value = employeesResponse.data;
 
           combinedEvents.value = [...events.value, ...sports.value].sort((a, b) => {
@@ -975,6 +1041,85 @@ import { Select } from "primevue";
             }
         };
 
+     // Add date filtering functionality
+     const toggleDateFilter = () => {
+       showDateFilter.value = !showDateFilter.value;
+       if (!showDateFilter.value) {
+         clearDateFilter();
+       }
+     };
+
+     const clearDateFilter = () => {
+       dateRange.value = {
+         from: null,
+         to: null
+       };
+       showDateFilter.value = false;
+     };
+
+     const filterByDate = () => {
+       if (!dateRange.value.from && !dateRange.value.to) return;
+       // The filtering is handled in the filteredEvents computed property
+     };
+
+     // Modify the filteredEvents computed property to include date range filtering
+     const filteredEvents = computed(() => {
+       let events = combinedEvents.value;
+
+       // Apply search query filter
+       if (searchQuery.value) {
+         const query = searchQuery.value.toLowerCase().trim();
+         events = events.filter(event => {
+           if (!event) return false;
+
+           const title = event.title?.toLowerCase() || '';
+           const description = event.description?.toLowerCase() || '';
+           const venue = event.venue?.toLowerCase() || '';
+           const category = categoryMap.value[event.category_id]?.toLowerCase() || '';
+           const tags = event.tags?.map(tag => tag?.name?.toLowerCase() || '').filter(Boolean) || [];
+
+           return (
+             title.includes(query) ||
+             description.includes(query) ||
+             venue.includes(query) ||
+             category.includes(query) ||
+             tags.some(tag => tag.includes(query))
+           );
+         });
+       }
+
+       // Apply date range filter
+       if (dateRange.value.from || dateRange.value.to) {
+         events = events.filter(event => {
+           if (!event.startDate) return false;
+
+           const eventDate = parse(event.startDate, 'MMM-dd-yyyy', new Date());
+
+           // If only from date is set
+           if (dateRange.value.from && !dateRange.value.to) {
+             return eventDate >= dateRange.value.from;
+           }
+
+           // If only to date is set
+           if (!dateRange.value.from && dateRange.value.to) {
+             return eventDate <= dateRange.value.to;
+           }
+
+           // If both dates are set
+           if (dateRange.value.from && dateRange.value.to) {
+             return isWithinInterval(eventDate, {
+               start: dateRange.value.from,
+               end: dateRange.value.to
+             });
+           }
+
+           return true;
+         });
+       }
+
+       return events;
+     });
+
      return {
      combinedEvents,
      categoryMap,
@@ -1010,7 +1155,169 @@ import { Select } from "primevue";
      removeImage,
      defaultImage,
      toDataURL,
+     searchQuery,
+     filteredEvents,
+     showDateFilter,
+     dateRange,
+     toggleDateFilter,
+     clearDateFilter,
+     filterByDate,
      };
     },
  });
  </script>
+
+<style scoped>
+.search-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.search-wrapper {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
+}
+
+.search-container .p-input-icon-left {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+}
+
+.search-container .p-input-icon-left i {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+}
+
+.search-container .p-input-icon-left .p-inputtext {
+  width: 100%;
+  padding-left: 2.5rem;
+}
+
+@media (max-width: 768px) {
+  .search-container .p-input-icon-left {
+    max-width: 100%;
+  }
+}
+
+.no-results-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.icon-and-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.no-results-title {
+  color: #333;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.no-results-text {
+  color: #555;
+  margin: 5px 0 0 0;
+}
+
+.date-filter-btn {
+  min-width: 40px;
+  height: 40px;
+}
+
+.date-filter-container {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 1rem;
+}
+
+.date-range-wrapper {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.date-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+
+.date-input-group label {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.date-filter-calendar {
+  width: 100%;
+}
+
+.clear-date-btn {
+  align-self: flex-end;
+  color: #dc3545;
+}
+
+.clear-date-btn:hover {
+  background-color: #dc3545;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .date-range-wrapper {
+    flex-direction: column;
+  }
+
+  .date-filter-container {
+    width: 100%;
+  }
+
+  .date-filter-calendar {
+    width: 100%;
+  }
+}
+
+.create-button {
+  background: #7e0bc1;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  margin: 0;
+  height: 40px;
+}
+
+.create-button:hover {
+  background-color: #6800b3e9;
+}
+</style>
