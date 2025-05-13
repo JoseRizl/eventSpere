@@ -517,4 +517,14 @@ function saveToggleState(key, value) {
 .h-40 {
   height: 10rem;
 }
+
+/* Remove menu item background in collapsed mode except on hover */
+:deep(.p-tieredmenu.menu-collapsed .p-menuitem-link) {
+  background: transparent !important;
+}
+
+/* On hover, show background only behind the icon */
+:deep(.p-tieredmenu.menu-collapsed .p-menuitem-link:hover) {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
 </style>

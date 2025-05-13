@@ -325,3 +325,39 @@
 
 
 }
+
+/* Responsive main content margin for sidebar states */
+@media (min-width: 1024px) {
+  body.sidebar-collapsed .event-list-container,
+  body.sidebar-collapsed .category-list-container,
+  body.sidebar-collapsed .archive-list-container {
+    margin-left: 48px;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  body.sidebar-expanded .event-list-container,
+  body.sidebar-expanded .category-list-container,
+  body.sidebar-expanded .archive-list-container {
+    margin-left: 240px;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Ensure tables/content do not extend under the sidebar */
+.event-list-container,
+.category-list-container,
+.archive-list-container {
+  max-width: 1200px;
+  margin-right: auto;
+  margin-left: auto;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.event-list-container .p-datatable,
+.category-list-container .p-datatable,
+.archive-list-container .p-datatable {
+  width: 100%;
+  max-width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}

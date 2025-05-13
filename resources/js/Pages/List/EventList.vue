@@ -1,8 +1,8 @@
 <template>
     <div class="event-list-container">
-        <div class="flex justify-content-center align-items-center mb-4">
-        <h1 class="title">Event List</h1>
-      </div>
+        <div class="flex justify-center items-center mb-4">
+            <h1 class="title text-center w-full">Event List</h1>
+        </div>
 
       <!-- Add Search Bar -->
       <div class="search-container mb-4">
