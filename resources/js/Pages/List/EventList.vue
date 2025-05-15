@@ -158,13 +158,49 @@
       <!-- Committee Selection -->
       <div class="p-field">
         <label>Committee</label>
-        <Select v-model="taskEntry.committee" :options="committees" optionLabel="name" placeholder="Select Committee" filter @change="updateEmployees(index)" />
+        <Select
+          v-model="taskEntry.committee"
+          :options="committees"
+          optionLabel="name"
+          placeholder="Select Committee"
+          filter
+          @change="updateEmployees(index)"
+        >
+          <template #option="slotProps">
+            <div>{{ slotProps.option.name }}</div>
+          </template>
+          <template #value="slotProps">
+            <div v-if="slotProps.value">{{ slotProps.value.name }}</div>
+            <span v-else>{{ slotProps.placeholder }}</span>
+          </template>
+        </Select>
       </div>
 
       <!-- Employee Selection -->
       <div v-if="taskEntry.committee" class="p-field">
-        <label>Employee</label>
-        <Select v-model="taskEntry.employee" :options="filteredEmployees[index]" optionLabel="name" placeholder="Select Employee" filter/>
+        <label>Employees</label>
+        <MultiSelect
+          v-model="taskEntry.employees"
+          :options="filteredEmployees[index]"
+          optionLabel="name"
+          placeholder="Select Employees"
+          display="chip"
+          filter
+        >
+          <template #chip="slotProps">
+            <div class="flex items-center gap-2 px-2 py-1 rounded bg-blue-100 text-blue-800 text-xs">
+              {{ slotProps.value.name }}
+              <button
+                type="button"
+                class="text-blue-600 hover:text-blue-800"
+                @click.stop="removeEmployee(index, slotProps.value)"
+                v-tooltip.top="'Remove Employee'"
+              >
+                ✕
+              </button>
+            </div>
+          </template>
+        </MultiSelect>
       </div>
 
       <!-- Task Description -->
@@ -793,7 +829,7 @@ import { Select } from "primevue";
           //Tags value for multiselect
           tags.value = tagsResponse.data;
 
-          committees.value = committeesResponse.value;
+          committees.value = committeesResponse.data;
           employees.value = employeesResponse.data;
 
           combinedEvents.value = [...events.value, ...sports.value].sort((a, b) => {
@@ -807,17 +843,71 @@ import { Select } from "primevue";
        // Open Task Modal
     const openTaskModal = (event) => {
       selectedEvent.value = event;
-      taskAssignments.value = event.tasks ? [...event.tasks] : [{ committee: null, employee: null, task: "" }];
+
+      // Create maps for quick lookup
+      const committeesMap = committees.value.reduce((map, committee) => {
+        map[committee.id] = committee;
+        return map;
+      }, {});
+
+      const employeesMap = employees.value.reduce((map, employee) => {
+        map[employee.id] = employee;
+        return map;
+      }, {});
+
+      // Normalize tasks with proper committee and employee objects
+      taskAssignments.value = event.tasks ? event.tasks.map(task => {
+        // Handle committee - could be full object, partial object, or just ID
+        let committee = null;
+        if (task.committee) {
+          if (typeof task.committee === 'object') {
+            if (task.committee.name) {
+              committee = task.committee;
+            } else {
+              committee = committeesMap[task.committee.id] || { id: task.committee.id, name: 'Unknown Committee' };
+            }
+          } else {
+            committee = committeesMap[task.committee] || { id: task.committee, name: 'Unknown Committee' };
+          }
+        }
+
+        // Handle employees - convert single employee to array if needed
+        let employees = [];
+        if (task.employees) {
+          // If it's already an array of employees
+          employees = task.employees.map(emp => {
+            if (typeof emp === 'object') {
+              return emp.name ? emp : employeesMap[emp.id] || { id: emp.id, name: 'Unknown Employee' };
+            }
+            return employeesMap[emp] || { id: emp, name: 'Unknown Employee' };
+          });
+        } else if (task.employee) {
+          // If it's a single employee, convert to array
+          if (typeof task.employee === 'object') {
+            employees = [task.employee.name ? task.employee : employeesMap[task.employee.id] || { id: task.employee.id, name: 'Unknown Employee' }];
+          } else {
+            employees = [employeesMap[task.employee] || { id: task.employee, name: 'Unknown Employee' }];
+          }
+        }
+
+        return {
+          ...task,
+          committee,
+          employees
+        };
+      }) : [{ committee: null, employees: [], task: "" }];
+
       // Populate filteredEmployees based on already selected committees
       filteredEmployees.value = taskAssignments.value.map(task =>
-        employees.value.filter(emp => Number(emp.committeeId) === Number(task.committee?.id))
+        task.committee ? employees.value.filter(emp => Number(emp.committeeId) === Number(task.committee.id)) : []
       );
+
       isTaskModalVisible.value = true;
     };
 
     // Add a new task entry
     const addTask = () => {
-      taskAssignments.value.push({ committee: null, employee: null, task: "" });
+      taskAssignments.value.push({ committee: null, employees: [], task: "" });
       filteredEmployees.value.push([]);
     };
 
@@ -861,7 +951,11 @@ import { Select } from "primevue";
         try {
         const updatedEvent = {
         ...selectedEvent.value,
-        tasks: taskAssignments.value
+        tasks: taskAssignments.value.map(task => ({
+            committee: task.committee ? { id: task.committee.id } : null,
+            employees: task.employees.map(emp => ({ id: emp.id })),
+            task: task.task
+        }))
         };
 
         await axios.put(`http://localhost:3000/events/${selectedEvent.value.id}`, updatedEvent);
@@ -1142,6 +1236,12 @@ import { Select } from "primevue";
        return events;
      });
 
+     const removeEmployee = (taskIndex, employeeToRemove) => {
+       taskAssignments.value[taskIndex].employees = taskAssignments.value[taskIndex].employees.filter(
+         emp => emp.id !== employeeToRemove.id
+       );
+     };
+
      return {
      combinedEvents,
      categoryMap,
@@ -1185,6 +1285,7 @@ import { Select } from "primevue";
      clearDateFilter,
      filterByDate,
      getEventTags,
+     removeEmployee,
      };
     },
  });
