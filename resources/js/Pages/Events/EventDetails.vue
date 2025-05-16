@@ -45,6 +45,58 @@ const eventDetails = ref({
       }
       // If it's just an ID, find the corresponding tag object
       return tagsMap.value[tag] || { id: tag, name: 'Unknown Tag', color: '#cccccc' };
+    }) || [],
+    tasks: props.event.tasks?.map(task => {
+      // Handle committee
+      let committee = null;
+      if (task.committee) {
+        if (typeof task.committee === 'object') {
+          if (task.committee.name) {
+            committee = task.committee;
+          } else {
+            const foundCommittee = committees.value.find(c => c.id == task.committee.id);
+            committee = foundCommittee || { id: task.committee.id, name: 'Unknown Committee' };
+          }
+        } else {
+          const foundCommittee = committees.value.find(c => c.id == task.committee);
+          committee = foundCommittee || { id: task.committee, name: 'Unknown Committee' };
+        }
+      }
+
+      // Handle employees array
+      let employees = [];
+      if (task.employees) {
+        employees = task.employees.map(emp => {
+          if (typeof emp === 'object') {
+            if (emp.name) {
+              return emp;
+            }
+            const foundEmployee = employees.value.find(e => e.id == emp.id);
+            return foundEmployee || { id: emp.id, name: 'Unknown Employee' };
+          }
+          const foundEmployee = employees.value.find(e => e.id == emp);
+          return foundEmployee || { id: emp, name: 'Unknown Employee' };
+        });
+      } else if (task.employee) {
+        // Handle legacy single employee format
+        if (typeof task.employee === 'object') {
+          if (task.employee.name) {
+            employees = [task.employee];
+          } else {
+            const foundEmployee = employees.value.find(e => e.id == task.employee.id);
+            employees = [foundEmployee || { id: task.employee.id, name: 'Unknown Employee' }];
+          }
+        } else {
+          const foundEmployee = employees.value.find(e => e.id == task.employee);
+          employees = [foundEmployee || { id: task.employee, name: 'Unknown Employee' }];
+        }
+      }
+
+      return {
+        ...task,
+        committee,
+        employees
+      };
     }) || []
 });
 
@@ -109,15 +161,21 @@ const updateFilteredEmployees = (index) => {
   } else {
     filteredEmployees.value[index] = [];
   }
-  // Reset employee selection when committee changes
-  task.employee = null;
+  // Reset employees when committee changes
+  task.employees = [];
+};
+
+const removeEmployee = (taskIndex, employeeToRemove) => {
+  eventDetails.value.tasks[taskIndex].employees = eventDetails.value.tasks[taskIndex].employees.filter(
+    emp => emp.id !== employeeToRemove.id
+  );
 };
 
 // Methods
 const addCommitteeTask = () => {
   eventDetails.value.tasks.push({
     committee: null,
-    employee: null,
+    employees: [],
     task: ''
   });
   filteredEmployees.value.push([]);
@@ -176,7 +234,6 @@ const saveChanges = () => {
     startTime: eventDetails.value.startTime,
     endTime: eventDetails.value.endTime,
     category_id: eventDetails.value.category?.id || null,
-    // Only send tag IDs to the database
     tags: eventDetails.value.tags.map(tag => tag.id),
     schedules: eventDetails.value.schedules.map(s => ({
       time: s.time.padStart(5, '0'),
@@ -184,7 +241,7 @@ const saveChanges = () => {
     })),
     tasks: eventDetails.value.tasks.map(task => ({
       committee: task.committee ? { id: task.committee.id } : null,
-      employee: task.employee ? { id: task.employee.id } : null,
+      employees: task.employees.map(emp => ({ id: emp.id })),
       task: task.task
     }))
   };
@@ -478,42 +535,48 @@ const normalizedRelatedEvents = computed(() => {
         <div class="p-field">
           <label class="block text-sm font-medium mb-1">Committee</label>
           <Select
-  v-model="taskItem.committee"
-  :options="committees"
-  optionLabel="name"
-  placeholder="Select Committee"
-  class="w-full"
-  @change="updateFilteredEmployees(index)"
->
-  <template #option="slotProps">
-    <div>{{ slotProps.option.name }}</div>
-  </template>
-  <template #value="slotProps">
-    <div v-if="slotProps.value">{{ slotProps.value.name }}</div>
-    <span v-else>{{ slotProps.placeholder }}</span>
-  </template>
-</Select>
+            v-model="taskItem.committee"
+            :options="committees"
+            optionLabel="name"
+            placeholder="Select Committee"
+            class="w-full"
+            @change="updateFilteredEmployees(index)"
+          >
+            <template #option="slotProps">
+              <div>{{ slotProps.option.name }}</div>
+            </template>
+            <template #value="slotProps">
+              <div v-if="slotProps.value">{{ slotProps.value.name }}</div>
+              <span v-else>{{ slotProps.placeholder }}</span>
+            </template>
+          </Select>
         </div>
 
         <!-- Employee Selection (only shows if committee is selected) -->
         <div v-if="taskItem.committee" class="p-field">
-          <label class="block text-sm font-medium mb-1">Employee</label>
-          <Select
-  v-model="taskItem.employee"
-  :options="filteredEmployees[index]"
-  optionLabel="name"
-  placeholder="Select Employee"
-  class="w-full"
-  :disabled="!taskItem.committee"
->
-  <template #option="slotProps">
-    <div>{{ slotProps.option.name }}</div>
-  </template>
-  <template #value="slotProps">
-    <div v-if="slotProps.value">{{ slotProps.value.name }}</div>
-    <span v-else>{{ slotProps.placeholder }}</span>
-  </template>
-</Select>
+          <label class="block text-sm font-medium mb-1">Employees</label>
+          <MultiSelect
+            v-model="taskItem.employees"
+            :options="filteredEmployees[index]"
+            optionLabel="name"
+            placeholder="Select Employees"
+            display="chip"
+            filter
+          >
+            <template #chip="slotProps">
+              <div class="flex items-center gap-2 px-2 py-1 rounded bg-blue-100 text-blue-800 text-xs">
+                {{ slotProps.value.name }}
+                <button
+                  type="button"
+                  class="text-blue-600 hover:text-blue-800"
+                  @click.stop="removeEmployee(index, slotProps.value)"
+                  v-tooltip.top="'Remove Employee'"
+                >
+                  ✕
+                </button>
+              </div>
+            </template>
+          </MultiSelect>
         </div>
 
         <!-- Task Description -->
@@ -545,7 +608,7 @@ const normalizedRelatedEvents = computed(() => {
     </div>
     <div v-else class="space-y-1 pl-4 text-sm">
       <p v-for="(taskItem, index) in eventDetails.tasks" :key="index">
-        {{ taskItem.employee?.name || 'No employee selected' }}
+        {{ taskItem.employees?.map(e => e.name).join(', ') || 'No employees selected' }}
         ({{ taskItem.committee?.name || 'No committee selected' }}):
         {{ taskItem.task || 'No task specified' }}
       </p>

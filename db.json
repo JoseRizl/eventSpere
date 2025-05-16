@@ -12,22 +12,20 @@
             "image": "https:\/\/primefaces.org\/cdn\/primeng\/images\/demo\/product\/bamboo-watch.jpg",
             "archived": false,
             "tags": [
-                {
-                    "id": "1",
-                    "name": "Foundation Day",
-                    "color": "#FF5733"
-                }
+                "1"
             ],
             "category_id": "2",
             "type": "event",
             "tasks": [
                 {
                     "committee": {
-                        "id": 1
+                        "id": "1"
                     },
-                    "employee": {
-                        "id": "9"
-                    },
+                    "employees": [
+                        {
+                            "id": "9"
+                        }
+                    ],
                     "task": "Tig bira sa sakyanans"
                 }
             ],
@@ -250,9 +248,14 @@
                     "committee": {
                         "id": "3"
                     },
-                    "employee": {
-                        "id": "11"
-                    },
+                    "employees": [
+                        {
+                            "id": "7"
+                        },
+                        {
+                            "id": "11"
+                        }
+                    ],
                     "task": "Overthink"
                 }
             ],
@@ -316,7 +319,19 @@
                     "activity": "activity 2"
                 }
             ],
-            "tasks": []
+            "tasks": [
+                {
+                    "committee": {
+                        "id": "1"
+                    },
+                    "employees": [
+                        {
+                            "id": "5"
+                        }
+                    ],
+                    "task": "Nuk"
+                }
+            ]
         },
         {
             "id": "ee74",
