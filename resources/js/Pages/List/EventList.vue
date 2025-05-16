@@ -364,23 +364,54 @@
           </div>
 
           <!-- Tags Selection -->
-        <div class="p-field">
-        <label for="tags">Tags</label>
+          <div class="p-field">
+            <label for="tags">Tags</label>
             <MultiSelect
-                id="tags"
-                v-model="selectedEvent.tags"
-                :options="tags"
-                optionLabel="name"
-                placeholder="Select tags"
-                display="chip"
-            />
-        </div>
+              id="tags"
+              v-model="selectedEvent.tags"
+              :options="tags"
+              optionLabel="name"
+              placeholder="Select tags"
+              display="chip"
+            >
+              <!-- Option Template -->
+              <template #option="slotProps">
+                <div class="flex items-center gap-2">
+                  <div
+                    class="w-3 h-3 rounded-full"
+                    :style="{ backgroundColor: slotProps.option.color || '#800080' }"
+                  ></div>
+                  <span>{{ slotProps.option.name }}</span>
+                </div>
+              </template>
+              <!-- Selected Chip Template -->
+              <template #chip="slotProps">
+                <div
+                  class="flex items-center gap-2 px-2 py-1 rounded text-white text-xs"
+                  :style="{ backgroundColor: slotProps.value.color || '#800080' }"
+                >
+                  <div
+                    class="w-2 h-2 rounded-full bg-white opacity-50"
+                  ></div>
+                  {{ slotProps.value.name }}
+                  <button
+                    type="button"
+                    class="text-white hover:text-gray-200"
+                    @click.stop="removeTag(slotProps.value)"
+                    v-tooltip.top="'Remove Tag'"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </template>
+            </MultiSelect>
+          </div>
 
-        <!-- Venue -->
-        <div class="p-field">
-        <label for="venue">Venue</label>
-        <InputText id="venue" v-model="selectedEvent.venue" placeholder="Enter event venue (e.g., Main Hall, Stadium)" />
-        </div>
+          <!-- Venue -->
+          <div class="p-field">
+            <label for="venue">Venue</label>
+            <InputText id="venue" v-model="selectedEvent.venue" placeholder="Enter event venue (e.g., Main Hall, Stadium)" />
+          </div>
 
           <!-- Event Category Dropdown -->
           <div class="p-field">
@@ -1242,6 +1273,10 @@ import { Select } from "primevue";
        );
      };
 
+     const removeTag = (tagToRemove) => {
+       selectedEvent.value.tags = selectedEvent.value.tags.filter(tag => tag.id !== tagToRemove.id);
+     };
+
      return {
      combinedEvents,
      categoryMap,
@@ -1286,6 +1321,7 @@ import { Select } from "primevue";
      filterByDate,
      getEventTags,
      removeEmployee,
+     removeTag,
      };
     },
  });
