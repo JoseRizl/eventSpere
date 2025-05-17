@@ -1,5 +1,6 @@
 <template>
     <div class="event-list-container">
+        <LoadingSpinner :show="saving" />
         <div class="flex justify-center items-center mb-4">
             <h1 class="title text-center w-full">Event List</h1>
         </div>
@@ -504,13 +505,57 @@
       </Dialog>
     </div>
 
-    <Dialog v-model:visible="isConfirmModalVisible" modal header="Confirmation" :style="{ width: '30vw' }">
-    <p>{{ confirmMessage }}</p>
-    <template #footer>
-        <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="cancelConfirmation" />
-        <Button label="Confirm" icon="pi pi-check" class="p-button-primary" @click="confirmAction" />
-    </template>
-    </Dialog>
+    <!-- Success Dialog -->
+    <div v-if="showSuccessDialog" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center" style="z-index: 9998;">
+      <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+        <h2 class="text-lg font-semibold text-green-700 mb-2">Success!</h2>
+        <p class="text-sm text-gray-700 mb-4">{{ successMessage }}</p>
+        <div class="flex justify-end">
+          <button @click="showSuccessDialog = false" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Dialog -->
+    <div v-if="showErrorDialog" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center" style="z-index: 9998;">
+      <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+        <h2 class="text-lg font-semibold text-red-700 mb-2">Error</h2>
+        <p class="text-sm text-gray-700 mb-4">{{ errorMessage }}</p>
+        <div class="flex justify-end">
+          <button @click="showErrorDialog = false" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Archive Confirmation Dialog -->
+    <ConfirmationDialog
+      v-model:show="showArchiveConfirm"
+      title="Archive Event?"
+      :message="eventToProcess ? `Are you sure you want to archive '${eventToProcess.title}'?` : ''"
+      confirmText="Yes, Archive"
+      confirmButtonClass="bg-yellow-600 hover:bg-yellow-700"
+      @confirm="confirmArchive"
+    />
+
+    <!-- Delete Task Confirmation Dialog -->
+    <ConfirmationDialog
+      v-model:show="showDeleteTaskConfirm"
+      title="Delete Task?"
+      :message="taskToDelete ? `Are you sure you want to delete this task?` : ''"
+      confirmText="Yes, Delete"
+      confirmButtonClass="bg-red-600 hover:bg-red-700"
+      @confirm="confirmDeleteTask"
+    />
+
+    <!-- Save Changes Confirmation Dialog -->
+    <ConfirmationDialog
+      v-model:show="showSaveConfirm"
+      title="Save Changes?"
+      :message="selectedEvent ? `Are you sure you want to save changes to '${selectedEvent.title}'?` : ''"
+      confirmText="Yes, Save"
+      confirmButtonClass="bg-green-600 hover:bg-green-700"
+      @confirm="confirmSaveChanges"
+    />
 
   </template>
 
@@ -519,9 +564,15 @@
   import axios from "axios";
   import { parse, format, isWithinInterval } from "date-fns";
 import { Select } from "primevue";
+import LoadingSpinner from '@/Components/LoadingSpinner.vue';
+import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 
   export default defineComponent({
     name: "EventList",
+    components: {
+      LoadingSpinner,
+      ConfirmationDialog
+    },
     setup() {
       const dateError = ref("");
       const resetErrors = () => {
@@ -942,30 +993,41 @@ import { Select } from "primevue";
       filteredEmployees.value.push([]);
     };
 
-    const deleteTask = async (index, taskEntry) => {
-        if (!confirm(`Are you sure you want to delete this task?`)) return;
+    const deleteTask = (index) => {
+      taskToDelete.value = { index, taskEntry: taskAssignments.value[index] };
+      showDeleteTaskConfirm.value = true;
+    };
 
-        try {
-            taskAssignments.value.splice(index, 1); // Remove from local UI
+    const confirmDeleteTask = async () => {
+      if (!taskToDelete.value) return;
+      saving.value = true;
 
-            const updatedEvent = {
-            ...selectedEvent.value,
-            tasks: [...taskAssignments.value]
-            };
+      try {
+        taskAssignments.value.splice(taskToDelete.value.index, 1);
 
-            await axios.put(`http://localhost:3000/events/${selectedEvent.value.id}`, updatedEvent);
+        const updatedEvent = {
+          ...selectedEvent.value,
+          tasks: [...taskAssignments.value]
+        };
 
-            // Update local event data
-            const eventIndex = combinedEvents.value.findIndex(event => event.id === selectedEvent.value.id);
-            if (eventIndex !== -1) {
-            combinedEvents.value[eventIndex].tasks = [...taskAssignments.value];
-            }
+        await axios.put(`http://localhost:3000/events/${selectedEvent.value.id}`, updatedEvent);
 
-            alert("Task deleted successfully!");
-        } catch (error) {
-            console.error("Error deleting task:", error);
-            alert("Failed to delete task.");
+        const eventIndex = combinedEvents.value.findIndex(event => event.id === selectedEvent.value.id);
+        if (eventIndex !== -1) {
+          combinedEvents.value[eventIndex].tasks = [...taskAssignments.value];
         }
+
+        successMessage.value = 'Task deleted successfully!';
+        showSuccessDialog.value = true;
+      } catch (error) {
+        console.error("Error deleting task:", error);
+        errorMessage.value = 'Failed to delete task.';
+        showErrorDialog.value = true;
+      } finally {
+        saving.value = false;
+        showDeleteTaskConfirm.value = false;
+        taskToDelete.value = null;
+      }
     };
 
     // Update filtered employees when committee changes
@@ -1057,272 +1119,296 @@ import { Select } from "primevue";
         isEditModalVisible.value = true;
     };
 
-    const saveEditedEvent = async () => {
-        if (!selectedEvent.value) return;
-        resetErrors();
+    const saveEditedEvent = () => {
+      if (!selectedEvent.value) return;
+      resetErrors();
 
-        // 1. Validate title
-        if (!selectedEvent.value.title.trim()) {
-            alert("Please enter a valid event title");
-            return;
+      if (!selectedEvent.value.title.trim()) {
+        errorMessage.value = 'Please enter a valid event title';
+        showErrorDialog.value = true;
+        return;
+      }
+
+      if (selectedEvent.value.startDate && selectedEvent.value.endDate) {
+        const start = new Date(selectedEvent.value.startDate);
+        const end = new Date(selectedEvent.value.endDate);
+
+        if (end < start) {
+          dateError.value = "End date cannot be before start date";
+          return;
         }
 
-        // Validate dates
-        if (selectedEvent.value.startDate && selectedEvent.value.endDate) {
-            const start = new Date(selectedEvent.value.startDate);
-            const end = new Date(selectedEvent.value.endDate);
-
-            if (end < start) {
-                dateError.value = "End date cannot be before start date";
-                return;
-            }
-
-            const now = new Date();
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            if (end < today && start < today) {
-                dateError.value = "Event cannot be entirely in the past";
-                return;
-            }
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        if (end < today && start < today) {
+          dateError.value = "Event cannot be entirely in the past";
+          return;
         }
+      }
 
-        confirmMessage.value = `Are you sure you want to save changes to "${selectedEvent.value.title}"?`;
-        isConfirmModalVisible.value = true;
-
-        confirmAction.value = async () => {
-            try {
-                const collection = selectedEvent.value.type === "sport" ? "sports" : "events";
-
-                // Handle image data properly
-                let finalImage = selectedEvent.value.image;
-                const oldImageUrl = selectedEvent.value.image;
-
-                // Only process if it's a new blob image
-                if (selectedEvent.value.image && selectedEvent.value.image.startsWith('blob:')) {
-                    try {
-                        if (oldImageUrl && oldImageUrl.startsWith('blob:')) {
-                            URL.revokeObjectURL(oldImageUrl);
-                        }
-                        const response = await fetch(selectedEvent.value.image);
-                        const blob = await response.blob();
-                        finalImage = await new Promise((resolve, reject) => {
-                            const reader = new FileReader();
-                            reader.onerror = reject;
-                            reader.onloadend = () => resolve(reader.result);
-                            reader.readAsDataURL(blob);
-                        });
-                    } catch (error) {
-                        console.error("Image conversion failed:", error);
-                        finalImage = defaultImage;
-                    }
-                } else if (!selectedEvent.value.image) {
-                    // Handle case where image was removed
-                    finalImage = defaultImage;
-                }
-
-                // Normalize tags to store only IDs
-                const normalizedTags = Array.isArray(selectedEvent.value.tags)
-                    ? selectedEvent.value.tags.map(tag => tag?.id || tag)
-                    : [];
-
-                // Prepare payload
-                const payload = {
-                    ...selectedEvent.value,
-                    image: finalImage,
-                    tags: normalizedTags, // Store only tag IDs
-                    startDate: selectedEvent.value.startDate
-                        ? format(new Date(selectedEvent.value.startDate), "MMM-dd-yyyy")
-                        : null,
-                    endDate: selectedEvent.value.endDate
-                        ? format(new Date(selectedEvent.value.endDate), "MMM-dd-yyyy")
-                        : null,
-                    startTime: selectedEvent.value.startTime?.padStart(5, "0") || "00:00",
-                    endTime: selectedEvent.value.endTime?.padStart(5, "0") || "00:00",
-                };
-
-                // Update server
-                await axios.put(`http://localhost:3000/${collection}/${selectedEvent.value.id}`, payload);
-
-                // Update local state with full tag objects for display
-                const index = combinedEvents.value.findIndex(e => e.id === selectedEvent.value.id);
-                if (index !== -1) {
-                    combinedEvents.value.splice(index, 1, {
-                        ...selectedEvent.value,
-                        image: finalImage,
-                        // Keep full tag objects in local state for display
-                        tags: selectedEvent.value.tags
-                    });
-                }
-
-                // Close modals
-                isEditModalVisible.value = false;
-                isConfirmModalVisible.value = false;
-                alert("Event updated successfully!");
-            } catch (error) {
-                console.error("Error updating event:", error);
-                alert("Failed to update the event.");
-            }
-        };
-
-        cancelConfirmation.value = () => {
-            isConfirmModalVisible.value = false;
-        };
+      showSaveConfirm.value = true;
     };
 
+    const confirmSaveChanges = async () => {
+      saving.value = true;
 
-        const archiveEvent = async (event) => {
-            if (!confirm(`Are you sure you want to archive "${event.title}"?`)) return;
+      try {
+        const collection = selectedEvent.value.type === "sport" ? "sports" : "events";
 
-            try {
-                // Update the event's `archived` status on the server
-                await axios.put(`http://localhost:3000/events/${event.id}`, {
-                ...event,
-                archived: true, // Ensure the `archived` flag is set to true
-                });
+        let finalImage = selectedEvent.value.image;
+        const oldImageUrl = selectedEvent.value.image;
 
-                // Remove the archived event from the local list
-                combinedEvents.value = combinedEvents.value.filter(e => e.id !== event.id);
-                alert("Event archived successfully!");
-            } catch (error) {
-                console.error("Error archiving event:", error);
-                alert("Failed to archive the event.");
+        if (selectedEvent.value.image && selectedEvent.value.image.startsWith('blob:')) {
+          try {
+            if (oldImageUrl && oldImageUrl.startsWith('blob:')) {
+              URL.revokeObjectURL(oldImageUrl);
             }
+            const response = await fetch(selectedEvent.value.image);
+            const blob = await response.blob();
+            finalImage = await new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onerror = reject;
+              reader.onloadend = () => resolve(reader.result);
+              reader.readAsDataURL(blob);
+            });
+          } catch (error) {
+            console.error("Image conversion failed:", error);
+            finalImage = defaultImage;
+          }
+        } else if (!selectedEvent.value.image) {
+          finalImage = defaultImage;
+        }
+
+        const normalizedTags = Array.isArray(selectedEvent.value.tags)
+          ? selectedEvent.value.tags.map(tag => tag?.id || tag)
+          : [];
+
+        const payload = {
+          ...selectedEvent.value,
+          image: finalImage,
+          tags: normalizedTags,
+          startDate: selectedEvent.value.startDate
+            ? format(new Date(selectedEvent.value.startDate), "MMM-dd-yyyy")
+            : null,
+          endDate: selectedEvent.value.endDate
+            ? format(new Date(selectedEvent.value.endDate), "MMM-dd-yyyy")
+            : null,
+          startTime: selectedEvent.value.startTime?.padStart(5, "0") || "00:00",
+          endTime: selectedEvent.value.endTime?.padStart(5, "0") || "00:00",
         };
 
-     // Add date filtering functionality
-     const toggleDateFilter = () => {
-       showDateFilter.value = !showDateFilter.value;
-       if (!showDateFilter.value) {
-         clearDateFilter();
-       }
-     };
+        await axios.put(`http://localhost:3000/${collection}/${selectedEvent.value.id}`, payload);
 
-     const clearDateFilter = () => {
-       dateRange.value = {
-         from: null,
-         to: null
-       };
-       showDateFilter.value = false;
-     };
+        const index = combinedEvents.value.findIndex(e => e.id === selectedEvent.value.id);
+        if (index !== -1) {
+          combinedEvents.value.splice(index, 1, {
+            ...selectedEvent.value,
+            image: finalImage,
+            tags: selectedEvent.value.tags
+          });
+        }
 
-     const filterByDate = () => {
-       if (!dateRange.value.from && !dateRange.value.to) return;
-       // The filtering is handled in the filteredEvents computed property
-     };
+        isEditModalVisible.value = false;
+        successMessage.value = 'Event updated successfully!';
+        showSuccessDialog.value = true;
+      } catch (error) {
+        console.error("Error updating event:", error);
+        errorMessage.value = 'Failed to update the event.';
+        showErrorDialog.value = true;
+      } finally {
+        saving.value = false;
+        showSaveConfirm.value = false;
+      }
+    };
 
-     // Modify the filteredEvents computed property to include date range filtering
-     const filteredEvents = computed(() => {
-       let events = combinedEvents.value;
+    const archiveEvent = (event) => {
+      eventToProcess.value = event;
+      showArchiveConfirm.value = true;
+    };
 
-       // Apply search query filter
-       if (searchQuery.value) {
-         const query = searchQuery.value.toLowerCase().trim();
-         events = events.filter(event => {
-           if (!event) return false;
+    const confirmArchive = async () => {
+      if (!eventToProcess.value) return;
+      saving.value = true;
 
-           const title = event.title?.toLowerCase() || '';
-           const description = event.description?.toLowerCase() || '';
-           const venue = event.venue?.toLowerCase() || '';
-           const category = categoryMap.value[event.category_id]?.toLowerCase() || '';
-           const tags = event.tags?.map(tag => tag?.name?.toLowerCase() || '').filter(Boolean) || [];
+      try {
+        await axios.put(`http://localhost:3000/events/${eventToProcess.value.id}`, {
+          ...eventToProcess.value,
+          archived: true,
+        });
 
-           return (
-             title.includes(query) ||
-             description.includes(query) ||
-             venue.includes(query) ||
-             category.includes(query) ||
-             tags.some(tag => tag.includes(query))
-           );
-         });
-       }
+        combinedEvents.value = combinedEvents.value.filter(e => e.id !== eventToProcess.value.id);
+        successMessage.value = 'Event archived successfully!';
+        showSuccessDialog.value = true;
+      } catch (error) {
+        console.error("Error archiving event:", error);
+        errorMessage.value = 'Failed to archive the event.';
+        showErrorDialog.value = true;
+      } finally {
+        saving.value = false;
+        showArchiveConfirm.value = false;
+        eventToProcess.value = null;
+      }
+    };
 
-       // Apply date range filter
-       if (dateRange.value.from || dateRange.value.to) {
-         events = events.filter(event => {
-           if (!event.startDate) return false;
+    const removeEmployee = (taskIndex, employeeToRemove) => {
+      taskAssignments.value[taskIndex].employees = taskAssignments.value[taskIndex].employees.filter(
+        emp => emp.id !== employeeToRemove.id
+      );
+    };
 
-           const eventDate = parse(event.startDate, 'MMM-dd-yyyy', new Date());
+    const removeTag = (tagToRemove) => {
+      selectedEvent.value.tags = selectedEvent.value.tags.filter(tag => tag.id !== tagToRemove.id);
+    };
 
-           // If only from date is set
-           if (dateRange.value.from && !dateRange.value.to) {
-             return eventDate >= dateRange.value.from;
-           }
+    // Add date filtering functionality
+    const toggleDateFilter = () => {
+      showDateFilter.value = !showDateFilter.value;
+      if (!showDateFilter.value) {
+        clearDateFilter();
+      }
+    };
 
-           // If only to date is set
-           if (!dateRange.value.from && dateRange.value.to) {
-             return eventDate <= dateRange.value.to;
-           }
+    const clearDateFilter = () => {
+      dateRange.value = {
+        from: null,
+        to: null
+      };
+      showDateFilter.value = false;
+    };
 
-           // If both dates are set
-           if (dateRange.value.from && dateRange.value.to) {
-             return isWithinInterval(eventDate, {
-               start: dateRange.value.from,
-               end: dateRange.value.to
-             });
-           }
+    const filterByDate = () => {
+      if (!dateRange.value.from && !dateRange.value.to) return;
+      // The filtering is handled in the filteredEvents computed property
+    };
 
-           return true;
-         });
-       }
+    // Modify the filteredEvents computed property to include date range filtering
+    const filteredEvents = computed(() => {
+      let events = combinedEvents.value;
 
-       return events;
-     });
+      // Apply search query filter
+      if (searchQuery.value) {
+        const query = searchQuery.value.toLowerCase().trim();
+        events = events.filter(event => {
+          if (!event) return false;
 
-     const removeEmployee = (taskIndex, employeeToRemove) => {
-       taskAssignments.value[taskIndex].employees = taskAssignments.value[taskIndex].employees.filter(
-         emp => emp.id !== employeeToRemove.id
-       );
-     };
+          const title = event.title?.toLowerCase() || '';
+          const description = event.description?.toLowerCase() || '';
+          const venue = event.venue?.toLowerCase() || '';
+          const category = categoryMap.value[event.category_id]?.toLowerCase() || '';
+          const tags = event.tags?.map(tag => tag?.name?.toLowerCase() || '').filter(Boolean) || [];
 
-     const removeTag = (tagToRemove) => {
-       selectedEvent.value.tags = selectedEvent.value.tags.filter(tag => tag.id !== tagToRemove.id);
-     };
+          return (
+            title.includes(query) ||
+            description.includes(query) ||
+            venue.includes(query) ||
+            category.includes(query) ||
+            tags.some(tag => tag.includes(query))
+          );
+        });
+      }
 
-     return {
-     combinedEvents,
-     categoryMap,
-     formatDateTime,
-     editEvent,
-     saveEditedEvent,
-     isEditModalVisible,
-     archiveEvent,
-     selectedEvent,
-     categories,
-     tags,
-     isTaskModalVisible,
-     taskAssignments,
-     committees,
-     employees,
-     filteredEmployees,
-     openTaskModal,
-     addTask,
-     deleteTask,
-     updateEmployees,
-     saveTaskAssignments,
-     isConfirmModalVisible,
-     confirmMessage,
-     confirmAction,
-     cancelConfirmation,
-     dateError,
-     isCreateModalVisible,
-     newEvent,
-     openCreateModal,
-     createEvent,
-     handleImageUpload,
-     handleEditImageUpload,
-     removeImage,
-     defaultImage,
-     toDataURL,
-     searchQuery,
-     filteredEvents,
-     showDateFilter,
-     dateRange,
-     toggleDateFilter,
-     clearDateFilter,
-     filterByDate,
-     getEventTags,
-     removeEmployee,
-     removeTag,
-     };
+      // Apply date range filter
+      if (dateRange.value.from || dateRange.value.to) {
+        events = events.filter(event => {
+          if (!event.startDate) return false;
+
+          const eventDate = parse(event.startDate, 'MMM-dd-yyyy', new Date());
+
+          // If only from date is set
+          if (dateRange.value.from && !dateRange.value.to) {
+            return eventDate >= dateRange.value.from;
+          }
+
+          // If only to date is set
+          if (!dateRange.value.from && dateRange.value.to) {
+            return eventDate <= dateRange.value.to;
+          }
+
+          // If both dates are set
+          if (dateRange.value.from && dateRange.value.to) {
+            return isWithinInterval(eventDate, {
+              start: dateRange.value.from,
+              end: dateRange.value.to
+            });
+          }
+
+          return true;
+        });
+      }
+
+      return events;
+    });
+
+    const saving = ref(false);
+    const showSuccessDialog = ref(false);
+    const successMessage = ref('');
+    const showErrorDialog = ref(false);
+    const errorMessage = ref('');
+    const showArchiveConfirm = ref(false);
+    const showDeleteTaskConfirm = ref(false);
+    const showSaveConfirm = ref(false);
+    const eventToProcess = ref(null);
+    const taskToDelete = ref(null);
+
+    return {
+    combinedEvents,
+    categoryMap,
+    formatDateTime,
+    editEvent,
+    saveEditedEvent,
+    isEditModalVisible,
+    archiveEvent,
+    selectedEvent,
+    categories,
+    tags,
+    isTaskModalVisible,
+    taskAssignments,
+    committees,
+    employees,
+    filteredEmployees,
+    openTaskModal,
+    addTask,
+    deleteTask,
+    updateEmployees,
+    saveTaskAssignments,
+    isConfirmModalVisible,
+    confirmMessage,
+    confirmAction,
+    cancelConfirmation,
+    dateError,
+    isCreateModalVisible,
+    newEvent,
+    openCreateModal,
+    createEvent,
+    handleImageUpload,
+    handleEditImageUpload,
+    removeImage,
+    defaultImage,
+    toDataURL,
+    searchQuery,
+    filteredEvents,
+    showDateFilter,
+    dateRange,
+    toggleDateFilter,
+    clearDateFilter,
+    filterByDate,
+    getEventTags,
+    removeEmployee,
+    removeTag,
+    saving,
+    showSuccessDialog,
+    successMessage,
+    showErrorDialog,
+    errorMessage,
+    showArchiveConfirm,
+    showDeleteTaskConfirm,
+    showSaveConfirm,
+    eventToProcess,
+    taskToDelete,
+    confirmArchive,
+    confirmDeleteTask,
+    confirmSaveChanges,
+    };
     },
  });
  </script>
