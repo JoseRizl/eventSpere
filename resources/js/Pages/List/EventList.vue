@@ -71,7 +71,13 @@
           <template #body="{ data }">
             <div class="flex items-center gap-2">
               <img v-if="data.image" :src="data.image" alt="Event Image" class="event-icon" />
-              <span>{{ data.title }}</span>
+              <Link
+                :href="route('event.details', { id: data.id })"
+                class="text-lg font-medium overflow-hidden line-clamp-2 hover:text-blue-600 transition-colors duration-200 cursor-pointer"
+                v-tooltip.top="data.title"
+              >
+                {{ data.title }}
+              </Link>
             </div>
 
             <!-- Tags Display -->
