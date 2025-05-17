@@ -4,11 +4,13 @@ import { router, usePage } from '@inertiajs/vue3';
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
 import LoadingSpinner from '@/Components/LoadingSpinner.vue';
+import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 
 export default defineComponent({
   name: "CategoryList",
   components: {
-    LoadingSpinner
+    LoadingSpinner,
+    ConfirmationDialog
   },
   setup() {
     const toast = useToast();
@@ -501,21 +503,12 @@ export default defineComponent({
     </Dialog>
 
     <!-- Delete Confirmation Dialog -->
-    <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center" style="z-index: 9998;">
-      <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-        <h2 class="text-lg font-semibold mb-2">Delete {{ showTags ? 'Tag' : 'Category' }}?</h2>
-        <p class="text-sm text-gray-600 mb-4">Are you sure you want to delete this {{ showTags ? 'tag' : 'category' }}?</p>
-        <div class="flex justify-end gap-2">
-          <button @click="showDeleteConfirm = false" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
-          <button
-            @click="confirmDelete"
-            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            Yes, Delete
-          </button>
-        </div>
-      </div>
-    </div>
+    <ConfirmationDialog
+      v-model:show="showDeleteConfirm"
+      :title="`Delete ${showTags ? 'Tag' : 'Category'}?`"
+      :message="`Are you sure you want to delete this ${showTags ? 'tag' : 'category'}?`"
+      @confirm="confirmDelete"
+    />
   </div>
 </template>
 
