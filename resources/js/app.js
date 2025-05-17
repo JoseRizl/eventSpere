@@ -23,6 +23,8 @@ import 'primeicons/primeicons.css';
   import Dialog from 'primevue/dialog';
   import Dropdown from 'primevue/dropdown';
   import Select from 'primevue/select';
+  import Toast from 'primevue/toast';
+  import ToastService from 'primevue/toastservice';
 
 
 // Pinia
@@ -39,9 +41,13 @@ createInertiaApp({
   title: (title) => `EMS ${title}`,
   resolve: (name) => {
     const pages = import.meta.glob('./Pages/**/*.vue', { eager: true });
-    let page = pages[`./Pages/${name}.vue`];
-    page.default.layout = page.default.layout || MainLayout;
-    return page;
+    const page = pages[`./Pages/${name}.vue`];
+    if (!page) {
+      throw new Error(`Page ${name} not found`);
+    }
+    const component = page.default;
+    component.layout = component.layout || MainLayout;
+    return component;
   },
   setup({ el, App, props, plugin }) {
     const app = createApp({ render: () => h(App, props) });
@@ -54,6 +60,7 @@ createInertiaApp({
       .use(plugin)
       .use(ZiggyVue)
       .use(pinia) // Add Pinia
+      .use(ToastService)
       .directive('tooltip', Tooltip)
       .use(PrimeVue, {
         theme: {
@@ -85,6 +92,7 @@ createInertiaApp({
       .component('Dialog', Dialog)
       .component('Dropdown', Dropdown)
       .component('Select', Select)
+      .component('Toast', Toast)
 
       .mount(el);
 

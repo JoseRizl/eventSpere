@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { parse, format, parseISO, isValid } from 'date-fns';
 import { usePage, router } from '@inertiajs/vue3';
+import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 
 // Inertia props
 const { props } = usePage();
@@ -708,8 +709,11 @@ const normalizedRelatedEvents = computed(() => {
         </div>
       </div>
 
+      <!-- Loading Dialog -->
+      <LoadingSpinner :show="saving" />
+
       <!-- Success Message Dialog -->
-      <div v-if="showSuccessDialog" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+      <div v-if="showSuccessDialog" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center" style="z-index: 9998;">
         <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
           <h2 class="text-lg font-semibold text-green-700 mb-2">Success!</h2>
           <p class="text-sm text-gray-700 mb-4">The event was updated successfully.</p>
@@ -719,23 +723,12 @@ const normalizedRelatedEvents = computed(() => {
         </div>
       </div>
 
-      <!-- Loading Dialog -->
-      <div v-if="saving" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 shadow-lg flex items-center gap-3">
-          <svg class="animate-spin w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-          </svg>
-          <span class="text-gray-700 font-medium">Saving changes...</span>
-        </div>
-      </div>
-
       <!-- Error Dialog -->
       <Dialog
         v-model:visible="showErrorDialog"
         modal
         header="Error"
-        :style="{ width: '400px' }"
+        :style="{ width: '400px', zIndex: 9998 }"
       >
         <div class="flex items-center gap-3">
           <i class="pi pi-exclamation-triangle text-red-500 text-2xl"></i>
@@ -750,39 +743,39 @@ const normalizedRelatedEvents = computed(() => {
           />
         </template>
       </Dialog>
-    </div>
 
-    <!-- Delete Task Confirmation Dialog -->
-<div v-if="showDeleteTaskConfirm" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-  <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-    <h2 class="text-lg font-semibold mb-2">Delete Task?</h2>
-    <p class="text-sm text-gray-600 mb-4">Are you sure you want to delete this task?</p>
-    <div class="flex justify-end gap-2">
-      <button @click="showDeleteTaskConfirm = false" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
-      <button
-        @click="confirmDeleteTask"
-        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-      >
-        Yes
-      </button>
-    </div>
-  </div>
-</div>
+      <!-- Delete Task Confirmation Dialog -->
+      <div v-if="showDeleteTaskConfirm" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center" style="z-index: 9998;">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+          <h2 class="text-lg font-semibold mb-2">Delete Task?</h2>
+          <p class="text-sm text-gray-600 mb-4">Are you sure you want to delete this task?</p>
+          <div class="flex justify-end gap-2">
+            <button @click="showDeleteTaskConfirm = false" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
+            <button
+              @click="confirmDeleteTask"
+              class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            >
+              Yes
+            </button>
+          </div>
+        </div>
+      </div>
 
-<!-- Delete Schedule Confirmation Dialog -->
-<div v-if="showDeleteScheduleConfirm" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-  <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-    <h2 class="text-lg font-semibold mb-2">Delete Schedule?</h2>
-    <p class="text-sm text-gray-600 mb-4">Are you sure you want to delete this schedule item?</p>
-    <div class="flex justify-end gap-2">
-      <button @click="showDeleteScheduleConfirm = false" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
-      <button
-        @click="confirmDeleteSchedule"
-        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-      >
-        Yes
-      </button>
+      <!-- Delete Schedule Confirmation Dialog -->
+      <div v-if="showDeleteScheduleConfirm" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center" style="z-index: 9998;">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+          <h2 class="text-lg font-semibold mb-2">Delete Schedule?</h2>
+          <p class="text-sm text-gray-600 mb-4">Are you sure you want to delete this schedule item?</p>
+          <div class="flex justify-end gap-2">
+            <button @click="showDeleteScheduleConfirm = false" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
+            <button
+              @click="confirmDeleteSchedule"
+              class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            >
+              Yes
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
   </template>

@@ -1,19 +1,47 @@
 <script>
 import { defineComponent, ref, onMounted, computed, watch } from "vue";
-import axios from "axios";
+import { router, usePage } from '@inertiajs/vue3';
+import Toast from 'primevue/toast';
+import { useToast } from 'primevue/usetoast';
+import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 
 export default defineComponent({
   name: "CategoryList",
+  components: {
+    LoadingSpinner
+  },
   setup() {
-    const categories = ref([]);
-    const tags = ref([]);
-    const events = ref([]);
+    const toast = useToast();
+    const { props, flash } = usePage();
+    const categories = ref(props.categories || []);
+    const tags = ref(props.tags || []);
+    const events = ref(props.events || []);
     const isEditModalVisible = ref(false);
     const isCreateModalVisible = ref(false);
     const selectedItem = ref(null);
     const newItem = ref({ title: "", description: "", color: "#800080" });
     const showTags = ref(localStorage.getItem("showTags") === "true");
     const searchQuery = ref("");
+    const saving = ref(false);
+    const showSaveConfirmDialog = ref(false);
+    const showSuccessDialog = ref(false);
+    const errorMessage = ref(null);
+    const showErrorDialog = ref(false);
+    const errorDialogMessage = ref('');
+    const showDeleteConfirm = ref(false);
+    const itemToDelete = ref(null);
+    const showCreateConfirm = ref(false);
+    const showEditConfirm = ref(false);
+
+    // Watch for flash messages
+    watch(() => flash, (newFlash) => {
+      if (newFlash.success) {
+        toast.add({ severity: 'success', summary: 'Success', detail: newFlash.success, life: 3000 });
+      }
+      if (newFlash.error) {
+        toast.add({ severity: 'error', summary: 'Error', detail: newFlash.error, life: 3000 });
+      }
+    }, { deep: true });
 
     const normalizedEvents = computed(() => {
       return events.value.map(event => ({
@@ -48,14 +76,14 @@ export default defineComponent({
 
     const fetchData = async () => {
       try {
-        const [categoriesResponse, tagsResponse, eventsResponse] = await Promise.all([
-          axios.get("http://localhost:3000/category"),
-          axios.get("http://localhost:3000/tags"),
-          axios.get("http://localhost:3000/events"),
-        ]);
-        categories.value = categoriesResponse.data;
-        tags.value = tagsResponse.data;
-        events.value = eventsResponse.data;
+        await router.visit('/category-list', {
+          preserveState: true,
+          onSuccess: (page) => {
+            categories.value = page.props.categories;
+            tags.value = page.props.tags;
+            events.value = page.props.events;
+          }
+        });
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -83,24 +111,37 @@ export default defineComponent({
     // Save Edited Item
     const saveEditedItem = async () => {
       if (!selectedItem.value) return;
+      saving.value = true;
+      errorMessage.value = null;
+      showErrorDialog.value = false;
 
       try {
-        const endpoint = showTags.value ? 'tags' : 'category';
-        await axios.put(
-          `http://localhost:3000/${endpoint}/${selectedItem.value.id}`,
-          selectedItem.value
-        );
+        await router.put(`/categories/${selectedItem.value.id}`, selectedItem.value, {
+          onSuccess: () => {
+            // Update the list without reloading
+            const list = showTags.value ? tags : categories;
+            const index = list.value.findIndex(c => c.id === selectedItem.value.id);
+            if (index !== -1) list.value[index] = { ...selectedItem.value };
 
-        // Update the list without reloading
-        const list = showTags.value ? tags : categories;
-        const index = list.value.findIndex(c => c.id === selectedItem.value.id);
-        if (index !== -1) list.value[index] = { ...selectedItem.value };
-
-        isEditModalVisible.value = false;
-        alert(`${showTags.value ? 'Tag' : 'Category'} updated successfully!`);
+            isEditModalVisible.value = false;
+            showSuccessDialog.value = true;
+            toast.add({ severity: 'success', summary: 'Success', detail: `${showTags.value ? 'Tag' : 'Category'} updated successfully!`, life: 3000 });
+          },
+          onError: (errors) => {
+            errorMessage.value = errors.message || 'Failed to update item';
+            showErrorDialog.value = true;
+            errorDialogMessage.value = JSON.stringify(errors, null, 2);
+          },
+          onFinish: () => {
+            saving.value = false;
+          }
+        });
       } catch (error) {
         console.error("Error updating item:", error);
-        alert(`Failed to update the ${showTags.value ? 'tag' : 'category'}.`);
+        errorMessage.value = `Failed to update the ${showTags.value ? 'tag' : 'category'}.`;
+        showErrorDialog.value = true;
+        errorDialogMessage.value = error.message;
+        saving.value = false;
       }
     };
 
@@ -114,43 +155,108 @@ export default defineComponent({
 
     // Create New Item
     const createItem = async () => {
-      const endpoint = showTags.value ? 'tags' : 'category';
       const requiredField = showTags.value ? 'name' : 'title';
 
       if (!newItem.value[requiredField]?.trim()) {
-        alert(`${showTags.value ? 'Tag' : 'Category'} name is required.`);
+        toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: `${showTags.value ? 'Tag' : 'Category'} name is required.`,
+          life: 3000
+        });
         return;
       }
 
-      try {
-        const response = await axios.post(
-          `http://localhost:3000/${endpoint}`,
-          newItem.value
-        );
+      saving.value = true;
+      errorMessage.value = null;
+      showErrorDialog.value = false;
 
-        (showTags.value ? tags : categories).value.push(response.data);
-        isCreateModalVisible.value = false;
-        alert(`${showTags.value ? 'Tag' : 'Category'} created successfully!`);
+      try {
+        await router.post('/categories', newItem.value, {
+          onSuccess: () => {
+            isCreateModalVisible.value = false;
+            // Reset the form
+            newItem.value = showTags.value
+              ? { name: "", color: "#800080" }
+              : { title: "", description: "" };
+            // Show success message
+            showSuccessDialog.value = true;
+            toast.add({
+              severity: 'success',
+              summary: 'Success',
+              detail: `${showTags.value ? 'Tag' : 'Category'} created successfully!`,
+              life: 3000
+            });
+            // Fetch updated list
+            fetchData();
+          },
+          onError: (errors) => {
+            errorMessage.value = errors.message || 'Failed to create item';
+            showErrorDialog.value = true;
+            errorDialogMessage.value = JSON.stringify(errors, null, 2);
+          },
+          onFinish: () => {
+            saving.value = false;
+          }
+        });
       } catch (error) {
         console.error("Error creating item:", error);
-        alert(`Failed to create the ${showTags.value ? 'tag' : 'category'}.`);
+        errorMessage.value = `Failed to create the ${showTags.value ? 'tag' : 'category'}.`;
+        showErrorDialog.value = true;
+        errorDialogMessage.value = error.message;
+        saving.value = false;
       }
     };
 
     // Delete Item
     const deleteItem = async (id) => {
-      if (!confirm(`Are you sure you want to delete this ${showTags.value ? 'tag' : 'category'}?`)) return;
+      itemToDelete.value = id;
+      showDeleteConfirm.value = true;
+    };
+
+    const confirmDelete = async () => {
+      if (!itemToDelete.value) return;
+      saving.value = true;
+      errorMessage.value = null;
+      showErrorDialog.value = false;
 
       try {
-        const endpoint = showTags.value ? 'tags' : 'category';
-        await axios.delete(`http://localhost:3000/${endpoint}/${id}`);
+        await router.delete(`/categories/${itemToDelete.value}`, {
+          data: { type: showTags.value ? 'tag' : 'category' },
+          onSuccess: async (page) => {
+            // Update the data from the response
+            categories.value = page.props.categories;
+            tags.value = page.props.tags;
+            events.value = page.props.events;
 
-        const list = showTags.value ? tags : categories;
-        list.value = list.value.filter(c => c.id !== id);
-        alert(`${showTags.value ? 'Tag' : 'Category'} deleted successfully!`);
+            // Show success message after data is updated
+            showSuccessDialog.value = true;
+            toast.add({
+              severity: 'success',
+              summary: 'Success',
+              detail: `${showTags.value ? 'Tag' : 'Category'} deleted successfully!`,
+              life: 3000
+            });
+          },
+          onError: (errors) => {
+            errorMessage.value = errors.message || 'Failed to delete item';
+            showErrorDialog.value = true;
+            errorDialogMessage.value = JSON.stringify(errors, null, 2);
+          },
+          onFinish: () => {
+            saving.value = false;
+            showDeleteConfirm.value = false;
+            itemToDelete.value = null;
+          }
+        });
       } catch (error) {
         console.error("Error deleting item:", error);
-        alert(`Failed to delete the ${showTags.value ? 'tag' : 'category'}.`);
+        errorMessage.value = `Failed to delete the ${showTags.value ? 'tag' : 'category'}.`;
+        showErrorDialog.value = true;
+        errorDialogMessage.value = error.message;
+        saving.value = false;
+        showDeleteConfirm.value = false;
+        itemToDelete.value = null;
       }
     };
 
@@ -181,6 +287,18 @@ export default defineComponent({
       newItem,
       isItemInUse,
       toggleView,
+      toast,
+      saving,
+      showSaveConfirmDialog,
+      showSuccessDialog,
+      errorMessage,
+      showErrorDialog,
+      errorDialogMessage,
+      showDeleteConfirm,
+      itemToDelete,
+      showCreateConfirm,
+      showEditConfirm,
+      confirmDelete,
     };
   },
 });
@@ -188,6 +306,8 @@ export default defineComponent({
 
 <template>
   <div class="category-list-container">
+    <Toast />
+    <LoadingSpinner :show="saving" />
     <h1 class="title text-center mb-4">{{ showTags ? 'Tag' : 'Category' }} List</h1>
 
     <div class="category-header">
@@ -347,6 +467,55 @@ export default defineComponent({
         <Button :label="`Create ${showTags ? 'Tag' : 'Category'}`" icon="pi pi-check" class="p-button-primary" @click="createItem" />
       </template>
     </Dialog>
+
+    <!-- Success Message Dialog -->
+    <div v-if="showSuccessDialog" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center" style="z-index: 9998;">
+      <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+        <h2 class="text-lg font-semibold text-green-700 mb-2">Success!</h2>
+        <p class="text-sm text-gray-700 mb-4">The operation was completed successfully.</p>
+        <div class="flex justify-end">
+          <button @click="showSuccessDialog = false" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Dialog -->
+    <Dialog
+      v-model:visible="showErrorDialog"
+      modal
+      header="Error"
+      :style="{ width: '400px', zIndex: 9998 }"
+    >
+      <div class="flex items-center gap-3">
+        <i class="pi pi-exclamation-triangle text-red-500 text-2xl"></i>
+        <span>{{ errorDialogMessage }}</span>
+      </div>
+      <template #footer>
+        <Button
+          label="OK"
+          icon="pi pi-check"
+          @click="showErrorDialog = false"
+          class="p-button-text"
+        />
+      </template>
+    </Dialog>
+
+    <!-- Delete Confirmation Dialog -->
+    <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center" style="z-index: 9998;">
+      <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+        <h2 class="text-lg font-semibold mb-2">Delete {{ showTags ? 'Tag' : 'Category' }}?</h2>
+        <p class="text-sm text-gray-600 mb-4">Are you sure you want to delete this {{ showTags ? 'tag' : 'category' }}?</p>
+        <div class="flex justify-end gap-2">
+          <button @click="showDeleteConfirm = false" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
+          <button
+            @click="confirmDelete"
+            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Yes, Delete
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 

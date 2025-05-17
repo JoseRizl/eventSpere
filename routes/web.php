@@ -2,15 +2,15 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\CategoryController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-
 
 Route::middleware('auth')->group(function () {
     Route::inertia('/home', 'Home')->name('home');
 
     Route::inertia('/event-list', 'List/EventList')->name('event.list');
-    Route::inertia('/category-list', 'List/CategoryList')->name('category.list');
+    Route::get('/category-list', [CategoryController::class, 'index'])->name('category.list');
     Route::inertia('/archive', 'List/Archive')->name('archive');
 
     Route::inertia('/create-category', 'Create/CreateCategory')->name('category.create');
@@ -25,9 +25,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/events/{id}', [EventController::class, 'show'])->name('event.details');
     Route::post('/events/{id}/update', [EventController::class, 'update'])->name('event.update');
 
+    // Category and Tag routes
+    Route::post('/categories', [CategoryController::class, 'store'])->name('category.store');
+    Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('category.update');
+    Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('category.destroy');
 });
-
-
 
 Route::middleware('guest')->group(function () {
     Route::inertia('/register', 'Auth/Register')->name('register');
@@ -37,6 +39,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/', [AuthController::class, 'login']);
 });
 
+// Redirect any unmatched routes to home
 Route::get('/{any}', function () {
-    return Inertia::render('App'); // Use a wrapper page like App.vue
+    return redirect()->route('home');
 })->where('any', '.*')->middleware('auth');
