@@ -278,52 +278,61 @@ function saveToggleState(key, value) {
             preserve-scroll
             class="block h-full"
         >
-        <Card class="h-full flex flex-col justify-between min-h-[340px]">
+        <Card class="h-full flex flex-col justify-between min-h-[280px]">
             <template #header>
-                <div class="h-40 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden">
-                <img v-if="event.image" :src="event.image" class="h-full w-full object-cover" alt="Event image"/>
-                <span v-else class="text-gray-500">No image</span>
+                <div class="h-40 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
+                    <div class="absolute inset-0 bg-gradient-to-b from-gray-900/20 to-transparent z-10"></div>
+                    <img
+                        v-if="event.image"
+                        :src="event.image"
+                        class="h-full w-full object-cover"
+                        alt="Event image"
+                    />
+                    <span v-else class="text-gray-500">No image</span>
+                    <Tag
+                        v-if="isNewEvent(event)"
+                        value="NEW"
+                        severity="success"
+                        class="absolute top-2 right-2 z-20"
+                    />
                 </div>
-                <Tag
-                v-if="isNewEvent(event)"
-                value="NEW"
-                severity="success"
-                class="absolute top-2 right-2 z-10"
-                />
             </template>
             <template #title>
-                <h3 class="text-lg font-medium overflow-hidden h-12 line-clamp-2">
+                <h3
+                    class="text-lg font-medium overflow-hidden line-clamp-1 cursor-help"
+                    v-tooltip.top="event.title"
+                >
                     {{ event.title }}
                 </h3>
             </template>
 
             <template #subtitle>
-                <div class="text-sm text-gray-500 overflow-hidden h-6 line-clamp-1">
-                {{ event.formattedDate }}
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-500">{{ event.formattedDate }}</span>
+                    <Tag
+                        :value="getUpcomingTag(event.startDate, event.endDate)"
+                        :severity="getUpcomingSeverity(event.startDate, event.endDate)"
+                        class="text-xs"
+                    />
                 </div>
-                <Tag
-                :value="getUpcomingTag(event.startDate, event.endDate)"
-                :severity="getUpcomingSeverity(event.startDate, event.endDate)"
-                class="text-xs"
-                />
             </template>
 
             <template #content>
-            <div class="flex-1 mb-4 overflow-hidden h-[calc(2*1.5rem)]">
-                <p class="text-sm text-gray-600 line-clamp-2">
-                {{ event.description }}
-                </p>
-            </div>
+                <div class="flex-1 mb-2 overflow-hidden h-[calc(1.5rem)]">
+                    <p class="text-sm text-gray-600 line-clamp-1">
+                        {{ event.description }}
+                    </p>
+                </div>
             </template>
 
             <template #footer>
                 <div class="flex justify-end mt-2 z-20">
-                <Button
-                label="Event Details"
-                icon="pi pi-info-circle"
-                class="p-button-text p-button-sm"
-                @click.stop="$inertia.visit(route('event.details', { id: event.id }))"
-                />
+                    <Button
+                        label="View Details"
+                        icon="pi pi-info-circle"
+                        class="p-button-text p-button-sm"
+                        @click.stop="$inertia.visit(route('event.details', { id: event.id }))"
+                    />
                 </div>
             </template>
             </Card>
@@ -354,51 +363,60 @@ function saveToggleState(key, value) {
             preserve-scroll
             class="block h-full"
         >
-        <Card class="h-full flex flex-col justify-between min-h-[340px]">
+        <Card class="h-full flex flex-col justify-between min-h-[280px]">
             <template #header>
-                <div class="h-40 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden">
-                <img v-if="event.image" :src="event.image" class="h-full w-full object-cover" alt="Event image"/>
-                <span v-else class="text-gray-500">No image</span>
+                <div class="h-40 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
+                    <div class="absolute inset-0 bg-gradient-to-b from-gray-900/20 to-transparent z-10"></div>
+                    <img
+                        v-if="event.image"
+                        :src="event.image"
+                        class="h-full w-full object-cover"
+                        alt="Event image"
+                    />
+                    <span v-else class="text-gray-500">No image</span>
+                    <Tag
+                        v-if="isNewEvent(event)"
+                        value="NEW"
+                        severity="success"
+                        class="absolute top-2 right-2 z-20"
+                    />
                 </div>
-                <Tag
-                v-if="isNewEvent(event)"
-                value="NEW"
-                severity="success"
-                class="absolute top-2 right-2 z-10"
-                />
             </template>
             <template #title>
-                <h3 class="text-lg font-medium overflow-hidden h-12 line-clamp-2">
+                <h3
+                    class="text-lg font-medium overflow-hidden line-clamp-1 cursor-help"
+                    v-tooltip.top="event.title"
+                >
                     {{ event.title }}
                 </h3>
             </template>
 
             <template #subtitle>
-            <div class="overflow-hidden h-6 line-clamp-1">
-                <span class="text-sm text-gray-500">{{ event.formattedDate }}</span>
-            </div>
-            <Tag
-            :value="getUpcomingTag(event.startDate, event.endDate)"
-            :severity="getUpcomingSeverity(event.startDate, event.endDate)"
-            class="text-xs"
-            />
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-500">{{ event.formattedDate }}</span>
+                    <Tag
+                        :value="getUpcomingTag(event.startDate, event.endDate)"
+                        :severity="getUpcomingSeverity(event.startDate, event.endDate)"
+                        class="text-xs"
+                    />
+                </div>
             </template>
 
             <template #content>
-            <div class="flex-1 mb-4 overflow-hidden h-[calc(2*1.5rem)]">
-                <p class="text-sm text-gray-600 line-clamp-2">
-                {{ event.description }}
-                </p>
-            </div>
+                <div class="flex-1 mb-2 overflow-hidden h-[calc(1.5rem)]">
+                    <p class="text-sm text-gray-600 line-clamp-1">
+                        {{ event.description }}
+                    </p>
+                </div>
             </template>
 
             <template #footer>
                 <div class="flex justify-end mt-2 z-20">
                     <Button
-                    label="Event Details"
-                    icon="pi pi-info-circle"
-                    class="p-button-text p-button-sm"
-                    @click.stop="$inertia.visit(route('event.details', { id: event.id }))"
+                        label="View Details"
+                        icon="pi pi-info-circle"
+                        class="p-button-text p-button-sm"
+                        @click.stop="$inertia.visit(route('event.details', { id: event.id }))"
                     />
                 </div>
             </template>
@@ -432,52 +450,61 @@ function saveToggleState(key, value) {
             preserve-scroll
             class="block h-full"
         >
-            <Card class="h-full flex flex-col justify-between min-h-[340px]">
+            <Card class="h-full flex flex-col justify-between min-h-[280px]">
             <template #header>
-                <div class="h-40 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden">
-                <img v-if="event.image" :src="event.image" class="h-full w-full object-cover" alt="Event image"/>
-                <span v-else class="text-gray-500">No image</span>
-                <Tag
-                    v-if="isNewEvent(event)"
-                    value="NEW"
-                    severity="success"
-                    class="absolute top-2 right-2 z-10"
-                />
+                <div class="h-40 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
+                    <div class="absolute inset-0 bg-gradient-to-b from-gray-900/20 to-transparent z-10"></div>
+                    <img
+                        v-if="event.image"
+                        :src="event.image"
+                        class="h-full w-full object-cover"
+                        alt="Event image"
+                    />
+                    <span v-else class="text-gray-500">No image</span>
+                    <Tag
+                        v-if="isNewEvent(event)"
+                        value="NEW"
+                        severity="success"
+                        class="absolute top-2 right-2 z-20"
+                    />
                 </div>
             </template>
 
             <template #title>
-                <h3 class="text-lg font-medium overflow-hidden h-12 line-clamp-2">
-                {{ event.title }}
+                <h3
+                    class="text-lg font-medium overflow-hidden line-clamp-1 cursor-help"
+                    v-tooltip.top="event.title"
+                >
+                    {{ event.title }}
                 </h3>
             </template>
 
             <template #subtitle>
-                <div class="text-sm text-gray-500 overflow-hidden h-6 line-clamp-1">
-                <span class="text-xs text-gray-500">{{ event.formattedDate }}</span>
-                <Tag
-                :value="getUpcomingTag(event.startDate, event.endDate)"
-                :severity="getUpcomingSeverity(event.startDate, event.endDate)"
-                class="text-xs"
-                />
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-500">{{ event.formattedDate }}</span>
+                    <Tag
+                        :value="getUpcomingTag(event.startDate, event.endDate)"
+                        :severity="getUpcomingSeverity(event.startDate, event.endDate)"
+                        class="text-xs"
+                    />
                 </div>
             </template>
 
             <template #content>
-            <div class="flex-1 mb-4 overflow-hidden h-[calc(2*1.5rem)]">
-                <p class="text-sm text-gray-600 line-clamp-2">
-                {{ event.description }}
-                </p>
-            </div>
+                <div class="flex-1 mb-2 overflow-hidden h-[calc(1.5rem)]">
+                    <p class="text-sm text-gray-600 line-clamp-1">
+                        {{ event.description }}
+                    </p>
+                </div>
             </template>
 
             <template #footer>
                 <div class="flex justify-end mt-2 z-20">
                     <Button
-                    label="Event Details"
-                    icon="pi pi-info-circle"
-                    class="p-button-text p-button-sm"
-                    @click.stop="$inertia.visit(route('event.details', { id: event.id }))"
+                        label="View Details"
+                        icon="pi pi-info-circle"
+                        class="p-button-text p-button-sm"
+                        @click.stop="$inertia.visit(route('event.details', { id: event.id }))"
                     />
                 </div>
             </template>
@@ -515,7 +542,24 @@ function saveToggleState(key, value) {
 }
 
 .h-40 {
-  height: 10rem;
+  position: relative;
+  background-color: #f3f4f6;
+}
+
+.h-40 img {
+  transition: transform 0.3s ease;
+}
+
+.h-40:hover img {
+  transform: scale(1.05);
+}
+
+.h-40::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+  pointer-events: none;
 }
 
 /* Remove menu item background in collapsed mode except on hover */
@@ -526,5 +570,14 @@ function saveToggleState(key, value) {
 /* On hover, show background only behind the icon */
 :deep(.p-tieredmenu.menu-collapsed .p-menuitem-link:hover) {
   background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Card styles */
+.min-h-\[280px\] {
+  min-height: 280px;
+}
+
+.h-\[calc\(1\.5rem\)\] {
+  height: 1.5rem;
 }
 </style>

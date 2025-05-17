@@ -737,30 +737,50 @@ import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
         reader.onload = (e) => {
             const img = new Image();
             img.onload = () => {
-            const MAX_SIZE = 800;
-            let width = img.width;
-            let height = img.height;
+                const MAX_SIZE = 800; // Back to 800px for better storage
+                let width = img.width;
+                let height = img.height;
 
-            if (width > height && width > MAX_SIZE) {
-                height *= MAX_SIZE / width;
-                width = MAX_SIZE;
-            } else if (height > MAX_SIZE) {
-                width *= MAX_SIZE / height;
-                height = MAX_SIZE;
-            }
+                if (width > height && width > MAX_SIZE) {
+                    height *= MAX_SIZE / width;
+                    width = MAX_SIZE;
+                } else if (height > MAX_SIZE) {
+                    width *= MAX_SIZE / height;
+                    height = MAX_SIZE;
+                }
 
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = width;
-            canvas.height = height;
-            ctx.drawImage(img, 0, 0, width, height);
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = width;
+                canvas.height = height;
 
-            // Convert directly to data URL instead of SVG wrapper
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-            selectedEvent.value.image = dataUrl;
+                // Enable image smoothing for better quality
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Get compressed data with balanced quality
+                const compressedData = canvas.toDataURL('image/jpeg', 0.8);
+
+                // Create SVG wrapper for better scaling and storage
+                const svgContent = `
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        width="${width}"
+                        height="${height}">
+                    <image href="${compressedData}"
+                            width="100%"
+                            height="100%"
+                            preserveAspectRatio="xMidYMid meet"/>
+                    </svg>`;
+
+                // Create final SVG blob
+                const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
+                const svgUrl = URL.createObjectURL(svgBlob);
+                selectedEvent.value.image = svgUrl;
             };
             img.onerror = () => {
-            selectedEvent.value.image = defaultImage;
+                selectedEvent.value.image = defaultImage;
             };
             img.src = e.target.result;
         };
@@ -768,37 +788,7 @@ import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
             selectedEvent.value.image = defaultImage;
         };
         reader.readAsDataURL(file);
-        };
-
-        async function toDataURL(maybeFileOrUrl) {
-        if (typeof maybeFileOrUrl === "string" &&
-            maybeFileOrUrl.startsWith("data:")) {
-            return maybeFileOrUrl;
-        }
-        if (typeof maybeFileOrUrl === "string" &&
-            maybeFileOrUrl.startsWith("blob:")) {
-            // Convert blob: URL → DataURL
-            const resp = await fetch(maybeFileOrUrl);
-            const blob = await resp.blob();
-            return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onerror = reject;
-            reader.onloadend = () => resolve(reader.result);
-            reader.readAsDataURL(blob);
-            });
-        }
-        if (maybeFileOrUrl instanceof File) {
-            // Convert File object → DataURL
-            return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onerror = reject;
-            reader.onloadend = () => resolve(reader.result);
-            reader.readAsDataURL(maybeFileOrUrl);
-            });
-        }
-        // Fallback default
-        return defaultImage;
-        }
+    };
 
       const handleImageUpload = (event) => {
         const file = event.target.files[0];
@@ -807,51 +797,56 @@ import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
         const reader = new FileReader();
         reader.onload = (e) => {
             const img = new Image();
-            img.onload = async () => {
-            // Compression setup
-            const MAX_SIZE = 800;
-            let width = img.width;
-            let height = img.height;
+            img.onload = () => {
+                // Compression setup
+                const MAX_SIZE = 800; // Back to 800px for better storage
+                let width = img.width;
+                let height = img.height;
 
-            // Calculate new dimensions
-            if (width > height && width > MAX_SIZE) {
-                height *= MAX_SIZE / width;
-                width = MAX_SIZE;
-            } else if (height > MAX_SIZE) {
-                width *= MAX_SIZE / height;
-                height = MAX_SIZE;
-            }
+                // Calculate new dimensions while maintaining aspect ratio
+                if (width > height && width > MAX_SIZE) {
+                    height *= MAX_SIZE / width;
+                    width = MAX_SIZE;
+                } else if (height > MAX_SIZE) {
+                    width *= MAX_SIZE / height;
+                    height = MAX_SIZE;
+                }
 
-            // Create canvas for compression
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = width;
-            canvas.height = height;
-            ctx.drawImage(img, 0, 0, width, height);
+                // Create canvas for compression
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = width;
+                canvas.height = height;
 
-            // Get compressed data
-            const compressedData = canvas.toDataURL('image/jpeg', 0.7);
+                // Enable image smoothing for better quality
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
 
-            // Create SVG wrapper
-            const svgContent = `
-                <svg xmlns="http://www.w3.org/2000/svg"
-                    width="${width}"
-                    height="${height}">
-                <image href="${compressedData}"
-                        width="100%"
-                        height="100%"/>
-                </svg>`;
+                ctx.drawImage(img, 0, 0, width, height);
 
-            // Create final SVG blob
-            const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
-            const svgUrl = URL.createObjectURL(svgBlob);
-            newEvent.value.image = svgUrl;
+                // Get compressed data with balanced quality
+                const compressedData = canvas.toDataURL('image/jpeg', 0.8);
+
+                // Create SVG wrapper for better scaling and storage
+                const svgContent = `
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        width="${width}"
+                        height="${height}">
+                    <image href="${compressedData}"
+                            width="100%"
+                            height="100%"
+                            preserveAspectRatio="xMidYMid meet"/>
+                    </svg>`;
+
+                // Create final SVG blob
+                const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
+                const svgUrl = URL.createObjectURL(svgBlob);
+                newEvent.value.image = svgUrl;
             };
             img.src = e.target.result;
         };
-
         reader.readAsDataURL(file);
-        };
+    };
 
         const removeImage = (isEdit = false) => {
         const target = isEdit ? selectedEvent.value : newEvent.value;
@@ -1384,7 +1379,6 @@ import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
     handleEditImageUpload,
     removeImage,
     defaultImage,
-    toDataURL,
     searchQuery,
     filteredEvents,
     showDateFilter,
