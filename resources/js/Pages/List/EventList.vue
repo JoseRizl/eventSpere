@@ -271,58 +271,68 @@
             />
           </div>
 
-          <!-- Start & End DateTime -->
-        <div class="p-field grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Start -->
-        <div class="flex flex-col">
-            <label for="startDate" class="mb-1 font-semibold">Start</label>
-            <div class="flex items-center gap-2">
-            <DatePicker
-                id="startDate"
-                v-model="newEvent.startDate"
-                dateFormat="MM-dd-yy"
-                showIcon
-                class="w-full"
-            />
-            <input
-                type="time"
-                id="startTime"
-                v-model="newEvent.startTime"
-                placeholder="HH:mm"
-                class="p-inputtext p-component w-36"
-                @blur="newEvent.startTime = newEvent.startTime.padStart(5, '0')"
-            />
+          <!-- Create Event Modal -->
+          <div class="p-field grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Start -->
+            <div class="flex flex-col">
+              <label for="startDate" class="mb-1 font-semibold">Start</label>
+              <div class="flex items-center gap-2">
+                <DatePicker
+                  id="startDate"
+                  v-model="newEvent.startDate"
+                  dateFormat="MM-dd-yy"
+                  showIcon
+                  class="w-full"
+                />
+                <input
+                  v-if="!newEvent.isAllDay"
+                  type="time"
+                  id="startTime"
+                  v-model="newEvent.startTime"
+                  placeholder="HH:mm"
+                  class="p-inputtext p-component w-36"
+                  @blur="newEvent.startTime = newEvent.startTime.padStart(5, '0')"
+                />
+              </div>
             </div>
-        </div>
 
-        <!-- End -->
-        <div class="flex flex-col">
-            <label for="endDate" class="mb-1 font-semibold">End</label>
-            <div class="flex items-center gap-2">
-            <DatePicker
-                id="endDate"
-                v-model="newEvent.endDate"
-                dateFormat="MM-dd-yy"
-                showIcon
-                class="w-full"
-            />
-            <input
-                type="time"
-                id="endTime"
-                v-model="newEvent.endTime"
-                placeholder="HH:mm"
-                class="p-inputtext p-component w-36"
-                @blur="newEvent.endTime = newEvent.endTime.padStart(5, '0')"
-            />
+            <!-- End -->
+            <div class="flex flex-col">
+              <label for="endDate" class="mb-1 font-semibold">End</label>
+              <div class="flex items-center gap-2">
+                <DatePicker
+                  id="endDate"
+                  v-model="newEvent.endDate"
+                  dateFormat="MM-dd-yy"
+                  showIcon
+                  class="w-full"
+                />
+                <input
+                  v-if="!newEvent.isAllDay"
+                  type="time"
+                  id="endTime"
+                  v-model="newEvent.endTime"
+                  placeholder="HH:mm"
+                  class="p-inputtext p-component w-36"
+                  @blur="newEvent.endTime = newEvent.endTime.padStart(5, '0')"
+                />
+              </div>
             </div>
-        </div>
-        </div>
 
-        <!-- Error Message -->
-        <div v-if="dateError" class="text-red-500 text-sm mt-2 flex items-center">
-        <i class="pi pi-exclamation-triangle mr-2"></i>
-        {{ dateError }}
-        </div>
+            <!-- All Day Checkbox - Moved below date/time fields -->
+            <div class="col-span-2 mt-2">
+              <div class="flex items-center gap-2 checkbox-container">
+                <Checkbox v-model="newEvent.isAllDay" :binary="true" />
+                <label for="allDay" class="checkbox-label">All Day Event</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Error Message -->
+          <div v-if="dateError" class="text-red-500 text-sm mt-2 flex items-center">
+            <i class="pi pi-exclamation-triangle mr-2"></i>
+            {{ dateError }}
+          </div>
 
           <!-- Event Description -->
           <div class="p-field">
@@ -332,27 +342,27 @@
         </div>
 
         <div class="p-field">
-        <label for="image">Event Image</label>
-        <div class="flex align-items-center gap-2">
+          <label for="image">Event Image</label>
+          <div class="flex align-items-center gap-2">
             <input
-            type="file"
-            id="image"
-            accept="image/*"
-            @change="handleImageUpload"
-            class="p-inputtext"
+              type="file"
+              id="image"
+              accept="image/*"
+              @change="handleImageUpload"
+              class="p-inputtext"
             />
             <Button
-            v-if="newEvent.image && newEvent.image !== defaultImage"
-            icon="pi pi-times"
-            class="p-button-rounded p-button-danger p-button-text"
-            @click="removeImage(false)"
-            v-tooltip.top="'Remove image'"
+              v-if="newEvent.image && newEvent.image !== defaultImage"
+              icon="pi pi-times"
+              class="p-button-rounded p-button-danger p-button-text"
+              @click="removeImage(false)"
+              v-tooltip.top="'Remove image'"
             />
-        </div>
-        <small class="p-text-secondary">Leave empty to use default image</small>
-        <div v-if="newEvent.image" class="mt-2">
+          </div>
+          <small class="p-text-secondary">Leave empty to use default image</small>
+          <div v-if="newEvent.image" class="mt-2">
             <img :src="newEvent.image" alt="Preview" class="preview-image" />
-        </div>
+          </div>
         </div>
 
         <template #footer>
@@ -433,46 +443,56 @@
             />
           </div>
 
-        <div class="p-field grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Start Date & Time -->
-        <div class="flex flex-col">
-            <label for="startDate" class="mb-1 font-semibold">Start</label>
-            <div class="flex items-center gap-2">
-            <DatePicker id="startDate" v-model="selectedEvent.startDate" dateFormat="MM-dd-yy" showIcon class="w-full" />
-            <input
-                type="time"
-                id="startTime"
-                v-model="selectedEvent.startTime"
-                placeholder="HH:mm"
-                class="p-inputtext p-component w-36"
-                @blur="selectedEvent.startTime = selectedEvent.startTime.padStart(5, '0')"
-            />
+          <!-- Edit Event Modal -->
+          <div class="p-field grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Start Date & Time -->
+            <div class="flex flex-col">
+              <label for="startDate" class="mb-1 font-semibold">Start</label>
+              <div class="flex items-center gap-2">
+                <DatePicker id="startDate" v-model="selectedEvent.startDate" dateFormat="MM-dd-yy" showIcon class="w-full" />
+                <input
+                  v-if="!selectedEvent.isAllDay"
+                  type="time"
+                  id="startTime"
+                  v-model="selectedEvent.startTime"
+                  placeholder="HH:mm"
+                  class="p-inputtext p-component w-36"
+                  @blur="selectedEvent.startTime = selectedEvent.startTime.padStart(5, '0')"
+                />
+              </div>
             </div>
-        </div>
 
-        <!-- End Date & Time -->
-        <div class="flex flex-col">
-            <label for="endDate" class="mb-1 font-semibold">End</label>
-            <div class="flex items-center gap-2">
-            <DatePicker id="endDate" v-model="selectedEvent.endDate" dateFormat="MM-dd-yy" showIcon class="w-full" />
-            <input
-                type="time"
-                id="endTime"
-                v-model="selectedEvent.endTime"
-                placeholder="HH:mm"
-                class="p-inputtext p-component w-36"
-                @blur="selectedEvent.endTime = selectedEvent.endTime.padStart(5, '0')"
-            />
+            <!-- End Date & Time -->
+            <div class="flex flex-col">
+              <label for="endDate" class="mb-1 font-semibold">End</label>
+              <div class="flex items-center gap-2">
+                <DatePicker id="endDate" v-model="selectedEvent.endDate" dateFormat="MM-dd-yy" showIcon class="w-full" />
+                <input
+                  v-if="!selectedEvent.isAllDay"
+                  type="time"
+                  id="endTime"
+                  v-model="selectedEvent.endTime"
+                  placeholder="HH:mm"
+                  class="p-inputtext p-component w-36"
+                  @blur="selectedEvent.endTime = selectedEvent.endTime.padStart(5, '0')"
+                />
+              </div>
             </div>
-        </div>
-        </div>
 
-        <!-- Error Display -->
-        <div v-if="dateError" class="text-red-500 text-sm mt-2 flex items-center">
-        <i class="pi pi-exclamation-triangle mr-2"></i>
-        {{ dateError }}
-        </div>
+            <!-- All Day Checkbox - Moved below date/time fields -->
+            <div class="col-span-2 mt-2">
+              <div class="flex items-center gap-2 checkbox-container">
+                <Checkbox v-model="selectedEvent.isAllDay" :binary="true" />
+                <label for="allDay" class="checkbox-label">All Day Event</label>
+              </div>
+            </div>
+          </div>
 
+          <!-- Error Display -->
+          <div v-if="dateError" class="text-red-500 text-sm mt-2 flex items-center">
+            <i class="pi pi-exclamation-triangle mr-2"></i>
+            {{ dateError }}
+          </div>
 
           <div class="p-field">
             <label for="description">Description</label>
@@ -481,27 +501,27 @@
         </div>
 
         <div class="p-field">
-        <label for="image">Event Image</label>
-        <div class="flex align-items-center gap-2">
+          <label for="image">Event Image</label>
+          <div class="flex align-items-center gap-2">
             <input
-            type="file"
-            id="image"
-            accept="image/*"
-            @change="handleEditImageUpload"
-            class="p-inputtext"
+              type="file"
+              id="image"
+              accept="image/*"
+              @change="handleEditImageUpload"
+              class="p-inputtext"
             />
             <Button
-            v-if="selectedEvent.image && selectedEvent.image !== defaultImage"
-            icon="pi pi-times"
-            class="p-button-rounded p-button-danger p-button-text"
-            @click="removeImage(true)"
-            v-tooltip.top="'Remove image'"
+              v-if="selectedEvent.image && selectedEvent.image !== defaultImage"
+              icon="pi pi-times"
+              class="p-button-rounded p-button-danger p-button-text"
+              @click="removeImage(true)"
+              v-tooltip.top="'Remove image'"
             />
-        </div>
-        <small class="p-text-secondary">Leave empty to keep current image</small>
-        <div v-if="selectedEvent.image" class="mt-2">
+          </div>
+          <small class="p-text-secondary">Leave empty to keep current image</small>
+          <div v-if="selectedEvent.image" class="mt-2">
             <img :src="selectedEvent.image" alt="Preview" class="preview-image" />
-        </div>
+          </div>
         </div>
 
         <template #footer>
@@ -566,12 +586,13 @@
   </template>
 
   <script>
-  import { defineComponent, ref, onMounted, computed } from "vue";
+  import { defineComponent, ref, onMounted, computed, watch } from "vue";
   import axios from "axios";
   import { parse, format, isWithinInterval } from "date-fns";
 import { Select } from "primevue";
 import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
+import Checkbox from 'primevue/checkbox';
 
   export default defineComponent({
     name: "EventList",
@@ -616,11 +637,12 @@ import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
         category_id: null,
         startDate: null,
         endDate: null,
-        startTime: "00:00",
-        endTime: "00:00",
+        startTime: "",
+        endTime: "",
         tags: [],
         image: "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-        archived: false
+        archived: false,
+        isAllDay: false
       });
 
       const openCreateModal = () => {
@@ -631,11 +653,12 @@ import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
           category_id: null,
           startDate: null,
           endDate: null,
-          startTime: "00:00",
-          endTime: "00:00",
+          startTime: "",
+          endTime: "",
           tags: [],
           image: "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-          archived: false
+          archived: false,
+          isAllDay: false
         };
         isCreateModalVisible.value = true;
         dateError.value = "";
@@ -1071,17 +1094,19 @@ import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
       // Format date and time display
       const formatDateTime = (date, time) => {
         const formattedDate = date ? format(new Date(date), 'MMM-dd-yyyy') : 'No date';
-        let formattedTime = '00:00';
+        let formattedTime = '';
 
-        if (time) {
-            try {
+        if (time === "00:00" && time === "23:59") {
+          formattedTime = 'All Day';
+        } else if (time) {
+          try {
             const paddedTime = time.padStart(5, '0');
             const parsedTime = parse(paddedTime, 'HH:mm', new Date());
             formattedTime = format(parsedTime, 'hh:mm a');
-            } catch (e) {
+          } catch (e) {
             console.error('Error formatting time:', e);
-            formattedTime = time.padStart(5, '0'); // Fallback to original format if parsing fails
-            }
+            formattedTime = time.padStart(5, '0');
+          }
         }
 
         return { date: formattedDate, time: formattedTime };
@@ -1351,6 +1376,27 @@ import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
     const eventToProcess = ref(null);
     const taskToDelete = ref(null);
 
+    // Add watch for isAllDay changes
+    watch(() => newEvent.value.isAllDay, (newValue) => {
+      if (newValue) {
+        newEvent.value.startTime = "00:00";
+        newEvent.value.endTime = "23:59";
+      } else {
+        newEvent.value.startTime = "";
+        newEvent.value.endTime = "";
+      }
+    });
+
+    watch(() => selectedEvent.value?.isAllDay, (newValue) => {
+      if (newValue) {
+        selectedEvent.value.startTime = "00:00";
+        selectedEvent.value.endTime = "23:59";
+      } else {
+        selectedEvent.value.startTime = "";
+        selectedEvent.value.endTime = "";
+      }
+    });
+
     return {
     combinedEvents,
     categoryMap,
@@ -1565,5 +1611,20 @@ import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 
 .create-button:hover {
   background-color: #6800b3e9;
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-label {
+  line-height: 1;
+  padding-top: 9px;
+}
+
+:deep(.p-checkbox) {
+  display: flex;
+  align-items: center;
 }
 </style>
