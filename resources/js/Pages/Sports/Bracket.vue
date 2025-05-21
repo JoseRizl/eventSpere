@@ -5,11 +5,15 @@ import InputText from "primevue/inputtext";
 import Select from "primevue/select";
 import Button from "primevue/button";
 import { computed } from "vue";
+import axios from "axios";
+import { Link } from '@inertiajs/vue3';
 
 // Reactive State
 const bracketName = ref("");
 const numberOfPlayers = ref();
 const matchType = ref("");
+const selectedEvent = ref(null);
+const events = ref([]);
 const brackets = ref([]);
 const showDialog = ref(false);
 const currentMatchIndex = ref(0);
@@ -29,13 +33,28 @@ const currentGameNumber = computed(() => `Game ${currentMatchIndex.value + 1}`);
 
 
 // Options
-const bracketTypeOptions = ["Single Elimination", "Single Elimination Pt. 2"];
+const bracketTypeOptions = ["Single Elimination", "Double Elimination"];
 
 // Open Dialog for Bracket Creation
-const openDialog = () => {
+const openDialog = async () => {
   bracketName.value = "";
   numberOfPlayers.value = null;
   matchType.value = "";
+  selectedEvent.value = null;
+
+  // Fetch sports events
+  try {
+    const response = await axios.get("http://localhost:3000/events");
+    // Filter events where category_id is 3 (Sports) and not archived
+    events.value = response.data.filter(event => {
+      // Handle both string and number category_id
+      const categoryId = parseInt(event.category_id);
+      return categoryId === 3 && !event.archived;
+    });
+  } catch (error) {
+    console.error("Error fetching events:", error);
+  }
+
   showDialog.value = true;
 };
 
@@ -60,7 +79,7 @@ const toggleBracket = (bracketIdx) => {
 
 // Create Bracket
 const createBracket = () => {
-  if (!bracketName.value || !numberOfPlayers.value || !matchType.value) {
+  if (!bracketName.value || !numberOfPlayers.value || !matchType.value || !selectedEvent.value) {
     showMissingFieldsDialog.value = true;
     return;
   }
@@ -69,6 +88,7 @@ const createBracket = () => {
   brackets.value.push({
     name: bracketName.value,
     type: matchType.value,
+    event: selectedEvent.value,
     matches: newBracket,
     currentMatchIndex: 0,
     lines: [], // Initialize lines for each bracket
@@ -423,7 +443,18 @@ const cancelDeleteBracket = () => {
       <!-- Bracket Display Section -->
       <div v-for="(bracket, bracketIdx) in brackets" :key="bracketIdx" class="bracket-section">
         <div class="bracket-wrapper">
-          <h2>{{ bracket.name }} ({{ bracket.type }})</h2>
+          <div class="bracket-header">
+            <h2>{{ bracket.name }} ({{ bracket.type }})</h2>
+            <div class="event-info" v-if="bracket.event">
+              <span class="event-label">Event:</span>
+              <Link
+                :href="route('event.details', { id: bracket.event.id })"
+                class="event-title"
+              >
+                {{ bracket.event.title }}
+              </Link>
+            </div>
+          </div>
           <button @click="toggleBracket(bracketIdx)" class="toggle-button">
             {{ expandedBrackets[bracketIdx] ? 'Hide Bracket' : 'Show Bracket' }}
           </button>
@@ -593,6 +624,17 @@ const cancelDeleteBracket = () => {
           <div class="p-field">
             <label for="bracketName">Bracket Name:</label>
             <InputText v-model="bracketName" placeholder="Enter bracket name" />
+          </div>
+
+          <div class="p-field">
+            <label for="event">Select Event:</label>
+            <Select
+              v-model="selectedEvent"
+              :options="events"
+              optionLabel="title"
+              placeholder="Select a sports event"
+              filter
+            />
           </div>
 
           <div class="p-field">
@@ -1084,5 +1126,35 @@ const cancelDeleteBracket = () => {
   display: flex;
   justify-content: center;
   margin-top: 20px;
+}
+
+.bracket-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.event-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  color: #666;
+}
+
+.event-label {
+  font-weight: bold;
+}
+
+.event-title {
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.event-title:hover {
+  color: #0056b3;
+  text-decoration: underline;
 }
 </style>
