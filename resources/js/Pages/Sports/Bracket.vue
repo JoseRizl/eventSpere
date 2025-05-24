@@ -1,5 +1,5 @@
 <script setup>
-import { ref, nextTick, watch } from "vue";
+import { ref, nextTick, watch, onMounted } from "vue";
 import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import Select from "primevue/select";
@@ -77,27 +77,78 @@ const toggleBracket = (bracketIdx) => {
   }
 };
 
-// Create Bracket
-const createBracket = () => {
+// Add event details fetching
+const fetchEventDetails = async (eventId) => {
+  try {
+    const response = await axios.get(`http://localhost:3000/events/${eventId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching event details:', error);
+    return null;
+  }
+};
+
+// Modify createBracket to only store event_id
+const createBracket = async () => {
   if (!bracketName.value || !numberOfPlayers.value || !matchType.value || !selectedEvent.value) {
     showMissingFieldsDialog.value = true;
     return;
   }
 
   const newBracket = generateBracket();
-  brackets.value.push({
+  const bracketData = {
     name: bracketName.value,
     type: matchType.value,
-    event: selectedEvent.value,
-    matches: newBracket,
-    currentMatchIndex: 0,
-    lines: [], // Initialize lines for each bracket
-  });
-  expandedBrackets.value.push(false); // Initialize expanded state
-  showDialog.value = false;
+    event_id: selectedEvent.value.id, // Only store the event_id
+    status: 'active',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    matches: newBracket
+  };
 
-  // Call updateLines for the newly created bracket
-  updateLines(brackets.value.length - 1);
+  try {
+    await saveBrackets(bracketData);
+    brackets.value.push(bracketData);
+    expandedBrackets.value.push(false);
+    showDialog.value = false;
+
+    // Call updateLines for the newly created bracket
+    updateLines(brackets.value.length - 1);
+  } catch (error) {
+    console.error('Error creating bracket:', error);
+  }
+};
+
+// Modify fetchBrackets to include event details
+const fetchBrackets = async () => {
+  try {
+    const response = await axios.get('http://localhost:3000/brackets');
+    if (response.data) {
+      // Fetch event details for each bracket
+      const bracketsWithEvents = await Promise.all(
+        response.data.map(async (bracket) => {
+          try {
+            const eventDetails = await fetchEventDetails(bracket.event_id);
+            return {
+              ...bracket,
+              event: eventDetails || { title: 'Event not found' } // Provide fallback if event not found
+            };
+          } catch (error) {
+            console.error(`Error fetching event details for bracket ${bracket.id}:`, error);
+            return {
+              ...bracket,
+              event: { title: 'Event not found' }
+            };
+          }
+        })
+      );
+      brackets.value = bracketsWithEvents;
+      // Initialize expanded state for each bracket
+      expandedBrackets.value = new Array(brackets.value.length).fill(false);
+    }
+  } catch (error) {
+    console.error('Error fetching brackets:', error);
+  }
 };
 
 const generateBracket = () => {
@@ -105,16 +156,22 @@ const generateBracket = () => {
   const totalSlots = Math.pow(2, Math.ceil(Math.log2(numPlayers)));
   const totalByes = totalSlots - numPlayers;
 
-  // Create arrays for players and BYEs
+  // Create arrays for players and BYEs with IDs
   const players = Array.from({ length: numPlayers }, (_, i) => ({
+    id: null, // Will be set when saved to database
     name: `Player ${i + 1}`,
     score: 0,
     completed: false,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   }));
   const byes = Array.from({ length: totalByes }, () => ({
+    id: null,
     name: "BYE",
     score: 0,
-    completed: true, // Mark BYE as completed
+    completed: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   }));
 
   // Initialize slots array
@@ -126,7 +183,7 @@ const generateBracket = () => {
     if (byeIndex < byes.length) {
       slots[i + 1] = byes[byeIndex++];
     }
-}
+  }
 
   // 4. Fill remaining slots with players
   let playerIndex = 0;
@@ -136,43 +193,74 @@ const generateBracket = () => {
     }
   }
 
-  // 5. Pair into matches
+  // 5. Pair into matches with IDs
   const firstRound = [];
   for (let i = 0; i < totalSlots; i += 2) {
-    const match = [slots[i], slots[i + 1]];
+    const match = {
+      id: null, // Will be set when saved to database
+      round: 1,
+      match_number: i/2 + 1,
+      players: [slots[i], slots[i + 1]],
+      winner_id: null,
+      status: 'pending', // pending, completed, cancelled
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
     firstRound.push(match);
 
     // Automatically conclude matches with a BYE
-    if (match[0].name === "BYE" || match[1].name === "BYE") {
-      const winner = match[0].name === "BYE" ? match[1] : match[0];
-      winner.completed = true; // Mark the winner as completed
+    if (match.players[0].name === "BYE" || match.players[1].name === "BYE") {
+      const winner = match.players[0].name === "BYE" ? match.players[1] : match.players[0];
+      winner.completed = true;
+      match.status = 'completed';
+      match.winner_id = winner.id;
     }
   }
 
   // 6. Build empty placeholders for later rounds
   const rounds = [firstRound];
   let prevMatches = firstRound;
+  let roundNumber = 2;
+
   while (prevMatches.length > 1) {
     const nextMatches = Array.from(
       { length: Math.ceil(prevMatches.length / 2) },
-      () => [
-        { name: "TBD", score: 0, completed: false },
-        { name: "TBD", score: 0, completed: false },
-      ]
+      (_, i) => ({
+        id: null,
+        round: roundNumber,
+        match_number: i + 1,
+        players: [
+          { id: null, name: "TBD", score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+          { id: null, name: "TBD", score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
+        ],
+        winner_id: null,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
     );
     rounds.push(nextMatches);
     prevMatches = nextMatches;
+    roundNumber++;
   }
 
   return rounds;
 };
 
 
-// Edit Participant Names
-const editParticipant = (bracketIdx, roundIdx, matchIdx, teamIdx) => {
+// Modify editParticipant to save to db.json
+const editParticipant = async (bracketIdx, roundIdx, matchIdx, teamIdx) => {
   const newName = prompt("Enter new participant name:");
   if (newName) {
-    brackets.value[bracketIdx].matches[roundIdx][matchIdx][teamIdx].name = newName;
+    const match = brackets.value[bracketIdx].matches[roundIdx][matchIdx];
+    match.players[teamIdx].name = newName;
+    match.players[teamIdx].updated_at = new Date().toISOString();
+
+    try {
+      await saveBrackets(brackets.value[bracketIdx]);
+    } catch (error) {
+      console.error('Error updating participant:', error);
+    }
   }
 };
 
@@ -191,50 +279,72 @@ const getRoundAndMatchIndices = (bracketIdx, currentMatchIndex) => {
   return { roundIdx: 0, matchIdx: 0 }; // Fallback
 };
 
-// Update increaseScore and decreaseScore to use the helper function
-const increaseScore = (bracketIdx, teamIdx) => {
+// Modify increaseScore to save to db.json
+const increaseScore = async (bracketIdx, teamIdx) => {
   const { roundIdx, matchIdx } = getRoundAndMatchIndices(bracketIdx, currentMatchIndex.value);
   const match = brackets.value[bracketIdx].matches[roundIdx][matchIdx];
-  match[teamIdx].score++;
-};
+  match.players[teamIdx].score++;
+  match.players[teamIdx].updated_at = new Date().toISOString();
 
-const decreaseScore = (bracketIdx, teamIdx) => {
-  const { roundIdx, matchIdx } = getRoundAndMatchIndices(bracketIdx, currentMatchIndex.value);
-  const match = brackets.value[bracketIdx].matches[roundIdx][matchIdx];
-  if (match[teamIdx].score > 0) {
-    match[teamIdx].score--;
+  try {
+    await saveBrackets(brackets.value[bracketIdx]);
+  } catch (error) {
+    console.error('Error updating score:', error);
   }
 };
 
-// Function to conclude a match with confirmation
-const concludeMatch = (bracketIdx) => {
-  pendingBracketIdx = bracketIdx;
-  showConfirmDialog.value = true;
+// Modify decreaseScore to save to db.json
+const decreaseScore = async (bracketIdx, teamIdx) => {
+  const { roundIdx, matchIdx } = getRoundAndMatchIndices(bracketIdx, currentMatchIndex.value);
+  const match = brackets.value[bracketIdx].matches[roundIdx][matchIdx];
+  if (match.players[teamIdx].score > 0) {
+    match.players[teamIdx].score--;
+    match.players[teamIdx].updated_at = new Date().toISOString();
+
+    try {
+      await saveBrackets(brackets.value[bracketIdx]);
+    } catch (error) {
+      console.error('Error updating score:', error);
+    }
+  }
 };
 
-const confirmEndMatch = () => {
+// Modify confirmEndMatch to save to db.json
+const confirmEndMatch = async () => {
   if (pendingBracketIdx !== null) {
     const { roundIdx, matchIdx } = getRoundAndMatchIndices(pendingBracketIdx, currentMatchIndex.value);
     const match = brackets.value[pendingBracketIdx].matches[roundIdx][matchIdx];
 
-    const winner = match[0].score >= match[1].score ? match[0] : match[1];
-    match[0].completed = true;
-    match[1].completed = true;
-    match.completed = true;
+    const winner = match.players[0].score >= match.players[1].score ? match.players[0] : match.players[1];
+    match.players[0].completed = true;
+    match.players[1].completed = true;
+    match.status = 'completed';
+    match.winner_id = winner.id;
+    match.updated_at = new Date().toISOString();
 
-    if (brackets.value[pendingBracketIdx].matches[roundIdx + 1]) {
-      const nextRoundIdx = Math.floor(matchIdx / 2);
-      const nextMatchPos = matchIdx % 2 === 0 ? 0 : 1;
+    try {
+      if (brackets.value[pendingBracketIdx].matches[roundIdx + 1]) {
+        const nextRoundIdx = Math.floor(matchIdx / 2);
+        const nextMatchPos = matchIdx % 2 === 0 ? 0 : 1;
 
-      brackets.value[pendingBracketIdx].matches[roundIdx + 1][nextRoundIdx][nextMatchPos] = {
-        ...winner,
-        score: 0,
-        completed: false,
-      };
-    } else {
-      winnerMessage.value = `Winner: ${winner.name}`;
-      showWinnerDialog.value = true;
+        const nextMatch = brackets.value[pendingBracketIdx].matches[roundIdx + 1][nextRoundIdx];
+        nextMatch.players[nextMatchPos] = {
+          ...winner,
+          score: 0,
+          completed: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+      } else {
+        winnerMessage.value = `Winner: ${winner.name}`;
+        showWinnerDialog.value = true;
+      }
+
+      await saveBrackets(brackets.value[pendingBracketIdx]);
+    } catch (error) {
+      console.error('Error concluding match:', error);
     }
+
     showConfirmDialog.value = false;
     pendingBracketIdx = null;
   }
@@ -252,19 +362,23 @@ const undoConcludeMatch = (bracketIdx) => {
 
   // Show confirmation dialog
   if (confirm('Are you sure you want to undo this match completion?')) {
-    match[0].completed = false;
-    match[1].completed = false;
-    match.completed = false;
+    match.players[0].completed = false;
+    match.players[1].completed = false;
+    match.status = 'pending';
+    match.winner_id = null;
 
     // Remove the winner from the next round
     if (brackets.value[bracketIdx].matches[roundIdx + 1]) {
       const nextRoundIdx = Math.floor(matchIdx / 2);
       const nextMatchPos = matchIdx % 2 === 0 ? 0 : 1;
 
-      brackets.value[bracketIdx].matches[roundIdx + 1][nextRoundIdx][nextMatchPos] = {
+      brackets.value[bracketIdx].matches[roundIdx + 1][nextRoundIdx].players[nextMatchPos] = {
+        id: null,
         name: '',
         score: 0,
         completed: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
     }
   }
@@ -380,8 +494,8 @@ watch(currentMatchIndex, () => {
   }
 });
 
-// Function to remove a bracket
-const removeBracket = (bracketIdx) => {
+// Modify removeBracket to save to db.json
+const removeBracket = async (bracketIdx) => {
   deleteBracketIdx.value = bracketIdx;
   showDeleteConfirmDialog.value = true;
 };
@@ -409,10 +523,15 @@ const isQuarterfinalRound = (bracketIdx, roundIdx) => {
   return roundIdx === brackets.value[bracketIdx].matches.length - 3;
 };
 
-const confirmDeleteBracket = () => {
+const confirmDeleteBracket = async () => {
   if (deleteBracketIdx.value !== null) {
-    brackets.value.splice(deleteBracketIdx.value, 1);
-    deleteBracketIdx.value = null;
+    try {
+      await axios.delete(`http://localhost:3000/brackets/${brackets.value[deleteBracketIdx.value].id}`);
+      brackets.value.splice(deleteBracketIdx.value, 1);
+      deleteBracketIdx.value = null;
+    } catch (error) {
+      console.error('Error deleting bracket:', error);
+    }
   }
   showDeleteConfirmDialog.value = false;
 };
@@ -420,6 +539,27 @@ const confirmDeleteBracket = () => {
 const cancelDeleteBracket = () => {
   showDeleteConfirmDialog.value = false;
   deleteBracketIdx.value = null;
+};
+
+// Add onMounted hook to fetch brackets when component loads
+onMounted(() => {
+  fetchBrackets();
+});
+
+// Add new function to save brackets
+const saveBrackets = async (bracketData) => {
+  try {
+    if (bracketData.id) {
+      // Update existing bracket
+      await axios.put(`http://localhost:3000/brackets/${bracketData.id}`, bracketData);
+    } else {
+      // Create new bracket
+      const response = await axios.post('http://localhost:3000/brackets', bracketData);
+      bracketData.id = response.data.id;
+    }
+  } catch (error) {
+    console.error('Error saving bracket:', error);
+  }
 };
 
 </script>
@@ -448,10 +588,10 @@ const cancelDeleteBracket = () => {
             <div class="event-info" v-if="bracket.event">
               <span class="event-label">Event:</span>
               <Link
-                :href="route('event.details', { id: bracket.event.id })"
+                :href="route('event.details', { id: bracket.event_id })"
                 class="event-title"
               >
-                {{ bracket.event.title }}
+                {{ bracket.event?.title || 'Loading...' }}
               </Link>
             </div>
           </div>
@@ -494,26 +634,26 @@ const cancelDeleteBracket = () => {
                         @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 0)"
                         :class="{
                           editable: true,
-                          winner: match[0].completed && match[0].score >= match[1].score,
-                          loser: match[0].completed && match[0].score < match[1].score,
-                          'bye-text': match[0].name === 'BYE',
-                          'facing-bye': match[1].name === 'BYE'
+                          winner: match.players[0].completed && match.players[0].score >= match.players[1].score,
+                          loser: match.players[0].completed && match.players[0].score < match.players[1].score,
+                          'bye-text': match.players[0].name === 'BYE',
+                          'facing-bye': match.players[1].name === 'BYE'
                         }"
                       >
-                        {{ match[0].name || 'TBD' }} | {{ match[0].score }}
+                        {{ match.players[0].name || 'TBD' }} | {{ match.players[0].score }}
                       </span>
                       <hr />
                       <span
                         @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 1)"
                         :class="{
                           editable: true,
-                          winner: match[1].completed && match[1].score >= match[0].score,
-                          loser: match[1].completed && match[1].score < match[0].score,
-                          'bye-text': match[1].name === 'BYE',
-                          'facing-bye': match[0].name === 'BYE'
+                          winner: match.players[1].completed && match.players[1].score >= match.players[0].score,
+                          loser: match.players[1].completed && match.players[1].score < match.players[0].score,
+                          'bye-text': match.players[1].name === 'BYE',
+                          'facing-bye': match.players[0].name === 'BYE'
                         }"
                       >
-                        {{ match[1].name || 'TBD' }} | {{ match[1].score }}
+                        {{ match.players[1].name || 'TBD' }} | {{ match.players[1].score }}
                       </span>
                   </div>
                 </div>
@@ -552,7 +692,7 @@ const cancelDeleteBracket = () => {
                     <button
                       class="score-btn"
                       @click="increaseScore(bracketIdx, 0)"
-                      :disabled="currentMatch(bracketIdx).completed"
+                      :disabled="currentMatch(bracketIdx).status === 'completed'"
                     >
                       +
                     </button>
@@ -564,7 +704,7 @@ const cancelDeleteBracket = () => {
                     <button
                       class="score-btn"
                       @click="decreaseScore(bracketIdx, 0)"
-                      :disabled="currentMatch(bracketIdx).completed"
+                      :disabled="currentMatch(bracketIdx).status === 'completed'"
                     >
                       -
                     </button>
@@ -579,7 +719,7 @@ const cancelDeleteBracket = () => {
                     <button
                       class="score-btn"
                       @click="increaseScore(bracketIdx, 1)"
-                      :disabled="currentMatch(bracketIdx).completed"
+                      :disabled="currentMatch(bracketIdx).status === 'completed'"
                     >
                       +
                     </button>
@@ -591,7 +731,7 @@ const cancelDeleteBracket = () => {
                     <button
                       class="score-btn"
                       @click="decreaseScore(bracketIdx, 1)"
-                      :disabled="currentMatch(bracketIdx).completed"
+                      :disabled="currentMatch(bracketIdx).status === 'completed'"
                     >
                       -
                     </button>
@@ -601,7 +741,7 @@ const cancelDeleteBracket = () => {
                 </div>
 
                 <!-- Dynamic Button/Label -->
-                <div v-if="currentMatch(bracketIdx).completed" class="completed-text" @click="undoConcludeMatch(bracketIdx)">
+                <div v-if="currentMatch(bracketIdx).status === 'completed'" class="completed-text" @click="undoConcludeMatch(bracketIdx)">
                 Completed
                 </div>
 

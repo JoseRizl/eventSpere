@@ -3,7 +3,8 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "concurrently \"vite\" \"npm run json-server\"",
+        "json-server": "json-server --watch db.json --port 3001 --host 0.0.0.0"
     },
     "devDependencies": {
         "@primevue/auto-import-resolver": "^4.2.4",
@@ -32,6 +33,7 @@
         "vue": "^3.5.13",
         "vue-router": "^4.5.0",
         "vue-tournament-bracket": "^3.0.0",
-        "ziggy": "^2.4.0"
+        "ziggy": "^2.4.0",
+        "json-server": "^0.17.4"
     }
 }
