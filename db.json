@@ -613,13 +613,13 @@
   ],
   "brackets": [
     {
-      "id": "0d6c",
-      "name": "Basketbol",
+      "id": "c1ec",
+      "name": "d",
       "type": "Single Elimination",
       "event_id": "fbe4",
       "status": "active",
-      "created_at": "2025-05-24T05:44:52.549Z",
-      "updated_at": "2025-05-24T05:44:52.549Z",
+      "created_at": "2025-05-24T06:02:07.558Z",
+      "updated_at": "2025-05-24T06:02:07.558Z",
       "matches": [
         [
           {
@@ -632,22 +632,22 @@
                 "name": "Player 1",
                 "score": 0,
                 "completed": false,
-                "created_at": "2025-05-24T05:44:52.549Z",
-                "updated_at": "2025-05-24T05:44:52.549Z"
+                "created_at": "2025-05-24T06:02:07.557Z",
+                "updated_at": "2025-05-24T06:02:07.557Z"
               },
               {
                 "id": null,
                 "name": "Player 2",
                 "score": 0,
                 "completed": false,
-                "created_at": "2025-05-24T05:44:52.549Z",
-                "updated_at": "2025-05-24T05:44:52.549Z"
+                "created_at": "2025-05-24T06:02:07.557Z",
+                "updated_at": "2025-05-24T06:02:07.557Z"
               }
             ],
             "winner_id": null,
             "status": "pending",
-            "created_at": "2025-05-24T05:44:52.549Z",
-            "updated_at": "2025-05-24T05:44:52.549Z"
+            "created_at": "2025-05-24T06:02:07.558Z",
+            "updated_at": "2025-05-24T06:02:07.558Z"
           },
           {
             "id": null,
@@ -659,22 +659,22 @@
                 "name": "Player 3",
                 "score": 0,
                 "completed": false,
-                "created_at": "2025-05-24T05:44:52.549Z",
-                "updated_at": "2025-05-24T05:44:52.549Z"
+                "created_at": "2025-05-24T06:02:07.557Z",
+                "updated_at": "2025-05-24T06:02:07.557Z"
               },
               {
                 "id": null,
                 "name": "Player 4",
                 "score": 0,
                 "completed": false,
-                "created_at": "2025-05-24T05:44:52.549Z",
-                "updated_at": "2025-05-24T05:44:52.549Z"
+                "created_at": "2025-05-24T06:02:07.557Z",
+                "updated_at": "2025-05-24T06:02:07.557Z"
               }
             ],
             "winner_id": null,
             "status": "pending",
-            "created_at": "2025-05-24T05:44:52.549Z",
-            "updated_at": "2025-05-24T05:44:52.549Z"
+            "created_at": "2025-05-24T06:02:07.558Z",
+            "updated_at": "2025-05-24T06:02:07.558Z"
           },
           {
             "id": null,
@@ -685,23 +685,23 @@
                 "id": null,
                 "name": "Player 5",
                 "score": 0,
-                "completed": false,
-                "created_at": "2025-05-24T05:44:52.549Z",
-                "updated_at": "2025-05-24T05:44:52.549Z"
+                "completed": true,
+                "created_at": "2025-05-24T06:02:07.557Z",
+                "updated_at": "2025-05-24T06:02:07.557Z"
               },
               {
                 "id": null,
-                "name": "Player 6",
+                "name": "BYE",
                 "score": 0,
-                "completed": false,
-                "created_at": "2025-05-24T05:44:52.549Z",
-                "updated_at": "2025-05-24T05:44:52.549Z"
+                "completed": true,
+                "created_at": "2025-05-24T06:02:07.558Z",
+                "updated_at": "2025-05-24T06:02:07.558Z"
               }
             ],
             "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-05-24T05:44:52.549Z",
-            "updated_at": "2025-05-24T05:44:52.549Z"
+            "status": "completed",
+            "created_at": "2025-05-24T06:02:07.558Z",
+            "updated_at": "2025-05-24T06:02:07.558Z"
           },
           {
             "id": null,
@@ -710,25 +710,25 @@
             "players": [
               {
                 "id": null,
-                "name": "Player 7",
+                "name": "Player 6",
                 "score": 0,
                 "completed": true,
-                "created_at": "2025-05-24T05:44:52.549Z",
-                "updated_at": "2025-05-24T05:44:52.549Z"
+                "created_at": "2025-05-24T06:02:07.557Z",
+                "updated_at": "2025-05-24T06:02:07.557Z"
               },
               {
                 "id": null,
                 "name": "BYE",
                 "score": 0,
                 "completed": true,
-                "created_at": "2025-05-24T05:44:52.549Z",
-                "updated_at": "2025-05-24T05:44:52.549Z"
+                "created_at": "2025-05-24T06:02:07.558Z",
+                "updated_at": "2025-05-24T06:02:07.558Z"
               }
             ],
             "winner_id": null,
             "status": "completed",
-            "created_at": "2025-05-24T05:44:52.549Z",
-            "updated_at": "2025-05-24T05:44:52.549Z"
+            "created_at": "2025-05-24T06:02:07.558Z",
+            "updated_at": "2025-05-24T06:02:07.558Z"
           }
         ],
         [
@@ -742,22 +742,22 @@
                 "name": "TBD",
                 "score": 0,
                 "completed": false,
-                "created_at": "2025-05-24T05:44:52.549Z",
-                "updated_at": "2025-05-24T05:44:52.549Z"
+                "created_at": "2025-05-24T06:02:07.558Z",
+                "updated_at": "2025-05-24T06:02:07.558Z"
               },
               {
                 "id": null,
                 "name": "TBD",
                 "score": 0,
                 "completed": false,
-                "created_at": "2025-05-24T05:44:52.549Z",
-                "updated_at": "2025-05-24T05:44:52.549Z"
+                "created_at": "2025-05-24T06:02:07.558Z",
+                "updated_at": "2025-05-24T06:02:07.558Z"
               }
             ],
             "winner_id": null,
             "status": "pending",
-            "created_at": "2025-05-24T05:44:52.549Z",
-            "updated_at": "2025-05-24T05:44:52.549Z"
+            "created_at": "2025-05-24T06:02:07.558Z",
+            "updated_at": "2025-05-24T06:02:07.558Z"
           },
           {
             "id": null,
@@ -769,22 +769,22 @@
                 "name": "TBD",
                 "score": 0,
                 "completed": false,
-                "created_at": "2025-05-24T05:44:52.549Z",
-                "updated_at": "2025-05-24T05:44:52.549Z"
+                "created_at": "2025-05-24T06:02:07.558Z",
+                "updated_at": "2025-05-24T06:02:07.558Z"
               },
               {
                 "id": null,
                 "name": "TBD",
                 "score": 0,
                 "completed": false,
-                "created_at": "2025-05-24T05:44:52.549Z",
-                "updated_at": "2025-05-24T05:44:52.549Z"
+                "created_at": "2025-05-24T06:02:07.558Z",
+                "updated_at": "2025-05-24T06:02:07.558Z"
               }
             ],
             "winner_id": null,
             "status": "pending",
-            "created_at": "2025-05-24T05:44:52.549Z",
-            "updated_at": "2025-05-24T05:44:52.549Z"
+            "created_at": "2025-05-24T06:02:07.558Z",
+            "updated_at": "2025-05-24T06:02:07.558Z"
           }
         ],
         [
@@ -798,22 +798,22 @@
                 "name": "TBD",
                 "score": 0,
                 "completed": false,
-                "created_at": "2025-05-24T05:44:52.549Z",
-                "updated_at": "2025-05-24T05:44:52.549Z"
+                "created_at": "2025-05-24T06:02:07.558Z",
+                "updated_at": "2025-05-24T06:02:07.558Z"
               },
               {
                 "id": null,
                 "name": "TBD",
                 "score": 0,
                 "completed": false,
-                "created_at": "2025-05-24T05:44:52.549Z",
-                "updated_at": "2025-05-24T05:44:52.549Z"
+                "created_at": "2025-05-24T06:02:07.558Z",
+                "updated_at": "2025-05-24T06:02:07.558Z"
               }
             ],
             "winner_id": null,
             "status": "pending",
-            "created_at": "2025-05-24T05:44:52.549Z",
-            "updated_at": "2025-05-24T05:44:52.549Z"
+            "created_at": "2025-05-24T06:02:07.558Z",
+            "updated_at": "2025-05-24T06:02:07.558Z"
           }
         ]
       ]

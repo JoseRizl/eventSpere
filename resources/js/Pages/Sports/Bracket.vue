@@ -58,19 +58,62 @@ const openDialog = async () => {
   showDialog.value = true;
 };
 
-// Toggle bracket visibility
+// Add new function to handle BYE rounds
+const handleByeRounds = (bracketIdx) => {
+  const bracket = brackets.value[bracketIdx];
+
+  // Check each round except the last one
+  for (let roundIdx = 0; roundIdx < bracket.matches.length - 1; roundIdx++) {
+    const currentRound = bracket.matches[roundIdx];
+
+    currentRound.forEach((match, matchIdx) => {
+      // Check if match has a BYE
+      if (match.players[0].name === "BYE" || match.players[1].name === "BYE") {
+        // Get the winner (non-BYE player)
+        const winner = match.players[0].name === "BYE" ? match.players[1] : match.players[0];
+
+        // Mark match as completed
+        match.status = 'completed';
+        match.players[0].completed = true;
+        match.players[1].completed = true;
+        match.winner_id = winner.id;
+
+        // Calculate next round position
+        const nextRoundIdx = roundIdx + 1;
+        const nextMatchIdx = Math.floor(matchIdx / 2);
+        const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
+
+        // Update next round with winner
+        if (bracket.matches[nextRoundIdx] && bracket.matches[nextRoundIdx][nextMatchIdx]) {
+          const nextMatch = bracket.matches[nextRoundIdx][nextMatchIdx];
+          nextMatch.players[nextPlayerPos] = {
+            ...winner,
+            score: 0,
+            completed: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+        }
+      }
+    });
+  }
+};
+
+// Modify toggleBracket to include BYE round handling
 const toggleBracket = (bracketIdx) => {
   if (expandedBrackets.value[bracketIdx]) {
     expandedBrackets.value[bracketIdx] = false;
   } else {
     expandedBrackets.value = expandedBrackets.value.map((expanded, idx) => idx === bracketIdx);
+    // Handle BYE rounds when bracket is shown
+    handleByeRounds(bracketIdx);
     updateLines(bracketIdx);
 
     // Check if a winner has been decided
     const lastRound = brackets.value[bracketIdx].matches[brackets.value[bracketIdx].matches.length - 1];
     const finalMatch = lastRound[0];
-    if (finalMatch[0].completed && finalMatch[1].completed) {
-      const winner = finalMatch[0].score >= finalMatch[1].score ? finalMatch[0] : finalMatch[1];
+    if (finalMatch.players[0].completed && finalMatch.players[1].completed) {
+      const winner = finalMatch.players[0].score >= finalMatch.players[1].score ? finalMatch.players[0] : finalMatch.players[1];
       winnerMessage.value = `Winner: ${winner.name}`;
       showWinnerDialog.value = true;
     }
@@ -88,7 +131,7 @@ const fetchEventDetails = async (eventId) => {
   }
 };
 
-// Modify createBracket to only store event_id
+// Modify createBracket to handle BYE rounds immediately
 const createBracket = async () => {
   if (!bracketName.value || !numberOfPlayers.value || !matchType.value || !selectedEvent.value) {
     showMissingFieldsDialog.value = true;
@@ -99,7 +142,7 @@ const createBracket = async () => {
   const bracketData = {
     name: bracketName.value,
     type: matchType.value,
-    event_id: selectedEvent.value.id, // Only store the event_id
+    event_id: selectedEvent.value.id,
     status: 'active',
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -111,6 +154,9 @@ const createBracket = async () => {
     brackets.value.push(bracketData);
     expandedBrackets.value.push(false);
     showDialog.value = false;
+
+    // Handle BYE rounds immediately after creation
+    handleByeRounds(brackets.value.length - 1);
 
     // Call updateLines for the newly created bracket
     updateLines(brackets.value.length - 1);
@@ -382,6 +428,12 @@ const undoConcludeMatch = (bracketIdx) => {
       };
     }
   }
+};
+
+// Add the concludeMatch function after the undoConcludeMatch function
+const concludeMatch = (bracketIdx) => {
+  pendingBracketIdx = bracketIdx;
+  showConfirmDialog.value = true;
 };
 
 // Correct Round Display
@@ -683,7 +735,7 @@ const saveBrackets = async (bracketData) => {
               <div v-if="currentMatch(bracketIdx)" class="match-card styled">
                 <!-- Sport Tag with Correct Round Counter -->
                 <div class="sport-tag">
-                {{ bracket.name }} - Round {{ getCurrentRound(bracketIdx) }}
+                  {{ bracket.name }} - Round {{ getCurrentRound(bracketIdx) }}
                 </div>
 
                 <div class="match-content">
@@ -698,7 +750,7 @@ const saveBrackets = async (bracketData) => {
                     </button>
 
                     <div class="score-display">
-                      {{ currentMatch(bracketIdx)[0]?.score.toString().padStart(3, '0') }}
+                      {{ currentMatch(bracketIdx).players[0]?.score.toString().padStart(2, '0') }}
                     </div>
 
                     <button
@@ -709,7 +761,7 @@ const saveBrackets = async (bracketData) => {
                       -
                     </button>
 
-                    <span class="team-name">{{ currentMatch(bracketIdx)[0]?.name || 'TBD' }}</span>
+                    <span class="team-name">{{ currentMatch(bracketIdx).players[0]?.name || 'TBD' }}</span>
                   </div>
 
                   <span class="vs">VS</span>
@@ -725,7 +777,7 @@ const saveBrackets = async (bracketData) => {
                     </button>
 
                     <div class="score-display">
-                      {{ currentMatch(bracketIdx)[1]?.score.toString().padStart(3, '0') }}
+                      {{ currentMatch(bracketIdx).players[1]?.score.toString().padStart(2, '0') }}
                     </div>
 
                     <button
@@ -736,21 +788,21 @@ const saveBrackets = async (bracketData) => {
                       -
                     </button>
 
-                    <span class="team-name">{{ currentMatch(bracketIdx)[1]?.name || 'TBD' }}</span>
+                    <span class="team-name">{{ currentMatch(bracketIdx).players[1]?.name || 'TBD' }}</span>
                   </div>
                 </div>
 
-                <!-- Dynamic Button/Label -->
-                <div v-if="currentMatch(bracketIdx).status === 'completed'" class="completed-text" @click="undoConcludeMatch(bracketIdx)">
-                Completed
+                <!-- Match Status -->
+                <div v-if="currentMatch(bracketIdx).status === 'completed'"
+                     class="completed-text"
+                     @click="undoConcludeMatch(bracketIdx)">
+                  Completed
                 </div>
 
-                <button
-                v-else
-                @click="concludeMatch(bracketIdx)"
-                class="match-over"
-                >
-                End Match
+                <button v-else
+                        @click="concludeMatch(bracketIdx)"
+                        class="match-over">
+                  End Match
                 </button>
               </div>
             </div>
@@ -1069,7 +1121,7 @@ const saveBrackets = async (bracketData) => {
     margin-top: 5px;
   }
         .match-card.styled {
-          background-color: #d1d5db; /* Gray background */
+          background-color: #d1d5db;
           padding: 20px;
           border-radius: 12px;
           box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -1111,11 +1163,103 @@ const saveBrackets = async (bracketData) => {
           background-color: #d70000;
         }
 
-        .match.highlight {
-            border: 2px solid black; /* Border for Highlight */
-            background-color: lightgray;  /* Background */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle Shadow */
-          }
+        .team-name {
+          font-weight: bold;
+          margin-bottom: 10px;
+          font-size: 1.1rem;
+        }
+
+        .score-controls {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .score-btn {
+          background-color: rgba(255, 255, 255, 0.2);
+          color: #fff;
+          border: none;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          cursor: pointer;
+          font-size: 1.2rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s ease;
+        }
+
+        .score-btn:hover:not(:disabled) {
+          background-color: rgba(255, 255, 255, 0.3);
+          transform: scale(1.1);
+        }
+
+        .score-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .score-display {
+          background-color: rgba(255, 255, 255, 0.9);
+          color: #000;
+          padding: 8px 16px;
+          border-radius: 8px;
+          font-weight: bold;
+          font-size: 1.2rem;
+          min-width: 50px;
+        }
+
+        .vs {
+          font-weight: bold;
+          color: #333;
+          font-size: 1.5rem;
+          padding: 0 15px;
+        }
+
+        .match-status {
+          margin-top: 20px;
+        }
+
+        .match-over, .completed-text {
+          width: 100%;
+          padding: 12px;
+          border-radius: 8px;
+          font-weight: 600;
+          text-align: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          transition: all 0.2s ease;
+        }
+
+        .match-over {
+          background-color: #ff4757;
+          color: white;
+          border: none;
+          cursor: pointer;
+        }
+
+        .match-over:hover {
+          background-color: #e63946;
+          transform: translateY(-2px);
+        }
+
+        .completed-text {
+          background-color: #28a745;
+          color: #fff;
+          cursor: pointer;
+        }
+
+        .completed-text:hover {
+          background-color: #218838;
+          transform: translateY(-2px);
+        }
+
+        .completed-text i, .match-over i {
+          font-size: 1.2rem;
+        }
 
 .connection-lines {
   position: absolute;
@@ -1296,5 +1440,11 @@ const saveBrackets = async (bracketData) => {
 .event-title:hover {
   color: #0056b3;
   text-decoration: underline;
+}
+
+.match.highlight {
+  border: 2px solid black;
+  background-color: lightgray;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 </style>
