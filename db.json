@@ -613,13 +613,13 @@
   ],
   "brackets": [
     {
-      "id": "c1ec",
-      "name": "d",
+      "id": "5b42",
+      "name": "bal",
       "type": "Single Elimination",
       "event_id": "fbe4",
       "status": "active",
-      "created_at": "2025-05-24T06:02:07.558Z",
-      "updated_at": "2025-05-24T06:02:07.558Z",
+      "created_at": "2025-05-25T02:23:58.493Z",
+      "updated_at": "2025-05-25T02:23:58.493Z",
       "matches": [
         [
           {
@@ -632,22 +632,22 @@
                 "name": "Player 1",
                 "score": 0,
                 "completed": false,
-                "created_at": "2025-05-24T06:02:07.557Z",
-                "updated_at": "2025-05-24T06:02:07.557Z"
+                "created_at": "2025-05-25T02:23:58.493Z",
+                "updated_at": "2025-05-25T02:23:58.493Z"
               },
               {
                 "id": null,
                 "name": "Player 2",
                 "score": 0,
                 "completed": false,
-                "created_at": "2025-05-24T06:02:07.557Z",
-                "updated_at": "2025-05-24T06:02:07.557Z"
+                "created_at": "2025-05-25T02:23:58.493Z",
+                "updated_at": "2025-05-25T02:23:58.493Z"
               }
             ],
             "winner_id": null,
             "status": "pending",
-            "created_at": "2025-05-24T06:02:07.558Z",
-            "updated_at": "2025-05-24T06:02:07.558Z"
+            "created_at": "2025-05-25T02:23:58.493Z",
+            "updated_at": "2025-05-25T02:23:58.493Z"
           },
           {
             "id": null,
@@ -659,22 +659,22 @@
                 "name": "Player 3",
                 "score": 0,
                 "completed": false,
-                "created_at": "2025-05-24T06:02:07.557Z",
-                "updated_at": "2025-05-24T06:02:07.557Z"
+                "created_at": "2025-05-25T02:23:58.493Z",
+                "updated_at": "2025-05-25T02:23:58.493Z"
               },
               {
                 "id": null,
                 "name": "Player 4",
                 "score": 0,
                 "completed": false,
-                "created_at": "2025-05-24T06:02:07.557Z",
-                "updated_at": "2025-05-24T06:02:07.557Z"
+                "created_at": "2025-05-25T02:23:58.493Z",
+                "updated_at": "2025-05-25T02:23:58.493Z"
               }
             ],
             "winner_id": null,
             "status": "pending",
-            "created_at": "2025-05-24T06:02:07.558Z",
-            "updated_at": "2025-05-24T06:02:07.558Z"
+            "created_at": "2025-05-25T02:23:58.493Z",
+            "updated_at": "2025-05-25T02:23:58.493Z"
           },
           {
             "id": null,
@@ -686,22 +686,22 @@
                 "name": "Player 5",
                 "score": 0,
                 "completed": true,
-                "created_at": "2025-05-24T06:02:07.557Z",
-                "updated_at": "2025-05-24T06:02:07.557Z"
+                "created_at": "2025-05-25T02:23:58.493Z",
+                "updated_at": "2025-05-25T02:23:58.493Z"
               },
               {
                 "id": null,
                 "name": "BYE",
                 "score": 0,
                 "completed": true,
-                "created_at": "2025-05-24T06:02:07.558Z",
-                "updated_at": "2025-05-24T06:02:07.558Z"
+                "created_at": "2025-05-25T02:23:58.493Z",
+                "updated_at": "2025-05-25T02:23:58.493Z"
               }
             ],
             "winner_id": null,
             "status": "completed",
-            "created_at": "2025-05-24T06:02:07.558Z",
-            "updated_at": "2025-05-24T06:02:07.558Z"
+            "created_at": "2025-05-25T02:23:58.493Z",
+            "updated_at": "2025-05-25T02:23:58.493Z"
           },
           {
             "id": null,
@@ -713,22 +713,22 @@
                 "name": "Player 6",
                 "score": 0,
                 "completed": true,
-                "created_at": "2025-05-24T06:02:07.557Z",
-                "updated_at": "2025-05-24T06:02:07.557Z"
+                "created_at": "2025-05-25T02:23:58.493Z",
+                "updated_at": "2025-05-25T02:23:58.493Z"
               },
               {
                 "id": null,
                 "name": "BYE",
                 "score": 0,
                 "completed": true,
-                "created_at": "2025-05-24T06:02:07.558Z",
-                "updated_at": "2025-05-24T06:02:07.558Z"
+                "created_at": "2025-05-25T02:23:58.493Z",
+                "updated_at": "2025-05-25T02:23:58.493Z"
               }
             ],
             "winner_id": null,
             "status": "completed",
-            "created_at": "2025-05-24T06:02:07.558Z",
-            "updated_at": "2025-05-24T06:02:07.558Z"
+            "created_at": "2025-05-25T02:23:58.493Z",
+            "updated_at": "2025-05-25T02:23:58.493Z"
           }
         ],
         [
@@ -742,22 +742,22 @@
                 "name": "TBD",
                 "score": 0,
                 "completed": false,
-                "created_at": "2025-05-24T06:02:07.558Z",
-                "updated_at": "2025-05-24T06:02:07.558Z"
+                "created_at": "2025-05-25T02:23:58.493Z",
+                "updated_at": "2025-05-25T02:23:58.493Z"
               },
               {
                 "id": null,
                 "name": "TBD",
                 "score": 0,
                 "completed": false,
-                "created_at": "2025-05-24T06:02:07.558Z",
-                "updated_at": "2025-05-24T06:02:07.558Z"
+                "created_at": "2025-05-25T02:23:58.493Z",
+                "updated_at": "2025-05-25T02:23:58.493Z"
               }
             ],
             "winner_id": null,
             "status": "pending",
-            "created_at": "2025-05-24T06:02:07.558Z",
-            "updated_at": "2025-05-24T06:02:07.558Z"
+            "created_at": "2025-05-25T02:23:58.493Z",
+            "updated_at": "2025-05-25T02:23:58.493Z"
           },
           {
             "id": null,
@@ -769,22 +769,22 @@
                 "name": "TBD",
                 "score": 0,
                 "completed": false,
-                "created_at": "2025-05-24T06:02:07.558Z",
-                "updated_at": "2025-05-24T06:02:07.558Z"
+                "created_at": "2025-05-25T02:23:58.493Z",
+                "updated_at": "2025-05-25T02:23:58.493Z"
               },
               {
                 "id": null,
                 "name": "TBD",
                 "score": 0,
                 "completed": false,
-                "created_at": "2025-05-24T06:02:07.558Z",
-                "updated_at": "2025-05-24T06:02:07.558Z"
+                "created_at": "2025-05-25T02:23:58.493Z",
+                "updated_at": "2025-05-25T02:23:58.493Z"
               }
             ],
             "winner_id": null,
             "status": "pending",
-            "created_at": "2025-05-24T06:02:07.558Z",
-            "updated_at": "2025-05-24T06:02:07.558Z"
+            "created_at": "2025-05-25T02:23:58.493Z",
+            "updated_at": "2025-05-25T02:23:58.493Z"
           }
         ],
         [
@@ -798,25 +798,361 @@
                 "name": "TBD",
                 "score": 0,
                 "completed": false,
-                "created_at": "2025-05-24T06:02:07.558Z",
-                "updated_at": "2025-05-24T06:02:07.558Z"
+                "created_at": "2025-05-25T02:23:58.493Z",
+                "updated_at": "2025-05-25T02:23:58.493Z"
               },
               {
                 "id": null,
                 "name": "TBD",
                 "score": 0,
                 "completed": false,
-                "created_at": "2025-05-24T06:02:07.558Z",
-                "updated_at": "2025-05-24T06:02:07.558Z"
+                "created_at": "2025-05-25T02:23:58.493Z",
+                "updated_at": "2025-05-25T02:23:58.493Z"
               }
             ],
             "winner_id": null,
             "status": "pending",
-            "created_at": "2025-05-24T06:02:07.558Z",
-            "updated_at": "2025-05-24T06:02:07.558Z"
+            "created_at": "2025-05-25T02:23:58.493Z",
+            "updated_at": "2025-05-25T02:23:58.493Z"
           }
         ]
-      ]
+      ],
+      "lines": []
+    },
+    {
+      "name": "f",
+      "type": "Double Elimination",
+      "event_id": "9148",
+      "status": "active",
+      "created_at": "2025-05-25T03:04:27.548Z",
+      "updated_at": "2025-05-25T03:04:27.548Z",
+      "matches": {
+        "winners": [
+          [
+            {
+              "id": null,
+              "round": 1,
+              "match_number": 1,
+              "bracket_type": "winners",
+              "players": [
+                {
+                  "id": null,
+                  "name": "Player 1",
+                  "score": 2,
+                  "completed": true,
+                  "created_at": "2025-05-25T03:04:27.548Z",
+                  "updated_at": "2025-05-25T03:04:35.959Z"
+                },
+                {
+                  "id": null,
+                  "name": "Player 2",
+                  "score": 0,
+                  "completed": true,
+                  "created_at": "2025-05-25T03:04:27.548Z",
+                  "updated_at": "2025-05-25T03:04:27.548Z"
+                }
+              ],
+              "winner_id": null,
+              "loser_id": null,
+              "status": "completed",
+              "created_at": "2025-05-25T03:04:27.548Z",
+              "updated_at": "2025-05-25T03:04:37.677Z"
+            },
+            {
+              "id": null,
+              "round": 1,
+              "match_number": 2,
+              "bracket_type": "winners",
+              "players": [
+                {
+                  "id": null,
+                  "name": "Player 3",
+                  "score": 1,
+                  "completed": true,
+                  "created_at": "2025-05-25T03:04:27.548Z",
+                  "updated_at": "2025-05-25T03:04:38.723Z"
+                },
+                {
+                  "id": null,
+                  "name": "Player 4",
+                  "score": 0,
+                  "completed": true,
+                  "created_at": "2025-05-25T03:04:27.548Z",
+                  "updated_at": "2025-05-25T03:04:27.548Z"
+                }
+              ],
+              "winner_id": null,
+              "loser_id": null,
+              "status": "completed",
+              "created_at": "2025-05-25T03:04:27.548Z",
+              "updated_at": "2025-05-25T03:04:39.982Z"
+            }
+          ],
+          [
+            {
+              "id": null,
+              "round": 2,
+              "match_number": 1,
+              "bracket_type": "winners",
+              "players": [
+                {
+                  "id": null,
+                  "name": "Player 1",
+                  "score": 1,
+                  "completed": true,
+                  "created_at": "2025-05-25T03:04:37.677Z",
+                  "updated_at": "2025-05-25T03:04:44.157Z"
+                },
+                {
+                  "id": null,
+                  "name": "Player 3",
+                  "score": 0,
+                  "completed": true,
+                  "created_at": "2025-05-25T03:04:39.982Z",
+                  "updated_at": "2025-05-25T03:04:39.982Z"
+                }
+              ],
+              "winner_id": null,
+              "loser_id": null,
+              "status": "completed",
+              "created_at": "2025-05-25T03:04:27.548Z",
+              "updated_at": "2025-05-25T03:04:47.485Z"
+            }
+          ]
+        ],
+        "losers": [
+          [
+            {
+              "id": null,
+              "round": 1,
+              "match_number": 1,
+              "bracket_type": "losers",
+              "players": [
+                {
+                  "id": null,
+                  "name": "Player 2",
+                  "score": 2,
+                  "completed": true,
+                  "created_at": "2025-05-25T03:04:37.677Z",
+                  "updated_at": "2025-05-25T03:07:57.278Z"
+                },
+                {
+                  "id": null,
+                  "name": "Player 4",
+                  "score": 1,
+                  "completed": true,
+                  "created_at": "2025-05-25T03:04:39.982Z",
+                  "updated_at": "2025-05-25T03:07:49.103Z"
+                }
+              ],
+              "winner_id": null,
+              "loser_id": null,
+              "status": "completed",
+              "created_at": "2025-05-25T03:04:27.548Z",
+              "updated_at": "2025-05-25T03:10:16.051Z"
+            },
+            {
+              "id": null,
+              "round": 1,
+              "match_number": 2,
+              "bracket_type": "losers",
+              "players": [
+                {
+                  "id": null,
+                  "name": "Player 3",
+                  "score": 0,
+                  "completed": true,
+                  "created_at": "2025-05-25T03:04:47.485Z",
+                  "updated_at": "2025-05-25T03:04:47.485Z"
+                },
+                {
+                  "id": null,
+                  "name": "BYE",
+                  "score": 0,
+                  "completed": true,
+                  "created_at": "2025-05-25T03:04:47.485Z",
+                  "updated_at": "2025-05-25T03:04:47.485Z"
+                }
+              ],
+              "winner_id": null,
+              "loser_id": null,
+              "status": "completed",
+              "created_at": "2025-05-25T03:04:27.548Z",
+              "updated_at": "2025-05-25T03:04:27.548Z"
+            }
+          ],
+          [
+            {
+              "id": null,
+              "round": 2,
+              "match_number": 1,
+              "bracket_type": "losers",
+              "players": [
+                {
+                  "id": null,
+                  "name": "Player 2",
+                  "score": 2,
+                  "completed": true,
+                  "created_at": "2025-05-25T03:10:16.051Z",
+                  "updated_at": "2025-05-25T03:10:19.661Z"
+                },
+                {
+                  "id": null,
+                  "name": "Player 3",
+                  "score": 0,
+                  "completed": true,
+                  "created_at": "2025-05-25T03:11:50.431Z",
+                  "updated_at": "2025-05-25T03:11:50.431Z"
+                }
+              ],
+              "winner_id": null,
+              "loser_id": null,
+              "status": "completed",
+              "created_at": "2025-05-25T03:04:27.548Z",
+              "updated_at": "2025-05-25T03:12:01.688Z"
+            }
+          ]
+        ],
+        "grand_finals": [
+          {
+            "id": null,
+            "round": 1,
+            "match_number": 1,
+            "bracket_type": "grand_finals",
+            "players": [
+              {
+                "id": null,
+                "name": "Player 1",
+                "score": 1,
+                "completed": true,
+                "created_at": "2025-05-25T03:04:47.485Z",
+                "updated_at": "2025-05-25T03:10:25.989Z"
+              },
+              {
+                "id": null,
+                "name": "Player 2",
+                "score": 2,
+                "completed": true,
+                "created_at": "2025-05-25T03:12:01.688Z",
+                "updated_at": "2025-05-25T03:12:05.604Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "completed",
+            "created_at": "2025-05-25T03:04:27.548Z",
+            "updated_at": "2025-05-25T03:12:06.980Z"
+          }
+        ]
+      },
+      "lines": {
+        "winners": [
+          {
+            "x1": 534.6000366210938,
+            "y1": 64,
+            "x2": 554.6000366210938,
+            "y2": 64
+          },
+          {
+            "x1": 554.6000366210938,
+            "y1": 64,
+            "x2": 554.6000366210938,
+            "y2": 103
+          },
+          {
+            "x1": 554.6000366210938,
+            "y1": 103,
+            "x2": 574.6000366210938,
+            "y2": 103
+          },
+          {
+            "x1": 534.6000366210938,
+            "y1": 136,
+            "x2": 554.6000366210938,
+            "y2": 136
+          },
+          {
+            "x1": 554.6000366210938,
+            "y1": 136,
+            "x2": 554.6000366210938,
+            "y2": 103
+          },
+          {
+            "x1": 554.6000366210938,
+            "y1": 103,
+            "x2": 574.6000366210938,
+            "y2": 103
+          },
+          {
+            "x1": 724.6000366210938,
+            "y1": 103,
+            "x2": 490.4000244140625,
+            "y2": 653.5999755859375
+          }
+        ],
+        "losers": [
+          {
+            "x1": 556.2000122070312,
+            "y1": 352,
+            "x2": 576.2000122070312,
+            "y2": 352
+          },
+          {
+            "x1": 576.2000122070312,
+            "y1": 352,
+            "x2": 576.2000122070312,
+            "y2": 391
+          },
+          {
+            "x1": 576.2000122070312,
+            "y1": 391,
+            "x2": 596.2000122070312,
+            "y2": 391
+          },
+          {
+            "x1": 556.2000122070312,
+            "y1": 424,
+            "x2": 576.2000122070312,
+            "y2": 424
+          },
+          {
+            "x1": 576.2000122070312,
+            "y1": 424,
+            "x2": 576.2000122070312,
+            "y2": 391
+          },
+          {
+            "x1": 576.2000122070312,
+            "y1": 391,
+            "x2": 596.2000122070312,
+            "y2": 391
+          },
+          {
+            "x1": 746.2000122070312,
+            "y1": 391,
+            "x2": 490.4000244140625,
+            "y2": 653.5999755859375
+          }
+        ]
+      },
+      "id": "2b38",
+      "event": {
+        "id": "9148",
+        "title": "Palakasan Day 1",
+        "description": "Spor",
+        "venue": "Naawn",
+        "category_id": "3",
+        "startDate": "May-28-2025",
+        "endDate": null,
+        "startTime": "08:00",
+        "endTime": "16:00",
+        "tags": [
+          "2"
+        ],
+        "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+        "archived": false,
+        "createdAt": "2025-05-09T00:09:46.343Z"
+      }
     }
   ],
   "announcements": [
