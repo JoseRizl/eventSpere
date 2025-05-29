@@ -231,7 +231,7 @@ const createBracket = async () => {
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     matches: newBracket,
-    lines: matchType.value === "Single Elimination" ? [] : { winners: [], losers: [] }
+    lines: matchType.value === "Single Elimination" ? [] : { winners: [], losers: [], finals: [] }
   };
 
   try {
@@ -1275,7 +1275,7 @@ const currentMatch = (bracketIdx) => {
 // Update lines dynamically using SVG
 const updateLines = (bracketIdx) => {
   const bracket = brackets.value[bracketIdx];
-  bracket.lines = bracket.type === 'Single Elimination' ? [] : { winners: [], losers: [] };
+  bracket.lines = bracket.type === 'Single Elimination' ? [] : { winners: [], losers: [], finals: [] };
 
   nextTick(() => {
     const container = document.querySelector('.bracket');
@@ -1284,7 +1284,7 @@ const updateLines = (bracketIdx) => {
     const containerRect = container.getBoundingClientRect();
 
     if (bracket.type === 'Single Elimination') {
-      // Existing single elimination line generation
+      // Single elimination line generation
       for (let round = 0; round < bracket.matches.length - 1; round++) {
         const current = bracket.matches[round];
         const next = bracket.matches[round + 1];
@@ -1314,90 +1314,108 @@ const updateLines = (bracketIdx) => {
       }
     } else if (bracket.type === 'Double Elimination') {
       // Winners bracket lines
-      for (let round = 0; round < bracket.matches.winners.length - 1; round++) {
-        const current = bracket.matches.winners[round];
-        const next = bracket.matches.winners[round + 1];
+      const winnersContainer = document.querySelector('.winners-lines');
+      if (winnersContainer) {
+        const winnersRect = winnersContainer.getBoundingClientRect();
 
-        current.forEach((match, i) => {
-          const fromEl = document.getElementById(`winners-match-${round}-${i}`);
-          const toEl = document.getElementById(`winners-match-${round + 1}-${Math.floor(i / 2)}`);
+        for (let round = 0; round < bracket.matches.winners.length - 1; round++) {
+          const current = bracket.matches.winners[round];
+          const next = bracket.matches.winners[round + 1];
 
-          if (!fromEl || !toEl) return;
+          current.forEach((match, i) => {
+            const fromEl = document.getElementById(`winners-match-${round}-${i}`);
+            const toEl = document.getElementById(`winners-match-${round + 1}-${Math.floor(i / 2)}`);
 
-          const fromRect = fromEl.getBoundingClientRect();
-          const toRect = toEl.getBoundingClientRect();
+            if (!fromEl || !toEl) return;
 
-          const fromCenterY = fromRect.top - containerRect.top + fromRect.height / 2;
-          const toCenterY = toRect.top - containerRect.top + toRect.height / 2;
+            const fromRect = fromEl.getBoundingClientRect();
+            const toRect = toEl.getBoundingClientRect();
 
-          const fromRightX = fromRect.right - containerRect.left;
-          const toLeftX = toRect.left - containerRect.left;
-          const midX = (fromRightX + toLeftX) / 2;
+            const fromCenterY = fromRect.top - winnersRect.top + fromRect.height / 2;
+            const toCenterY = toRect.top - winnersRect.top + toRect.height / 2;
 
-          bracket.lines.winners.push(
-            { x1: fromRightX, y1: fromCenterY, x2: midX, y2: fromCenterY },
-            { x1: midX, y1: fromCenterY, x2: midX, y2: toCenterY },
-            { x1: midX, y1: toCenterY, x2: toLeftX, y2: toCenterY }
-          );
-        });
+            const fromRightX = fromRect.right - winnersRect.left;
+            const toLeftX = toRect.left - winnersRect.left;
+            const midX = (fromRightX + toLeftX) / 2;
+
+            bracket.lines.winners.push(
+              { x1: fromRightX, y1: fromCenterY, x2: midX, y2: fromCenterY },
+              { x1: midX, y1: fromCenterY, x2: midX, y2: toCenterY },
+              { x1: midX, y1: toCenterY, x2: toLeftX, y2: toCenterY }
+            );
+          });
+        }
       }
 
       // Losers bracket lines
-      for (let round = 0; round < bracket.matches.losers.length - 1; round++) {
-        const current = bracket.matches.losers[round];
-        const next = bracket.matches.losers[round + 1];
+      const losersContainer = document.querySelector('.losers-lines');
+      if (losersContainer) {
+        const losersRect = losersContainer.getBoundingClientRect();
 
-        current.forEach((match, i) => {
-          const fromEl = document.getElementById(`losers-match-${round}-${i}`);
-          const toEl = document.getElementById(`losers-match-${round + 1}-${Math.floor(i / 2)}`);
+        for (let round = 0; round < bracket.matches.losers.length - 1; round++) {
+          const current = bracket.matches.losers[round];
+          const next = bracket.matches.losers[round + 1];
 
-          if (!fromEl || !toEl) return;
+          current.forEach((match, i) => {
+            const fromEl = document.getElementById(`losers-match-${round}-${i}`);
+            const toEl = document.getElementById(`losers-match-${round + 1}-${Math.floor(i / 2)}`);
 
-          const fromRect = fromEl.getBoundingClientRect();
-          const toRect = toEl.getBoundingClientRect();
+            if (!fromEl || !toEl) return;
 
-          const fromCenterY = fromRect.top - containerRect.top + fromRect.height / 2;
-          const toCenterY = toRect.top - containerRect.top + toRect.height / 2;
+            const fromRect = fromEl.getBoundingClientRect();
+            const toRect = toEl.getBoundingClientRect();
 
-          const fromRightX = fromRect.right - containerRect.left;
-          const toLeftX = toRect.left - containerRect.left;
-          const midX = (fromRightX + toLeftX) / 2;
+            const fromCenterY = fromRect.top - losersRect.top + fromRect.height / 2;
+            const toCenterY = toRect.top - losersRect.top + toRect.height / 2;
 
-          bracket.lines.losers.push(
-            { x1: fromRightX, y1: fromCenterY, x2: midX, y2: fromCenterY },
-            { x1: midX, y1: fromCenterY, x2: midX, y2: toCenterY },
-            { x1: midX, y1: toCenterY, x2: toLeftX, y2: toCenterY }
-          );
-        });
+            const fromRightX = fromRect.right - losersRect.left;
+            const toLeftX = toRect.left - losersRect.left;
+            const midX = (fromRightX + toLeftX) / 2;
+
+            bracket.lines.losers.push(
+              { x1: fromRightX, y1: fromCenterY, x2: midX, y2: fromCenterY },
+              { x1: midX, y1: fromCenterY, x2: midX, y2: toCenterY },
+              { x1: midX, y1: toCenterY, x2: toLeftX, y2: toCenterY }
+            );
+          });
+        }
       }
 
       // Connect winners and losers brackets to grand finals
-      const lastWinnersMatch = document.getElementById(`winners-match-${bracket.matches.winners.length - 1}-0`);
-      const lastLosersMatch = document.getElementById(`losers-match-${bracket.matches.losers.length - 1}-0`);
-      const grandFinalsMatch = document.getElementById('grand-finals-match-0');
+      const finalsContainer = document.querySelector('.finals-lines');
+      if (finalsContainer) {
+        const finalsRect = finalsContainer.getBoundingClientRect();
+        const lastWinnersMatch = document.getElementById(`winners-match-${bracket.matches.winners.length - 1}-0`);
+        const lastLosersMatch = document.getElementById(`losers-match-${bracket.matches.losers.length - 1}-0`);
+        const grandFinalsMatch = document.getElementById('grand-finals-match-0');
 
-      if (lastWinnersMatch && lastLosersMatch && grandFinalsMatch) {
-        const winnersRect = lastWinnersMatch.getBoundingClientRect();
-        const losersRect = lastLosersMatch.getBoundingClientRect();
-        const finalsRect = grandFinalsMatch.getBoundingClientRect();
+        if (lastWinnersMatch && lastLosersMatch && grandFinalsMatch) {
+          const winnersRect = lastWinnersMatch.getBoundingClientRect();
+          const losersRect = lastLosersMatch.getBoundingClientRect();
+          const finalsRect = grandFinalsMatch.getBoundingClientRect();
 
-        const winnersCenterY = winnersRect.top - containerRect.top + winnersRect.height / 2;
-        const losersCenterY = losersRect.top - containerRect.top + losersRect.height / 2;
-        const finalsCenterY = finalsRect.top - containerRect.top + finalsRect.height / 2;
+          // Only draw lines if there are actual players in the grand finals
+          const grandFinalsPlayers = bracket.matches.grand_finals[0].players;
+          if (grandFinalsPlayers[0].name !== 'TBD' || grandFinalsPlayers[1].name !== 'TBD') {
+            // Connect winners bracket to finals
+            const winnersCenterY = winnersRect.top - finalsRect.top + winnersRect.height / 2;
+            const winnersRightX = winnersRect.right - finalsRect.left;
+            const finalsLeftX = finalsRect.left - finalsRect.left;
+            const finalsCenterY = finalsRect.top - finalsRect.top + finalsRect.height / 2;
 
-        const winnersRightX = winnersRect.right - containerRect.left;
-        const losersRightX = losersRect.right - containerRect.left;
-        const finalsLeftX = finalsRect.left - containerRect.left;
+            bracket.lines.finals.push(
+              { x1: winnersRightX, y1: winnersCenterY, x2: finalsLeftX, y2: finalsCenterY }
+            );
 
-        // Connect winners bracket to finals
-        bracket.lines.winners.push(
-          { x1: winnersRightX, y1: winnersCenterY, x2: finalsLeftX, y2: finalsCenterY }
-        );
+            // Connect losers bracket to finals
+            const losersCenterY = losersRect.top - finalsRect.top + losersRect.height / 2;
+            const losersRightX = losersRect.right - finalsRect.left;
 
-        // Connect losers bracket to finals
-        bracket.lines.losers.push(
-          { x1: losersRightX, y1: losersCenterY, x2: finalsLeftX, y2: finalsCenterY }
-        );
+            bracket.lines.finals.push(
+              { x1: losersRightX, y1: losersCenterY, x2: finalsLeftX, y2: finalsCenterY }
+            );
+          }
+        }
       }
     }
   });
@@ -1644,17 +1662,17 @@ const getTotalMatches = (bracketIdx) => {
               <div class="bracket-section winners">
                 <h3>Winners Bracket</h3>
                 <div class="bracket">
-                  <svg class="connection-lines">
-                    <line
-                      v-for="(line, i) in bracket.lines?.winners"
-                      :key="`winners-${i}`"
-                      :x1="line.x1"
-                      :y1="line.y1"
-                      :x2="line.x2"
-                      :y2="line.y2"
-                      stroke="black"
-                      stroke-width="2"
-                    />
+                  <svg class="connection-lines winners-lines">
+                    <g v-for="(line, i) in bracket.lines?.winners" :key="`winners-${i}`">
+                      <line
+                        :x1="line.x1"
+                        :y1="line.y1"
+                        :x2="line.x2"
+                        :y2="line.y2"
+                        stroke="black"
+                        stroke-width="2"
+                      />
+                    </g>
                   </svg>
 
                   <div v-for="(round, roundIdx) in bracket.matches.winners" :key="`winners-${roundIdx}`"
@@ -1704,17 +1722,17 @@ const getTotalMatches = (bracketIdx) => {
               <div class="bracket-section losers">
                 <h3>Losers Bracket</h3>
                 <div class="bracket">
-                  <svg class="connection-lines">
-                    <line
-                      v-for="(line, i) in bracket.lines?.losers"
-                      :key="`losers-${i}`"
-                      :x1="line.x1"
-                      :y1="line.y1"
-                      :x2="line.x2"
-                      :y2="line.y2"
-                      stroke="black"
-                      stroke-width="2"
-                    />
+                  <svg class="connection-lines losers-lines">
+                    <g v-for="(line, i) in bracket.lines?.losers" :key="`losers-${i}`">
+                      <line
+                        :x1="line.x1"
+                        :y1="line.y1"
+                        :x2="line.x2"
+                        :y2="line.y2"
+                        stroke="black"
+                        stroke-width="2"
+                      />
+                    </g>
                   </svg>
 
                   <div v-for="(round, roundIdx) in bracket.matches.losers" :key="`losers-${roundIdx}`"
@@ -1766,6 +1784,19 @@ const getTotalMatches = (bracketIdx) => {
               <div class="bracket-section grand-finals">
                 <h3>Grand Finals</h3>
                 <div class="bracket">
+                  <svg class="connection-lines finals-lines">
+                    <g v-for="(line, i) in bracket.lines?.finals" :key="`finals-${i}`">
+                      <line
+                        :x1="line.x1"
+                        :y1="line.y1"
+                        :x2="line.x2"
+                        :y2="line.y2"
+                        stroke="black"
+                        stroke-width="2"
+                      />
+                    </g>
+                  </svg>
+
                   <div v-for="(match, matchIdx) in bracket.matches.grand_finals" :key="`grand-finals-${matchIdx}`"
                     :id="`grand-finals-match-${matchIdx}`"
                     :class="['match', { 'highlight': isCurrentMatch(bracketIdx, bracket.matches.winners.length + bracket.matches.losers.length, matchIdx, 'grand_finals') }]"
@@ -2355,6 +2386,48 @@ const getTotalMatches = (bracketIdx) => {
   width: 100%;
   height: 100%;
   pointer-events: none;
+  z-index: 1;
+}
+
+.winners-lines {
+  stroke: #007bff;
+}
+
+.losers-lines {
+  stroke: #dc3545;
+}
+
+.finals-lines {
+  stroke: #28a745;
+}
+
+.bracket {
+  position: relative;
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.bracket-section {
+  position: relative;
+  margin-bottom: 30px;
+}
+
+.bracket-section.winners {
+  border-right: 2px solid #007bff;
+  padding-right: 20px;
+}
+
+.bracket-section.losers {
+  border-left: 2px solid #dc3545;
+  padding-left: 20px;
+}
+
+.bracket-section.grand-finals {
+  border-top: 2px solid #28a745;
+  padding-top: 20px;
+  margin-top: 20px;
 }
 
 .delete-button {

@@ -820,12 +820,13 @@
       "lines": []
     },
     {
-      "name": "f",
+      "id": "8ad6",
+      "name": "ga;",
       "type": "Double Elimination",
-      "event_id": "9148",
+      "event_id": "24f0",
       "status": "active",
-      "created_at": "2025-05-25T03:04:27.548Z",
-      "updated_at": "2025-05-25T03:04:27.548Z",
+      "created_at": "2025-05-29T02:33:34.780Z",
+      "updated_at": "2025-05-29T02:33:34.780Z",
       "matches": {
         "winners": [
           [
@@ -838,25 +839,25 @@
                 {
                   "id": null,
                   "name": "Player 1",
-                  "score": 2,
+                  "score": 0,
                   "completed": true,
-                  "created_at": "2025-05-25T03:04:27.548Z",
-                  "updated_at": "2025-05-25T03:04:35.959Z"
+                  "created_at": "2025-05-29T02:33:34.780Z",
+                  "updated_at": "2025-05-29T02:33:34.780Z"
                 },
                 {
                   "id": null,
                   "name": "Player 2",
                   "score": 0,
                   "completed": true,
-                  "created_at": "2025-05-25T03:04:27.548Z",
-                  "updated_at": "2025-05-25T03:04:27.548Z"
+                  "created_at": "2025-05-29T02:33:34.780Z",
+                  "updated_at": "2025-05-29T02:33:34.780Z"
                 }
               ],
               "winner_id": null,
               "loser_id": null,
               "status": "completed",
-              "created_at": "2025-05-25T03:04:27.548Z",
-              "updated_at": "2025-05-25T03:04:37.677Z"
+              "created_at": "2025-05-29T02:33:34.780Z",
+              "updated_at": "2025-05-29T02:34:32.006Z"
             },
             {
               "id": null,
@@ -867,25 +868,25 @@
                 {
                   "id": null,
                   "name": "Player 3",
-                  "score": 1,
+                  "score": 0,
                   "completed": true,
-                  "created_at": "2025-05-25T03:04:27.548Z",
-                  "updated_at": "2025-05-25T03:04:38.723Z"
+                  "created_at": "2025-05-29T02:33:34.780Z",
+                  "updated_at": "2025-05-29T02:33:34.780Z"
                 },
                 {
                   "id": null,
                   "name": "Player 4",
                   "score": 0,
                   "completed": true,
-                  "created_at": "2025-05-25T03:04:27.548Z",
-                  "updated_at": "2025-05-25T03:04:27.548Z"
+                  "created_at": "2025-05-29T02:33:34.780Z",
+                  "updated_at": "2025-05-29T02:33:34.780Z"
                 }
               ],
               "winner_id": null,
               "loser_id": null,
               "status": "completed",
-              "created_at": "2025-05-25T03:04:27.548Z",
-              "updated_at": "2025-05-25T03:04:39.982Z"
+              "created_at": "2025-05-29T02:33:34.780Z",
+              "updated_at": "2025-05-29T02:34:34.420Z"
             }
           ],
           [
@@ -898,25 +899,25 @@
                 {
                   "id": null,
                   "name": "Player 1",
-                  "score": 1,
+                  "score": 0,
                   "completed": true,
-                  "created_at": "2025-05-25T03:04:37.677Z",
-                  "updated_at": "2025-05-25T03:04:44.157Z"
+                  "created_at": "2025-05-29T02:34:32.007Z",
+                  "updated_at": "2025-05-29T02:34:32.007Z"
                 },
                 {
                   "id": null,
                   "name": "Player 3",
                   "score": 0,
                   "completed": true,
-                  "created_at": "2025-05-25T03:04:39.982Z",
-                  "updated_at": "2025-05-25T03:04:39.982Z"
+                  "created_at": "2025-05-29T02:34:34.420Z",
+                  "updated_at": "2025-05-29T02:34:34.420Z"
                 }
               ],
               "winner_id": null,
               "loser_id": null,
               "status": "completed",
-              "created_at": "2025-05-25T03:04:27.548Z",
-              "updated_at": "2025-05-25T03:04:47.485Z"
+              "created_at": "2025-05-29T02:33:34.780Z",
+              "updated_at": "2025-05-29T02:34:36.260Z"
             }
           ]
         ],
@@ -931,25 +932,25 @@
                 {
                   "id": null,
                   "name": "Player 2",
-                  "score": 2,
+                  "score": 0,
                   "completed": true,
-                  "created_at": "2025-05-25T03:04:37.677Z",
-                  "updated_at": "2025-05-25T03:07:57.278Z"
+                  "created_at": "2025-05-29T02:34:32.007Z",
+                  "updated_at": "2025-05-29T02:34:32.007Z"
                 },
                 {
                   "id": null,
                   "name": "Player 4",
-                  "score": 1,
+                  "score": 0,
                   "completed": true,
-                  "created_at": "2025-05-25T03:04:39.982Z",
-                  "updated_at": "2025-05-25T03:07:49.103Z"
+                  "created_at": "2025-05-29T02:34:34.420Z",
+                  "updated_at": "2025-05-29T02:34:34.420Z"
                 }
               ],
               "winner_id": null,
               "loser_id": null,
               "status": "completed",
-              "created_at": "2025-05-25T03:04:27.548Z",
-              "updated_at": "2025-05-25T03:10:16.051Z"
+              "created_at": "2025-05-29T02:33:34.780Z",
+              "updated_at": "2025-05-29T02:34:42.938Z"
             },
             {
               "id": null,
@@ -962,23 +963,23 @@
                   "name": "Player 3",
                   "score": 0,
                   "completed": true,
-                  "created_at": "2025-05-25T03:04:47.485Z",
-                  "updated_at": "2025-05-25T03:04:47.485Z"
+                  "created_at": "2025-05-29T02:34:36.260Z",
+                  "updated_at": "2025-05-29T02:34:36.260Z"
                 },
                 {
                   "id": null,
                   "name": "BYE",
                   "score": 0,
                   "completed": true,
-                  "created_at": "2025-05-25T03:04:47.485Z",
-                  "updated_at": "2025-05-25T03:04:47.485Z"
+                  "created_at": "2025-05-29T02:34:36.260Z",
+                  "updated_at": "2025-05-29T02:34:36.260Z"
                 }
               ],
               "winner_id": null,
               "loser_id": null,
               "status": "completed",
-              "created_at": "2025-05-25T03:04:27.548Z",
-              "updated_at": "2025-05-25T03:04:27.548Z"
+              "created_at": "2025-05-29T02:33:34.780Z",
+              "updated_at": "2025-05-29T02:33:34.780Z"
             }
           ],
           [
@@ -991,25 +992,25 @@
                 {
                   "id": null,
                   "name": "Player 2",
-                  "score": 2,
+                  "score": 0,
                   "completed": true,
-                  "created_at": "2025-05-25T03:10:16.051Z",
-                  "updated_at": "2025-05-25T03:10:19.661Z"
+                  "created_at": "2025-05-29T02:34:42.938Z",
+                  "updated_at": "2025-05-29T02:34:42.938Z"
                 },
                 {
                   "id": null,
                   "name": "Player 3",
                   "score": 0,
                   "completed": true,
-                  "created_at": "2025-05-25T03:11:50.431Z",
-                  "updated_at": "2025-05-25T03:11:50.431Z"
+                  "created_at": "2025-05-29T02:34:36.261Z",
+                  "updated_at": "2025-05-29T02:34:36.261Z"
                 }
               ],
               "winner_id": null,
               "loser_id": null,
               "status": "completed",
-              "created_at": "2025-05-25T03:04:27.548Z",
-              "updated_at": "2025-05-25T03:12:01.688Z"
+              "created_at": "2025-05-29T02:33:34.780Z",
+              "updated_at": "2025-05-29T02:34:48.289Z"
             }
           ]
         ],
@@ -1023,25 +1024,25 @@
               {
                 "id": null,
                 "name": "Player 1",
-                "score": 1,
+                "score": 0,
                 "completed": true,
-                "created_at": "2025-05-25T03:04:47.485Z",
-                "updated_at": "2025-05-25T03:10:25.989Z"
+                "created_at": "2025-05-29T02:34:36.260Z",
+                "updated_at": "2025-05-29T02:34:36.260Z"
               },
               {
                 "id": null,
                 "name": "Player 2",
-                "score": 2,
+                "score": 0,
                 "completed": true,
-                "created_at": "2025-05-25T03:12:01.688Z",
-                "updated_at": "2025-05-25T03:12:05.604Z"
+                "created_at": "2025-05-29T02:34:48.289Z",
+                "updated_at": "2025-05-29T02:34:48.289Z"
               }
             ],
             "winner_id": null,
             "loser_id": null,
             "status": "completed",
-            "created_at": "2025-05-25T03:04:27.548Z",
-            "updated_at": "2025-05-25T03:12:06.980Z"
+            "created_at": "2025-05-29T02:33:34.780Z",
+            "updated_at": "2025-05-29T02:35:31.315Z"
           }
         ]
       },
@@ -1082,76 +1083,89 @@
             "y1": 103,
             "x2": 574.6000366210938,
             "y2": 103
-          },
-          {
-            "x1": 724.6000366210938,
-            "y1": 103,
-            "x2": 490.4000244140625,
-            "y2": 653.5999755859375
           }
         ],
         "losers": [
           {
-            "x1": 556.2000122070312,
-            "y1": 352,
-            "x2": 576.2000122070312,
-            "y2": 352
+            "x1": 534.6000061035156,
+            "y1": 64,
+            "x2": 554.6000061035156,
+            "y2": 64
           },
           {
-            "x1": 576.2000122070312,
-            "y1": 352,
-            "x2": 576.2000122070312,
-            "y2": 391
+            "x1": 554.6000061035156,
+            "y1": 64,
+            "x2": 554.6000061035156,
+            "y2": 103
           },
           {
-            "x1": 576.2000122070312,
-            "y1": 391,
-            "x2": 596.2000122070312,
-            "y2": 391
+            "x1": 554.6000061035156,
+            "y1": 103,
+            "x2": 574.6000061035156,
+            "y2": 103
           },
           {
-            "x1": 556.2000122070312,
-            "y1": 424,
-            "x2": 576.2000122070312,
-            "y2": 424
+            "x1": 534.6000061035156,
+            "y1": 136,
+            "x2": 554.6000061035156,
+            "y2": 136
           },
           {
-            "x1": 576.2000122070312,
-            "y1": 424,
-            "x2": 576.2000122070312,
-            "y2": 391
+            "x1": 554.6000061035156,
+            "y1": 136,
+            "x2": 554.6000061035156,
+            "y2": 103
           },
           {
-            "x1": 576.2000122070312,
-            "y1": 391,
-            "x2": 596.2000122070312,
-            "y2": 391
-          },
+            "x1": 554.6000061035156,
+            "y1": 103,
+            "x2": 574.6000061035156,
+            "y2": 103
+          }
+        ],
+        "finals": []
+      },
+      "event": {
+        "id": "24f0",
+        "title": "Mag over think",
+        "venue": "Sainyo",
+        "description": "Nagtuo ang alimango na galupad ang isda?",
+        "category": "2",
+        "startDate": "May-21-2025",
+        "endDate": "May-21-2025",
+        "startTime": "01:00",
+        "endTime": "23:30",
+        "image": "data:image/svg+xml;base64,CiAgICAgICAgPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgICAgICAgICAgICB3aWR0aD0iNzEiCiAgICAgICAgICAgICBoZWlnaHQ9IjY2Ij4KICAgICAgICAgIDxpbWFnZSBocmVmPSJkYXRhOmltYWdlL2pwZWc7YmFzZTY0LC85ai80QUFRU2taSlJnQUJBUUFBQVFBQkFBRC80Z0hZU1VORFgxQlNUMFpKVEVVQUFRRUFBQUhJQUFBQUFBUXdBQUJ0Ym5SeVVrZENJRmhaV2lBSDRBQUJBQUVBQUFBQUFBQmhZM053QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQVFBQTl0WUFBUUFBQUFEVExRQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFsa1pYTmpBQUFBOEFBQUFDUnlXRmxhQUFBQkZBQUFBQlJuV0ZsYUFBQUJLQUFBQUJSaVdGbGFBQUFCUEFBQUFCUjNkSEIwQUFBQlVBQUFBQlJ5VkZKREFBQUJaQUFBQUNoblZGSkRBQUFCWkFBQUFDaGlWRkpEQUFBQlpBQUFBQ2hqY0hKMEFBQUJqQUFBQUR4dGJIVmpBQUFBQUFBQUFBRUFBQUFNWlc1VlV3QUFBQWdBQUFBY0FITUFVZ0JIQUVKWVdWb2dBQUFBQUFBQWI2SUFBRGoxQUFBRGtGaFpXaUFBQUFBQUFBQmltUUFBdDRVQUFCamFXRmxhSUFBQUFBQUFBQ1NnQUFBUGhBQUF0czlZV1ZvZ0FBQUFBQUFBOXRZQUFRQUFBQURUTFhCaGNtRUFBQUFBQUFRQUFBQUNabVlBQVBLbkFBQU5XUUFBRTlBQUFBcGJBQUFBQUFBQUFBQnRiSFZqQUFBQUFBQUFBQUVBQUFBTVpXNVZVd0FBQUNBQUFBQWNBRWNBYndCdkFHY0FiQUJsQUNBQVNRQnVBR01BTGdBZ0FESUFNQUF4QURiLzJ3QkRBQW9IQndnSEJnb0lDQWdMQ2dvTERoZ1FEZzBORGgwVkZoRVlJeDhsSkNJZklpRW1LemN2SmlrMEtTRWlNRUV4TkRrN1BqNCtKUzVFU1VNOFNEYzlQanYvMndCREFRb0xDdzRORGh3UUVCdzdLQ0lvT3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096di93QUFSQ0FCQ0FFY0RBU0lBQWhFQkF4RUIvOFFBSEFBQUFRVUJBUUVBQUFBQUFBQUFBQUFBQUFNRUJRWUhBUUlJLzhRQU9CQUFBUU1EQVFVRUNBTUpBQUFBQUFBQUFRSURCQUFGRVJJR0V5RXhRUWRSWVhFVUZTSkNnWkhCMFNOU29SWXlNMkp5Z3JHeXd2L0VBQmNCQUFNQkFBQUFBQUFBQUFBQUFBQUFBQUFCQWdQL3hBQWRFUUVCQUFNQUF3RUJBQUFBQUFBQUFBQUFBUUlSTVJJaFFRTlIvOW9BREFNQkFBSVJBeEVBUHdETksxK04yUzdQUGx4UHB0eDFJVmpnNjN5Nkg5eXNoclNkbHUwRkRNaGlQTVZwV2hJYlZyT05TZW54cWtaWFJScnN5dEhycGNGMlRPQ0JuU1F0R1QxL0xYSGV6ZXh0V2xVd3laNVdsZWtqZUl4L3BWOW1CcDl5TmRvcWd0QUkxbFBkVENhakVPNVErcVR2RWp3cG84cXFhdXpTeXk3ZDZUYlpjNWJpZUsyMXVJSkh5U0tyam15Y1J0d29VNUlIOXcrMVdxRGNYNERvY1pXVW51NzZlVEhZRjFhM3ZzeDVIVWU2by9TcTFwUGxmNm94MlhoQldDNi80ZTBQdFhoelptSWtaUzQvOHg5cW4zVUZCSVZqSTVFVndZVW1ucUR5cW1YYTN0UWQxdWxMSlhxenFJUExIaDQwVS8ycFFFcWpZNjYvcFJVWHJiRzdpQXF3enRrWmQ0a3R5YmFsS2xrQkxqYWVCU2UveU5WNnQ1L1pOcDVJZWl1bGgwQUZMaU9TeFNneWhQWit4WEt3V05zcWQzNUtQeG1GbmdmTHhwQis3UnBqUWt4VmtxWi9DZVFybmpwbnZwUjdacS9PamRxdUpLUDZ6WGxyWVZVWmhha1NqdjFENEh6cXZUTzQxV3pqZUtTT1FQRHlwckplRWR0U2xqMlFjbnlwMU5qdlcrU1daQ2REcWVRUHZDbTd1aVhISUhVWUk2MWJQV3FpMzd5aUc1aVNNc3I0b2RUL0FJTkt4N2hCa0hYR2xJSjZwMVVuYUxERXVNdDZGUGs3cEtrbmQ2dVdycFVlZXpDK291ZTZhUUN6cTRPaFhERlRhdVRibTFLMHI5Rndmei84MFU5MjR0RVN6TTJ5TXcvdlhnaGUrSU9RRDdPUHJSVTNyWEhpcFY5RTJseVZieUljeEowZTR2bVBLdm5hdnBTMFhCRnhnb2R5Q3NEQ3g0MGp2VWp3eFhEaXVhaFNNcDV4cGxUamFOWlR4MDk5STFDN1F5UFdET09ZUjlUVFhabUhDdXJTNHo2eTNKSEZEZzVud1BmVFBiQzhOM0s0aGFVcVFFZ0p3cm5VTEZtdXczMHV0S0tWSk9RUldrbnBqZXJQZHRqSjZWYnhqUzRSMVNjWitGUUVtNVhtM2d4RnlubXdQY0tzNHFRbWJhWE9TenU5NEVER0NVakJOVng5MVRxeXRhaVZIcWFKTDlGMThSZDNmZWZXMnA1d3JQSEdmaFJYbTVuSmIrUDBvcWIxcGp3d3JWckxmRjJ5U2s4UzJyZ29lRlpUVjVYY0lTWHdSTVlLVmR6ZzRmclR4bTBmcGJOYWE1R25OUzJRNjBzS1NhSHBCUWtuU1ZEd3JLcmJ0V20xU1FwRXB0eG9uQzBid2NhdUN0cWJOT2hCVGQ1aXNMSXlOYjZVa0h4Qk5UWnBjdTRnOXFiZERlZFhLaXVoQ3p4VTBvWU9hcURpaWc2VmNENDFhWm0xRHJPb0dWYlpPT1N3OGc1L1dxbmNMdjZlK1hYWEc4L3lrQVZVcUxIa3JwTlN3YVFWSlJqK0luNTAxZGw2anBiNjlUVmJMUW5LQktBT21lSHlvcEY3R0VnS0NqeHljMFZuZXRjZUVxS0tLREZGRkZBRkZGRkFGRkZGQUZGRkZBZi8yUT09IgogICAgICAgICAgICAgICAgIHdpZHRoPSIxMDAlIgogICAgICAgICAgICAgICAgIGhlaWdodD0iMTAwJSIvPgogICAgICAgIDwvc3ZnPg==",
+        "archived": false,
+        "tags": [
+          "3",
+          "6",
+          "4"
+        ],
+        "category_id": "3",
+        "type": "event",
+        "tasks": [
           {
-            "x1": 746.2000122070312,
-            "y1": 391,
-            "x2": 490.4000244140625,
-            "y2": 653.5999755859375
+            "committee": {
+              "id": "3"
+            },
+            "employees": [
+              {
+                "id": "11"
+              },
+              {
+                "id": "3"
+              }
+            ],
+            "task": "Overthink"
+          }
+        ],
+        "schedules": [
+          {
+            "time": "01:30",
+            "activity": "Start"
           }
         ]
-      },
-      "id": "2b38",
-      "event": {
-        "id": "9148",
-        "title": "Palakasan Day 1",
-        "description": "Spor",
-        "venue": "Naawn",
-        "category_id": "3",
-        "startDate": "May-28-2025",
-        "endDate": null,
-        "startTime": "08:00",
-        "endTime": "16:00",
-        "tags": [
-          "2"
-        ],
-        "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
-        "archived": false,
-        "createdAt": "2025-05-09T00:09:46.343Z"
       }
     }
   ],
