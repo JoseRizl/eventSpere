@@ -917,7 +917,7 @@ const confirmEndMatch = async () => {
 };
 
 // Update undoConcludeMatch function
-const undoConcludeMatch = (bracketIdx) => {
+const undoConcludeMatch = async (bracketIdx) => {
   const { roundIdx, matchIdx, bracketType } = getRoundAndMatchIndices(bracketIdx, currentMatchIndex.value);
   const bracket = brackets.value[bracketIdx];
 
@@ -1021,6 +1021,18 @@ const undoConcludeMatch = (bracketIdx) => {
             updated_at: new Date().toISOString()
           };
         }
+      }
+
+      try {
+        // Save the updated bracket to the database
+        await saveBrackets(bracket);
+
+        // Update lines after undoing the match
+        nextTick(() => {
+          updateLines(bracketIdx);
+        });
+      } catch (error) {
+        console.error('Error saving bracket after undoing match:', error);
       }
     }
   }
@@ -1378,43 +1390,6 @@ const updateLines = (bracketIdx) => {
               { x1: midX, y1: toCenterY, x2: toLeftX, y2: toCenterY }
             );
           });
-        }
-      }
-
-      // Connect winners and losers brackets to grand finals
-      const finalsContainer = document.querySelector('.finals-lines');
-      if (finalsContainer) {
-        const finalsRect = finalsContainer.getBoundingClientRect();
-        const lastWinnersMatch = document.getElementById(`winners-match-${bracket.matches.winners.length - 1}-0`);
-        const lastLosersMatch = document.getElementById(`losers-match-${bracket.matches.losers.length - 1}-0`);
-        const grandFinalsMatch = document.getElementById('grand-finals-match-0');
-
-        if (lastWinnersMatch && lastLosersMatch && grandFinalsMatch) {
-          const winnersRect = lastWinnersMatch.getBoundingClientRect();
-          const losersRect = lastLosersMatch.getBoundingClientRect();
-          const finalsRect = grandFinalsMatch.getBoundingClientRect();
-
-          // Only draw lines if there are actual players in the grand finals
-          const grandFinalsPlayers = bracket.matches.grand_finals[0].players;
-          if (grandFinalsPlayers[0].name !== 'TBD' || grandFinalsPlayers[1].name !== 'TBD') {
-            // Connect winners bracket to finals
-            const winnersCenterY = winnersRect.top - finalsRect.top + winnersRect.height / 2;
-            const winnersRightX = winnersRect.right - finalsRect.left;
-            const finalsLeftX = finalsRect.left - finalsRect.left;
-            const finalsCenterY = finalsRect.top - finalsRect.top + finalsRect.height / 2;
-
-            bracket.lines.finals.push(
-              { x1: winnersRightX, y1: winnersCenterY, x2: finalsLeftX, y2: finalsCenterY }
-            );
-
-            // Connect losers bracket to finals
-            const losersCenterY = losersRect.top - finalsRect.top + losersRect.height / 2;
-            const losersRightX = losersRect.right - finalsRect.left;
-
-            bracket.lines.finals.push(
-              { x1: losersRightX, y1: losersCenterY, x2: finalsLeftX, y2: finalsCenterY }
-            );
-          }
         }
       }
     }
