@@ -1,4 +1,6 @@
 import './bootstrap';
+import '../css/app.css';
+import '../css/bracket.css';
 
 import router from './routes'; // Adjust the path to your `router.js` file
 

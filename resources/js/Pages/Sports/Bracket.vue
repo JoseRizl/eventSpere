@@ -284,6 +284,12 @@ const fetchBrackets = async () => {
   }
 };
 
+// Add a function to generate unique IDs
+const generateId = () => {
+  return Math.random().toString(36).substr(2, 9);
+};
+
+// Update generateBracket function to assign IDs
 const generateBracket = () => {
   const numPlayers = numberOfPlayers.value;
   const totalSlots = Math.pow(2, Math.ceil(Math.log2(numPlayers)));
@@ -291,7 +297,7 @@ const generateBracket = () => {
 
   // Create arrays for players and BYEs with IDs
   const players = Array.from({ length: numPlayers }, (_, i) => ({
-    id: null, // Will be set when saved to database
+    id: generateId(),
     name: `Player ${i + 1}`,
     score: 0,
     completed: false,
@@ -299,7 +305,7 @@ const generateBracket = () => {
     updated_at: new Date().toISOString()
   }));
   const byes = Array.from({ length: totalByes }, () => ({
-    id: null,
+    id: generateId(),
     name: "BYE",
     score: 0,
     completed: true,
@@ -310,15 +316,15 @@ const generateBracket = () => {
   // Initialize slots array
   const slots = Array(totalSlots).fill(null);
 
-  // 3. Alternate BYEs and Participants
+  // Alternate BYEs and Participants
   let byeIndex = 0;
-  for (let i = totalSlots-2; i >=0; i-=2) {
+  for (let i = totalSlots-2; i >= 0; i -= 2) {
     if (byeIndex < byes.length) {
       slots[i + 1] = byes[byeIndex++];
     }
   }
 
-  // 4. Fill remaining slots with players
+  // Fill remaining slots with players
   let playerIndex = 0;
   for (let i = 0; i < totalSlots; i++) {
     if (!slots[i] && playerIndex < players.length) {
@@ -326,16 +332,16 @@ const generateBracket = () => {
     }
   }
 
-  // 5. Pair into matches with IDs
+  // Pair into matches with IDs
   const firstRound = [];
   for (let i = 0; i < totalSlots; i += 2) {
     const match = {
-      id: null, // Will be set when saved to database
+      id: generateId(),
       round: 1,
       match_number: i/2 + 1,
       players: [slots[i], slots[i + 1]],
       winner_id: null,
-      status: 'pending', // pending, completed, cancelled
+      status: 'pending',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
@@ -350,7 +356,7 @@ const generateBracket = () => {
     }
   }
 
-  // 6. Build empty placeholders for later rounds
+  // Build empty placeholders for later rounds
   const rounds = [firstRound];
   let prevMatches = firstRound;
   let roundNumber = 2;
@@ -359,7 +365,7 @@ const generateBracket = () => {
     const nextMatches = Array.from(
       { length: Math.ceil(prevMatches.length / 2) },
       (_, i) => ({
-        id: null,
+        id: generateId(),
         round: roundNumber,
         match_number: i + 1,
         players: [
@@ -387,7 +393,7 @@ const generateDoubleEliminationBracket = () => {
 
   // Create arrays for players and BYEs with IDs
   const players = Array.from({ length: numPlayers }, (_, i) => ({
-    id: null,
+    id: generateId(),
     name: `Player ${i + 1}`,
     score: 0,
     completed: false,
@@ -395,7 +401,7 @@ const generateDoubleEliminationBracket = () => {
     updated_at: new Date().toISOString()
   }));
   const byes = Array.from({ length: totalByes }, () => ({
-    id: null,
+    id: generateId(),
     name: "BYE",
     score: 0,
     completed: true,
@@ -427,7 +433,7 @@ const generateDoubleEliminationBracket = () => {
   const winnersFirstRound = [];
   for (let i = 0; i < totalSlots; i += 2) {
     const match = {
-      id: null,
+      id: generateId(),
       round: 1,
       match_number: i/2 + 1,
       bracket_type: 'winners',
@@ -459,7 +465,7 @@ const generateDoubleEliminationBracket = () => {
   const firstLosersRound = [];
   for (let i = 0; i < totalSlots/2; i++) {
     const match = {
-      id: null,
+      id: generateId(),
       round: 1,
       match_number: i + 1,
       bracket_type: 'losers',
@@ -487,7 +493,7 @@ const generateDoubleEliminationBracket = () => {
 
     for (let i = 0; i < nextRoundMatches; i++) {
       const match = {
-        id: null,
+        id: generateId(),
         round: losersRoundNumber,
         match_number: i + 1,
         bracket_type: 'losers',
@@ -519,7 +525,7 @@ const generateDoubleEliminationBracket = () => {
     const nextMatches = Array.from(
       { length: Math.ceil(prevWinnersMatches.length / 2) },
       (_, i) => ({
-        id: null,
+        id: generateId(),
         round: winnersRoundNumber,
         match_number: i + 1,
         bracket_type: 'winners',
@@ -541,7 +547,7 @@ const generateDoubleEliminationBracket = () => {
 
   // Add grand finals match
   const grandFinals = [{
-    id: null,
+    id: generateId(),
     round: 1,
     match_number: 1,
     bracket_type: 'grand_finals',
@@ -631,7 +637,7 @@ const decreaseScore = async (bracketIdx, teamIdx) => {
   }
 };
 
-// Update editParticipant function
+// Update editParticipant function to propagate changes
 const editParticipant = async (bracketIdx, roundIdx, matchIdx, teamIdx, bracketType = 'winners') => {
   const newName = prompt("Enter new participant name:");
   if (newName) {
@@ -655,8 +661,26 @@ const editParticipant = async (bracketIdx, roundIdx, matchIdx, teamIdx, bracketT
     }
 
     if (match) {
+      const playerId = match.players[teamIdx].id;
       match.players[teamIdx].name = newName;
       match.players[teamIdx].updated_at = new Date().toISOString();
+
+      // Update player name in all subsequent matches
+      if (bracket.type === 'Single Elimination') {
+        for (let r = roundIdx + 1; r < bracket.matches.length; r++) {
+          for (let m = 0; m < bracket.matches[r].length; m++) {
+            const nextMatch = bracket.matches[r][m];
+            if (nextMatch.players[0].id === playerId) {
+              nextMatch.players[0].name = newName;
+              nextMatch.players[0].updated_at = new Date().toISOString();
+            }
+            if (nextMatch.players[1].id === playerId) {
+              nextMatch.players[1].name = newName;
+              nextMatch.players[1].updated_at = new Date().toISOString();
+            }
+          }
+        }
+      }
 
       try {
         await saveBrackets(bracket);
@@ -753,28 +777,18 @@ const cancelEndMatch = () => {
   pendingBracketIdx = null;
 };
 
-// Update confirmEndMatch function to handle losers bracket progression
+// Update confirmEndMatch function to properly handle losers bracket assignment
 const confirmEndMatch = async () => {
   if (pendingBracketIdx !== null) {
     const bracket = brackets.value[pendingBracketIdx];
     const { roundIdx, matchIdx, bracketType } = getRoundAndMatchIndices(pendingBracketIdx, currentMatchIndex.value);
 
     if (bracket.type === 'Single Elimination') {
-      // ... existing single elimination logic ...
-    } else if (bracket.type === 'Double Elimination') {
-      // Get the current match based on bracket type
-      let currentMatch;
-      if (bracketType === 'winners') {
-        currentMatch = bracket.matches.winners[roundIdx][matchIdx];
-      } else if (bracketType === 'losers') {
-        currentMatch = bracket.matches.losers[roundIdx - bracket.matches.winners.length][matchIdx];
-      } else {
-        currentMatch = bracket.matches.grand_finals[matchIdx];
-      }
-
+      const currentMatch = bracket.matches[roundIdx][matchIdx];
       const winner = currentMatch.players[0].score >= currentMatch.players[1].score ? currentMatch.players[0] : currentMatch.players[1];
       const loser = currentMatch.players[0].score >= currentMatch.players[1].score ? currentMatch.players[1] : currentMatch.players[0];
 
+      // Mark current match as completed
       currentMatch.players[0].completed = true;
       currentMatch.players[1].completed = true;
       currentMatch.status = 'completed';
@@ -783,25 +797,16 @@ const confirmEndMatch = async () => {
       currentMatch.updated_at = new Date().toISOString();
 
       try {
-        if (bracketType === 'winners') {
-          // Move winner to next winners bracket match or grand finals
-          if (roundIdx < bracket.matches.winners.length - 1) {
-            const nextRoundIdx = roundIdx + 1;
-            const nextMatchIdx = Math.floor(matchIdx / 2);
-            const nextMatchPos = matchIdx % 2 === 0 ? 0 : 1;
+        // Move winner to next round if not in final round
+        if (roundIdx < bracket.matches.length - 1) {
+          const nextRoundIdx = roundIdx + 1;
+          const nextMatchIdx = Math.floor(matchIdx / 2);
+          const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
 
-            const nextMatch = bracket.matches.winners[nextRoundIdx][nextMatchIdx];
-            nextMatch.players[nextMatchPos] = {
-              ...winner,
-              score: 0,
-              completed: false,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            };
-          } else {
-            // This is the winners bracket final - winner goes to grand finals
-            const grandFinalsMatch = bracket.matches.grand_finals[0];
-            grandFinalsMatch.players[0] = {
+          // Ensure the next match exists
+          if (bracket.matches[nextRoundIdx] && bracket.matches[nextRoundIdx][nextMatchIdx]) {
+            const nextMatch = bracket.matches[nextRoundIdx][nextMatchIdx];
+            nextMatch.players[nextPlayerPos] = {
               ...winner,
               score: 0,
               completed: false,
@@ -809,105 +814,258 @@ const confirmEndMatch = async () => {
               updated_at: new Date().toISOString()
             };
           }
+        } else {
+          // This is the final match - show winner dialog
+          winnerMessage.value = `Winner: ${winner.name}`;
+          showWinnerDialog.value = true;
+        }
 
-          // Move loser to first round of losers bracket
-          const firstLosersRound = bracket.matches.losers[0];
-          for (let i = 0; i < firstLosersRound.length; i++) {
-            const losersMatch = firstLosersRound[i];
-            if (losersMatch.players[0].name === 'TBD') {
-              losersMatch.players[0] = {
-                ...loser,
-                score: 0,
-                completed: false,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              };
-              break;
-            } else if (losersMatch.players[1].name === 'TBD') {
-              losersMatch.players[1] = {
-                ...loser,
-                score: 0,
-                completed: false,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              };
-              break;
-            }
-          }
+        // Save the updated bracket
+        await saveBrackets(bracket);
 
-          // Handle BYEs after winners bracket final is completed
-          handleDoubleEliminationByes(bracket);
-        } else if (bracketType === 'losers') {
-          // Move winner to next losers bracket match or grand finals
-          const losersRoundIdx = roundIdx - bracket.matches.winners.length;
-          if (losersRoundIdx < bracket.matches.losers.length - 1) {
-            const nextRoundIdx = losersRoundIdx + 1;
-            const nextMatchIdx = Math.floor(matchIdx / 2);
-            const nextMatchPos = matchIdx % 2 === 0 ? 0 : 1;
+        // Update lines after saving
+        nextTick(() => {
+          updateLines(pendingBracketIdx);
+        });
+      } catch (error) {
+        console.error('Error concluding match:', error);
+      }
+    } else if (bracket.type === 'Double Elimination') {
+      let currentMatch;
+      switch (bracketType) {
+        case 'winners':
+          currentMatch = bracket.matches.winners[roundIdx][matchIdx];
+          break;
+        case 'losers':
+          currentMatch = bracket.matches.losers[roundIdx - bracket.matches.winners.length][matchIdx];
+          break;
+        case 'grand_finals':
+          currentMatch = bracket.matches.grand_finals[matchIdx];
+          break;
+      }
 
-            const nextMatch = bracket.matches.losers[nextRoundIdx][nextMatchIdx];
-            nextMatch.players[nextMatchPos] = {
-              ...winner,
-              score: 0,
-              completed: false,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            };
-          } else {
-            // This is the losers bracket final - winner goes to grand finals
-            const grandFinalsMatch = bracket.matches.grand_finals[0];
-            grandFinalsMatch.players[1] = {
-              ...winner,
-              score: 0,
-              completed: false,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            };
-          }
-        } else if (bracketType === 'grand_finals') {
-          // Check if we need a second grand finals match
-          const winnersBracketWinner = bracket.matches.winners[bracket.matches.winners.length - 1][0].winner_id;
+      if (currentMatch) {
+        const winner = currentMatch.players[0].score >= currentMatch.players[1].score ? currentMatch.players[0] : currentMatch.players[1];
+        const loser = currentMatch.players[0].score >= currentMatch.players[1].score ? currentMatch.players[1] : currentMatch.players[0];
 
-          if (winner.id === winnersBracketWinner) {
-            // Winners bracket winner won the grand finals
-            winnerMessage.value = `Tournament Winner: ${winner.name}`;
-            showWinnerDialog.value = true;
-          } else {
-            // Losers bracket winner won, need a second grand finals match
-            const secondGrandFinals = {
-              id: null,
-              round: 2,
-              match_number: 1,
-              bracket_type: 'grand_finals',
-              players: [
-                {
+        // Mark current match as completed
+        currentMatch.players[0].completed = true;
+        currentMatch.players[1].completed = true;
+        currentMatch.status = 'completed';
+        currentMatch.winner_id = winner.id;
+        currentMatch.loser_id = loser.id;
+        currentMatch.updated_at = new Date().toISOString();
+
+        try {
+          if (bracketType === 'winners') {
+            // Move winner to next winners bracket match or grand finals
+            if (roundIdx < bracket.matches.winners.length - 1) {
+              const nextRoundIdx = roundIdx + 1;
+              const nextMatchIdx = Math.floor(matchIdx / 2);
+              const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
+
+              if (bracket.matches.winners[nextRoundIdx] && bracket.matches.winners[nextRoundIdx][nextMatchIdx]) {
+                const nextMatch = bracket.matches.winners[nextRoundIdx][nextMatchIdx];
+                nextMatch.players[nextPlayerPos] = {
                   ...winner,
                   score: 0,
                   completed: false,
                   created_at: new Date().toISOString(),
                   updated_at: new Date().toISOString()
-                },
-                {
-                  ...loser,
+                };
+              }
+            } else {
+              // This is the winners bracket final - move winner to grand finals
+              const grandFinalsMatch = bracket.matches.grand_finals[0];
+              if (grandFinalsMatch) {
+                grandFinalsMatch.players[0] = {
+                  ...winner,
                   score: 0,
                   completed: false,
                   created_at: new Date().toISOString(),
                   updated_at: new Date().toISOString()
-                }
-              ],
-              winner_id: null,
-              loser_id: null,
-              status: 'pending',
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            };
-            bracket.matches.grand_finals.push(secondGrandFinals);
-          }
-        }
+                };
+              }
+            }
 
-        await saveBrackets(bracket);
-      } catch (error) {
-        console.error('Error concluding match:', error);
+            // Place loser in first round of losers bracket
+            const losersRoundIdx = 0;
+
+            // Count total losers so far to determine position
+            let totalLosers = 0;
+            for (let r = 0; r <= roundIdx; r++) {
+              for (let m = 0; m < bracket.matches.winners[r].length; m++) {
+                if (r === roundIdx && m === matchIdx) {
+                  break;
+                }
+                if (bracket.matches.winners[r][m].status === 'completed') {
+                  totalLosers++;
+                }
+              }
+            }
+
+            // Calculate position in first round of losers bracket
+            const losersMatchIdx = Math.floor(totalLosers / 2);
+            const losersPlayerPos = totalLosers % 2;
+
+            console.log(`Moving loser from W${roundIdx+1}M${matchIdx+1} to L${losersRoundIdx+1}M${losersMatchIdx+1}P${losersPlayerPos+1}`);
+
+            // Ensure the losers bracket has enough matches in round 1
+            while (bracket.matches.losers[0].length <= losersMatchIdx) {
+              bracket.matches.losers[0].push({
+                id: generateId(),
+                round: 1,
+                match_number: bracket.matches.losers[0].length + 1,
+                bracket_type: 'losers',
+                players: [
+                  { id: null, name: "TBD", score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+                  { id: null, name: "TBD", score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
+                ],
+                winner_id: null,
+                loser_id: null,
+                status: 'pending',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              });
+            }
+
+            const losersMatch = bracket.matches.losers[0][losersMatchIdx];
+
+            // Only place the loser if the slot is available (TBD)
+            if (losersMatch.players[losersPlayerPos].name === 'TBD') {
+              losersMatch.players[losersPlayerPos] = {
+                ...loser,
+                score: 0,
+                completed: false,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              };
+            } else {
+              console.error('Losers bracket slot already occupied:', {
+                round: losersRoundIdx,
+                match: losersMatchIdx,
+                position: losersPlayerPos,
+                existingPlayer: losersMatch.players[losersPlayerPos].name
+              });
+            }
+
+            // If this is the last winners bracket match, handle BYEs in losers bracket
+            if (roundIdx === bracket.matches.winners.length - 1) {
+              // Convert remaining TBDs in losers bracket round 1 to BYEs
+              const firstLosersRound = bracket.matches.losers[0];
+              firstLosersRound.forEach(match => {
+                if (match.players[0].name === 'TBD') {
+                  match.players[0] = {
+                    id: generateId(),
+                    name: 'BYE',
+                    score: 0,
+                    completed: true,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                  };
+                }
+                if (match.players[1].name === 'TBD') {
+                  match.players[1] = {
+                    id: generateId(),
+                    name: 'BYE',
+                    score: 0,
+                    completed: true,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                  };
+                }
+              });
+
+              // Handle BYE matches in losers bracket
+              for (let roundIdx = 0; roundIdx < bracket.matches.losers.length - 1; roundIdx++) {
+                const currentRound = bracket.matches.losers[roundIdx];
+                const nextRound = bracket.matches.losers[roundIdx + 1];
+
+                currentRound.forEach((match, matchIdx) => {
+                  if (match.players[0].name === 'BYE' || match.players[1].name === 'BYE') {
+                    const winner = match.players[0].name === 'BYE' ? match.players[1] : match.players[0];
+                    winner.completed = true;
+                    match.status = 'completed';
+                    match.winner_id = winner.id;
+
+                    // Move winner to next round
+                    const nextMatchIdx = Math.floor(matchIdx / 2);
+                    const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
+
+                    if (nextRound[nextMatchIdx]) {
+                      nextRound[nextMatchIdx].players[nextPlayerPos] = {
+                        ...winner,
+                        score: 0,
+                        completed: false,
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                      };
+                    }
+                  }
+                });
+              }
+            }
+          } else if (bracketType === 'losers') {
+            // Move winner to next losers bracket match
+            if (roundIdx < bracket.matches.winners.length + bracket.matches.losers.length - 1) {
+              const nextRoundIdx = roundIdx - bracket.matches.winners.length + 1;
+              const nextMatchIdx = Math.floor(matchIdx / 2);
+              const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
+
+              if (bracket.matches.losers[nextRoundIdx] && bracket.matches.losers[nextRoundIdx][nextMatchIdx]) {
+                const nextMatch = bracket.matches.losers[nextRoundIdx][nextMatchIdx];
+                nextMatch.players[nextPlayerPos] = {
+                  ...winner,
+                  score: 0,
+                  completed: false,
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString()
+                };
+              }
+            }
+
+            // Check if this is the last losers bracket match
+            if (roundIdx === bracket.matches.winners.length + bracket.matches.losers.length - 1) {
+              // Move winner to grand finals
+              const grandFinalsMatch = bracket.matches.grand_finals[0];
+              if (grandFinalsMatch) {
+                // If winners bracket final is completed, this is the second grand finals match
+                const winnersFinal = bracket.matches.winners[bracket.matches.winners.length - 1][0];
+                if (winnersFinal.status === 'completed') {
+                  grandFinalsMatch.players[1] = {
+                    ...winner,
+                    score: 0,
+                    completed: false,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                  };
+                } else {
+                  grandFinalsMatch.players[0] = {
+                    ...winner,
+                    score: 0,
+                    completed: false,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                  };
+                }
+              }
+            }
+          } else if (bracketType === 'grand_finals') {
+            // This is the final match - show winner dialog
+            winnerMessage.value = `Tournament Winner: ${winner.name}`;
+            showWinnerDialog.value = true;
+          }
+
+          // Save the updated bracket
+          await saveBrackets(bracket);
+
+          // Update lines after saving
+          nextTick(() => {
+            updateLines(pendingBracketIdx);
+          });
+        } catch (error) {
+          console.error('Error concluding match:', error);
+        }
       }
     }
 
@@ -922,109 +1080,167 @@ const undoConcludeMatch = async (bracketIdx) => {
   const bracket = brackets.value[bracketIdx];
 
   if (bracket.type === 'Single Elimination') {
-    // ... existing single elimination logic ...
-  } else if (bracket.type === 'Double Elimination') {
-    let currentMatch;
-    if (bracketType === 'winners') {
-      currentMatch = bracket.matches.winners[roundIdx][matchIdx];
-    } else if (bracketType === 'losers') {
-      currentMatch = bracket.matches.losers[roundIdx - bracket.matches.winners.length][matchIdx];
-    } else {
-      currentMatch = bracket.matches.grand_finals[matchIdx];
-    }
+    const currentMatch = bracket.matches[roundIdx][matchIdx];
 
     if (confirm('Are you sure you want to undo this match completion?')) {
       currentMatch.players[0].completed = false;
       currentMatch.players[1].completed = false;
       currentMatch.status = 'pending';
       currentMatch.winner_id = null;
-      currentMatch.loser_id = null;
+      currentMatch.updated_at = new Date().toISOString();
 
-      if (bracketType === 'winners') {
-        // Clear next winners bracket match
-        if (roundIdx < bracket.matches.winners.length - 1) {
-          const nextRoundIdx = roundIdx + 1;
-          const nextMatchIdx = Math.floor(matchIdx / 2);
-          const nextMatchPos = matchIdx % 2 === 0 ? 0 : 1;
+      // Clear next round match if not in final round
+      if (roundIdx < bracket.matches.length - 1) {
+        const nextRoundIdx = roundIdx + 1;
+        const nextMatchIdx = Math.floor(matchIdx / 2);
+        const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
 
-          bracket.matches.winners[nextRoundIdx][nextMatchIdx].players[nextMatchPos] = {
-            id: null,
-            name: 'TBD',
-            score: 0,
-            completed: false,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
-        } else {
-          // Clear grand finals if this was the winners bracket final
-          const grandFinalsMatch = bracket.matches.grand_finals[0];
-          grandFinalsMatch.players[0] = {
-            id: null,
-            name: 'TBD',
-            score: 0,
-            completed: false,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
-        }
-
-        // Clear corresponding losers bracket match
-        const firstLosersRound = bracket.matches.losers[0];
-        for (let i = 0; i < firstLosersRound.length; i++) {
-          const losersMatch = firstLosersRound[i];
-          if (losersMatch.players[0].id === currentMatch.winner_id || losersMatch.players[0].id === currentMatch.loser_id) {
-            losersMatch.players[0] = {
-              id: null,
-              name: 'TBD',
-              score: 0,
-              completed: false,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            };
-          }
-          if (losersMatch.players[1].id === currentMatch.winner_id || losersMatch.players[1].id === currentMatch.loser_id) {
-            losersMatch.players[1] = {
-              id: null,
-              name: 'TBD',
-              score: 0,
-              completed: false,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            };
-          }
-        }
-      } else if (bracketType === 'losers') {
-        // Clear next losers bracket match
-        const losersRoundIdx = roundIdx - bracket.matches.winners.length;
-        if (losersRoundIdx < bracket.matches.losers.length - 1) {
-          const nextRoundIdx = losersRoundIdx + 1;
-          const nextMatchIdx = Math.floor(matchIdx / 2);
-          const nextMatchPos = matchIdx % 2 === 0 ? 0 : 1;
-
-          bracket.matches.losers[nextRoundIdx][nextMatchIdx].players[nextMatchPos] = {
-            id: null,
-            name: 'TBD',
-            score: 0,
-            completed: false,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
-        } else {
-          // Clear grand finals if this was the losers bracket final
-          const grandFinalsMatch = bracket.matches.grand_finals[0];
-          grandFinalsMatch.players[1] = {
-            id: null,
-            name: 'TBD',
-            score: 0,
-            completed: false,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
-        }
+        bracket.matches[nextRoundIdx][nextMatchIdx].players[nextPlayerPos] = {
+          id: null,
+          name: 'TBD',
+          score: 0,
+          completed: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
       }
 
       try {
         // Save the updated bracket to the database
+        await saveBrackets(bracket);
+
+        // Update lines after undoing the match
+        nextTick(() => {
+          updateLines(bracketIdx);
+        });
+      } catch (error) {
+        console.error('Error saving bracket after undoing match:', error);
+      }
+    }
+  } else if (bracket.type === 'Double Elimination') {
+    let currentMatch;
+    switch (bracketType) {
+      case 'winners':
+        currentMatch = bracket.matches.winners[roundIdx][matchIdx];
+        break;
+      case 'losers':
+        currentMatch = bracket.matches.losers[roundIdx - bracket.matches.winners.length][matchIdx];
+        break;
+      case 'grand_finals':
+        currentMatch = bracket.matches.grand_finals[matchIdx];
+        break;
+    }
+
+    if (currentMatch && confirm('Are you sure you want to undo this match completion?')) {
+      // Reset current match state
+      currentMatch.players[0].completed = false;
+      currentMatch.players[1].completed = false;
+      currentMatch.status = 'pending';
+      currentMatch.winner_id = null;
+      currentMatch.loser_id = null;
+      currentMatch.updated_at = new Date().toISOString();
+
+      try {
+        if (bracketType === 'winners') {
+          // Clear next winners bracket match
+          if (roundIdx < bracket.matches.winners.length - 1) {
+            const nextRoundIdx = roundIdx + 1;
+            const nextMatchIdx = Math.floor(matchIdx / 2);
+            const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
+
+            if (bracket.matches.winners[nextRoundIdx] && bracket.matches.winners[nextRoundIdx][nextMatchIdx]) {
+              bracket.matches.winners[nextRoundIdx][nextMatchIdx].players[nextPlayerPos] = {
+                id: null,
+                name: 'TBD',
+                score: 0,
+                completed: false,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              };
+            }
+          }
+
+          // Clear corresponding losers bracket match
+          const losersRoundIdx = Math.floor(roundIdx / 2);
+          const losersMatchIdx = matchIdx;
+          const losersPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
+
+          if (bracket.matches.losers[losersRoundIdx] && bracket.matches.losers[losersRoundIdx][losersMatchIdx]) {
+            bracket.matches.losers[losersRoundIdx][losersMatchIdx].players[losersPlayerPos] = {
+              id: null,
+              name: 'TBD',
+              score: 0,
+              completed: false,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            };
+          }
+        } else if (bracketType === 'losers') {
+          // Clear next losers bracket match
+          if (roundIdx < bracket.matches.winners.length + bracket.matches.losers.length - 1) {
+            const nextRoundIdx = roundIdx - bracket.matches.winners.length + 1;
+            const nextMatchIdx = Math.floor(matchIdx / 2);
+            const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
+
+            if (bracket.matches.losers[nextRoundIdx] && bracket.matches.losers[nextRoundIdx][nextMatchIdx]) {
+              bracket.matches.losers[nextRoundIdx][nextMatchIdx].players[nextPlayerPos] = {
+                id: null,
+                name: 'TBD',
+                score: 0,
+                completed: false,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              };
+            }
+          }
+
+          // If this is the last losers bracket match, clear grand finals
+          if (roundIdx === bracket.matches.winners.length + bracket.matches.losers.length - 1) {
+            const grandFinalsMatch = bracket.matches.grand_finals[0];
+            if (grandFinalsMatch) {
+              const winnersFinal = bracket.matches.winners[bracket.matches.winners.length - 1][0];
+              if (winnersFinal.status === 'completed') {
+                grandFinalsMatch.players[1] = {
+                  id: null,
+                  name: 'TBD',
+                  score: 0,
+                  completed: false,
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString()
+                };
+              } else {
+                grandFinalsMatch.players[0] = {
+                  id: null,
+                  name: 'TBD',
+                  score: 0,
+                  completed: false,
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString()
+                };
+              }
+            }
+          }
+        } else if (bracketType === 'grand_finals') {
+          // Clear grand finals match
+          currentMatch.players[0] = {
+            id: null,
+            name: 'TBD',
+            score: 0,
+            completed: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          currentMatch.players[1] = {
+            id: null,
+            name: 'TBD',
+            score: 0,
+            completed: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+        }
+
+        // Save the updated bracket
         await saveBrackets(bracket);
 
         // Update lines after undoing the match
@@ -1980,717 +2196,6 @@ const getTotalMatches = (bracketIdx) => {
     </div>
   </template>
 
-<style scoped>
-/** Bracket*/
-
-      /* Container & General Styling */
-    .container {
-    padding: 20px;
-  }
-
-  .bracket-wrapper {
-    background-color: #f0f0f0;
-    padding: 15px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-  }
-
-  .match {
-    background: #fff;
-    position: relative;
-    border: 2px solid #007bff;
-    padding: 6px;
-    border-radius: 8px;
-    text-align: center;
-    width: 150px; /* Match size */
-    margin: 10px 0px; /* Spacing between matches */
-    margin-top: 10px;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-  }
-
-  .match-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    text-align: center;
-  }
-
-  .team {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100px;
-    padding: 10px;
-    border-radius: 8px;
-    color: #fff;
-  }
-
-  .team .team-name {
-    font-weight: bold;
-    margin-bottom: 5px;
-  }
-
-  .score-controls {
-    display: flex;
-    gap: 5px;
-    align-items: center;
-  }
-
-  .vs {
-    font-weight: bold;
-    color: #333;
-    font-size: 1.5rem;
-    padding: 0 15px;
-  }
-
-  .match-over, .completed-text {
-    width: 100%;
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-weight: bold;
-    text-align: center;
-  }
-
-  .match-over {
-    background-color: #ff4757;
-    color: white;
-    border: none;
-    cursor: pointer;
-    margin-top: 5px;
-  }
-
-  .completed-text {
-    background-color: #008000;
-    color: #fff;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-
-  .completed-text:hover {
-    background-color: #006400;
-  }
-
-  /* Editable Players */
-  .editable {
-    cursor: pointer;
-    color: #007bff;
-    transition: color 0.2s ease-in-out;
-  }
-
-  .editable:hover {
-    color: #0056b3;
-  }
-
-  .match::before {
-    top: 50%;
-    right: 100%;
-    transform: translateY(-50%);
-  }
-
-  .match::after {
-    top: 50%;
-    left: 100%;
-    transform: translateY(-50%);
-  }
-
-  .round .match {
-    margin-top: 0; /* Remove fixed margins */
-  }
-
-  /* Balanced Line Design (Pairs only) */
-  .round .match:nth-child(even)::before {
-      top: 50%; /* Centered to the match box */
-      transform: translateY(-50%); /* Aligns perfectly */}
-
-  .round .match:nth-child(odd)::before {
-      top: 50%; /* Centered to the match box */
-      transform: translateY(-50%); /* Aligns perfectly */
-  }
-
-  /* Remove Line for Final Round */
-  .round:last-child .match::after {
-    display: none;
-  }
-
-  .bracket {
-    display: flex;
-    gap: 40px;
-    align-items: flex-start; /* Aligns rounds at the top */
-    justify-content: center;
-    position: relative;
-  }
-
-  .round {
-    display: flex;
-    flex-direction: column;
-    gap: 20px; /* Creates balanced gaps in early rounds */
-    position: relative;
-  }
-
-  /** Bracket position individual cell */
-  .round-1 .match { margin-top: 0; margin-bottom: auto; }
-  .round-2 .match { margin-top: 39px; margin-bottom: 30px;}
-  .round-3 .match { margin-top: 110px; margin-bottom: 75px }
-  .round-4 .match { margin-top: 250px; margin-bottom: 225px;}
-  .round-5 .match { margin-top: 420px; margin-bottom: auto;}
-
-  /* Navigation & Matchup Section */
-  .navigation-and-matchup {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-  }
-
-  .navigation-controls {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-  }
-
-  .navigation-controls button {
-    background-color: #007bff;
-    color: #fff;
-    padding: 5px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-
-  .navigation-controls button:disabled {
-    background-color: #aaa;
-    cursor: not-allowed;
-  }
-
-  .navigation-controls button:hover {
-    background-color: #0056b3; /* Darker blue on hover */
-  }
-
-  /* Matchup Box */
-  .match-card {
-    text-align: center;
-    background: #f8f9fa;
-    border: 2px solid #007bff;
-    border-radius: 8px;
-    padding: 15px;
-    max-width: 300px;
-  }
-
-  /* Improved Button Design */
-  .score-btn {
-    background-color: #4caf50;
-    margin: 0 3px; /* Improved spacing between score controls */
-    color: #fff;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-  }
-
-  .score-btn:disabled {
-    background-color: #aaa;
-    cursor: not-allowed;
-  }
-
-  .team .score-display {
-    background-color: #fff;
-    color: #000;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: bold;
-    margin: 5px 0;
-  }
-
-  .match-over {
-    background-color: #ff4757;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    width: 100%;
-    margin-top: 5px;
-  }
-        .match-card.styled {
-          background-color: #d1d5db;
-          padding: 20px;
-          border-radius: 12px;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-          text-align: center;
-          position: relative;
-        }
-
-        .sport-tag {
-          background-color: #007bff;
-          color: #fff;
-          padding: 5px 15px;
-          border-radius: 15px;
-          display: inline-block;
-          margin-bottom: 15px;
-        }
-
-        .match-content {
-          display: flex;
-          justify-content: space-around;
-          align-items: center;
-          margin-bottom: 10px;
-        }
-
-        .team {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          padding: 15px;
-          border-radius: 8px;
-          color: #fff;
-          width: 80px;
-        }
-
-        .team.blue {
-          background-color: #0047ab;
-        }
-
-        .team.red {
-          background-color: #d70000;
-        }
-
-        .team-name {
-          font-weight: bold;
-          margin-bottom: 10px;
-          font-size: 1.1rem;
-        }
-
-        .score-controls {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .score-btn {
-          background-color: rgba(255, 255, 255, 0.2);
-          color: #fff;
-          border: none;
-          width: 32px;
-          height: 32px;
-          border-radius: 50%;
-          cursor: pointer;
-          font-size: 1.2rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.2s ease;
-        }
-
-        .score-btn:hover:not(:disabled) {
-          background-color: rgba(255, 255, 255, 0.3);
-          transform: scale(1.1);
-        }
-
-        .score-btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .score-display {
-          background-color: rgba(255, 255, 255, 0.9);
-          color: #000;
-          padding: 8px 16px;
-          border-radius: 8px;
-          font-weight: bold;
-          font-size: 1.2rem;
-          min-width: 50px;
-        }
-
-        .vs {
-          font-weight: bold;
-          color: #333;
-          font-size: 1.5rem;
-          padding: 0 15px;
-        }
-
-        .match-status {
-          margin-top: 20px;
-        }
-
-        .match-over, .completed-text {
-          width: 100%;
-          padding: 12px;
-          border-radius: 8px;
-          font-weight: 600;
-          text-align: center;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          transition: all 0.2s ease;
-        }
-
-        .match-over {
-          background-color: #ff4757;
-          color: white;
-          border: none;
-          cursor: pointer;
-        }
-
-        .match-over:hover {
-          background-color: #e63946;
-          transform: translateY(-2px);
-        }
-
-        .completed-text {
-          background-color: #28a745;
-          color: #fff;
-          cursor: pointer;
-        }
-
-        .completed-text:hover {
-          background-color: #218838;
-          transform: translateY(-2px);
-        }
-
-        .completed-text i, .match-over i {
-          font-size: 1.2rem;
-        }
-
-.connection-lines {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.winners-lines {
-  stroke: #007bff;
-}
-
-.losers-lines {
-  stroke: #dc3545;
-}
-
-.finals-lines {
-  stroke: #28a745;
-}
-
-.bracket {
-  position: relative;
-  display: flex;
-  gap: 40px;
-  align-items: flex-start;
-  justify-content: center;
-}
-
-.bracket-section {
-  position: relative;
-  margin-bottom: 30px;
-}
-
-.bracket-section.winners {
-  border-right: 2px solid #007bff;
-  padding-right: 20px;
-}
-
-.bracket-section.losers {
-  border-left: 2px solid #dc3545;
-  padding-left: 20px;
-}
-
-.bracket-section.grand-finals {
-  border-top: 2px solid #28a745;
-  padding-top: 20px;
-  margin-top: 20px;
-}
-
-.delete-button {
-  background-color: #ff4757;
-  color: white;
-  padding: 5px 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-bottom: 10px;
-}
-
-.delete-button:hover {
-  background-color: #e63946;
-
-}
-
-.match-over:hover {
-  background-color: #e63946; /* Lighter red on hover */
-}
-
-.toggle-button {
-  background-color: #007bff;
-  color: white;
-  padding: 5px 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-bottom: 10px;
-}
-
-.toggle-button:hover {
-  background-color: #0056b3;
-}
-
-.no-brackets-message {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-top: 20px;
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.icon-and-title {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.no-brackets-title {
-  color: #333;
-  margin: 0;
-  font-size: 1.5rem; /* Match the icon size */
-  font-weight: bold;
-}
-
-.no-brackets-text {
-  color: #555;
-  margin: 5px 0 0 0;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-
-.title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #333;
-}
-
-.winner {
-  color: #28a745; /* Green for winner */
-}
-
-.loser {
-  color: #dc3545; /* Red for loser */
-}
-
-.bye-text {
-  color: #dc3545; /* Red color for BYE text */
-}
-
-.facing-bye {
-  color: #28a745; /* Green color for players facing a BYE */
-}
-
-.bracket-wrapper h2 {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 10px;
-  text-align: left;
-}
-
-.round h3 {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #555;
-  margin-bottom: 15px;
-  text-align: center;
-}
-
-.p-dialog .p-dialog-content p {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #28a745; /* Green color for winner text */
-  text-align: center;
-  margin: 20px 0;
-}
-
-.confirmation-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.confirmation-buttons {
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.centered {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.button-container {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-.bracket-header {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 15px;
-}
-
-.event-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1rem;
-  color: #666;
-}
-
-.event-label {
-  font-weight: bold;
-}
-
-.event-title {
-  color: #007bff;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.event-title:hover {
-  color: #0056b3;
-  text-decoration: underline;
-}
-
-.match.highlight {
-  border: 2px solid black;
-  background-color: lightgray;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* Double Elimination Styles */
-.double-elimination-bracket {
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-  padding: 20px;
-}
-
-.bracket-section {
-  margin-bottom: 30px;
-}
-
-.bracket-section h3 {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.bracket-section.winners {
-  border-right: 2px solid #007bff;
-  padding-right: 20px;
-}
-
-.bracket-section.losers {
-  border-left: 2px solid #dc3545;
-  padding-left: 20px;
-}
-
-.bracket-section.grand-finals {
-  border-top: 2px solid #28a745;
-  padding-top: 20px;
-  margin-top: 20px;
-}
-
-.grand-finals .match {
-  background-color: #f8f9fa;
-  border: 2px solid #28a745;
-  transition: all 0.3s ease;
-}
-
-.grand-finals .match:hover {
-  background-color: #e8f5e9;
-  transform: translateY(-2px);
-}
-
-.winners .match {
-  border-color: #007bff;
-}
-
-.losers .match {
-  border-color: #dc3545;
-}
-
-.create-button {
-  background-color: #28a745;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.2s ease;
-}
-
-.create-button:hover {
-  background-color: #218838;
-}
-
-.bracket-controls {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.toggle-button {
-  background-color: #007bff;
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.2s ease;
-}
-
-.toggle-button:hover {
-  background-color: #0056b3;
-}
-
-.delete-button {
-  background-color: #dc3545;
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.2s ease;
-}
-
-.delete-button:hover {
-  background-color: #c82333;
-}
-
-.losers-bracket-loser {
-  color: #dc3545 !important; /* Red color for losers in losers bracket */
-  font-weight: bold;
-}
+<style>
+/* Styles have been moved to resources/css/bracket.css */
 </style>
