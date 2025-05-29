@@ -7,6 +7,7 @@ import Button from "primevue/button";
 import { computed } from "vue";
 import axios from "axios";
 import { Link } from '@inertiajs/vue3';
+import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 
 // Reactive State
 const bracketName = ref("");
@@ -2213,40 +2214,43 @@ const getTotalMatches = (bracketIdx) => {
         </div>
       </Dialog>
 
+      <!-- Winner Dialog -->
       <Dialog v-model:visible="showWinnerDialog" header="Winner!" modal dismissableMask>
         <p>{{ winnerMessage }}</p>
       </Dialog>
 
-      <Dialog v-model:visible="showConfirmDialog" header="Confirm End Match" modal>
-        <div class="confirmation-content">
-          <i class="pi pi-question-circle" style="font-size: 2rem; color: #007bff;"></i>
-          <p>Are you sure you want to conclude this match?</p>
-          <div class="confirmation-buttons">
-            <Button label="Yes" icon="pi pi-check" class="p-button-success" @click="confirmEndMatch" />
-            <Button label="No" icon="pi pi-times" class="p-button-secondary" @click="cancelEndMatch" />
-          </div>
-        </div>
-      </Dialog>
+      <!-- End Match Confirmation Dialog -->
+      <ConfirmationDialog
+        v-model:show="showConfirmDialog"
+        title="Confirm End Match"
+        message="Are you sure you want to conclude this match?"
+        confirmText="Yes"
+        cancelText="No"
+        confirmButtonClass="bg-green-600 hover:bg-green-700"
+        @confirm="confirmEndMatch"
+        @cancel="cancelEndMatch"
+      />
 
-      <Dialog v-model:visible="showMissingFieldsDialog" header="Missing Fields" modal>
-        <div class="dialog-content centered">
-          <i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: #ff4757;"></i>
-          <p>Please fill out all fields.</p>
-          <div class="button-container">
-            <Button label="OK" class="p-button-danger" @click="showMissingFieldsDialog = false" />
-          </div>
-        </div>
-      </Dialog>
+      <!-- Missing Fields Dialog -->
+      <ConfirmationDialog
+        v-model:show="showMissingFieldsDialog"
+        title="Missing Fields"
+        message="Please fill out all fields."
+        confirmText="OK"
+        confirmButtonClass="bg-red-600 hover:bg-red-700"
+        @confirm="showMissingFieldsDialog = false"
+      />
 
-      <Dialog v-model:visible="showDeleteConfirmDialog" header="Confirm Deletion" modal>
-        <div class="confirmation-content">
-          <i class="pi pi-question-circle" style="font-size: 2rem; color: #007bff;"></i>
-          <p>Are you sure you want to delete this bracket?</p>
-          <div class="confirmation-buttons">
-            <Button label="Yes" icon="pi pi-check" class="p-button-success" @click="confirmDeleteBracket" />
-            <Button label="No" icon="pi pi-times" class="p-button-secondary" @click="cancelDeleteBracket" />
-          </div>
-        </div>
-      </Dialog>
+      <!-- Delete Bracket Confirmation Dialog -->
+      <ConfirmationDialog
+        v-model:show="showDeleteConfirmDialog"
+        title="Confirm Deletion"
+        message="Are you sure you want to delete this bracket?"
+        confirmText="Yes"
+        cancelText="No"
+        confirmButtonClass="bg-red-600 hover:bg-red-700"
+        @confirm="confirmDeleteBracket"
+        @cancel="cancelDeleteBracket"
+      />
     </div>
   </template>

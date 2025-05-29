@@ -451,18 +451,20 @@
 
 /* Buttons */
 .create-button {
-  background-color: #28a745;
+  background: #7e0bc1;
   color: white;
-  padding: 10px 20px;
+  padding: 10px 15px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-size: 1rem;
   font-weight: bold;
-  transition: background-color 0.2s ease;
+  margin: 0;
+  height: 40px;
 }
 
 .create-button:hover {
-  background-color: #218838;
+  background-color: #6800b3e9;
 }
 
 .toggle-button {
