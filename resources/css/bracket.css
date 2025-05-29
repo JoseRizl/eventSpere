@@ -632,3 +632,35 @@
 .player-box .filled {
   background-color: #e8f5e9;
 }
+
+
+.loser-name {
+    color: #ff4757 !important;
+    font-weight: 500;
+  }
+
+  /* Ensure loser name stays red even after refresh */
+  .player-box span.loser-name {
+    color: #ff4757 !important;
+  }
+
+  .winner-name {
+    color: #2ed573 !important;
+    font-weight: 500;
+  }
+
+  /* Ensure winner name stays green even after refresh */
+  .player-box span.winner-name {
+    color: #2ed573 !important;
+  }
+
+  /* Keep existing styles for winners and other states */
+  .winner {
+    color: #2ed573;
+    font-weight: 500;
+  }
+
+  .loser {
+    color: #ff4757;
+    font-weight: 500;
+  }

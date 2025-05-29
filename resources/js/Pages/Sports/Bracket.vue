@@ -637,7 +637,7 @@ const decreaseScore = async (bracketIdx, teamIdx) => {
   }
 };
 
-// Update editParticipant function to propagate changes
+// Update editParticipant function to handle double elimination
 const editParticipant = async (bracketIdx, roundIdx, matchIdx, teamIdx, bracketType = 'winners') => {
   const newName = prompt("Enter new participant name:");
   if (newName) {
@@ -662,12 +662,14 @@ const editParticipant = async (bracketIdx, roundIdx, matchIdx, teamIdx, bracketT
 
     if (match) {
       const playerId = match.players[teamIdx].id;
-      match.players[teamIdx].name = newName;
-      match.players[teamIdx].updated_at = new Date().toISOString();
+      const playerScore = match.players[teamIdx].score;
+      const playerCompleted = match.players[teamIdx].completed;
+      const isWinner = match.winner_id === playerId;
+      const isLoser = match.loser_id === playerId;
 
-      // Update player name in all subsequent matches
+      // Update player name in all matches across the bracket
       if (bracket.type === 'Single Elimination') {
-        for (let r = roundIdx + 1; r < bracket.matches.length; r++) {
+        for (let r = roundIdx; r < bracket.matches.length; r++) {
           for (let m = 0; m < bracket.matches[r].length; m++) {
             const nextMatch = bracket.matches[r][m];
             if (nextMatch.players[0].id === playerId) {
@@ -678,6 +680,49 @@ const editParticipant = async (bracketIdx, roundIdx, matchIdx, teamIdx, bracketT
               nextMatch.players[1].name = newName;
               nextMatch.players[1].updated_at = new Date().toISOString();
             }
+          }
+        }
+      } else if (bracket.type === 'Double Elimination') {
+        // Update in winners bracket
+        for (let r = roundIdx; r < bracket.matches.winners.length; r++) {
+          for (let m = 0; m < bracket.matches.winners[r].length; m++) {
+            const nextMatch = bracket.matches.winners[r][m];
+            if (nextMatch.players[0].id === playerId) {
+              nextMatch.players[0].name = newName;
+              nextMatch.players[0].updated_at = new Date().toISOString();
+            }
+            if (nextMatch.players[1].id === playerId) {
+              nextMatch.players[1].name = newName;
+              nextMatch.players[1].updated_at = new Date().toISOString();
+            }
+          }
+        }
+
+        // Update in losers bracket
+        for (let r = 0; r < bracket.matches.losers.length; r++) {
+          for (let m = 0; m < bracket.matches.losers[r].length; m++) {
+            const nextMatch = bracket.matches.losers[r][m];
+            if (nextMatch.players[0].id === playerId) {
+              nextMatch.players[0].name = newName;
+              nextMatch.players[0].updated_at = new Date().toISOString();
+            }
+            if (nextMatch.players[1].id === playerId) {
+              nextMatch.players[1].name = newName;
+              nextMatch.players[1].updated_at = new Date().toISOString();
+            }
+          }
+        }
+
+        // Update in grand finals
+        for (let m = 0; m < bracket.matches.grand_finals.length; m++) {
+          const nextMatch = bracket.matches.grand_finals[m];
+          if (nextMatch.players[0].id === playerId) {
+            nextMatch.players[0].name = newName;
+            nextMatch.players[0].updated_at = new Date().toISOString();
+          }
+          if (nextMatch.players[1].id === playerId) {
+            nextMatch.players[1].name = newName;
+            nextMatch.players[1].updated_at = new Date().toISOString();
           }
         }
       }
@@ -1824,7 +1869,9 @@ const getTotalMatches = (bracketIdx) => {
                           winner: match.players[0].completed && match.players[0].score >= match.players[1].score,
                           loser: match.players[0].completed && match.players[0].score < match.players[1].score,
                           'bye-text': match.players[0].name === 'BYE',
-                          'facing-bye': match.players[1].name === 'BYE'
+                          'facing-bye': match.players[1].name === 'BYE',
+                          'loser-name': match.loser_id === match.players[0].id,
+                          'winner-name': match.winner_id === match.players[0].id
                         }"
                       >
                         {{ match.players[0].name || 'TBD' }} | {{ match.players[0].score }}
@@ -1837,7 +1884,9 @@ const getTotalMatches = (bracketIdx) => {
                           winner: match.players[1].completed && match.players[1].score >= match.players[0].score,
                           loser: match.players[1].completed && match.players[1].score < match.players[0].score,
                           'bye-text': match.players[1].name === 'BYE',
-                          'facing-bye': match.players[0].name === 'BYE'
+                          'facing-bye': match.players[0].name === 'BYE',
+                          'loser-name': match.loser_id === match.players[1].id,
+                          'winner-name': match.winner_id === match.players[1].id
                         }"
                       >
                         {{ match.players[1].name || 'TBD' }} | {{ match.players[1].score }}
@@ -1885,7 +1934,9 @@ const getTotalMatches = (bracketIdx) => {
                             winner: match.players[0].completed && match.players[0].score >= match.players[1].score,
                             loser: match.players[0].completed && match.players[0].score < match.players[1].score,
                             'bye-text': match.players[0].name === 'BYE',
-                            'facing-bye': match.players[1].name === 'BYE'
+                            'facing-bye': match.players[1].name === 'BYE',
+                            'loser-name': match.loser_id === match.players[0].id,
+                            'winner-name': match.winner_id === match.players[0].id
                           }"
                         >
                           {{ match.players[0].name || 'TBD' }} | {{ match.players[0].score }}
@@ -1898,7 +1949,9 @@ const getTotalMatches = (bracketIdx) => {
                             winner: match.players[1].completed && match.players[1].score >= match.players[0].score,
                             loser: match.players[1].completed && match.players[1].score < match.players[0].score,
                             'bye-text': match.players[1].name === 'BYE',
-                            'facing-bye': match.players[0].name === 'BYE'
+                            'facing-bye': match.players[0].name === 'BYE',
+                            'loser-name': match.loser_id === match.players[1].id,
+                            'winner-name': match.winner_id === match.players[1].id
                           }"
                         >
                           {{ match.players[1].name || 'TBD' }} | {{ match.players[1].score }}
@@ -1946,7 +1999,8 @@ const getTotalMatches = (bracketIdx) => {
                             loser: match.players[0].completed && match.players[0].score < match.players[1].score,
                             'bye-text': match.players[0].name === 'BYE',
                             'facing-bye': match.players[1].name === 'BYE',
-                            'losers-bracket-loser': match.players[0].completed && match.players[0].score < match.players[1].score
+                            'loser-name': match.loser_id === match.players[0].id,
+                            'winner-name': match.winner_id === match.players[0].id
                           }"
                         >
                           {{ match.players[0].name || 'TBD' }} | {{ match.players[0].score }}
@@ -1960,7 +2014,8 @@ const getTotalMatches = (bracketIdx) => {
                             loser: match.players[1].completed && match.players[1].score < match.players[0].score,
                             'bye-text': match.players[1].name === 'BYE',
                             'facing-bye': match.players[0].name === 'BYE',
-                            'losers-bracket-loser': match.players[1].completed && match.players[1].score < match.players[1].score
+                            'loser-name': match.loser_id === match.players[1].id,
+                            'winner-name': match.winner_id === match.players[1].id
                           }"
                         >
                           {{ match.players[1].name || 'TBD' }} | {{ match.players[1].score }}
@@ -2195,7 +2250,3 @@ const getTotalMatches = (bracketIdx) => {
       </Dialog>
     </div>
   </template>
-
-<style>
-/* Styles have been moved to resources/css/bracket.css */
-</style>
