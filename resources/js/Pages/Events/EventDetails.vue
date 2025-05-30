@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { parse, format, parseISO, isValid } from 'date-fns';
+import { parse, format, parseISO, isValid, addDays } from 'date-fns';
 import { usePage, router } from '@inertiajs/vue3';
 import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
@@ -39,7 +39,11 @@ const removeTag = (tagToRemove) => {
 const eventDetails = ref({
     ...props.event,
     venue: props.event.venue || '',
-    schedules: props.event.schedules || [],
+    scheduleLists: props.event.scheduleLists || [{
+      day: 1,
+      date: props.event.startDate,
+      schedules: props.event.schedules || []
+    }],
     tags: props.event.tags?.map(tag => {
       // Handle both cases: when tag is an object or just an ID
       if (typeof tag === 'object' && tag !== null) {
@@ -195,16 +199,50 @@ const confirmDeleteTask = () => {
   taskToDelete.value = null;
 };
 
-const addSchedule = () => {
-  eventDetails.value.schedules.push({ time: '', activity: '' });
+const totalDays = computed(() => {
+  if (!eventDetails.value.startDate || !eventDetails.value.endDate) return 1;
+  const start = parse(eventDetails.value.startDate, 'MMM-dd-yyyy', new Date());
+  const end = parse(eventDetails.value.endDate, 'MMM-dd-yyyy', new Date());
+  const diffTime = Math.abs(end - start);
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays + 1; // Include both start and end dates
+});
+
+const currentScheduleList = ref(0);
+
+const addScheduleList = () => {
+  if (eventDetails.value.scheduleLists.length >= totalDays.value) return;
+
+  const nextDay = eventDetails.value.scheduleLists.length + 1;
+  const startDate = parse(eventDetails.value.startDate, 'MMM-dd-yyyy', new Date());
+  const nextDate = addDays(startDate, nextDay - 1);
+
+  eventDetails.value.scheduleLists.push({
+    day: nextDay,
+    date: format(nextDate, 'MMM-dd-yyyy'),
+    schedules: []
+  });
 };
+
+const removeScheduleList = (index) => {
+  if (eventDetails.value.scheduleLists.length <= 1) return;
+  eventDetails.value.scheduleLists.splice(index, 1);
+  if (currentScheduleList.value >= eventDetails.value.scheduleLists.length) {
+    currentScheduleList.value = eventDetails.value.scheduleLists.length - 1;
+  }
+};
+
+const addSchedule = () => {
+  eventDetails.value.scheduleLists[currentScheduleList.value].schedules.push({ time: '', activity: '' });
+};
+
 const promptDeleteSchedule = (index) => {
   scheduleToDelete.value = index;
   showDeleteScheduleConfirm.value = true;
 };
 
 const confirmDeleteSchedule = () => {
-  eventDetails.value.schedules.splice(scheduleToDelete.value, 1);
+  eventDetails.value.scheduleLists[currentScheduleList.value].schedules.splice(scheduleToDelete.value, 1);
   showDeleteScheduleConfirm.value = false;
   scheduleToDelete.value = null;
 };
@@ -237,9 +275,13 @@ const saveChanges = () => {
     endTime: eventDetails.value.endTime,
     category_id: eventDetails.value.category?.id || null,
     tags: eventDetails.value.tags.map(tag => tag.id),
-    schedules: eventDetails.value.schedules.map(s => ({
-      time: s.time.padStart(5, '0'),
-      activity: s.activity
+    scheduleLists: eventDetails.value.scheduleLists.map(list => ({
+      day: list.day,
+      date: list.date,
+      schedules: list.schedules.map(s => ({
+        time: s.time.padStart(5, '0'),
+        activity: s.activity
+      }))
     })),
     tasks: eventDetails.value.tasks.map(task => ({
       committee: task.committee ? { id: task.committee.id } : null,
@@ -621,18 +663,65 @@ const normalizedRelatedEvents = computed(() => {
             <div>
               <h2 class="font-semibold mb-1">Event Schedules</h2>
               <div v-if="editMode">
-                <div v-for="(schedule, i) in eventDetails.schedules" :key="i" class="flex items-center gap-2 mb-2">
-                  <input v-model="schedule.time" type="time" class="border p-1 rounded w-32" />
-                  <input v-model="schedule.activity" type="text" placeholder="Activity" class="border p-1 rounded flex-1" />
-                  <button @click="promptDeleteSchedule(i)" class="text-red-500">✕</button>
+                <!-- Schedule List Navigation -->
+                <div class="flex items-center gap-4 mb-4">
+                  <div class="flex-1 flex gap-2 overflow-x-auto pb-2">
+                    <button
+                      v-for="(list, index) in eventDetails.scheduleLists"
+                      :key="index"
+                      @click="currentScheduleList = index"
+                      class="px-4 py-2 rounded whitespace-nowrap"
+                      :class="currentScheduleList === index ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300'"
+                    >
+                      Day {{ list.day }} ({{ formatDisplayDate(list.date) }})
+                    </button>
+                  </div>
+                  <div class="flex gap-2">
+                    <button
+                      @click="addScheduleList"
+                      :disabled="eventDetails.scheduleLists.length >= totalDays"
+                      class="px-3 py-2 rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      :title="eventDetails.scheduleLists.length >= totalDays ? 'Maximum number of days reached' : 'Add new day'"
+                    >
+                      + Add Day
+                    </button>
+                    <button
+                      v-if="eventDetails.scheduleLists.length > 1"
+                      @click="removeScheduleList(currentScheduleList)"
+                      class="px-3 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+                    >
+                      Remove Day
+                    </button>
+                  </div>
                 </div>
-                <button @click="addSchedule" class="text-blue-500 text-sm mt-2">+ Add Schedule</button>
+
+                <!-- Current Day's Schedules -->
+                <div class="border rounded-lg p-4">
+                  <h3 class="font-medium mb-3">Day {{ eventDetails.scheduleLists[currentScheduleList].day }} Schedule</h3>
+                  <div v-for="(schedule, i) in eventDetails.scheduleLists[currentScheduleList].schedules" :key="i" class="flex items-center gap-2 mb-2">
+                    <input v-model="schedule.time" type="time" class="border p-1 rounded w-32" />
+                    <input v-model="schedule.activity" type="text" placeholder="Activity" class="border p-1 rounded flex-1" />
+                    <button @click="promptDeleteSchedule(i)" class="text-red-500">✕</button>
+                  </div>
+                  <button @click="addSchedule" class="text-blue-500 text-sm mt-2">+ Add Schedule</button>
+                </div>
               </div>
-              <ul v-else class="list-disc pl-5 space-y-1 text-sm text-gray-700">
-                <li v-for="(schedule, i) in eventDetails.schedules" :key="i">
-                  {{ schedule.time }} - {{ schedule.activity }}
-                </li>
-              </ul>
+              <div v-else>
+                <!-- View Mode -->
+                <div class="space-y-4">
+                  <div v-for="(list, listIndex) in eventDetails.scheduleLists" :key="listIndex" class="border rounded-lg p-4">
+                    <h3 class="font-medium mb-2">Day {{ list.day }} ({{ formatDisplayDate(list.date) }})</h3>
+                    <ul class="list-disc pl-5 space-y-1 text-sm text-gray-700">
+                      <li v-for="(schedule, i) in list.schedules" :key="i">
+                        {{ schedule.time }} - {{ schedule.activity }}
+                      </li>
+                      <li v-if="list.schedules.length === 0" class="text-gray-500 italic">
+                        No schedules for this day
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- Save Button -->

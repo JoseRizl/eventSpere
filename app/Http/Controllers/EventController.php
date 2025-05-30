@@ -146,9 +146,16 @@ class EventController extends Controller
             }],
             'tags' => 'nullable|array',
             'tags.*' => ['required', Rule::in($validTagIds)],
-            'schedules' => 'nullable|array',
-            'schedules.*.time' => 'required|date_format:H:i',
-            'schedules.*.activity' => 'required|string|max:255',
+            'scheduleLists' => 'nullable|array',
+            'scheduleLists.*.day' => 'required|integer|min:1',
+            'scheduleLists.*.date' => ['required', 'string', function ($attribute, $value, $fail) {
+                if (!preg_match('/^[A-Za-z]{3}-\d{2}-\d{4}$/', $value)) {
+                    $fail('The '.$attribute.' must be in MMM-DD-YYYY format (e.g. May-28-2025)');
+                }
+            }],
+            'scheduleLists.*.schedules' => 'required|array',
+            'scheduleLists.*.schedules.*.time' => 'required|date_format:H:i',
+            'scheduleLists.*.schedules.*.activity' => 'required|string|max:255',
             'tasks' => 'nullable|array',
             'tasks.*.committee.id' => ['required', Rule::in($validCommitteeIds)],
             'tasks.*.employees' => 'required|array',
@@ -180,7 +187,7 @@ class EventController extends Controller
                     'startTime' => $validated['startTime'],
                     'endTime' => $validated['endTime'],
                     'tags' => $validated['tags'] ?? [],
-                    'schedules' => $validated['schedules'] ?? [],
+                    'scheduleLists' => $validated['scheduleLists'] ?? [],
                     'tasks' => $normalizedTasks
                 ];
                 break;
