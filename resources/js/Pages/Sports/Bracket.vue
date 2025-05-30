@@ -1447,14 +1447,14 @@ const showNextMatch = (bracketIdx) => {
   } else if (bracket.type === 'Double Elimination') {
     switch (activeBracketSection.value) {
       case 'winners':
-        const totalWinnersMatches = bracket.matches.winners.reduce((sum, round) => sum + round.length, 0);
+        const totalWinnersMatches = bracket.matches.winners.flat().length;
         if (currentWinnersMatchIndex.value < totalWinnersMatches - 1) {
           currentWinnersMatchIndex.value++;
         }
         break;
 
       case 'losers':
-        const totalLosersMatches = bracket.matches.losers.reduce((sum, round) => sum + round.length, 0);
+        const totalLosersMatches = bracket.matches.losers.flat().length;
         if (currentLosersMatchIndex.value < totalLosersMatches - 1) {
           currentLosersMatchIndex.value++;
         }
@@ -1792,6 +1792,25 @@ const getTotalMatches = (bracketIdx) => {
   return 0;
 };
 
+// Add navigateToSection function
+const navigateToSection = (bracketIdx, section) => {
+  activeBracketIdx.value = bracketIdx;
+  activeBracketSection.value = section;
+
+  // Reset the match index for the new section
+  switch (section) {
+    case 'winners':
+      currentWinnersMatchIndex.value = 0;
+      break;
+    case 'losers':
+      currentLosersMatchIndex.value = 0;
+      break;
+    case 'grand_finals':
+      currentGrandFinalsIndex.value = 0;
+      break;
+  }
+};
+
 </script>
 
 <template>
@@ -2083,14 +2102,24 @@ const getTotalMatches = (bracketIdx) => {
               <div class="navigation-controls">
                 <button
                   @click="showPreviousMatch(bracketIdx)"
-                  :disabled="currentMatchIndex === 0"
+                  :disabled="bracket.type === 'Single Elimination' ? currentMatchIndex === 0 :
+                    bracket.type === 'Double Elimination' && (
+                      (activeBracketSection === 'winners' && currentWinnersMatchIndex === 0) ||
+                      (activeBracketSection === 'losers' && currentLosersMatchIndex === 0) ||
+                      (activeBracketSection === 'grand_finals' && currentGrandFinalsIndex === 0)
+                    )"
                 >
                   Previous
                 </button>
 
                 <button
                   @click="showNextMatch(bracketIdx)"
-                  :disabled="currentMatchIndex >= getTotalMatches(bracketIdx) - 1"
+                  :disabled="bracket.type === 'Single Elimination' ? currentMatchIndex >= getTotalMatches(bracketIdx) - 1 :
+                    bracket.type === 'Double Elimination' && (
+                      (activeBracketSection === 'winners' && currentWinnersMatchIndex >= bracket.matches.winners.flat().length - 1) ||
+                      (activeBracketSection === 'losers' && currentLosersMatchIndex >= bracket.matches.losers.flat().length - 1) ||
+                      (activeBracketSection === 'grand_finals' && currentGrandFinalsIndex >= bracket.matches.grand_finals.length - 1)
+                    )"
                 >
                   Next
                 </button>
@@ -2168,6 +2197,28 @@ const getTotalMatches = (bracketIdx) => {
                         @click="concludeMatch(bracketIdx)"
                         class="match-over">
                   End Match
+                </button>
+              </div>
+
+              <!-- Section Navigation for Double Elimination -->
+              <div v-if="bracket.type === 'Double Elimination'" class="section-navigation">
+                <button
+                  @click="navigateToSection(bracketIdx, 'winners')"
+                  :class="{ active: activeBracketSection === 'winners' }"
+                >
+                  Winners
+                </button>
+                <button
+                  @click="navigateToSection(bracketIdx, 'losers')"
+                  :class="{ active: activeBracketSection === 'losers' }"
+                >
+                  Losers
+                </button>
+                <button
+                  @click="navigateToSection(bracketIdx, 'grand_finals')"
+                  :class="{ active: activeBracketSection === 'grand_finals' }"
+                >
+                  Grand Finals
                 </button>
               </div>
             </div>
@@ -2254,3 +2305,43 @@ const getTotalMatches = (bracketIdx) => {
       />
     </div>
   </template>
+
+<style scoped>
+/* ... existing styles ... */
+
+.navigation-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.section-navigation {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.section-navigation button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #e9ecef;
+  color: #495057;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.section-navigation button:hover {
+  background-color: #dee2e6;
+}
+
+.section-navigation button.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+/* ... existing styles ... */
+</style>
