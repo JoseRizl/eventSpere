@@ -2,7 +2,7 @@
 import { defineComponent, ref, onMounted, computed, watch } from "vue";
 import { router, usePage } from '@inertiajs/vue3';
 import Toast from 'primevue/toast';
-import { useToast } from 'primevue/usetoast';
+import { useToast } from '@/composables/useToast';
 import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 
@@ -13,7 +13,7 @@ export default defineComponent({
     ConfirmationDialog
   },
   setup() {
-    const toast = useToast();
+    const { toast, showSuccess, showError } = useToast();
     const { props, flash } = usePage();
     const categories = ref(props.categories || []);
     const tags = ref(props.tags || []);
@@ -34,16 +34,6 @@ export default defineComponent({
     const itemToDelete = ref(null);
     const showCreateConfirm = ref(false);
     const showEditConfirm = ref(false);
-
-    // Watch for flash messages
-    watch(() => flash, (newFlash) => {
-      if (newFlash.success) {
-        toast.add({ severity: 'success', summary: 'Success', detail: newFlash.success, life: 3000 });
-      }
-      if (newFlash.error) {
-        toast.add({ severity: 'error', summary: 'Error', detail: newFlash.error, life: 3000 });
-      }
-    }, { deep: true });
 
     const normalizedEvents = computed(() => {
       return events.value.map(event => ({
@@ -127,7 +117,7 @@ export default defineComponent({
 
             isEditModalVisible.value = false;
             showSuccessDialog.value = true;
-            toast.add({ severity: 'success', summary: 'Success', detail: `${showTags.value ? 'Tag' : 'Category'} updated successfully!`, life: 3000 });
+            showSuccess(`${showTags.value ? 'Tag' : 'Category'} updated successfully!`);
           },
           onError: (errors) => {
             errorMessage.value = errors.message || 'Failed to update item';
@@ -160,12 +150,7 @@ export default defineComponent({
       const requiredField = showTags.value ? 'name' : 'title';
 
       if (!newItem.value[requiredField]?.trim()) {
-        toast.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: `${showTags.value ? 'Tag' : 'Category'} name is required.`,
-          life: 3000
-        });
+        showError(`${showTags.value ? 'Tag' : 'Category'} name is required.`);
         return;
       }
 
@@ -183,12 +168,7 @@ export default defineComponent({
               : { title: "", description: "" };
             // Show success message
             showSuccessDialog.value = true;
-            toast.add({
-              severity: 'success',
-              summary: 'Success',
-              detail: `${showTags.value ? 'Tag' : 'Category'} created successfully!`,
-              life: 3000
-            });
+            showSuccess(`${showTags.value ? 'Tag' : 'Category'} created successfully!`);
             // Fetch updated list
             fetchData();
           },
@@ -233,12 +213,7 @@ export default defineComponent({
 
             // Show success message after data is updated
             showSuccessDialog.value = true;
-            toast.add({
-              severity: 'success',
-              summary: 'Success',
-              detail: `${showTags.value ? 'Tag' : 'Category'} deleted successfully!`,
-              life: 3000
-            });
+            showSuccess(`${showTags.value ? 'Tag' : 'Category'} deleted successfully!`);
           },
           onError: (errors) => {
             errorMessage.value = errors.message || 'Failed to delete item';
