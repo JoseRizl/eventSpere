@@ -7,6 +7,7 @@ use Illuminate\Validation\Rule;
 use App\Models\Event;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\File;
+use App\Models\Category;
 
 class EventController extends Controller
 {
@@ -199,6 +200,64 @@ class EventController extends Controller
             return back()->with('success', 'Event updated successfully.');
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to save event: '.$e->getMessage());
+        }
+    }
+
+    public function getArchivedEvents()
+    {
+        $json = File::get(base_path('db.json'));
+        $data = json_decode($json, true);
+
+        $archivedEvents = collect($data['events'] ?? [])
+            ->where('archived', true)
+            ->values()
+            ->toArray();
+
+        $categories = $data['categories'] ?? [];
+
+        return Inertia::render('List/Archive', [
+            'archivedEvents' => $archivedEvents,
+            'categories' => $categories
+        ]);
+    }
+
+    public function restore($id)
+    {
+        try {
+            $json = File::get(base_path('db.json'));
+            $data = json_decode($json, true);
+
+            foreach ($data['events'] as &$event) {
+                if ($event['id'] == $id) {
+                    $event['archived'] = false;
+                    break;
+                }
+            }
+
+            File::put(base_path('db.json'), json_encode($data, JSON_PRETTY_PRINT));
+            return back()->with('success', 'Event restored successfully');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to restore event');
+        }
+    }
+
+    public function permanentDelete($id)
+    {
+        try {
+            $json = File::get(base_path('db.json'));
+            $data = json_decode($json, true);
+
+            $data['events'] = collect($data['events'])
+                ->filter(function($event) use ($id) {
+                    return $event['id'] != $id;
+                })
+                ->values()
+                ->toArray();
+
+            File::put(base_path('db.json'), json_encode($data, JSON_PRETTY_PRINT));
+            return back()->with('success', 'Event permanently deleted');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to delete event');
         }
     }
 }

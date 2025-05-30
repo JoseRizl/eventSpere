@@ -123,10 +123,11 @@
 
 <script>
 import { defineComponent, ref, onMounted, computed } from "vue";
-import axios from "axios";
+import { router, usePage } from '@inertiajs/vue3';
 import { format } from "date-fns";
 import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
+import { useToast } from '@/composables/useToast';
 
 export default defineComponent({
   name: "Archive",
@@ -135,8 +136,10 @@ export default defineComponent({
     ConfirmationDialog
   },
   setup() {
-    const archivedEvents = ref([]);
-    const categories = ref([]);
+    const { showSuccess, showError } = useToast();
+    const { props } = usePage();
+    const archivedEvents = ref(props.archivedEvents || []);
+    const categories = ref(props.categories || []);
     const searchQuery = ref("");
     const saving = ref(false);
     const showSuccessDialog = ref(false);
@@ -173,19 +176,25 @@ export default defineComponent({
 
     onMounted(async () => {
       try {
-        const [eventsResponse, categoriesResponse] = await Promise.all([
-          axios.get("http://localhost:3000/events?archived=true"),
-          axios.get("http://localhost:3000/category"),
-        ]);
-
-        archivedEvents.value = eventsResponse.data.sort((a, b) => {
-          return new Date(b.startDate || "1970-01-01") - new Date(a.startDate || "1970-01-01");
+        await router.visit('/archived-events', {
+          preserveState: true,
+          onSuccess: (page) => {
+            archivedEvents.value = page.props.archivedEvents.sort((a, b) => {
+              return new Date(b.startDate || "1970-01-01") - new Date(a.startDate || "1970-01-01");
+            });
+            categories.value = page.props.categories;
+          },
+          onError: (errors) => {
+            errorMessage.value = 'Failed to load archived events.';
+            showErrorDialog.value = true;
+            showError('Failed to load archived events.');
+          }
         });
-        categories.value = categoriesResponse.data;
       } catch (error) {
-        console.error("Error fetching archived events or categories:", error);
+        console.error("Error fetching archived events:", error);
         errorMessage.value = 'Failed to load archived events.';
         showErrorDialog.value = true;
+        showError('Failed to load archived events.');
       }
     });
 
@@ -215,19 +224,29 @@ export default defineComponent({
       saving.value = true;
 
       try {
-        await axios.put(`http://localhost:3000/events/${eventToProcess.value.id}`, {
-          ...eventToProcess.value,
-          archived: false,
+        await router.put(`/events/${eventToProcess.value.id}/restore`, {}, {
+          onSuccess: () => {
+            archivedEvents.value = archivedEvents.value.filter(e => e.id !== eventToProcess.value.id);
+            successMessage.value = 'Event restored successfully!';
+            showSuccessDialog.value = true;
+            showSuccess('Event restored successfully!');
+          },
+          onError: (errors) => {
+            errorMessage.value = 'Failed to restore the event.';
+            showErrorDialog.value = true;
+            showError('Failed to restore the event.');
+          },
+          onFinish: () => {
+            saving.value = false;
+            showRestoreConfirm.value = false;
+            eventToProcess.value = null;
+          }
         });
-
-        archivedEvents.value = archivedEvents.value.filter(e => e.id !== eventToProcess.value.id);
-        successMessage.value = 'Event restored successfully!';
-        showSuccessDialog.value = true;
       } catch (error) {
         console.error("Error restoring event:", error);
         errorMessage.value = 'Failed to restore the event.';
         showErrorDialog.value = true;
-      } finally {
+        showError('Failed to restore the event.');
         saving.value = false;
         showRestoreConfirm.value = false;
         eventToProcess.value = null;
@@ -245,15 +264,29 @@ export default defineComponent({
       saving.value = true;
 
       try {
-        await axios.delete(`http://localhost:3000/events/${eventToProcess.value.id}`);
-        archivedEvents.value = archivedEvents.value.filter(e => e.id !== eventToProcess.value.id);
-        successMessage.value = 'Event permanently deleted!';
-        showSuccessDialog.value = true;
+        await router.delete(`/events/${eventToProcess.value.id}/permanent`, {
+          onSuccess: () => {
+            archivedEvents.value = archivedEvents.value.filter(e => e.id !== eventToProcess.value.id);
+            successMessage.value = 'Event permanently deleted!';
+            showSuccessDialog.value = true;
+            showSuccess('Event permanently deleted!');
+          },
+          onError: (errors) => {
+            errorMessage.value = 'Failed to delete the event.';
+            showErrorDialog.value = true;
+            showError('Failed to delete the event.');
+          },
+          onFinish: () => {
+            saving.value = false;
+            showDeleteConfirm.value = false;
+            eventToProcess.value = null;
+          }
+        });
       } catch (error) {
         console.error("Error deleting event:", error);
         errorMessage.value = 'Failed to delete the event.';
         showErrorDialog.value = true;
-      } finally {
+        showError('Failed to delete the event.');
         saving.value = false;
         showDeleteConfirm.value = false;
         eventToProcess.value = null;

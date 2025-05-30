@@ -13,6 +13,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/category-list', [CategoryController::class, 'index'])->name('category.list');
     Route::inertia('/archive', 'List/Archive')->name('archive');
 
+    Route::get('/archived-events', [EventController::class, 'getArchivedEvents'])->name('events.archived');
+    Route::put('/events/{id}/restore', [EventController::class, 'restore'])->name('events.restore');
+    Route::delete('/events/{id}/permanent', [EventController::class, 'permanentDelete'])->name('events.permanent-delete');
+
     Route::inertia('/create-category', 'Create/CreateCategory')->name('category.create');
     Route::inertia('/create-event', 'Create/CreateEvent')->name('event.create');
 
