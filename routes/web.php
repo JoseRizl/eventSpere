@@ -17,13 +17,8 @@ Route::middleware('auth')->group(function () {
     Route::put('/events/{id}/restore', [EventController::class, 'restore'])->name('events.restore');
     Route::delete('/events/{id}/permanent', [EventController::class, 'permanentDelete'])->name('events.permanent-delete');
 
-    Route::inertia('/create-category', 'Create/CreateCategory')->name('category.create');
-    Route::inertia('/create-event', 'Create/CreateEvent')->name('event.create');
-
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    Route::inertia('/task-form', 'Create/TaskForm')->name('task.form');
-    Route::inertia('/sports', 'Sports/MatchView')->name('match');
     Route::inertia('/bracket', 'Sports/Bracket')->name('bracket');
 
     Route::get('/events/{id}', [EventController::class, 'show'])->name('event.details');
