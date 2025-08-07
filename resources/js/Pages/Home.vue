@@ -257,263 +257,271 @@ function saveToggleState(key, value) {
     </div>
 
     <!-- Ongoing Events -->
-    <div v-if="ongoingEvents.length" class="w-full max-w-5xl mt-12">
-    <div class="flex justify-between items-center mb-4">
+    <div class="w-full max-w-5xl mt-12">
+      <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-semibold">Ongoing Events</h2>
         <Button
-        size="small"
-        icon="pi pi-chevron-down"
-        :label="showOngoingEvents ? 'Hide' : 'Show'"
-        @click="showOngoingEvents = !showOngoingEvents"
+          size="small"
+          icon="pi pi-chevron-down"
+          :label="showOngoingEvents ? 'Hide' : 'Show'"
+          @click="showOngoingEvents = !showOngoingEvents"
         />
-    </div>
-    <div v-if="showOngoingEvents" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div
-        v-for="(event, index) in ongoingEvents"
-        :key="'ongoing-' + index"
-        class="group relative h-full"
-        >
-        <Link
-            :href="route('event.details', { id: event.id })"
-            preserve-scroll
-            class="block h-full"
-        >
-        <Card class="h-full flex flex-col justify-between min-h-[280px]">
-            <template #header>
-                <div class="h-40 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
+      </div>
+      <div v-if="showOngoingEvents">
+        <div v-if="ongoingEvents.length" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div
+            v-for="(event, index) in ongoingEvents"
+            :key="'ongoing-' + index"
+            class="group relative h-full"
+          >
+            <Link
+              :href="route('event.details', { id: event.id })"
+              preserve-scroll
+              class="block h-full"
+            >
+              <Card class="h-full flex flex-col justify-between min-h-[280px]">
+                <template #header>
+                  <div class="h-40 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
                     <div class="absolute inset-0 bg-gradient-to-b from-gray-900/20 to-transparent z-10"></div>
                     <img
-                        v-if="event.image"
-                        :src="event.image"
-                        class="h-full w-full object-cover"
-                        alt="Event image"
+                      v-if="event.image"
+                      :src="event.image"
+                      class="h-full w-full object-cover"
+                      alt="Event image"
                     />
                     <span v-else class="text-gray-500">No image</span>
                     <Tag
-                        v-if="isNewEvent(event)"
-                        value="NEW"
-                        severity="success"
-                        class="absolute top-2 right-2 z-20"
+                      v-if="isNewEvent(event)"
+                      value="NEW"
+                      severity="success"
+                      class="absolute top-2 right-2 z-20"
                     />
-                </div>
-            </template>
-            <template #title>
-                <h3
+                  </div>
+                </template>
+                <template #title>
+                  <h3
                     class="text-lg font-medium overflow-hidden line-clamp-1 cursor-help"
                     v-tooltip.top="event.title"
-                >
+                  >
                     {{ event.title }}
-                </h3>
-            </template>
-
-            <template #subtitle>
-                <div class="flex items-center gap-2">
+                  </h3>
+                </template>
+                <template #subtitle>
+                  <div class="flex items-center gap-2">
                     <span class="text-sm text-gray-500">{{ event.formattedDate }}</span>
                     <Tag
-                        :value="getUpcomingTag(event.startDate, event.endDate)"
-                        :severity="getUpcomingSeverity(event.startDate, event.endDate)"
-                        class="text-xs"
+                      :value="getUpcomingTag(event.startDate, event.endDate)"
+                      :severity="getUpcomingSeverity(event.startDate, event.endDate)"
+                      class="text-xs"
                     />
-                </div>
-            </template>
-
-            <template #content>
-                <div class="flex-1 mb-2 overflow-hidden h-[calc(1.5rem)]">
+                  </div>
+                </template>
+                <template #content>
+                  <div class="flex-1 mb-2 overflow-hidden h-[calc(1.5rem)]">
                     <p class="text-sm text-gray-600 line-clamp-1">
-                        {{ event.description }}
+                      {{ event.description }}
                     </p>
-                </div>
-            </template>
-
-            <template #footer>
-                <div class="flex justify-end mt-2 z-20">
+                  </div>
+                </template>
+                <template #footer>
+                  <div class="flex justify-end mt-2 z-20">
                     <Button
-                        label="View Details"
-                        icon="pi pi-info-circle"
-                        class="p-button-text p-button-sm"
-                        @click.stop="$inertia.visit(route('event.details', { id: event.id }))"
+                      label="View Details"
+                      icon="pi pi-info-circle"
+                      class="p-button-text p-button-sm"
+                      @click.stop="$inertia.visit(route('event.details', { id: event.id }))"
                     />
-                </div>
-            </template>
-            </Card>
-        </Link>
+                  </div>
+                </template>
+              </Card>
+            </Link>
+          </div>
         </div>
-    </div>
+        <p v-else class="flex flex-col items-center justify-center py-10 bg-gray-50 rounded-lg shadow-inner border border-dashed border-gray-300 text-center text-gray-500">
+          <span class="text-4xl mb-2">📅</span>
+          <span class="font-semibold text-lg">No ongoing events</span>
+          <span class="text-sm">Check back later for updates!</span>
+        </p>
+      </div>
     </div>
 
     <!-- Events This Month -->
-    <div v-if="eventsThisMonth.length" class="w-full max-w-5xl mt-8">
-    <div class="flex justify-between items-center mb-4">
+    <div class="w-full max-w-5xl mt-8">
+      <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-semibold">Events This Month</h2>
         <Button
-        size="small"
-        icon="pi pi-chevron-down"
-        :label="showEventsThisMonth ? 'Hide' : 'Show'"
-        @click="showEventsThisMonth = !showEventsThisMonth"
+          size="small"
+          icon="pi pi-chevron-down"
+          :label="showEventsThisMonth ? 'Hide' : 'Show'"
+          @click="showEventsThisMonth = !showEventsThisMonth"
         />
-    </div>
-    <div v-if="showEventsThisMonth" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div
-        v-for="(event, index) in eventsThisMonth"
-        :key="'month-' + index"
-        class="group relative h-full"
-        >
-        <Link
-            :href="route('event.details', { id: event.id })"
-            preserve-scroll
-            class="block h-full"
-        >
-        <Card class="h-full flex flex-col justify-between min-h-[280px]">
-            <template #header>
-                <div class="h-40 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
+      </div>
+      <div v-if="showEventsThisMonth">
+        <div v-if="eventsThisMonth.length" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div
+            v-for="(event, index) in eventsThisMonth"
+            :key="'month-' + index"
+            class="group relative h-full"
+          >
+            <Link
+              :href="route('event.details', { id: event.id })"
+              preserve-scroll
+              class="block h-full"
+            >
+              <Card class="h-full flex flex-col justify-between min-h-[280px]">
+                <template #header>
+                  <div class="h-40 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
                     <div class="absolute inset-0 bg-gradient-to-b from-gray-900/20 to-transparent z-10"></div>
                     <img
-                        v-if="event.image"
-                        :src="event.image"
-                        class="h-full w-full object-cover"
-                        alt="Event image"
+                      v-if="event.image"
+                      :src="event.image"
+                      class="h-full w-full object-cover"
+                      alt="Event image"
                     />
                     <span v-else class="text-gray-500">No image</span>
                     <Tag
-                        v-if="isNewEvent(event)"
-                        value="NEW"
-                        severity="success"
-                        class="absolute top-2 right-2 z-20"
+                      v-if="isNewEvent(event)"
+                      value="NEW"
+                      severity="success"
+                      class="absolute top-2 right-2 z-20"
                     />
-                </div>
-            </template>
-            <template #title>
-                <h3
+                  </div>
+                </template>
+                <template #title>
+                  <h3
                     class="text-lg font-medium overflow-hidden line-clamp-1 cursor-help"
                     v-tooltip.top="event.title"
-                >
+                  >
                     {{ event.title }}
-                </h3>
-            </template>
-
-            <template #subtitle>
-                <div class="flex items-center gap-2">
+                  </h3>
+                </template>
+                <template #subtitle>
+                  <div class="flex items-center gap-2">
                     <span class="text-sm text-gray-500">{{ event.formattedDate }}</span>
                     <Tag
-                        :value="getUpcomingTag(event.startDate, event.endDate)"
-                        :severity="getUpcomingSeverity(event.startDate, event.endDate)"
-                        class="text-xs"
+                      :value="getUpcomingTag(event.startDate, event.endDate)"
+                      :severity="getUpcomingSeverity(event.startDate, event.endDate)"
+                      class="text-xs"
                     />
-                </div>
-            </template>
-
-            <template #content>
-                <div class="flex-1 mb-2 overflow-hidden h-[calc(1.5rem)]">
+                  </div>
+                </template>
+                <template #content>
+                  <div class="flex-1 mb-2 overflow-hidden h-[calc(1.5rem)]">
                     <p class="text-sm text-gray-600 line-clamp-1">
-                        {{ event.description }}
+                      {{ event.description }}
                     </p>
-                </div>
-            </template>
-
-            <template #footer>
-                <div class="flex justify-end mt-2 z-20">
+                  </div>
+                </template>
+                <template #footer>
+                  <div class="flex justify-end mt-2 z-20">
                     <Button
-                        label="View Details"
-                        icon="pi pi-info-circle"
-                        class="p-button-text p-button-sm"
-                        @click.stop="$inertia.visit(route('event.details', { id: event.id }))"
+                      label="View Details"
+                      icon="pi pi-info-circle"
+                      class="p-button-text p-button-sm"
+                      @click.stop="$inertia.visit(route('event.details', { id: event.id }))"
                     />
-                </div>
-            </template>
-            </Card>
-        </Link>
+                  </div>
+                </template>
+              </Card>
+            </Link>
+          </div>
         </div>
+        <p v-else class="flex flex-col items-center justify-center py-10 bg-gray-50 rounded-lg shadow-inner border border-dashed border-gray-300 text-center text-gray-500">
+          <span class="text-4xl mb-2">📅</span>
+          <span class="font-semibold text-lg">No events this month</span>
+          <span class="text-sm">Stay tuned for upcoming activities!</span>
+        </p>
+      </div>
     </div>
-    </div>
-    <p v-else class="text-center text-gray-500">No events this month.</p>
 
     <!-- Upcoming Events -->
-    <div v-if="upcomingEvents.length" class="w-full max-w-5xl mt-12">
-    <div class="flex justify-between items-center mb-4">
+    <div class="w-full max-w-5xl mt-12">
+      <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-semibold">Upcoming Events</h2>
         <Button
-        size="small"
-        icon="pi pi-chevron-down"
-        :label="showUpcomingEvents ? 'Hide' : 'Show'"
-        @click="showUpcomingEvents = !showUpcomingEvents"
+          size="small"
+          icon="pi pi-chevron-down"
+          :label="showUpcomingEvents ? 'Hide' : 'Show'"
+          @click="showUpcomingEvents = !showUpcomingEvents"
         />
-    </div>
-
-    <div v-if="showUpcomingEvents" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div
-        v-for="(event, index) in upcomingEvents"
-        :key="'upcoming-' + index"
-        class="group relative h-full"
-        >
-        <Link
-            :href="route('event.details', { id: event.id })"
-            preserve-scroll
-            class="block h-full"
-        >
-            <Card class="h-full flex flex-col justify-between min-h-[280px]">
-            <template #header>
-                <div class="h-40 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
+      </div>
+      <div v-if="showUpcomingEvents">
+        <div v-if="upcomingEvents.length" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div
+            v-for="(event, index) in upcomingEvents"
+            :key="'upcoming-' + index"
+            class="group relative h-full"
+          >
+            <Link
+              :href="route('event.details', { id: event.id })"
+              preserve-scroll
+              class="block h-full"
+            >
+              <Card class="h-full flex flex-col justify-between min-h-[280px]">
+                <template #header>
+                  <div class="h-40 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
                     <div class="absolute inset-0 bg-gradient-to-b from-gray-900/20 to-transparent z-10"></div>
                     <img
-                        v-if="event.image"
-                        :src="event.image"
-                        class="h-full w-full object-cover"
-                        alt="Event image"
+                      v-if="event.image"
+                      :src="event.image"
+                      class="h-full w-full object-cover"
+                      alt="Event image"
                     />
                     <span v-else class="text-gray-500">No image</span>
                     <Tag
-                        v-if="isNewEvent(event)"
-                        value="NEW"
-                        severity="success"
-                        class="absolute top-2 right-2 z-20"
+                      v-if="isNewEvent(event)"
+                      value="NEW"
+                      severity="success"
+                      class="absolute top-2 right-2 z-20"
                     />
-                </div>
-            </template>
-
-            <template #title>
-                <h3
+                  </div>
+                </template>
+                <template #title>
+                  <h3
                     class="text-lg font-medium overflow-hidden line-clamp-1 cursor-help"
                     v-tooltip.top="event.title"
-                >
+                  >
                     {{ event.title }}
-                </h3>
-            </template>
-
-            <template #subtitle>
-                <div class="flex items-center gap-2">
+                  </h3>
+                </template>
+                <template #subtitle>
+                  <div class="flex items-center gap-2">
                     <span class="text-sm text-gray-500">{{ event.formattedDate }}</span>
                     <Tag
-                        :value="getUpcomingTag(event.startDate, event.endDate)"
-                        :severity="getUpcomingSeverity(event.startDate, event.endDate)"
-                        class="text-xs"
+                      :value="getUpcomingTag(event.startDate, event.endDate)"
+                      :severity="getUpcomingSeverity(event.startDate, event.endDate)"
+                      class="text-xs"
                     />
-                </div>
-            </template>
-
-            <template #content>
-                <div class="flex-1 mb-2 overflow-hidden h-[calc(1.5rem)]">
+                  </div>
+                </template>
+                <template #content>
+                  <div class="flex-1 mb-2 overflow-hidden h-[calc(1.5rem)]">
                     <p class="text-sm text-gray-600 line-clamp-1">
-                        {{ event.description }}
+                      {{ event.description }}
                     </p>
-                </div>
-            </template>
-
-            <template #footer>
-                <div class="flex justify-end mt-2 z-20">
+                  </div>
+                </template>
+                <template #footer>
+                  <div class="flex justify-end mt-2 z-20">
                     <Button
-                        label="View Details"
-                        icon="pi pi-info-circle"
-                        class="p-button-text p-button-sm"
-                        @click.stop="$inertia.visit(route('event.details', { id: event.id }))"
+                      label="View Details"
+                      icon="pi pi-info-circle"
+                      class="p-button-text p-button-sm"
+                      @click.stop="$inertia.visit(route('event.details', { id: event.id }))"
                     />
-                </div>
-            </template>
-            </Card>
-        </Link>
+                  </div>
+                </template>
+              </Card>
+            </Link>
+          </div>
         </div>
+        <p v-else class="flex flex-col items-center justify-center py-10 bg-gray-50 rounded-lg shadow-inner border border-dashed border-gray-300 text-center text-gray-500">
+          <span class="text-4xl mb-2">📅</span>
+          <span class="font-semibold text-lg">No upcoming events</span>
+          <span class="text-sm">Events will be announced soon!</span>
+        </p>
+      </div>
     </div>
-    </div>
-    <p v-else class="text-center text-gray-500">No upcoming events.</p>
 
     <!-- Add Announcement Confirmation Modal -->
     <Dialog v-model:visible="showAddModal" header="Confirm Add" modal>
