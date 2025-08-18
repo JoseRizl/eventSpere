@@ -684,30 +684,29 @@ export function useBracketActions(state) {
                 grandFinalsMatch.players[0] = { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
               }
             }
+            // Map losers from winners bracket to losers round 1 in order, skipping BYE auto-completions
             const losersRoundIdx = 0;
             let totalLosers = 0;
             for (let r = 0; r <= roundIdx; r++) {
               for (let m = 0; m < bracket.matches.winners[r].length; m++) {
                 if (r === roundIdx && m === matchIdx) { break; }
-                if (bracket.matches.winners[r][m].status === 'completed') { totalLosers++; }
+                if (bracket.matches.winners[r][m].loser_id) { totalLosers++; }
               }
             }
             const losersMatchIdx = Math.floor(totalLosers / 2);
             const losersPlayerPos = totalLosers % 2;
-            while (bracket.matches.losers[0].length <= losersMatchIdx) {
-              bracket.matches.losers[0].push({
-                id: generateId(), round: 1, match_number: bracket.matches.losers[0].length + 1, bracket_type: 'losers',
+            while (bracket.matches.losers[losersRoundIdx].length <= losersMatchIdx) {
+              bracket.matches.losers[losersRoundIdx].push({
+                id: generateId(), round: 1, match_number: bracket.matches.losers[losersRoundIdx].length + 1, bracket_type: 'losers',
                 players: [
                   { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
                   { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
                 ], winner_id: null, loser_id: null, status: 'pending', created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
               });
             }
-            const losersMatch = bracket.matches.losers[0][losersMatchIdx];
+            const losersMatch = bracket.matches.losers[losersRoundIdx][losersMatchIdx];
             if (losersMatch.players[losersPlayerPos].name === 'TBD') {
               losersMatch.players[losersPlayerPos] = { ...loser, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
-            } else {
-              console.error('Losers bracket slot already occupied:', { round: losersRoundIdx, match: losersMatchIdx, position: losersPlayerPos, existingPlayer: losersMatch.players[losersPlayerPos].name });
             }
             if (roundIdx === bracket.matches.winners.length - 1) {
               const firstLosersRound = bracket.matches.losers[0];
@@ -809,9 +808,9 @@ export function useBracketActions(state) {
                 bracket.matches.winners[nextRoundIdx][nextMatchIdx].players[nextPlayerPos] = { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
               }
             }
-            const losersRoundIdx = Math.floor(roundIdx / 2);
-            const losersMatchIdx = matchIdx;
-            const losersPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
+            const losersRoundIdx = 0;
+            const losersMatchIdx = Math.floor(matchIdx / 2);
+            const losersPlayerPos = matchIdx % 2;
             if (bracket.matches.losers[losersRoundIdx] && bracket.matches.losers[losersRoundIdx][losersMatchIdx]) {
               bracket.matches.losers[losersRoundIdx][losersMatchIdx].players[losersPlayerPos] = { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
             }
@@ -836,8 +835,7 @@ export function useBracketActions(state) {
               }
             }
           } else if (bracketType === 'grand_finals') {
-            currentMatch.players[0] = { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
-            currentMatch.players[1] = { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+            // Keep grand finals participants; only status/winner fields were reset above
           }
           await saveBrackets(bracket);
           nextTick(() => updateLines(bracketIdx));
