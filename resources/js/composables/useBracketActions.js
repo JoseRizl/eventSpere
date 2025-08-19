@@ -28,6 +28,31 @@ export function useBracketActions(state) {
 
   const bracketTypeOptions = state.bracketTypeOptions;
 
+  // Action log for precise undo of slot assignments per bracket
+  const bracketActionLog = new Map();
+
+  const deepClone = (obj) => JSON.parse(JSON.stringify(obj));
+
+  const resolveMatch = (bracket, part, roundIdx, matchIdx) => {
+    if (part === 'winners') return bracket.matches.winners[roundIdx]?.[matchIdx];
+    if (part === 'losers') return bracket.matches.losers[roundIdx]?.[matchIdx];
+    if (part === 'grand_finals') return bracket.matches.grand_finals[matchIdx];
+    if (part === 'single') return bracket.matches[roundIdx]?.[matchIdx];
+    return undefined;
+  };
+
+  const setPlayerWithLog = (bracket, part, roundIdx, matchIdx, playerPos, newPlayer, performedActions) => {
+    const match = resolveMatch(bracket, part, roundIdx, matchIdx);
+    if (!match) return;
+    const prevPlayer = deepClone(match.players[playerPos]);
+    match.players[playerPos] = deepClone(newPlayer);
+    performedActions.push({
+      type: 'slot',
+      target: { part, roundIdx, matchIdx, playerPos },
+      prevPlayer,
+    });
+  };
+
   const openDialog = async () => {
     bracketName.value = "";
     numberOfPlayers.value = null;
@@ -197,6 +222,7 @@ export function useBracketActions(state) {
     try {
       await saveBrackets(bracketData);
       brackets.value.push(bracketData);
+      if (bracketData.id) bracketActionLog.set(bracketData.id, []);
       expandedBrackets.value.push(false);
       showDialog.value = false;
       handleByeRounds(brackets.value.length - 1);
@@ -223,6 +249,9 @@ export function useBracketActions(state) {
         );
         brackets.value = bracketsWithEvents;
         expandedBrackets.value = new Array(brackets.value.length).fill(false);
+        for (const b of brackets.value) {
+          if (b.id && !bracketActionLog.has(b.id)) bracketActionLog.set(b.id, []);
+        }
       }
     } catch (error) {
       console.error('Error fetching brackets:', error);
@@ -669,19 +698,17 @@ export function useBracketActions(state) {
         currentMatch.loser_id = loser.id;
         currentMatch.updated_at = new Date().toISOString();
         try {
+          const performedActions = [];
           if (bracketType === 'winners') {
             if (roundIdx < bracket.matches.winners.length - 1) {
               const nextRoundIdx = roundIdx + 1;
               const nextMatchIdx = Math.floor(matchIdx / 2);
               const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
-              if (bracket.matches.winners[nextRoundIdx] && bracket.matches.winners[nextRoundIdx][nextMatchIdx]) {
-                const nextMatch = bracket.matches.winners[nextRoundIdx][nextMatchIdx];
-                nextMatch.players[nextPlayerPos] = { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
-              }
+              setPlayerWithLog(bracket, 'winners', nextRoundIdx, nextMatchIdx, nextPlayerPos, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
             } else {
               const grandFinalsMatch = bracket.matches.grand_finals[0];
               if (grandFinalsMatch) {
-                grandFinalsMatch.players[0] = { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+                setPlayerWithLog(bracket, 'grand_finals', 0, 0, 0, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
               }
             }
             // Map losers from winners bracket to losers round 1 in order, skipping BYE auto-completions
@@ -704,9 +731,8 @@ export function useBracketActions(state) {
                 ], winner_id: null, loser_id: null, status: 'pending', created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
               });
             }
-            const losersMatch = bracket.matches.losers[losersRoundIdx][losersMatchIdx];
-            if (losersMatch.players[losersPlayerPos].name === 'TBD') {
-              losersMatch.players[losersPlayerPos] = { ...loser, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+            if (loser.name !== 'BYE') {
+              setPlayerWithLog(bracket, 'losers', losersRoundIdx, losersMatchIdx, losersPlayerPos, { ...loser, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
             }
             if (roundIdx === bracket.matches.winners.length - 1) {
               const firstLosersRound = bracket.matches.losers[0];
@@ -723,9 +749,7 @@ export function useBracketActions(state) {
                     winner2.completed = true; match.status = 'completed'; match.winner_id = winner2.id;
                     const nextMatchIdx2 = Math.floor(mIdx / 2);
                     const nextPlayerPos2 = mIdx % 2 === 0 ? 0 : 1;
-                    if (nextRound[nextMatchIdx2]) {
-                      nextRound[nextMatchIdx2].players[nextPlayerPos2] = { ...winner2, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
-                    }
+                    setPlayerWithLog(bracket, 'losers', r + 1, nextMatchIdx2, nextPlayerPos2, { ...winner2, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
                   }
                 });
               }
@@ -735,19 +759,16 @@ export function useBracketActions(state) {
               const nextRoundIdx = roundIdx - bracket.matches.winners.length + 1;
               const nextMatchIdx = Math.floor(matchIdx / 2);
               const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
-              if (bracket.matches.losers[nextRoundIdx] && bracket.matches.losers[nextRoundIdx][nextMatchIdx]) {
-                const nextMatch = bracket.matches.losers[nextRoundIdx][nextMatchIdx];
-                nextMatch.players[nextPlayerPos] = { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
-              }
+              setPlayerWithLog(bracket, 'losers', nextRoundIdx, nextMatchIdx, nextPlayerPos, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
             }
             if (roundIdx === bracket.matches.winners.length + bracket.matches.losers.length - 1) {
               const grandFinalsMatch = bracket.matches.grand_finals[0];
               if (grandFinalsMatch) {
                 const winnersFinal = bracket.matches.winners[bracket.matches.winners.length - 1][0];
                 if (winnersFinal.status === 'completed') {
-                  grandFinalsMatch.players[1] = { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+                  setPlayerWithLog(bracket, 'grand_finals', 0, 0, 1, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
                 } else {
-                  grandFinalsMatch.players[0] = { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+                  setPlayerWithLog(bracket, 'grand_finals', 0, 0, 0, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
                 }
               }
             }
@@ -756,6 +777,11 @@ export function useBracketActions(state) {
           }
           await saveBrackets(bracket);
           nextTick(() => updateLines(idx));
+          if (bracket.id && performedActions.length) {
+            const stack = bracketActionLog.get(bracket.id) || [];
+            stack.push(performedActions);
+            bracketActionLog.set(bracket.id, stack);
+          }
         } catch (e) {
           console.error('Error concluding match:', e);
         }
@@ -799,7 +825,17 @@ export function useBracketActions(state) {
         currentMatch.loser_id = null;
         currentMatch.updated_at = new Date().toISOString();
         try {
-          if (bracketType === 'winners') {
+          const stack = bracket.id ? bracketActionLog.get(bracket.id) : null;
+          if (stack && stack.length) {
+            const performedActions = stack.pop();
+            for (let i = performedActions.length - 1; i >= 0; i--) {
+              const a = performedActions[i];
+              if (a.type === 'slot') {
+                const match = resolveMatch(bracket, a.target.part, a.target.roundIdx, a.target.matchIdx);
+                if (match) match.players[a.target.playerPos] = deepClone(a.prevPlayer);
+              }
+            }
+          } else if (bracketType === 'winners') {
             if (roundIdx < bracket.matches.winners.length - 1) {
               const nextRoundIdx = roundIdx + 1;
               const nextMatchIdx = Math.floor(matchIdx / 2);
@@ -814,7 +850,7 @@ export function useBracketActions(state) {
             if (bracket.matches.losers[losersRoundIdx] && bracket.matches.losers[losersRoundIdx][losersMatchIdx]) {
               bracket.matches.losers[losersRoundIdx][losersMatchIdx].players[losersPlayerPos] = { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
             }
-          } else if (bracketType === 'losers') {
+          } else if (!stack && bracketType === 'losers') {
             if (roundIdx < bracket.matches.winners.length + bracket.matches.losers.length - 1) {
               const nextRoundIdx = roundIdx - bracket.matches.winners.length + 1;
               const nextMatchIdx = Math.floor(matchIdx / 2);
@@ -834,7 +870,7 @@ export function useBracketActions(state) {
                 }
               }
             }
-          } else if (bracketType === 'grand_finals') {
+          } else if (!stack && bracketType === 'grand_finals') {
             // Keep grand finals participants; only status/winner fields were reset above
           }
           await saveBrackets(bracket);
