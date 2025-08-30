@@ -164,10 +164,11 @@ onMounted(() => {
                         @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 0)"
                         :class="{
                           editable: true,
-                          winner: match.players[0].completed && match.players[0].score >= match.players[1].score,
-                          loser: match.players[0].completed && match.players[0].score < match.players[1].score,
+                          winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score >= match.players[1].score,
+                          loser: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score,
                           'bye-text': match.players[0].name === 'BYE',
                           'facing-bye': match.players[1].name === 'BYE',
+                          'tbd-text': !match.players[0].name || match.players[0].name === 'TBD',
                           'loser-name': match.loser_id === match.players[0].id,
                           'winner-name': match.winner_id === match.players[0].id
                         }"
@@ -179,10 +180,11 @@ onMounted(() => {
                         @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 1)"
                         :class="{
                           editable: true,
-                          winner: match.players[1].completed && match.players[1].score >= match.players[0].score,
-                          loser: match.players[1].completed && match.players[1].score < match.players[0].score,
+                          winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score >= match.players[0].score,
+                          loser: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score,
                           'bye-text': match.players[1].name === 'BYE',
                           'facing-bye': match.players[0].name === 'BYE',
+                          'tbd-text': !match.players[1].name || match.players[1].name === 'TBD',
                           'loser-name': match.loser_id === match.players[1].id,
                           'winner-name': match.winner_id === match.players[1].id
                         }"
@@ -229,10 +231,11 @@ onMounted(() => {
                           @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 0)"
                           :class="{
                             editable: true,
-                            winner: match.players[0].completed && match.players[0].score >= match.players[1].score,
-                            loser: match.players[0].completed && match.players[0].score < match.players[1].score,
+                            winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score >= match.players[1].score,
+                            loser: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score,
                             'bye-text': match.players[0].name === 'BYE',
                             'facing-bye': match.players[1].name === 'BYE',
+                            'tbd-text': !match.players[0].name || match.players[0].name === 'TBD',
                             'loser-name': match.loser_id === match.players[0].id,
                             'winner-name': match.winner_id === match.players[0].id
                           }"
@@ -244,10 +247,11 @@ onMounted(() => {
                           @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 1)"
                           :class="{
                             editable: true,
-                            winner: match.players[1].completed && match.players[1].score >= match.players[0].score,
-                            loser: match.players[1].completed && match.players[1].score < match.players[0].score,
+                            winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score >= match.players[0].score,
+                            loser: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score,
                             'bye-text': match.players[1].name === 'BYE',
                             'facing-bye': match.players[0].name === 'BYE',
+                            'tbd-text': !match.players[1].name || match.players[1].name === 'TBD',
                             'loser-name': match.loser_id === match.players[1].id,
                             'winner-name': match.winner_id === match.players[1].id
                           }"
@@ -293,10 +297,11 @@ onMounted(() => {
                           @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 0)"
                           :class="{
                             editable: true,
-                            winner: match.players[0].completed && match.players[0].score >= match.players[1].score,
-                            loser: match.players[0].completed && match.players[0].score < match.players[1].score,
+                            winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score >= match.players[1].score,
+                            loser: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score,
                             'bye-text': match.players[0].name === 'BYE',
                             'facing-bye': match.players[1].name === 'BYE',
+                            'tbd-text': !match.players[0].name || match.players[0].name === 'TBD',
                             'loser-name': match.loser_id === match.players[0].id,
                             'winner-name': match.winner_id === match.players[0].id
                           }"
@@ -308,10 +313,11 @@ onMounted(() => {
                           @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 1)"
                           :class="{
                             editable: true,
-                            winner: match.players[1].completed && match.players[1].score >= match.players[0].score,
-                            loser: match.players[1].completed && match.players[1].score < match.players[0].score,
+                            winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score >= match.players[0].score,
+                            loser: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score,
                             'bye-text': match.players[1].name === 'BYE',
                             'facing-bye': match.players[0].name === 'BYE',
+                            'tbd-text': !match.players[1].name || match.players[1].name === 'TBD',
                             'loser-name': match.loser_id === match.players[1].id,
                             'winner-name': match.winner_id === match.players[1].id
                           }"
@@ -351,8 +357,11 @@ onMounted(() => {
                         @click.stop="editParticipant(bracketIdx, 0, matchIdx, 0)"
                         :class="{
                           editable: true,
-                          winner: match.players[0].completed && match.players[0].score >= match.players[1].score,
-                          loser: match.players[0].completed && match.players[0].score < match.players[1].score
+                          winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score >= match.players[1].score,
+                          loser: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score,
+                          'bye-text': match.players[0].name === 'BYE',
+                          'facing-bye': match.players[1].name === 'BYE',
+                          'tbd-text': !match.players[0].name || match.players[0].name === 'TBD'
                         }"
                       >
                         {{ match.players[0].name || 'TBD' }} | {{ match.players[0].score }}
@@ -362,8 +371,11 @@ onMounted(() => {
                         @click.stop="editParticipant(bracketIdx, 0, matchIdx, 1)"
                         :class="{
                           editable: true,
-                          winner: match.players[1].completed && match.players[1].score >= match.players[0].score,
-                          loser: match.players[1].completed && match.players[1].score < match.players[0].score
+                          winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score >= match.players[0].score,
+                          loser: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score,
+                          'bye-text': match.players[1].name === 'BYE',
+                          'facing-bye': match.players[0].name === 'BYE',
+                          'tbd-text': !match.players[1].name || match.players[1].name === 'TBD'
                         }"
                       >
                         {{ match.players[1].name || 'TBD' }} | {{ match.players[1].score }}
@@ -433,7 +445,7 @@ onMounted(() => {
                       -
                     </button>
 
-                    <span class="team-name">{{ currentMatch(bracketIdx).players[0]?.name || 'TBD' }}</span>
+                    <span class="team-name" :class="{ 'tbd-text': !currentMatch(bracketIdx).players[0]?.name || currentMatch(bracketIdx).players[0]?.name === 'TBD' }">{{ currentMatch(bracketIdx).players[0]?.name || 'TBD' }}</span>
                   </div>
 
                   <span class="vs">VS</span>
@@ -460,7 +472,7 @@ onMounted(() => {
                       -
                     </button>
 
-                    <span class="team-name">{{ currentMatch(bracketIdx).players[1]?.name || 'TBD' }}</span>
+                    <span class="team-name" :class="{ 'tbd-text': !currentMatch(bracketIdx).players[1]?.name || currentMatch(bracketIdx).players[1]?.name === 'TBD' }">{{ currentMatch(bracketIdx).players[1]?.name || 'TBD' }}</span>
                   </div>
                 </div>
 
