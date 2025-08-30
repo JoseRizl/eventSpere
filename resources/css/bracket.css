@@ -628,15 +628,22 @@
   border-radius: 4px;
 }
 
-/* TBD text styling - consistent across all sections */
-.tbd-text {
-  color: #6f42c1 !important;
+/* Base styling for all player names - easier to read */
+.player-box span {
   font-weight: 500;
-  font-style: italic;
   background-color: #f8f9fa;
   padding: 2px 6px;
   border-radius: 4px;
   border: 1px solid #dee2e6;
+  display: inline-block;
+  min-width: 80px;
+  text-align: center;
+}
+
+/* TBD text styling - consistent across all sections */
+.tbd-text {
+  color: #6f42c1 !important;
+  font-style: italic;
 }
 
 /* Ensure TBD text overrides winner/loser colors */
@@ -668,9 +675,6 @@
 /* Ensure facing-bye styling takes precedence over winner/loser colors */
 .player-box .facing-bye {
   color: #28a745 !important;
-  font-weight: 500;
-  padding: 2px 6px;
-  border-radius: 4px;
 }
 
 /* Override winner/loser colors when facing-bye is present */
@@ -682,12 +686,7 @@
 /* Ensure BYE text styling takes precedence over all other colors */
 .player-box .bye-text {
   color: #6c757d !important;
-  font-weight: 500;
   font-style: italic;
-  background-color: #f8f9fa;
-  padding: 2px 6px;
-  border-radius: 4px;
-  border: 1px solid #dee2e6;
 }
 
 /* Override any other color classes when BYE is present */
@@ -716,24 +715,24 @@
 
 
 .loser-name {
-    color: #ff4757 !important;
-    font-weight: 500;
-  }
+  color: #ff4757 !important;
+  font-weight: 600;
+}
 
-  /* Ensure loser name stays red even after refresh */
-  .player-box span.loser-name {
-    color: #ff4757 !important;
-  }
+/* Ensure loser name stays red even after refresh */
+.player-box span.loser-name {
+  color: #ff4757 !important;
+}
 
   .winner-name {
-    color: #2ed573 !important;
-    font-weight: 500;
-  }
+  color: #2ed573 !important;
+  font-weight: 600;
+}
 
-  /* Ensure winner name stays green even after refresh */
-  .player-box span.winner-name {
-    color: #2ed573 !important;
-  }
+/* Ensure winner name stays green even after refresh */
+.player-box span.winner-name {
+  color: #2ed573 !important;
+}
 
   /* Keep existing styles for winners and other states */
   .winner {
