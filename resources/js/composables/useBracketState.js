@@ -28,6 +28,10 @@ export function useBracketState() {
 
   const bracketTypeOptions = ["Single Elimination", "Double Elimination", "Round Robin"];
 
+  const showRoundRobinMatchDialog = ref(false);
+  const selectedRoundRobinMatch = ref(null);
+  const selectedRoundRobinMatchData = ref(null);
+
   return {
     bracketName,
     numberOfPlayers,
@@ -52,6 +56,9 @@ export function useBracketState() {
     currentGrandFinalsIndex,
     activeBracketSection,
     bracketTypeOptions,
+    showRoundRobinMatchDialog,
+    selectedRoundRobinMatch,
+    selectedRoundRobinMatchData,
   };
 }
 

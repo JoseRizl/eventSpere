@@ -24,6 +24,7 @@ const {
   showWinnerDialog,
   winnerMessage,
   showConfirmDialog,
+  pendingBracketIdx,
   showMissingFieldsDialog,
   showDeleteConfirmDialog,
   deleteBracketIdx,
@@ -32,6 +33,9 @@ const {
   currentGrandFinalsIndex,
   activeBracketSection,
   bracketTypeOptions,
+  showRoundRobinMatchDialog,
+  selectedRoundRobinMatch,
+  selectedRoundRobinMatchData,
 } = state;
 
 const {
@@ -65,6 +69,9 @@ const {
   getTotalMatches,
   navigateToSection,
   getRoundRobinStandings,
+  openRoundRobinMatchDialog,
+  updateRoundRobinMatch,
+  closeRoundRobinMatchDialog,
 } = useBracketActions(state);
 
 onMounted(() => {
@@ -213,13 +220,11 @@ onMounted(() => {
                     :key="`round-${roundIdx}-${matchIdx}`"
                     :id="`round-match-${roundIdx}-${matchIdx}`"
                     :class="['match', { 'highlight': isCurrentMatch(bracketIdx, roundIdx, matchIdx, 'round_robin') }]"
-                    @click="navigateToMatch(bracketIdx, roundIdx, matchIdx, 'round_robin')"
+                    @click="openRoundRobinMatchDialog(bracketIdx, roundIdx, matchIdx, match)"
                   >
                     <div class="player-box">
                       <span
-                        @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 0)"
                         :class="{
-                          editable: true,
                           winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score >= match.players[1].score,
                           loser: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score,
                           'bye-text': match.players[0].name === 'BYE',
@@ -233,9 +238,7 @@ onMounted(() => {
                       </span>
                       <hr />
                       <span
-                        @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 1)"
                         :class="{
-                          editable: true,
                           winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score >= match.players[0].score,
                           loser: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score,
                           'bye-text': match.players[1].name === 'BYE',
@@ -678,6 +681,103 @@ onMounted(() => {
         @confirm="confirmDeleteBracket"
         @cancel="cancelDeleteBracket"
       />
+
+      <!-- Round Robin Match Dialog -->
+      <Dialog v-model:visible="showRoundRobinMatchDialog" header="Edit Match" modal :style="{ width: '500px' }">
+        <div class="round-robin-match-dialog">
+          <div class="match-info">
+            <h3>Round Robin Match</h3>
+            <p class="match-description">Edit player names, scores, and match status</p>
+          </div>
+
+          <div class="player-section">
+            <div class="player-input">
+              <label>Player 1 Name:</label>
+              <InputText
+                v-model="selectedRoundRobinMatchData.player1Name"
+                placeholder="Enter player name"
+                :disabled="selectedRoundRobinMatchData?.player1Name === 'BYE'"
+              />
+            </div>
+
+            <div class="score-section">
+              <label>Player 1 Score:</label>
+              <div class="score-controls">
+                <Button
+                  @click="selectedRoundRobinMatchData.player1Score--"
+                  :disabled="selectedRoundRobinMatchData.player1Score <= 0"
+                  icon="pi pi-minus"
+                  class="p-button-sm"
+                />
+                <span class="score-display">{{ selectedRoundRobinMatchData.player1Score }}</span>
+                <Button
+                  @click="selectedRoundRobinMatchData.player1Score++"
+                  icon="pi pi-plus"
+                  class="p-button-sm"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="vs-divider">VS</div>
+
+          <div class="player-section">
+            <div class="player-input">
+              <label>Player 2 Name:</label>
+              <InputText
+                v-model="selectedRoundRobinMatchData.player2Name"
+                placeholder="Enter player name"
+                :disabled="selectedRoundRobinMatchData?.player2Name === 'BYE'"
+              />
+            </div>
+
+            <div class="score-section">
+              <label>Player 2 Score:</label>
+              <div class="score-controls">
+                <Button
+                  @click="selectedRoundRobinMatchData.player2Score--"
+                  :disabled="selectedRoundRobinMatchData.player2Score <= 0"
+                  icon="pi pi-minus"
+                  class="p-button-sm"
+                />
+                <span class="score-display">{{ selectedRoundRobinMatchData.player2Score }}</span>
+                <Button
+                  @click="selectedRoundRobinMatchData.player2Score++"
+                  icon="pi pi-plus"
+                  class="p-button-sm"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="match-status-section">
+            <label>Match Status:</label>
+            <Select
+              v-model="selectedRoundRobinMatchData.status"
+              :options="[
+                { label: 'Pending', value: 'pending' },
+                { label: 'Completed', value: 'completed' }
+              ]"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Select status"
+            />
+          </div>
+
+          <div class="dialog-actions">
+            <Button
+              label="Cancel"
+              @click="closeRoundRobinMatchDialog"
+              class="p-button-secondary"
+            />
+            <Button
+              label="Update Match"
+              @click="updateRoundRobinMatch"
+              class="p-button-success"
+            />
+          </div>
+        </div>
+      </Dialog>
     </div>
   </template>
 
@@ -736,6 +836,106 @@ onMounted(() => {
   0% { opacity: 0.7; }
   50% { opacity: 1; }
   100% { opacity: 0.7; }
+}
+
+/* Round Robin Match Dialog Styles */
+.round-robin-match-dialog {
+  padding: 20px;
+}
+
+.match-info {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.match-info h3 {
+  margin: 0 0 5px 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.match-description {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.player-section {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.player-input {
+  margin-bottom: 15px;
+}
+
+.player-input label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #333;
+}
+
+.score-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.score-section label {
+  font-weight: 600;
+  color: #333;
+  min-width: 80px;
+}
+
+.score-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.score-display {
+  background: white;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  padding: 8px 12px;
+  min-width: 50px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.vs-divider {
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #333;
+  margin: 15px 0;
+  padding: 10px;
+  background: #e9ecef;
+  border-radius: 4px;
+}
+
+.match-status-section {
+  margin: 20px 0;
+}
+
+.match-status-section label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #333;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #dee2e6;
 }
 
 /* Ensure Round Robin doesn't inherit elimination bracket styles */
@@ -838,6 +1038,14 @@ onMounted(() => {
   left: auto !important;
   right: auto !important;
   bottom: auto !important;
+  /* Visual feedback for clickable matches */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.round-robin-bracket .match:hover {
+  border-color: #007bff !important;
+  box-shadow: 0 2px 6px rgba(0, 123, 255, 0.2) !important;
+  transform: translateY(-1px) !important;
 }
 
 .round-robin-bracket .match:last-child {

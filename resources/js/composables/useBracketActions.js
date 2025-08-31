@@ -24,6 +24,9 @@ export function useBracketActions(state) {
     currentLosersMatchIndex,
     currentGrandFinalsIndex,
     activeBracketSection,
+    showRoundRobinMatchDialog,
+    selectedRoundRobinMatch,
+    selectedRoundRobinMatchData,
   } = state;
 
   const bracketTypeOptions = state.bracketTypeOptions;
@@ -643,6 +646,8 @@ export function useBracketActions(state) {
           match = bracket.matches.grand_finals[matchIdx];
           break;
       }
+    } else if (bracket.type === 'Round Robin') {
+      match = bracket.matches[roundIdx][matchIdx];
     }
     if (match) {
       const playerId = match.players[teamIdx].id;
@@ -674,6 +679,20 @@ export function useBracketActions(state) {
           }
           if (bracket.matches.grand_finals[m].players[1].id === playerId) {
             bracket.matches.grand_finals[m].players[1].name = newName; bracket.matches.grand_finals[m].players[1].updated_at = new Date().toISOString();
+          }
+        }
+      } else if (bracket.type === 'Round Robin') {
+        // Update player name across all Round Robin matches
+        for (let r = 0; r < bracket.matches.length; r++) {
+          for (let m = 0; m < bracket.matches[r].length; m++) {
+            if (bracket.matches[r][m].players[0].id === playerId) {
+              bracket.matches[r][m].players[0].name = newName;
+              bracket.matches[r][m].players[0].updated_at = new Date().toISOString();
+            }
+            if (bracket.matches[r][m].players[1].id === playerId) {
+              bracket.matches[r][m].players[1].name = newName;
+              bracket.matches[r][m].players[1].updated_at = new Date().toISOString();
+            }
           }
         }
       }
@@ -1318,6 +1337,98 @@ export function useBracketActions(state) {
     });
   };
 
+  const openRoundRobinMatchDialog = (bracketIdx, roundIdx, matchIdx, match) => {
+    selectedRoundRobinMatch.value = { bracketIdx, roundIdx, matchIdx };
+    selectedRoundRobinMatchData.value = {
+      player1Name: match.players[0].name,
+      player2Name: match.players[1].name,
+      player1Score: match.players[0].score,
+      player2Score: match.players[1].score,
+      status: match.status
+    };
+    showRoundRobinMatchDialog.value = true;
+  };
+
+  const updateRoundRobinMatch = async () => {
+    if (!selectedRoundRobinMatch.value) return;
+
+    const { bracketIdx, roundIdx, matchIdx } = selectedRoundRobinMatch.value;
+    const bracket = brackets.value[bracketIdx];
+    const match = bracket.matches[roundIdx][matchIdx];
+
+    // Update player names directly
+    if (match.players[0].name !== selectedRoundRobinMatchData.value.player1Name) {
+      const playerId = match.players[0].id;
+      const newName = selectedRoundRobinMatchData.value.player1Name;
+      // Update player name across all Round Robin matches
+      for (let r = 0; r < bracket.matches.length; r++) {
+        for (let m = 0; m < bracket.matches[r].length; m++) {
+          if (bracket.matches[r][m].players[0].id === playerId) {
+            bracket.matches[r][m].players[0].name = newName;
+            bracket.matches[r][m].players[0].updated_at = new Date().toISOString();
+          }
+          if (bracket.matches[r][m].players[1].id === playerId) {
+            bracket.matches[r][m].players[1].name = newName;
+            bracket.matches[r][m].players[1].updated_at = new Date().toISOString();
+          }
+        }
+      }
+    }
+    if (match.players[1].name !== selectedRoundRobinMatchData.value.player2Name) {
+      const playerId = match.players[1].id;
+      const newName = selectedRoundRobinMatchData.value.player2Name;
+      // Update player name across all Round Robin matches
+      for (let r = 0; r < bracket.matches.length; r++) {
+        for (let m = 0; m < bracket.matches[r].length; m++) {
+          if (bracket.matches[r][m].players[0].id === playerId) {
+            bracket.matches[r][m].players[0].name = newName;
+            bracket.matches[r][m].players[0].updated_at = new Date().toISOString();
+          }
+          if (bracket.matches[r][m].players[1].id === playerId) {
+            bracket.matches[r][m].players[1].name = newName;
+            bracket.matches[r][m].players[1].updated_at = new Date().toISOString();
+          }
+        }
+      }
+    }
+
+    // Update scores
+    match.players[0].score = selectedRoundRobinMatchData.value.player1Score;
+    match.players[1].score = selectedRoundRobinMatchData.value.player2Score;
+
+    // Update match status
+    if (selectedRoundRobinMatchData.value.status === 'completed' && match.status !== 'completed') {
+      // End the match
+      const winner = match.players[0].score >= match.players[1].score ? match.players[0] : match.players[1];
+      const loser = match.players[0].score >= match.players[1].score ? match.players[1] : match.players[0];
+      match.players[0].completed = true;
+      match.players[1].completed = true;
+      match.status = 'completed';
+      match.winner_id = winner.id;
+      match.loser_id = loser.id;
+    } else if (selectedRoundRobinMatchData.value.status !== 'completed' && match.status === 'completed') {
+      // Undo the match
+      match.players[0].completed = false;
+      match.players[1].completed = false;
+      match.status = 'pending';
+      match.winner_id = null;
+      match.loser_id = null;
+    }
+
+    try {
+      await saveBrackets(bracket);
+      showRoundRobinMatchDialog.value = false;
+    } catch (error) {
+      console.error('Error updating Round Robin match:', error);
+    }
+  };
+
+  const closeRoundRobinMatchDialog = () => {
+    showRoundRobinMatchDialog.value = false;
+    selectedRoundRobinMatch.value = null;
+    selectedRoundRobinMatchData.value = null;
+  };
+
   watch(currentMatchIndex, () => {
     if (activeBracketIdx.value !== null) updateLines(activeBracketIdx.value);
   });
@@ -1358,6 +1469,9 @@ export function useBracketActions(state) {
     navigateToSection,
     bracketTypeOptions,
     getRoundRobinStandings,
+    openRoundRobinMatchDialog,
+    updateRoundRobinMatch,
+    closeRoundRobinMatchDialog,
   };
 }
 
