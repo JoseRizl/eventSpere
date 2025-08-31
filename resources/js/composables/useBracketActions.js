@@ -27,6 +27,7 @@ export function useBracketActions(state) {
     showRoundRobinMatchDialog,
     selectedRoundRobinMatch,
     selectedRoundRobinMatchData,
+    showMatchUpdateConfirmDialog,
   } = state;
 
   const bracketTypeOptions = state.bracketTypeOptions;
@@ -77,6 +78,11 @@ export function useBracketActions(state) {
 
   const handleByeRounds = (bracketIdx) => {
     const bracket = brackets.value[bracketIdx];
+
+    // Round Robin handles BYE matches during generation, so skip here
+    if (bracket.type === 'Round Robin') {
+      return;
+    }
 
     if (bracket.type === 'Single Elimination') {
       for (let roundIdx = 0; roundIdx < bracket.matches.length - 1; roundIdx++) {
@@ -1592,6 +1598,57 @@ export function useBracketActions(state) {
                 updated_at: new Date().toISOString()
               };
             }
+
+            // Convert TBD players to BYE in losers bracket round 1
+            const firstLosersRound = bracket.matches.losers[0];
+            firstLosersRound.forEach(match => {
+              if (match.players[0].name === 'TBD') {
+                match.players[0] = {
+                  id: generateId(),
+                  name: 'BYE',
+                  score: 0,
+                  completed: true,
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString()
+                };
+              }
+              if (match.players[1].name === 'TBD') {
+                match.players[1] = {
+                  id: generateId(),
+                  name: 'BYE',
+                  score: 0,
+                  completed: true,
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString()
+                };
+              }
+            });
+
+            // Auto-complete BYE matches in losers bracket
+            for (let r = 0; r < bracket.matches.losers.length - 1; r++) {
+              const currentRound = bracket.matches.losers[r];
+              const nextRound = bracket.matches.losers[r + 1];
+              currentRound.forEach((match, mIdx) => {
+                if (match.players[0].name === 'BYE' || match.players[1].name === 'BYE') {
+                  const winner2 = match.players[0].name === 'BYE' ? match.players[1] : match.players[0];
+                  winner2.completed = true;
+                  match.status = 'completed';
+                  match.winner_id = winner2.id;
+
+                  const nextMatchIdx2 = Math.floor(mIdx / 2);
+                  const nextPlayerPos2 = mIdx % 2 === 0 ? 0 : 1;
+                  if (nextRound && nextRound[nextMatchIdx2]) {
+                    nextRound[nextMatchIdx2].players[nextPlayerPos2] = {
+                      ...winner2,
+                      score: 0,
+                      completed: false,
+                      created_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString()
+                    };
+                  }
+                }
+              });
+            }
           }
           // Send loser to losers bracket
           if (loser.name !== 'BYE') {
@@ -1705,6 +1762,19 @@ export function useBracketActions(state) {
     selectedRoundRobinMatchData.value = null;
   };
 
+  const confirmMatchUpdate = () => {
+    showMatchUpdateConfirmDialog.value = true;
+  };
+
+  const cancelMatchUpdate = () => {
+    showMatchUpdateConfirmDialog.value = false;
+  };
+
+  const proceedWithMatchUpdate = async () => {
+    showMatchUpdateConfirmDialog.value = false;
+    await updateMatch();
+  };
+
   watch(currentMatchIndex, () => {
     if (activeBracketIdx.value !== null) updateLines(activeBracketIdx.value);
   });
@@ -1739,6 +1809,9 @@ export function useBracketActions(state) {
     openRoundRobinMatchDialog,
     updateMatch,
     closeRoundRobinMatchDialog,
+    confirmMatchUpdate,
+    cancelMatchUpdate,
+    proceedWithMatchUpdate,
   };
 }
 

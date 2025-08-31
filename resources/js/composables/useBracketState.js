@@ -31,6 +31,7 @@ export function useBracketState() {
   const showRoundRobinMatchDialog = ref(false);
   const selectedRoundRobinMatch = ref(null);
   const selectedRoundRobinMatchData = ref(null);
+  const showMatchUpdateConfirmDialog = ref(false);
 
   return {
     bracketName,
@@ -59,6 +60,7 @@ export function useBracketState() {
     showRoundRobinMatchDialog,
     selectedRoundRobinMatch,
     selectedRoundRobinMatchData,
+    showMatchUpdateConfirmDialog,
   };
 }
 

@@ -4,6 +4,7 @@ import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
 import Button from 'primevue/button';
+import InputSwitch from 'primevue/inputswitch';
 import { Link } from '@inertiajs/vue3';
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 import { useBracketState } from '@/composables/useBracketState.js';
@@ -31,6 +32,7 @@ const {
   showRoundRobinMatchDialog,
   selectedRoundRobinMatch,
   selectedRoundRobinMatchData,
+  showMatchUpdateConfirmDialog,
 } = state;
 
 const {
@@ -57,6 +59,9 @@ const {
   openRoundRobinMatchDialog,
   updateMatch,
   closeRoundRobinMatchDialog,
+  confirmMatchUpdate,
+  cancelMatchUpdate,
+  proceedWithMatchUpdate,
 } = useBracketActions(state);
 
 onMounted(() => {
@@ -524,6 +529,18 @@ onMounted(() => {
         @cancel="cancelDeleteBracket"
       />
 
+      <!-- Match Update Confirmation Dialog -->
+      <ConfirmationDialog
+        v-model:show="showMatchUpdateConfirmDialog"
+        title="Confirm Match Update"
+        message="Are you sure you want to update this match? This action may trigger bracket progression and cannot be easily undone."
+        confirmText="Yes, Update Match"
+        cancelText="Cancel"
+        confirmButtonClass="bg-green-600 hover:bg-green-700"
+        @confirm="proceedWithMatchUpdate"
+        @cancel="cancelMatchUpdate"
+      />
+
       <!-- Round Robin Match Dialog -->
       <Dialog v-model:visible="showRoundRobinMatchDialog" header="Edit Match" modal :style="{ width: '500px' }">
         <div v-if="selectedRoundRobinMatchData" class="round-robin-match-dialog">
@@ -594,16 +611,15 @@ onMounted(() => {
 
           <div class="match-status-section">
             <label>Match Status:</label>
-            <Select
-              v-model="selectedRoundRobinMatchData.status"
-              :options="[
-                { label: 'Pending', value: 'pending' },
-                { label: 'Completed', value: 'completed' }
-              ]"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Select status"
-            />
+            <div class="status-toggle">
+              <span class="status-label" :class="{ 'active': selectedRoundRobinMatchData.status === 'pending' }">Pending</span>
+              <InputSwitch
+                :modelValue="selectedRoundRobinMatchData.status === 'completed'"
+                @update:modelValue="(value) => selectedRoundRobinMatchData.status = value ? 'completed' : 'pending'"
+                class="status-switch"
+              />
+              <span class="status-label" :class="{ 'active': selectedRoundRobinMatchData.status === 'completed' }">Completed</span>
+            </div>
           </div>
 
           <div class="dialog-actions">
@@ -614,7 +630,7 @@ onMounted(() => {
             />
             <Button
               label="Update Match"
-              @click="updateMatch"
+              @click="confirmMatchUpdate"
               class="p-button-success"
             />
           </div>
@@ -769,6 +785,29 @@ onMounted(() => {
   margin-bottom: 5px;
   font-weight: 600;
   color: #333;
+}
+
+.status-toggle {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.status-label {
+  font-weight: 500;
+  color: #666;
+  transition: color 0.2s ease;
+}
+
+.status-label.active {
+  color: #007bff;
+  font-weight: 600;
+}
+
+.status-switch {
+  transform: scale(1.2);
 }
 
 .dialog-actions {
