@@ -1540,6 +1540,142 @@ export function useBracketActions(state) {
       match.status = 'completed';
       match.winner_id = winner.id;
       match.loser_id = loser.id;
+      match.updated_at = new Date().toISOString();
+
+      // Handle bracket progression for elimination brackets
+      if (bracket.type === 'Single Elimination') {
+        if (roundIdx < bracket.matches.length - 1) {
+          const nextRoundIdx = roundIdx + 1;
+          const nextMatchIdx = Math.floor(matchIdx / 2);
+          const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
+          if (bracket.matches[nextRoundIdx] && bracket.matches[nextRoundIdx][nextMatchIdx]) {
+            const nextMatch = bracket.matches[nextRoundIdx][nextMatchIdx];
+            nextMatch.players[nextPlayerPos] = {
+              ...winner,
+              score: 0,
+              completed: false,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            };
+          }
+        } else {
+          // Final match completed
+          winnerMessage.value = `Winner: ${winner.name}`;
+          showWinnerDialog.value = true;
+        }
+      } else if (bracket.type === 'Double Elimination') {
+        const performedActions = [];
+        if (bracketType === 'winners') {
+          if (roundIdx < bracket.matches.winners.length - 1) {
+            const nextRoundIdx = roundIdx + 1;
+            const nextMatchIdx = Math.floor(matchIdx / 2);
+            const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
+            if (bracket.matches.winners[nextRoundIdx] && bracket.matches.winners[nextRoundIdx][nextMatchIdx]) {
+              const nextMatch = bracket.matches.winners[nextRoundIdx][nextMatchIdx];
+              nextMatch.players[nextPlayerPos] = {
+                ...winner,
+                score: 0,
+                completed: false,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              };
+            }
+          } else {
+            // Winners bracket final - advance to grand finals
+            const grandFinalsMatch = bracket.matches.grand_finals[0];
+            if (grandFinalsMatch) {
+              grandFinalsMatch.players[0] = {
+                ...winner,
+                score: 0,
+                completed: false,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              };
+            }
+          }
+          // Send loser to losers bracket
+          if (loser.name !== 'BYE') {
+            const losersRoundIdx = 0;
+            let totalLosers = 0;
+            for (let r = 0; r <= roundIdx; r++) {
+              for (let m = 0; m < bracket.matches.winners[r].length; m++) {
+                if (r === roundIdx && m === matchIdx) { break; }
+                if (bracket.matches.winners[r][m].loser_id) { totalLosers++; }
+              }
+            }
+            const losersMatchIdx = Math.floor(totalLosers / 2);
+            const losersPlayerPos = totalLosers % 2;
+            while (bracket.matches.losers[losersRoundIdx].length <= losersMatchIdx) {
+              bracket.matches.losers[losersRoundIdx].push({
+                id: generateId(),
+                round: 1,
+                match_number: bracket.matches.losers[losersRoundIdx].length + 1,
+                bracket_type: 'losers',
+                players: [
+                  { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+                  { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+                ],
+                winner_id: null,
+                loser_id: null,
+                status: 'pending',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              });
+            }
+            bracket.matches.losers[losersRoundIdx][losersMatchIdx].players[losersPlayerPos] = {
+              ...loser,
+              score: 0,
+              completed: false,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            };
+          }
+        } else if (bracketType === 'losers') {
+          if (roundIdx < bracket.matches.winners.length + bracket.matches.losers.length - 1) {
+            const nextRoundIdx = roundIdx - bracket.matches.winners.length + 1;
+            const nextMatchIdx = Math.floor(matchIdx / 2);
+            const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
+            if (bracket.matches.losers[nextRoundIdx] && bracket.matches.losers[nextRoundIdx][nextMatchIdx]) {
+              const nextMatch = bracket.matches.losers[nextRoundIdx][nextMatchIdx];
+              nextMatch.players[nextPlayerPos] = {
+                ...winner,
+                score: 0,
+                completed: false,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              };
+            }
+          }
+          if (roundIdx === bracket.matches.winners.length + bracket.matches.losers.length - 1) {
+            // Losers bracket final - advance to grand finals
+            const grandFinalsMatch = bracket.matches.grand_finals[0];
+            if (grandFinalsMatch) {
+              const winnersFinal = bracket.matches.winners[bracket.matches.winners.length - 1][0];
+              if (winnersFinal.status === 'completed') {
+                grandFinalsMatch.players[1] = {
+                  ...winner,
+                  score: 0,
+                  completed: false,
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString()
+                };
+              } else {
+                grandFinalsMatch.players[0] = {
+                  ...winner,
+                  score: 0,
+                  completed: false,
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString()
+                };
+              }
+            }
+          }
+        } else if (bracketType === 'grand_finals') {
+          // Grand finals completed
+          winnerMessage.value = `Tournament Winner: ${winner.name}`;
+          showWinnerDialog.value = true;
+        }
+      }
     } else if (selectedRoundRobinMatchData.value.status !== 'completed' && match.status === 'completed') {
       // Undo the match
       match.players[0].completed = false;
@@ -1547,10 +1683,16 @@ export function useBracketActions(state) {
       match.status = 'pending';
       match.winner_id = null;
       match.loser_id = null;
+      // Note: Undoing bracket progression would be complex and might cause data inconsistencies
+      // For now, we'll just undo the match status and let users manually fix if needed
     }
 
     try {
       await saveBrackets(bracket);
+      // Update connection lines for elimination brackets
+      if (bracket.type === 'Single Elimination' || bracket.type === 'Double Elimination') {
+        nextTick(() => updateLines(bracketIdx));
+      }
       showRoundRobinMatchDialog.value = false;
     } catch (error) {
       console.error('Error updating Round Robin match:', error);
