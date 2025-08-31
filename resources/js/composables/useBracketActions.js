@@ -204,6 +204,8 @@ export function useBracketActions(state) {
       newBracket = generateBracket();
     } else if (matchType.value === 'Double Elimination') {
       newBracket = generateDoubleEliminationBracket();
+    } else if (matchType.value === 'Round Robin') {
+      newBracket = generateRoundRobinBracket();
     }
 
     const bracketData = {
@@ -214,7 +216,9 @@ export function useBracketActions(state) {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       matches: newBracket,
-      lines: matchType.value === 'Single Elimination' ? [] : { winners: [], losers: [], finals: [] },
+      lines: matchType.value === 'Single Elimination' ? [] :
+            matchType.value === 'Round Robin' ? [] :
+            { winners: [], losers: [], finals: [] },
       // Attach event details so UI can render immediately
       event: selectedEvent.value,
     };
@@ -494,6 +498,78 @@ export function useBracketActions(state) {
     }];
 
     return { winners: winnersRoundsArray, losers: losersRounds, grand_finals: grandFinals };
+  };
+
+  const generateRoundRobinBracket = () => {
+    const numPlayers = numberOfPlayers.value;
+
+    // For round robin, we need an even number of players
+    // If odd, we add a "BYE" player
+    const adjustedNumPlayers = numPlayers % 2 === 0 ? numPlayers : numPlayers + 1;
+
+    const players = Array.from({ length: numPlayers }, (_, i) => ({
+      id: generateId(),
+      name: `Player ${i + 1}`,
+      score: 0,
+      completed: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }));
+
+    // Add BYE player if needed
+    if (adjustedNumPlayers > numPlayers) {
+      players.push({
+        id: generateId(),
+        name: 'BYE',
+        score: 0,
+        completed: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
+    }
+
+    // Generate round robin schedule using circle method
+    const rounds = [];
+    const numRounds = adjustedNumPlayers - 1;
+    const halfSize = adjustedNumPlayers / 2;
+
+    for (let round = 0; round < numRounds; round++) {
+      const roundMatches = [];
+      for (let i = 0; i < halfSize; i++) {
+        const player1Idx = i === 0 ? 0 : (round + i) % (adjustedNumPlayers - 1) + 1;
+        const player2Idx = (round + adjustedNumPlayers - 1 - i) % (adjustedNumPlayers - 1) + 1;
+
+        const match = {
+          id: generateId(),
+          round: round + 1,
+          match_number: i + 1,
+          bracket_type: 'round_robin',
+          players: [
+            { ...players[player1Idx] },
+            { ...players[player2Idx] }
+          ],
+          winner_id: null,
+          loser_id: null,
+          status: 'pending',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+
+        // Auto-complete BYE matches
+        if (match.players[0].name === 'BYE' || match.players[1].name === 'BYE') {
+          const winner = match.players[0].name === 'BYE' ? match.players[1] : match.players[0];
+          winner.completed = true;
+          match.status = 'completed';
+          match.winner_id = winner.id;
+          match.loser_id = match.players[0].name === 'BYE' ? match.players[0].id : match.players[1].id;
+        }
+
+        roundMatches.push(match);
+      }
+      rounds.push(roundMatches);
+    }
+
+    return rounds;
   };
 
   const increaseScore = async (bracketIdx, teamIdx) => {
@@ -1188,6 +1264,60 @@ export function useBracketActions(state) {
     }
   };
 
+  const getRoundRobinStandings = (bracketIdx) => {
+    const bracket = brackets.value[bracketIdx];
+    if (bracket.type !== 'Round Robin') return [];
+
+    const playerStats = {};
+    const allMatches = bracket.matches.flat();
+
+    // Initialize player stats
+    allMatches.forEach(match => {
+      match.players.forEach(player => {
+        if (player.name !== 'BYE' && player.name !== 'TBD') {
+          if (!playerStats[player.id]) {
+            playerStats[player.id] = {
+              id: player.id,
+              name: player.name,
+              wins: 0,
+              losses: 0,
+              totalGames: 0
+            };
+          }
+        }
+      });
+    });
+
+    // Calculate wins and losses
+    allMatches.forEach(match => {
+      if (match.status === 'completed') {
+        const winner = match.players.find(p => p.id === match.winner_id);
+        const loser = match.players.find(p => p.id === match.loser_id);
+
+        if (winner && winner.name !== 'BYE' && playerStats[winner.id]) {
+          playerStats[winner.id].wins++;
+          playerStats[winner.id].totalGames++;
+        }
+        if (loser && loser.name !== 'BYE' && playerStats[loser.id]) {
+          playerStats[loser.id].losses++;
+          playerStats[loser.id].totalGames++;
+        }
+      }
+    });
+
+    // Convert to array and calculate win rate
+    const standings = Object.values(playerStats).map(player => ({
+      ...player,
+      winRate: player.totalGames > 0 ? Math.round((player.wins / player.totalGames) * 100) : 0
+    }));
+
+    // Sort by wins (descending), then by win rate (descending)
+    return standings.sort((a, b) => {
+      if (b.wins !== a.wins) return b.wins - a.wins;
+      return b.winRate - a.winRate;
+    });
+  };
+
   watch(currentMatchIndex, () => {
     if (activeBracketIdx.value !== null) updateLines(activeBracketIdx.value);
   });
@@ -1227,6 +1357,7 @@ export function useBracketActions(state) {
     getTotalMatches,
     navigateToSection,
     bracketTypeOptions,
+    getRoundRobinStandings,
   };
 }
 

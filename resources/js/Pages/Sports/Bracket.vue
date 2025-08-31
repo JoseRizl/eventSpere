@@ -64,6 +64,7 @@ const {
   getCurrentRound,
   getTotalMatches,
   navigateToSection,
+  getRoundRobinStandings,
 } = useBracketActions(state);
 
 onMounted(() => {
@@ -191,6 +192,88 @@ onMounted(() => {
                       >
                         {{ match.players[1].name || 'TBD' }} | {{ match.players[1].score }}
                       </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Round Robin Display -->
+            <div v-else-if="bracket.type === 'Round Robin'" class="round-robin-bracket">
+              <div class="bracket">
+                <!-- Scroll indicator -->
+                <div v-if="bracket.matches.length > 3" class="scroll-indicator">
+                  <i class="pi pi-arrow-right"></i> Scroll to see all rounds
+                </div>
+                <div v-for="(round, roundIdx) in bracket.matches" :key="`round-${roundIdx}`"
+                  :class="['round', `round-${roundIdx + 1}`]">
+                  <h3>Round {{ roundIdx + 1 }}</h3>
+
+                  <div
+                    v-for="(match, matchIdx) in round"
+                    :key="`round-${roundIdx}-${matchIdx}`"
+                    :id="`round-match-${roundIdx}-${matchIdx}`"
+                    :class="['match', { 'highlight': isCurrentMatch(bracketIdx, roundIdx, matchIdx, 'round_robin') }]"
+                    @click="navigateToMatch(bracketIdx, roundIdx, matchIdx, 'round_robin')"
+                  >
+                    <div class="player-box">
+                      <span
+                        @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 0)"
+                        :class="{
+                          editable: true,
+                          winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score >= match.players[1].score,
+                          loser: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score,
+                          'bye-text': match.players[0].name === 'BYE',
+                          'facing-bye': match.players[1].name === 'BYE',
+                          'tbd-text': !match.players[0].name || match.players[0].name === 'TBD',
+                          'loser-name': match.loser_id === match.players[0].id,
+                          'winner-name': match.winner_id === match.players[0].id
+                        }"
+                      >
+                        {{ match.players[0].name || 'TBD' }} | {{ match.players[0].score }}
+                      </span>
+                      <hr />
+                      <span
+                        @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 1)"
+                        :class="{
+                          editable: true,
+                          winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score >= match.players[0].score,
+                          loser: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score,
+                          'bye-text': match.players[1].name === 'BYE',
+                          'facing-bye': match.players[0].name === 'BYE',
+                          'tbd-text': !match.players[1].name || match.players[1].name === 'TBD',
+                          'loser-name': match.loser_id === match.players[1].id,
+                          'winner-name': match.winner_id === match.players[1].id
+                        }"
+                      >
+                        {{ match.players[1].name || 'TBD' }} | {{ match.players[1].score }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Round Robin Standings -->
+              <div class="standings-section">
+                <h3>Standings</h3>
+                <div class="standings-table">
+                  <div class="standings-header">
+                    <span class="rank">Rank</span>
+                    <span class="player">Player</span>
+                    <span class="wins">Wins</span>
+                    <span class="losses">Losses</span>
+                    <span class="win-rate">Win Rate</span>
+                  </div>
+                  <div
+                    v-for="(player, index) in getRoundRobinStandings(bracketIdx)"
+                    :key="player.id"
+                    class="standings-row"
+                    :class="{ 'winner': index === 0 }"
+                  >
+                    <span class="rank">{{ index + 1 }}</span>
+                    <span class="player">{{ player.name }}</span>
+                    <span class="wins">{{ player.wins }}</span>
+                    <span class="losses">{{ player.losses }}</span>
+                    <span class="win-rate">{{ player.winRate }}%</span>
                   </div>
                 </div>
               </div>
@@ -392,7 +475,8 @@ onMounted(() => {
               <div class="navigation-controls">
                 <button
                   @click="showPreviousMatch(bracketIdx)"
-                  :disabled="bracket.type === 'Single Elimination' ? currentMatchIndex === 0 :
+                  :disabled="bracket.type === 'Round Robin' ? currentMatchIndex === 0 :
+                    bracket.type === 'Single Elimination' ? currentMatchIndex === 0 :
                     bracket.type === 'Double Elimination' && (
                       (activeBracketSection === 'winners' && currentWinnersMatchIndex === 0) ||
                       (activeBracketSection === 'losers' && currentLosersMatchIndex === 0) ||
@@ -404,7 +488,8 @@ onMounted(() => {
 
                 <button
                   @click="showNextMatch(bracketIdx)"
-                  :disabled="bracket.type === 'Single Elimination' ? currentMatchIndex >= getTotalMatches(bracketIdx) - 1 :
+                  :disabled="bracket.type === 'Round Robin' ? currentMatchIndex >= getTotalMatches(bracketIdx) - 1 :
+                    bracket.type === 'Single Elimination' ? currentMatchIndex >= getTotalMatches(bracketIdx) - 1 :
                     bracket.type === 'Double Elimination' && (
                       (activeBracketSection === 'winners' && currentWinnersMatchIndex >= bracket.matches.winners.flat().length - 1) ||
                       (activeBracketSection === 'losers' && currentLosersMatchIndex >= bracket.matches.losers.flat().length - 1) ||
@@ -598,6 +683,301 @@ onMounted(() => {
 
 <style scoped>
 /* ... existing styles ... */
+
+.round-robin-bracket {
+  margin: 20px 0;
+  /* Override any inherited bracket styles */
+  position: relative;
+  width: 100%;
+  /* Add container styling for horizontal layout */
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #dee2e6;
+}
+
+/* Add scrollbar styling for better UX */
+.round-robin-bracket .bracket::-webkit-scrollbar {
+  height: 8px;
+}
+
+.round-robin-bracket .bracket::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.round-robin-bracket .bracket::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.round-robin-bracket .bracket::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Scroll indicator */
+.scroll-indicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 123, 255, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+
+/* Ensure Round Robin doesn't inherit elimination bracket styles */
+.round-robin-bracket .bracket {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 20px !important;
+  /* Override any inherited bracket styles */
+  position: relative !important;
+  width: 100% !important;
+  /* Remove any inherited flex properties that might cause exponential spacing */
+  flex: none !important;
+  /* Enable horizontal scrolling for many rounds */
+  overflow-x: auto !important;
+  padding-bottom: 10px !important;
+  /* Override any inherited alignment */
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+}
+
+.round-robin-bracket .bracket {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  /* Override any inherited bracket styles */
+  position: relative;
+  width: 100%;
+}
+
+.round-robin-bracket .round {
+  background: #f8f9fa !important;
+  border-radius: 8px !important;
+  padding: 15px !important;
+  border: 1px solid #dee2e6 !important;
+  /* Remove any inherited spacing that might cause exponential growth */
+  margin: 0 !important;
+  /* Override any inherited positioning */
+  position: relative !important;
+  /* Set fixed width for each round */
+  min-width: 280px !important;
+  max-width: 320px !important;
+  flex-shrink: 0 !important;
+  /* Ensure consistent spacing */
+  margin-right: 20px !important;
+  margin-bottom: 0 !important;
+  /* Override any inherited flex properties */
+  flex: none !important;
+  /* Override any inherited display properties */
+  display: flex !important;
+  flex-direction: column !important;
+  /* Grid alignment for matches */
+  justify-content: flex-start !important;
+  align-items: stretch !important;
+}
+
+.round-robin-bracket .round:last-child {
+  margin-bottom: 0;
+}
+
+.round-robin-bracket .round h3 {
+  margin: 0 0 15px 0;
+  color: #495057;
+  font-size: 1.1rem;
+  text-align: center;
+  background: #e9ecef;
+  padding: 8px;
+  border-radius: 4px;
+  /* Make round headers sticky */
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10 !important;
+}
+
+.round-robin-bracket .match {
+  background: white !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 6px !important;
+  margin-bottom: 10px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  /* Ensure consistent spacing */
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  margin-top: 0 !important;
+  /* Override any inherited positioning */
+  position: relative !important;
+  width: 100% !important;
+  /* Override any inherited flex properties */
+  flex: none !important;
+  /* Override any inherited display properties */
+  display: block !important;
+  /* Compact match display */
+  padding: 8px !important;
+  /* Uniform height for grid alignment */
+  min-height: 60px !important;
+  height: auto !important;
+  /* Remove any inherited margins that might cause misalignment */
+  transform: none !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+}
+
+.round-robin-bracket .match:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* Override any inherited round-specific styles that might cause misalignment */
+.round-robin-bracket .round-1 .match,
+.round-robin-bracket .round-2 .match,
+.round-robin-bracket .round-3 .match,
+.round-robin-bracket .round-4 .match,
+.round-robin-bracket .round-5 .match,
+.round-robin-bracket .round-6 .match,
+.round-robin-bracket .round-7 .match,
+.round-robin-bracket .round-8 .match {
+  margin-top: 0 !important;
+  margin-bottom: 10px !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+}
+
+.round-robin-bracket .match:hover {
+  border-color: #007bff;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.1);
+}
+
+.round-robin-bracket .match.highlight {
+  border-color: #007bff !important;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2) !important;
+}
+
+/* Ensure player boxes are also uniformly aligned */
+.round-robin-bracket .match .player-box {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.round-robin-bracket .match .player-box span {
+  margin: 0 !important;
+  padding: 4px 8px !important;
+  text-align: center !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.round-robin-bracket .match .player-box hr {
+  margin: 2px 0 !important;
+  border: none !important;
+  border-top: 1px solid #dee2e6 !important;
+}
+
+.standings-section {
+  margin-top: 30px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  border: 1px solid #dee2e6;
+}
+
+.standings-section h3 {
+  margin: 0 0 20px 0;
+  color: #495057;
+  text-align: center;
+  font-size: 1.2rem;
+}
+
+.standings-table {
+  background: white;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #ced4da;
+}
+
+.standings-header,
+.standings-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 80px 80px 100px;
+  gap: 10px;
+  padding: 12px 15px;
+  align-items: center;
+}
+
+.standings-header {
+  background: #e9ecef;
+  font-weight: bold;
+  color: #495057;
+  border-bottom: 1px solid #ced4da;
+}
+
+.standings-row {
+  border-bottom: 1px solid #f1f3f4;
+  transition: background-color 0.2s ease;
+}
+
+.standings-row:last-child {
+  border-bottom: none;
+}
+
+.standings-row:hover {
+  background: #f8f9fa;
+}
+
+.standings-row.winner {
+  background: #d4edda;
+  font-weight: bold;
+  color: #155724;
+}
+
+.standings-row.winner:hover {
+  background: #c3e6cb;
+}
+
+.standings-header .rank,
+.standings-header .player,
+.standings-header .wins,
+.standings-header .losses,
+.standings-header .win-rate {
+  font-size: 0.9rem;
+}
+
+.standings-row .rank {
+  font-weight: bold;
+  text-align: center;
+}
+
+.standings-row .wins,
+.standings-row .losses,
+.standings-row .win-rate {
+  text-align: center;
+}
 
 .navigation-controls {
   display: flex;

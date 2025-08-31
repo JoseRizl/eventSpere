@@ -1275,6 +1275,886 @@
           }
         ]
       }
+    },
+    {
+      "id": "f5e2",
+      "name": "123",
+      "type": "Round Robin",
+      "event_id": "24f0",
+      "status": "active",
+      "created_at": "2025-08-31T01:17:55.411Z",
+      "updated_at": "2025-08-31T01:17:55.411Z",
+      "matches": [
+        [
+          {
+            "id": "jptnl34ne",
+            "round": 1,
+            "match_number": 1,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "zu1cacx0t",
+                "name": "Player 1",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "ejv0pzvyt",
+                "name": "Player 2",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          },
+          {
+            "id": "3t51xwzbc",
+            "round": 1,
+            "match_number": 2,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "xg4ezop7n",
+                "name": "Player 3",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "xzgpalq5n",
+                "name": "Player 8",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          },
+          {
+            "id": "4mm6hogmf",
+            "round": 1,
+            "match_number": 3,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "i14y9rbjc",
+                "name": "Player 4",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "esb6wsl4n",
+                "name": "Player 7",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          },
+          {
+            "id": "zxpr0hy88",
+            "round": 1,
+            "match_number": 4,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "gz9nboj4u",
+                "name": "Player 5",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "0m5861ggc",
+                "name": "Player 6",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          }
+        ],
+        [
+          {
+            "id": "prnqv8u2z",
+            "round": 2,
+            "match_number": 1,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "zu1cacx0t",
+                "name": "Player 1",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "gz9nboj4u",
+                "name": "Player 5",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          },
+          {
+            "id": "jgflzuu86",
+            "round": 2,
+            "match_number": 2,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "i14y9rbjc",
+                "name": "Player 4",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "i14y9rbjc",
+                "name": "Player 4",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          },
+          {
+            "id": "lpd39sjy8",
+            "round": 2,
+            "match_number": 3,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "gz9nboj4u",
+                "name": "Player 5",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "xg4ezop7n",
+                "name": "Player 3",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          },
+          {
+            "id": "od7ezgbg1",
+            "round": 2,
+            "match_number": 4,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "0m5861ggc",
+                "name": "Player 6",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "ejv0pzvyt",
+                "name": "Player 2",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          }
+        ],
+        [
+          {
+            "id": "wxnpa76hq",
+            "round": 3,
+            "match_number": 1,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "zu1cacx0t",
+                "name": "Player 1",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "xzgpalq5n",
+                "name": "Player 8",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          },
+          {
+            "id": "a5dz3yz24",
+            "round": 3,
+            "match_number": 2,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "gz9nboj4u",
+                "name": "Player 5",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "esb6wsl4n",
+                "name": "Player 7",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          },
+          {
+            "id": "ppl3ddg9m",
+            "round": 3,
+            "match_number": 3,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "0m5861ggc",
+                "name": "Player 6",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "0m5861ggc",
+                "name": "Player 6",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          },
+          {
+            "id": "hfsnyx2oc",
+            "round": 3,
+            "match_number": 4,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "esb6wsl4n",
+                "name": "Player 7",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "gz9nboj4u",
+                "name": "Player 5",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          }
+        ],
+        [
+          {
+            "id": "xma4xkhfl",
+            "round": 4,
+            "match_number": 1,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "zu1cacx0t",
+                "name": "Player 1",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "i14y9rbjc",
+                "name": "Player 4",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          },
+          {
+            "id": "6z91dyrbh",
+            "round": 4,
+            "match_number": 2,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "0m5861ggc",
+                "name": "Player 6",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "xg4ezop7n",
+                "name": "Player 3",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          },
+          {
+            "id": "mrqd4ipr5",
+            "round": 4,
+            "match_number": 3,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "esb6wsl4n",
+                "name": "Player 7",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "ejv0pzvyt",
+                "name": "Player 2",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          },
+          {
+            "id": "5yseib2yn",
+            "round": 4,
+            "match_number": 4,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "xzgpalq5n",
+                "name": "Player 8",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "xzgpalq5n",
+                "name": "Player 8",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          }
+        ],
+        [
+          {
+            "id": "bmdoxesdb",
+            "round": 5,
+            "match_number": 1,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "zu1cacx0t",
+                "name": "Player 1",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "esb6wsl4n",
+                "name": "Player 7",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          },
+          {
+            "id": "nv9grtdtb",
+            "round": 5,
+            "match_number": 2,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "esb6wsl4n",
+                "name": "Player 7",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "0m5861ggc",
+                "name": "Player 6",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          },
+          {
+            "id": "25qbm22r4",
+            "round": 5,
+            "match_number": 3,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "xzgpalq5n",
+                "name": "Player 8",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "gz9nboj4u",
+                "name": "Player 5",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          },
+          {
+            "id": "j72izr5u3",
+            "round": 5,
+            "match_number": 4,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "ejv0pzvyt",
+                "name": "Player 2",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "i14y9rbjc",
+                "name": "Player 4",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          }
+        ],
+        [
+          {
+            "id": "v8kow5iyb",
+            "round": 6,
+            "match_number": 1,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "zu1cacx0t",
+                "name": "Player 1",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "xg4ezop7n",
+                "name": "Player 3",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          },
+          {
+            "id": "brui5j69t",
+            "round": 6,
+            "match_number": 2,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "xzgpalq5n",
+                "name": "Player 8",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "ejv0pzvyt",
+                "name": "Player 2",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          },
+          {
+            "id": "8svq4txpb",
+            "round": 6,
+            "match_number": 3,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "ejv0pzvyt",
+                "name": "Player 2",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "xzgpalq5n",
+                "name": "Player 8",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          },
+          {
+            "id": "vkouud1sa",
+            "round": 6,
+            "match_number": 4,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "xg4ezop7n",
+                "name": "Player 3",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "esb6wsl4n",
+                "name": "Player 7",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          }
+        ],
+        [
+          {
+            "id": "ypa1jdtag",
+            "round": 7,
+            "match_number": 1,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "zu1cacx0t",
+                "name": "Player 1",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "0m5861ggc",
+                "name": "Player 6",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          },
+          {
+            "id": "d89cma48e",
+            "round": 7,
+            "match_number": 2,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "ejv0pzvyt",
+                "name": "Player 2",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "gz9nboj4u",
+                "name": "Player 5",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          },
+          {
+            "id": "wi5gpfodz",
+            "round": 7,
+            "match_number": 3,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "xg4ezop7n",
+                "name": "Player 3",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "i14y9rbjc",
+                "name": "Player 4",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          },
+          {
+            "id": "u6hbmlfnb",
+            "round": 7,
+            "match_number": 4,
+            "bracket_type": "round_robin",
+            "players": [
+              {
+                "id": "i14y9rbjc",
+                "name": "Player 4",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              },
+              {
+                "id": "xg4ezop7n",
+                "name": "Player 3",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-08-31T01:17:55.411Z",
+                "updated_at": "2025-08-31T01:17:55.411Z"
+              }
+            ],
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-08-31T01:17:55.411Z",
+            "updated_at": "2025-08-31T01:17:55.411Z"
+          }
+        ]
+      ],
+      "lines": [],
+      "event": {
+        "id": "24f0",
+        "title": "Mag over think",
+        "venue": "Sainyo",
+        "description": "Nagtuo ang alimango na galupad ang isda?",
+        "category": "2",
+        "startDate": "May-21-2025",
+        "endDate": "May-21-2025",
+        "startTime": "01:00",
+        "endTime": "23:30",
+        "image": "data:image/svg+xml;base64,CiAgICAgICAgPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgICAgICAgICAgICB3aWR0aD0iNzEiCiAgICAgICAgICAgICBoZWlnaHQ9IjY2Ij4KICAgICAgICAgIDxpbWFnZSBocmVmPSJkYXRhOmltYWdlL2pwZWc7YmFzZTY0LC85ai80QUFRU2taSlJnQUJBUUFBQVFBQkFBRC80Z0hZU1VORFgxQlNUMFpKVEVVQUFRRUFBQUhJQUFBQUFBUXdBQUJ0Ym5SeVVrZENJRmhaV2lBSDRBQUJBQUVBQUFBQUFBQmhZM053QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQVFBQTl0WUFBUUFBQUFEVExRQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFsa1pYTmpBQUFBOEFBQUFDUnlXRmxhQUFBQkZBQUFBQlJuV0ZsYUFBQUJLQUFBQUJSaVdGbGFBQUFCUEFBQUFCUjNkSEIwQUFBQlVBQUFBQlJ5VkZKREFBQUJaQUFBQUNoblZGSkRBQUFCWkFBQUFDaGlWRkpEQUFBQlpBQUFBQ2hqY0hKMEFBQUJqQUFBQUR4dGJIVmpBQUFBQUFBQUFBRUFBQUFNWlc1VlV3QUFBQWdBQUFBY0FITUFVZ0JIQUVKWVdWb2dBQUFBQUFBQWI2SUFBRGoxQUFBRGtGaFpXaUFBQUFBQUFBQmltUUFBdDRVQUFCamFXRmxhSUFBQUFBQUFBQ1NnQUFBUGhBQUF0czlZV1ZvZ0FBQUFBQUFBOXRZQUFRQUFBQURUTFhCaGNtRUFBQUFBQUFRQUFBQUNabVlBQVBLbkFBQU5XUUFBRTlBQUFBcGJBQUFBQUFBQUFBQnRiSFZqQUFBQUFBQUFBQUVBQUFBTVpXNVZVd0FBQUNBQUFBQWNBRWNBYndCdkFHY0FiQUJsQUNBQVNRQnVBR01BTGdBZ0FESUFNQUF4QURiLzJ3QkRBQW9IQndnSEJnb0lDQWdMQ2dvTERoZ1FEZzBORGgwVkZoRVlJeDhsSkNJZklpRW1LemN2SmlrMEtTRWlNRUV4TkRrN1BqNCtKUzVFU1VNOFNEYzlQanYvMndCREFRb0xDdzRORGh3UUVCdzdLQ0lvT3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096czdPenM3T3pzN096di93QUFSQ0FCQ0FFY0RBU0lBQWhFQkF4RUIvOFFBSEFBQUFRVUJBUUVBQUFBQUFBQUFBQUFBQUFNRUJRWUhBUUlJLzhRQU9CQUFBUU1EQVFVRUNBTUpBQUFBQUFBQUFRSURCQUFGRVJJR0V5RXhRUWRSWVhFVUZTSkNnWkhCMFNOU29SWXlNMkp5Z3JHeXd2L0VBQmNCQUFNQkFBQUFBQUFBQUFBQUFBQUFBQUFCQWdQL3hBQWRFUUVCQUFNQUF3RUJBQUFBQUFBQUFBQUFBUUlSTVJJaFFRTlIvOW9BREFNQkFBSVJBeEVBUHdETksxK04yUzdQUGx4UHB0eDFJVmpnNjN5Nkg5eXNoclNkbHUwRkRNaGlQTVZwV2hJYlZyT05TZW54cWtaWFJScnN5dEhycGNGMlRPQ0JuU1F0R1QxL0xYSGV6ZXh0V2xVd3laNVdsZWtqZUl4L3BWOW1CcDl5TmRvcWd0QUkxbFBkVENhakVPNVErcVR2RWp3cG84cXFhdXpTeXk3ZDZUYlpjNWJpZUsyMXVJSkh5U0tyam15Y1J0d29VNUlIOXcrMVdxRGNYNERvY1pXVW51NzZlVEhZRjFhM3ZzeDVIVWU2by9TcTFwUGxmNm94MlhoQldDNi80ZTBQdFhoelptSWtaUzQvOHg5cW4zVUZCSVZqSTVFVndZVW1ucUR5cW1YYTN0UWQxdWxMSlhxenFJUExIaDQwVS8ycFFFcWpZNjYvcFJVWHJiRzdpQXF3enRrWmQ0a3R5YmFsS2xrQkxqYWVCU2UveU5WNnQ1L1pOcDVJZWl1bGgwQUZMaU9TeFNneWhQWit4WEt3V05zcWQzNUtQeG1GbmdmTHhwQis3UnBqUWt4VmtxWi9DZVFybmpwbnZwUjdacS9PamRxdUpLUDZ6WGxyWVZVWmhha1NqdjFENEh6cXZUTzQxV3pqZUtTT1FQRHlwckplRWR0U2xqMlFjbnlwMU5qdlcrU1daQ2REcWVRUHZDbTd1aVhISUhVWUk2MWJQV3FpMzd5aUc1aVNNc3I0b2RUL0FJTkt4N2hCa0hYR2xJSjZwMVVuYUxERXVNdDZGUGs3cEtrbmQ2dVdycFVlZXpDK291ZTZhUUN6cTRPaFhERlRhdVRibTFLMHI5Rndmei84MFU5MjR0RVN6TTJ5TXcvdlhnaGUrSU9RRDdPUHJSVTNyWEhpcFY5RTJseVZieUljeEowZTR2bVBLdm5hdnBTMFhCRnhnb2R5Q3NEQ3g0MGp2VWp3eFhEaXVhaFNNcDV4cGxUamFOWlR4MDk5STFDN1F5UFdET09ZUjlUVFhabUhDdXJTNHo2eTNKSEZEZzVud1BmVFBiQzhOM0s0aGFVcVFFZ0p3cm5VTEZtdXczMHV0S0tWSk9RUldrbnBqZXJQZHRqSjZWYnhqUzRSMVNjWitGUUVtNVhtM2d4RnlubXdQY0tzNHFRbWJhWE9TenU5NEVER0NVakJOVng5MVRxeXRhaVZIcWFKTDlGMThSZDNmZWZXMnA1d3JQSEdmaFJYbTVuSmIrUDBvcWIxcGp3d3JWckxmRjJ5U2s4UzJyZ29lRlpUVjVYY0lTWHdSTVlLVmR6ZzRmclR4bTBmcGJOYWE1R25OUzJRNjBzS1NhSHBCUWtuU1ZEd3JLcmJ0V20xU1FwRXB0eG9uQzBid2NhdUN0cWJOT2hCVGQ1aXNMSXlOYjZVa0h4Qk5UWnBjdTRnOXFiZERlZFhLaXVoQ3p4VTBvWU9hcURpaWc2VmNENDFhWm0xRHJPb0dWYlpPT1N3OGc1L1dxbmNMdjZlK1hYWEc4L3lrQVZVcUxIa3JwTlN3YVFWSlJqK0luNTAxZGw2anBiNjlUVmJMUW5LQktBT21lSHlvcEY3R0VnS0NqeHljMFZuZXRjZUVxS0tLREZGRkZBRkZGRkFGRkZGQUZGRkZBZi8yUT09IgogICAgICAgICAgICAgICAgIHdpZHRoPSIxMDAlIgogICAgICAgICAgICAgICAgIGhlaWdodD0iMTAwJSIvPgogICAgICAgIDwvc3ZnPg==",
+        "archived": false,
+        "tags": [
+          "3",
+          "6",
+          "4"
+        ],
+        "category_id": "3",
+        "type": "event",
+        "tasks": [
+          {
+            "committee": {
+              "id": "3"
+            },
+            "employees": [
+              {
+                "id": "11"
+              },
+              {
+                "id": "3"
+              }
+            ],
+            "task": "Overthink"
+          }
+        ],
+        "schedules": [
+          {
+            "time": "01:30",
+            "activity": "Start"
+          }
+        ]
+      }
     }
   ],
   "announcements": [

@@ -26,7 +26,7 @@ export function useBracketState() {
   const currentGrandFinalsIndex = ref(0);
   const activeBracketSection = ref('winners');
 
-  const bracketTypeOptions = ["Single Elimination", "Double Elimination"];
+  const bracketTypeOptions = ["Single Elimination", "Double Elimination", "Round Robin"];
 
   return {
     bracketName,
