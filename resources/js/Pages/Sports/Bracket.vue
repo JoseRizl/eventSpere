@@ -33,6 +33,8 @@ const {
   selectedRoundRobinMatch,
   selectedRoundRobinMatchData,
   showMatchUpdateConfirmDialog,
+  roundRobinScoring,
+  showScoringConfigDialog,
 } = state;
 
 const {
@@ -62,6 +64,9 @@ const {
   confirmMatchUpdate,
   cancelMatchUpdate,
   proceedWithMatchUpdate,
+  openScoringConfigDialog,
+  closeScoringConfigDialog,
+  saveScoringConfig,
 } = useBracketActions(state);
 
 onMounted(() => {
@@ -211,8 +216,9 @@ onMounted(() => {
                     <div class="player-box">
                       <span
                         :class="{
-                          winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score >= match.players[1].score,
+                          winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score > match.players[1].score,
                           loser: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score,
+                          tie: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score === match.players[1].score && match.is_tie,
                           'bye-text': match.players[0].name === 'BYE',
                           'facing-bye': match.players[1].name === 'BYE',
                           'tbd-text': !match.players[0].name || match.players[0].name === 'TBD',
@@ -225,8 +231,9 @@ onMounted(() => {
                       <hr />
                       <span
                         :class="{
-                          winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score >= match.players[0].score,
+                          winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score > match.players[0].score,
                           loser: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score,
+                          tie: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score === match.players[0].score && match.is_tie,
                           'bye-text': match.players[1].name === 'BYE',
                           'facing-bye': match.players[0].name === 'BYE',
                           'tbd-text': !match.players[1].name || match.players[1].name === 'TBD',
@@ -243,14 +250,24 @@ onMounted(() => {
 
               <!-- Round Robin Standings -->
               <div class="standings-section">
-                <h3>Standings</h3>
+                <div class="standings-header-row">
+                  <h3>Standings</h3>
+                  <button
+                    @click="openScoringConfigDialog"
+                    class="scoring-config-btn"
+                    title="Configure scoring system"
+                  >
+                    <i class="pi pi-cog"></i>
+                  </button>
+                </div>
                 <div class="standings-table">
                   <div class="standings-header">
                     <span class="rank">Rank</span>
                     <span class="player">Player</span>
                     <span class="wins">Wins</span>
+                    <span class="draws">Draws</span>
                     <span class="losses">Losses</span>
-                    <span class="win-rate">Win Rate</span>
+                    <span class="points">Points</span>
                   </div>
                   <div
                     v-for="(player, index) in getRoundRobinStandings(bracketIdx)"
@@ -261,8 +278,9 @@ onMounted(() => {
                     <span class="rank">{{ index + 1 }}</span>
                     <span class="player">{{ player.name }}</span>
                     <span class="wins">{{ player.wins }}</span>
+                    <span class="draws">{{ player.draws }}</span>
                     <span class="losses">{{ player.losses }}</span>
-                    <span class="win-rate">{{ player.winRate }}%</span>
+                    <span class="points">{{ player.points }}</span>
                   </div>
                 </div>
               </div>
@@ -541,6 +559,54 @@ onMounted(() => {
         @cancel="cancelMatchUpdate"
       />
 
+      <!-- Scoring Configuration Dialog -->
+      <Dialog v-model:visible="showScoringConfigDialog" header="Configure Scoring System" modal :style="{ width: '400px' }">
+        <div class="scoring-config-dialog">
+          <div class="scoring-option">
+            <label>Win Points:</label>
+            <InputText
+              v-model="roundRobinScoring.win"
+              type="number"
+              step="0.5"
+              min="0"
+              placeholder="1"
+            />
+          </div>
+          <div class="scoring-option">
+            <label>Draw Points:</label>
+            <InputText
+              v-model="roundRobinScoring.draw"
+              type="number"
+              step="0.5"
+              min="0"
+              placeholder="0.5"
+            />
+          </div>
+          <div class="scoring-option">
+            <label>Loss Points:</label>
+            <InputText
+              v-model="roundRobinScoring.loss"
+              type="number"
+              step="0.5"
+              min="0"
+              placeholder="0"
+            />
+          </div>
+          <div class="dialog-actions">
+            <Button
+              label="Cancel"
+              @click="closeScoringConfigDialog"
+              class="p-button-secondary"
+            />
+            <Button
+              label="Save"
+              @click="saveScoringConfig"
+              class="p-button-success"
+            />
+          </div>
+        </div>
+      </Dialog>
+
       <!-- Round Robin Match Dialog -->
       <Dialog v-model:visible="showRoundRobinMatchDialog" header="Edit Match" modal :style="{ width: '500px' }">
         <div v-if="selectedRoundRobinMatchData" class="round-robin-match-dialog">
@@ -620,6 +686,13 @@ onMounted(() => {
               />
               <span class="status-label" :class="{ 'active': selectedRoundRobinMatchData.status === 'completed' }">Completed</span>
             </div>
+          </div>
+
+          <div v-if="selectedRoundRobinMatchData.status === 'completed' && selectedRoundRobinMatchData.player1Score === selectedRoundRobinMatchData.player2Score"
+               :class="['tie-indicator', selectedRoundRobinMatch?.bracketType !== 'round_robin' ? 'tie-warning-bg' : '']">
+            <i class="pi pi-exclamation-triangle"></i>
+            <span v-if="selectedRoundRobinMatch?.bracketType === 'round_robin'">This match is a tie!</span>
+            <span v-else class="tie-warning">Ties are not allowed in elimination brackets. Please adjust scores to determine a winner.</span>
           </div>
 
           <div class="dialog-actions">
@@ -1007,6 +1080,37 @@ onMounted(() => {
   border: 1px solid #dee2e6;
 }
 
+.standings-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.standings-header-row h3 {
+  margin: 0;
+  color: #495057;
+  font-size: 1.2rem;
+}
+
+.scoring-config-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.scoring-config-btn:hover {
+  background: #0056b3;
+}
+
 .standings-section h3 {
   margin: 0 0 20px 0;
   color: #495057;
@@ -1024,7 +1128,7 @@ onMounted(() => {
 .standings-header,
 .standings-row {
   display: grid;
-  grid-template-columns: 60px 1fr 80px 80px 100px;
+  grid-template-columns: 60px 1fr 80px 80px 80px 100px;
   gap: 10px;
   padding: 12px 15px;
   align-items: center;
@@ -1063,8 +1167,9 @@ onMounted(() => {
 .standings-header .rank,
 .standings-header .player,
 .standings-header .wins,
+.standings-header .draws,
 .standings-header .losses,
-.standings-header .win-rate {
+.standings-header .points {
   font-size: 0.9rem;
 }
 
@@ -1074,9 +1179,73 @@ onMounted(() => {
 }
 
 .standings-row .wins,
+.standings-row .draws,
 .standings-row .losses,
-.standings-row .win-rate {
+.standings-row .points {
   text-align: center;
+}
+
+/* Scoring Configuration Dialog */
+.scoring-config-dialog {
+  padding: 10px 0;
+}
+
+.scoring-option {
+  margin-bottom: 20px;
+}
+
+.scoring-option label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #495057;
+}
+
+.scoring-option input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.scoring-option input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Tie indicator in match dialog */
+.tie-indicator {
+  background: #fff3e0;
+  border: 1px solid #ffcc80;
+  border-radius: 6px;
+  padding: 12px;
+  margin: 15px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #e65100;
+}
+
+.tie-indicator i {
+  color: #fd7e14;
+  font-size: 1.1rem;
+}
+
+.tie-warning {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.tie-warning-bg {
+  background: #f8d7da !important;
+  border: 1px solid #f5c6cb !important;
+  color: #721c24 !important;
+}
+
+.tie-warning-bg i {
+  color: #dc3545 !important;
 }
 
 

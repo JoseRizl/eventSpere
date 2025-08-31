@@ -602,13 +602,23 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Winner/Loser States */
+/* Winner/Loser/Tie States */
 .winner {
   color: #28a745;
 }
 
 .loser {
   color: #dc3545;
+}
+
+.tie {
+  color: #fd7e14 !important;
+  font-weight: bold;
+}
+
+/* Ensure tie takes precedence over winner/loser in Round Robin */
+.round-robin-bracket .player-box span.tie {
+  color: #fd7e14 !important;
 }
 
 .bye-text {
@@ -659,9 +669,10 @@
   color: #6f42c1 !important;
 }
 
-/* Override any existing winner/loser color rules */
+/* Override any existing winner/loser/tie color rules */
 .bracket .player-box span.tbd-text.winner,
-.bracket .player-box span.tbd-text.loser {
+.bracket .player-box span.tbd-text.loser,
+.bracket .player-box span.tbd-text.tie {
   color: #6f42c1 !important;
   background-color: #f8f9fa !important;
   border: 1px solid #dee2e6 !important;
@@ -677,9 +688,10 @@
   color: #28a745 !important;
 }
 
-/* Override winner/loser colors when facing-bye is present */
+/* Override winner/loser/tie colors when facing-bye is present */
 .player-box .facing-bye.winner,
-.player-box .facing-bye.loser {
+.player-box .facing-bye.loser,
+.player-box .facing-bye.tie {
   color: #28a745 !important;
 }
 
@@ -692,6 +704,7 @@
 /* Override any other color classes when BYE is present */
 .player-box .bye-text.winner,
 .player-box .bye-text.loser,
+.player-box .bye-text.tie,
 .player-box .bye-text.winner-name,
 .player-box .bye-text.loser-name {
   color: #6c757d !important;

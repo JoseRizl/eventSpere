@@ -33,6 +33,14 @@ export function useBracketState() {
   const selectedRoundRobinMatchData = ref(null);
   const showMatchUpdateConfirmDialog = ref(false);
 
+  // Round Robin scoring configuration
+  const roundRobinScoring = ref({
+    win: 1,
+    draw: 0.5,
+    loss: 0
+  });
+  const showScoringConfigDialog = ref(false);
+
   return {
     bracketName,
     numberOfPlayers,
@@ -61,6 +69,8 @@ export function useBracketState() {
     selectedRoundRobinMatch,
     selectedRoundRobinMatchData,
     showMatchUpdateConfirmDialog,
+    roundRobinScoring,
+    showScoringConfigDialog,
   };
 }
 

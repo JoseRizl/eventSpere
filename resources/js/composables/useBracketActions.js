@@ -28,6 +28,8 @@ export function useBracketActions(state) {
     selectedRoundRobinMatch,
     selectedRoundRobinMatchData,
     showMatchUpdateConfirmDialog,
+    roundRobinScoring,
+    showScoringConfigDialog,
   } = state;
 
   const bracketTypeOptions = state.bracketTypeOptions;
@@ -1306,40 +1308,68 @@ export function useBracketActions(state) {
               name: player.name,
               wins: 0,
               losses: 0,
-              totalGames: 0
+              draws: 0,
+              totalGames: 0,
+              points: 0
             };
           }
         }
       });
     });
 
-    // Calculate wins and losses
+    // Calculate wins, losses, draws, and points
     allMatches.forEach(match => {
       if (match.status === 'completed') {
-        const winner = match.players.find(p => p.id === match.winner_id);
-        const loser = match.players.find(p => p.id === match.loser_id);
+        const player1 = match.players[0];
+        const player2 = match.players[1];
 
-        if (winner && winner.name !== 'BYE' && playerStats[winner.id]) {
-          playerStats[winner.id].wins++;
-          playerStats[winner.id].totalGames++;
-        }
-        if (loser && loser.name !== 'BYE' && playerStats[loser.id]) {
-          playerStats[loser.id].losses++;
-          playerStats[loser.id].totalGames++;
+        if (player1.name === 'BYE' || player2.name === 'BYE') {
+          // Handle BYE matches
+          const winner = player1.name === 'BYE' ? player2 : player1;
+          if (playerStats[winner.id]) {
+            playerStats[winner.id].wins++;
+            playerStats[winner.id].totalGames++;
+            playerStats[winner.id].points += roundRobinScoring.value.win;
+          }
+        } else if (match.winner_id && match.loser_id) {
+          // Regular win/loss
+          const winner = match.players.find(p => p.id === match.winner_id);
+          const loser = match.players.find(p => p.id === match.loser_id);
+
+          if (winner && playerStats[winner.id]) {
+            playerStats[winner.id].wins++;
+            playerStats[winner.id].totalGames++;
+            playerStats[winner.id].points += roundRobinScoring.value.win;
+          }
+          if (loser && playerStats[loser.id]) {
+            playerStats[loser.id].losses++;
+            playerStats[loser.id].totalGames++;
+            playerStats[loser.id].points += roundRobinScoring.value.loss;
+          }
+        } else if (match.is_tie) {
+          // Tie match
+          if (playerStats[player1.id]) {
+            playerStats[player1.id].draws++;
+            playerStats[player1.id].totalGames++;
+            playerStats[player1.id].points += roundRobinScoring.value.draw;
+          }
+          if (playerStats[player2.id]) {
+            playerStats[player2.id].draws++;
+            playerStats[player2.id].totalGames++;
+            playerStats[player2.id].points += roundRobinScoring.value.draw;
+          }
         }
       }
     });
 
-    // Convert to array and calculate win rate
-    const standings = Object.values(playerStats).map(player => ({
-      ...player,
-      winRate: player.totalGames > 0 ? Math.round((player.wins / player.totalGames) * 100) : 0
-    }));
+    // Convert to array
+    const standings = Object.values(playerStats);
 
-    // Sort by wins (descending), then by win rate (descending)
+    // Sort by points (descending), then by wins (descending), then by draws (descending)
     return standings.sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
       if (b.wins !== a.wins) return b.wins - a.wins;
-      return b.winRate - a.winRate;
+      return b.draws - a.draws;
     });
   };
 
@@ -1538,15 +1568,43 @@ export function useBracketActions(state) {
 
     // Update match status
     if (selectedRoundRobinMatchData.value.status === 'completed' && match.status !== 'completed') {
+      // Check for ties in elimination brackets
+      if ((bracket.type === 'Single Elimination' || bracket.type === 'Double Elimination') &&
+          match.players[0].score === match.players[1].score) {
+        // Cannot complete elimination bracket matches with ties
+        alert('Ties are not allowed in elimination brackets. Please adjust the scores to determine a winner.');
+        return;
+      }
+
       // End the match
-      const winner = match.players[0].score >= match.players[1].score ? match.players[0] : match.players[1];
-      const loser = match.players[0].score >= match.players[1].score ? match.players[1] : match.players[0];
       match.players[0].completed = true;
       match.players[1].completed = true;
       match.status = 'completed';
-      match.winner_id = winner.id;
-      match.loser_id = loser.id;
       match.updated_at = new Date().toISOString();
+
+      // Determine winner and loser (for elimination brackets)
+      let winner, loser;
+      if (bracket.type === 'Round Robin') {
+        // Check for tie in Round Robin
+        if (match.players[0].score === match.players[1].score) {
+          match.is_tie = true;
+          match.winner_id = null;
+          match.loser_id = null;
+        } else {
+          winner = match.players[0].score > match.players[1].score ? match.players[0] : match.players[1];
+          loser = match.players[0].score > match.players[1].score ? match.players[1] : match.players[0];
+          match.winner_id = winner.id;
+          match.loser_id = loser.id;
+          match.is_tie = false;
+        }
+      } else {
+        // Elimination brackets - no ties allowed (already checked above)
+        winner = match.players[0].score > match.players[1].score ? match.players[0] : match.players[1];
+        loser = match.players[0].score > match.players[1].score ? match.players[1] : match.players[0];
+        match.winner_id = winner.id;
+        match.loser_id = loser.id;
+        match.is_tie = false;
+      }
 
       // Handle bracket progression for elimination brackets
       if (bracket.type === 'Single Elimination') {
@@ -1775,6 +1833,18 @@ export function useBracketActions(state) {
     await updateMatch();
   };
 
+  const openScoringConfigDialog = () => {
+    showScoringConfigDialog.value = true;
+  };
+
+  const closeScoringConfigDialog = () => {
+    showScoringConfigDialog.value = false;
+  };
+
+  const saveScoringConfig = () => {
+    showScoringConfigDialog.value = false;
+  };
+
   watch(currentMatchIndex, () => {
     if (activeBracketIdx.value !== null) updateLines(activeBracketIdx.value);
   });
@@ -1812,6 +1882,9 @@ export function useBracketActions(state) {
     confirmMatchUpdate,
     cancelMatchUpdate,
     proceedWithMatchUpdate,
+    openScoringConfigDialog,
+    closeScoringConfigDialog,
+    saveScoringConfig,
   };
 }
 
