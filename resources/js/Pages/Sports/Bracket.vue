@@ -18,7 +18,6 @@ const {
   events,
   brackets,
   showDialog,
-  currentMatchIndex,
   expandedBrackets,
   activeBracketIdx,
   showWinnerDialog,
@@ -28,10 +27,6 @@ const {
   showMissingFieldsDialog,
   showDeleteConfirmDialog,
   deleteBracketIdx,
-  currentWinnersMatchIndex,
-  currentLosersMatchIndex,
-  currentGrandFinalsIndex,
-  activeBracketSection,
   bracketTypeOptions,
   showRoundRobinMatchDialog,
   selectedRoundRobinMatch,
@@ -43,18 +38,11 @@ const {
   toggleBracket,
   createBracket,
   fetchBrackets,
-  increaseScore,
-  decreaseScore,
   editParticipant,
   cancelEndMatch,
   confirmEndMatch,
   undoConcludeMatch,
   getRoundAndMatchIndices,
-  isCurrentMatch,
-  navigateToMatch,
-  showNextMatch,
-  showPreviousMatch,
-  currentMatch,
   updateLines,
   removeBracket,
   calculateByes,
@@ -64,13 +52,10 @@ const {
   confirmDeleteBracket,
   cancelDeleteBracket,
   saveBrackets,
-  concludeMatch,
-  getCurrentRound,
-  getTotalMatches,
-  navigateToSection,
   getRoundRobinStandings,
+  openMatchDialog,
   openRoundRobinMatchDialog,
-  updateRoundRobinMatch,
+  updateMatch,
   closeRoundRobinMatchDialog,
 } = useBracketActions(state);
 
@@ -87,7 +72,7 @@ onMounted(() => {
 // using composable cancelEndMatch
 // using composable confirmEndMatch
 
-// using composable isCurrentMatch
+
 
 
 // watchers handled in composable
@@ -164,14 +149,12 @@ onMounted(() => {
                   v-for="(match, matchIdx) in round"
                   :key="matchIdx"
                   :id="`match-${roundIdx}-${matchIdx}`"
-                  :class="['match', { 'highlight': isCurrentMatch(bracketIdx, roundIdx, matchIdx) }]"
-                  @click="navigateToMatch(bracketIdx, roundIdx, matchIdx)"
+                  :class="['match']"
+                  @click="openMatchDialog(bracketIdx, roundIdx, matchIdx, match, 'single')"
                 >
                   <div class="player-box">
                       <span
-                        @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 0)"
                         :class="{
-                          editable: true,
                           winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score >= match.players[1].score,
                           loser: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score,
                           'bye-text': match.players[0].name === 'BYE',
@@ -185,9 +168,7 @@ onMounted(() => {
                       </span>
                       <hr />
                       <span
-                        @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 1)"
                         :class="{
-                          editable: true,
                           winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score >= match.players[0].score,
                           loser: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score,
                           'bye-text': match.players[1].name === 'BYE',
@@ -219,7 +200,7 @@ onMounted(() => {
                     v-for="(match, matchIdx) in round"
                     :key="`round-${roundIdx}-${matchIdx}`"
                     :id="`round-match-${roundIdx}-${matchIdx}`"
-                    :class="['match', { 'highlight': isCurrentMatch(bracketIdx, roundIdx, matchIdx, 'round_robin') }]"
+                    :class="['match']"
                     @click="openRoundRobinMatchDialog(bracketIdx, roundIdx, matchIdx, match)"
                   >
                     <div class="player-box">
@@ -309,14 +290,12 @@ onMounted(() => {
                       v-for="(match, matchIdx) in round"
                       :key="`winners-${roundIdx}-${matchIdx}`"
                       :id="`winners-match-${roundIdx}-${matchIdx}`"
-                      :class="['match', { 'highlight': isCurrentMatch(bracketIdx, roundIdx, matchIdx, 'winners') }]"
-                      @click="navigateToMatch(bracketIdx, roundIdx, matchIdx, 'winners')"
+                      :class="['match']"
+                      @click="openMatchDialog(bracketIdx, roundIdx, matchIdx, match, 'winners')"
                     >
                       <div class="player-box">
                         <span
-                          @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 0)"
                           :class="{
-                            editable: true,
                             winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score >= match.players[1].score,
                             loser: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score,
                             'bye-text': match.players[0].name === 'BYE',
@@ -330,9 +309,7 @@ onMounted(() => {
                         </span>
                         <hr />
                         <span
-                          @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 1)"
                           :class="{
-                            editable: true,
                             winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score >= match.players[0].score,
                             loser: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score,
                             'bye-text': match.players[1].name === 'BYE',
@@ -375,14 +352,12 @@ onMounted(() => {
                       v-for="(match, matchIdx) in round"
                       :key="`losers-${roundIdx}-${matchIdx}`"
                       :id="`losers-match-${roundIdx}-${matchIdx}`"
-                      :class="['match', { 'highlight': isCurrentMatch(bracketIdx, roundIdx + bracket.matches.winners.length, matchIdx, 'losers') }]"
-                      @click="navigateToMatch(bracketIdx, roundIdx + bracket.matches.winners.length, matchIdx, 'losers')"
+                      :class="['match']"
+                      @click="openMatchDialog(bracketIdx, roundIdx + bracket.matches.winners.length, matchIdx, match, 'losers')"
                     >
                       <div class="player-box">
                         <span
-                          @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 0)"
                           :class="{
-                            editable: true,
                             winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score >= match.players[1].score,
                             loser: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score,
                             'bye-text': match.players[0].name === 'BYE',
@@ -396,9 +371,7 @@ onMounted(() => {
                         </span>
                         <hr />
                         <span
-                          @click.stop="editParticipant(bracketIdx, roundIdx, matchIdx, 1)"
                           :class="{
-                            editable: true,
                             winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score >= match.players[0].score,
                             loser: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score,
                             'bye-text': match.players[1].name === 'BYE',
@@ -435,14 +408,12 @@ onMounted(() => {
 
                   <div v-for="(match, matchIdx) in bracket.matches.grand_finals" :key="`grand-finals-${matchIdx}`"
                     :id="`grand-finals-match-${matchIdx}`"
-                    :class="['match', { 'highlight': isCurrentMatch(bracketIdx, bracket.matches.winners.length + bracket.matches.losers.length, matchIdx, 'grand_finals') }]"
-                    @click="navigateToMatch(bracketIdx, bracket.matches.winners.length + bracket.matches.losers.length, matchIdx, 'grand_finals')"
+                    :class="['match']"
+                    @click="openMatchDialog(bracketIdx, bracket.matches.winners.length + bracket.matches.losers.length, matchIdx, match, 'grand_finals')"
                   >
                     <div class="player-box">
                       <span
-                        @click.stop="editParticipant(bracketIdx, 0, matchIdx, 0)"
                         :class="{
-                          editable: true,
                           winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score >= match.players[1].score,
                           loser: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score,
                           'bye-text': match.players[0].name === 'BYE',
@@ -454,9 +425,7 @@ onMounted(() => {
                       </span>
                       <hr />
                       <span
-                        @click.stop="editParticipant(bracketIdx, 0, matchIdx, 1)"
                         :class="{
-                          editable: true,
                           winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score >= match.players[0].score,
                           loser: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score,
                           'bye-text': match.players[1].name === 'BYE',
@@ -472,134 +441,7 @@ onMounted(() => {
               </div>
             </div>
 
-            <!-- Navigation & Matchup Box -->
-            <div class="navigation-and-matchup">
-              <!-- Navigation Controls -->
-              <div class="navigation-controls">
-                <button
-                  @click="showPreviousMatch(bracketIdx)"
-                  :disabled="bracket.type === 'Round Robin' ? currentMatchIndex === 0 :
-                    bracket.type === 'Single Elimination' ? currentMatchIndex === 0 :
-                    bracket.type === 'Double Elimination' && (
-                      (activeBracketSection === 'winners' && currentWinnersMatchIndex === 0) ||
-                      (activeBracketSection === 'losers' && currentLosersMatchIndex === 0) ||
-                      (activeBracketSection === 'grand_finals' && currentGrandFinalsIndex === 0)
-                    )"
-                >
-                  Previous
-                </button>
 
-                <button
-                  @click="showNextMatch(bracketIdx)"
-                  :disabled="bracket.type === 'Round Robin' ? currentMatchIndex >= getTotalMatches(bracketIdx) - 1 :
-                    bracket.type === 'Single Elimination' ? currentMatchIndex >= getTotalMatches(bracketIdx) - 1 :
-                    bracket.type === 'Double Elimination' && (
-                      (activeBracketSection === 'winners' && currentWinnersMatchIndex >= bracket.matches.winners.flat().length - 1) ||
-                      (activeBracketSection === 'losers' && currentLosersMatchIndex >= bracket.matches.losers.flat().length - 1) ||
-                      (activeBracketSection === 'grand_finals' && currentGrandFinalsIndex >= bracket.matches.grand_finals.length - 1)
-                    )"
-                >
-                  Next
-                </button>
-              </div>
-
-              <!-- Current Match Display -->
-              <div v-if="currentMatch(bracketIdx)" class="match-card styled">
-                <!-- Sport Tag with Correct Round Counter -->
-                <div class="sport-tag">
-                  {{ bracket.name }} - Round {{ getCurrentRound(bracketIdx) }}
-                </div>
-
-                <div class="match-content">
-                  <!-- Left Team -->
-                  <div class="team blue">
-                    <button
-                      class="score-btn"
-                      @click="increaseScore(bracketIdx, 0)"
-                      :disabled="currentMatch(bracketIdx).status === 'completed'"
-                    >
-                      +
-                    </button>
-
-                    <div class="score-display">
-                      {{ currentMatch(bracketIdx).players[0]?.score.toString().padStart(2, '0') }}
-                    </div>
-
-                    <button
-                      class="score-btn"
-                      @click="decreaseScore(bracketIdx, 0)"
-                      :disabled="currentMatch(bracketIdx).status === 'completed'"
-                    >
-                      -
-                    </button>
-
-                    <span class="team-name" :class="{ 'tbd-text': !currentMatch(bracketIdx).players[0]?.name || currentMatch(bracketIdx).players[0]?.name === 'TBD' }">{{ currentMatch(bracketIdx).players[0]?.name || 'TBD' }}</span>
-                  </div>
-
-                  <span class="vs">VS</span>
-
-                  <!-- Right Team -->
-                  <div class="team red">
-                    <button
-                      class="score-btn"
-                      @click="increaseScore(bracketIdx, 1)"
-                      :disabled="currentMatch(bracketIdx).status === 'completed'"
-                    >
-                      +
-                    </button>
-
-                    <div class="score-display">
-                      {{ currentMatch(bracketIdx).players[1]?.score.toString().padStart(2, '0') }}
-                    </div>
-
-                    <button
-                      class="score-btn"
-                      @click="decreaseScore(bracketIdx, 1)"
-                      :disabled="currentMatch(bracketIdx).status === 'completed'"
-                    >
-                      -
-                    </button>
-
-                    <span class="team-name" :class="{ 'tbd-text': !currentMatch(bracketIdx).players[1]?.name || currentMatch(bracketIdx).players[1]?.name === 'TBD' }">{{ currentMatch(bracketIdx).players[1]?.name || 'TBD' }}</span>
-                  </div>
-                </div>
-
-                <!-- Match Status -->
-                <div v-if="currentMatch(bracketIdx).status === 'completed'"
-                     class="completed-text"
-                     @click="undoConcludeMatch(bracketIdx)">
-                  Completed
-                </div>
-
-                <button v-else
-                        @click="concludeMatch(bracketIdx)"
-                        class="match-over">
-                  End Match
-                </button>
-              </div>
-
-              <!-- Section Navigation for Double Elimination -->
-              <div v-if="bracket.type === 'Double Elimination'" class="section-navigation">
-                <button
-                  @click="navigateToSection(bracketIdx, 'winners')"
-                  :class="{ active: activeBracketSection === 'winners' }"
-                >
-                  Winners
-                </button>
-                <button
-                  @click="navigateToSection(bracketIdx, 'losers')"
-                  :class="{ active: activeBracketSection === 'losers' }"
-                >
-                  Losers
-                </button>
-                <button
-                  @click="navigateToSection(bracketIdx, 'grand_finals')"
-                  :class="{ active: activeBracketSection === 'grand_finals' }"
-                >
-                  Grand Finals
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -684,7 +526,7 @@ onMounted(() => {
 
       <!-- Round Robin Match Dialog -->
       <Dialog v-model:visible="showRoundRobinMatchDialog" header="Edit Match" modal :style="{ width: '500px' }">
-        <div class="round-robin-match-dialog">
+        <div v-if="selectedRoundRobinMatchData" class="round-robin-match-dialog">
           <div class="match-info">
             <h3>Round Robin Match</h3>
             <p class="match-description">Edit player names, scores, and match status</p>
@@ -772,7 +614,7 @@ onMounted(() => {
             />
             <Button
               label="Update Match"
-              @click="updateRoundRobinMatch"
+              @click="updateMatch"
               class="p-button-success"
             />
           </div>
@@ -1078,10 +920,21 @@ onMounted(() => {
   box-shadow: 0 2px 4px rgba(0, 123, 255, 0.1);
 }
 
-.round-robin-bracket .match.highlight {
-  border-color: #007bff !important;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2) !important;
+/* Make all bracket matches clickable with hover effects */
+.bracket .match,
+.double-elimination-bracket .match {
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
+
+.bracket .match:hover,
+.double-elimination-bracket .match:hover {
+  border-color: #007bff;
+  box-shadow: 0 2px 6px rgba(0, 123, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+
 
 /* Ensure player boxes are also uniformly aligned */
 .round-robin-bracket .match .player-box {
@@ -1187,39 +1040,5 @@ onMounted(() => {
   text-align: center;
 }
 
-.navigation-controls {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
 
-.section-navigation {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: center;
-  margin-top: 1rem;
-}
-
-.section-navigation button {
-  padding: 0.5rem 1rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background-color: #e9ecef;
-  color: #495057;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.section-navigation button:hover {
-  background-color: #dee2e6;
-}
-
-.section-navigation button.active {
-  background-color: #007bff;
-  color: white;
-  border-color: #007bff;
-}
-
-/* ... existing styles ... */
 </style>

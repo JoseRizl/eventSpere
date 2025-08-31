@@ -1337,8 +1337,8 @@ export function useBracketActions(state) {
     });
   };
 
-  const openRoundRobinMatchDialog = (bracketIdx, roundIdx, matchIdx, match) => {
-    selectedRoundRobinMatch.value = { bracketIdx, roundIdx, matchIdx };
+  const openMatchDialog = (bracketIdx, roundIdx, matchIdx, match, bracketType = 'round_robin') => {
+    selectedRoundRobinMatch.value = { bracketIdx, roundIdx, matchIdx, bracketType };
     selectedRoundRobinMatchData.value = {
       player1Name: match.players[0].name,
       player2Name: match.players[1].name,
@@ -1349,44 +1349,178 @@ export function useBracketActions(state) {
     showRoundRobinMatchDialog.value = true;
   };
 
-  const updateRoundRobinMatch = async () => {
+  const openRoundRobinMatchDialog = (bracketIdx, roundIdx, matchIdx, match) => {
+    openMatchDialog(bracketIdx, roundIdx, matchIdx, match, 'round_robin');
+  };
+
+  const updateMatch = async () => {
     if (!selectedRoundRobinMatch.value) return;
 
-    const { bracketIdx, roundIdx, matchIdx } = selectedRoundRobinMatch.value;
+    const { bracketIdx, roundIdx, matchIdx, bracketType } = selectedRoundRobinMatch.value;
     const bracket = brackets.value[bracketIdx];
-    const match = bracket.matches[roundIdx][matchIdx];
+
+    let match;
+    if (bracket.type === 'Single Elimination') {
+      match = bracket.matches[roundIdx][matchIdx];
+    } else if (bracket.type === 'Double Elimination') {
+      switch (bracketType) {
+        case 'winners':
+          match = bracket.matches.winners[roundIdx][matchIdx];
+          break;
+        case 'losers':
+          match = bracket.matches.losers[roundIdx - bracket.matches.winners.length][matchIdx];
+          break;
+        case 'grand_finals':
+          match = bracket.matches.grand_finals[matchIdx];
+          break;
+      }
+    } else if (bracket.type === 'Round Robin') {
+      match = bracket.matches[roundIdx][matchIdx];
+    }
 
     // Update player names directly
     if (match.players[0].name !== selectedRoundRobinMatchData.value.player1Name) {
       const playerId = match.players[0].id;
       const newName = selectedRoundRobinMatchData.value.player1Name;
-      // Update player name across all Round Robin matches
-      for (let r = 0; r < bracket.matches.length; r++) {
-        for (let m = 0; m < bracket.matches[r].length; m++) {
-          if (bracket.matches[r][m].players[0].id === playerId) {
-            bracket.matches[r][m].players[0].name = newName;
-            bracket.matches[r][m].players[0].updated_at = new Date().toISOString();
+
+      // Update player name across all matches in the bracket
+      if (bracket.type === 'Single Elimination') {
+        for (let r = 0; r < bracket.matches.length; r++) {
+          for (let m = 0; m < bracket.matches[r].length; m++) {
+            if (bracket.matches[r][m].players[0].id === playerId) {
+              bracket.matches[r][m].players[0].name = newName;
+              bracket.matches[r][m].players[0].updated_at = new Date().toISOString();
+            }
+            if (bracket.matches[r][m].players[1].id === playerId) {
+              bracket.matches[r][m].players[1].name = newName;
+              bracket.matches[r][m].players[1].updated_at = new Date().toISOString();
+            }
           }
-          if (bracket.matches[r][m].players[1].id === playerId) {
-            bracket.matches[r][m].players[1].name = newName;
-            bracket.matches[r][m].players[1].updated_at = new Date().toISOString();
+        }
+      } else if (bracket.type === 'Double Elimination') {
+        // Update in winners bracket
+        for (let r = 0; r < bracket.matches.winners.length; r++) {
+          for (let m = 0; m < bracket.matches.winners[r].length; m++) {
+            if (bracket.matches.winners[r][m].players[0].id === playerId) {
+              bracket.matches.winners[r][m].players[0].name = newName;
+              bracket.matches.winners[r][m].players[0].updated_at = new Date().toISOString();
+            }
+            if (bracket.matches.winners[r][m].players[1].id === playerId) {
+              bracket.matches.winners[r][m].players[1].name = newName;
+              bracket.matches.winners[r][m].players[1].updated_at = new Date().toISOString();
+            }
+          }
+        }
+        // Update in losers bracket
+        for (let r = 0; r < bracket.matches.losers.length; r++) {
+          for (let m = 0; m < bracket.matches.losers[r].length; m++) {
+            if (bracket.matches.losers[r][m].players[0].id === playerId) {
+              bracket.matches.losers[r][m].players[0].name = newName;
+              bracket.matches.losers[r][m].players[0].updated_at = new Date().toISOString();
+            }
+            if (bracket.matches.losers[r][m].players[1].id === playerId) {
+              bracket.matches.losers[r][m].players[1].name = newName;
+              bracket.matches.losers[r][m].players[1].updated_at = new Date().toISOString();
+            }
+          }
+        }
+        // Update in grand finals
+        for (let m = 0; m < bracket.matches.grand_finals.length; m++) {
+          if (bracket.matches.grand_finals[m].players[0].id === playerId) {
+            bracket.matches.grand_finals[m].players[0].name = newName;
+            bracket.matches.grand_finals[m].players[0].updated_at = new Date().toISOString();
+          }
+          if (bracket.matches.grand_finals[m].players[1].id === playerId) {
+            bracket.matches.grand_finals[m].players[1].name = newName;
+            bracket.matches.grand_finals[m].players[1].updated_at = new Date().toISOString();
+          }
+        }
+      } else if (bracket.type === 'Round Robin') {
+        // Update player name across all Round Robin matches
+        for (let r = 0; r < bracket.matches.length; r++) {
+          for (let m = 0; m < bracket.matches[r].length; m++) {
+            if (bracket.matches[r][m].players[0].id === playerId) {
+              bracket.matches[r][m].players[0].name = newName;
+              bracket.matches[r][m].players[0].updated_at = new Date().toISOString();
+            }
+            if (bracket.matches[r][m].players[1].id === playerId) {
+              bracket.matches[r][m].players[1].name = newName;
+              bracket.matches[r][m].players[1].updated_at = new Date().toISOString();
+            }
           }
         }
       }
     }
+
     if (match.players[1].name !== selectedRoundRobinMatchData.value.player2Name) {
       const playerId = match.players[1].id;
       const newName = selectedRoundRobinMatchData.value.player2Name;
-      // Update player name across all Round Robin matches
-      for (let r = 0; r < bracket.matches.length; r++) {
-        for (let m = 0; m < bracket.matches[r].length; m++) {
-          if (bracket.matches[r][m].players[0].id === playerId) {
-            bracket.matches[r][m].players[0].name = newName;
-            bracket.matches[r][m].players[0].updated_at = new Date().toISOString();
+
+      // Update player name across all matches in the bracket
+      if (bracket.type === 'Single Elimination') {
+        for (let r = 0; r < bracket.matches.length; r++) {
+          for (let m = 0; m < bracket.matches[r].length; m++) {
+            if (bracket.matches[r][m].players[0].id === playerId) {
+              bracket.matches[r][m].players[0].name = newName;
+              bracket.matches[r][m].players[0].updated_at = new Date().toISOString();
+            }
+            if (bracket.matches[r][m].players[1].id === playerId) {
+              bracket.matches[r][m].players[1].name = newName;
+              bracket.matches[r][m].players[1].updated_at = new Date().toISOString();
+            }
           }
-          if (bracket.matches[r][m].players[1].id === playerId) {
-            bracket.matches[r][m].players[1].name = newName;
-            bracket.matches[r][m].players[1].updated_at = new Date().toISOString();
+        }
+      } else if (bracket.type === 'Double Elimination') {
+        // Update in winners bracket
+        for (let r = 0; r < bracket.matches.winners.length; r++) {
+          for (let m = 0; m < bracket.matches.winners[r].length; m++) {
+            if (bracket.matches.winners[r][m].players[0].id === playerId) {
+              bracket.matches.winners[r][m].players[0].name = newName;
+              bracket.matches.winners[r][m].players[0].updated_at = new Date().toISOString();
+            }
+            if (bracket.matches.winners[r][m].players[1].id === playerId) {
+              bracket.matches.winners[r][m].players[1].name = newName;
+              bracket.matches.winners[r][m].players[1].updated_at = new Date().toISOString();
+            }
+          }
+        }
+        // Update in losers bracket
+        for (let r = 0; r < bracket.matches.losers.length; r++) {
+          for (let m = 0; m < bracket.matches.losers[r].length; m++) {
+            if (bracket.matches.losers[r][m].players[0].id === playerId) {
+              bracket.matches.losers[r][m].players[0].name = newName;
+              bracket.matches.losers[r][m].players[0].updated_at = new Date().toISOString();
+            }
+            if (bracket.matches.losers[r][m].players[1].id === playerId) {
+              bracket.matches.losers[r][m].players[1].name = newName;
+              bracket.matches.losers[r][m].players[1].updated_at = new Date().toISOString();
+            }
+          }
+        }
+        // Update in grand finals
+        for (let m = 0; m < bracket.matches.grand_finals.length; m++) {
+          if (bracket.matches.grand_finals[m].players[0].id === playerId) {
+            bracket.matches.grand_finals[m].players[0].name = newName;
+            bracket.matches.grand_finals[m].players[0].updated_at = new Date().toISOString();
+          }
+          if (bracket.matches.grand_finals[m].players[1].id === playerId) {
+            bracket.matches.grand_finals[m].players[1].name = newName;
+            bracket.matches.grand_finals[m].players[1].updated_at = new Date().toISOString();
+            bracket.matches.grand_finals[m].players[1].updated_at = new Date().toISOString();
+          }
+        }
+      } else if (bracket.type === 'Round Robin') {
+        // Update player name across all Round Robin matches
+        for (let r = 0; r < bracket.matches.length; r++) {
+          for (let m = 0; m < bracket.matches[r].length; m++) {
+            if (bracket.matches[r][m].players[0].id === playerId) {
+              bracket.matches[r][m].players[0].name = newName;
+              bracket.matches[r][m].players[0].updated_at = new Date().toISOString();
+            }
+            if (bracket.matches[r][m].players[1].id === playerId) {
+              bracket.matches[r][m].players[1].name = newName;
+              bracket.matches[r][m].players[1].updated_at = new Date().toISOString();
+            }
           }
         }
       }
@@ -1442,18 +1576,12 @@ export function useBracketActions(state) {
     toggleBracket,
     createBracket,
     fetchBrackets,
-    increaseScore,
-    decreaseScore,
     editParticipant,
     cancelEndMatch,
     confirmEndMatch,
     undoConcludeMatch,
     getRoundAndMatchIndices,
     isCurrentMatch,
-    navigateToMatch,
-    showNextMatch,
-    showPreviousMatch,
-    currentMatch,
     updateLines,
     removeBracket,
     calculateByes,
@@ -1463,14 +1591,11 @@ export function useBracketActions(state) {
     confirmDeleteBracket,
     cancelDeleteBracket,
     saveBrackets,
-    concludeMatch,
-    getCurrentRound,
-    getTotalMatches,
-    navigateToSection,
     bracketTypeOptions,
     getRoundRobinStandings,
+    openMatchDialog,
     openRoundRobinMatchDialog,
-    updateRoundRobinMatch,
+    updateMatch,
     closeRoundRobinMatchDialog,
   };
 }
