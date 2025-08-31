@@ -514,10 +514,10 @@ export function useBracketActions(state) {
   const generateRoundRobinBracket = () => {
     const numPlayers = numberOfPlayers.value;
 
-    // For round robin, we need an even number of players
-    // If odd, we add a "BYE" player
+    // Ensure even number of participants by adding BYE when needed
     const adjustedNumPlayers = numPlayers % 2 === 0 ? numPlayers : numPlayers + 1;
 
+    // Build players array and add BYE if necessary
     const players = Array.from({ length: numPlayers }, (_, i) => ({
       id: generateId(),
       name: `Player ${i + 1}`,
@@ -527,7 +527,6 @@ export function useBracketActions(state) {
       updated_at: new Date().toISOString(),
     }));
 
-    // Add BYE player if needed
     if (adjustedNumPlayers > numPlayers) {
       players.push({
         id: generateId(),
@@ -539,16 +538,19 @@ export function useBracketActions(state) {
       });
     }
 
-    // Generate round robin schedule using circle method
+    // We'll pair by taking the current 'order' array and pairing i with (n-1-i).
+    // After each round rotate the whole array to the right by 1 so first slot changes.
+    const order = players.slice(); // working order
     const rounds = [];
     const numRounds = adjustedNumPlayers - 1;
     const halfSize = adjustedNumPlayers / 2;
 
     for (let round = 0; round < numRounds; round++) {
       const roundMatches = [];
+
       for (let i = 0; i < halfSize; i++) {
-        const player1Idx = i === 0 ? 0 : (round + i) % (adjustedNumPlayers - 1) + 1;
-        const player2Idx = (round + adjustedNumPlayers - 1 - i) % (adjustedNumPlayers - 1) + 1;
+        const a = order[i];
+        const b = order[adjustedNumPlayers - 1 - i];
 
         const match = {
           id: generateId(),
@@ -556,8 +558,8 @@ export function useBracketActions(state) {
           match_number: i + 1,
           bracket_type: 'round_robin',
           players: [
-            { ...players[player1Idx] },
-            { ...players[player2Idx] }
+            { ...a },
+            { ...b }
           ],
           winner_id: null,
           loser_id: null,
@@ -577,7 +579,11 @@ export function useBracketActions(state) {
 
         roundMatches.push(match);
       }
+
       rounds.push(roundMatches);
+
+      // rotate entire order right by one element (so first position changes next round)
+      order.unshift(order.pop());
     }
 
     return rounds;

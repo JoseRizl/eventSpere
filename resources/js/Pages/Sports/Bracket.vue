@@ -725,6 +725,9 @@ onMounted(() => {
   border-radius: 12px;
   padding: 20px;
   border: 1px solid #dee2e6;
+  /* Ensure proper width constraint for horizontal scrolling */
+  max-width: 100%;
+  overflow: hidden;
 }
 
 /* Add scrollbar styling for better UX */
