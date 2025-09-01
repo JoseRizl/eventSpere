@@ -1,9 +1,16 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick, watch } from 'vue';
 import { parse, format, parseISO, isValid, addDays } from 'date-fns';
 import { usePage, router } from '@inertiajs/vue3';
 import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
+import { useBracketState } from '@/composables/useBracketState.js';
+import { useBracketActions } from '@/composables/useBracketActions.js';
+import { Link } from '@inertiajs/vue3';
+import Dialog from 'primevue/dialog';
+import InputText from 'primevue/inputtext';
+import InputSwitch from 'primevue/inputswitch';
+import Button from 'primevue/button';
 
 // Inertia props
 const { props } = usePage();
@@ -23,6 +30,54 @@ const showDeleteTaskConfirm = ref(false);
 const taskToDelete = ref(null);
 const showDeleteScheduleConfirm = ref(false);
 const scheduleToDelete = ref(null);
+
+// Bracket logic
+const bracketState = useBracketState();
+const {
+  brackets,
+  expandedBrackets,
+  showWinnerDialog,
+  winnerMessage,
+  showRoundRobinMatchDialog,
+  selectedRoundRobinMatchData,
+  showMatchUpdateConfirmDialog,
+  roundRobinScoring,
+  showScoringConfigDialog,
+} = bracketState;
+
+const {
+  fetchBrackets,
+  updateLines,
+  isFinalRound,
+  isSemifinalRound,
+  isQuarterfinalRound,
+  getRoundRobinStandings,
+  openMatchDialog,
+  openRoundRobinMatchDialog,
+  confirmMatchUpdate,
+  cancelMatchUpdate,
+  proceedWithMatchUpdate,
+  openScoringConfigDialog,
+  closeScoringConfigDialog,
+  saveScoringConfig,
+} = useBracketActions(bracketState);
+
+const relatedBrackets = computed(() => {
+  if (!brackets.value || !props.event) {
+    return [];
+  }
+  return brackets.value.filter(bracket => bracket.event_id === props.event.id);
+});
+
+const truncateNameElimination = (name) => {
+  if (!name) return 'TBD';
+  return name.length > 13 ? name.substring(0, 13) + '...' : name;
+};
+
+const truncateNameRoundRobin = (name) => {
+  if (!name) return 'TBD';
+  return name.length > 15 ? name.substring(0, 15) + '...' : name;
+};
 
 // Create a map of tags for quick lookup
 const tagsMap = computed(() => {
@@ -130,6 +185,7 @@ const toggleEdit = () => {
 // Add this near your other initialization code
 onMounted(() => {
   // Ensure tasks have proper committee/employee references
+  fetchBrackets();
   if (eventDetails.value.tasks) {
     filteredEmployees.value = eventDetails.value.tasks.map(task => {
       // Find matching committee in committees list
@@ -150,6 +206,20 @@ onMounted(() => {
   } else {
     eventDetails.value.tasks = [];
     filteredEmployees.value = [];
+  }
+});
+
+watch(relatedBrackets, (newBrackets) => {
+  if (newBrackets.length > 0) {
+    newBrackets.forEach(bracket => {
+      const originalIndex = brackets.value.findIndex(b => b.id === bracket.id);
+      if (originalIndex !== -1) {
+        expandedBrackets.value[originalIndex] = true; // Always show
+        nextTick(() => {
+          updateLines(originalIndex);
+        });
+      }
+    });
   }
 });
 
@@ -404,6 +474,10 @@ const normalizedRelatedEvents = computed(() => {
     })
   }));
 });
+
+const getBracketIndex = (bracketId) => {
+    return brackets.value.findIndex(b => b.id === bracketId);
+}
 </script>
 
 <template>
@@ -782,6 +856,347 @@ const normalizedRelatedEvents = computed(() => {
         </div>
       </div>
 
+      <!-- Brackets Section -->
+      <div v-if="relatedBrackets.length > 0" class="mt-6">
+        <h2 class="text-xl font-bold mb-4">Tournament Brackets</h2>
+        <div v-for="bracket in relatedBrackets" :key="bracket.id" class="bracket-section">
+            <div class="bracket-wrapper">
+                <div class="bracket-header">
+                    <h2>{{ bracket.name }} ({{ bracket.type }})</h2>
+                </div>
+
+                <div>
+                    <!-- Single Elimination Display -->
+                    <div v-if="bracket.type === 'Single Elimination'" class="bracket">
+                        <svg class="connection-lines">
+                        <line
+                            v-for="(line, i) in bracket.lines"
+                            :key="i"
+                            :x1="line.x1"
+                            :y1="line.y1"
+                            :x2="line.x2"
+                            :y2="line.y2"
+                            stroke="black"
+                            stroke-width="2"
+                        />
+                        </svg>
+
+                        <div v-for="(round, roundIdx) in bracket.matches" :key="roundIdx"
+                        :class="['round', `round-${roundIdx + 1}`]">
+                        <h3>
+                            {{ isFinalRound(getBracketIndex(bracket.id), roundIdx) ? 'Final Round' : isSemifinalRound(getBracketIndex(bracket.id), roundIdx) ? 'Semifinal' : isQuarterfinalRound(getBracketIndex(bracket.id), roundIdx) ? 'Quarterfinal' : `Round ${roundIdx + 1}` }}
+                        </h3>
+
+                        <!-- Matches Display -->
+                        <div
+                            v-for="(match, matchIdx) in round"
+                            :key="matchIdx"
+                            :id="`match-${roundIdx}-${matchIdx}`"
+                            :class="['match']"
+                            @click="openMatchDialog(getBracketIndex(bracket.id), roundIdx, matchIdx, match, 'single')"
+                        >
+                            <div class="player-box">
+                                <span
+                                :class="{
+                                    winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score >= match.players[1].score,
+                                    loser: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score,
+                                    'bye-text': match.players[0].name === 'BYE',
+                                    'facing-bye': match.players[1].name === 'BYE',
+                                    'tbd-text': !match.players[0].name || match.players[0].name === 'TBD',
+                                    'loser-name': match.loser_id === match.players[0].id,
+                                    'winner-name': match.winner_id === match.players[0].id
+                                }"
+                                >
+                                {{ truncateNameElimination(match.players[0].name) }} | {{ match.players[0].score }}
+                                </span>
+                                <hr />
+                                <span
+                                :class="{
+                                    winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score >= match.players[0].score,
+                                    loser: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score,
+                                    'bye-text': match.players[1].name === 'BYE',
+                                    'facing-bye': match.players[0].name === 'BYE',
+                                    'tbd-text': !match.players[1].name || match.players[1].name === 'TBD',
+                                    'loser-name': match.loser_id === match.players[1].id,
+                                    'winner-name': match.winner_id === match.players[1].id
+                                }"
+                                >
+                                {{ truncateNameElimination(match.players[1].name) }} | {{ match.players[1].score }}
+                                </span>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+
+                    <!-- Round Robin Display -->
+                    <div v-else-if="bracket.type === 'Round Robin'" class="round-robin-bracket">
+                        <div class="bracket">
+                        <div v-for="(round, roundIdx) in bracket.matches" :key="`round-${roundIdx}`"
+                            :class="['round', `round-${roundIdx + 1}`]">
+                            <h3>Round {{ roundIdx + 1 }}</h3>
+
+                            <div
+                            v-for="(match, matchIdx) in round"
+                            :key="`round-${roundIdx}-${matchIdx}`"
+                            :id="`round-match-${roundIdx}-${matchIdx}`"
+                            :class="['match']"
+                            @click="openRoundRobinMatchDialog(getBracketIndex(bracket.id), roundIdx, matchIdx, match)"
+                            >
+                            <div class="player-box">
+                                <span
+                                :class="{
+                                    winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score > match.players[1].score,
+                                    loser: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score,
+                                    tie: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score === match.players[1].score && match.is_tie,
+                                    'bye-text': match.players[0].name === 'BYE',
+                                    'facing-bye': match.players[1].name === 'BYE',
+                                    'tbd-text': !match.players[0].name || match.players[0].name === 'TBD',
+                                    'loser-name': match.loser_id === match.players[0].id,
+                                    'winner-name': match.winner_id === match.players[0].id
+                                }"
+                                >
+                                {{ truncateNameRoundRobin(match.players[0].name) }} | {{ match.players[0].score }}
+                                </span>
+                                <hr />
+                                <span
+                                :class="{
+                                    winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score > match.players[0].score,
+                                    loser: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score,
+                                    tie: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score === match.players[0].score && match.is_tie,
+                                    'bye-text': match.players[1].name === 'BYE',
+                                    'facing-bye': match.players[0].name === 'BYE',
+                                    'tbd-text': !match.players[1].name || match.players[1].name === 'TBD',
+                                    'loser-name': match.loser_id === match.players[1].id,
+                                    'winner-name': match.winner_id === match.players[1].id
+                                }"
+                                >
+                                {{ truncateNameRoundRobin(match.players[1].name) }} | {{ match.players[1].score }}
+                                </span>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+
+                        <!-- Round Robin Standings -->
+                        <div class="standings-section">
+                        <div class="standings-header-row">
+                            <h3>Standings</h3>
+                            <button
+                            @click="openScoringConfigDialog"
+                            class="scoring-config-btn"
+                            title="Configure scoring system"
+                            >
+                            <i class="pi pi-cog"></i>
+                            </button>
+                        </div>
+                        <div class="standings-table">
+                            <div class="standings-header">
+                            <span class="rank">Rank</span>
+                            <span class="player">Player</span>
+                            <span class="wins">Wins</span>
+                            <span class="draws">Draws</span>
+                            <span class="losses">Losses</span>
+                            <span class="points">Points</span>
+                            </div>
+                            <div
+                            v-for="(player, index) in getRoundRobinStandings(getBracketIndex(bracket.id))"
+                            :key="player.id"
+                            class="standings-row"
+                            :class="{ 'winner': index === 0 }"
+                            >
+                            <span class="rank">{{ index + 1 }}</span>
+                            <span class="player">{{ truncateNameRoundRobin(player.name) }}</span>
+                            <span class="wins">{{ player.wins }}</span>
+                            <span class="draws">{{ player.draws }}</span>
+                            <span class="losses">{{ player.losses }}</span>
+                            <span class="points">{{ player.points }}</span>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+
+                    <!-- Double Elimination Display -->
+                    <div v-else-if="bracket.type === 'Double Elimination'" class="double-elimination-bracket">
+                        <!-- Winners Bracket -->
+                        <div class="bracket-section winners">
+                        <h3>Winners Bracket</h3>
+                        <div class="bracket">
+                            <svg class="connection-lines winners-lines">
+                            <g v-for="(line, i) in bracket.lines?.winners" :key="`winners-${i}`">
+                                <line
+                                :x1="line.x1"
+                                :y1="line.y1"
+                                :x2="line.x2"
+                                :y2="line.y2"
+                                stroke="black"
+                                stroke-width="2"
+                                />
+                            </g>
+                            </svg>
+
+                            <div v-for="(round, roundIdx) in bracket.matches.winners" :key="`winners-${roundIdx}`"
+                            :class="['round', `round-${roundIdx + 1}`]">
+                            <h4>Round {{ roundIdx + 1 }}</h4>
+
+                            <div
+                                v-for="(match, matchIdx) in round"
+                                :key="`winners-${roundIdx}-${matchIdx}`"
+                                :id="`winners-match-${roundIdx}-${matchIdx}`"
+                                :class="['match']"
+                                @click="openMatchDialog(getBracketIndex(bracket.id), roundIdx, matchIdx, match, 'winners')"
+                            >
+                                <div class="player-box">
+                                <span
+                                    :class="{
+                                    winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score >= match.players[1].score,
+                                    loser: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score,
+                                    'bye-text': match.players[0].name === 'BYE',
+                                    'facing-bye': match.players[1].name === 'BYE',
+                                    'tbd-text': !match.players[0].name || match.players[0].name === 'TBD',
+                                    'loser-name': match.loser_id === match.players[0].id,
+                                    'winner-name': match.winner_id === match.players[0].id
+                                    }"
+                                >
+                                    {{ truncateNameElimination(match.players[0].name) }} | {{ match.players[0].score }}
+                                </span>
+                                <hr />
+                                <span
+                                    :class="{
+                                    winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score >= match.players[0].score,
+                                    loser: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score,
+                                    'bye-text': match.players[1].name === 'BYE',
+                                    'facing-bye': match.players[0].name === 'BYE',
+                                    'tbd-text': !match.players[1].name || match.players[1].name === 'TBD',
+                                    'loser-name': match.loser_id === match.players[1].id,
+                                    'winner-name': match.winner_id === match.players[1].id
+                                    }"
+                                >
+                                    {{ truncateNameElimination(match.players[1].name) }} | {{ match.players[1].score }}
+                                </span>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+
+                        <!-- Losers Bracket -->
+                        <div class="bracket-section losers">
+                        <h3>Losers Bracket</h3>
+                        <div class="bracket">
+                            <svg class="connection-lines losers-lines">
+                            <g v-for="(line, i) in bracket.lines?.losers" :key="`losers-${i}`">
+                                <line
+                                :x1="line.x1"
+                                :y1="line.y1"
+                                :x2="line.x2"
+                                :y2="line.y2"
+                                stroke="black"
+                                stroke-width="2"
+                                />
+                            </g>
+                            </svg>
+
+                            <div v-for="(round, roundIdx) in bracket.matches.losers" :key="`losers-${roundIdx}`"
+                            :class="['round', `round-${roundIdx + 1}`]">
+                            <h4>Round {{ roundIdx + 1 }}</h4>
+
+                            <div
+                                v-for="(match, matchIdx) in round"
+                                :key="`losers-${roundIdx}-${matchIdx}`"
+                                :id="`losers-match-${roundIdx}-${matchIdx}`"
+                                :class="['match']"
+                                @click="openMatchDialog(getBracketIndex(bracket.id), roundIdx + bracket.matches.winners.length, matchIdx, match, 'losers')"
+                            >
+                                <div class="player-box">
+                                <span
+                                    :class="{
+                                    winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score >= match.players[1].score,
+                                    loser: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score,
+                                    'bye-text': match.players[0].name === 'BYE',
+                                    'facing-bye': match.players[1].name === 'BYE',
+                                    'tbd-text': !match.players[0].name || match.players[0].name === 'TBD',
+                                    'loser-name': match.loser_id === match.players[0].id,
+                                    'winner-name': match.winner_id === match.players[0].id
+                                    }"
+                                >
+                                    {{ truncateNameElimination(match.players[0].name) }} | {{ match.players[0].score }}
+                                </span>
+                                <hr />
+                                <span
+                                    :class="{
+                                    winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score >= match.players[0].score,
+                                    loser: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score,
+                                    'bye-text': match.players[1].name === 'BYE',
+                                    'facing-bye': match.players[0].name === 'BYE',
+                                    'tbd-text': !match.players[1].name || match.players[1].name === 'TBD',
+                                    'loser-name': match.loser_id === match.players[1].id,
+                                    'winner-name': match.winner_id === match.players[1].id
+                                    }"
+                                >
+                                    {{ truncateNameElimination(match.players[1].name) }} | {{ match.players[1].score }}
+                                </span>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+
+                        <!-- Grand Finals -->
+                        <div class="bracket-section grand-finals">
+                        <h3>Finals</h3>
+                        <div class="bracket">
+                            <svg class="connection-lines finals-lines">
+                            <g v-for="(line, i) in bracket.lines?.finals" :key="`finals-${i}`">
+                                <line
+                                :x1="line.x1"
+                                :y1="line.y1"
+                                :x2="line.x2"
+                                :y2="line.y2"
+                                stroke="black"
+                                stroke-width="2"
+                                />
+                            </g>
+                            </svg>
+
+                            <div v-for="(match, matchIdx) in bracket.matches.grand_finals" :key="`grand-finals-${matchIdx}`"
+                            :id="`grand-finals-match-${matchIdx}`"
+                            :class="['match']"
+                            @click="openMatchDialog(getBracketIndex(bracket.id), bracket.matches.winners.length + bracket.matches.losers.length, matchIdx, match, 'grand_finals')"
+                            >
+                            <div class="player-box">
+                                <span
+                                :class="{
+                                    winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score >= match.players[1].score,
+                                    loser: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score,
+                                    'bye-text': match.players[0].name === 'BYE',
+                                    'facing-bye': match.players[1].name === 'BYE',
+                                    'tbd-text': !match.players[0].name || match.players[0].name === 'TBD'
+                                }"
+                                >
+                                {{ truncateNameElimination(match.players[0].name) }} | {{ match.players[0].score }}
+                                </span>
+                                <hr />
+                                <span
+                                :class="{
+                                    winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score >= match.players[0].score,
+                                    loser: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score,
+                                    'bye-text': match.players[1].name === 'BYE',
+                                    'facing-bye': match.players[0].name === 'BYE',
+                                    'tbd-text': !match.players[1].name || match.players[1].name === 'TBD'
+                                }"
+                                >
+                                {{ truncateNameElimination(match.players[1].name) }} | {{ match.players[1].score }}
+                                </span>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+
       <!-- Loading Dialog -->
       <LoadingSpinner :show="saving" />
 
@@ -843,4 +1258,177 @@ const normalizedRelatedEvents = computed(() => {
         @confirm="saveChanges"
       />
     </div>
+
+    <!-- Dialogs from Bracket.vue -->
+    <!-- Winner Dialog -->
+    <Dialog v-model:visible="showWinnerDialog" header="Winner!" modal dismissableMask>
+        <p>{{ winnerMessage }}</p>
+    </Dialog>
+
+    <!-- Match Update Confirmation Dialog -->
+    <ConfirmationDialog
+    v-model:show="showMatchUpdateConfirmDialog"
+    title="Confirm Match Update"
+    message="Are you sure you want to update this match? This action may trigger bracket progression and cannot be easily undone."
+    confirmText="Yes, Update Match"
+    cancelText="Cancel"
+    confirmButtonClass="bg-green-600 hover:bg-green-700"
+    @confirm="proceedWithMatchUpdate"
+    @cancel="cancelMatchUpdate"
+    />
+
+    <!-- Scoring Configuration Dialog -->
+    <Dialog v-model:visible="showScoringConfigDialog" header="Configure Scoring System" modal :style="{ width: '400px' }">
+    <div class="scoring-config-dialog">
+        <div class="scoring-option">
+        <label>Win Points:</label>
+        <InputText
+            v-model="roundRobinScoring.win"
+            type="number"
+            step="0.5"
+            min="0"
+            placeholder="1"
+        />
+        </div>
+        <div class="scoring-option">
+        <label>Draw Points:</label>
+        <InputText
+            v-model="roundRobinScoring.draw"
+            type="number"
+            step="0.5"
+            min="0"
+            placeholder="0.5"
+        />
+        </div>
+        <div class="scoring-option">
+        <label>Loss Points:</label>
+        <InputText
+            v-model="roundRobinScoring.loss"
+            type="number"
+            step="0.5"
+            min="0"
+            placeholder="0"
+        />
+        </div>
+        <div class="dialog-actions">
+        <Button
+            label="Cancel"
+            @click="closeScoringConfigDialog"
+            class="p-button-secondary"
+        />
+        <Button
+            label="Save"
+            @click="saveScoringConfig"
+            class="p-button-success"
+        />
+        </div>
+    </div>
+    </Dialog>
+
+    <!-- Round Robin Match Dialog -->
+    <Dialog v-model:visible="showRoundRobinMatchDialog" header="Edit Match" modal :style="{ width: '500px' }">
+    <div v-if="selectedRoundRobinMatchData" class="round-robin-match-dialog">
+        <div class="match-info">
+        <h3>Round Robin Match</h3>
+        <p class="match-description">Edit player names, scores, and match status</p>
+        </div>
+
+        <div class="player-section">
+        <div class="player-input">
+            <label>Player 1 Name:</label>
+            <InputText
+            v-model="selectedRoundRobinMatchData.player1Name"
+            placeholder="Enter player name"
+            :disabled="selectedRoundRobinMatchData?.player1Name === 'BYE'"
+            />
+        </div>
+
+        <div class="score-section">
+            <label>Player 1 Score:</label>
+            <div class="score-controls">
+            <Button
+                @click="selectedRoundRobinMatchData.player1Score--"
+                :disabled="selectedRoundRobinMatchData.player1Score <= 0"
+                icon="pi pi-minus"
+                class="p-button-sm"
+            />
+            <span class="score-display">{{ selectedRoundRobinMatchData.player1Score }}</span>
+            <Button
+                @click="selectedRoundRobinMatchData.player1Score++"
+                icon="pi pi-plus"
+                class="p-button-sm"
+            />
+            </div>
+        </div>
+        </div>
+
+        <div class="vs-divider">VS</div>
+
+        <div class="player-section">
+        <div class="player-input">
+            <label>Player 2 Name:</label>
+            <InputText
+            v-model="selectedRoundRobinMatchData.player2Name"
+            placeholder="Enter player name"
+            :disabled="selectedRoundRobinMatchData?.player2Name === 'BYE'"
+            />
+        </div>
+
+        <div class="score-section">
+            <label>Player 2 Score:</label>
+            <div class="score-controls">
+            <Button
+                @click="selectedRoundRobinMatchData.player2Score--"
+                :disabled="selectedRoundRobinMatchData.player2Score <= 0"
+                icon="pi pi-minus"
+                class="p-button-sm"
+            />
+            <span class="score-display">{{ selectedRoundRobinMatchData.player2Score }}</span>
+            <Button
+                @click="selectedRoundRobinMatchData.player2Score++"
+                icon="pi pi-plus"
+                class="p-button-sm"
+            />
+            </div>
+        </div>
+        </div>
+
+        <div class="match-status-section">
+        <label>Match Status:</label>
+        <div class="status-toggle">
+            <span class="status-label" :class="{ 'active': selectedRoundRobinMatchData.status === 'pending' }">Pending</span>
+            <InputSwitch
+            :modelValue="selectedRoundRobinMatchData.status === 'completed'"
+            @update:modelValue="(value) => selectedRoundRobinMatchData.status = value ? 'completed' : 'pending'"
+            class="status-switch"
+            />
+            <span class="status-label" :class="{ 'active': selectedRoundRobinMatchData.status === 'completed' }">Completed</span>
+        </div>
+        </div>
+
+        <div v-if="selectedRoundRobinMatchData.status === 'completed' && selectedRoundRobinMatchData.player1Score === selectedRoundRobinMatchData.player2Score"
+            :class="['tie-indicator', selectedRoundRobinMatch?.bracketType !== 'round_robin' ? 'tie-warning-bg' : '']">
+        <i class="pi pi-exclamation-triangle"></i>
+        <span v-if="selectedRoundRobinMatch?.bracketType === 'round_robin'">This match is a tie!</span>
+        <span v-else class="tie-warning">Ties are not allowed in elimination brackets. Please adjust scores to determine a winner.</span>
+        </div>
+
+        <div class="dialog-actions">
+        <Button
+            label="Cancel"
+            @click="closeRoundRobinMatchDialog"
+            class="p-button-secondary"
+        />
+        <Button
+            label="Update Match"
+            @click="confirmMatchUpdate"
+            class="p-button-success"
+        />
+        </div>
+    </div>
+    </Dialog>
   </template>
+
+<style scoped>
+@import 'resources/css/bracket.css';
+</style>
