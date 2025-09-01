@@ -1,10 +1,13 @@
 <script setup>
-import { Link, useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Link, useForm, usePage } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
 // Ref
 const toggleMenu = ref(false);
 const menuBarItems = ref([]);
 const isSidebarCollapsed = ref(false);
+
+const page = usePage();
+const user = computed(() => page.props.auth.user);
 
 const sideBarItems = ref([
     {
@@ -82,8 +85,9 @@ const logout = () => {
                         <button v-ripple class="relative overflow-hidden w-full border-0 bg-transparent flex items-start justify-center pl-4 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-none cursor-pointer transition-colors duration-200">
                             <Avatar image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png" class="mr-2" shape="circle" />
                             <span class="inline-flex flex-col items-start">
-                                <span class="font-bold text-xs">Admin</span>
+                                <span class="font-bold text-xs">{{ user?.name }}</span>
                                 <span class="text-xs">Admin</span>
+                                <!--<span class="text-xs">{{ user?.role }}</span> -->
                             </span>
                         </button>
                     </template>

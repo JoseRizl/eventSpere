@@ -858,7 +858,7 @@ const getBracketIndex = (bracketId) => {
 
       <!-- Brackets Section -->
       <div v-if="relatedBrackets.length > 0" class="mt-6">
-        <h2 class="text-xl font-bold mb-4">Tournament Brackets</h2>
+        <h2 class="text-xl font-bold mb-4">Bracket</h2>
         <div v-for="bracket in relatedBrackets" :key="bracket.id" class="bracket-section">
             <div class="bracket-wrapper">
                 <div class="bracket-header">
@@ -1136,57 +1136,6 @@ const getBracketIndex = (bracketId) => {
                                     {{ truncateNameElimination(match.players[1].name) }} | {{ match.players[1].score }}
                                 </span>
                                 </div>
-                            </div>
-                            </div>
-                        </div>
-                        </div>
-
-                        <!-- Grand Finals -->
-                        <div class="bracket-section grand-finals">
-                        <h3>Finals</h3>
-                        <div class="bracket">
-                            <svg class="connection-lines finals-lines">
-                            <g v-for="(line, i) in bracket.lines?.finals" :key="`finals-${i}`">
-                                <line
-                                :x1="line.x1"
-                                :y1="line.y1"
-                                :x2="line.x2"
-                                :y2="line.y2"
-                                stroke="black"
-                                stroke-width="2"
-                                />
-                            </g>
-                            </svg>
-
-                            <div v-for="(match, matchIdx) in bracket.matches.grand_finals" :key="`grand-finals-${matchIdx}`"
-                            :id="`grand-finals-match-${matchIdx}`"
-                            :class="['match']"
-                            @click="openMatchDialog(getBracketIndex(bracket.id), bracket.matches.winners.length + bracket.matches.losers.length, matchIdx, match, 'grand_finals')"
-                            >
-                            <div class="player-box">
-                                <span
-                                :class="{
-                                    winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score >= match.players[1].score,
-                                    loser: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score,
-                                    'bye-text': match.players[0].name === 'BYE',
-                                    'facing-bye': match.players[1].name === 'BYE',
-                                    'tbd-text': !match.players[0].name || match.players[0].name === 'TBD'
-                                }"
-                                >
-                                {{ truncateNameElimination(match.players[0].name) }} | {{ match.players[0].score }}
-                                </span>
-                                <hr />
-                                <span
-                                :class="{
-                                    winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score >= match.players[0].score,
-                                    loser: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score,
-                                    'bye-text': match.players[1].name === 'BYE',
-                                    'facing-bye': match.players[0].name === 'BYE',
-                                    'tbd-text': !match.players[1].name || match.players[1].name === 'TBD'
-                                }"
-                                >
-                                {{ truncateNameElimination(match.players[1].name) }} | {{ match.players[1].score }}
-                                </span>
                             </div>
                             </div>
                         </div>
