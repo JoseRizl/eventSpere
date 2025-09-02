@@ -29,7 +29,10 @@ export function useBracketActions(state) {
     selectedRoundRobinMatchData,
     showMatchUpdateConfirmDialog,
     roundRobinScoring,
+    standingsRevision,
     showScoringConfigDialog,
+    tempScoringConfig,
+
   } = state;
 
   const bracketTypeOptions = state.bracketTypeOptions;
@@ -1334,8 +1337,7 @@ export function useBracketActions(state) {
           const winner = player1.name === 'BYE' ? player2 : player1;
           if (playerStats[winner.id]) {
             playerStats[winner.id].wins++;
-            playerStats[winner.id].totalGames++;
-            playerStats[winner.id].points += roundRobinScoring.value.win;
+            playerStats[winner.id].points += Number(roundRobinScoring.value.win);
           }
         } else if (match.winner_id && match.loser_id) {
           // Regular win/loss
@@ -1344,25 +1346,21 @@ export function useBracketActions(state) {
 
           if (winner && playerStats[winner.id]) {
             playerStats[winner.id].wins++;
-            playerStats[winner.id].totalGames++;
-            playerStats[winner.id].points += roundRobinScoring.value.win;
+            playerStats[winner.id].points += Number(roundRobinScoring.value.win);
           }
           if (loser && playerStats[loser.id]) {
             playerStats[loser.id].losses++;
-            playerStats[loser.id].totalGames++;
-            playerStats[loser.id].points += roundRobinScoring.value.loss;
+            playerStats[loser.id].points += Number(roundRobinScoring.value.loss);
           }
         } else if (match.is_tie) {
           // Tie match
           if (playerStats[player1.id]) {
             playerStats[player1.id].draws++;
-            playerStats[player1.id].totalGames++;
-            playerStats[player1.id].points += roundRobinScoring.value.draw;
+            playerStats[player1.id].points += Number(roundRobinScoring.value.draw);
           }
           if (playerStats[player2.id]) {
             playerStats[player2.id].draws++;
-            playerStats[player2.id].totalGames++;
-            playerStats[player2.id].points += roundRobinScoring.value.draw;
+            playerStats[player2.id].points += Number(roundRobinScoring.value.draw);
           }
         }
       }
@@ -1377,6 +1375,18 @@ export function useBracketActions(state) {
       if (b.wins !== a.wins) return b.wins - a.wins;
       return b.draws - a.draws;
     });
+  };
+
+  const isRoundRobinConcluded = (bracketIdx) => {
+    const bracket = brackets.value[bracketIdx];
+    if (!bracket || bracket.type !== 'Round Robin' || !bracket.matches) {
+      return false;
+    }
+    const allMatches = bracket.matches.flat();
+    if (allMatches.length === 0) {
+      return false; // No matches, not concluded
+    }
+    return allMatches.every(match => match.status === 'completed');
   };
 
   const openMatchDialog = (bracketIdx, roundIdx, matchIdx, match, bracketType = 'round_robin') => {
@@ -1840,14 +1850,23 @@ export function useBracketActions(state) {
   };
 
   const openScoringConfigDialog = () => {
+    tempScoringConfig.value = deepClone(roundRobinScoring.value); // Save current state
     showScoringConfigDialog.value = true;
   };
 
   const closeScoringConfigDialog = () => {
+    roundRobinScoring.value = tempScoringConfig.value; // Restore on cancel
     showScoringConfigDialog.value = false;
   };
 
   const saveScoringConfig = () => {
+    const SCORING_CONFIG_KEY = 'roundRobinScoringConfig';
+    // Ensure values are numbers before saving
+    roundRobinScoring.value.win = Number(roundRobinScoring.value.win);
+    roundRobinScoring.value.draw = Number(roundRobinScoring.value.draw);
+    roundRobinScoring.value.loss = Number(roundRobinScoring.value.loss);
+    localStorage.setItem(SCORING_CONFIG_KEY, JSON.stringify(roundRobinScoring.value));
+    standingsRevision.value++; // Force re-computation of standings
     showScoringConfigDialog.value = false;
   };
 
@@ -1881,6 +1900,7 @@ export function useBracketActions(state) {
     saveBrackets,
     bracketTypeOptions,
     getRoundRobinStandings,
+    isRoundRobinConcluded,
     openMatchDialog,
     openRoundRobinMatchDialog,
     updateMatch,
@@ -1893,5 +1913,3 @@ export function useBracketActions(state) {
     saveScoringConfig,
   };
 }
-
-

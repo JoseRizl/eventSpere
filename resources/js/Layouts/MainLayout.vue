@@ -1,6 +1,6 @@
 <script setup>
 import { Link, useForm, usePage } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 // Ref
 const toggleMenu = ref(false);
 const menuBarItems = ref([]);
@@ -64,12 +64,40 @@ const logout = () => {
     form.post(route('logout'));
 };
 
+const setScrollbarWidthProperty = () => {
+    // Create a temporary div to measure the scrollbar width
+    const outer = document.createElement('div');
+    outer.style.visibility = 'hidden';
+    outer.style.overflow = 'scroll'; // force scrollbar
+    document.body.appendChild(outer);
+
+    const inner = document.createElement('div');
+    outer.appendChild(inner);
+
+    // Calculate the width
+    const scrollbarWidth = (outer.offsetWidth - inner.offsetWidth);
+
+    // Clean up
+    outer.parentNode.removeChild(outer);
+
+    // Set the CSS variable
+    document.documentElement.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`);
+};
+
+onMounted(() => {
+    setScrollbarWidthProperty();
+    window.addEventListener('resize', setScrollbarWidthProperty);
+});
+
+onUnmounted(() => {
+    window.removeEventListener('resize', setScrollbarWidthProperty);
+});
 </script>
 
 <template>
     <div class="bg-gray-100">
         <div class="flex flex-col md:flex-row">
-            <header class="fixed top-0 left-0 right-0 z-[1100] w-full transition-all duration-300 ease-in-out">
+            <header id="main-header" class="fixed top-0 left-0 right-0 z-[1100] w-full">
                 <Menubar :model="menuBarItems" class="w-full md:w-100 !border-l-0 !rounded-none">
                     <template #start>
                         <div class="flex items-center gap-3">
@@ -97,8 +125,8 @@ const logout = () => {
                     </template>
                 </Menubar>
             </header>
-            <aside :class="[
-                'fixed top-0 left-0 h-screen transition-all duration-300 ease-in-out',
+            <aside id="main-sidebar" :class="[
+                'fixed top-0 left-0 h-screen',
                 isSidebarCollapsed ? 'sidebar-collapsed' : 'sidebar-expanded'
             ]" style="padding-top:3.5rem;">
                 <div class="card flex flex-col h-full">
@@ -142,8 +170,8 @@ const logout = () => {
 
             <!-- Main Content -->
             <main class="flex-1">
-                <div :class="[
-                    'md:mt-12 px-4 py-4 transition-all duration-300 ease-in-out',
+                <div id="main-content-wrapper" :class="[
+                    'md:mt-12 px-4 py-4',
                     isSidebarCollapsed ? 'lg:ml-[48px] ml-[48px]' : 'lg:ml-60 ml-60'
                 ]">
                     <slot />
@@ -154,18 +182,17 @@ const logout = () => {
 </template>
 
 <style scoped>
-.transition-all {
-    transition-property: all;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 300ms;
-}
-
 /* Sidebar width for expanded/collapsed */
 .sidebar-expanded {
     width: 240px;
 }
 .sidebar-collapsed {
     width: 48px;
+}
+
+/* Transition for sidebar width and main content margin */
+#main-sidebar, #main-content-wrapper {
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Ensure sidebar background collapses with sidebar */

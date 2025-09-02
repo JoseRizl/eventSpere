@@ -1,5 +1,20 @@
 import { ref, computed } from 'vue';
 
+const SCORING_CONFIG_KEY = 'roundRobinScoringConfig';
+
+const loadScoringConfig = () => {
+    const savedConfig = localStorage.getItem(SCORING_CONFIG_KEY);
+    if (savedConfig) {
+        try {
+            const parsed = JSON.parse(savedConfig);
+            return { win: Number(parsed.win) || 1, draw: Number(parsed.draw) || 0.5, loss: Number(parsed.loss) || 0 };
+        } catch (e) {
+            console.error("Failed to parse scoring config from localStorage", e);
+        }
+    }
+    return { win: 1, draw: 0.5, loss: 0 };
+};
+
 export function useBracketState() {
   const bracketName = ref("");
   const numberOfPlayers = ref();
@@ -33,13 +48,11 @@ export function useBracketState() {
   const selectedRoundRobinMatchData = ref(null);
   const showMatchUpdateConfirmDialog = ref(false);
 
-  // Round Robin scoring configuration
-  const roundRobinScoring = ref({
-    win: 1,
-    draw: 0.5,
-    loss: 0
-  });
+  const roundRobinScoring = ref(loadScoringConfig());
   const showScoringConfigDialog = ref(false);
+  const tempScoringConfig = ref(null);
+
+  const standingsRevision = ref(0);
 
   return {
     bracketName,
@@ -71,7 +84,7 @@ export function useBracketState() {
     showMatchUpdateConfirmDialog,
     roundRobinScoring,
     showScoringConfigDialog,
+    tempScoringConfig,
+    standingsRevision,
   };
 }
-
-

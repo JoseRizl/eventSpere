@@ -1221,6 +1221,12 @@
     text-align: center;
   }
 
+  .winner-crown {
+    color: #f59e0b; /* amber-500 */
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+
   /* Scoring Configuration Dialog */
   .scoring-config-dialog {
     padding: 10px 0;

@@ -37,6 +37,7 @@ const {
   showMatchUpdateConfirmDialog,
   roundRobinScoring,
   showScoringConfigDialog,
+  standingsRevision,
 } = state;
 
 const {
@@ -59,6 +60,7 @@ const {
   cancelDeleteBracket,
   saveBrackets,
   getRoundRobinStandings,
+  isRoundRobinConcluded,
   openMatchDialog,
   openRoundRobinMatchDialog,
   updateMatch,
@@ -262,7 +264,7 @@ onMounted(() => {
               <div class="standings-section">
                 <div class="standings-header-row">
                   <h3>Standings</h3>
-                  <button
+                  <button v-if="user?.name === 'Admin'"
                     @click="openScoringConfigDialog"
                     class="scoring-config-btn"
                     title="Configure scoring system"
@@ -280,13 +282,16 @@ onMounted(() => {
                     <span class="points">Points</span>
                   </div>
                   <div
-                    v-for="(player, index) in getRoundRobinStandings(bracketIdx)"
+                    v-for="(player, index) in (standingsRevision, getRoundRobinStandings(bracketIdx))"
                     :key="player.id"
                     class="standings-row"
-                    :class="{ 'winner': index === 0 }"
+                    :class="{ 'winner': index === 0 && isRoundRobinConcluded(bracketIdx) }"
                   >
                     <span class="rank">{{ index + 1 }}</span>
-                    <span class="player">{{ truncateNameRoundRobin(player.name) }}</span>
+                    <span class="player">
+                      {{ truncateNameRoundRobin(player.name) }}
+                      <i v-if="index === 0 && isRoundRobinConcluded(bracketIdx)" class="pi pi-crown winner-crown"></i>
+                    </span>
                     <span class="wins">{{ player.wins }}</span>
                     <span class="draws">{{ player.draws }}</span>
                     <span class="losses">{{ player.losses }}</span>

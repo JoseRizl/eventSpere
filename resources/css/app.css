@@ -72,10 +72,16 @@
         @apply w-8 h-8 overflow-auto rounded-full bg-slate-100 focus:outline-none focus:ring-1 focus:ring-slate-100 focus:ring-offset-2 focus:ring-offset-slate-800;
     }
 
-        html {
-            overflow-y: scroll;
-          }
+      /* Prevent content shift when modal/dialog opens and scrollbar disappears */
+      body.p-overflow-hidden {
+        overflow: hidden !important;
+        padding-right: var(--scrollbar-width, 0) !important;
+      }
 
+      body.p-overflow-hidden #main-header,
+      body.p-overflow-hidden #main-sidebar {
+        padding-right: var(--scrollbar-width, 0) !important;
+      }
       /* Ensure the sidebar and its menus have higher priority */
     aside, .p-tieredmenu {
     z-index: 1000 !important; /* Place sidebar above all content */
