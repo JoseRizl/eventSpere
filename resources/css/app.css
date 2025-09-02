@@ -10,6 +10,7 @@
     body {
         font-family: "Poppins", sans-serif;
         font-size: 12px;
+        background-image: linear-gradient(to top, #f5f3ff, #ffffff);
     }
 }
 
@@ -20,13 +21,10 @@
     /*input[type="search"],
     input[type="tel"],*/
     input[type="url"], textarea {
-        @apply block w-full rounded-md border-0 p-2 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm bg-white
+        @apply block w-full rounded-md border-0 p-2 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-purple-500 sm:text-sm bg-white
     }/*
-    label {
-        @apply block text-sm font-medium leading-6 text-slate-900 first-letter:capitalize;
-    }
     header {
-        @apply bg-slate-800 shadow-md;
+        @apply bg-gradient-to-r from-purple-700 to-blue-600 shadow-md;
     }
     nav {
         @apply p-5 max-w-screen-lg mx-auto flex items-center justify-between;
@@ -34,17 +32,20 @@
     main {
         @apply max-w-screen-lg mx-auto;
     }
+    label {
+        @apply block text-sm font-medium leading-6 text-slate-900 first-letter:capitalize;
+    }
     .primary-btn {
-        @apply flex w-full justify-center rounded-md bg-blue-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:bg-slate-400 disabled:cursor-wait;
+        @apply flex w-full justify-center rounded-md bg-purple-700 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-purple-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-700 disabled:bg-slate-400 disabled:cursor-wait;
     }
     .text-link {
-        @apply font-semibold text-blue-500 hover:text-blue-600;
+        @apply font-semibold text-purple-600 hover:text-purple-500;
     }
     .nav-link {
         @apply text-slate-200 hover:bg-slate-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium;
     }
     .title {
-        @apply my-6 text-center text-3xl font-bold leading-9 text-slate-900;
+        @apply my-6 text-center text-2xl font-bold leading-7 text-slate-900;
     }
     .error {
         @apply text-xs text-red-500 mt-1;
@@ -53,10 +54,10 @@
         @apply w-full text-sm text-left rounded-md shadow-lg overflow-hidden mb-6 table-auto bg-white;
     }
     thead {
-        @apply text-xs uppercase font-medium border-b border-slate-100 text-slate-600;
+        @apply text-xs uppercase font-medium border-b border-slate-200 text-slate-100 bg-purple-600;
     }
     tbody tr {
-        @apply hover:bg-slate-100 w-full p-0;
+        @apply hover:bg-purple-50 w-full p-0;
     }
     th {
         @apply px-6 py-4;
@@ -71,18 +72,6 @@
         @apply w-8 h-8 overflow-auto rounded-full bg-slate-100 focus:outline-none focus:ring-1 focus:ring-slate-100 focus:ring-offset-2 focus:ring-offset-slate-800;
     }
 
-        /*Login and Register*/
-        .title {
-            @apply my-6 text-center text-2xl font-bold leading-7 text-slate-900;
-        }
-        .text-link {
-            @apply font-semibold text-blue-500 hover:text-blue-600;
-        }
-        .primary-btn {
-            @apply flex w-full justify-center rounded-md bg-blue-900 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:bg-slate-400 disabled:cursor-wait;
-        }
-
-
         html {
             overflow-y: scroll;
           }
@@ -91,6 +80,10 @@
     aside, .p-tieredmenu {
     z-index: 1000 !important; /* Place sidebar above all content */
     position: relative; /* Creates proper stacking context */
+    }
+
+    aside {
+        @apply bg-gradient-to-b from-purple-600 to-blue-500;
     }
 
     .group {
@@ -145,7 +138,7 @@
         width: 100%;
         padding: 2rem;
         border-radius: 8px;
-        background-color: #fff;
+        background-image: linear-gradient(to bottom, #faf5ff, #ffffff);
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         display: flex; /* Use flexbox for layout */
         flex-direction: column; /* Stack items vertically */
@@ -160,8 +153,8 @@
         text-align: center; /* Center align the title */
       }
       .venue {
-        font-weight: 500;
-        color: var(--primary-color);
+        font-weight: 600;
+        color: #ca8a04; /* A nice yellow, Tailwind's yellow-600 */
       }
 
       .flex.justify-content-between {
@@ -220,14 +213,11 @@
       }
 
       .p-datatable th {
-        background-color: #f4f4f4;
-        color: #555;
-        font-weight: 600;
-        text-align: center;
+        @apply bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold text-center;
       }
 
       .p-datatable-striped tr:nth-child(odd) {
-        background-color: #fafafa;
+        background-color: #faf5ff; /* purple-50 */
       }
 
       .event-icon {
@@ -248,20 +238,11 @@
       }
 
       .create-button {
-        background: #7e0bc1;
-        color: white;
-        padding: 10px 15px;
-        margin-top: 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 1rem;
-        font-weight: bold;
-        margin-bottom: 20px;
+        @apply bg-purple-600 text-white px-4 py-2.5 border-none rounded-md cursor-pointer text-base font-bold my-5;
       }
 
       .create-button:hover {
-        background-color: #6800b3e9; /* Darker blue on hover */
+        @apply bg-purple-700;
       }
 
       textarea,

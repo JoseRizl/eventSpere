@@ -25,7 +25,6 @@ const {
   expandedBrackets,
   activeBracketIdx,
   showWinnerDialog,
-  winnerMessage,
   showConfirmDialog,
   pendingBracketIdx,
   showMissingFieldsDialog,
@@ -517,11 +516,6 @@ onMounted(() => {
             <Button label="Create Bracket" class="p-button-success" @click="createBracket" />
           </div>
         </div>
-      </Dialog>
-
-      <!-- Winner Dialog -->
-      <Dialog v-model:visible="showWinnerDialog" header="Winner!" modal dismissableMask>
-        <p>{{ winnerMessage }}</p>
       </Dialog>
 
       <!-- End Match Confirmation Dialog -->
