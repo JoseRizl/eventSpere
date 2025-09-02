@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, onUnmounted, computed, watch } from "vue";
 import axios from "axios";
 import { format } from "date-fns";
 import { Link, router } from "@inertiajs/vue3";
@@ -21,31 +21,94 @@ watch(showEventsThisMonth, (val) => saveToggleState('showEventsThisMonth', val))
 watch(showOngoingEvents, (val) => saveToggleState('showOngoingEvents', val));
 watch(showUpcomingEvents, (val) => saveToggleState('showUpcomingEvents', val));
 const showLatestBanner = ref(true);
+const currentAnnouncementIndex = ref(0);
+const announcementDirection = ref('next'); // 'next' or 'prev'
+let announcementTimer = null;
 
-const latestAnnouncement = computed(() =>
-  store.announcements.length ? store.announcements[store.announcements.length - 1] : null
-);
+const sortedAnnouncements = computed(() => {
+  if (!store.announcements || store.announcements.length === 0) {
+    return [];
+  }
+  // Sort by timestamp descending to show most recent first
+  return [...store.announcements].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+});
 
-const getEventStartDate = (news) => {
-  return typeof news.startDate === 'string' && news.startDate.includes('-')
-    ? parse(news.startDate, "MMM-dd-yyyy", new Date())
-    : new Date(news.startDate);
+const currentAnnouncement = computed(() => {
+  if (sortedAnnouncements.value.length > 0) {
+    return sortedAnnouncements.value[currentAnnouncementIndex.value];
+  }
+  return null;
+});
+
+const startAnnouncementCarousel = () => {
+  if (announcementTimer) clearInterval(announcementTimer);
+  if (sortedAnnouncements.value.length > 1) {
+    announcementTimer = setInterval(() => {
+      announcementDirection.value = 'next'; // Set direction for auto-advance
+      currentAnnouncementIndex.value = (currentAnnouncementIndex.value + 1) % sortedAnnouncements.value.length;
+    }, 15000); // 15 seconds
+  }
+};
+
+const nextAnnouncement = () => {
+  if (sortedAnnouncements.value.length > 1) {
+    announcementDirection.value = 'next';
+    currentAnnouncementIndex.value = (currentAnnouncementIndex.value + 1) % sortedAnnouncements.value.length;
+    startAnnouncementCarousel(); // Reset timer on manual navigation
+  }
+};
+
+const prevAnnouncement = () => {
+  if (sortedAnnouncements.value.length > 1) {
+    announcementDirection.value = 'prev';
+    currentAnnouncementIndex.value = (currentAnnouncementIndex.value - 1 + sortedAnnouncements.value.length) % sortedAnnouncements.value.length;
+    startAnnouncementCarousel(); // Reset timer on manual navigation
+  }
+};
+
+const getFullDateTime = (dateInput, timeStr) => {
+  if (!dateInput) return null;
+
+  let datePart;
+  if (dateInput instanceof Date) {
+    datePart = new Date(dateInput.getTime()); // Clone to avoid mutation
+  } else if (typeof dateInput === 'string') {
+    // Handle 'MMM-dd-yyyy' format from our backend
+    if (dateInput.includes('-') && dateInput.split('-').length === 3) {
+      datePart = parse(dateInput, 'MMM-dd-yyyy', new Date());
+    } else {
+      // Handle other string formats like ISO
+      datePart = new Date(dateInput);
+    }
+  } else {
+    return null; // Invalid input type
+  }
+
+  if (isNaN(datePart.getTime())) return null;
+
+  if (timeStr) {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    if (!isNaN(hours) && !isNaN(minutes)) {
+      datePart.setHours(hours, minutes, 0, 0);
+    }
+  } else {
+    // If no time is provided, ensure it's set to the start of the day
+    datePart.setHours(0, 0, 0, 0);
+  }
+  return datePart;
 };
 
 const ongoingEvents = computed(() => {
+  const now = new Date();
   const events = allNews.value.filter((news) => {
-    const start = getEventStartDate(news);
-    const end = news.endDate
-      ? (news.endDate.includes('-')
-          ? parse(news.endDate, "MMM-dd-yyyy", new Date())
-          : new Date(news.endDate))
-      : start;
-
+    const start = getFullDateTime(news.startDate, news.startTime);
+    // If no end date, it's a single-day event. If no end time, assume it lasts till end of day.
+    const end = getFullDateTime(news.endDate || news.startDate, news.endTime || '23:59');
     return isWithinInterval(now, { start, end });
   });
 
   // Sort by start date (ascending)
-  return events.sort((a, b) => getEventStartDate(a) - getEventStartDate(b));
+  return events.sort((a, b) => getFullDateTime(a.startDate, a.startTime) - getFullDateTime(b.startDate, b.startTime));
 });
 
 const isNewEvent = (event) => {
@@ -58,75 +121,78 @@ const isNewEvent = (event) => {
   return createdAtDate > oneWeekAgo;
 };
 
-const getUpcomingTag = (startDate, endDate) => {
-  if (!startDate) return 'Upcoming';
+const getUpcomingTag = (event) => {
+  const { startDate, endDate, startTime, endTime } = event;
+  const now = new Date();
 
-  const startDateObj = new Date(startDate);
-  const endDateObj = endDate ? new Date(endDate) : startDateObj;
+  const startDateTime = getFullDateTime(startDate, startTime);
+  const endDateTime = getFullDateTime(endDate || startDate, endTime || startTime);
 
-  if (isNaN(startDateObj.getTime())) return 'Upcoming';
+  if (!startDateTime || !endDateTime) return 'Upcoming';
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0); // Normalize to start of day for comparison
+  if (endDateTime < now) return 'Ended';
+  if (startDateTime <= now && now <= endDateTime) return 'Ongoing';
 
-  // Check if event has ended (end date is in the past)
-  if (endDateObj < today) return 'Ended';
+  const diffMs = startDateTime - now;
+  const diffHours = diffMs / (1000 * 60 * 60);
+  const diffDays = diffHours / 24;
 
-  // Check if event is ongoing (today is between start and end dates)
-  if (startDateObj <= today && today <= endDateObj) return 'Ongoing';
-
-  // For future events, calculate days until start
-  const daysDiff = Math.floor((startDateObj - today) / (1000 * 60 * 60 * 24));
-
-  if (daysDiff === 0) return 'Today';
-  if (daysDiff < 3) return 'Very Soon';
-  if (daysDiff < 7) return 'This Week';
-  if (daysDiff < 14) return 'Next Week';
-  if (daysDiff < 30) return 'This Month';
+  if (diffHours < 1) return 'Starting Soon';
+  if (diffHours < 24) return 'Today';
+  if (diffDays < 3) return 'Very Soon';
+  if (diffDays < 7) return 'This Week';
+  if (diffDays < 14) return 'Next Week';
+  if (diffDays < 30) return 'This Month';
   return 'Upcoming';
 };
 
-const getUpcomingSeverity = (startDate, endDate) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+const getUpcomingSeverity = (event) => {
+  const { startDate, endDate, startTime, endTime } = event;
+  const now = new Date();
 
-  const startDateObj = new Date(startDate);
-  const endDateObj = endDate ? new Date(endDate) : startDateObj;
+  const startDateTime = getFullDateTime(startDate, startTime);
+  const endDateTime = getFullDateTime(endDate || startDate, endTime || startTime);
 
-  if (endDateObj < today) return null; // No severity for ended events
-  if (startDateObj <= today && today <= endDateObj) return 'success'; // Ongoing
+  if (!startDateTime || !endDateTime) return 'info'; // Default for invalid dates
 
-  const daysDiff = Math.floor((startDateObj - today) / (1000 * 60 * 60 * 24));
+  if (endDateTime < now) return null; // Ended events have no severity
+  if (startDateTime <= now && now <= endDateTime) return 'success'; // Ongoing
 
-  if (daysDiff < 3) return 'danger';
-  if (daysDiff < 7) return 'warning';
-  return 'info';
+  const diffMs = startDateTime - now;
+  const diffHours = diffMs / (1000 * 60 * 60);
+
+  if (diffHours < 24 * 3) return 'danger'; // Less than 3 days
+  if (diffHours < 24 * 7) return 'warning'; // Less than 7 days
+  return 'info'; // Upcoming
 };
 
 const eventsThisMonth = computed(() => {
+  const now = new Date();
   const events = allNews.value.filter((news) => {
-    const start = getEventStartDate(news);
-    const end = news.endDate
-      ? (news.endDate.includes('-')
-          ? parse(news.endDate, "MMM-dd-yyyy", new Date())
-          : new Date(news.endDate))
-      : start;
+    const start = getFullDateTime(news.startDate, news.startTime);
+    const end = getFullDateTime(news.endDate || news.startDate, news.endTime || '23:59');
 
-    return isSameMonth(start, now) && !(isWithinInterval(now, { start, end }));
+    if (!start || !end) return false;
+
+    // Check if the event starts in the current month but is not currently ongoing.
+    return isSameMonth(start, now) && !isWithinInterval(now, { start, end });
   });
 
   // Sort by start date (ascending)
-  return events.sort((a, b) => getEventStartDate(a) - getEventStartDate(b));
+  return events.sort((a, b) => getFullDateTime(a.startDate, a.startTime) - getFullDateTime(b.startDate, b.startTime));
 });
 
 const upcomingEvents = computed(() => {
+  const now = new Date();
   const events = allNews.value.filter((news) => {
-    const start = getEventStartDate(news);
+    const start = getFullDateTime(news.startDate, news.startTime);
+    if (!start) return false;
+    // Event is in the future and not in the current month.
     return start > now && !isSameMonth(start, now);
   });
 
   // Sort by start date (ascending)
-  return events.sort((a, b) => getEventStartDate(a) - getEventStartDate(b));
+  return events.sort((a, b) => getFullDateTime(a.startDate, a.startTime) - getFullDateTime(b.startDate, b.startTime));
 });
 
 // Fetch announcements and news
@@ -145,8 +211,15 @@ onMounted(async () => {
       }));
 
     await store.fetchAnnouncements();
+    startAnnouncementCarousel();
   } catch (error) {
     console.error("Error fetching news:", error);
+  }
+});
+
+onUnmounted(() => {
+  if (announcementTimer) {
+    clearInterval(announcementTimer);
   }
 });
 
@@ -206,27 +279,27 @@ function saveToggleState(key, value) {
       <!-- Announcements Dropdown -->
       <div
         v-if="showAnnouncements"
-        class="absolute top-12 right-0 w-72 bg-white border rounded shadow-md p-4"
+        class="absolute top-12 right-0 w-80 bg-white border rounded shadow-md p-4"
       >
         <h3 class="font-bold text-center mb-2">Announcements</h3>
 
         <!-- Add Announcement Section -->
         <div class="flex items-center gap-2 mb-2">
           <InputText v-model="newAnnouncement" placeholder="wen, wer, wat" class="w-full"/>
-          <Button icon="pi pi-plus" class="p-button-success" @click="confirmAdd" v-tooltip.top="'Create Announcement'"/>
+          <Button icon="pi pi-plus" class="p-button-success shrink-0" @click="confirmAdd" v-tooltip.top="'Create Announcement'"/>
         </div>
 
-        <ul v-if="store.announcements.length">
+        <ul v-if="store.announcements.length" class="max-h-96 overflow-y-auto">
             <li
             v-for="announcement in store.announcements"
             :key="announcement.id"
-            class="p-2 border-b flex justify-between items-center"
+            class="group p-3 border-b flex justify-between items-start hover:bg-gray-50"
             >
             <div class="flex-1 min-w-0">
-                <p class="break-words text-sm w-full">{{ announcement.message }}</p>
-                <p class="text-xs text-gray-500 mt-1">{{ announcement.formattedTimestamp }}</p>
+                <p class="break-words text-base w-full">{{ announcement.message }}</p>
+                <p class="text-xs text-gray-500 mt-2">{{ announcement.formattedTimestamp }}</p>
             </div>
-            <Button icon="pi pi-trash" class="p-button-text p-button-danger shrink-0" @click="confirmDelete(announcement.id)"/>
+            <Button icon="pi pi-trash" class="p-button-text p-button-danger shrink-0 hidden group-hover:block" @click="confirmDelete(announcement.id)"/>
             </li>
         </ul>
 
@@ -242,18 +315,43 @@ function saveToggleState(key, value) {
     <!-- News and Update Title -->
     <h1 class="text-2xl font-bold mt-6 text-center">News and Updates</h1>
 
-    <div v-if="latestAnnouncement && showLatestBanner"
-    class="mt-4 mb-6 w-full max-w-5xl bg-purple-100 border-l-4 border-purple-500 text-purple-700 p-4 relative rounded shadow"
+    <!-- Announcement Banner -->
+    <div v-if="currentAnnouncement && showLatestBanner"
+      class="mt-4 mb-6 w-full max-w-5xl bg-purple-100 border-l-4 border-purple-500 text-purple-700 p-4 relative rounded shadow flex items-center gap-2 overflow-hidden"
     >
-    <strong class="block font-semibold mb-1">📣 Latest Announcement</strong>
-    <p>{{ latestAnnouncement.message }}</p>
-    <button
-     @click="showLatestBanner = false"
-     class="absolute top-6 right-2 text-purple-700 hover:text-purple-900 text-2xl leading-none"
-     aria-label="Close"
-    >
-     &times;
-    </button>
+      <!-- Prev Button -->
+      <Button
+        v-if="sortedAnnouncements.length > 1"
+        icon="pi pi-chevron-left"
+        class="p-button-text p-button-rounded text-purple-700 hover:bg-purple-200 shrink-0"
+        @click="prevAnnouncement"
+        aria-label="Previous Announcement"
+      />
+
+      <!-- Announcement Content -->
+      <transition :name="announcementDirection === 'next' ? 'slide-next' : 'slide-prev'" mode="out-in">
+        <div :key="currentAnnouncement.id" class="flex-grow text-center">
+            <strong class="block font-semibold mb-1 text-lg">📣 Announcement</strong>
+            <p class="text-base">{{ currentAnnouncement.message }}</p>
+            <p class="text-xs text-purple-500 mt-1">{{ currentAnnouncement.formattedTimestamp }}</p>
+        </div>
+      </transition>
+
+      <!-- Next Button -->
+      <Button
+        v-if="sortedAnnouncements.length > 1"
+        icon="pi pi-chevron-right"
+        class="p-button-text p-button-rounded text-purple-700 hover:bg-purple-200 shrink-0"
+        @click="nextAnnouncement"
+        aria-label="Next Announcement"
+      />
+
+      <!-- Close Button -->
+      <button
+        @click="showLatestBanner = false"
+        class="absolute top-2 right-2 text-purple-700 hover:text-purple-900 text-xl leading-none"
+        aria-label="Close"
+      >&times;</button>
     </div>
 
     <!-- Ongoing Events -->
@@ -310,8 +408,8 @@ function saveToggleState(key, value) {
                   <div class="flex items-center gap-2">
                     <span class="text-sm text-gray-500">{{ event.formattedDate }}</span>
                     <Tag
-                      :value="getUpcomingTag(event.startDate, event.endDate)"
-                      :severity="getUpcomingSeverity(event.startDate, event.endDate)"
+                      :value="getUpcomingTag(event)"
+                      :severity="getUpcomingSeverity(event)"
                       class="text-xs"
                     />
                   </div>
@@ -399,8 +497,8 @@ function saveToggleState(key, value) {
                   <div class="flex items-center gap-2">
                     <span class="text-sm text-gray-500">{{ event.formattedDate }}</span>
                     <Tag
-                      :value="getUpcomingTag(event.startDate, event.endDate)"
-                      :severity="getUpcomingSeverity(event.startDate, event.endDate)"
+                      :value="getUpcomingTag(event)"
+                      :severity="getUpcomingSeverity(event)"
                       class="text-xs"
                     />
                   </div>
@@ -488,8 +586,8 @@ function saveToggleState(key, value) {
                   <div class="flex items-center gap-2">
                     <span class="text-sm text-gray-500">{{ event.formattedDate }}</span>
                     <Tag
-                      :value="getUpcomingTag(event.startDate, event.endDate)"
-                      :severity="getUpcomingSeverity(event.startDate, event.endDate)"
+                      :value="getUpcomingTag(event)"
+                      :severity="getUpcomingSeverity(event)"
                       class="text-xs"
                     />
                   </div>
@@ -587,5 +685,52 @@ function saveToggleState(key, value) {
 
 .h-\[calc\(1\.5rem\)\] {
   height: 1.5rem;
+}
+
+/* Custom scrollbar for announcements list */
+.max-h-96.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.max-h-96.overflow-y-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.max-h-96.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #c1c1c1; /* Lighter gray */
+  border-radius: 10px;
+}
+
+.max-h-96.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8; /* Darker gray on hover */
+}
+
+/* Announcement Carousel Transitions */
+.slide-next-enter-active,
+.slide-next-leave-active,
+.slide-prev-enter-active,
+.slide-prev-leave-active {
+  transition: all 0.25s ease-in-out;
+}
+
+/* Slide Next */
+.slide-next-enter-from {
+  transform: translateX(100%);
+  opacity: 0;
+}
+.slide-next-leave-to {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+/* Slide Previous */
+.slide-prev-enter-from {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+.slide-prev-leave-to {
+  transform: translateX(100%);
+  opacity: 0;
 }
 </style>

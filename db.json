@@ -7,7 +7,7 @@
       "category": "3",
       "startDate": "Sep-02-2025",
       "endDate": "Sep-02-2025",
-      "startTime": "15:00",
+      "startTime": "14:00",
       "endTime": "16:00",
       "image": "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
       "archived": false,
@@ -42,7 +42,7 @@
           "date": "Jun-02-2025",
           "schedules": [
             {
-              "time": "08:00",
+              "time": "02:00",
               "activity": "Basketbal"
             }
           ]
@@ -225,8 +225,8 @@
       "description": "Celebration of Buwan ng Wika",
       "venue": "Court",
       "category_id": "2",
-      "startDate": "Sep-30-2025",
-      "endDate": "Sep-30-2025",
+      "startDate": "Oct-31-2025",
+      "endDate": "Oct-31-2025",
       "startTime": "00:00",
       "endTime": "23:59",
       "tags": [
@@ -1659,8 +1659,18 @@
   ],
   "announcements": [
     {
+      "id": "1f0f",
+      "message": "System Maintainance in 12 hours",
+      "timestamp": "2025-07-01T14:41:26.192Z"
+    },
+    {
       "id": "2f0f",
-      "message": "🚨Event registration closes this Friday",
+      "message": "MSUN",
+      "timestamp": "2025-08-29T14:41:26.192Z"
+    },
+    {
+      "id": "1",
+      "message": "🚨Event registration closes Friday, September 5",
       "timestamp": "2025-09-01T14:41:26.192Z"
     }
   ],
