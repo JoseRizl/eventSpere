@@ -9,47 +9,51 @@ const isSidebarCollapsed = ref(false);
 const page = usePage();
 const user = computed(() => page.props.auth.user);
 
-const sideBarItems = ref([
-    {
-        separator: true
-    },
-    {
-        label: 'News and Updates',
-        icon: 'pi pi-objects-column',
-        route: route('home'),
-    },
-    {
-        label: 'Events',
-        icon: 'pi pi-calendar-clock',
-        route: route('event.list'),
-    },
-    {
-        label: 'Categories/Tags',
-        icon: 'pi pi-palette',
-        route: route('category.list')
-    },
-    {
-        label: 'Sports',
-        icon: 'pi pi-ticket',
-        route: route('bracket')
-    },
-    {
-        label: 'Archive',
-        icon: 'pi pi-folder',
-        route: route('archive')
-    },
-    {
-        separator: true
-    },
-    {
-        label: 'Log Out',
-        icon: 'pi pi-sign-out',
-        shortcut: '⌘+S',
-        action: () => {
-            logout();
+const sideBarItems = computed(() => {
+    const allItems = [
+        {
+            separator: true
         },
-    },
-]);
+        {
+            label: 'News and Updates',
+            icon: 'pi pi-objects-column',
+            route: route('home'),
+        },
+        {
+            label: 'Events',
+            icon: 'pi pi-calendar-clock',
+            route: route('event.list'),
+        },
+        {
+            label: 'Categories/Tags',
+            icon: 'pi pi-palette',
+            route: route('category.list'),
+            adminOnly: true,
+        },
+        {
+            label: 'Sports',
+            icon: 'pi pi-ticket',
+            route: route('bracket'),
+        },
+        {
+            label: 'Archive',
+            icon: 'pi pi-folder',
+            route: route('archive'),
+            adminOnly: true,
+        },
+        {
+            separator: true
+        },
+        {
+            label: 'Log Out',
+            icon: 'pi pi-sign-out',
+            shortcut: '⌘+S',
+            action: logout,
+        },
+    ];
+
+    return user.value?.name === 'Admin' ? allItems : allItems.filter(item => !item.adminOnly);
+});
 
 const toggleSidebar = () => {
     isSidebarCollapsed.value = !isSidebarCollapsed.value;
@@ -86,7 +90,7 @@ const logout = () => {
                             <Avatar image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png" class="mr-2" shape="circle" />
                             <span class="inline-flex flex-col items-start">
                                 <span class="font-bold text-xs">{{ user?.name }}</span>
-                                <span class="text-xs">Admin</span>
+                                <span class="text-xs">Role</span>
                                 <!--<span class="text-xs">{{ user?.role }}</span> -->
                             </span>
                         </button>

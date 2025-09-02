@@ -20,7 +20,7 @@
             v-tooltip.top="'Filter by date'"
           />
         </div>
-        <button class="create-button" @click="openCreateModal">Add Event</button>
+        <button v-if="user?.name === 'Admin'" class="create-button" @click="openCreateModal">Add Event</button>
       </div>
 
       <!-- Date Filter Calendar - Moved outside search-wrapper -->
@@ -134,7 +134,7 @@
           </template>
         </Column>
 
-        <Column header="Actions" style="width:10%;" body-class="text-center">
+        <Column v-if="user?.name === 'Admin'" header="Actions" style="width:10%;" body-class="text-center">
           <template #body="{ data }">
             <div class="action-buttons">
               <Button icon="pi pi-pen-to-square" class="p-button-rounded p-button-info" @click="editEvent(data)" v-tooltip.top="'Edit Event'"/>
@@ -143,7 +143,7 @@
           </template>
         </Column>
 
-        <Column header="Tasks" style="width:15%;" body-class="text-center">
+        <Column v-if="user?.name === 'Admin'" header="Tasks" style="width:15%;" body-class="text-center">
         <template #body="{ data }">
             <Button icon="pi pi-list" class="p-button-rounded p-button-warning" @click="openTaskModal(data)" v-tooltip.top="'Manage Tasks'"/>
         </template>
@@ -587,21 +587,23 @@
 
   <script>
   import { defineComponent, ref, onMounted, computed, watch } from "vue";
+  import { usePage, Link } from '@inertiajs/vue3';
   import axios from "axios";
   import { parse, format, isWithinInterval } from "date-fns";
-import { Select } from "primevue";
-import LoadingSpinner from '@/Components/LoadingSpinner.vue';
-import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
-import Checkbox from 'primevue/checkbox';
+  import LoadingSpinner from '@/Components/LoadingSpinner.vue';
+  import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 
   export default defineComponent({
     name: "EventList",
     components: {
       LoadingSpinner,
-      ConfirmationDialog
+      ConfirmationDialog,
+      Link,
     },
     setup() {
       const dateError = ref("");
+      const page = usePage();
+      const user = computed(() => page.props.auth.user);
       const resetErrors = () => {
         dateError.value = "";
         };
@@ -1454,6 +1456,7 @@ import Checkbox from 'primevue/checkbox';
     confirmArchive,
     confirmDeleteTask,
     confirmSaveChanges,
+    user,
     };
     },
  });

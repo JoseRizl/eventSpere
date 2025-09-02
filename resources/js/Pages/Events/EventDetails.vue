@@ -14,6 +14,7 @@ import Button from 'primevue/button';
 
 // Inertia props
 const { props } = usePage();
+const user = computed(() => props.auth.user);
 //const categories = ref(props.categories || []);
 const tags = ref(props.tags || []);
 const saving = ref(false);
@@ -511,12 +512,13 @@ const getBracketIndex = (bracketId) => {
               />
               <h1 v-else class="text-xl font-bold">{{ eventDetails.title }}</h1>
 
-              <button
-                @click="toggleEdit"
-                class="px-4 py-2 rounded bg-gray-600 text-white hover:bg-gray-700 ml-4"
-              >
-                {{ editMode ? 'Cancel' : 'Edit Event' }}
-              </button>
+                <button
+                    v-if="user?.name === 'Admin'"
+                    @click="toggleEdit"
+                    class="px-4 py-2 rounded bg-gray-600 text-white hover:bg-gray-700 ml-4"
+                >
+                    {{ editMode ? 'Cancel' : 'Edit Event' }}
+                </button>
             </div>
 
             <!-- Description -->
@@ -893,7 +895,7 @@ const getBracketIndex = (bracketId) => {
                             :key="matchIdx"
                             :id="`match-${roundIdx}-${matchIdx}`"
                             :class="['match']"
-                            @click="openMatchDialog(getBracketIndex(bracket.id), roundIdx, matchIdx, match, 'single')"
+                            @click="user?.name === 'Admin' && openMatchDialog(getBracketIndex(bracket.id), roundIdx, matchIdx, match, 'single')"
                         >
                             <div class="player-box">
                                 <span
@@ -940,7 +942,7 @@ const getBracketIndex = (bracketId) => {
                             :key="`round-${roundIdx}-${matchIdx}`"
                             :id="`round-match-${roundIdx}-${matchIdx}`"
                             :class="['match']"
-                            @click="openRoundRobinMatchDialog(getBracketIndex(bracket.id), roundIdx, matchIdx, match)"
+                            @click="user?.name === 'Admin' && openRoundRobinMatchDialog(getBracketIndex(bracket.id), roundIdx, matchIdx, match)"
                             >
                             <div class="player-box">
                                 <span
@@ -1043,7 +1045,7 @@ const getBracketIndex = (bracketId) => {
                                 :key="`winners-${roundIdx}-${matchIdx}`"
                                 :id="`winners-match-${roundIdx}-${matchIdx}`"
                                 :class="['match']"
-                                @click="openMatchDialog(getBracketIndex(bracket.id), roundIdx, matchIdx, match, 'winners')"
+                                @click="user?.name === 'Admin' && openMatchDialog(getBracketIndex(bracket.id), roundIdx, matchIdx, match, 'winners')"
                             >
                                 <div class="player-box">
                                 <span
@@ -1105,7 +1107,7 @@ const getBracketIndex = (bracketId) => {
                                 :key="`losers-${roundIdx}-${matchIdx}`"
                                 :id="`losers-match-${roundIdx}-${matchIdx}`"
                                 :class="['match']"
-                                @click="openMatchDialog(getBracketIndex(bracket.id), roundIdx + bracket.matches.winners.length, matchIdx, match, 'losers')"
+                                @click="user?.name === 'Admin' && openMatchDialog(getBracketIndex(bracket.id), roundIdx + bracket.matches.winners.length, matchIdx, match, 'losers')"
                             >
                                 <div class="player-box">
                                 <span

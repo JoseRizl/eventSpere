@@ -2,7 +2,7 @@
 import { ref, onMounted, onUnmounted, computed, watch } from "vue";
 import axios from "axios";
 import { format } from "date-fns";
-import { Link, router } from "@inertiajs/vue3";
+import { Link, router, usePage } from "@inertiajs/vue3";
 import { useAnnouncementStore } from "../stores/announcementStore";
 import { isSameMonth, isWithinInterval, parse } from "date-fns";
 
@@ -24,6 +24,9 @@ const showLatestBanner = ref(true);
 const currentAnnouncementIndex = ref(0);
 const announcementDirection = ref('next'); // 'next' or 'prev'
 let announcementTimer = null;
+
+const page = usePage();
+const user = computed(() => page.props.auth.user);
 
 const sortedAnnouncements = computed(() => {
   if (!store.announcements || store.announcements.length === 0) {
@@ -284,7 +287,7 @@ function saveToggleState(key, value) {
         <h3 class="font-bold text-center mb-2">Announcements</h3>
 
         <!-- Add Announcement Section -->
-        <div class="flex items-center gap-2 mb-2">
+        <div v-if="user?.name === 'Admin'" class="flex items-center gap-2 mb-2">
           <InputText v-model="newAnnouncement" placeholder="wen, wer, wat" class="w-full"/>
           <Button icon="pi pi-plus" class="p-button-success shrink-0" @click="confirmAdd" v-tooltip.top="'Create Announcement'"/>
         </div>
@@ -299,7 +302,7 @@ function saveToggleState(key, value) {
                 <p class="break-words text-base w-full">{{ announcement.message }}</p>
                 <p class="text-xs text-gray-500 mt-2">{{ announcement.formattedTimestamp }}</p>
             </div>
-            <Button icon="pi pi-trash" class="p-button-text p-button-danger shrink-0 hidden group-hover:block" @click="confirmDelete(announcement.id)"/>
+            <Button v-if="user?.name === 'Admin'" icon="pi pi-trash" class="p-button-text p-button-danger shrink-0 hidden group-hover:block" @click="confirmDelete(announcement.id)"/>
             </li>
         </ul>
 
