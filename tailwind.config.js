@@ -9,6 +9,9 @@ export default {
         './resources/**/*.js',
         './resources/**/*.vue',
     ],
+    safelist: [
+        'p-overflow-hidden',
+    ],
     theme: {
         extend: {
             fontFamily: {
@@ -16,5 +19,6 @@ export default {
             },
         },
     },
-    plugins: [require('tailwindcss-primeui')],
+
+    plugins: [],
 };

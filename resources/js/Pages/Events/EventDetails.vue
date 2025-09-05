@@ -1442,6 +1442,3 @@ const getBracketIndex = (bracketId) => {
     </Dialog>
   </template>
 
-<style scoped>
-@import 'resources/css/bracket.css';
-</style>

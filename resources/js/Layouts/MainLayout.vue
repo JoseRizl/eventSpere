@@ -64,33 +64,10 @@ const logout = () => {
     form.post(route('logout'));
 };
 
-const setScrollbarWidthProperty = () => {
-    // Create a temporary div to measure the scrollbar width
-    const outer = document.createElement('div');
-    outer.style.visibility = 'hidden';
-    outer.style.overflow = 'scroll'; // force scrollbar
-    document.body.appendChild(outer);
-
-    const inner = document.createElement('div');
-    outer.appendChild(inner);
-
-    // Calculate the width
-    const scrollbarWidth = (outer.offsetWidth - inner.offsetWidth);
-
-    // Clean up
-    outer.parentNode.removeChild(outer);
-
-    // Set the CSS variable
-    document.documentElement.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`);
-};
-
 onMounted(() => {
-    setScrollbarWidthProperty();
-    window.addEventListener('resize', setScrollbarWidthProperty);
 });
 
 onUnmounted(() => {
-    window.removeEventListener('resize', setScrollbarWidthProperty);
 });
 </script>
 
