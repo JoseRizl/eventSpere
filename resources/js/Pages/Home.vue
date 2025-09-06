@@ -1,10 +1,10 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed, watch } from "vue";
 import axios from "axios";
-import { format } from "date-fns";
+import { format, isWithinInterval, isSameMonth, parse } from "date-fns";
 import { Link, router, usePage } from "@inertiajs/vue3";
 import { useAnnouncementStore } from "../stores/announcementStore";
-import { isSameMonth, isWithinInterval, parse } from "date-fns";
+import EventCalendar from '@/Components/EventCalendar.vue';
 
 const allNews = ref([]);
 const store = useAnnouncementStore();
@@ -72,33 +72,25 @@ const prevAnnouncement = () => {
 const getFullDateTime = (dateInput, timeStr) => {
   if (!dateInput) return null;
 
-  let datePart;
-  if (dateInput instanceof Date) {
-    datePart = new Date(dateInput.getTime()); // Clone to avoid mutation
-  } else if (typeof dateInput === 'string') {
-    // Handle 'MMM-dd-yyyy' format from our backend
-    if (dateInput.includes('-') && dateInput.split('-').length === 3) {
-      datePart = parse(dateInput, 'MMM-dd-yyyy', new Date());
-    } else {
-      // Handle other string formats like ISO
-      datePart = new Date(dateInput);
-    }
+  let date;
+  if (typeof dateInput === 'string' && /^[A-Za-z]{3}-\d{2}-\d{4}$/.test(dateInput)) {
+    date = parse(dateInput, 'MMM-dd-yyyy', new Date());
   } else {
-    return null; // Invalid input type
+    date = new Date(dateInput);
   }
 
-  if (isNaN(datePart.getTime())) return null;
+  if (isNaN(date.getTime())) return null;
 
   if (timeStr) {
     const [hours, minutes] = timeStr.split(':').map(Number);
     if (!isNaN(hours) && !isNaN(minutes)) {
-      datePart.setHours(hours, minutes, 0, 0);
+      date.setHours(hours, minutes, 0, 0);
     }
   } else {
-    // If no time is provided, ensure it's set to the start of the day
-    datePart.setHours(0, 0, 0, 0);
+    // If no time is provided, treat it as start of the day to avoid timezone issues with date-only strings
+    date.setHours(0, 0, 0, 0);
   }
-  return datePart;
+  return date;
 };
 
 const ongoingEvents = computed(() => {
@@ -211,7 +203,8 @@ onMounted(async () => {
         formattedDate: news.startDate
           ? format(new Date(news.startDate), "MMMM dd, yyyy")
           : "No date",
-      }));
+      }))
+      .sort((a, b) => getFullDateTime(a.startDate, a.startTime) - getFullDateTime(b.startDate, b.startTime));
 
     await store.fetchAnnouncements();
     startAnnouncementCarousel();
@@ -310,11 +303,6 @@ function saveToggleState(key, value) {
       </div>
     </div>
 
-    <!-- Logo Section -->
-    <div class="w-full max-w-5xl bg-white p-6 rounded-lg shadow-md flex justify-center">
-      <img src="/resources/images/NCSlogo.png" alt="School Logo" class="w-32 md:w-48" />
-    </div>
-
     <!-- News and Update Title -->
     <h1 class="text-2xl font-bold mt-6 text-center">News and Updates</h1>
 
@@ -357,6 +345,11 @@ function saveToggleState(key, value) {
       >&times;</button>
     </div>
 
+    <!-- Event Calendar -->
+    <div class="w-full max-w-5xl">
+      <EventCalendar :events="allNews" />
+    </div>
+
     <!-- Ongoing Events -->
     <div class="w-full max-w-5xl mt-12">
       <div class="flex justify-between items-center mb-4">
@@ -390,7 +383,7 @@ function saveToggleState(key, value) {
                       class="h-full w-full object-cover"
                       alt="Event image"
                     />
-                    <span v-else class="text-gray-500">No image</span>
+                    <img v-else src="/resources/images/NCSlogo.png" class="w-24 h-24 object-contain opacity-50" alt="Event Placeholder" />
                     <Tag
                       v-if="isNewEvent(event)"
                       value="NEW"
@@ -479,7 +472,7 @@ function saveToggleState(key, value) {
                       class="h-full w-full object-cover"
                       alt="Event image"
                     />
-                    <span v-else class="text-gray-500">No image</span>
+                    <img v-else src="/resources/images/NCSlogo.png" class="w-24 h-24 object-contain opacity-50" alt="Event Placeholder" />
                     <Tag
                       v-if="isNewEvent(event)"
                       value="NEW"
@@ -568,7 +561,7 @@ function saveToggleState(key, value) {
                       class="h-full w-full object-cover"
                       alt="Event image"
                     />
-                    <span v-else class="text-gray-500">No image</span>
+                    <img v-else src="/resources/images/NCSlogo.png" class="w-24 h-24 object-contain opacity-50" alt="Event Placeholder" />
                     <Tag
                       v-if="isNewEvent(event)"
                       value="NEW"
