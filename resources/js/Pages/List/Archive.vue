@@ -14,13 +14,30 @@
       </div>
     </div>
 
-    <!-- No Results Message -->
-    <div v-if="searchQuery && filteredEvents.length === 0" class="no-results-message">
-      <div class="icon-and-title">
-        <i class="pi pi-search" style="font-size: 1.5rem; color: #007bff; margin-right: 10px;"></i>
-        <h2 class="no-results-title">No Archived Events Found</h2>
+    <DataTable v-if="initialLoading" :value="Array(5).fill({})" class="p-datatable-striped">
+        <Column header="Event Name" style="width:20%;"><template #body><Skeleton /></template></Column>
+        <Column header="Description" style="width:15%;"><template #body><Skeleton /></template></Column>
+        <Column header="Venue" style="width:15%;"><template #body><Skeleton /></template></Column>
+        <Column header="Start Date & Time" style="width:20%;"><template #body><Skeleton /></template></Column>
+        <Column header="End Date & Time" style="width:20%;"><template #body><Skeleton /></template></Column>
+        <Column header="Actions" style="width:10%;" body-class="text-center"><template #body><div class="flex justify-center gap-2"><Skeleton shape="circle" size="2rem" /><Skeleton shape="circle" size="2rem" /></div></template></Column>
+    </DataTable>
+
+    <div v-else-if="filteredEvents.length === 0">
+      <div v-if="searchQuery" class="no-results-message">
+        <div class="icon-and-title">
+          <i class="pi pi-search" style="font-size: 1.5rem; color: #007bff; margin-right: 10px;"></i>
+          <h2 class="no-results-title">No Archived Events Found</h2>
+        </div>
+        <p class="no-results-text">No archived events match your search criteria. Try adjusting your search terms.</p>
       </div>
-      <p class="no-results-text">No archived events match your search criteria. Try adjusting your search terms.</p>
+      <div v-else class="no-results-message">
+        <div class="icon-and-title">
+          <i class="pi pi-inbox" style="font-size: 1.5rem; color: #6c757d; margin-right: 10px;"></i>
+          <h2 class="no-results-title">No Archived Events</h2>
+        </div>
+        <p class="no-results-text">There are currently no events in the archive.</p>
+      </div>
     </div>
 
     <DataTable v-else :value="filteredEvents" class="p-datatable-striped">
@@ -115,27 +132,30 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted, computed } from "vue";
+import { defineComponent, ref, onMounted, computed, nextTick } from "vue";
 import { router, usePage } from '@inertiajs/vue3';
 import { format } from "date-fns";
 import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 import SuccessDialog from '@/Components/SuccessDialog.vue';
 import { useToast } from '@/composables/useToast';
+import Skeleton from 'primevue/skeleton';
 
 export default defineComponent({
   name: "Archive",
   components: {
     LoadingSpinner,
     ConfirmationDialog,
-    SuccessDialog
+    SuccessDialog,
+    Skeleton
   },
   setup() {
     const { showSuccess, showError } = useToast();
-    const { props } = usePage();
+    const { props } = usePage(); // props are now fully utilized
     const archivedEvents = ref(props.archivedEvents || []);
     const categories = ref(props.categories || []);
     const searchQuery = ref("");
+    const initialLoading = ref(true);
     const saving = ref(false);
     const showSuccessDialog = ref(false);
     const successMessage = ref('');
@@ -169,28 +189,10 @@ export default defineComponent({
       });
     });
 
-    onMounted(async () => {
-      try {
-        await router.visit('/archived-events', {
-          preserveState: true,
-          onSuccess: (page) => {
-            archivedEvents.value = page.props.archivedEvents.sort((a, b) => {
-              return new Date(b.startDate || "1970-01-01") - new Date(a.startDate || "1970-01-01");
-            });
-            categories.value = page.props.categories;
-          },
-          onError: (errors) => {
-            errorMessage.value = 'Failed to load archived events.';
-            showErrorDialog.value = true;
-            showError('Failed to load archived events.');
-          }
-        });
-      } catch (error) {
-        console.error("Error fetching archived events:", error);
-        errorMessage.value = 'Failed to load archived events.';
-        showErrorDialog.value = true;
-        showError('Failed to load archived events.');
-      }
+    onMounted(() => {
+      // Data is now passed as props on initial visit.
+      // We just need to switch off the loading indicator after mount.
+      initialLoading.value = false;
     });
 
     // Format date and time display
@@ -297,6 +299,7 @@ export default defineComponent({
       deleteEventPermanently,
       confirmDelete,
       searchQuery,
+      initialLoading,
       filteredEvents,
       saving,
       showSuccessDialog,

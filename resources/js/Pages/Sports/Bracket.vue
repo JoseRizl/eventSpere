@@ -1,11 +1,12 @@
 <script setup>
-import { onMounted, computed } from 'vue';
+import { onMounted, computed, ref } from 'vue';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
 import Button from 'primevue/button';
 import InputSwitch from 'primevue/inputswitch';
 import { Link, usePage } from '@inertiajs/vue3';
+import Skeleton from 'primevue/skeleton';
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 import { useBracketState } from '@/composables/useBracketState.js';
 import { useBracketActions } from '@/composables/useBracketActions.js';
@@ -13,6 +14,7 @@ import { useBracketActions } from '@/composables/useBracketActions.js';
 const page = usePage();
 const user = computed(() => page.props.auth.user);
 
+const initialLoading = ref(true);
 const state = useBracketState();
 const {
   bracketName,
@@ -73,8 +75,13 @@ const {
   saveScoringConfig,
 } = useBracketActions(state);
 
-onMounted(() => {
-  fetchBrackets();
+onMounted(async () => {
+  initialLoading.value = true;
+  try {
+    await fetchBrackets();
+  } finally {
+    initialLoading.value = false;
+  }
 });
 
 // Helper function to truncate names for elimination brackets (13 characters)
@@ -117,8 +124,26 @@ onMounted(() => {
           <button v-if="user?.name === 'Admin'" class="create-button" @click="openDialog">Create Bracket</button>
         </div>
 
+      <!-- Loading Skeleton -->
+      <div v-if="initialLoading">
+        <div v-for="i in 2" :key="i" class="bracket-section">
+            <div class="bracket-wrapper">
+                <div class="bracket-header">
+                    <h2><Skeleton width="10rem" height="1.5rem" class="mb-2" /></h2>
+                    <div class="event-info">
+                        <Skeleton width="8rem" height="1rem" />
+                    </div>
+                </div>
+                <div class="bracket-controls">
+                    <Skeleton width="8rem" height="2.5rem" />
+                    <Skeleton width="8rem" height="2.5rem" />
+                </div>
+            </div>
+        </div>
+      </div>
+
       <!-- Display message when no brackets are created -->
-      <div v-if="brackets.length === 0" class="no-brackets-message">
+      <div v-else-if="brackets.length === 0" class="no-brackets-message">
         <div class="icon-and-title">
           <i class="pi pi-info-circle" style="font-size: 1.5rem; color: #007bff; margin-right: 10px;"></i>
           <h2 class="no-brackets-title">No Brackets Created Yet</h2>
@@ -127,7 +152,7 @@ onMounted(() => {
       </div>
 
       <!-- Bracket Display Section -->
-      <div v-for="(bracket, bracketIdx) in brackets" :key="bracketIdx" class="bracket-section">
+      <div v-else v-for="(bracket, bracketIdx) in brackets" :key="bracketIdx" class="bracket-section">
         <div class="bracket-wrapper">
           <div class="bracket-header">
             <h2>{{ bracket.name }} ({{ bracket.type }})</h2>

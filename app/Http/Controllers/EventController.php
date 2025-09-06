@@ -210,6 +210,9 @@ class EventController extends Controller
 
         $archivedEvents = collect($data['events'] ?? [])
             ->where('archived', true)
+            ->sortByDesc(function ($event) {
+                return strtotime($event['startDate'] ?? '1970-01-01');
+            })
             ->values()
             ->toArray();
 

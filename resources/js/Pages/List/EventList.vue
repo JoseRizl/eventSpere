@@ -66,6 +66,26 @@
         <p class="no-results-text">No events match your search criteria. Try adjusting your search terms.</p>
       </div>
 
+      <!-- No Events Message -->
+      <div v-else-if="!initialLoading && filteredEvents.length === 0" class="no-results-message">
+        <div class="icon-and-title">
+          <i class="pi pi-calendar-times" style="font-size: 1.5rem; color: #6c757d; margin-right: 10px;"></i>
+          <h2 class="no-results-title">No Events Available</h2>
+        </div>
+        <p class="no-results-text">There are currently no events to display. Check back later or create a new event.</p>
+      </div>
+
+      <DataTable v-else-if="initialLoading" :value="Array(5).fill({})" class="p-datatable-striped">
+        <Column header="Event Name" style="width:20%;"><template #body><Skeleton /></template></Column>
+        <Column header="Description" style="width:15%;"><template #body><Skeleton /></template></Column>
+        <Column header="Venue" style="width:15%;"><template #body><Skeleton /></template></Column>
+        <Column header="Category" style="width:15%;"><template #body><Skeleton /></template></Column>
+        <Column header="Start Date & Time" style="width:20%;"><template #body><Skeleton /></template></Column>
+        <Column header="End Date & Time" style="width:20%;"><template #body><Skeleton /></template></Column>
+        <Column v-if="user?.name === 'Admin'" header="Actions" style="width:10%;" body-class="text-center"><template #body><div class="flex justify-center gap-2"><Skeleton shape="circle" size="2rem" /><Skeleton shape="circle" size="2rem" /></div></template></Column>
+        <Column v-if="user?.name === 'Admin'" header="Tasks" style="width:15%;" body-class="text-center"><template #body><div class="flex justify-center gap-2"><Skeleton shape="circle" size="2rem" /></div></template></Column>
+      </DataTable>
+
       <DataTable v-else :value="filteredEvents" class="p-datatable-striped">
         <Column field="title" header="Event Name" style="width:20%;" sortable>
           <template #body="{ data }">
@@ -597,6 +617,7 @@
   import LoadingSpinner from '@/Components/LoadingSpinner.vue';
   import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
   import SuccessDialog from '@/Components/SuccessDialog.vue';
+  import Skeleton from 'primevue/skeleton';
 
   export default defineComponent({
     name: "EventList",
@@ -605,6 +626,7 @@
       ConfirmationDialog,
       SuccessDialog,
       Link,
+      Skeleton,
     },
     setup() {
       const dateError = ref("");
@@ -616,6 +638,7 @@
       const events = ref([]);
       const sports = ref([]);
       const categories = ref([]);
+      const initialLoading = ref(true);
       const combinedEvents = ref([]);
       const isEditModalVisible = ref(false);
       const selectedEvent = ref(null);
@@ -928,6 +951,7 @@
     };
 
       onMounted(async () => {
+        initialLoading.value = true;
         try {
           const [eventsResponse, sportsResponse, categoriesResponse, tagsResponse, committeesResponse, employeesResponse] = await Promise.all([
             axios.get("http://localhost:3000/events"),
@@ -963,6 +987,8 @@
           });
         } catch (error) {
           console.error("Error fetching data:", error);
+        } finally {
+          initialLoading.value = false;
         }
       });
 
@@ -1473,6 +1499,7 @@
     eventToProcess,
     taskToDelete,
     confirmArchive,
+    initialLoading,
     confirmDeleteTask,
     confirmSaveChanges,
     user,

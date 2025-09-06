@@ -6,13 +6,15 @@ import { useToast } from '@/composables/useToast';
 import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 import SuccessDialog from '@/Components/SuccessDialog.vue';
+import Skeleton from 'primevue/skeleton';
 
 export default defineComponent({
   name: "CategoryList",
   components: {
     LoadingSpinner,
     ConfirmationDialog,
-    SuccessDialog
+    SuccessDialog,
+    Skeleton
   },
   setup() {
     const { toast, showSuccess, showError } = useToast();
@@ -26,6 +28,7 @@ export default defineComponent({
     const newItem = ref({ title: "", description: "", color: "#800080" });
     const showTags = ref(localStorage.getItem("showTags") === "true");
     const searchQuery = ref("");
+    const initialLoading = ref(true);
     const saving = ref(false);
     const showSaveConfirmDialog = ref(false);
     const successMessage = ref('');
@@ -66,7 +69,9 @@ export default defineComponent({
 
     // Fetch data on mount
     onMounted(async () => {
+      initialLoading.value = true;
       await fetchData();
+      initialLoading.value = false;
     });
 
     const fetchData = async () => {
@@ -272,6 +277,7 @@ export default defineComponent({
       toggleView,
       toast,
       saving,
+      initialLoading,
       showSaveConfirmDialog,
       successMessage,
       showSuccessDialog,
@@ -316,13 +322,28 @@ export default defineComponent({
       </div>
     </div>
 
-    <!-- No Results Message -->
-    <div v-if="searchQuery && filteredItems.length === 0" class="no-results-message">
-      <div class="icon-and-title">
-        <i class="pi pi-search" style="font-size: 1.5rem; color: #007bff; margin-right: 10px;"></i>
-        <h2 class="no-results-title">No {{ showTags ? 'Tags' : 'Categories' }} Found</h2>
+    <DataTable v-if="initialLoading" :value="Array(5).fill({})" class="p-datatable-striped">
+        <Column :header="showTags ? 'Tag Name' : 'Category Name'" style="width:30%;"><template #body><Skeleton /></template></Column>
+        <Column v-if="!showTags" header="Description" style="width:40%;"><template #body><Skeleton /></template></Column>
+        <Column v-if="showTags" header="Color" style="width:20%;"><template #body><Skeleton /></template></Column>
+        <Column header="Actions" style="width:10%;" body-class="text-center"><template #body><div class="flex justify-center gap-2"><Skeleton shape="circle" size="2rem" /><Skeleton shape="circle" size="2rem" /></div></template></Column>
+    </DataTable>
+
+    <div v-else-if="filteredItems.length === 0" class="no-results-message">
+      <div v-if="searchQuery">
+        <div class="icon-and-title">
+          <i class="pi pi-search" style="font-size: 1.5rem; color: #007bff; margin-right: 10px;"></i>
+          <h2 class="no-results-title">No {{ showTags ? 'Tags' : 'Categories' }} Found</h2>
+        </div>
+        <p class="no-results-text">No {{ showTags ? 'tags' : 'categories' }} match your search criteria. Try adjusting your search terms.</p>
       </div>
-      <p class="no-results-text">No {{ showTags ? 'tags' : 'categories' }} match your search criteria. Try adjusting your search terms.</p>
+      <div v-else>
+        <div class="icon-and-title">
+          <i class="pi pi-tags" style="font-size: 1.5rem; color: #6c757d; margin-right: 10px;"></i>
+          <h2 class="no-results-title">No {{ showTags ? 'Tags' : 'Categories' }} Available</h2>
+        </div>
+        <p class="no-results-text">There are currently no items to display. Create a new one to get started.</p>
+      </div>
     </div>
 
     <DataTable v-else :value="filteredItems" class="p-datatable-striped">
