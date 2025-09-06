@@ -4,6 +4,7 @@ import { parse, format, parseISO, isValid, addDays } from 'date-fns';
 import { usePage, router } from '@inertiajs/vue3';
 import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
+import SuccessDialog from '@/Components/SuccessDialog.vue';
 import { useBracketState } from '@/composables/useBracketState.js';
 import { useBracketActions } from '@/composables/useBracketActions.js';
 import { Link } from '@inertiajs/vue3';
@@ -19,6 +20,7 @@ const user = computed(() => props.auth.user);
 const tags = ref(props.tags || []);
 const saving = ref(false);
 const showSaveConfirmDialog = ref(false);
+const successMessage = ref('');
 const showSuccessDialog = ref(false);
 const errorMessage = ref(null);
 const showErrorDialog = ref(false);
@@ -379,6 +381,7 @@ const saveChanges = () => {
     },
     onSuccess: () => {
       showSuccessDialog.value = true;
+      successMessage.value = 'The event was updated successfully.';
       editMode.value = false;
       router.reload({ only: ['event'] });
     }
@@ -1214,16 +1217,10 @@ const getBracketIndex = (bracketId) => {
       <LoadingSpinner :show="saving" />
 
       <!-- Success Message Dialog -->
-      <div v-if="showSuccessDialog" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center" style="z-index: 9998;">
-        <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-          <h2 class="text-lg font-semibold text-green-700 mb-2">Success!</h2>
-          <p class="text-sm text-gray-700 mb-4">The event was updated successfully.</p>
-          <div class="flex justify-end">
-            <button @click="showSuccessDialog = false" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Close</button>
-          </div>
-        </div>
-      </div>
-
+      <SuccessDialog
+        v-model:show="showSuccessDialog"
+        :message="successMessage"
+      />
       <!-- Error Dialog -->
       <Dialog
         v-model:visible="showErrorDialog"
@@ -1441,4 +1438,3 @@ const getBracketIndex = (bracketId) => {
     </div>
     </Dialog>
   </template>
-

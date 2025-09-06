@@ -20,7 +20,7 @@
             v-tooltip.top="'Filter by date'"
           />
         </div>
-        <button v-if="user?.name === 'Admin'" class="create-button" @click="openCreateModal">Add Event</button>
+        <button v-if="user?.name === 'Admin'" class="create-button" @click="openCreateModal">Create Event</button>
       </div>
 
       <!-- Date Filter Calendar - Moved outside search-wrapper -->
@@ -532,16 +532,10 @@
     </div>
 
     <!-- Success Dialog -->
-    <div v-if="showSuccessDialog" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center" style="z-index: 9998;">
-      <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-        <h2 class="text-lg font-semibold text-green-700 mb-2">Success!</h2>
-        <p class="text-sm text-gray-700 mb-4">{{ successMessage }}</p>
-        <div class="flex justify-end">
-          <button @click="showSuccessDialog = false" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Close</button>
-        </div>
-      </div>
-    </div>
-
+    <SuccessDialog
+        v-model:show="showSuccessDialog"
+        :message="successMessage"
+    />
     <!-- Error Dialog -->
     <div v-if="showErrorDialog" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center" style="z-index: 9998;">
       <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
@@ -583,6 +577,16 @@
       @confirm="confirmSaveChanges"
     />
 
+    <!-- Create Confirmation Dialog -->
+    <ConfirmationDialog
+      v-model:show="showCreateConfirm"
+      title="Create Event?"
+      message="Are you sure you want to create this event?"
+      confirmText="Yes, Create"
+      confirmButtonClass="bg-green-600 hover:bg-green-700"
+      @confirm="confirmCreateEvent"
+    />
+
   </template>
 
   <script>
@@ -592,12 +596,14 @@
   import { parse, format, isWithinInterval } from "date-fns";
   import LoadingSpinner from '@/Components/LoadingSpinner.vue';
   import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
+  import SuccessDialog from '@/Components/SuccessDialog.vue';
 
   export default defineComponent({
     name: "EventList",
     components: {
       LoadingSpinner,
       ConfirmationDialog,
+      SuccessDialog,
       Link,
     },
     setup() {
@@ -666,12 +672,13 @@
         dateError.value = "";
       };
 
-     const createEvent = async () => {
+     const createEvent = () => {
         resetErrors();
 
         // Validate title
         if (!newEvent.value.title.trim()) {
-            alert("Please enter a valid event title");
+            errorMessage.value = "Please enter a valid event title";
+            showErrorDialog.value = true;
             return;
         }
 
@@ -697,6 +704,10 @@
             }
         }
 
+        showCreateConfirm.value = true;
+    };
+
+    const confirmCreateEvent = async () => {
         let finalImage = newEvent.value.image;
         if (newEvent.value.image.startsWith('blob:')) {
             const response = await fetch(newEvent.value.image);
@@ -707,6 +718,9 @@
                 reader.readAsDataURL(blob);
             });
         }
+
+        saving.value = true;
+        showCreateConfirm.value = false;
 
         try {
             // Normalize tags to store only IDs
@@ -747,10 +761,14 @@
 
             combinedEvents.value = [createdEvent, ...combinedEvents.value];
             isCreateModalVisible.value = false;
-            alert("Event created successfully!");
+            successMessage.value = 'Event created successfully!';
+            showSuccessDialog.value = true;
         } catch (error) {
             console.error("Error creating event:", error);
-            alert("Failed to create the event.");
+            errorMessage.value = 'Failed to create the event.';
+            showErrorDialog.value = true;
+        } finally {
+            saving.value = false;
         }
     };
 
@@ -1377,6 +1395,7 @@
     const showSaveConfirm = ref(false);
     const eventToProcess = ref(null);
     const taskToDelete = ref(null);
+      const showCreateConfirm = ref(false);
 
     // Add watch for isAllDay changes
     watch(() => newEvent.value.isAllDay, (newValue) => {
@@ -1457,6 +1476,8 @@
     confirmDeleteTask,
     confirmSaveChanges,
     user,
+    showCreateConfirm,
+    confirmCreateEvent,
     };
     },
  });

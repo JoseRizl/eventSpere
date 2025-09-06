@@ -78,16 +78,9 @@
     </DataTable>
 
     <!-- Success Dialog -->
-    <div v-if="showSuccessDialog" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center" style="z-index: 9998;">
-      <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-        <h2 class="text-lg font-semibold text-green-700 mb-2">Success!</h2>
-        <p class="text-sm text-gray-700 mb-4">{{ successMessage }}</p>
-        <div class="flex justify-end">
-          <button @click="showSuccessDialog = false" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Close</button>
-        </div>
-      </div>
-    </div>
-
+    <SuccessDialog
+      v-model:show="showSuccessDialog"
+      :message="successMessage" />
     <!-- Error Dialog -->
     <div v-if="showErrorDialog" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center" style="z-index: 9998;">
       <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
@@ -127,13 +120,15 @@ import { router, usePage } from '@inertiajs/vue3';
 import { format } from "date-fns";
 import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
+import SuccessDialog from '@/Components/SuccessDialog.vue';
 import { useToast } from '@/composables/useToast';
 
 export default defineComponent({
   name: "Archive",
   components: {
     LoadingSpinner,
-    ConfirmationDialog
+    ConfirmationDialog,
+    SuccessDialog
   },
   setup() {
     const { showSuccess, showError } = useToast();
@@ -382,4 +377,3 @@ export default defineComponent({
   }
 }
 </style>
-

@@ -5,12 +5,14 @@ import Toast from 'primevue/toast';
 import { useToast } from '@/composables/useToast';
 import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
+import SuccessDialog from '@/Components/SuccessDialog.vue';
 
 export default defineComponent({
   name: "CategoryList",
   components: {
     LoadingSpinner,
-    ConfirmationDialog
+    ConfirmationDialog,
+    SuccessDialog
   },
   setup() {
     const { toast, showSuccess, showError } = useToast();
@@ -26,6 +28,7 @@ export default defineComponent({
     const searchQuery = ref("");
     const saving = ref(false);
     const showSaveConfirmDialog = ref(false);
+    const successMessage = ref('');
     const showSuccessDialog = ref(false);
     const errorMessage = ref(null);
     const showErrorDialog = ref(false);
@@ -116,6 +119,7 @@ export default defineComponent({
             if (index !== -1) list.value[index] = { ...selectedItem.value };
 
             isEditModalVisible.value = false;
+            successMessage.value = `${showTags.value ? 'Tag' : 'Category'} updated successfully!`;
             showSuccessDialog.value = true;
             showSuccess(`${showTags.value ? 'Tag' : 'Category'} updated successfully!`);
           },
@@ -167,6 +171,7 @@ export default defineComponent({
               ? { name: "", color: "#800080" }
               : { title: "", description: "" };
             // Show success message
+            successMessage.value = `${showTags.value ? 'Tag' : 'Category'} created successfully!`;
             showSuccessDialog.value = true;
             showSuccess(`${showTags.value ? 'Tag' : 'Category'} created successfully!`);
             // Fetch updated list
@@ -212,6 +217,7 @@ export default defineComponent({
             events.value = page.props.events;
 
             // Show success message after data is updated
+            successMessage.value = `${showTags.value ? 'Tag' : 'Category'} deleted successfully!`;
             showSuccessDialog.value = true;
             showSuccess(`${showTags.value ? 'Tag' : 'Category'} deleted successfully!`);
           },
@@ -267,6 +273,7 @@ export default defineComponent({
       toast,
       saving,
       showSaveConfirmDialog,
+      successMessage,
       showSuccessDialog,
       errorMessage,
       showErrorDialog,
@@ -446,16 +453,10 @@ export default defineComponent({
     </Dialog>
 
     <!-- Success Message Dialog -->
-    <div v-if="showSuccessDialog" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center" style="z-index: 9998;">
-      <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-        <h2 class="text-lg font-semibold text-green-700 mb-2">Success!</h2>
-        <p class="text-sm text-gray-700 mb-4">The operation was completed successfully.</p>
-        <div class="flex justify-end">
-          <button @click="showSuccessDialog = false" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Close</button>
-        </div>
-      </div>
-    </div>
-
+    <SuccessDialog
+      v-model:show="showSuccessDialog"
+      :message="successMessage"
+    />
     <!-- Error Dialog -->
     <Dialog
       v-model:visible="showErrorDialog"
