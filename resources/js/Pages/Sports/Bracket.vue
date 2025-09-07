@@ -25,13 +25,9 @@ const {
   brackets,
   showDialog,
   expandedBrackets,
-  activeBracketIdx,
-  showWinnerDialog,
   showConfirmDialog,
-  pendingBracketIdx,
   showMissingFieldsDialog,
   showDeleteConfirmDialog,
-  deleteBracketIdx,
   bracketTypeOptions,
   showRoundRobinMatchDialog,
   selectedRoundRobinMatch,
@@ -47,25 +43,18 @@ const {
   toggleBracket,
   createBracket,
   fetchBrackets,
-  editParticipant,
   cancelEndMatch,
   confirmEndMatch,
-  undoConcludeMatch,
-  getRoundAndMatchIndices,
-  updateLines,
   removeBracket,
-  calculateByes,
   isFinalRound,
   isSemifinalRound,
   isQuarterfinalRound,
   confirmDeleteBracket,
   cancelDeleteBracket,
-  saveBrackets,
   getRoundRobinStandings,
   isRoundRobinConcluded,
   openMatchDialog,
   openRoundRobinMatchDialog,
-  updateMatch,
   closeRoundRobinMatchDialog,
   confirmMatchUpdate,
   cancelMatchUpdate,
@@ -74,6 +63,13 @@ const {
   closeScoringConfigDialog,
   saveScoringConfig,
 } = useBracketActions(state);
+
+const selectedBracket = computed(() => {
+  if (selectedRoundRobinMatch.value) {
+    return brackets.value[selectedRoundRobinMatch.value.bracketIdx];
+  }
+  return null;
+});
 
 onMounted(async () => {
   initialLoading.value = true;
@@ -724,9 +720,9 @@ onMounted(() => {
           </div>
 
           <div v-if="selectedRoundRobinMatchData.status === 'completed' && selectedRoundRobinMatchData.player1Score === selectedRoundRobinMatchData.player2Score"
-               :class="['tie-indicator', selectedRoundRobinMatch?.bracketType !== 'round_robin' ? 'tie-warning-bg' : '']">
+               :class="['tie-indicator', selectedBracket?.type !== 'Round Robin' ? 'tie-warning-bg' : '']">
             <i class="pi pi-exclamation-triangle"></i>
-            <span v-if="selectedRoundRobinMatch?.bracketType === 'round_robin'">This match is a tie!</span>
+            <span v-if="selectedBracket?.type === 'Round Robin'">This match is a tie!</span>
             <span v-else class="tie-warning">Ties are not allowed in elimination brackets. Please adjust scores to determine a winner.</span>
           </div>
 

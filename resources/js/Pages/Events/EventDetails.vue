@@ -59,7 +59,6 @@ const {
   isRoundRobinConcluded,
   openMatchDialog,
   openRoundRobinMatchDialog,
-  updateMatch,
   closeRoundRobinMatchDialog,
   confirmMatchUpdate,
   cancelMatchUpdate,
