@@ -607,10 +607,10 @@ const getBracketIndex = (bracketId) => {
                 <button
                 @click="currentView = 'details'"
                 :class="[
-                    'px-4 py-2 font-semibold transition-colors duration-200',
+                    'px-4 py-2 font-semibold transition-colors duration-200 focus:outline-none',
                     currentView === 'details'
-                    ? 'border-b-2 border-purple-500 text-purple-600'
-                    : 'text-gray-500 hover:text-purple-600',
+                    ? 'border-b-2 border-[#0077B3] text-[#0077B3]'
+                    : 'text-gray-500 hover:text-[#0077B3]',
                 ]"
                 >
                 Event Details
@@ -618,10 +618,10 @@ const getBracketIndex = (bracketId) => {
                 <button
                 @click="currentView = 'announcements'"
                 :class="[
-                    'px-4 py-2 font-semibold transition-colors duration-200',
+                    'px-4 py-2 font-semibold transition-colors duration-200 focus:outline-none',
                     currentView === 'announcements'
-                    ? 'border-b-2 border-purple-500 text-purple-600'
-                    : 'text-gray-500 hover:text-purple-600',
+                    ? 'border-b-2 border-[#0077B3] text-[#0077B3]'
+                    : 'text-gray-500 hover:text-[#0077B3]',
                 ]"
                 >
                 Announcements

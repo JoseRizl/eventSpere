@@ -322,13 +322,13 @@ function saveToggleState(key, value) {
     <!-- Announcement Banner -->
     <div v-if="currentAnnouncement && showLatestBanner"
       @click="scrollToAnnouncement(currentAnnouncement.id)"
-      class="mt-4 mb-6 w-full max-w-5xl bg-purple-100 border-l-4 border-purple-500 text-purple-700 p-4 relative rounded shadow flex items-center gap-2 overflow-hidden cursor-pointer"
+      class="mt-4 mb-6 w-full max-w-5xl bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 relative rounded shadow flex items-center gap-2 overflow-hidden cursor-pointer"
     >
       <!-- Prev Button -->
       <Button
         v-if="sortedAnnouncements.length > 1"
         icon="pi pi-chevron-left"
-        class="p-button-text p-button-rounded text-purple-700 hover:bg-purple-200 shrink-0"
+        class="p-button-text p-button-rounded text-blue-700 hover:bg-purple-200 shrink-0"
         @click.stop="prevAnnouncement"
         aria-label="Previous Announcement"
       />
@@ -338,7 +338,7 @@ function saveToggleState(key, value) {
         <div :key="currentAnnouncement.id" class="flex-grow text-center">
             <strong class="block font-semibold mb-1 text-lg">📣 Announcement</strong>
             <p class="text-base">{{ currentAnnouncement.message }}</p>
-            <p class="text-xs text-purple-500 mt-1">{{ currentAnnouncement.formattedTimestamp }}</p>
+            <p class="text-xs text-blue-500 mt-1">{{ currentAnnouncement.formattedTimestamp }}</p>
         </div>
       </transition>
 
@@ -346,7 +346,7 @@ function saveToggleState(key, value) {
       <Button
         v-if="sortedAnnouncements.length > 1"
         icon="pi pi-chevron-right"
-        class="p-button-text p-button-rounded text-purple-700 hover:bg-purple-200 shrink-0"
+        class="p-button-text p-button-rounded text-blue-700 hover:bg-purple-200 shrink-0"
         @click.stop="nextAnnouncement"
         aria-label="Next Announcement"
       />
@@ -354,7 +354,7 @@ function saveToggleState(key, value) {
       <!-- Close Button -->
       <button
         @click.stop="showLatestBanner = false"
-        class="absolute top-2 right-2 text-purple-700 hover:text-purple-900 text-xl leading-none"
+        class="absolute top-2 right-2 text-blue-700 hover:text-blue-900 text-xl leading-none"
         aria-label="Close"
       >&times;</button>
     </div>
