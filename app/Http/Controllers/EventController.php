@@ -111,6 +111,7 @@ class EventController extends Controller
     public function update(Request $request, $id)
     {
         // Get valid IDs from JSON
+        $validCategoryIds = array_column($this->jsonData['categories'] ?? [], 'id');
         $validTagIds = array_column($this->jsonData['tags'] ?? [], 'id');
         $validCommitteeIds = array_column($this->jsonData['committees'] ?? [], 'id');
         $validEmployeeIds = array_column($this->jsonData['employees'] ?? [], 'id');
@@ -119,6 +120,8 @@ class EventController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'image' => 'nullable|string',
+            'category_id' => ['nullable', Rule::in($validCategoryIds)],
             'venue' => 'nullable|string|max:255',
             'startDate' => ['required', 'string', function ($attribute, $value, $fail) {
                 if (!preg_match('/^[A-Za-z]{3}-\d{2}-\d{4}$/', $value)) {
@@ -182,6 +185,8 @@ class EventController extends Controller
                     ...$event,
                     'title' => $validated['title'],
                     'description' => $validated['description'],
+                    'image' => $validated['image'] ?? $event['image'],
+                    'category_id' => $validated['category_id'] ?? ($event['category_id'] ?? null),
                     'venue' => $validated['venue'],
                     'startDate' => $validated['startDate'],
                     'endDate' => $validated['endDate'],

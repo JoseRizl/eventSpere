@@ -18,7 +18,7 @@ import Textarea from 'primevue/textarea';
 const { props } = usePage();
 const user = computed(() => props.auth.user);
 const currentView = ref('details'); // 'details' or 'announcements'
-//const categories = ref(props.categories || []);
+const bannerImageInput = ref(null);
 const tags = ref(props.tags || []);
 const saving = ref(false);
 const showSaveConfirmDialog = ref(false);
@@ -277,6 +277,13 @@ const toBase64 = file => new Promise((resolve, reject) => {
     reader.onerror = error => reject(error);
 });
 
+const handleBannerImageUpload = async (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    eventDetails.value.image = await toBase64(file);
+  }
+};
+
 const addAnnouncement = async () => {
   if (!newAnnouncement.value.message.trim()) {
     return;
@@ -455,12 +462,12 @@ const saveChanges = () => {
     id: eventDetails.value.id,
     title: eventDetails.value.title,
     description: eventDetails.value.description,
+    image: eventDetails.value.image,
     venue: eventDetails.value.venue,
     startDate: eventDetails.value.startDate,
     endDate: eventDetails.value.endDate,
     startTime: eventDetails.value.startTime,
     endTime: eventDetails.value.endTime,
-    category_id: eventDetails.value.category?.id || null,
     tags: eventDetails.value.tags.map(tag => tag.id),
     scheduleLists: eventDetails.value.scheduleLists.map(list => ({
       day: list.day,
@@ -600,29 +607,41 @@ const getBracketIndex = (bracketId) => {
 
 <template>
     <div class="min-h-screen bg-gray-200 py-8 px-4">
-        <div class="max-w-6xl mx-auto">
+        <div class="max-w-6xl mx-auto mt-8">
+            <!-- Banner Image -->
+            <div class="w-full bg-black rounded-lg shadow-md overflow-hidden relative">
+                <img
+                v-if="eventDetails?.image"
+                :src="eventDetails.image"
+                :alt="eventDetails.title"
+                class="w-full h-64 object-contain"
+                />
+                <div v-else class="w-full h-64 bg-gray-300 flex items-center justify-center">
+                <span class="text-gray-500 text-lg">No Image Available</span>
+                </div>
+                <div v-if="editMode" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                    <input type="file" @change="handleBannerImageUpload" accept="image/*" class="hidden" ref="bannerImageInput" />
+                    <Button label="Change Image" icon="pi pi-upload" @click="$refs.bannerImageInput.click()" />
+                </div>
+            </div>
+
             <!-- View Toggle -->
-            <div class="w-full mt-8">
+            <div class="w-full mt-4">
             <div class="flex border-b">
                 <button
                 @click="currentView = 'details'"
                 :class="[
                     'px-4 py-2 font-semibold transition-colors duration-200 focus:outline-none',
                     currentView === 'details'
-                    ? 'border-b-2 border-[#0077B3] text-[#0077B3]'
-                    : 'text-gray-500 hover:text-[#0077B3]',
+                    ? 'border-b-2 border-[#0077B3] text-[#0077B3]' // Active tab
+                    : 'text-gray-500 hover:text-[#0077B3]', // Inactive tab
                 ]"
                 >
                 Event Details
                 </button>
                 <button
                 @click="currentView = 'announcements'"
-                :class="[
-                    'px-4 py-2 font-semibold transition-colors duration-200 focus:outline-none',
-                    currentView === 'announcements'
-                    ? 'border-b-2 border-[#0077B3] text-[#0077B3]'
-                    : 'text-gray-500 hover:text-[#0077B3]',
-                ]"
+                :class="['px-4 py-2 font-semibold transition-colors duration-200 focus:outline-none', currentView === 'announcements' ? 'border-b-2 border-[#0077B3] text-[#0077B3]' : 'text-gray-500 hover:text-[#0077B3]']"
                 >
                 Announcements
                 </button>
@@ -630,25 +649,13 @@ const getBracketIndex = (bracketId) => {
             </div>
         </div>
 
-        <div v-if="currentView === 'details'">
-            <div class="max-w-6xl mx-auto flex flex-col md:flex-row gap-6 mt-8">
+        <div class="max-w-6xl mx-auto mt-4">
+            <div class="flex flex-col md:flex-row gap-6">
                 <!-- Main content (left side) - takes remaining space -->
                 <div class="flex-1">
-                <!-- Banner Image -->
-                <div class="w-full bg-white rounded-lg shadow-md overflow-hidden">
-                    <img
-                    v-if="eventDetails?.image"
-                    :src="eventDetails.image"
-                    :alt="eventDetails.title"
-                    class="w-full h-64 object-cover"
-                    />
-                    <div v-else class="w-full h-64 bg-gray-300 flex items-center justify-center">
-                    <span class="text-gray-500 text-lg">No Image Available</span>
-                    </div>
-                </div>
-
-                <!-- Event Details -->
-                <div v-if="eventDetails" class="bg-white shadow-md rounded-lg p-6 w-full mt-6 flex flex-col space-y-4">
+                    <div v-if="currentView === 'details'">
+                        <!-- Event Details -->
+                        <div v-if="eventDetails" class="bg-white shadow-md rounded-lg p-6 w-full flex flex-col space-y-4">
                     <!-- Title -->
                     <div class="flex justify-between items-center">
                     <input
@@ -956,58 +963,9 @@ const getBracketIndex = (bracketId) => {
                     Save Changes
                     </button>
                 </div>
-                </div>
-
-                <!-- Related events sidebar (right side) - fixed width -->
-                <div class="md:w-80 flex-shrink-0">
-                <div class="bg-white shadow-md rounded-lg p-4 sticky top-4">
-                    <h3 class="font-bold text-lg mb-4">Related Events</h3>
-
-                    <div v-if="normalizedRelatedEvents.length > 0" class="space-y-4">
-                    <div
-                        v-for="event in normalizedRelatedEvents"
-                        :key="event.id"
-                        class="cursor-pointer hover:bg-gray-50 rounded p-2 transition-colors"
-                        @click="router.visit(`/events/${event.id}`)"
-                    >
-                        <div class="flex gap-3">
-                        <div class="w-24 h-16 flex-shrink-0">
-                            <img
-                            :src="event.image || '/placeholder-event.jpg'"
-                            :alt="event.title"
-                            class="w-full h-full object-cover rounded"
-                            />
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <h4 class="font-medium text-sm truncate">{{ event.title }}</h4>
-                            <p class="text-xs text-gray-500 mt-1">
-                            {{ formatDisplayDate(event.startDate) }}
-                            </p>
-                            <div class="flex flex-wrap gap-1 mt-1">
-                            <span
-                                v-for="tag in event.tags?.slice(0, 2)"
-                                :key="tag.id"
-                                class="text-xs px-1.5 py-0.5 rounded"
-                                :style="{ backgroundColor: tag.color, color: '#fff' }"
-                            >
-                                {{ tag.name }}
-                            </span>
-                            </div>
-                        </div>
-                        </div>
                     </div>
-                    </div>
-
-                    <p v-else class="text-gray-500 text-sm">
-                    No related events found
-                    </p>
-                </div>
-                </div>
-            </div>
-        </div>
-
-          <div v-if="currentView === 'announcements'" class="max-w-6xl mx-auto mt-8">
-    <div class="w-full bg-white rounded-lg shadow-md p-6">
+                    <div v-if="currentView === 'announcements'">
+                        <div class="w-full bg-white rounded-lg shadow-md p-6">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold">Event Announcements</h2>
         <Button
@@ -1066,10 +1024,59 @@ const getBracketIndex = (bracketId) => {
         <p>No announcements for this event yet.</p>
       </div>
     </div>
-  </div>
+                    </div>
+                </div>
+
+                <!-- Related events sidebar (right side) - fixed width, shown only on details view -->
+                <div v-if="currentView === 'details'" class="md:w-80 flex-shrink-0">
+                <div class="bg-white shadow-md rounded-lg p-4 sticky top-4">
+                    <h3 class="font-bold text-lg mb-4">Related Events</h3>
+
+                    <div v-if="normalizedRelatedEvents.length > 0" class="space-y-4">
+                    <div
+                        v-for="event in normalizedRelatedEvents"
+                        :key="event.id"
+                        class="cursor-pointer hover:bg-gray-50 rounded p-2 transition-colors"
+                        @click="router.visit(`/events/${event.id}`)"
+                    >
+                        <div class="flex gap-3">
+                        <div class="w-24 h-16 flex-shrink-0">
+                            <img
+                            :src="event.image || '/placeholder-event.jpg'"
+                            :alt="event.title"
+                            class="w-full h-full object-cover rounded"
+                            />
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-medium text-sm truncate">{{ event.title }}</h4>
+                            <p class="text-xs text-gray-500 mt-1">
+                            {{ formatDisplayDate(event.startDate) }}
+                            </p>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                            <span
+                                v-for="tag in event.tags?.slice(0, 2)"
+                                :key="tag.id"
+                                class="text-xs px-1.5 py-0.5 rounded"
+                                :style="{ backgroundColor: tag.color, color: '#fff' }"
+                            >
+                                {{ tag.name }}
+                            </span>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+
+                    <p v-else class="text-gray-500 text-sm">
+                    No related events found
+                    </p>
+                </div>
+                </div>
+            </div>
+        </div>
 
       <!-- Brackets Section -->
-      <div v-if="relatedBrackets.length > 0" class="mt-6">
+      <div v-if="relatedBrackets.length > 0" class="max-w-6xl mx-auto mt-6">
         <h2 class="text-xl font-bold mb-4">Bracket</h2>
         <div v-for="bracket in relatedBrackets" :key="bracket.id" class="bracket-section">
             <div class="bracket-wrapper">
