@@ -203,6 +203,12 @@ const toggleEdit = () => {
 
 // Add this near your other initialization code
 onMounted(() => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const viewParam = urlParams.get('view');
+  if (viewParam === 'announcements') {
+    currentView.value = 'announcements';
+  }
+
   // Ensure tasks have proper committee/employee references
   fetchBrackets();
   if (eventDetails.value.tasks) {
@@ -1002,7 +1008,7 @@ const getBracketIndex = (bracketId) => {
               shape="circle"
               size="small"
             />
-            <span class="text-gray-600 text-sm font-semibold">Admin</span>
+            <span class="text-gray-600 text-sm font-semibold">{{user?.name}}</span>
           </div>
 
           <p class="text-gray-800 text-base whitespace-pre-line">{{ announcement.message }}</p>

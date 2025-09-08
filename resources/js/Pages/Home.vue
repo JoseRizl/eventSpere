@@ -2,21 +2,17 @@
 import { ref, onMounted, onUnmounted, computed, watch, nextTick } from "vue";
 import axios from "axios";
 import { format, isWithinInterval, isSameMonth, parse } from "date-fns";
-import { Link, router, usePage } from "@inertiajs/vue3";
-import { useAnnouncementStore } from "../stores/announcementStore";
+import { Link, usePage, router } from "@inertiajs/vue3";
 import EventCalendar from '@/Components/EventCalendar.vue';
+import Avatar from 'primevue/avatar';
 
 const allNews = ref([]);
-const store = useAnnouncementStore();
 const showAnnouncements = ref(false);
-const newAnnouncement = ref("");
-const showAddModal = ref(false);
-const showDeleteModal = ref(false);
-const selectedAnnouncementId = ref(null);
 const now = new Date();
 const showEventsThisMonth = ref(loadToggleState('showEventsThisMonth', true));
 const showOngoingEvents = ref(loadToggleState('showOngoingEvents', true));
 const showUpcomingEvents = ref(loadToggleState('showUpcomingEvents', true));
+const eventAnnouncements = ref([]);
 watch(showEventsThisMonth, (val) => saveToggleState('showEventsThisMonth', val));
 watch(showOngoingEvents, (val) => saveToggleState('showOngoingEvents', val));
 watch(showUpcomingEvents, (val) => saveToggleState('showUpcomingEvents', val));
@@ -30,11 +26,7 @@ const user = computed(() => page.props.auth.user);
 const currentView = ref('events'); // 'events' or 'announcements'
 
 const sortedAnnouncements = computed(() => {
-  if (!store.announcements || store.announcements.length === 0) {
-    return [];
-  }
-  // Sort by timestamp descending to show most recent first
-  return [...store.announcements].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  return eventAnnouncements.value;
 });
 
 const currentAnnouncement = computed(() => {
@@ -206,8 +198,11 @@ const upcomingEvents = computed(() => {
 // Fetch announcements and news
 onMounted(async () => {
   try {
-    const eventsResponse = await axios.get("http://localhost:3000/events");
-    const sportsResponse = await axios.get("http://localhost:3000/sports");
+    const [eventsResponse, sportsResponse, eventAnnouncementsResponse] = await Promise.all([
+        axios.get("http://localhost:3000/events"),
+        axios.get("http://localhost:3000/sports"),
+        axios.get("http://localhost:3000/event_announcements")
+    ]);
 
     allNews.value = [...eventsResponse.data, ...sportsResponse.data]
       .filter((news) => !news.archived)
@@ -219,7 +214,18 @@ onMounted(async () => {
       }))
       .sort((a, b) => getFullDateTime(a.startDate, a.startTime) - getFullDateTime(b.startDate, b.startTime));
 
-    await store.fetchAnnouncements();
+    const eventMap = allNews.value.reduce((map, event) => {
+        map[event.id] = event;
+        return map;
+    }, {});
+
+    eventAnnouncements.value = eventAnnouncementsResponse.data.map(ann => ({
+        ...ann,
+        event: eventMap[ann.eventId],
+        formattedTimestamp: format(new Date(ann.timestamp), "MMMM dd, yyyy HH:mm"),
+    })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+
     startAnnouncementCarousel();
   } catch (error) {
     console.error("Error fetching news:", error);
@@ -234,32 +240,6 @@ onUnmounted(() => {
 
 const toggleAnnouncements = () => {
   showAnnouncements.value = !showAnnouncements.value;
-};
-
-// Open Add Confirmation Modal
-const confirmAdd = () => {
-  if (newAnnouncement.value.trim()) {
-    showAddModal.value = true;
-  }
-};
-
-// Add Announcement After Confirmation
-const addAnnouncement = async () => {
-  await store.addAnnouncement(newAnnouncement.value);
-  newAnnouncement.value = "";
-  showAddModal.value = false;
-};
-
-// Open Delete Confirmation Modal
-const confirmDelete = (id) => {
-  selectedAnnouncementId.value = id;
-  showDeleteModal.value = true;
-};
-
-// Delete Announcement After Confirmation
-const deleteAnnouncement = async () => {
-  await store.removeAnnouncement(selectedAnnouncementId.value);
-  showDeleteModal.value = false;
 };
 
 function loadToggleState(key, defaultValue) {
@@ -292,23 +272,20 @@ function saveToggleState(key, value) {
       >
         <h3 class="font-bold text-center mb-2">Announcements</h3>
 
-        <!-- Add Announcement Section -->
-        <div v-if="user?.name === 'Admin'" class="flex items-center gap-2 mb-2">
-          <InputText v-model="newAnnouncement" placeholder="wen, wer, wat" class="w-full"/>
-          <Button icon="pi pi-plus" class="p-button-success shrink-0" @click="confirmAdd" v-tooltip.top="'Create Announcement'"/>
-        </div>
-
-        <ul v-if="store.announcements.length" class="max-h-96 overflow-y-auto">
+        <ul v-if="sortedAnnouncements.length" class="max-h-96 overflow-y-auto">
             <li
-            v-for="announcement in store.announcements"
+            v-for="announcement in sortedAnnouncements"
             :key="announcement.id"
-            class="group p-3 border-b flex justify-between items-start hover:bg-gray-50"
+            @click="announcement.event && router.visit(route('event.details', { id: announcement.event.id, view: 'announcements' }))"
+            :class="['group p-3 border-b flex justify-between items-start', announcement.event ? 'hover:bg-gray-50 cursor-pointer' : '']"
             >
             <div class="flex-1 min-w-0">
-                <p class="break-words text-base w-full">{{ announcement.message }}</p>
+                <span v-if="announcement.event" class="text-xs font-semibold text-blue-600 group-hover:underline block truncate">
+                    {{ announcement.event.title }}
+                </span>
+                <p class="break-words text-sm w-full">{{ announcement.message }}</p>
                 <p class="text-xs text-gray-500 mt-2">{{ announcement.formattedTimestamp }}</p>
             </div>
-            <Button v-if="user?.name === 'Admin'" icon="pi pi-trash" class="p-button-text p-button-danger shrink-0 hidden group-hover:block" @click="confirmDelete(announcement.id)"/>
             </li>
         </ul>
 
@@ -336,7 +313,10 @@ function saveToggleState(key, value) {
       <!-- Announcement Content -->
       <transition :name="announcementDirection === 'next' ? 'slide-next' : 'slide-prev'" mode="out-in">
         <div :key="currentAnnouncement.id" class="flex-grow text-center">
-            <strong class="block font-semibold mb-1 text-lg">📣 Announcement</strong>
+            <strong v-if="currentAnnouncement.event" class="block font-semibold mb-1 text-lg">
+                📣 Announcement for <Link :href="route('event.details', { id: currentAnnouncement.event.id })" @click.stop class="text-blue-800 hover:underline">{{ currentAnnouncement.event.title }}</Link>
+            </strong>
+            <strong v-else class="block font-semibold mb-1 text-lg">📣 Announcement</strong>
             <p class="text-base">{{ currentAnnouncement.message }}</p>
             <p class="text-xs text-blue-500 mt-1">{{ currentAnnouncement.formattedTimestamp }}</p>
         </div>
@@ -553,16 +533,39 @@ function saveToggleState(key, value) {
 
     <!-- Announcement Board -->
     <div v-if="currentView === 'announcements'" class="w-full max-w-5xl mt-8">
-      <h2 class="text-xl font-semibold mb-4">Announcement Board</h2>
-      <div v-if="sortedAnnouncements.length" class="space-y-4">
+      <h2 class="text-2xl font-bold mb-6">Announcement Board</h2>
+      <div v-if="sortedAnnouncements.length" class="space-y-6">
         <div
           v-for="announcement in sortedAnnouncements"
           :key="announcement.id"
           :id="`announcement-${announcement.id}`"
-          class="p-4 bg-white rounded-lg shadow-md border-l-4 border-blue-500"
+          @click="announcement.event && router.visit(route('event.details', { id: announcement.event.id, view: 'announcements' }))"
+          :class="['p-6 bg-white rounded-lg shadow-lg border-l-4 border-blue-500', announcement.event ? 'cursor-pointer hover:bg-gray-50 transition-colors' : '']"
         >
-          <p class="text-gray-800 text-base">{{ announcement.message }}</p>
-          <p class="text-xs text-gray-500 mt-2 text-right">{{ announcement.formattedTimestamp }}</p>
+          <!-- User Avatar and Name -->
+          <div class="flex items-center mb-3">
+            <Avatar
+              image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png"
+              class="mr-2"
+              shape="circle"
+              size="small"
+            />
+            <span class="text-gray-600 text-sm font-semibold">{{ user?.name }}</span>
+          </div>
+          <div v-if="announcement.event" class="mb-3">
+            <span class="text-sm text-gray-600">For event:</span>
+            <Link :href="route('event.details', { id: announcement.event.id, view: 'announcements' })" @click.stop class="font-semibold text-blue-700 hover:underline ml-1 text-base">
+              {{ announcement.event.title }}
+            </Link>
+          </div>
+          <p class="text-gray-800 text-lg leading-relaxed">{{ announcement.message }}</p>
+          <img
+            v-if="announcement.image"
+            :src="announcement.image"
+            alt="Announcement image"
+            class="mt-4 rounded-lg max-w-md mx-auto h-auto shadow-md"
+          />
+          <p class="text-sm text-gray-500 mt-4 text-right">{{ announcement.formattedTimestamp }}</p>
         </div>
       </div>
       <p v-else class="flex flex-col items-center justify-center py-10 bg-gray-50 rounded-lg shadow-inner border border-dashed border-gray-300 text-center text-gray-500">
@@ -571,25 +574,6 @@ function saveToggleState(key, value) {
         <span class="text-sm">Check back later for updates.</span>
       </p>
     </div>
-
-    <!-- Add Announcement Confirmation Modal -->
-    <Dialog v-model:visible="showAddModal" header="Confirm Add" modal>
-      <p>Are you sure you want to add this announcement?</p>
-      <p class="font-semibold">{{ newAnnouncement }}</p>
-      <div class="flex justify-end gap-2 mt-4">
-        <Button label="Cancel" class="p-button-secondary" @click="showAddModal = false"/>
-        <Button label="Confirm" class="p-button-success" @click="addAnnouncement"/>
-      </div>
-    </Dialog>
-
-    <!-- Delete Confirmation Modal -->
-    <Dialog v-model:visible="showDeleteModal" header="Confirm Delete" modal>
-      <p>Are you sure you want to delete this announcement?</p>
-      <div class="flex justify-end gap-2 mt-4">
-        <Button label="Cancel" class="p-button-secondary" @click="showDeleteModal = false"/>
-        <Button label="Delete" class="p-button-danger" @click="deleteAnnouncement"/>
-      </div>
-    </Dialog>
   </div>
 </template>
 
