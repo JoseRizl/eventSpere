@@ -615,15 +615,23 @@ const getBracketIndex = (bracketId) => {
     <div class="min-h-screen bg-gray-200 py-8 px-4">
         <div class="max-w-6xl mx-auto mt-8">
             <!-- Banner Image -->
-            <div class="w-full bg-black rounded-lg shadow-md overflow-hidden relative">
-                <img
-                v-if="eventDetails?.image"
-                :src="eventDetails.image"
-                :alt="eventDetails.title"
-                class="w-full h-64 object-contain"
-                />
+            <div class="w-full bg-gray-700 rounded-lg shadow-md overflow-hidden relative">
+                <template v-if="eventDetails?.image">
+                    <!-- Blurred Background -->
+                    <img
+                        :src="eventDetails.image"
+                        :alt="`${eventDetails.title} background`"
+                        class="absolute inset-0 w-full h-64 object-cover filter blur-lg scale-110"
+                    />
+                    <!-- Foreground Image -->
+                    <img
+                        :src="eventDetails.image"
+                        :alt="eventDetails.title"
+                        class="relative w-full h-64 object-contain"
+                    />
+                </template>
                 <div v-else class="w-full h-64 bg-gray-300 flex items-center justify-center">
-                <span class="text-gray-500 text-lg">No Image Available</span>
+                    <span class="text-gray-500 text-lg">No Image Available</span>
                 </div>
                 <div v-if="editMode" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                     <input type="file" @change="handleBannerImageUpload" accept="image/*" class="hidden" ref="bannerImageInput" />
