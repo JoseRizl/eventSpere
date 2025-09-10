@@ -157,14 +157,14 @@ class EventController extends Controller
                     $fail('The '.$attribute.' must be in MMM-DD-YYYY format (e.g. May-28-2025)');
                 }
             }],
-            'scheduleLists.*.schedules' => 'required|array',
-            'scheduleLists.*.schedules.*.time' => 'required|date_format:H:i',
-            'scheduleLists.*.schedules.*.activity' => 'required|string|max:255',
+            'scheduleLists.*.schedules' => 'nullable|array',
+            'scheduleLists.*.schedules.*.time' => 'nullable|date_format:H:i',
+            'scheduleLists.*.schedules.*.activity' => 'nullable|string|max:255',
             'tasks' => 'nullable|array',
-            'tasks.*.committee.id' => ['required', Rule::in($validCommitteeIds)],
-            'tasks.*.employees' => 'required|array',
-            'tasks.*.employees.*.id' => ['required', Rule::in($validEmployeeIds)],
-            'tasks.*.task' => 'required|string|max:255'
+            'tasks.*.committee.id' => ['nullable', Rule::in($validCommitteeIds)],
+            'tasks.*.employees' => 'nullable|array',
+            'tasks.*.employees.*.id' => ['nullable', Rule::in($validEmployeeIds)],
+            'tasks.*.task' => 'nullable|string|max:255'
         ]);
 
         // Update the event
