@@ -375,7 +375,7 @@ function saveToggleState(key, value) {
     <!-- Conditional Content -->
     <div v-if="currentView === 'events'">
       <!-- Ongoing Events -->
-      <div class="w-full max-w-5xl mt-8">
+      <div v-if="ongoingEvents.length > 0" class="w-full max-w-5xl mt-8">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-xl font-semibold">Ongoing Events</h2>
           <Button
@@ -387,7 +387,7 @@ function saveToggleState(key, value) {
           />
         </div>
         <div v-if="showOngoingEvents">
-          <div v-if="ongoingEvents.length" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div v-for="(event, index) in ongoingEvents" :key="'ongoing-' + index" class="group relative h-full">
               <Link :href="route('event.details', { id: event.id })" preserve-scroll class="block h-full">
                 <Card class="h-full flex flex-col justify-between min-h-[280px]">
@@ -422,22 +422,17 @@ function saveToggleState(key, value) {
               </Link>
             </div>
           </div>
-          <p v-else class="flex flex-col items-center justify-center py-10 bg-gray-50 rounded-lg shadow-inner border border-dashed border-gray-300 text-center text-gray-500">
-            <span class="text-4xl mb-2">📅</span>
-            <span class="font-semibold text-lg">No ongoing events</span>
-            <span class="text-sm">Check back later for updates!</span>
-          </p>
         </div>
       </div>
 
       <!-- Events This Month -->
-      <div class="w-full max-w-5xl mt-8">
+      <div v-if="eventsThisMonth.length > 0" class="w-full max-w-5xl mt-8">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-xl font-semibold">Events This Month</h2>
           <Button size="small" :icon="showEventsThisMonth ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" :label="showEventsThisMonth ? 'Hide' : 'Show'" @click="showEventsThisMonth = !showEventsThisMonth" class="p-button-text"/>
         </div>
         <div v-if="showEventsThisMonth">
-          <div v-if="eventsThisMonth.length" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div v-for="(event, index) in eventsThisMonth" :key="'month-' + index" class="group relative h-full">
               <Link :href="route('event.details', { id: event.id })" preserve-scroll class="block h-full">
                 <Card class="h-full flex flex-col justify-between min-h-[280px]">
@@ -472,22 +467,17 @@ function saveToggleState(key, value) {
               </Link>
             </div>
           </div>
-          <p v-else class="flex flex-col items-center justify-center py-10 bg-gray-50 rounded-lg shadow-inner border border-dashed border-gray-300 text-center text-gray-500">
-            <span class="text-4xl mb-2">📅</span>
-            <span class="font-semibold text-lg">No events this month</span>
-            <span class="text-sm">Stay tuned for upcoming activities!</span>
-          </p>
         </div>
       </div>
 
       <!-- Upcoming Events -->
-      <div class="w-full max-w-5xl mt-8">
+      <div v-if="upcomingEvents.length > 0" class="w-full max-w-5xl mt-8">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-xl font-semibold">Upcoming Events</h2>
           <Button size="small" :icon="showUpcomingEvents ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" :label="showUpcomingEvents ? 'Hide' : 'Show'" @click="showUpcomingEvents = !showUpcomingEvents" class="p-button-text"/>
         </div>
         <div v-if="showUpcomingEvents">
-          <div v-if="upcomingEvents.length" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div v-for="(event, index) in upcomingEvents" :key="'upcoming-' + index" class="group relative h-full">
               <Link :href="route('event.details', { id: event.id })" preserve-scroll class="block h-full">
                 <Card class="h-full flex flex-col justify-between min-h-[280px]">
@@ -522,11 +512,6 @@ function saveToggleState(key, value) {
               </Link>
             </div>
           </div>
-          <p v-else class="flex flex-col items-center justify-center py-10 bg-gray-50 rounded-lg shadow-inner border border-dashed border-gray-300 text-center text-gray-500">
-            <span class="text-4xl mb-2">📅</span>
-            <span class="font-semibold text-lg">No upcoming events</span>
-            <span class="text-sm">Events will be announced soon!</span>
-          </p>
         </div>
       </div>
     </div>
