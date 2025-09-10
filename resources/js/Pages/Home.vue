@@ -4,12 +4,18 @@ import axios from "axios";
 import { format, isWithinInterval, isSameMonth, parse } from "date-fns";
 import { Link, usePage, router } from "@inertiajs/vue3";
 import EventCalendar from '@/Components/EventCalendar.vue';
+import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
+import SuccessDialog from '@/Components/SuccessDialog.vue';
+import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import Avatar from 'primevue/avatar';
 
 const allNews = ref([]);
 const showAnnouncements = ref(false);
 const now = new Date();
 const showEventsThisMonth = ref(loadToggleState('showEventsThisMonth', true));
+const saving = ref(false);
+const showSuccessDialog = ref(false);
+const successMessage = ref('');
 const showOngoingEvents = ref(loadToggleState('showOngoingEvents', true));
 const showUpcomingEvents = ref(loadToggleState('showUpcomingEvents', true));
 const eventAnnouncements = ref([]);
@@ -19,6 +25,10 @@ watch(showUpcomingEvents, (val) => saveToggleState('showUpcomingEvents', val));
 const showLatestBanner = ref(true);
 const currentAnnouncementIndex = ref(0);
 const announcementDirection = ref('next'); // 'next' or 'prev'
+const showErrorDialog = ref(false);
+const errorMessage = ref('');
+const showDeleteAnnouncementConfirm = ref(false);
+const announcementToDelete = ref(null);
 let announcementTimer = null;
 
 const page = usePage();
@@ -251,6 +261,30 @@ function saveToggleState(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
+const promptDeleteAnnouncement = (announcement) => {
+  announcementToDelete.value = announcement;
+  showDeleteAnnouncementConfirm.value = true;
+};
+
+const confirmDeleteAnnouncement = async () => {
+  if (!announcementToDelete.value) return;
+  saving.value = true;
+  try {
+    await axios.delete(`http://localhost:3000/event_announcements/${announcementToDelete.value.id}`);
+    eventAnnouncements.value = eventAnnouncements.value.filter(a => a.id !== announcementToDelete.value.id);
+    successMessage.value = 'Announcement deleted successfully.';
+    showSuccessDialog.value = true;
+  } catch (error) {
+    console.error('Error deleting announcement:', error);
+    errorMessage.value = 'Failed to delete announcement.';
+    showErrorDialog.value = true;
+  } finally {
+    saving.value = false;
+    showDeleteAnnouncementConfirm.value = false;
+    announcementToDelete.value = null;
+  }
+};
+
 </script>
 
 <template>
@@ -337,11 +371,6 @@ function saveToggleState(key, value) {
         class="absolute top-2 right-2 text-blue-700 hover:text-blue-900 text-xl leading-none"
         aria-label="Close"
       >&times;</button>
-    </div>
-
-    <!-- Event Calendar -->
-    <div class="w-full max-w-5xl">
-      <EventCalendar :events="allNews" />
     </div>
 
     <!-- View Toggle -->
@@ -514,20 +543,34 @@ function saveToggleState(key, value) {
           </div>
         </div>
       </div>
+
+      <!-- Event Calendar -->
+    <div class="w-full max-w-5xl">
+        <h2 class="text-2xl font-bold mb-6 mt-8 text-center">Event Calendar</h2>
+      <EventCalendar :events="allNews" />
+    </div>
     </div>
 
     <!-- Announcement Board -->
     <div v-if="currentView === 'announcements'" class="w-full max-w-5xl mt-8">
-      <h2 class="text-2xl font-bold mb-6">Announcement Board</h2>
+      <h2 class="text-xl font-semibold mb-5">Announcement Board</h2>
       <div v-if="sortedAnnouncements.length" class="space-y-6">
         <div
           v-for="announcement in sortedAnnouncements"
           :key="announcement.id"
           :id="`announcement-${announcement.id}`"
           @click="announcement.event && router.visit(route('event.details', { id: announcement.event.id, view: 'announcements' }))"
-          :class="['p-6 bg-white rounded-lg shadow-lg border-l-4 border-blue-500', announcement.event ? 'cursor-pointer hover:bg-gray-50 transition-colors' : '']"
+          :class="['relative p-6 bg-white rounded-lg shadow-lg border-l-4 border-blue-500', announcement.event ? 'cursor-pointer hover:bg-gray-50 transition-colors' : '']"
         >
           <!-- User Avatar and Name -->
+          <div v-if="user?.name === 'Admin'" class="absolute top-2 right-2 z-10">
+            <Button
+                icon="pi pi-trash"
+                class="p-button-text p-button-danger p-button-rounded"
+                @click.stop="promptDeleteAnnouncement(announcement)"
+                v-tooltip.top="'Delete Announcement'"
+            />
+          </div>
           <div class="flex items-center mb-3">
             <Avatar
               image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png"
@@ -559,6 +602,30 @@ function saveToggleState(key, value) {
         <span class="text-sm">Check back later for updates.</span>
       </p>
     </div>
+
+    <!-- Dialogs -->
+    <LoadingSpinner :show="saving" />
+    <SuccessDialog
+      v-model:show="showSuccessDialog"
+      :message="successMessage"
+    />
+    <div v-if="showErrorDialog" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center" style="z-index: 9998;">
+      <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+        <h2 class="text-lg font-semibold text-red-700 mb-2">Error</h2>
+        <p class="text-sm text-gray-700 mb-4">{{ errorMessage }}</p>
+        <div class="flex justify-end">
+          <button @click="showErrorDialog = false" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Close</button>
+        </div>
+      </div>
+    </div>
+    <ConfirmationDialog
+      v-model:show="showDeleteAnnouncementConfirm"
+      title="Delete Announcement?"
+      message="Are you sure you want to delete this announcement?"
+      confirmText="Yes, Delete"
+      confirmButtonClass="bg-red-600 hover:bg-red-700"
+      @confirm="confirmDeleteAnnouncement"
+    />
   </div>
 </template>
 

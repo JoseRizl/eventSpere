@@ -1211,11 +1211,6 @@
         }
 
         const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        if (end < today && start < today) {
-          dateError.value = "Event cannot be entirely in the past";
-          return;
-        }
       }
 
       showSaveConfirm.value = true;
