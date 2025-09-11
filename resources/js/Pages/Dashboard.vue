@@ -64,6 +64,7 @@ const stats = computed(() => [
 <template>
     <div>
         <h1 class="text-2xl font-bold mb-6 text-slate-800">Dashboard</h1>
+        <h1 class="text-2xl font-bold mb-6 text-slate-800">Welcome, Principal</h1>
 
         <!-- Stats Boxes -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

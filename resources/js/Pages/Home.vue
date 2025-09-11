@@ -27,6 +27,7 @@ const currentAnnouncementIndex = ref(0);
 const announcementDirection = ref('next'); // 'next' or 'prev'
 const showErrorDialog = ref(false);
 const errorMessage = ref('');
+const hasNewAnnouncements = ref(false);
 const showDeleteAnnouncementConfirm = ref(false);
 const announcementToDelete = ref(null);
 let announcementTimer = null;
@@ -237,6 +238,16 @@ onMounted(async () => {
 
 
     startAnnouncementCarousel();
+
+    // Check for new announcements
+    if (sortedAnnouncements.value.length > 0) {
+      const latestTimestamp = new Date(sortedAnnouncements.value[0].timestamp).getTime();
+      const lastSeenTimestamp = localStorage.getItem('lastSeenAnnouncementTimestamp');
+
+      if (!lastSeenTimestamp || latestTimestamp > parseInt(lastSeenTimestamp, 10)) {
+        hasNewAnnouncements.value = true;
+      }
+    }
   } catch (error) {
     console.error("Error fetching news:", error);
   }
@@ -250,6 +261,15 @@ onUnmounted(() => {
 
 const toggleAnnouncements = () => {
   showAnnouncements.value = !showAnnouncements.value;
+
+  // If opening the panel and there are new announcements, mark them as seen
+  if (showAnnouncements.value && hasNewAnnouncements.value) {
+    hasNewAnnouncements.value = false;
+    if (sortedAnnouncements.value.length > 0) {
+      const latestTimestamp = new Date(sortedAnnouncements.value[0].timestamp).getTime();
+      localStorage.setItem('lastSeenAnnouncementTimestamp', latestTimestamp.toString());
+    }
+  }
 };
 
 function loadToggleState(key, defaultValue) {
@@ -293,10 +313,11 @@ const confirmDeleteAnnouncement = async () => {
     <div class="fixed top-16 right-4 z-50">
       <button
         @click="toggleAnnouncements"
-        class="p-3 rounded-full bg-blue-500 text-white hover:bg-blue-600 shadow-md"
+        class="relative p-3 rounded-full bg-blue-500 text-white hover:bg-blue-600 shadow-lg transition-transform transform hover:scale-110"
         v-tooltip="'Announcements'"
       >
-        🔔
+        <span class="text-xl">🔔</span>
+        <span v-if="hasNewAnnouncements" class="absolute top-1 right-1 block h-3 w-3 rounded-full bg-red-500 border-2 border-white"></span>
       </button>
 
       <!-- Announcements Dropdown -->
