@@ -272,25 +272,27 @@
             />
           </div>
 
-          <!-- Venue -->
-          <div class="p-field">
-            <label for="venue">Venue</label>
-            <InputText id="venue" v-model="newEvent.venue" placeholder="Enter event venue (e.g., Main Hall, Stadium)" />
-          </div>
+          <div class="p-field grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Venue -->
+            <div>
+              <label for="venue">Venue</label>
+              <InputText id="venue" v-model="newEvent.venue" placeholder="Enter event venue (e.g., Main Hall, Stadium)" class="w-full" />
+            </div>
 
-          <!-- Event Category Dropdown -->
-          <div class="p-field">
-            <label for="category">Category</label>
-            <Select
-              id="category"
-              v-model="newEvent.category_id"
-              :options="categories"
-              optionLabel="title"
-              optionValue="id"
-              placeholder="Select a category"
-            />
+            <!-- Event Category Dropdown -->
+            <div>
+              <label for="category">Category</label>
+              <Select
+                id="category"
+                v-model="newEvent.category_id"
+                :options="categories"
+                optionLabel="title"
+                optionValue="id"
+                placeholder="Select a category"
+                class="w-full"
+              />
+            </div>
           </div>
-
           <!-- Create Event Modal -->
           <div class="p-field grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Start -->
@@ -444,25 +446,27 @@
             </MultiSelect>
           </div>
 
-          <!-- Venue -->
-          <div class="p-field">
-            <label for="venue">Venue</label>
-            <InputText id="venue" v-model="selectedEvent.venue" placeholder="Enter event venue (e.g., Main Hall, Stadium)" />
-          </div>
+          <div class="p-field grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Venue -->
+            <div>
+              <label for="venue">Venue</label>
+              <InputText id="venue" v-model="selectedEvent.venue" placeholder="Enter event venue (e.g., Main Hall, Stadium)" class="w-full" />
+            </div>
 
-          <!-- Event Category Dropdown -->
-          <div class="p-field">
-            <label for="category">Category</label>
-            <Select
-              id="category"
-              v-model="selectedEvent.category_id"
-              :options="categories"
-              optionLabel="title"
-              optionValue="id"
-              placeholder="Select a category"
-            />
+            <!-- Event Category Dropdown -->
+            <div>
+              <label for="category">Category</label>
+              <Select
+                id="category"
+                v-model="selectedEvent.category_id"
+                :options="categories"
+                optionLabel="title"
+                optionValue="id"
+                placeholder="Select a category"
+                class="w-full"
+              />
+            </div>
           </div>
-
           <!-- Edit Event Modal -->
           <div class="p-field grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Start Date & Time -->

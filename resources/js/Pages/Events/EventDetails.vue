@@ -12,6 +12,7 @@ import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import InputSwitch from 'primevue/inputswitch';
 import Button from 'primevue/button';
+import Select from 'primevue/select';
 import Textarea from 'primevue/textarea';
 
 // Inertia props
@@ -27,6 +28,7 @@ const showSuccessDialog = ref(false);
 const errorMessage = ref(null);
 const showErrorDialog = ref(false);
 const errorDialogMessage = ref('');
+const categories = ref(props.categories || []);
 const committees = ref(props.committees || []);
 const employees = ref(props.employees || []);
 const filteredEmployees = ref([]);
@@ -64,6 +66,7 @@ const {
 
 const {
   fetchBrackets,
+  handleByeRounds,
   updateLines,
   isFinalRound,
   isSemifinalRound,
@@ -106,6 +109,13 @@ const tagsMap = computed(() => {
   }, {});
 });
 
+const categoryMap = computed(() => {
+  return categories.value.reduce((map, category) => {
+    map[category.id] = category.title;
+    return map;
+  }, {});
+});
+
 const removeTag = (tagToRemove) => {
   normalizedTags.value = normalizedTags.value.filter(tag => tag.id !== tagToRemove.id);
 };
@@ -113,6 +123,7 @@ const removeTag = (tagToRemove) => {
 const eventDetails = ref({
     ...props.event,
     venue: props.event.venue || '',
+    category_id: props.event.category?.id || props.event.category_id,
     scheduleLists: props.event.scheduleLists || [{
       day: 1,
       date: props.event.startDate,
@@ -210,6 +221,7 @@ onMounted(() => {
   }
 
   // Ensure tasks have proper committee/employee references
+  fetchEventAnnouncements();
   fetchBrackets();
   if (eventDetails.value.tasks) {
     filteredEmployees.value = eventDetails.value.tasks.map(task => {
@@ -235,17 +247,16 @@ onMounted(() => {
 });
 
 watch(relatedBrackets, (newBrackets) => {
-  if (newBrackets.length > 0) {
-    newBrackets.forEach(bracket => {
-      const originalIndex = brackets.value.findIndex(b => b.id === bracket.id);
-      if (originalIndex !== -1) {
-        expandedBrackets.value[originalIndex] = true; // Always show
-        nextTick(() => {
-          updateLines(originalIndex);
-        });
-      }
-    });
-  }
+  newBrackets.forEach(bracket => {
+    const originalIndex = brackets.value.findIndex(b => b.id === bracket.id);
+    if (originalIndex !== -1) {
+      expandedBrackets.value[originalIndex] = true; // Always show
+      handleByeRounds(originalIndex);
+      nextTick(() => {
+        updateLines(originalIndex);
+      });
+    }
+  });
 });
 
 const fetchEventAnnouncements = async () => {
@@ -257,11 +268,6 @@ const fetchEventAnnouncements = async () => {
     console.error('Error fetching event announcements:', error);
   }
 };
-
-onMounted(() => {
-  // ... existing onMounted logic
-  fetchEventAnnouncements();
-});
 
 const openAddAnnouncementModal = () => {
   newAnnouncement.value = { message: '', image: null, imagePreview: null };
@@ -470,6 +476,7 @@ const saveChanges = () => {
     description: eventDetails.value.description,
     image: eventDetails.value.image,
     venue: eventDetails.value.venue,
+    category_id: eventDetails.value.category_id,
     startDate: eventDetails.value.startDate,
     endDate: eventDetails.value.endDate,
     startTime: eventDetails.value.startTime,
@@ -667,6 +674,18 @@ const getBracketIndex = (bracketId) => {
             <div class="flex flex-col md:flex-row gap-6">
                 <!-- Main content (left side) - takes remaining space -->
                 <div class="flex-1">
+                    <!-- View Toggle -->
+                    <div class="w-full mb-4">
+                        <div class="flex border-b">
+                            <button @click="currentView = 'details'" :class="['px-4 py-2 font-semibold transition-colors duration-200 focus:outline-none', currentView === 'details' ? 'border-b-2 border-[#0077B3] text-[#0077B3]' : 'text-gray-500 hover:text-[#0077B3]']">
+                                Event Details
+                            </button>
+                            <button @click="currentView = 'announcements'" :class="['px-4 py-2 font-semibold transition-colors duration-200 focus:outline-none', currentView === 'announcements' ? 'border-b-2 border-[#0077B3] text-[#0077B3]' : 'text-gray-500 hover:text-[#0077B3]']">
+                                Announcements
+                            </button>
+                        </div>
+                    </div>
+
                     <div v-if="currentView === 'details'">
                         <!-- Event Details -->
                         <div v-if="eventDetails" class="bg-white shadow-md rounded-lg p-6 w-full flex flex-col space-y-4">
@@ -700,17 +719,36 @@ const getBracketIndex = (bracketId) => {
                     <p v-else class="text-gray-700 whitespace-pre-line">{{ eventDetails.description }}</p>
                     </div>
 
-                    <!-- Venue -->
-                    <div>
-                    <input
-                        v-if="editMode"
-                        v-model="eventDetails.venue"
-                        class="w-full border rounded p-2"
-                        placeholder="Enter venue (e.g., Conference Room A)"
-                    />
-                    <p v-else>
-                        <strong>Venue:</strong> {{ eventDetails.venue || 'Not specified' }}
-                    </p>
+                    <!-- Venue and Category -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Venue -->
+                        <div>
+                            <template v-if="editMode">
+                                <label class="text-sm font-medium mb-1">Venue</label>
+                                <InputText
+                                    v-model="eventDetails.venue"
+                                    class="w-full"
+                                    placeholder="Enter event venue (e.g., Conference Room A)"
+                                />
+                            </template>
+                            <p v-else>
+                                <strong>Venue:</strong> {{ eventDetails.venue || 'Not specified' }}
+                            </p>
+                        </div>
+                        <!-- Category -->
+                        <div>
+                            <template v-if="editMode">
+                                <label class="text-sm font-medium mb-1">Category</label>
+                                <Select v-model="eventDetails.category_id"
+                                    :options="categories"
+                                    optionLabel="title"
+                                    optionValue="id"
+                                    placeholder="Select a category"
+                                    class="w-full"
+                                />
+                            </template>
+                            <p v-else><strong>Category:</strong> {{ categoryMap[eventDetails.category_id] || 'Uncategorized' }}</p>
+                        </div>
                     </div>
 
                     <!-- Tags -->

@@ -1911,5 +1911,6 @@ export function useBracketActions(state) {
     openScoringConfigDialog,
     closeScoringConfigDialog,
     saveScoringConfig,
+    handleByeRounds,
   };
 }

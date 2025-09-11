@@ -104,6 +104,7 @@ class EventController extends Controller
             'tags' => $data['tags'] ?? [],
             'committees' => $data['committees'] ?? [],
             'employees' => $data['employees'] ?? [],
+            'categories' => $data['category'] ?? [],
             'relatedEvents' => $relatedEvents,
         ]);
     }
@@ -111,7 +112,7 @@ class EventController extends Controller
     public function update(Request $request, $id)
     {
         // Get valid IDs from JSON
-        $validCategoryIds = array_column($this->jsonData['categories'] ?? [], 'id');
+        $validCategoryIds = array_column($this->jsonData['category'] ?? [], 'id');
         $validTagIds = array_column($this->jsonData['tags'] ?? [], 'id');
         $validCommitteeIds = array_column($this->jsonData['committees'] ?? [], 'id');
         $validEmployeeIds = array_column($this->jsonData['employees'] ?? [], 'id');
@@ -221,7 +222,7 @@ class EventController extends Controller
             ->values()
             ->toArray();
 
-        $categories = $data['categories'] ?? [];
+        $categories = $data['category'] ?? [];
 
         return Inertia::render('List/Archive', [
             'archivedEvents' => $archivedEvents,
