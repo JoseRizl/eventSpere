@@ -10,49 +10,72 @@ const page = usePage();
 const user = computed(() => page.props.auth.user);
 
 const sideBarItems = computed(() => {
-    const allItems = [
-        {
-            separator: true
-        },
-        {
-            label: 'News and Updates',
-            icon: 'pi pi-objects-column',
-            route: route('home'),
-        },
-        {
-            label: 'Events',
-            icon: 'pi pi-calendar-clock',
-            route: route('event.list'),
-        },
-        {
-            label: 'Categories/Tags',
-            icon: 'pi pi-palette',
-            route: route('category.list'),
-            adminOnly: true,
-        },
-        {
-            label: 'Sports',
-            icon: 'pi pi-ticket',
-            route: route('bracket'),
-        },
-        {
-            label: 'Archive',
-            icon: 'pi pi-folder',
-            route: route('archive'),
-            adminOnly: true,
-        },
-        {
-            separator: true
-        },
-        {
-            label: 'Log Out',
-            icon: 'pi pi-sign-out',
-            shortcut: '⌘+S',
-            action: logout,
-        },
-    ];
+  const allItems = [
+    {
+      separator: true,
+    },
+    {
+      label: 'News and Updates',
+      icon: 'pi pi-objects-column',
+      route: route('home'),
+    },
+    {
+      label: 'Dashboard',
+      icon: 'pi pi-chart-bar',
+      route: route('dashboard'),
+      roles: ['Admin', 'Principal'],
+    },
+    {
+      label: 'Events',
+      icon: 'pi pi-calendar-clock',
+      route: route('events.index'),
+      roles: ['Admin', 'Principal'],
+    },
+    {
+      label: 'Categories/Tags',
+      icon: 'pi pi-palette',
+      route: route('category.list'),
+      roles: ['Admin', 'Principal'],
+    },
+    {
+      label: 'Sports',
+      icon: 'pi pi-ticket',
+      route: route('bracket'),
+      roles: ['Admin', 'SportsManager'],
+    },
+    {
+      label: 'Archive',
+      icon: 'pi pi-folder',
+      route: route('archive'),
+      roles: ['Admin', 'Principal'],
+    },
+    {
+      separator: true,
+    },
+    {
+      label: 'Log Out',
+      icon: 'pi pi-sign-out',
+      shortcut: '⌘+S',
+      action: logout,
+    },
+    {
+      label: 'Login',
+      icon: 'pi pi-sign-in',
+      route: route('login'),
+    },
+  ];
 
-    return user.value?.name === 'Admin' ? allItems : allItems.filter(item => !item.adminOnly);
+  const userRole = user.value?.name;
+
+  return allItems.filter(item => {
+    if (item.label === 'Log Out') return !!user.value;
+
+    if (item.label === 'Login') return !user.value;
+
+    if (item.separator) return true;
+    if (!item.roles) return true;
+    return userRole && item.roles.includes(userRole);
+  });
 });
 
 const toggleSidebar = () => {

@@ -6,9 +6,11 @@ use App\Http\Controllers\CategoryController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::middleware('auth')->group(function () {
-    Route::inertia('/home', 'Home')->name('home');
+Route::inertia('/home', 'Home')->name('home');
+Route::get('/events/{id}', [EventController::class, 'show'])->name('event.details');
 
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', [EventController::class, 'dashboard'])->name('dashboard');
     Route::inertia('/event-list', 'List/EventList')->name('event.list');
     Route::get('/category-list', [CategoryController::class, 'index'])->name('category.list');
     Route::get('/archive', [EventController::class, 'getArchivedEvents'])->name('archive');
@@ -21,7 +23,6 @@ Route::middleware('auth')->group(function () {
 
     Route::inertia('/bracket', 'Sports/Bracket')->name('bracket');
 
-    Route::get('/events/{id}', [EventController::class, 'show'])->name('event.details');
     Route::post('/events/{id}/update', [EventController::class, 'update'])->name('event.update');
 
     // Category and Tag routes
@@ -35,13 +36,16 @@ Route::middleware('auth')->group(function () {
     Route::put('/events/{id}/archive', [EventController::class, 'archive'])->name('events.archive');
 });
 
-Route::middleware('guest')->group(function () {
+
     Route::inertia('/register', 'Auth/Register')->name('register');
     Route::post('/register', [AuthController::class, 'register']);
 
     Route::inertia('/', 'Auth/Login')->name('login');
     Route::post('/', [AuthController::class, 'login']);
-});
+
+    Route::middleware('guest')->group(function () {
+
+    });
 
 // Redirect any unmatched routes to home
 Route::get('/{any}', function () {

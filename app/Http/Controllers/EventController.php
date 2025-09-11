@@ -139,6 +139,22 @@ class EventController extends Controller
         ]);
     }
 
+    public function dashboard()
+    {
+        $data = $this->jsonData;
+        $events = collect($data['events'] ?? [])
+            ->where('archived', '!=', true)
+            ->sortByDesc(function ($event) {
+                return strtotime($event['startDate'] ?? '1970-01-01');
+            })
+            ->values()
+            ->toArray();
+
+        return Inertia::render('Dashboard', [
+            'events_prop' => $events,
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validCategoryIds = array_column($this->jsonData['category'] ?? [], 'id');

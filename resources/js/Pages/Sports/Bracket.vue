@@ -117,7 +117,7 @@ onMounted(() => {
     <div class="container">
         <div class="header">
           <h1 class="title">Ongoing Games</h1>
-          <button v-if="user?.name === 'Admin'" class="create-button" @click="openDialog">Create Bracket</button>
+          <button v-if="user?.name === 'Admin' || user?.name === 'SportsManager'" class="create-button" @click="openDialog">Create Bracket</button>
         </div>
 
       <!-- Loading Skeleton -->
@@ -166,7 +166,7 @@ onMounted(() => {
             <button @click="toggleBracket(bracketIdx)" class="toggle-button">
               {{ expandedBrackets[bracketIdx] ? 'Hide Bracket' : 'Show Bracket' }}
             </button>
-            <button v-if="user?.name === 'Admin'" @click="removeBracket(bracketIdx)" class="delete-button">Delete Bracket</button>
+            <button v-if="user?.name === 'Admin' || user?.name === 'SportsManager'" @click="removeBracket(bracketIdx)" class="delete-button">Delete Bracket</button>
           </div>
 
           <div v-if="expandedBrackets[bracketIdx]">
@@ -197,7 +197,7 @@ onMounted(() => {
                   :key="matchIdx"
                   :id="`match-${roundIdx}-${matchIdx}`"
                   :class="['match']"
-                  @click="user?.name === 'Admin' && openMatchDialog(bracketIdx, roundIdx, matchIdx, match, 'single')"
+                  @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openMatchDialog(bracketIdx, roundIdx, matchIdx, match, 'single')"
                 >
                   <div class="player-box">
                       <span
@@ -244,7 +244,7 @@ onMounted(() => {
                     :key="`round-${roundIdx}-${matchIdx}`"
                     :id="`round-match-${roundIdx}-${matchIdx}`"
                     :class="['match']"
-                    @click="user?.name === 'Admin' && openRoundRobinMatchDialog(bracketIdx, roundIdx, matchIdx, match)"
+                    @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openRoundRobinMatchDialog(bracketIdx, roundIdx, matchIdx, match)"
                   >
                     <div class="player-box">
                       <span
@@ -285,7 +285,7 @@ onMounted(() => {
               <div class="standings-section">
                 <div class="standings-header-row">
                   <h3>Standings</h3>
-                  <button v-if="user?.name === 'Admin'"
+                  <button v-if="user?.name === 'Admin' || user?.name === 'SportsManager'"
                     @click="openScoringConfigDialog"
                     class="scoring-config-btn"
                     title="Configure scoring system"
@@ -350,7 +350,7 @@ onMounted(() => {
                       :key="`winners-${roundIdx}-${matchIdx}`"
                       :id="`winners-match-${roundIdx}-${matchIdx}`"
                       :class="['match']"
-                      @click="user?.name === 'Admin' && openMatchDialog(bracketIdx, roundIdx, matchIdx, match, 'winners')"
+                      @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openMatchDialog(bracketIdx, roundIdx, matchIdx, match, 'winners')"
                     >
                       <div class="player-box">
                         <span
@@ -412,7 +412,7 @@ onMounted(() => {
                       :key="`losers-${roundIdx}-${matchIdx}`"
                       :id="`losers-match-${roundIdx}-${matchIdx}`"
                       :class="['match']"
-                      @click="user?.name === 'Admin' && openMatchDialog(bracketIdx, roundIdx + bracket.matches.winners.length, matchIdx, match, 'losers')"
+                      @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openMatchDialog(bracketIdx, roundIdx + bracket.matches.winners.length, matchIdx, match, 'losers')"
                     >
                       <div class="player-box">
                         <span
@@ -468,7 +468,7 @@ onMounted(() => {
                   <div v-for="(match, matchIdx) in bracket.matches.grand_finals" :key="`grand-finals-${matchIdx}`"
                     :id="`grand-finals-match-${matchIdx}`"
                     :class="['match']"
-                    @click="user?.name === 'Admin' && openMatchDialog(bracketIdx, bracket.matches.winners.length + bracket.matches.losers.length, matchIdx, match, 'grand_finals')"
+                    @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openMatchDialog(bracketIdx, bracket.matches.winners.length + bracket.matches.losers.length, matchIdx, match, 'grand_finals')"
                   >
                     <div class="player-box">
                       <span

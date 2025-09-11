@@ -1,5 +1,5 @@
 <script setup>
-import { useForm } from '@inertiajs/vue3';
+import { useForm, Link } from '@inertiajs/vue3';
 import AuthLayout from '../../Layouts/AuthLayout.vue';
 import TextInput from '../../Components/TextInput.vue';
 
@@ -67,6 +67,16 @@ defineOptions({ layout: AuthLayout });
                     >
                         Login
                     </button>
+
+                    <div class="relative flex py-2 items-center">
+                        <div class="flex-grow border-t border-gray-300"></div>
+                        <span class="flex-shrink mx-4 text-gray-400 text-sm">Or</span>
+                        <div class="flex-grow border-t border-gray-300"></div>
+                    </div>
+
+                    <Link :href="route('home')" class="w-full block text-center bg-slate-600 text-white py-2 rounded-lg hover:bg-slate-700 transition">
+                        Continue as Guest
+                    </Link>
                 </form>
             </div>
 
