@@ -262,14 +262,18 @@
           <!-- Tags Selection -->
           <div class="p-field">
             <label for="tags">Tags</label>
-            <MultiSelect
-              id="tags"
-              v-model="newEvent.tags"
-              :options="tags"
-              optionLabel="name"
-              placeholder="Select tags"
-              display="chip"
-            />
+            <div class="flex items-center gap-2">
+                <MultiSelect
+                  id="tags"
+                  v-model="newEvent.tags"
+                  :options="tags"
+                  optionLabel="name"
+                  placeholder="Select tags"
+                  display="chip"
+                  class="w-full"
+                />
+                <Button icon="pi pi-plus" class="p-button-secondary p-button-rounded" @click="openTagModal" v-tooltip.top="'Create New Tag'" />
+            </div>
           </div>
 
           <div class="p-field grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -390,6 +394,24 @@
         <template #footer>
           <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="isCreateModalVisible = false" />
           <Button label="Create Event" icon="pi pi-check" class="p-button-primary" @click="createEvent" />
+        </template>
+      </Dialog>
+
+      <!-- Create Tag Modal -->
+      <Dialog v-model:visible="isCreateTagModalVisible" modal header="Create New Tag" :style="{ width: '30vw' }">
+        <div class="p-fluid">
+            <div class="p-field">
+                <label for="tagName">Tag Name</label>
+                <InputText id="tagName" v-model="newTag.name" />
+            </div>
+            <div class="p-field">
+                <label for="tagColor">Tag Color</label>
+                <ColorPicker id="tagColor" v-model="newTag.color" />
+            </div>
+        </div>
+        <template #footer>
+            <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="isCreateTagModalVisible = false" />
+            <Button label="Create" icon="pi pi-check" @click="createTag" :loading="saving" />
         </template>
       </Dialog>
 
@@ -622,6 +644,7 @@
   import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
   import SuccessDialog from '@/Components/SuccessDialog.vue';
   import Skeleton from 'primevue/skeleton';
+  import ColorPicker from 'primevue/colorpicker';
 
   export default defineComponent({
     name: "EventList",
@@ -645,7 +668,7 @@
       const initialLoading = ref(true);
       const isEditModalVisible = ref(false);
       const selectedEvent = ref(null);
-      const tags = computed(() => page.props.tags_prop || []);
+      const tags = ref(page.props.tags_prop || []);
       const committees = computed(() => page.props.committees_prop || []);
       const filteredEmployees = ref([]);
       const isTaskModalVisible = ref(false);
@@ -656,12 +679,18 @@
       const confirmAction = ref(() => {});
       const cancelConfirmation = ref(() => {});
       const isCreateModalVisible = ref(false);
+      const isCreateTagModalVisible = ref(false);
       const defaultImage = "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg";
       const searchQuery = ref("");
       const showDateFilter = ref(false);
       const dateRange = ref({
         from: null,
         to: null
+      });
+
+      const newTag = ref({
+        name: "",
+        color: "#ff0000"
       });
 
       const newEvent = ref({
@@ -708,6 +737,42 @@
         isCreateModalVisible.value = true;
         dateError.value = "";
       };
+
+     const openTagModal = () => {
+       newTag.value = { name: '', color: '#ff0000' };
+       isCreateTagModalVisible.value = true;
+     };
+
+     const createTag = async () => {
+       if (!newTag.value.name.trim()) {
+         errorMessage.value = "Tag name cannot be empty.";
+         showErrorDialog.value = true;
+         return;
+       }
+       const colorValue = newTag.value.color.startsWith('#') ? newTag.value.color : `#${newTag.value.color}`;
+
+       saving.value = true;
+       try {
+         const response = await axios.post(route('category.store'), {
+           name: newTag.value.name,
+           color: colorValue
+         });
+
+         if (response.data.success) {
+           const createdTag = response.data.tag;
+           tags.value.push(createdTag);
+           newEvent.value.tags.push(createdTag);
+           isCreateTagModalVisible.value = false;
+           successMessage.value = 'Tag created successfully!';
+           showSuccessDialog.value = true;
+         }
+       } catch (error) {
+         errorMessage.value = `Failed to create tag: ${error.response?.data?.message || 'An unknown error occurred.'}`;
+         showErrorDialog.value = true;
+       } finally {
+         saving.value = false;
+       }
+     };
 
      const createEvent = () => {
         resetErrors();
@@ -1430,9 +1495,13 @@
     cancelConfirmation,
     dateError,
     isCreateModalVisible,
+    isCreateTagModalVisible,
     newEvent,
+    newTag,
     openCreateModal,
+    openTagModal,
     createEvent,
+    createTag,
     handleImageUpload,
     handleEditImageUpload,
     removeImage,

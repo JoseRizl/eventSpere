@@ -46,6 +46,10 @@ class CategoryController extends Controller
         $this->jsonData[$collection][] = $newItem;
         File::put(base_path('db.json'), json_encode($this->jsonData, JSON_PRETTY_PRINT));
 
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'tag' => $newItem]);
+        }
+
         return redirect()->back()->with('success', $isTag ? 'Tag created successfully!' : 'Category created successfully!');
     }
 
