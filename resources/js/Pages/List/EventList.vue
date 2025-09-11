@@ -615,7 +615,7 @@
 
   <script>
   import { defineComponent, ref, onMounted, computed, watch } from "vue";
-  import { usePage, Link } from '@inertiajs/vue3';
+  import { usePage, Link, router } from '@inertiajs/vue3';
   import axios from "axios";
   import { parse, format, isWithinInterval } from "date-fns";
   import LoadingSpinner from '@/Components/LoadingSpinner.vue';
@@ -639,19 +639,18 @@
       const resetErrors = () => {
         dateError.value = "";
         };
-      const events = ref([]);
+      const events = computed(() => page.props.events_prop || []);
       const sports = ref([]);
-      const categories = ref([]);
+      const categories = computed(() => page.props.categories_prop || []);
       const initialLoading = ref(true);
-      const combinedEvents = ref([]);
       const isEditModalVisible = ref(false);
       const selectedEvent = ref(null);
-      const tags = ref([]);
-      const committees = ref([]);
+      const tags = computed(() => page.props.tags_prop || []);
+      const committees = computed(() => page.props.committees_prop || []);
       const filteredEmployees = ref([]);
       const isTaskModalVisible = ref(false);
       const taskAssignments = ref([]);
-      const employees = ref([]);
+      const employees = computed(() => page.props.employees_prop || []);
       const isConfirmModalVisible = ref(false);
       const confirmMessage = ref('');
       const confirmAction = ref(() => {});
@@ -678,6 +677,17 @@
         image: "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
         archived: false,
         isAllDay: false
+      });
+
+      const combinedEvents = computed(() => {
+        const allEvents = (events.value || []).map(event => ({
+            ...event,
+            category_id: event.category?.id || event.category_id,
+        }));
+
+        return [...allEvents, ...sports.value].sort((a, b) => {
+            return new Date(b.startDate || "1970-01-01") - new Date(a.startDate || "1970-01-01");
+        });
       });
 
       const openCreateModal = () => {
@@ -750,55 +760,41 @@
         showCreateConfirm.value = false;
 
         try {
-            // Normalize tags to store only IDs
-            const normalizedTags = Array.isArray(newEvent.value.tags)
-                ? newEvent.value.tags.map(tag => {
-                    // If tag is already just an ID, return it
-                    if (typeof tag === 'string' || typeof tag === 'number') {
-                        return tag;
-                    }
-                    // If tag is an object with id, return the id
-                    return tag.id || tag;
-                })
-                : [];
+          const payload = {
+            ...newEvent.value,
+            image: finalImage || defaultImage,
+            tags: Array.isArray(newEvent.value.tags) ? newEvent.value.tags.map(tag => tag.id) : [],
+            startDate: newEvent.value.startDate
+                ? format(new Date(newEvent.value.startDate), "MMM-dd-yyyy")
+                : null,
+            endDate: newEvent.value.endDate
+                ? format(new Date(newEvent.value.endDate), "MMM-dd-yyyy")
+                : null,
+            startTime: newEvent.value.startTime.padStart(5, "0"),
+            endTime: newEvent.value.endTime.padStart(5, "0"),
+            archived: false,
+            createdAt: new Date().toISOString(),
+        };
 
-            const payload = {
-                ...newEvent.value,
-                image: finalImage || defaultImage,
-                tags: normalizedTags, // Store only tag IDs
-                startDate: newEvent.value.startDate
-                    ? format(new Date(newEvent.value.startDate), "MMM-dd-yyyy")
-                    : null,
-                endDate: newEvent.value.endDate
-                    ? format(new Date(newEvent.value.endDate), "MMM-dd-yyyy")
-                    : null,
-                startTime: newEvent.value.startTime.padStart(5, "0"),
-                endTime: newEvent.value.endTime.padStart(5, "0"),
-                archived: false,
-                createdAt: new Date().toISOString(),
-            };
-
-            const response = await axios.post("http://localhost:3000/events", payload);
-
-            // Add the new event to the local list
-            const createdEvent = {
-                ...response.data,
-                type: "event"
-            };
-
-            combinedEvents.value = [createdEvent, ...combinedEvents.value];
-            isCreateModalVisible.value = false;
-            successMessage.value = 'Event created successfully!';
-            showSuccessDialog.value = true;
-        } catch (error) {
-            console.error("Error creating event:", error);
-            errorMessage.value = 'Failed to create the event.';
-            showErrorDialog.value = true;
-        } finally {
-            saving.value = false;
-        }
-    };
-
+        await router.post(route('events.store'), payload, {
+            onSuccess: () => {
+                isCreateModalVisible.value = false;
+                successMessage.value = 'Event created successfully!';
+                showSuccessDialog.value = true;
+            },
+            onError: (errors) => {
+                errorMessage.value = 'Failed to create the event.';
+                showErrorDialog.value = true;
+            },
+            preserveScroll: true
+        });
+    } catch (error) {
+        errorMessage.value = 'Failed to create the event.';
+        showErrorDialog.value = true;
+    } finally {
+        saving.value = false;
+    }
+      };
 
       const handleEditImageUpload = (event) => {
         const file = event.target.files[0];
@@ -954,47 +950,19 @@
         .filter(tag => tag); // Filter out any undefined tags
     };
 
-      onMounted(async () => {
+    onMounted(async () => {
         initialLoading.value = true;
         try {
-          const [eventsResponse, sportsResponse, categoriesResponse, tagsResponse, committeesResponse, employeesResponse] = await Promise.all([
-            axios.get("http://localhost:3000/events"),
-            axios.get("http://localhost:3000/sports"),
-            axios.get("http://localhost:3000/category"),
-            axios.get("http://localhost:3000/tags"),
-            axios.get("http://localhost:3000/committees"),
-            axios.get("http://localhost:3000/employees")
-          ]);
-
-          const tagsMap = tagsResponse.data.reduce((map, tag) => {
-            map[tag.id] = tag;
-            return map;
-        }, {});
-
-        events.value = eventsResponse.data
-        .filter(event => !event.archived) // Exclude archived events
-        .map(event => ({
-            ...event,
-            category_id: event.category?.id || event.category_id,
-        }));
-
-          categories.value = categoriesResponse.data;
-
-          //Tags value for multiselect
-          tags.value = tagsResponse.data;
-
-          committees.value = committeesResponse.data;
-          employees.value = employeesResponse.data;
-
-          combinedEvents.value = [...events.value, ...sports.value].sort((a, b) => {
-            return new Date(b.startDate || "1970-01-01") - new Date(a.startDate || "1970-01-01");
-          });
+            // Data from Inertia props is already available in computed properties.
+            // We only need to fetch data from other sources if any.
+            const sportsResponse = await axios.get("http://localhost:3000/sports");
+            sports.value = sportsResponse.data;
         } catch (error) {
-          console.error("Error fetching data:", error);
+            console.error("Error fetching sports data:", error);
         } finally {
-          initialLoading.value = false;
+            initialLoading.value = false;
         }
-      });
+    });
 
        // Open Task Modal
     const openTaskModal = (event) => {
@@ -1124,19 +1092,25 @@
             task: task.task
         }))
         };
-
-        await axios.put(`http://localhost:3000/events/${selectedEvent.value.id}`, updatedEvent);
-
-        const index = combinedEvents.value.findIndex(event => event.id === selectedEvent.value.id);
-        if (index !== -1) {
-        combinedEvents.value[index].tasks = [...taskAssignments.value];
-        }
-
-        isTaskModalVisible.value = false;
-        alert("Tasks assigned successfully!");
+        await router.put(route('events.updateFromList', {id: selectedEvent.value.id}), updatedEvent, {
+          onSuccess: () => {
+            const index = combinedEvents.value.findIndex(event => event.id === selectedEvent.value.id);
+            if (index !== -1) {
+              combinedEvents.value[index].tasks = [...taskAssignments.value];
+            }
+            isTaskModalVisible.value = false;
+            successMessage.value = 'Tasks assigned successfully!';
+            showSuccessDialog.value = true;
+          },
+          onError: (errors) => {
+            errorMessage.value = 'Failed to save tasks.';
+            showErrorDialog.value = true;
+          },
+          preserveScroll: true
+        });
       } catch (error) {
-        console.error("Error saving tasks:", error);
-        alert("Failed to save tasks.");
+        errorMessage.value = 'Failed to save tasks.';
+        showErrorDialog.value = true;
       }
     };
 
@@ -1222,13 +1196,9 @@
 
     const confirmSaveChanges = async () => {
       saving.value = true;
-
       try {
-        const collection = selectedEvent.value.type === "sport" ? "sports" : "events";
-
         let finalImage = selectedEvent.value.image;
         const oldImageUrl = selectedEvent.value.image;
-
         if (selectedEvent.value.image && selectedEvent.value.image.startsWith('blob:')) {
           try {
             if (oldImageUrl && oldImageUrl.startsWith('blob:')) {
@@ -1243,17 +1213,14 @@
               reader.readAsDataURL(blob);
             });
           } catch (error) {
-            console.error("Image conversion failed:", error);
             finalImage = defaultImage;
           }
         } else if (!selectedEvent.value.image) {
           finalImage = defaultImage;
         }
-
         const normalizedTags = Array.isArray(selectedEvent.value.tags)
           ? selectedEvent.value.tags.map(tag => tag?.id || tag)
           : [];
-
         const payload = {
           ...selectedEvent.value,
           image: finalImage,
@@ -1267,23 +1234,19 @@
           startTime: selectedEvent.value.startTime?.padStart(5, "0") || "00:00",
           endTime: selectedEvent.value.endTime?.padStart(5, "0") || "00:00",
         };
-
-        await axios.put(`http://localhost:3000/${collection}/${selectedEvent.value.id}`, payload);
-
-        const index = combinedEvents.value.findIndex(e => e.id === selectedEvent.value.id);
-        if (index !== -1) {
-          combinedEvents.value.splice(index, 1, {
-            ...selectedEvent.value,
-            image: finalImage,
-            tags: selectedEvent.value.tags
-          });
-        }
-
-        isEditModalVisible.value = false;
-        successMessage.value = 'Event updated successfully!';
-        showSuccessDialog.value = true;
+        await router.put(route('events.updateFromList', {id: selectedEvent.value.id}), payload, {
+          onSuccess: () => {
+            isEditModalVisible.value = false;
+            successMessage.value = 'Event updated successfully!';
+            showSuccessDialog.value = true;
+          },
+          onError: (errors) => {
+            errorMessage.value = 'Failed to update the event.';
+            showErrorDialog.value = true;
+          },
+          preserveScroll: true
+        });
       } catch (error) {
-        console.error("Error updating event:", error);
         errorMessage.value = 'Failed to update the event.';
         showErrorDialog.value = true;
       } finally {
@@ -1297,28 +1260,25 @@
       showArchiveConfirm.value = true;
     };
 
-    const confirmArchive = async () => {
+    const confirmArchive = () => {
       if (!eventToProcess.value) return;
       saving.value = true;
-
-      try {
-        await axios.put(`http://localhost:3000/events/${eventToProcess.value.id}`, {
-          ...eventToProcess.value,
-          archived: true,
-        });
-
-        combinedEvents.value = combinedEvents.value.filter(e => e.id !== eventToProcess.value.id);
-        successMessage.value = 'Event archived successfully!';
-        showSuccessDialog.value = true;
-      } catch (error) {
-        console.error("Error archiving event:", error);
-        errorMessage.value = 'Failed to archive the event.';
-        showErrorDialog.value = true;
-      } finally {
-        saving.value = false;
-        showArchiveConfirm.value = false;
-        eventToProcess.value = null;
-      }
+      router.put(route('events.archive', {id: eventToProcess.value.id}), {}, {
+        onSuccess: () => {
+          successMessage.value = 'Event archived successfully!';
+          showSuccessDialog.value = true;
+        },
+        onError: (errors) => {
+          errorMessage.value = 'Failed to archive the event.';
+          showErrorDialog.value = true;
+        },
+        onFinish: () => {
+          saving.value = false;
+          showArchiveConfirm.value = false;
+          eventToProcess.value = null;
+        },
+        preserveScroll: true
+      });
     };
 
     const removeEmployee = (taskIndex, employeeToRemove) => {
@@ -1331,7 +1291,7 @@
       selectedEvent.value.tags = selectedEvent.value.tags.filter(tag => tag.id !== tagToRemove.id);
     };
 
-    // Add date filtering functionality
+// Add date filtering functionality
     const toggleDateFilter = () => {
       showDateFilter.value = !showDateFilter.value;
       if (!showDateFilter.value) {

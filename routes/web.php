@@ -13,6 +13,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/category-list', [CategoryController::class, 'index'])->name('category.list');
     Route::get('/archive', [EventController::class, 'getArchivedEvents'])->name('archive');
 
+    Route::get('/events', [EventController::class, 'index'])->name('events.index');
     Route::put('/events/{id}/restore', [EventController::class, 'restore'])->name('events.restore');
     Route::delete('/events/{id}/permanent', [EventController::class, 'permanentDelete'])->name('events.permanent-delete');
 
@@ -27,6 +28,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/categories', [CategoryController::class, 'store'])->name('category.store');
     Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('category.update');
     Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('category.destroy');
+
+    // Additional event routes for Vue actions
+    Route::post('/events', [EventController::class, 'store'])->name('events.store');
+    Route::put('/events/{id}/update-from-list', [EventController::class, 'updateFromList'])->name('events.updateFromList');
+    Route::put('/events/{id}/archive', [EventController::class, 'archive'])->name('events.archive');
 });
 
 Route::middleware('guest')->group(function () {

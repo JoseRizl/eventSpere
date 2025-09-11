@@ -16,6 +16,36 @@ class EventController extends Controller
         $this->jsonData = json_decode(File::get(base_path('db.json')), true);
     }
 
+    public function index()
+{
+    $data = $this->jsonData;
+    $events = collect($data['events'] ?? [])
+        ->where('archived', '!=', true)
+        ->sortByDesc(function ($event) {
+            return strtotime($event['startDate'] ?? '1970-01-01');
+        })
+        ->values()
+        ->toArray();
+
+    if (request()->wantsJson()) {
+        return response()->json([
+            'events_prop' => $events,
+            'tags_prop' => $data['tags'] ?? [],
+            'committees_prop' => $data['committees'] ?? [],
+            'employees_prop' => $data['employees'] ?? [],
+            'categories_prop' => $data['category'] ?? [],
+        ]);
+    }
+
+    return Inertia::render('List/EventList', [
+        'events_prop' => $events,
+        'tags_prop' => $data['tags'] ?? [],
+        'committees_prop' => $data['committees'] ?? [],
+        'employees_prop' => $data['employees'] ?? [],
+        'categories_prop' => $data['category'] ?? [],
+    ]);
+}
+
     public function show($id)
     {
         $json = File::get(base_path('db.json'));
@@ -109,7 +139,73 @@ class EventController extends Controller
         ]);
     }
 
+    public function store(Request $request)
+    {
+        $validCategoryIds = array_column($this->jsonData['category'] ?? [], 'id');
+        $validTagIds = collect($this->jsonData['tags'] ?? [])->pluck('id')->toArray();
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'image' => 'nullable|string',
+            'category_id' => ['nullable', Rule::in($validCategoryIds)],
+            'venue' => 'nullable|string|max:255',
+            'startDate' => ['nullable', 'string', function ($attribute, $value, $fail) {
+                if ($value && !preg_match('/^[A-Za-z]{3}-\d{2}-\d{4}$/', $value)) {
+                    $fail('The '.$attribute.' must be in MMM-DD-YYYY format.');
+                }
+            }],
+            'endDate' => ['nullable', 'string', function ($attribute, $value, $fail) use ($request) {
+                if ($value && !preg_match('/^[A-Za-z]{3}-\d{2}-\d{4}$/', $value)) {
+                    $fail('The '.$attribute.' must be in MMM-DD-YYYY format.');
+                }
+                if ($request->input('startDate') && $value) {
+                    $startDate = \DateTime::createFromFormat('M-d-Y', $request->input('startDate'));
+                    $endDate = \DateTime::createFromFormat('M-d-Y', $value);
+                    if ($endDate < $startDate) {
+                        $fail('The end date must be on or after the start date.');
+                    }
+                }
+            }],
+            'startTime' => 'required|date_format:H:i',
+            'endTime' => 'required|date_format:H:i',
+            'tags' => 'nullable|array',
+            'tags.*' => ['sometimes', Rule::in($validTagIds)],
+            'isAllDay' => 'boolean',
+            'archived' => 'boolean',
+        ]);
+
+        $data = $this->jsonData;
+        $newEvent = $validated;
+        $newEvent['id'] = substr(md5(uniqid()), 0, 4);
+        $newEvent['createdAt'] = now()->toISOString();
+        $newEvent['tasks'] = [];
+        $newEvent['scheduleLists'] = [];
+        $newEvent['type'] = 'event';
+
+        // Normalize tags to be objects if they are just IDs
+        $newEvent['tags'] = collect($validated['tags'] ?? [])->map(function($tagId) use ($data) {
+            return collect($data['tags'])->firstWhere('id', $tagId);
+        })->filter()->values()->toArray();
+
+        array_unshift($data['events'], $newEvent);
+
+        File::put(base_path('db.json'), json_encode($data, JSON_PRETTY_PRINT));
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'event' => $newEvent]);
+        }
+        return redirect()->route('events.index')->with('success', 'Event created successfully.');
+    }
+
     public function update(Request $request, $id)
+    {
+        // This method is used by EventDetails.vue, we'll create a new one for EventList.vue
+        // to avoid breaking existing functionality.
+        return $this->updateFromDetails($request, $id);
+    }
+
+    public function updateFromDetails(Request $request, $id)
     {
         // Get valid IDs from JSON
         $validCategoryIds = array_column($this->jsonData['category'] ?? [], 'id');
@@ -207,6 +303,85 @@ class EventController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to save event: '.$e->getMessage());
         }
+    }
+
+    public function updateFromList(Request $request, $id)
+    {
+        $validCategoryIds = array_column($this->jsonData['category'] ?? [], 'id');
+        $validTagIds = array_column($this->jsonData['tags'] ?? [], 'id');
+        $validCommitteeIds = array_column($this->jsonData['committees'] ?? [], 'id');
+        $validEmployeeIds = array_column($this->jsonData['employees'] ?? [], 'id');
+
+        $validated = $request->validate([
+            'title' => 'sometimes|required|string|max:255',
+            'description' => 'nullable|string',
+            'image' => 'nullable|string',
+            'category_id' => ['nullable', Rule::in($validCategoryIds)],
+            'venue' => 'nullable|string|max:255',
+            'startDate' => ['nullable', 'string'],
+            'endDate' => ['nullable', 'string'],
+            'startTime' => 'sometimes|required|date_format:H:i',
+            'endTime' => 'sometimes|required|date_format:H:i',
+            'tags' => 'nullable|array',
+            'tags.*' => ['sometimes', Rule::in($validTagIds)],
+            'isAllDay' => 'sometimes|boolean',
+            'archived' => 'sometimes|boolean',
+            'tasks' => 'nullable|array',
+            'tasks.*.committee.id' => ['nullable', Rule::in($validCommitteeIds)],
+            'tasks.*.employees' => 'nullable|array',
+            'tasks.*.employees.*.id' => ['nullable', Rule::in($validEmployeeIds)],
+            'tasks.*.task' => 'nullable|string|max:255'
+        ]);
+
+        $data = $this->jsonData;
+        $eventFound = false;
+
+        foreach ($data['events'] as &$event) {
+            if ($event['id'] == $id) {
+                $event = array_merge($event, $validated);
+
+                // Normalize tags to be objects
+                if (isset($validated['tags'])) {
+                    $event['tags'] = collect($validated['tags'])->map(function($tagId) use ($data) {
+                        return collect($data['tags'])->firstWhere('id', $tagId);
+                    })->filter()->values()->toArray();
+                }
+
+                $eventFound = true;
+                break;
+            }
+        }
+
+        if (!$eventFound) {
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'error' => 'Event not found.'], 404);
+            }
+            return back()->with('error', 'Event not found.');
+        }
+
+        File::put(base_path('db.json'), json_encode($data, JSON_PRETTY_PRINT));
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+        return redirect()->route('events.index')->with('success', 'Event updated successfully.');
+    }
+
+    public function archive($id)
+    {
+        $this->jsonData['events'] = collect($this->jsonData['events'])->map(function ($event) use ($id) {
+            if ($event['id'] == $id) {
+                $event['archived'] = true;
+            }
+            return $event;
+        })->toArray();
+
+        File::put(base_path('db.json'), json_encode($this->jsonData, JSON_PRETTY_PRINT));
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+        return redirect()->route('events.index')->with('success', 'Event archived successfully.');
     }
 
     public function getArchivedEvents()

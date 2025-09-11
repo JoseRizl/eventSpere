@@ -646,28 +646,6 @@ const getBracketIndex = (bracketId) => {
                 </div>
             </div>
 
-            <!-- View Toggle -->
-            <div class="w-full mt-4">
-            <div class="flex border-b">
-                <button
-                @click="currentView = 'details'"
-                :class="[
-                    'px-4 py-2 font-semibold transition-colors duration-200 focus:outline-none',
-                    currentView === 'details'
-                    ? 'border-b-2 border-[#0077B3] text-[#0077B3]' // Active tab
-                    : 'text-gray-500 hover:text-[#0077B3]', // Inactive tab
-                ]"
-                >
-                Event Details
-                </button>
-                <button
-                @click="currentView = 'announcements'"
-                :class="['px-4 py-2 font-semibold transition-colors duration-200 focus:outline-none', currentView === 'announcements' ? 'border-b-2 border-[#0077B3] text-[#0077B3]' : 'text-gray-500 hover:text-[#0077B3]']"
-                >
-                Announcements
-                </button>
-            </div>
-            </div>
         </div>
 
         <div class="max-w-6xl mx-auto mt-4">
