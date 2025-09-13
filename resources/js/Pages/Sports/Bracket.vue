@@ -7,6 +7,7 @@ import Button from 'primevue/button';
 import InputSwitch from 'primevue/inputswitch';
 import { Link, usePage } from '@inertiajs/vue3';
 import Skeleton from 'primevue/skeleton';
+import SuccessDialog from '@/Components/SuccessDialog.vue';
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 import { useBracketState } from '@/composables/useBracketState.js';
 import { useBracketActions } from '@/composables/useBracketActions.js';
@@ -30,6 +31,8 @@ const {
   showMissingFieldsDialog,
   showDeleteConfirmDialog,
   bracketTypeOptions,
+  showSuccessDialog,
+  successMessage,
   showRoundRobinMatchDialog,
   selectedRoundRobinMatch,
   selectedRoundRobinMatchData,
@@ -596,6 +599,12 @@ onMounted(() => {
         confirmButtonClass="bg-red-600 hover:bg-red-700"
         @confirm="confirmDeleteBracket"
         @cancel="cancelDeleteBracket"
+      />
+
+      <!-- Success Dialog -->
+      <SuccessDialog
+        v-model:show="showSuccessDialog"
+        :message="successMessage"
       />
 
       <!-- Match Update Confirmation Dialog -->

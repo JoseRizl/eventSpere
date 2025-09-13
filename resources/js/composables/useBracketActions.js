@@ -20,6 +20,8 @@ export function useBracketActions(state) {
     showMissingFieldsDialog,
     showDeleteConfirmDialog,
     deleteBracketIdx,
+    showSuccessDialog,
+    successMessage,
     currentWinnersMatchIndex,
     currentLosersMatchIndex,
     currentGrandFinalsIndex,
@@ -245,6 +247,8 @@ export function useBracketActions(state) {
       showDialog.value = false;
       handleByeRounds(brackets.value.length - 1);
       nextTick(() => updateLines(brackets.value.length - 1));
+      successMessage.value = 'Bracket created successfully!';
+      showSuccessDialog.value = true;
     } catch (error) {
       console.error('Error creating bracket:', error);
     }
@@ -1236,6 +1240,8 @@ export function useBracketActions(state) {
           activeBracketIdx.value = null;
         }
         deleteBracketIdx.value = null;
+        successMessage.value = 'Bracket deleted successfully.';
+        showSuccessDialog.value = true;
       } catch (e) {
         console.error('Error deleting bracket:', e);
       }

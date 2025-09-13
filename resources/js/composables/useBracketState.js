@@ -33,6 +33,8 @@ export function useBracketState() {
   const showMissingFieldsDialog = ref(false);
   const showDeleteConfirmDialog = ref(false);
   const deleteBracketIdx = ref(null);
+  const showSuccessDialog = ref(false);
+  const successMessage = ref('');
 
   const currentGameNumber = computed(() => `Game ${currentMatchIndex.value + 1}`);
 
@@ -72,6 +74,8 @@ export function useBracketState() {
     showMissingFieldsDialog,
     showDeleteConfirmDialog,
     deleteBracketIdx,
+    showSuccessDialog,
+    successMessage,
     currentGameNumber,
     currentWinnersMatchIndex,
     currentLosersMatchIndex,

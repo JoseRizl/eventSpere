@@ -2362,6 +2362,238 @@
           }
         ]
       }
+    },
+    {
+      "id": "9b23",
+      "name": "dos",
+      "type": "Single Elimination",
+      "event_id": "b342",
+      "status": "active",
+      "created_at": "2025-09-13T13:40:00.679Z",
+      "updated_at": "2025-09-13T13:40:00.679Z",
+      "matches": [
+        [
+          {
+            "id": "rk1hn9s6r",
+            "round": 1,
+            "match_number": 1,
+            "players": [
+              {
+                "id": "bfjqldy8s",
+                "name": "Player 1",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-09-13T13:40:00.679Z",
+                "updated_at": "2025-09-13T13:40:00.679Z"
+              },
+              {
+                "id": "y71arc030",
+                "name": "Player 2",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-09-13T13:40:00.679Z",
+                "updated_at": "2025-09-13T13:40:00.679Z"
+              }
+            ],
+            "winner_id": null,
+            "status": "pending",
+            "created_at": "2025-09-13T13:40:00.679Z",
+            "updated_at": "2025-09-13T13:40:00.679Z"
+          },
+          {
+            "id": "bxwduq0ue",
+            "round": 1,
+            "match_number": 2,
+            "players": [
+              {
+                "id": "e8b5tarfq",
+                "name": "Player 3",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-09-13T13:40:00.679Z",
+                "updated_at": "2025-09-13T13:40:00.679Z"
+              },
+              {
+                "id": "yuzgbn92i",
+                "name": "Player 4",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-09-13T13:40:00.679Z",
+                "updated_at": "2025-09-13T13:40:00.679Z"
+              }
+            ],
+            "winner_id": null,
+            "status": "pending",
+            "created_at": "2025-09-13T13:40:00.679Z",
+            "updated_at": "2025-09-13T13:40:00.679Z"
+          },
+          {
+            "id": "qq689mzyt",
+            "round": 1,
+            "match_number": 3,
+            "players": [
+              {
+                "id": "nyoc8q85c",
+                "name": "Player 5",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-09-13T13:40:00.679Z",
+                "updated_at": "2025-09-13T13:40:00.679Z"
+              },
+              {
+                "id": "025zk00bs",
+                "name": "Player 6",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-09-13T13:40:00.679Z",
+                "updated_at": "2025-09-13T13:40:00.679Z"
+              }
+            ],
+            "winner_id": null,
+            "status": "pending",
+            "created_at": "2025-09-13T13:40:00.679Z",
+            "updated_at": "2025-09-13T13:40:00.679Z"
+          },
+          {
+            "id": "7uhs3odqp",
+            "round": 1,
+            "match_number": 4,
+            "players": [
+              {
+                "id": "v642a95da",
+                "name": "Player 7",
+                "score": 0,
+                "completed": true,
+                "created_at": "2025-09-13T13:40:00.679Z",
+                "updated_at": "2025-09-13T13:40:00.679Z"
+              },
+              {
+                "id": "vhmm9astn",
+                "name": "BYE",
+                "score": 0,
+                "completed": true,
+                "created_at": "2025-09-13T13:40:00.679Z",
+                "updated_at": "2025-09-13T13:40:00.679Z"
+              }
+            ],
+            "winner_id": "v642a95da",
+            "status": "completed",
+            "created_at": "2025-09-13T13:40:00.679Z",
+            "updated_at": "2025-09-13T13:40:00.679Z"
+          }
+        ],
+        [
+          {
+            "id": "3vb2562w6",
+            "round": 2,
+            "match_number": 1,
+            "players": [
+              {
+                "id": null,
+                "name": "TBD",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-09-13T13:40:00.679Z",
+                "updated_at": "2025-09-13T13:40:00.679Z"
+              },
+              {
+                "id": null,
+                "name": "TBD",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-09-13T13:40:00.679Z",
+                "updated_at": "2025-09-13T13:40:00.679Z"
+              }
+            ],
+            "winner_id": null,
+            "status": "pending",
+            "created_at": "2025-09-13T13:40:00.679Z",
+            "updated_at": "2025-09-13T13:40:00.679Z"
+          },
+          {
+            "id": "g4wbdzwvh",
+            "round": 2,
+            "match_number": 2,
+            "players": [
+              {
+                "id": null,
+                "name": "TBD",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-09-13T13:40:00.679Z",
+                "updated_at": "2025-09-13T13:40:00.679Z"
+              },
+              {
+                "id": null,
+                "name": "TBD",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-09-13T13:40:00.679Z",
+                "updated_at": "2025-09-13T13:40:00.679Z"
+              }
+            ],
+            "winner_id": null,
+            "status": "pending",
+            "created_at": "2025-09-13T13:40:00.679Z",
+            "updated_at": "2025-09-13T13:40:00.679Z"
+          }
+        ],
+        [
+          {
+            "id": "k4pkic4k8",
+            "round": 3,
+            "match_number": 1,
+            "players": [
+              {
+                "id": null,
+                "name": "TBD",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-09-13T13:40:00.679Z",
+                "updated_at": "2025-09-13T13:40:00.679Z"
+              },
+              {
+                "id": null,
+                "name": "TBD",
+                "score": 0,
+                "completed": false,
+                "created_at": "2025-09-13T13:40:00.679Z",
+                "updated_at": "2025-09-13T13:40:00.679Z"
+              }
+            ],
+            "winner_id": null,
+            "status": "pending",
+            "created_at": "2025-09-13T13:40:00.679Z",
+            "updated_at": "2025-09-13T13:40:00.679Z"
+          }
+        ]
+      ],
+      "lines": [],
+      "event": {
+        "title": "123",
+        "description": "123",
+        "image": "data:image/svg+xml;base64,CiAgICAgICAgICAgICAgICAgICAgPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgICAgICAgICAgICAgICAgICAgICAgIHdpZHRoPSIxMTQiCiAgICAgICAgICAgICAgICAgICAgICAgIGhlaWdodD0iNzMiPgogICAgICAgICAgICAgICAgICAgIDxpbWFnZSBocmVmPSJkYXRhOmltYWdlL2pwZWc7YmFzZTY0LC85ai80QUFRU2taSlJnQUJBUUFBQVFBQkFBRC80Z0hZU1VORFgxQlNUMFpKVEVVQUFRRUFBQUhJQUFBQUFBUXdBQUJ0Ym5SeVVrZENJRmhaV2lBSDRBQUJBQUVBQUFBQUFBQmhZM053QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQVFBQTl0WUFBUUFBQUFEVExRQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFsa1pYTmpBQUFBOEFBQUFDUnlXRmxhQUFBQkZBQUFBQlJuV0ZsYUFBQUJLQUFBQUJSaVdGbGFBQUFCUEFBQUFCUjNkSEIwQUFBQlVBQUFBQlJ5VkZKREFBQUJaQUFBQUNoblZGSkRBQUFCWkFBQUFDaGlWRkpEQUFBQlpBQUFBQ2hqY0hKMEFBQUJqQUFBQUR4dGJIVmpBQUFBQUFBQUFBRUFBQUFNWlc1VlV3QUFBQWdBQUFBY0FITUFVZ0JIQUVKWVdWb2dBQUFBQUFBQWI2SUFBRGoxQUFBRGtGaFpXaUFBQUFBQUFBQmltUUFBdDRVQUFCamFXRmxhSUFBQUFBQUFBQ1NnQUFBUGhBQUF0czlZV1ZvZ0FBQUFBQUFBOXRZQUFRQUFBQURUTFhCaGNtRUFBQUFBQUFRQUFBQUNabVlBQVBLbkFBQU5XUUFBRTlBQUFBcGJBQUFBQUFBQUFBQnRiSFZqQUFBQUFBQUFBQUVBQUFBTVpXNVZVd0FBQUNBQUFBQWNBRWNBYndCdkFHY0FiQUJsQUNBQVNRQnVBR01BTGdBZ0FESUFNQUF4QURiLzJ3QkRBQVlFQlFZRkJBWUdCUVlIQndZSUNoQUtDZ2tKQ2hRT0R3d1FGeFFZR0JjVUZoWWFIU1VmR2hzakhCWVdJQ3dnSXlZbktTb3BHUjh0TUMwb01DVW9LU2ovMndCREFRY0hCd29JQ2hNS0NoTW9HaFlhS0Nnb0tDZ29LQ2dvS0Nnb0tDZ29LQ2dvS0Nnb0tDZ29LQ2dvS0Nnb0tDZ29LQ2dvS0Nnb0tDZ29LQ2dvS0Nnb0tDai93QUFSQ0FCSkFISURBU0lBQWhFQkF4RUIvOFFBSEFBQkFBSURBUUVCQUFBQUFBQUFBQUFBQUFVR0FRUUhBd2dDLzhRQU5oQUFBQVlCQWdRREJRY0VBd0FBQUFBQUFBRUNBd1FGRVFZU0J5RXhVUk1VWVNKQmNZR1JDQlVqUWtOU29SWWtKVEp5b3ZIL3hBQVpBUUVCQVFFQkFRQUFBQUFBQUFBQUFBQUFBUUlEQkFYL3hBQW9FUUFDQWdFQ0JBWURBUUFBQUFBQUFBQUFBUUlSQXlFeEJCSWlRUk15VWJIQjhHR2gwZUgvMmdBTUF3RUFBaEVERVFBL0FQcWtBeUdRQUFNaGtBQURJWkFBQXlHUUFBTWhrQUFESVpBQUF5R1FBQU1nQU1BQWlOVzJjcW0wOU5zWU1MenowWkJ1ZUFTOXBxU1hYQjk4Q3hYTTZRU3Nsd0VQcEcvaTZuMDdDdDRCL2d5VWJ0dWVhRmREU2ZxUjhoRFVtdFB2dlhOclIxMFB4SU5XZ3ZNejkvc2s0ZjZaRjd6Ni9RL1FkUEJuY2sxNWR5OHIxTGlBaktPK3JMNXVRdW9tTlNreDNUWmROQi82ckxxUmpCMzlZV29DcFBObys5RGE4YnkvUGRzL2NNK0hOTnhyVkNuc1NnRFJ1N2FEUjFqMWhheUV4b2JPTjdxdWljbVJGL0prTmVicU9vZzFFZXptVDJXWVVoS1ZzdUxQSGlFb3NwMmwxTXpJK2dpaEpxMGhUSllCVmthOG9mRWFUSWt1eEV1bVJOdVNtRnRJVVo5UGFVV0JZNUVwaU5GWEpmZWJiam9UdlU0cFdFa252a1dXT1VmTWcwMXVld0NueE5jTldhVGRvcWl6c29oR1pGSmJiSkRhL3dEaWFqTEpmQWJsSnJDdHRMUlZXNFQ4RzFTbmY1T1dqdzFxVDNUN2xGOEJwNE1pN2JGNVdXUUJWci9WN1ZSckNob0RpdVBQV3UvRGlUTERaSkl6eVpmSXhhUm1lT1VFcFNXK3E5aU5OYmdBQVlJQmd5SlJHU2lJeVBrWkdNZ0FQbmJVVnpaY0lMKzlwNjZNNC9XWHFUazA2VTh5WmtxTWtxUjhDeVgvQUY5UmJQS0h3djRNU1RVcnhMdVdXWEhENXFkbHZjdm5qUDBTUGJqWnMvcVBoNXZTUi81alBNdmR0LzhBQjQ2OWh2NjI0cFVtbThTbXFlcWJWWVMzMjhvM080SWtKU3J1Um1YMVBzUHJLU3lSaE9lMjcvUExvdjRkN3RKdjdSRzhPYXRmRGpYa0Nra0xWNVhVRmVsMGpXZWY3eHNzckxQcVJuL0EyN2l5aFUvMmhreTdCdzIyenBqU1NpU2F1ZTh2Y1JEMTR0YUpmajZiUmUwODYxbDIxSzhpYkhRL0pVOWtrcUxlUkVmdjI4L2xnZWRCTmN1T044RzFURmVialNhRXNtdEJrU1ZtcEpta3o3bHpHbE5aYnpOMzB5VDdkdFAxN0Z1K28vWEczVjFKWjhNTHlKRmtxY2ZjUWpZazJWbGt5Y1NmVXlFTnd5eHFqaVdSV0g0c1RUdFRFYWlNcUxLVXJVeTJhbDQ3KzBmUDBJWHZqdXk0L3dBS3IxcU95dDExYUd5U2hDY21mNGllaEVLanArQkwwWnFDczFTVVI5Nmx0NnFLMVA4QUNiTlM0cnFXa0VTbEpMbnR3a3M5dVljTzRQaDNHT2pkMXIzcGU2dENGT0ZJNjllVlVTNnFaVmRQWlE3SGtObTJwS2l6akpkUzlTSHpCRzFGWTNPaU5QYVBsUHVLYlhmT1Y3emhxNXVSMmlTb2tHZnhXUmZCSTcxZWEvcW1heDM3a2NWYVdhMEdVZUxGUWExcVdaY3M5aTdtWTVtL3d2dGFqaHRWekl6WlBhbGdXS3JoNWxCNTNtdkJMYlQzTWtrbjRtbjFHT0I1Y1dtYlMycXYxOVNZK256SGU0a2RxSkZhanhtMHRzdEpKQ0VKTEJFUmRDSEt2dEd4L0thVGdhamlHYk5wVVRtWEdYazhsYlZLSktrL0E4a2Z5RjQwM3ErbnZhMXVVeE1aYWNOSmVLdzZva0xhVjcwcVNmTWh6L2kxS1BYenRmb3pUS2lsRTVLUS9ZeTIvYWFqTklQT0RWMDNHZlBIcDZqejhOam5qNGhPYXFucjgvZTVpQ2FscVNzWWl2dUxsSllxU1JKaVVmbU5wZmxXOGZMK053NmFLdHBxdFlZMUpiU296OFoxcExURU5DRzE3bE5rMmsrU3V4NU1Xa2N1SW56U1NXeVgrL0ptYnNBQUR6bVFBQUFJdTVvYTI1a1FYN0tLaDkyQzc0MGRTdjAxOXkrZ2xBQVZ5YlZNV0FBQkFBQUFCZ2twU1ptU1NJejdFTWdBQWpKdEJVVG5qZG1Wa041MCtxMXNwTXorZUJ0d29VV0N6NFVLTXpIYS9hMGdrbDlDR3dBcmsycWJGa1pUME5iVHlKejliRlF3N05kOFo5U2Z6cjdpVEFBYmNuYkYyQUFCQVp3R0FBQU1CZ0FBREFZQUFBd0dBQUFNQmdBQURBWUFBQXdHQUFBTUFBQUQvOWs9IgogICAgICAgICAgICAgICAgICAgICAgICAgICAgd2lkdGg9IjEwMCUiCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBoZWlnaHQ9IjEwMCUiCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCBtZWV0Ii8+CiAgICAgICAgICAgICAgICAgICAgPC9zdmc+",
+        "category_id": "3",
+        "venue": "Gym",
+        "startDate": "Aug-30-2025",
+        "endDate": "Sep-12-2025",
+        "startTime": "00:00",
+        "endTime": "23:59",
+        "isAllDay": true,
+        "archived": false,
+        "tags": [
+          {
+            "id": "68c359dddbe18",
+            "name": "213",
+            "color": "#b53f3f"
+          }
+        ],
+        "id": "b342",
+        "createdAt": "2025-09-11T23:24:33.482566Z",
+        "tasks": [],
+        "scheduleLists": [],
+        "type": "event"
+      }
     }
   ],
   "announcements": [
