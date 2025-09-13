@@ -114,9 +114,9 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="container">
-        <div class="header">
-          <h1 class="title">Ongoing Games</h1>
+    <div class="bracket-container">
+        <h1 class="title">Brackets</h1>
+        <div class="flex justify-end mb-5">
           <button v-if="user?.name === 'Admin' || user?.name === 'SportsManager'" class="create-button" @click="openDialog">Create Bracket</button>
         </div>
 

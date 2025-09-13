@@ -78,10 +78,6 @@
     position: relative; /* Creates proper stacking context */
     }
 
-    aside {
-        @apply bg-gradient-to-b from-purple-600 to-blue-500;
-    }
-
     .group {
         transition: all 0.2s ease;
       }
@@ -105,20 +101,6 @@
         user-select: none;
         -webkit-user-select: none;
     }
-    .category-header {
-        color: #0077b3;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-      }
-      .event-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-        color: #0077b3;
-      }
     .create-category-wrapper,
     .create-event-wrapper {
         display: flex; /* Flexbox for centering */
@@ -185,8 +167,10 @@
         font-weight: bold; /* Make labels bold for clarity */
       }
 
-      .category-list.event-list-container,
-      .event-list-container {
+      .category-list-container,
+      .event-list-container,
+      .archive-list-container,
+      .bracket-container {
         padding: 1rem;
         font-family: Arial, sans-serif;
         position: relative; /* Reset stacking context */
@@ -194,7 +178,7 @@
       }
 
       .title {
-        font-size: 1.5rem;
+        font-size: 2rem;
         margin-bottom: 1rem;
         font-weight: bold;
         color: #333;
@@ -324,13 +308,15 @@
 @media (min-width: 1024px) {
   body.sidebar-collapsed .event-list-container,
   body.sidebar-collapsed .category-list-container,
-  body.sidebar-collapsed .archive-list-container {
+  body.sidebar-collapsed .archive-list-container,
+  body.sidebar-collapsed .bracket-container {
     margin-left: 48px;
     transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   body.sidebar-expanded .event-list-container,
   body.sidebar-expanded .category-list-container,
-  body.sidebar-expanded .archive-list-container {
+  body.sidebar-expanded .archive-list-container,
+  body.sidebar-expanded .bracket-container {
     margin-left: 240px;
     transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -339,7 +325,8 @@
 /* Ensure tables/content do not extend under the sidebar */
 .event-list-container,
 .category-list-container,
-.archive-list-container {
+.archive-list-container,
+.bracket-container {
   max-width: 1200px;
   margin-right: auto;
   margin-left: auto;

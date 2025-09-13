@@ -298,7 +298,7 @@ export default defineComponent({
   <div class="category-list-container">
     <Toast />
     <LoadingSpinner :show="saving" />
-    <h1 class="title text-center mb-4">{{ showTags ? 'Tag' : 'Category' }} List</h1>
+    <h1 class="title">{{ showTags ? 'Tags' : 'Category' }} List</h1>
 
     <div class="category-header">
       <div class="search-container">

@@ -15,6 +15,7 @@ const menuBarItems = ref([]);
 const isSidebarCollapsed = ref(false);
 const op = ref();
 const profileMenu = ref();
+const menuStyle = ref({});
 const eventAnnouncements = ref([]);
 const hasNewAnnouncements = ref(false);
 let announcementPoller = null;
@@ -29,15 +30,15 @@ const sideBarItems = computed(() => {
       separator: true,
     },
     {
-      label: 'News and Updates',
-      icon: 'pi pi-objects-column',
-      route: route('home'),
-    },
-    {
       label: 'Dashboard',
       icon: 'pi pi-chart-bar',
       route: route('dashboard'),
       roles: ['Principal', 'Admin'],
+    },
+    {
+      label: 'News and Updates',
+      icon: 'pi pi-objects-column',
+      route: route('home'),
     },
     {
       label: 'Events',
@@ -46,16 +47,16 @@ const sideBarItems = computed(() => {
       roles: ['Admin', 'Principal'],
     },
     {
+      label: 'Brackets',
+      icon: 'pi pi-ticket',
+      route: route('bracket'),
+      roles: ['Admin', 'SportsManager'],
+    },
+    {
       label: 'Categories/Tags',
       icon: 'pi pi-palette',
       route: route('category.list'),
       roles: ['Admin', 'Principal'],
-    },
-    {
-      label: 'Sports',
-      icon: 'pi pi-ticket',
-      route: route('bracket'),
-      roles: ['Admin', 'SportsManager'],
     },
     {
       label: 'Archive',
@@ -97,6 +98,7 @@ const profileMenuItems = computed(() => (user.value ? [
     }
 ]));
 const toggleProfileMenu = (event) => {
+    menuStyle.value = { width: `${event.currentTarget.offsetWidth}px` };
     profileMenu.value.toggle(event);
 };
 
@@ -216,14 +218,14 @@ onUnmounted(() => {
                                 <Badge v-if="hasNewAnnouncements" severity="danger" class="absolute top-1 right-1 !p-0 !w-2 !h-2"></Badge>
                             </button>
 
-                            <button @click="toggleProfileMenu" aria-haspopup="true" aria-controls="profile_menu" v-ripple class="relative overflow-hidden w-full border-0 bg-transparent flex items-center justify-center pl-4 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-none cursor-pointer transition-colors duration-200">
+                            <button @click="toggleProfileMenu" aria-haspopup="true" aria-controls="profile_menu" v-ripple class="relative overflow-hidden border-0 bg-transparent flex items-center justify-center px-3 py-2 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-md cursor-pointer transition-colors duration-200">
                                 <Avatar :image="user ? 'https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png' : undefined" :icon="!user ? 'pi pi-user' : undefined" class="mr-2" shape="circle" />
                                 <span class="inline-flex flex-col items-start">
                                     <span class="font-bold text-xs">{{ user?.name || 'Guest' }}</span>
                                     <span class="text-xs">{{ user ? 'Role' : 'Account' }}</span>
                                 </span>
                             </button>
-                            <Menu ref="profileMenu" id="profile_menu" :model="profileMenuItems" :popup="true" />
+                            <Menu ref="profileMenu" id="profile_menu" :model="profileMenuItems" :popup="true" appendTo="self" :pt="{ root: { style: menuStyle } }" />
                         </div>
                     </template>
                 </Menubar>

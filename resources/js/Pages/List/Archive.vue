@@ -1,7 +1,7 @@
 <template>
-  <div class="archive-container">
+  <div class="archive-list-container">
     <LoadingSpinner :show="saving" />
-    <h1 class="title text-center mb-4">Archived Events</h1>
+    <h1 class="title">Archived Events</h1>
 
     <div class="search-container mb-4">
       <div class="p-input-icon-left">
@@ -315,10 +315,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.archive-container {
-  padding: 20px;
-}
-
 .search-container {
   display: flex;
   justify-content: flex-start;

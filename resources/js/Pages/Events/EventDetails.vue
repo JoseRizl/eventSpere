@@ -1116,7 +1116,7 @@ const getBracketIndex = (bracketId) => {
 
       <!-- Brackets Section -->
       <div v-if="relatedBrackets.length > 0" class="max-w-6xl mx-auto mt-6">
-        <h2 class="text-xl font-bold mb-4">Bracket</h2>
+        <h2 class="text-xl font-bold mb-4">Games</h2>
         <div v-for="bracket in relatedBrackets" :key="bracket.id" class="bracket-section">
             <div class="bracket-wrapper">
                 <div class="bracket-header">

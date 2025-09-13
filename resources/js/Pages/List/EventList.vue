@@ -1,11 +1,8 @@
 <template>
     <div class="event-list-container">
         <LoadingSpinner :show="saving" />
-        <div class="flex justify-center items-center mb-4">
-            <h1 class="title text-center w-full">Event List</h1>
-        </div>
+        <h1 class="title">Event List</h1>
 
-      <!-- Add Search Bar -->
       <div class="search-container mb-4">
         <div class="search-wrapper">
           <div class="p-input-icon-left">
