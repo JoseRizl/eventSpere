@@ -36,6 +36,7 @@ const relatedEvents = ref(props.relatedEvents || []);
 const showDeleteTaskConfirm = ref(false);
 const taskToDelete = ref(null);
 const showDeleteScheduleConfirm = ref(false);
+const searchQuery = ref('');
 const scheduleToDelete = ref(null);
 
 // Event-specific announcements
@@ -82,6 +83,7 @@ const {
   openScoringConfigDialog,
   closeScoringConfigDialog,
   saveScoringConfig,
+  toggleBracket,
 } = useBracketActions(bracketState);
 
 const relatedBrackets = computed(() => {
@@ -89,6 +91,18 @@ const relatedBrackets = computed(() => {
     return [];
   }
   return brackets.value.filter(bracket => bracket.event_id === props.event.id);
+});
+
+const filteredRelatedBrackets = computed(() => {
+  if (!searchQuery.value) {
+    return relatedBrackets.value;
+  }
+  const query = searchQuery.value.toLowerCase().trim();
+  return relatedBrackets.value.filter(bracket => {
+    const bracketNameMatch = bracket.name?.toLowerCase().includes(query);
+    const bracketTypeMatch = bracket.type?.toLowerCase().includes(query);
+    return bracketNameMatch || bracketTypeMatch;
+  });
 });
 
 const truncateNameElimination = (name) => {
@@ -250,7 +264,9 @@ watch(relatedBrackets, (newBrackets) => {
   newBrackets.forEach(bracket => {
     const originalIndex = brackets.value.findIndex(b => b.id === bracket.id);
     if (originalIndex !== -1) {
-      expandedBrackets.value[originalIndex] = true; // Always show
+      if (expandedBrackets.value[originalIndex] === undefined) {
+        expandedBrackets.value[originalIndex] = true; // Expand by default
+      }
       handleByeRounds(originalIndex);
       nextTick(() => {
         updateLines(originalIndex);
@@ -1117,13 +1133,37 @@ const getBracketIndex = (bracketId) => {
       <!-- Brackets Section -->
       <div v-if="relatedBrackets.length > 0" class="max-w-6xl mx-auto mt-6">
         <h2 class="text-xl font-bold mb-4">Games</h2>
-        <div v-for="bracket in relatedBrackets" :key="bracket.id" class="bracket-section">
+        <div v-if="relatedBrackets.length > 1" class="search-container mb-4" style="max-width: 300px;">
+            <div class="p-input-icon-left w-full">
+                <i class="pi pi-search" />
+                <InputText
+                    v-model="searchQuery"
+                    placeholder="Search games..."
+                    class="w-full"
+                />
+            </div>
+        </div>
+        <div v-if="filteredRelatedBrackets.length === 0" class="no-brackets-message">
+            <div class="icon-and-title">
+                <i class="pi pi-search" style="font-size: 1.5rem; color: #007bff; margin-right: 10px;"></i>
+                <h2 class="no-brackets-title">No Games Found</h2>
+            </div>
+            <p class="no-brackets-text">No games match your search criteria. Try adjusting your search terms.</p>
+        </div>
+        <div v-else v-for="bracket in filteredRelatedBrackets" :key="bracket.id" class="bracket-section">
             <div class="bracket-wrapper">
-                <div class="bracket-header">
+                <div class="bracket-header" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
                     <h2>{{ bracket.name }} ({{ bracket.type }})</h2>
+                    <Button
+                        text
+                        rounded
+                        :icon="expandedBrackets[getBracketIndex(bracket.id)] ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+                        @click="toggleBracket(getBracketIndex(bracket.id))"
+                        class="bracket-toggle-button"
+                    />
                 </div>
 
-                <div>
+                <div v-if="expandedBrackets[getBracketIndex(bracket.id)]">
                     <!-- Single Elimination Display -->
                     <div v-if="bracket.type === 'Single Elimination'" class="bracket">
                         <svg class="connection-lines">
@@ -1701,4 +1741,46 @@ const getBracketIndex = (bracketId) => {
         </div>
     </div>
     </Dialog>
-  </template>
+</template>
+
+<style scoped>
+.bracket-toggle-button {
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+.bracket-toggle-button :deep(.pi) {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #4B5563; /* gray-600 */
+    transition: color 0.2s;
+}
+
+.bracket-toggle-button:hover :deep(.pi) {
+    color: #1F2937; /* gray-800 */
+}
+
+.search-container {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.search-container .p-input-icon-left {
+  position: relative;
+  width: 100%;
+}
+
+.search-container .p-input-icon-left i {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+}
+
+.search-container .p-input-icon-left .p-inputtext {
+  width: 100%;
+  padding-left: 2.5rem;
+}
+</style>
