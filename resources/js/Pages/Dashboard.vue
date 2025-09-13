@@ -55,7 +55,7 @@ const totalEventsCount = computed(() => events.value.length);
 
 const stats = computed(() => [
     { title: 'Events This Year', value: eventsThisYearCount.value, icon: 'pi pi-calendar', color: 'bg-blue-500' },
-    { title: 'Ongoing Events', value: ongoingEventsCount.value, icon: 'pi pi-spin pi-spinner', color: 'bg-green-500' },
+    { title: 'Ongoing Events', value: ongoingEventsCount.value, icon: 'pi pi-spinner', color: 'bg-green-500' },
     { title: 'Upcoming Events', value: upcomingEventsCount.value, icon: 'pi pi-calendar-plus', color: 'bg-orange-500' },
     { title: 'Total Active Events', value: totalEventsCount.value, icon: 'pi pi-globe', color: 'bg-purple-500' },
 ]);
