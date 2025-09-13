@@ -845,7 +845,9 @@
                 showSuccessDialog.value = true;
             },
             onError: (errors) => {
-                errorMessage.value = 'Failed to create the event.';
+                const firstErrorKey = Object.keys(errors)[0];
+                const firstErrorMessage = firstErrorKey ? (Array.isArray(errors[firstErrorKey]) ? errors[firstErrorKey][0] : errors[firstErrorKey]) : 'Failed to create the event.';
+                errorMessage.value = firstErrorMessage;
                 showErrorDialog.value = true;
             },
             preserveScroll: true
@@ -1165,7 +1167,9 @@
             showSuccessDialog.value = true;
           },
           onError: (errors) => {
-            errorMessage.value = 'Failed to save tasks.';
+            const firstErrorKey = Object.keys(errors)[0];
+            const firstErrorMessage = firstErrorKey ? (Array.isArray(errors[firstErrorKey]) ? errors[firstErrorKey][0] : errors[firstErrorKey]) : 'Failed to save tasks.';
+            errorMessage.value = firstErrorMessage;
             showErrorDialog.value = true;
           },
           preserveScroll: true
@@ -1303,7 +1307,9 @@
             showSuccessDialog.value = true;
           },
           onError: (errors) => {
-            errorMessage.value = 'Failed to update the event.';
+            const firstErrorKey = Object.keys(errors)[0];
+            const firstErrorMessage = firstErrorKey ? (Array.isArray(errors[firstErrorKey]) ? errors[firstErrorKey][0] : errors[firstErrorKey]) : 'Failed to update the event.';
+            errorMessage.value = firstErrorMessage;
             showErrorDialog.value = true;
           },
           preserveScroll: true

@@ -273,7 +273,7 @@ class EventController extends Controller
             'scheduleLists.*.schedules' => 'nullable|array',
             'scheduleLists.*.schedules.*.time' => 'nullable|date_format:H:i',
             'scheduleLists.*.schedules.*.activity' => 'nullable|string|max:255',
-            'tasks' => 'nullable|array',
+            'tasks' => ['nullable', 'array', function ($attribute, $value, $fail) use ($request, $id) { $this->validateTaskAssignments($attribute, $value, $fail, $request, $id); }],
             'tasks.*.committee.id' => ['nullable', Rule::in($validCommitteeIds)],
             'tasks.*.employees' => 'nullable|array',
             'tasks.*.employees.*.id' => ['nullable', Rule::in($validEmployeeIds)],
@@ -342,7 +342,7 @@ class EventController extends Controller
             'tags.*' => ['sometimes', Rule::in($validTagIds)],
             'isAllDay' => 'sometimes|boolean',
             'archived' => 'sometimes|boolean',
-            'tasks' => 'nullable|array',
+            'tasks' => ['sometimes', 'nullable', 'array', function ($attribute, $value, $fail) use ($request, $id) { $this->validateTaskAssignments($attribute, $value, $fail, $request, $id); }],
             'tasks.*.committee.id' => ['nullable', Rule::in($validCommitteeIds)],
             'tasks.*.employees' => 'nullable|array',
             'tasks.*.employees.*.id' => ['nullable', Rule::in($validEmployeeIds)],
@@ -458,6 +458,80 @@ class EventController extends Controller
             return back()->with('success', 'Event permanently deleted');
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to delete event');
+        }
+    }
+
+    private function validateTaskAssignments(string $attribute, mixed $value, \Closure $fail, Request $request, ?string $eventId = null): void
+    {
+        $allEvents = collect($this->jsonData['events'] ?? []);
+        $currentEvent = $eventId ? $allEvents->firstWhere('id', $eventId) : null;
+
+        // Determine start and end dates for the event being validated
+        $eventStartDateStr = $request->input('startDate');
+        $eventEndDateStr = $request->input('endDate');
+
+        if ($currentEvent) {
+            $eventStartDateStr = $eventStartDateStr ?? $currentEvent['startDate'];
+            $eventEndDateStr = $eventEndDateStr ?? $currentEvent['endDate'];
+        }
+
+        // --- Check for duplicates within the same event ---
+        $employeeCounts = collect($value)->flatMap(function ($task) {
+            return collect($task['employees'] ?? [])->pluck('id');
+        })->filter()->countBy();
+
+        foreach ($employeeCounts as $employeeId => $count) {
+            if ($count > 1) {
+                $employee = collect($this->jsonData['employees'])->firstWhere('id', $employeeId);
+                $employeeName = $employee['name'] ?? 'Unknown Employee';
+                $fail("Employee \"{$employeeName}\" cannot be assigned to multiple tasks within the same event.");
+                return;
+            }
+        }
+
+        // --- Check for conflicts with other events ---
+        if (!$eventStartDateStr || !$eventEndDateStr) {
+            return; // Cannot proceed without dates for cross-event check
+        }
+
+        $eventStartDate = \DateTime::createFromFormat('M-d-Y', $eventStartDateStr);
+        $eventEndDate = \DateTime::createFromFormat('M-d-Y', $eventEndDateStr);
+
+        if (!$eventStartDate || !$eventEndDate) {
+            return; // Invalid date format, other validators will catch this.
+        }
+
+        $currentEmployeeIds = $employeeCounts->keys();
+
+        if ($currentEmployeeIds->isEmpty()) {
+            return; // No employees to check.
+        }
+
+        $otherEvents = $eventId
+            ? $allEvents->where('id', '!=', $eventId)->where('archived', '!=', true)
+            : $allEvents->where('archived', '!=', true);
+
+        foreach ($currentEmployeeIds as $employeeId) {
+            $employee = collect($this->jsonData['employees'])->firstWhere('id', $employeeId);
+            $employeeName = $employee['name'] ?? 'Unknown Employee';
+
+            foreach ($otherEvents as $otherEvent) {
+                $isAssignedToOtherEvent = collect($otherEvent['tasks'] ?? [])->flatMap(function ($task) {
+                    return collect($task['employees'] ?? [])->map(function ($emp) {
+                        return is_array($emp) ? ($emp['id'] ?? null) : $emp;
+                    });
+                })->whereNotNull()->contains($employeeId);
+
+                if ($isAssignedToOtherEvent && !empty($otherEvent['startDate']) && !empty($otherEvent['endDate'])) {
+                    $otherEventStartDate = \DateTime::createFromFormat('M-d-Y', $otherEvent['startDate']);
+                    $otherEventEndDate = \DateTime::createFromFormat('M-d-Y', $otherEvent['endDate']);
+
+                    if ($otherEventStartDate && $otherEventEndDate && $eventStartDate <= $otherEventEndDate && $eventEndDate >= $otherEventStartDate) {
+                        $fail("Employee \"{$employeeName}\" is already assigned to another event (\"{$otherEvent['title']}\") during this time period.");
+                        return;
+                    }
+                }
+            }
         }
     }
 }

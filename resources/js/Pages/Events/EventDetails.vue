@@ -36,6 +36,7 @@ const relatedEvents = ref(props.relatedEvents || []);
 const showDeleteTaskConfirm = ref(false);
 const taskToDelete = ref(null);
 const showDeleteScheduleConfirm = ref(false);
+const originalEventDetails = ref(null);
 const searchQuery = ref('');
 const scheduleToDelete = ref(null);
 
@@ -223,6 +224,16 @@ const normalizedTags = computed({
 // Edit mode toggle
 const editMode = ref(false);
 const toggleEdit = () => {
+  if (editMode.value) {
+    // Cancelling edit mode: restore original data
+    if (originalEventDetails.value) {
+      eventDetails.value = JSON.parse(JSON.stringify(originalEventDetails.value));
+    }
+    errorMessage.value = null; // Clear any validation errors
+  } else {
+    // Entering edit mode: store a copy of the current data
+    originalEventDetails.value = JSON.parse(JSON.stringify(eventDetails.value));
+  }
   editMode.value = !editMode.value;
 };
 
@@ -525,9 +536,17 @@ const saveChanges = () => {
     onFinish: () => saving.value = false,
     onError: (errors) => {
       saving.value = false;
-      errorMessage.value = errors.message || 'Failed to save event';
+      const firstErrorKey = Object.keys(errors)[0];
+      let message = 'Failed to save event. Please check the form for errors.';
+      if (firstErrorKey) {
+          const errorValue = errors[firstErrorKey];
+          message = Array.isArray(errorValue) ? errorValue[0] : errorValue;
+      } else if (errors.message) {
+          message = errors.message;
+      }
+      errorMessage.value = message;
+      errorDialogMessage.value = message;
       showErrorDialog.value = true;
-      errorDialogMessage.value = JSON.stringify(errors, null, 2);
     },
     onSuccess: () => {
       showSuccessDialog.value = true;
@@ -719,11 +738,11 @@ const getBracketIndex = (bracketId) => {
                         class="w-full border rounded p-2"
                         placeholder="Event Description"
                     />
-                    <p v-else class="text-gray-700 whitespace-pre-line">{{ eventDetails.description }}</p>
+                    <p v-else class="text-gray-700 whitespace-pre-line text-sm">{{ eventDetails.description }}</p>
                     </div>
 
                     <!-- Venue and Category -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                         <!-- Venue -->
                         <div>
                             <template v-if="editMode">
@@ -856,8 +875,8 @@ const getBracketIndex = (bracketId) => {
                     </div>
 
                     <!-- Committee -->
-        <div>
-            <h2 class="font-semibold mb-1">Committee:</h2>
+                    <div v-if="editMode || (eventDetails.tasks && eventDetails.tasks.length > 0)">
+                    <h2 class="font-semibold mb-1">Committee:</h2>
             <div v-if="editMode">
             <div v-for="(taskItem, index) in eventDetails.tasks" :key="index" class="space-y-2 mb-4 p-3 border rounded">
                 <!-- Committee Selection -->
@@ -945,7 +964,7 @@ const getBracketIndex = (bracketId) => {
         </div>
 
                     <!-- Schedules -->
-                    <div>
+                    <div v-if="editMode || (eventDetails.scheduleLists && eventDetails.scheduleLists.length > 0)">
                     <h2 class="font-semibold mb-1">Event Schedules</h2>
                     <div v-if="editMode">
                         <!-- Schedule List Navigation -->
@@ -981,18 +1000,19 @@ const getBracketIndex = (bracketId) => {
                         </div>
 
                         <!-- Current Day's Schedules -->
-                        <div class="border rounded-lg p-4">
-                        <h3 class="font-medium mb-3">Day {{ eventDetails.scheduleLists[currentScheduleList].day }} Schedule</h3>
-                        <div v-for="(schedule, i) in eventDetails.scheduleLists[currentScheduleList].schedules" :key="i" class="flex items-center gap-2 mb-2">
-                            <input v-model="schedule.time" type="time" class="border p-1 rounded w-32" />
-                            <input v-model="schedule.activity" type="text" placeholder="Activity" class="border p-1 rounded flex-1" />
-                            <button @click="promptDeleteSchedule(i)" class="text-red-500">✕</button>
+                        <div v-if="eventDetails.scheduleLists && eventDetails.scheduleLists.length > 0" class="border rounded-lg p-4">
+                            <h3 class="font-medium mb-3">Day {{ eventDetails.scheduleLists[currentScheduleList].day }} Schedule</h3>
+                            <div v-for="(schedule, i) in eventDetails.scheduleLists[currentScheduleList].schedules" :key="i" class="flex items-center gap-2 mb-2">
+                                <input v-model="schedule.time" type="time" class="border p-1 rounded w-32" />
+                                <input v-model="schedule.activity" type="text" placeholder="Activity" class="border p-1 rounded flex-1" />
+                                <button @click="promptDeleteSchedule(i)" class="text-red-500">✕</button>
+                            </div>
+                            <button @click="addSchedule" class="text-blue-500 text-sm mt-2">+ Add Schedule</button>
                         </div>
-                        <button @click="addSchedule" class="text-blue-500 text-sm mt-2">+ Add Schedule</button>
-                        </div>
+                        <p v-else class="text-gray-500 italic p-4">No schedules. Add a day to start.</p>
                     </div>
                     <div v-else>
-                        <!-- View Mode -->
+                        <!-- View Mode for Schedules -->
                         <div class="space-y-4">
                         <div v-for="(list, listIndex) in eventDetails.scheduleLists" :key="listIndex" class="border rounded-lg p-4">
                             <h3 class="font-medium mb-2">Day {{ list.day }} ({{ formatDisplayDate(list.date) }})</h3>
