@@ -1293,14 +1293,12 @@
     const confirmSaveChanges = async () => {
       saving.value = true;
       try {
+        // If the image is a new upload (blob URL), convert it to a base64 data URL
         let finalImage = selectedEvent.value.image;
-        const oldImageUrl = selectedEvent.value.image;
         if (selectedEvent.value.image && selectedEvent.value.image.startsWith('blob:')) {
+          const blobUrl = selectedEvent.value.image;
           try {
-            if (oldImageUrl && oldImageUrl.startsWith('blob:')) {
-              URL.revokeObjectURL(oldImageUrl);
-            }
-            const response = await fetch(selectedEvent.value.image);
+            const response = await fetch(blobUrl);
             const blob = await response.blob();
             finalImage = await new Promise((resolve, reject) => {
               const reader = new FileReader();
@@ -1308,7 +1306,9 @@
               reader.onloadend = () => resolve(reader.result);
               reader.readAsDataURL(blob);
             });
+            URL.revokeObjectURL(blobUrl); // Revoke the blob URL after it has been read
           } catch (error) {
+            console.error("Failed to process blob image:", error);
             finalImage = defaultImage;
           }
         } else if (!selectedEvent.value.image) {

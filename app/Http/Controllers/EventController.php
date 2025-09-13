@@ -354,6 +354,7 @@ class EventController extends Controller
 
         foreach ($data['events'] as &$event) {
             if ($event['id'] == $id) {
+                // Explicitly merge validated data to be more intentional about what is being updated.
                 $event = array_merge($event, $validated);
 
                 // Normalize tags to be objects
@@ -363,6 +364,16 @@ class EventController extends Controller
                     })->filter()->values()->toArray();
                 }
 
+                // Normalize tasks to ensure consistent structure, which was missing.
+                if (isset($validated['tasks'])) {
+                    $event['tasks'] = collect($validated['tasks'])->map(function($task) {
+                        return [
+                            'committee' => isset($task['committee']['id']) ? ['id' => $task['committee']['id']] : null,
+                            'employees' => collect($task['employees'])->map(fn($emp) => ['id' => $emp['id']])->toArray(),
+                            'task' => $task['task'] ?? ''
+                        ];
+                    })->toArray();
+                }
                 $eventFound = true;
                 break;
             }
