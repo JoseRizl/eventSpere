@@ -14,6 +14,7 @@ import { useBracketActions } from '@/composables/useBracketActions.js';
 const page = usePage();
 const user = computed(() => page.props.auth.user);
 
+const searchQuery = ref('');
 const initialLoading = ref(true);
 const state = useBracketState();
 const {
@@ -63,6 +64,18 @@ const {
   closeScoringConfigDialog,
   saveScoringConfig,
 } = useBracketActions(state);
+
+const filteredBrackets = computed(() => {
+  if (!searchQuery.value) {
+    return brackets.value;
+  }
+  const query = searchQuery.value.toLowerCase().trim();
+  return brackets.value.filter(bracket => {
+    const bracketNameMatch = bracket.name?.toLowerCase().includes(query);
+    const eventNameMatch = bracket.event?.title?.toLowerCase().includes(query);
+    return bracketNameMatch || eventNameMatch;
+  });
+});
 
 const selectedBracket = computed(() => {
   if (selectedRoundRobinMatch.value) {
@@ -116,7 +129,17 @@ onMounted(() => {
 <template>
     <div class="bracket-container">
         <h1 class="title">Brackets</h1>
-        <div class="flex justify-end mb-5">
+        <div class="flex justify-between items-center mb-5">
+          <div class="search-container">
+            <div class="p-input-icon-left w-full">
+                <i class="pi pi-search" />
+                <InputText
+                    v-model="searchQuery"
+                    placeholder="Search brackets..."
+                    class="w-full"
+                />
+            </div>
+          </div>
           <button v-if="user?.name === 'Admin' || user?.name === 'SportsManager'" class="create-button" @click="openDialog">Create Bracket</button>
         </div>
 
@@ -139,16 +162,25 @@ onMounted(() => {
       </div>
 
       <!-- Display message when no brackets are created -->
-      <div v-else-if="brackets.length === 0" class="no-brackets-message">
-        <div class="icon-and-title">
-          <i class="pi pi-info-circle" style="font-size: 1.5rem; color: #007bff; margin-right: 10px;"></i>
-          <h2 class="no-brackets-title">No Brackets Created Yet</h2>
+      <div v-else-if="filteredBrackets.length === 0" class="no-brackets-message">
+        <div v-if="searchQuery">
+            <div class="icon-and-title">
+                <i class="pi pi-search" style="font-size: 1.5rem; color: #007bff; margin-right: 10px;"></i>
+                <h2 class="no-brackets-title">No Brackets Found</h2>
+            </div>
+            <p class="no-brackets-text">No brackets match your search criteria. Try adjusting your search terms.</p>
         </div>
-        <p class="no-brackets-text">Click the "Create Bracket" button above to start a new tournament.</p>
+        <div v-else>
+            <div class="icon-and-title">
+                <i class="pi pi-info-circle" style="font-size: 1.5rem; color: #007bff; margin-right: 10px;"></i>
+                <h2 class="no-brackets-title">No Brackets Created Yet</h2>
+            </div>
+            <p class="no-brackets-text">Click the "Create Bracket" button above to start a new tournament.</p>
+        </div>
       </div>
 
       <!-- Bracket Display Section -->
-      <div v-else v-for="(bracket, bracketIdx) in brackets" :key="bracketIdx" class="bracket-section">
+      <div v-else v-for="bracket in filteredBrackets" :key="bracket.id" class="bracket-section">
         <div class="bracket-wrapper">
           <div class="bracket-header">
             <h2>{{ bracket.name }} ({{ bracket.type }})</h2>
@@ -163,13 +195,13 @@ onMounted(() => {
             </div>
           </div>
           <div class="bracket-controls">
-            <button @click="toggleBracket(bracketIdx)" class="toggle-button">
-              {{ expandedBrackets[bracketIdx] ? 'Hide Bracket' : 'Show Bracket' }}
+            <button @click="toggleBracket(brackets.indexOf(bracket))" class="toggle-button">
+              {{ expandedBrackets[brackets.indexOf(bracket)] ? 'Hide Bracket' : 'Show Bracket' }}
             </button>
-            <button v-if="user?.name === 'Admin' || user?.name === 'SportsManager'" @click="removeBracket(bracketIdx)" class="delete-button">Delete Bracket</button>
+            <button v-if="user?.name === 'Admin' || user?.name === 'SportsManager'" @click="removeBracket(brackets.indexOf(bracket))" class="delete-button">Delete Bracket</button>
           </div>
 
-          <div v-if="expandedBrackets[bracketIdx]">
+          <div v-if="expandedBrackets[brackets.indexOf(bracket)]">
             <!-- Single Elimination Display -->
             <div v-if="bracket.type === 'Single Elimination'" class="bracket">
               <svg class="connection-lines">
@@ -188,7 +220,7 @@ onMounted(() => {
               <div v-for="(round, roundIdx) in bracket.matches" :key="roundIdx"
                 :class="['round', `round-${roundIdx + 1}`]">
                 <h3>
-                  {{ isFinalRound(bracketIdx, roundIdx) ? 'Final Round' : isSemifinalRound(bracketIdx, roundIdx) ? 'Semifinal' : isQuarterfinalRound(bracketIdx, roundIdx) ? 'Quarterfinal' : `Round ${roundIdx + 1}` }}
+                  {{ isFinalRound(brackets.indexOf(bracket), roundIdx) ? 'Final Round' : isSemifinalRound(brackets.indexOf(bracket), roundIdx) ? 'Semifinal' : isQuarterfinalRound(brackets.indexOf(bracket), roundIdx) ? 'Quarterfinal' : `Round ${roundIdx + 1}` }}
                 </h3>
 
                 <!-- Matches Display -->
@@ -197,7 +229,7 @@ onMounted(() => {
                   :key="matchIdx"
                   :id="`match-${roundIdx}-${matchIdx}`"
                   :class="['match']"
-                  @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openMatchDialog(bracketIdx, roundIdx, matchIdx, match, 'single')"
+                  @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openMatchDialog(brackets.indexOf(bracket), roundIdx, matchIdx, match, 'single')"
                 >
                   <div class="player-box">
                       <span
@@ -242,7 +274,7 @@ onMounted(() => {
                     :key="`round-${roundIdx}-${matchIdx}`"
                     :id="`round-match-${roundIdx}-${matchIdx}`"
                     :class="['match']"
-                    @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openRoundRobinMatchDialog(bracketIdx, roundIdx, matchIdx, match)"
+                    @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openRoundRobinMatchDialog(brackets.indexOf(bracket), roundIdx, matchIdx, match)"
                   >
                     <div class="player-box">
                       <span
@@ -297,15 +329,15 @@ onMounted(() => {
                     <span class="points">Points</span>
                   </div>
                   <div
-                    v-for="(player, index) in (standingsRevision, getRoundRobinStandings(bracketIdx))"
+                    v-for="(player, index) in (standingsRevision, getRoundRobinStandings(brackets.indexOf(bracket)))"
                     :key="player.id"
                     class="standings-row"
-                    :class="{ 'winner': index === 0 && isRoundRobinConcluded(bracketIdx) }"
+                    :class="{ 'winner': index === 0 && isRoundRobinConcluded(brackets.indexOf(bracket)) }"
                   >
                     <span class="rank">{{ index + 1 }}</span>
                     <span class="player">
                       {{ truncateNameRoundRobin(player.name) }}
-                      <i v-if="index === 0 && isRoundRobinConcluded(bracketIdx)" class="pi pi-crown winner-crown"></i>
+                      <i v-if="index === 0 && isRoundRobinConcluded(brackets.indexOf(bracket))" class="pi pi-crown winner-crown"></i>
                     </span>
                     <span class="wins">{{ player.wins }}</span>
                     <span class="draws">{{ player.draws }}</span>
@@ -344,7 +376,7 @@ onMounted(() => {
                       :key="`winners-${roundIdx}-${matchIdx}`"
                       :id="`winners-match-${roundIdx}-${matchIdx}`"
                       :class="['match']"
-                      @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openMatchDialog(bracketIdx, roundIdx, matchIdx, match, 'winners')"
+                                @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openMatchDialog(brackets.indexOf(bracket), roundIdx, matchIdx, match, 'winners')"
                     >
                       <div class="player-box">
                         <span
@@ -404,7 +436,7 @@ onMounted(() => {
                       :key="`losers-${roundIdx}-${matchIdx}`"
                       :id="`losers-match-${roundIdx}-${matchIdx}`"
                       :class="['match']"
-                      @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openMatchDialog(bracketIdx, roundIdx + bracket.matches.winners.length, matchIdx, match, 'losers')"
+                                @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openMatchDialog(brackets.indexOf(bracket), roundIdx + bracket.matches.winners.length, matchIdx, match, 'losers')"
                     >
                       <div class="player-box">
                         <span
@@ -458,7 +490,7 @@ onMounted(() => {
                   <div v-for="(match, matchIdx) in bracket.matches.grand_finals" :key="`grand-finals-${matchIdx}`"
                     :id="`grand-finals-match-${matchIdx}`"
                     :class="['match']"
-                    @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openMatchDialog(bracketIdx, bracket.matches.winners.length + bracket.matches.losers.length, matchIdx, match, 'grand_finals')"
+                    @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openMatchDialog(brackets.indexOf(bracket), bracket.matches.winners.length + bracket.matches.losers.length, matchIdx, match, 'grand_finals')"
                   >
                     <div class="player-box">
                       <span
@@ -731,3 +763,30 @@ onMounted(() => {
       </Dialog>
     </div>
   </template>
+
+<style scoped>
+.search-container {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 400px;
+}
+
+.search-container .p-input-icon-left {
+  position: relative;
+  width: 100%;
+}
+
+.search-container .p-input-icon-left i {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+}
+
+.search-container .p-input-icon-left .p-inputtext {
+  width: 100%;
+  padding-left: 2.5rem;
+}
+</style>
