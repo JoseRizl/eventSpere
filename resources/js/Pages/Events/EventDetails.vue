@@ -221,6 +221,34 @@ const normalizedTags = computed({
   }
 });
 
+const formattedDescription = computed(() => {
+  const text = eventDetails.value.description;
+  if (!text) return '';
+
+  // 1. Escape the entire string to prevent XSS from user-inputted HTML.
+  const escapeHtml = (unsafe) => {
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  };
+  const escapedText = escapeHtml(text);
+
+  // 2. Find URLs in the escaped text and wrap them in <a> tags.
+  const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])|(\bwww\.[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])|(\b[A-Z0-9.-]+\.(com|org|net|gov|edu|io|co|us|ca|uk|de|fr|au|info|biz|me|tv|app|dev)\b([-A-Z0-9+&@#\/%?=~_|!:,.;]*))/gi;
+
+  return escapedText.replace(urlRegex, (url) => {
+    const unescapedUrlForHref = url.replace(/&amp;/g, '&');
+    let href = unescapedUrlForHref;
+    if (!href.match(/^(https?|ftp|file):\/\//i)) {
+      href = 'http://' + href;
+    }
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">${url}</a>`;
+  });
+});
+
 // Edit mode toggle
 const editMode = ref(false);
 const toggleEdit = () => {
@@ -738,7 +766,7 @@ const getBracketIndex = (bracketId) => {
                         class="w-full border rounded p-2"
                         placeholder="Event Description"
                     />
-                    <p v-else class="text-gray-700 whitespace-pre-line text-sm">{{ eventDetails.description }}</p>
+                    <p v-else class="text-gray-700 whitespace-pre-line text-sm" v-html="formattedDescription"></p>
                     </div>
 
                     <!-- Venue and Category -->

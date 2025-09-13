@@ -111,12 +111,10 @@
           </template>
         </Column>
 
-        <Column field="description" header="Description" style="width:15%;">
-        <template #body="{ data }">
-            <div class="description">
-            {{ data.description }}
-            </div>
-        </template>
+        <Column field="description" header="Description" style="width:15%;" sortable>
+          <template #body="{ data }">
+            <div class="description line-clamp-3 whitespace-pre-line" v-html="formatDescription(data.description)" @click="handleDescriptionClick"></div>
+          </template>
         </Column>
 
         <Column field="venue" header="Venue" style="width:15%;" sortable>
@@ -127,13 +125,13 @@
         </template>
         </Column>
 
-        <Column header="Category" style="width:15%;">
+        <Column field="category_id" header="Category" style="width:15%;" sortable>
           <template #body="{ data }">
             {{ categoryMap[data.category_id] || "Uncategorized" }}
           </template>
         </Column>
 
-        <Column header="Start Date & Time" style="width:20%;" sortable>
+        <Column field="startDateTime" header="Start Date & Time" style="width:20%;" sortable>
           <template #body="{ data }">
             <div class="date-time">
               <span class="date">{{ formatDateTime(data.startDate, data.startTime).date }}</span>
@@ -142,7 +140,7 @@
           </template>
         </Column>
 
-        <Column header="End Date & Time" style="width:20%;" sortable>
+        <Column field="endDateTime" header="End Date & Time" style="width:20%;" sortable>
           <template #body="{ data }">
             <div class="date-time">
               <span class="date">{{ formatDateTime(data.endDate, data.endTime).date }}</span>
@@ -706,13 +704,20 @@
       });
 
       const combinedEvents = computed(() => {
-        const allEvents = (events.value || []).map(event => ({
-            ...event,
-            category_id: event.category?.id || event.category_id,
-        }));
+        const processItem = item => ({
+            ...item,
+            category_id: item.category?.id || item.category_id,
+            startDateTime: item.startDate ? `${format(new Date(item.startDate), 'yyyy-MM-dd')}T${item.startTime || '00:00'}` : null,
+            endDateTime: item.endDate ? `${format(new Date(item.endDate), 'yyyy-MM-dd')}T${item.endTime || '00:00'}` : null,
+        });
 
-        return [...allEvents, ...sports.value].sort((a, b) => {
-            return new Date(b.startDate || "1970-01-01") - new Date(a.startDate || "1970-01-01");
+        const allEvents = (events.value || []).map(processItem);
+        const allSports = (sports.value || []).map(processItem);
+
+        return [...allEvents, ...allSports].sort((a, b) => {
+            const dateA = a.startDateTime ? new Date(a.startDateTime) : new Date("1970-01-01");
+            const dateB = b.startDateTime ? new Date(b.startDateTime) : new Date("1970-01-01");
+            return dateB - dateA;
         });
       });
 
@@ -733,6 +738,31 @@
         };
         isCreateModalVisible.value = true;
         dateError.value = "";
+      };
+
+      const formatDescription = (description) => {
+        if (!description) return '';
+
+        const escapeHtml = (unsafe) => {
+          return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+        };
+        const escapedText = escapeHtml(description);
+
+        const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])|(\bwww\.[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])|(\b[A-Z0-9.-]+\.(com|org|net|gov|edu|io|co|us|ca|uk|de|fr|au|info|biz|me|tv|app|dev)\b([-A-Z0-9+&@#\/%?=~_|!:,.;]*))/gi;
+
+        return escapedText.replace(urlRegex, (url) => {
+          const unescapedUrlForHref = url.replace(/&amp;/g, '&');
+          let href = unescapedUrlForHref;
+          if (!href.match(/^(https?|ftp|file):\/\//i)) {
+            href = 'http://' + href;
+          }
+          return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">${url}</a>`;
+        });
       };
 
      const openTagModal = () => {
@@ -1359,6 +1389,12 @@
       selectedEvent.value.tags = selectedEvent.value.tags.filter(tag => tag.id !== tagToRemove.id);
     };
 
+    const handleDescriptionClick = (event) => {
+      if (event.target.tagName === 'A') {
+        event.stopPropagation();
+      }
+    };
+
 // Add date filtering functionality
     const toggleDateFilter = () => {
       showDateFilter.value = !showDateFilter.value;
@@ -1536,6 +1572,8 @@
     user,
     showCreateConfirm,
     confirmCreateEvent,
+    formatDescription,
+    handleDescriptionClick,
     };
     },
  });
