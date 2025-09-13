@@ -174,7 +174,6 @@
         padding: 1rem;
         font-family: Arial, sans-serif;
         position: relative; /* Reset stacking context */
-        z-index: 0; /* Ensure it doesn't interfere with sidebar popups */
       }
 
       .title {

@@ -203,29 +203,27 @@ onMounted(() => {
                       <span
                         :class="{
                           winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score >= match.players[1].score,
-                          loser: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score,
                           'bye-text': match.players[0].name === 'BYE',
                           'facing-bye': match.players[1].name === 'BYE',
-                          'tbd-text': !match.players[0].name || match.players[0].name === 'TBD',
+                          'tbd-text': (!match.players[0].name || match.players[0].name === 'TBD') || ((match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score),
                           'loser-name': match.loser_id === match.players[0].id,
                           'winner-name': match.winner_id === match.players[0].id
                         }"
                       >
-                        {{ truncateNameElimination(match.players[0].name) }} | {{ match.players[0].score }}
+                        {{ truncateNameElimination(match.players[0].name) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
                       </span>
                       <hr />
                       <span
                         :class="{
                           winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score >= match.players[0].score,
-                          loser: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score,
                           'bye-text': match.players[1].name === 'BYE',
                           'facing-bye': match.players[0].name === 'BYE',
-                          'tbd-text': !match.players[1].name || match.players[1].name === 'TBD',
+                          'tbd-text': (!match.players[1].name || match.players[1].name === 'TBD') || ((match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score),
                           'loser-name': match.loser_id === match.players[1].id,
                           'winner-name': match.winner_id === match.players[1].id
                         }"
                       >
-                        {{ truncateNameElimination(match.players[1].name) }} | {{ match.players[1].score }}
+                        {{ truncateNameElimination(match.players[1].name) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
                       </span>
                   </div>
                 </div>
@@ -250,31 +248,27 @@ onMounted(() => {
                       <span
                         :class="{
                           winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score > match.players[1].score,
-                          loser: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score,
-                          tie: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score === match.players[1].score && match.is_tie,
                           'bye-text': match.players[0].name === 'BYE',
                           'facing-bye': match.players[1].name === 'BYE',
-                          'tbd-text': !match.players[0].name || match.players[0].name === 'TBD',
+                          'tbd-text': (!match.players[0].name || match.players[0].name === 'TBD') || ((match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && (match.players[0].score < match.players[1].score || (match.players[0].score === match.players[1].score && match.is_tie))),
                           'loser-name': match.loser_id === match.players[0].id,
                           'winner-name': match.winner_id === match.players[0].id
                         }"
                       >
-                        {{ truncateNameRoundRobin(match.players[0].name) }} | {{ match.players[0].score }}
+                        {{ truncateNameRoundRobin(match.players[0].name) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
                       </span>
                       <hr />
                       <span
                         :class="{
                           winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score > match.players[0].score,
-                          loser: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score,
-                          tie: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score === match.players[0].score && match.is_tie,
                           'bye-text': match.players[1].name === 'BYE',
                           'facing-bye': match.players[0].name === 'BYE',
-                          'tbd-text': !match.players[1].name || match.players[1].name === 'TBD',
+                          'tbd-text': (!match.players[1].name || match.players[1].name === 'TBD') || ((match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && (match.players[1].score < match.players[0].score || (match.players[1].score === match.players[0].score && match.is_tie))),
                           'loser-name': match.loser_id === match.players[1].id,
                           'winner-name': match.winner_id === match.players[1].id
                         }"
                       >
-                        {{ truncateNameRoundRobin(match.players[1].name) }} | {{ match.players[1].score }}
+                        {{ truncateNameRoundRobin(match.players[1].name) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
                       </span>
                     </div>
                   </div>
@@ -356,29 +350,27 @@ onMounted(() => {
                         <span
                           :class="{
                             winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score >= match.players[1].score,
-                            loser: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score,
                             'bye-text': match.players[0].name === 'BYE',
                             'facing-bye': match.players[1].name === 'BYE',
-                            'tbd-text': !match.players[0].name || match.players[0].name === 'TBD',
+                            'tbd-text': (!match.players[0].name || match.players[0].name === 'TBD') || ((match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score),
                             'loser-name': match.loser_id === match.players[0].id,
                             'winner-name': match.winner_id === match.players[0].id
                           }"
                         >
-                          {{ truncateNameElimination(match.players[0].name) }} | {{ match.players[0].score }}
+                          {{ truncateNameElimination(match.players[0].name) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
                         </span>
                         <hr />
                         <span
                           :class="{
                             winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score >= match.players[0].score,
-                            loser: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score,
                             'bye-text': match.players[1].name === 'BYE',
                             'facing-bye': match.players[0].name === 'BYE',
-                            'tbd-text': !match.players[1].name || match.players[1].name === 'TBD',
+                            'tbd-text': (!match.players[1].name || match.players[1].name === 'TBD') || ((match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score),
                             'loser-name': match.loser_id === match.players[1].id,
                             'winner-name': match.winner_id === match.players[1].id
                           }"
                         >
-                          {{ truncateNameElimination(match.players[1].name) }} | {{ match.players[1].score }}
+                          {{ truncateNameElimination(match.players[1].name) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
                         </span>
                       </div>
                     </div>
@@ -418,29 +410,27 @@ onMounted(() => {
                         <span
                           :class="{
                             winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score >= match.players[1].score,
-                            loser: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score,
                             'bye-text': match.players[0].name === 'BYE',
                             'facing-bye': match.players[1].name === 'BYE',
-                            'tbd-text': !match.players[0].name || match.players[0].name === 'TBD',
+                            'tbd-text': (!match.players[0].name || match.players[0].name === 'TBD') || ((match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score),
                             'loser-name': match.loser_id === match.players[0].id,
                             'winner-name': match.winner_id === match.players[0].id
                           }"
                         >
-                          {{ truncateNameElimination(match.players[0].name) }} | {{ match.players[0].score }}
+                          {{ truncateNameElimination(match.players[0].name) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
                         </span>
                         <hr />
                         <span
                           :class="{
                             winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score >= match.players[0].score,
-                            loser: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score,
                             'bye-text': match.players[1].name === 'BYE',
                             'facing-bye': match.players[0].name === 'BYE',
-                            'tbd-text': !match.players[1].name || match.players[1].name === 'TBD',
+                            'tbd-text': (!match.players[1].name || match.players[1].name === 'TBD') || ((match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score),
                             'loser-name': match.loser_id === match.players[1].id,
                             'winner-name': match.winner_id === match.players[1].id
                           }"
                         >
-                          {{ truncateNameElimination(match.players[1].name) }} | {{ match.players[1].score }}
+                          {{ truncateNameElimination(match.players[1].name) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
                         </span>
                       </div>
                     </div>
@@ -474,25 +464,23 @@ onMounted(() => {
                       <span
                         :class="{
                           winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score >= match.players[1].score,
-                          loser: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score,
                           'bye-text': match.players[0].name === 'BYE',
                           'facing-bye': match.players[1].name === 'BYE',
-                          'tbd-text': !match.players[0].name || match.players[0].name === 'TBD'
+                          'tbd-text': (!match.players[0].name || match.players[0].name === 'TBD') || ((match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score)
                         }"
                       >
-                        {{ truncateNameElimination(match.players[0].name) }} | {{ match.players[0].score }}
+                        {{ truncateNameElimination(match.players[0].name) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
                       </span>
                       <hr />
                       <span
                         :class="{
                           winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score >= match.players[0].score,
-                          loser: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score,
                           'bye-text': match.players[1].name === 'BYE',
                           'facing-bye': match.players[0].name === 'BYE',
-                          'tbd-text': !match.players[1].name || match.players[1].name === 'TBD'
+                          'tbd-text': (!match.players[1].name || match.players[1].name === 'TBD') || ((match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score)
                         }"
                       >
-                        {{ truncateNameElimination(match.players[1].name) }} | {{ match.players[1].score }}
+                        {{ truncateNameElimination(match.players[1].name) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
                       </span>
                     </div>
                   </div>
@@ -585,6 +573,7 @@ onMounted(() => {
         message="Are you sure you want to update this match? This action may trigger bracket progression and cannot be easily undone."
         confirmText="Yes, Update Match"
         cancelText="Cancel"
+        :style="{ zIndex: 1102 }"
         confirmButtonClass="bg-green-600 hover:bg-green-700"
         @confirm="proceedWithMatchUpdate"
         @cancel="cancelMatchUpdate"
