@@ -35,7 +35,7 @@ class AuthController extends Controller
 
        if(Auth::attempt($fields, $request->remember)){
         $request->session()->regenerate();
-        return redirect()->intended('/');
+        return redirect()->intended('/home');
        }
 
        return back()->withErrors([

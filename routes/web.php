@@ -6,7 +6,7 @@ use App\Http\Controllers\CategoryController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::inertia('/home', 'Home')->name('home');
+Route::inertia('/', 'Home')->name('home');
 Route::get('/events/{id}', [EventController::class, 'show'])->name('event.details');
 
 Route::middleware('auth')->group(function () {
@@ -40,8 +40,8 @@ Route::middleware('auth')->group(function () {
     Route::inertia('/register', 'Auth/Register')->name('register');
     Route::post('/register', [AuthController::class, 'register']);
 
-    Route::inertia('/', 'Auth/Login')->name('login');
-    Route::post('/', [AuthController::class, 'login']);
+    Route::inertia('/login', 'Auth/Login')->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
 
     Route::middleware('guest')->group(function () {
 

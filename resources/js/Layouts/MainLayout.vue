@@ -1,13 +1,25 @@
 <script setup>
-import { Link, useForm, usePage } from '@inertiajs/vue3';
+import { Link, useForm, usePage, router } from '@inertiajs/vue3';
 import { ref, computed, onMounted, onUnmounted } from 'vue';
+import axios from 'axios';
+import { format } from 'date-fns';
+import OverlayPanel from 'primevue/overlaypanel';
+import Badge from 'primevue/badge';
+import Toast from 'primevue/toast';
+import { useToast } from 'primevue/usetoast';
+
 // Ref
 const toggleMenu = ref(false);
 const menuBarItems = ref([]);
 const isSidebarCollapsed = ref(false);
+const op = ref();
+const eventAnnouncements = ref([]);
+const hasNewAnnouncements = ref(false);
+let announcementPoller = null;
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
+const toast = useToast();
 
 const sideBarItems = computed(() => {
   const allItems = [
@@ -23,7 +35,7 @@ const sideBarItems = computed(() => {
       label: 'Dashboard',
       icon: 'pi pi-chart-bar',
       route: route('dashboard'),
-      roles: ['Admin', 'Principal'],
+      roles: ['Principal', 'Admin'],
     },
     {
       label: 'Events',
@@ -87,15 +99,95 @@ const logout = () => {
     form.post(route('logout'));
 };
 
+const toggleAnnouncements = (event) => {
+  op.value.toggle(event);
+
+  if (hasNewAnnouncements.value) {
+    hasNewAnnouncements.value = false;
+    if (eventAnnouncements.value.length > 0) {
+      const latestTimestamp = new Date(eventAnnouncements.value[0].timestamp).getTime();
+      localStorage.setItem('lastSeenAnnouncementTimestamp', latestTimestamp.toString());
+    }
+  }
+};
+
+const playNotificationSound = () => {
+  // Ensure this runs only on the client
+  if (typeof window === 'undefined') return;
+  const audio = new Audio('/sounds/notification.mp3'); // Place notification.mp3 in your public/sounds/ directory
+  audio.play().catch(error => {
+    // Autoplay was prevented, which is common in browsers until a user interaction.
+    // We can silently ignore this as the visual cues are still present.
+    console.log("Notification sound was blocked by the browser.", error);
+  });
+};
+
+const fetchAndSetAnnouncements = async (isInitialLoad = false) => {
+    try {
+        const [eventsResponse, sportsResponse, eventAnnouncementsResponse] = await Promise.all([
+            axios.get("http://localhost:3000/events"),
+            axios.get("http://localhost:3000/sports"),
+            axios.get("http://localhost:3000/event_announcements")
+        ]);
+
+        const allNews = [...eventsResponse.data, ...sportsResponse.data]
+          .filter((news) => !news.archived);
+
+        const eventMap = allNews.reduce((map, event) => {
+            map[event.id] = event;
+            return map;
+        }, {});
+
+        const newAnnouncements = eventAnnouncementsResponse.data.map(ann => ({
+            ...ann,
+            event: eventMap[ann.eventId],
+            formattedTimestamp: format(new Date(ann.timestamp), "MMMM dd, yyyy HH:mm"),
+        })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        if (newAnnouncements.length > 0) {
+            const latestTimestamp = new Date(newAnnouncements[0].timestamp).getTime();
+            if (isInitialLoad) {
+                const lastSeenTimestamp = localStorage.getItem('lastSeenAnnouncementTimestamp');
+                if (!lastSeenTimestamp || latestTimestamp > parseInt(lastSeenTimestamp, 10)) {
+                    hasNewAnnouncements.value = true;
+                }
+            } else {
+                // For polling, if the latest announcement is different, show notification.
+                if (eventAnnouncements.value.length === 0 || newAnnouncements[0].id !== eventAnnouncements.value[0]?.id) {
+                    hasNewAnnouncements.value = true;
+                    toast.add({
+                        severity: 'info',
+                        summary: 'New Announcement',
+                        detail: newAnnouncements[0].message.substring(0, 100) + (newAnnouncements[0].message.length > 100 ? '...' : ''),
+                        life: 6000
+                    });
+                    playNotificationSound();
+                }
+            }
+        }
+
+        eventAnnouncements.value = newAnnouncements;
+    } catch (error) {
+        console.error("Error fetching announcements:", error);
+    }
+};
+
 onMounted(() => {
+    fetchAndSetAnnouncements(true);
+    // Poll for new announcements every 10 seconds for a more responsive feel.
+    announcementPoller = setInterval(() => fetchAndSetAnnouncements(false), 10000);
 });
 
 onUnmounted(() => {
+    if (announcementPoller) {
+        clearInterval(announcementPoller);
+    }
 });
 </script>
 
 <template>
     <div class="bg-gray-100">
+        <Toast position="bottom-right" />
         <div class="flex flex-col md:flex-row">
             <header id="main-header" class="fixed top-0 left-0 right-0 z-[1100] w-full">
                 <Menubar :model="menuBarItems" class="w-full md:w-100 !border-l-0 !rounded-none">
@@ -114,14 +206,20 @@ onUnmounted(() => {
                         </div>
                     </template>
                     <template #end>
-                        <button v-ripple class="relative overflow-hidden w-full border-0 bg-transparent flex items-start justify-center pl-4 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-none cursor-pointer transition-colors duration-200">
-                            <Avatar image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png" class="mr-2" shape="circle" />
-                            <span class="inline-flex flex-col items-start">
-                                <span class="font-bold text-xs">{{ user?.name }}</span>
-                                <span class="text-xs">Role</span>
-                                <!--<span class="text-xs">{{ user?.role }}</span> -->
-                            </span>
-                        </button>
+                        <div class="flex items-center gap-2 mr-2">
+                            <button @click="toggleAnnouncements" v-ripple :class="['relative p-ripple p-2 rounded-full hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors duration-200 text-slate-600', { 'notification-bell-ring': hasNewAnnouncements }]">
+                                <i class="pi pi-bell text-lg" />
+                                <Badge v-if="hasNewAnnouncements" severity="danger" class="absolute top-1 right-1 !p-0 !w-2 !h-2"></Badge>
+                            </button>
+
+                            <button v-ripple class="relative overflow-hidden w-full border-0 bg-transparent flex items-start justify-center pl-4 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-none cursor-pointer transition-colors duration-200">
+                                <Avatar image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png" class="mr-2" shape="circle" />
+                                <span class="inline-flex flex-col items-start">
+                                    <span class="font-bold text-xs">{{ user?.name }}</span>
+                                    <span class="text-xs">Role</span>
+                                </span>
+                            </button>
+                        </div>
                     </template>
                 </Menubar>
             </header>
@@ -177,6 +275,29 @@ onUnmounted(() => {
                     <slot />
                 </div>
             </main>
+
+            <OverlayPanel ref="op" :showCloseIcon="true">
+                <div class="w-80">
+                    <h3 class="font-bold text-center mb-2">Announcements</h3>
+                    <ul v-if="eventAnnouncements.length" class="max-h-96 overflow-y-auto announcement-list">
+                        <li
+                        v-for="announcement in eventAnnouncements"
+                        :key="announcement.id"
+                        @click="announcement.event && router.visit(route('event.details', { id: announcement.event.id, view: 'announcements' }))"
+                        :class="['group p-3 border-b flex justify-between items-start', announcement.event ? 'hover:bg-gray-100 cursor-pointer' : '']"
+                        >
+                        <div class="flex-1 min-w-0">
+                            <span v-if="announcement.event" class="text-xs font-semibold text-blue-600 group-hover:underline block truncate">
+                                {{ announcement.event.title }}
+                            </span>
+                            <p class="break-words text-sm w-full">{{ announcement.message }}</p>
+                            <p class="text-xs text-gray-500 mt-2">{{ announcement.formattedTimestamp }}</p>
+                        </div>
+                        </li>
+                    </ul>
+                    <p v-else class="text-center text-sm text-gray-500">No announcements</p>
+                </div>
+            </OverlayPanel>
         </div>
     </div>
 </template>
@@ -273,5 +394,48 @@ button:hover {
 :deep(.p-menubar .p-menubar-start .flex) {
     align-items: center;
     gap: 0.75rem;
+}
+
+.announcement-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.announcement-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.announcement-list::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+
+.announcement-list::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.notification-bell-ring {
+  animation: ring-animation 1.5s ease-in-out infinite;
+}
+
+@keyframes ring-animation {
+  0%, 100% { transform: rotate(0); }
+  10%, 30%, 50%, 70% { transform: rotate(-15deg); }
+  20%, 40%, 60%, 80% { transform: rotate(15deg); }
+}
+
+/* Custom Toast Style */
+:deep(.p-toast-message-info) {
+    border-style: solid;
+    border-width: 0 0 0 6px;
+    border-color: #6366F1; /* indigo-500 */
+    background: #EEF2FF; /* indigo-50 */
+}
+:deep(.p-toast-message-info .p-toast-summary) {
+    font-weight: 600;
+    color: #4338CA; /* indigo-700 */
+}
+:deep(.p-toast-message-info .p-toast-detail) {
+    color: #4f46e5; /* indigo-600 */
 }
 </style>

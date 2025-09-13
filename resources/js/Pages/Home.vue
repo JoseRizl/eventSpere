@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted, computed, watch, nextTick } from "vue";
+import { ref, onMounted, computed, watch, nextTick } from "vue";
 import axios from "axios";
 import { format, isWithinInterval, isSameMonth, parse } from "date-fns";
 import { Link, usePage, router } from "@inertiajs/vue3";
@@ -10,7 +10,6 @@ import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import Avatar from 'primevue/avatar';
 
 const allNews = ref([]);
-const showAnnouncements = ref(false);
 const now = new Date();
 const showEventsThisMonth = ref(loadToggleState('showEventsThisMonth', true));
 const saving = ref(false);
@@ -22,68 +21,14 @@ const eventAnnouncements = ref([]);
 watch(showEventsThisMonth, (val) => saveToggleState('showEventsThisMonth', val));
 watch(showOngoingEvents, (val) => saveToggleState('showOngoingEvents', val));
 watch(showUpcomingEvents, (val) => saveToggleState('showUpcomingEvents', val));
-const showLatestBanner = ref(true);
-const currentAnnouncementIndex = ref(0);
-const announcementDirection = ref('next'); // 'next' or 'prev'
 const showErrorDialog = ref(false);
 const errorMessage = ref('');
-const hasNewAnnouncements = ref(false);
 const showDeleteAnnouncementConfirm = ref(false);
 const announcementToDelete = ref(null);
-let announcementTimer = null;
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
 const currentView = ref('events'); // 'events' or 'announcements'
-
-const sortedAnnouncements = computed(() => {
-  return eventAnnouncements.value;
-});
-
-const currentAnnouncement = computed(() => {
-  if (sortedAnnouncements.value.length > 0) {
-    return sortedAnnouncements.value[currentAnnouncementIndex.value];
-  }
-  return null;
-});
-
-const startAnnouncementCarousel = () => {
-  if (announcementTimer) clearInterval(announcementTimer);
-  if (sortedAnnouncements.value.length > 1) {
-    announcementTimer = setInterval(() => {
-      announcementDirection.value = 'next'; // Set direction for auto-advance
-      currentAnnouncementIndex.value = (currentAnnouncementIndex.value + 1) % sortedAnnouncements.value.length;
-    }, 15000); // 15 seconds
-  }
-};
-
-const nextAnnouncement = () => {
-  if (sortedAnnouncements.value.length > 1) {
-    announcementDirection.value = 'next';
-    currentAnnouncementIndex.value = (currentAnnouncementIndex.value + 1) % sortedAnnouncements.value.length;
-    startAnnouncementCarousel(); // Reset timer on manual navigation
-  }
-};
-
-const prevAnnouncement = () => {
-  if (sortedAnnouncements.value.length > 1) {
-    announcementDirection.value = 'prev';
-    currentAnnouncementIndex.value = (currentAnnouncementIndex.value - 1 + sortedAnnouncements.value.length) % sortedAnnouncements.value.length;
-    startAnnouncementCarousel(); // Reset timer on manual navigation
-  }
-};
-
-const scrollToAnnouncement = (announcementId) => {
-  currentView.value = 'announcements';
-  nextTick(() => {
-    const element = document.getElementById(`announcement-${announcementId}`);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      element.classList.add('highlight');
-      setTimeout(() => element.classList.remove('highlight'), 2000); // Highlight for 2 seconds
-    }
-  });
-};
 
 const getFullDateTime = (dateInput, timeStr) => {
   if (!dateInput) return null;
@@ -236,41 +181,10 @@ onMounted(async () => {
         formattedTimestamp: format(new Date(ann.timestamp), "MMMM dd, yyyy HH:mm"),
     })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-
-    startAnnouncementCarousel();
-
-    // Check for new announcements
-    if (sortedAnnouncements.value.length > 0) {
-      const latestTimestamp = new Date(sortedAnnouncements.value[0].timestamp).getTime();
-      const lastSeenTimestamp = localStorage.getItem('lastSeenAnnouncementTimestamp');
-
-      if (!lastSeenTimestamp || latestTimestamp > parseInt(lastSeenTimestamp, 10)) {
-        hasNewAnnouncements.value = true;
-      }
-    }
   } catch (error) {
     console.error("Error fetching news:", error);
   }
 });
-
-onUnmounted(() => {
-  if (announcementTimer) {
-    clearInterval(announcementTimer);
-  }
-});
-
-const toggleAnnouncements = () => {
-  showAnnouncements.value = !showAnnouncements.value;
-
-  // If opening the panel and there are new announcements, mark them as seen
-  if (showAnnouncements.value && hasNewAnnouncements.value) {
-    hasNewAnnouncements.value = false;
-    if (sortedAnnouncements.value.length > 0) {
-      const latestTimestamp = new Date(sortedAnnouncements.value[0].timestamp).getTime();
-      localStorage.setItem('lastSeenAnnouncementTimestamp', latestTimestamp.toString());
-    }
-  }
-};
 
 function loadToggleState(key, defaultValue) {
   const saved = localStorage.getItem(key);
@@ -309,90 +223,8 @@ const confirmDeleteAnnouncement = async () => {
 
 <template>
   <div class="min-h-screen flex flex-col items-center bg-gray-100 py-8 px-4">
-    <!-- Bell Icon for Announcements -->
-    <div class="fixed top-16 right-4 z-50">
-      <button
-        @click="toggleAnnouncements"
-        class="relative p-3 rounded-full bg-blue-500 text-white hover:bg-blue-600 shadow-lg transition-transform transform hover:scale-110"
-        v-tooltip="'Announcements'"
-      >
-        <span class="text-xl">🔔</span>
-        <span v-if="hasNewAnnouncements" class="absolute top-1 right-1 block h-3 w-3 rounded-full bg-red-500 border-2 border-white"></span>
-      </button>
-
-      <!-- Announcements Dropdown -->
-      <div
-        v-if="showAnnouncements"
-        class="absolute top-12 right-0 w-80 bg-white border rounded shadow-md p-4"
-      >
-        <h3 class="font-bold text-center mb-2">Announcements</h3>
-
-        <ul v-if="sortedAnnouncements.length" class="max-h-96 overflow-y-auto">
-            <li
-            v-for="announcement in sortedAnnouncements"
-            :key="announcement.id"
-            @click="announcement.event && router.visit(route('event.details', { id: announcement.event.id, view: 'announcements' }))"
-            :class="['group p-3 border-b flex justify-between items-start', announcement.event ? 'hover:bg-gray-50 cursor-pointer' : '']"
-            >
-            <div class="flex-1 min-w-0">
-                <span v-if="announcement.event" class="text-xs font-semibold text-blue-600 group-hover:underline block truncate">
-                    {{ announcement.event.title }}
-                </span>
-                <p class="break-words text-sm w-full">{{ announcement.message }}</p>
-                <p class="text-xs text-gray-500 mt-2">{{ announcement.formattedTimestamp }}</p>
-            </div>
-            </li>
-        </ul>
-
-        <p v-else class="text-center text-sm text-gray-500">No announcements</p>
-      </div>
-    </div>
-
     <!-- News and Update Title -->
     <h1 class="text-2xl font-bold mt-6 text-center">News and Updates</h1>
-
-    <!-- Announcement Banner -->
-    <div v-if="currentAnnouncement && showLatestBanner"
-      @click="scrollToAnnouncement(currentAnnouncement.id)"
-      class="mt-4 mb-6 w-full max-w-5xl bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 relative rounded shadow flex items-center gap-2 overflow-hidden cursor-pointer"
-    >
-      <!-- Prev Button -->
-      <Button
-        v-if="sortedAnnouncements.length > 1"
-        icon="pi pi-chevron-left"
-        class="p-button-text p-button-rounded text-blue-700 hover:bg-purple-200 shrink-0"
-        @click.stop="prevAnnouncement"
-        aria-label="Previous Announcement"
-      />
-
-      <!-- Announcement Content -->
-      <transition :name="announcementDirection === 'next' ? 'slide-next' : 'slide-prev'" mode="out-in">
-        <div :key="currentAnnouncement.id" class="flex-grow text-center">
-            <strong v-if="currentAnnouncement.event" class="block font-semibold mb-1 text-lg">
-                📣 Announcement for <Link :href="route('event.details', { id: currentAnnouncement.event.id })" @click.stop class="text-blue-800 hover:underline">{{ currentAnnouncement.event.title }}</Link>
-            </strong>
-            <strong v-else class="block font-semibold mb-1 text-lg">📣 Announcement</strong>
-            <p class="text-base">{{ currentAnnouncement.message }}</p>
-            <p class="text-xs text-blue-500 mt-1">{{ currentAnnouncement.formattedTimestamp }}</p>
-        </div>
-      </transition>
-
-      <!-- Next Button -->
-      <Button
-        v-if="sortedAnnouncements.length > 1"
-        icon="pi pi-chevron-right"
-        class="p-button-text p-button-rounded text-blue-700 hover:bg-purple-200 shrink-0"
-        @click.stop="nextAnnouncement"
-        aria-label="Next Announcement"
-      />
-
-      <!-- Close Button -->
-      <button
-        @click.stop="showLatestBanner = false"
-        class="absolute top-2 right-2 text-blue-700 hover:text-blue-900 text-xl leading-none"
-        aria-label="Close"
-      >&times;</button>
-    </div>
 
     <!-- View Toggle -->
     <div class="w-full max-w-5xl mt-8">
@@ -575,16 +407,16 @@ const confirmDeleteAnnouncement = async () => {
     <!-- Announcement Board -->
     <div v-if="currentView === 'announcements'" class="w-full max-w-5xl mt-8">
       <h2 class="text-xl font-semibold mb-5">Announcement Board</h2>
-      <div v-if="sortedAnnouncements.length" class="space-y-6">
+      <div v-if="eventAnnouncements.length" class="space-y-6">
         <div
-          v-for="announcement in sortedAnnouncements"
+          v-for="announcement in eventAnnouncements"
           :key="announcement.id"
           :id="`announcement-${announcement.id}`"
           @click="announcement.event && router.visit(route('event.details', { id: announcement.event.id, view: 'announcements' }))"
           :class="['relative p-6 bg-white rounded-lg shadow-lg border-l-4 border-blue-500', announcement.event ? 'cursor-pointer hover:bg-gray-50 transition-colors' : '']"
         >
           <!-- User Avatar and Name -->
-          <div v-if="user?.name === 'Admin'" class="absolute top-2 right-2 z-10">
+          <div v-if="user?.name === 'Admin' || user?.name === 'Principal'" class="absolute top-2 right-2 z-10">
             <Button
                 icon="pi pi-trash"
                 class="p-button-text p-button-danger p-button-rounded"
@@ -712,34 +544,6 @@ const confirmDeleteAnnouncement = async () => {
 
 .max-h-96.overflow-y-auto::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8; /* Darker gray on hover */
-}
-
-/* Announcement Carousel Transitions */
-.slide-next-enter-active,
-.slide-next-leave-active,
-.slide-prev-enter-active,
-.slide-prev-leave-active {
-  transition: all 0.25s ease-in-out;
-}
-
-/* Slide Next */
-.slide-next-enter-from {
-  transform: translateX(100%);
-  opacity: 0;
-}
-.slide-next-leave-to {
-  transform: translateX(-100%);
-  opacity: 0;
-}
-
-/* Slide Previous */
-.slide-prev-enter-from {
-  transform: translateX(-100%);
-  opacity: 0;
-}
-.slide-prev-leave-to {
-  transform: translateX(100%);
-  opacity: 0;
 }
 
 .highlight {
