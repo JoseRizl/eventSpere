@@ -259,6 +259,10 @@ watch(relatedBrackets, (newBrackets) => {
   });
 });
 
+const goBack = () => {
+    window.history.back();
+};
+
 const fetchEventAnnouncements = async () => {
   if (!props.event?.id) return;
   try {
@@ -620,7 +624,12 @@ const getBracketIndex = (bracketId) => {
 
 <template>
     <div class="min-h-screen bg-gray-200 py-8 px-4">
-        <div class="max-w-6xl mx-auto mt-8">
+        <div class="max-w-6xl mx-auto mt-4">
+            <!-- Back Button for non-management -->
+            <div v-if="!user || !['Admin', 'Principal', 'SportsManager'].includes(user.name)" class="mb-4">
+                <Button icon="pi pi-arrow-left" label="Back" @click="goBack" class="p-button-text" />
+            </div>
+
             <!-- Banner Image -->
             <div class="w-full bg-gray-700 rounded-lg shadow-md overflow-hidden relative">
                 <template v-if="eventDetails?.image">

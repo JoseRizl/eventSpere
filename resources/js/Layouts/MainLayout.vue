@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import OverlayPanel from 'primevue/overlaypanel';
 import Badge from 'primevue/badge';
 import Toast from 'primevue/toast';
+import Menu from 'primevue/menu';
 import { useToast } from 'primevue/usetoast';
 
 // Ref
@@ -13,6 +14,7 @@ const toggleMenu = ref(false);
 const menuBarItems = ref([]);
 const isSidebarCollapsed = ref(false);
 const op = ref();
+const profileMenu = ref();
 const eventAnnouncements = ref([]);
 const hasNewAnnouncements = ref(false);
 let announcementPoller = null;
@@ -61,29 +63,11 @@ const sideBarItems = computed(() => {
       route: route('archive'),
       roles: ['Admin', 'Principal'],
     },
-    {
-      separator: true,
-    },
-    {
-      label: 'Log Out',
-      icon: 'pi pi-sign-out',
-      shortcut: '⌘+S',
-      action: logout,
-    },
-    {
-      label: 'Login',
-      icon: 'pi pi-sign-in',
-      route: route('login'),
-    },
   ];
 
   const userRole = user.value?.name;
 
   return allItems.filter(item => {
-    if (item.label === 'Log Out') return !!user.value;
-
-    if (item.label === 'Login') return !user.value;
-
     if (item.separator) return true;
     if (!item.roles) return true;
     return userRole && item.roles.includes(userRole);
@@ -97,6 +81,23 @@ const toggleSidebar = () => {
 const logout = () => {
     const form = useForm({});
     form.post(route('logout'));
+};
+
+const profileMenuItems = computed(() => (user.value ? [
+    {
+        label: 'Logout',
+        icon: 'pi pi-sign-out',
+        command: logout
+    }
+] : [
+    {
+        label: 'Login',
+        icon: 'pi pi-sign-in',
+        command: () => router.visit(route('login'))
+    }
+]));
+const toggleProfileMenu = (event) => {
+    profileMenu.value.toggle(event);
 };
 
 const toggleAnnouncements = (event) => {
@@ -192,8 +193,9 @@ onUnmounted(() => {
             <header id="main-header" class="fixed top-0 left-0 right-0 z-[1100] w-full">
                 <Menubar :model="menuBarItems" class="w-full md:w-100 !border-l-0 !rounded-none">
                     <template #start>
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-4">
                             <button
+                                v-if="user"
                                 @click="toggleSidebar"
                                 class="p-2 rounded-md hover:bg-gray-200 transition-colors duration-200 flex items-center justify-center"
                                 style="height: 2.25rem; width: 2.25rem;"
@@ -201,8 +203,10 @@ onUnmounted(() => {
                             >
                                 <i class="pi pi-bars text-lg"></i>
                             </button>
-                            <Avatar image="/images/NCSlogo.png" shape="circle" class="menubar-logo" />
-                            <span class="text-xl font-semibold">Event Sphere</span>
+                            <Link :href="route('home')" class="flex items-center gap-3 text-surface-800 dark:text-surface-0 no-underline">
+                                <Avatar image="/images/NCSlogo.png" shape="circle" class="menubar-logo" />
+                                <span class="text-xl font-semibold">Event Sphere</span>
+                            </Link>
                         </div>
                     </template>
                     <template #end>
@@ -212,18 +216,19 @@ onUnmounted(() => {
                                 <Badge v-if="hasNewAnnouncements" severity="danger" class="absolute top-1 right-1 !p-0 !w-2 !h-2"></Badge>
                             </button>
 
-                            <button v-ripple class="relative overflow-hidden w-full border-0 bg-transparent flex items-start justify-center pl-4 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-none cursor-pointer transition-colors duration-200">
-                                <Avatar image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png" class="mr-2" shape="circle" />
+                            <button @click="toggleProfileMenu" aria-haspopup="true" aria-controls="profile_menu" v-ripple class="relative overflow-hidden w-full border-0 bg-transparent flex items-center justify-center pl-4 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-none cursor-pointer transition-colors duration-200">
+                                <Avatar :image="user ? 'https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png' : undefined" :icon="!user ? 'pi pi-user' : undefined" class="mr-2" shape="circle" />
                                 <span class="inline-flex flex-col items-start">
-                                    <span class="font-bold text-xs">{{ user?.name }}</span>
-                                    <span class="text-xs">Role</span>
+                                    <span class="font-bold text-xs">{{ user?.name || 'Guest' }}</span>
+                                    <span class="text-xs">{{ user ? 'Role' : 'Account' }}</span>
                                 </span>
                             </button>
+                            <Menu ref="profileMenu" id="profile_menu" :model="profileMenuItems" :popup="true" />
                         </div>
                     </template>
                 </Menubar>
             </header>
-            <aside id="main-sidebar" :class="[
+            <aside v-if="user" id="main-sidebar" :class="[
                 'fixed top-0 left-0 h-screen',
                 isSidebarCollapsed ? 'sidebar-collapsed' : 'sidebar-expanded'
             ]" style="padding-top:3.5rem;">
@@ -270,7 +275,7 @@ onUnmounted(() => {
             <main class="flex-1">
                 <div id="main-content-wrapper" :class="[
                     'md:mt-12 px-4 py-4',
-                    isSidebarCollapsed ? 'lg:ml-[48px] ml-[48px]' : 'lg:ml-60 ml-60'
+                    user ? (isSidebarCollapsed ? 'lg:ml-[48px]' : 'lg:ml-60') : ''
                 ]">
                     <slot />
                 </div>
@@ -437,5 +442,9 @@ button:hover {
 }
 :deep(.p-toast-message-info .p-toast-detail) {
     color: #4f46e5; /* indigo-600 */
+}
+
+.no-underline {
+  text-decoration: none;
 }
 </style>
