@@ -2,7 +2,7 @@
 import { Link, useForm, usePage, router } from '@inertiajs/vue3';
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
-import { format } from 'date-fns';
+import { format, subMonths } from 'date-fns';
 import OverlayPanel from 'primevue/overlaypanel';
 import Badge from 'primevue/badge';
 import Toast from 'primevue/toast';
@@ -16,9 +16,10 @@ const isSidebarCollapsed = ref(false);
 const op = ref();
 const profileMenu = ref();
 const menuStyle = ref({});
-const eventAnnouncements = ref([]);
-const hasNewAnnouncements = ref(false);
-let announcementPoller = null;
+const notifications = ref([]);
+const readNotificationIds = ref([]);
+const displayLimit = ref(10);
+let poller = null;
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
@@ -102,17 +103,45 @@ const toggleProfileMenu = (event) => {
     profileMenu.value.toggle(event);
 };
 
-const toggleAnnouncements = (event) => {
-  op.value.toggle(event);
-
-  if (hasNewAnnouncements.value) {
-    hasNewAnnouncements.value = false;
-    if (eventAnnouncements.value.length > 0) {
-      const latestTimestamp = new Date(eventAnnouncements.value[0].timestamp).getTime();
-      localStorage.setItem('lastSeenAnnouncementTimestamp', latestTimestamp.toString());
+const loadReadNotifications = () => {
+    const storedIds = localStorage.getItem('readNotificationIds');
+    if (storedIds) {
+        readNotificationIds.value = JSON.parse(storedIds);
     }
-  }
 };
+
+const markNotificationAsRead = (notificationId) => {
+    if (!readNotificationIds.value.includes(notificationId)) {
+        readNotificationIds.value.push(notificationId);
+        localStorage.setItem('readNotificationIds', JSON.stringify(readNotificationIds.value));
+        // Update the notification in the list for immediate UI feedback
+        const notification = notifications.value.find(n => n.id === notificationId);
+        if (notification) {
+            notification.isRead = true;
+        }
+    }
+};
+
+const handleNotificationClick = (notification) => {
+    markNotificationAsRead(notification.id);
+    if (notification.link) {
+        router.visit(notification.link);
+        op.value.hide();
+    }
+};
+
+const toggleNotifications = (event) => {
+  op.value.toggle(event);
+  displayLimit.value = 10;
+};
+
+const displayedNotifications = computed(() => {
+    return notifications.value.slice(0, displayLimit.value);
+});
+
+const showLoadMore = computed(() => {
+    return notifications.value.length > displayLimit.value;
+});
 
 const playNotificationSound = () => {
   // Ensure this runs only on the client
@@ -125,7 +154,23 @@ const playNotificationSound = () => {
   });
 };
 
-const fetchAndSetAnnouncements = async (isInitialLoad = false) => {
+const loadMore = () => {
+    displayLimit.value += 10;
+};
+
+const unreadCount = computed(() => notifications.value.filter(n => !n.isRead).length);
+
+const hasUnreadNotifications = computed(() => unreadCount.value > 0);
+
+const markAllAsRead = () => {
+    notifications.value.forEach(n => {
+        if (!n.isRead) {
+            markNotificationAsRead(n.id);
+        }
+    });
+};
+
+const pollForUpdates = async (isInitialLoad = false) => {
     try {
         const [eventsResponse, sportsResponse, eventAnnouncementsResponse] = await Promise.all([
             axios.get("http://localhost:3000/events"),
@@ -133,57 +178,84 @@ const fetchAndSetAnnouncements = async (isInitialLoad = false) => {
             axios.get("http://localhost:3000/event_announcements")
         ]);
 
-        const allNews = [...eventsResponse.data, ...sportsResponse.data]
-          .filter((news) => !news.archived);
+        const allEvents = [...eventsResponse.data, ...sportsResponse.data]
+          .filter((event) => !event.archived);
 
-        const eventMap = allNews.reduce((map, event) => {
+        const eventMap = allEvents.reduce((map, event) => {
             map[event.id] = event;
             return map;
         }, {});
 
-        const newAnnouncements = eventAnnouncementsResponse.data.map(ann => ({
-            ...ann,
-            event: eventMap[ann.eventId],
+        // Process announcements
+        const oneMonthAgo = subMonths(new Date(), 1);
+        const announcementNotifications = eventAnnouncementsResponse.data.map(ann => ({
+            id: `ann-${ann.id}`,
+            type: 'announcement',
+            timestamp: new Date(ann.timestamp),
+            data: {
+                ...ann,
+                event: eventMap[ann.eventId],
+            },
+            message: ann.message,
+            title: eventMap[ann.eventId] ? `Announcement: ${eventMap[ann.eventId]?.title}` : 'General Announcement',
+            link: eventMap[ann.eventId] ? route('event.details', { id: eventMap[ann.eventId].id, view: 'announcements' }) : null,
             formattedTimestamp: format(new Date(ann.timestamp), "MMMM dd, yyyy HH:mm"),
-        })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        }));
 
-        if (newAnnouncements.length > 0) {
-            const latestTimestamp = new Date(newAnnouncements[0].timestamp).getTime();
-            if (isInitialLoad) {
-                const lastSeenTimestamp = localStorage.getItem('lastSeenAnnouncementTimestamp');
-                if (!lastSeenTimestamp || latestTimestamp > parseInt(lastSeenTimestamp, 10)) {
-                    hasNewAnnouncements.value = true;
-                }
-            } else {
-                // For polling, if the latest announcement is different, show notification.
-                if (eventAnnouncements.value.length === 0 || newAnnouncements[0].id !== eventAnnouncements.value[0]?.id) {
-                    hasNewAnnouncements.value = true;
-                    toast.add({
-                        severity: 'info',
-                        summary: 'New Announcement',
-                        detail: newAnnouncements[0].message.substring(0, 100) + (newAnnouncements[0].message.length > 100 ? '...' : ''),
-                        life: 6000
-                    });
-                    playNotificationSound();
-                }
+        // Process new events
+        const newEventNotifications = allEvents
+            .filter(event => event.createdAt) // only events with createdAt
+            .map(event => ({
+                id: `evt-${event.id}`,
+                type: 'newEvent',
+                timestamp: new Date(event.createdAt),
+                data: event,
+                message: `New event created: ${event.title}`,
+                title: 'New Event',
+                link: route('event.details', { id: event.id }),
+                formattedTimestamp: format(new Date(event.createdAt), "MMMM dd, yyyy HH:mm"),
+            }));
+
+        const allNotifications = [...announcementNotifications, ...newEventNotifications]
+            .filter(n => n.timestamp >= oneMonthAgo)
+            .sort((a, b) => b.timestamp - a.timestamp)
+            .map(n => ({
+                ...n,
+                isRead: readNotificationIds.value.includes(n.id)
+            }));
+
+        // Check for genuinely new notifications to show a toast
+        if (!isInitialLoad) {
+            const latestId = allNotifications[0]?.id;
+            const previousLatestId = notifications.value[0]?.id;
+
+            if (latestId && latestId !== previousLatestId) {
+                const newNotification = allNotifications[0];
+                toast.add({
+                    severity: 'info',
+                    summary: newNotification.type === 'announcement' ? 'New Announcement' : 'New Event',
+                    detail: newNotification.message.substring(0, 100) + (newNotification.message.length > 100 ? '...' : ''),
+                    life: 6000
+                });
+                playNotificationSound();
             }
         }
-
-        eventAnnouncements.value = newAnnouncements;
+        notifications.value = allNotifications;
     } catch (error) {
-        console.error("Error fetching announcements:", error);
+        console.error("Error fetching updates:", error);
     }
 };
 
 onMounted(() => {
-    fetchAndSetAnnouncements(true);
-    // Poll for new announcements every 10 seconds for a more responsive feel.
-    announcementPoller = setInterval(() => fetchAndSetAnnouncements(false), 10000);
+    loadReadNotifications();
+    pollForUpdates(true);
+    // Poll for new updates every 10 seconds for a more responsive feel.
+    poller = setInterval(() => pollForUpdates(false), 10000);
 });
 
 onUnmounted(() => {
-    if (announcementPoller) {
-        clearInterval(announcementPoller);
+    if (poller) {
+        clearInterval(poller);
     }
 });
 </script>
@@ -213,10 +285,45 @@ onUnmounted(() => {
                     </template>
                     <template #end>
                         <div class="flex items-center gap-2 mr-2">
-                            <button @click="toggleAnnouncements" v-ripple :class="['relative p-ripple p-2 rounded-full hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors duration-200 text-slate-600', { 'notification-bell-ring': hasNewAnnouncements }]">
+                            <button @click="toggleNotifications" v-ripple :class="['relative p-ripple p-2 rounded-full hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors duration-200 text-slate-600', { 'notification-bell-ring': hasUnreadNotifications }]">
                                 <i class="pi pi-bell text-lg" />
-                                <Badge v-if="hasNewAnnouncements" severity="danger" class="absolute top-1 right-1 !p-0 !w-2 !h-2"></Badge>
+                                <Badge v-if="hasUnreadNotifications" severity="danger" class="absolute top-1 right-1 !p-0 !w-2 !h-2"></Badge>
                             </button>
+                            <OverlayPanel ref="op" :showCloseIcon="true" appendTo="self">
+                                <div class="w-80">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h3 class="font-bold text-center flex-1">Notifications</h3>
+                                        <button @click="markAllAsRead" v-if="unreadCount > 0" class="text-sm text-blue-600 hover:underline p-1">Mark all as read</button>
+                                    </div>
+                                    <ul v-if="notifications.length > 0" class="max-h-96 overflow-y-auto announcement-list">
+                                        <li
+                                        v-for="notification in displayedNotifications"
+                                        :key="notification.id"
+                                        @click="handleNotificationClick(notification)"
+                                        :class="[
+                                            'group p-3 border-b flex justify-between items-start transition-colors duration-150',
+                                            notification.link ? 'cursor-pointer' : '',
+                                            !notification.isRead ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-100'
+                                        ]"
+                                        >
+                                        <div class="flex-1 min-w-0">
+                                            <span class="text-xs font-semibold text-blue-600 group-hover:underline block truncate">
+                                                {{ notification.title }}
+                                            </span>
+                                            <p class="break-words text-sm w-full">{{ notification.message }}</p>
+                                            <p class="text-xs text-gray-500 mt-2">{{ notification.formattedTimestamp }}</p>
+                                        </div>
+                                        <div class="flex-shrink-0 ml-2" v-if="!notification.isRead">
+                                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-1"></div>
+                                        </div>
+                                        </li>
+                                    </ul>
+                                    <p v-else class="text-center text-sm text-gray-500 py-4">You're all caught up!</p>
+                                    <div v-if="showLoadMore" class="text-center mt-2">
+                                        <button @click="loadMore" class="text-sm font-semibold text-blue-600 hover:underline p-2 w-full">Load More</button>
+                                    </div>
+                                </div>
+                            </OverlayPanel>
 
                             <button @click="toggleProfileMenu" aria-haspopup="true" aria-controls="profile_menu" v-ripple class="relative overflow-hidden border-0 bg-transparent flex items-center justify-center px-3 py-2 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-md cursor-pointer transition-colors duration-200">
                                 <Avatar :image="user ? 'https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png' : undefined" :icon="!user ? 'pi pi-user' : undefined" class="mr-2" shape="circle" />
@@ -283,28 +390,6 @@ onUnmounted(() => {
                 </div>
             </main>
 
-            <OverlayPanel ref="op" :showCloseIcon="true">
-                <div class="w-80">
-                    <h3 class="font-bold text-center mb-2">Announcements</h3>
-                    <ul v-if="eventAnnouncements.length" class="max-h-96 overflow-y-auto announcement-list">
-                        <li
-                        v-for="announcement in eventAnnouncements"
-                        :key="announcement.id"
-                        @click="announcement.event && router.visit(route('event.details', { id: announcement.event.id, view: 'announcements' }))"
-                        :class="['group p-3 border-b flex justify-between items-start', announcement.event ? 'hover:bg-gray-100 cursor-pointer' : '']"
-                        >
-                        <div class="flex-1 min-w-0">
-                            <span v-if="announcement.event" class="text-xs font-semibold text-blue-600 group-hover:underline block truncate">
-                                {{ announcement.event.title }}
-                            </span>
-                            <p class="break-words text-sm w-full">{{ announcement.message }}</p>
-                            <p class="text-xs text-gray-500 mt-2">{{ announcement.formattedTimestamp }}</p>
-                        </div>
-                        </li>
-                    </ul>
-                    <p v-else class="text-center text-sm text-gray-500">No announcements</p>
-                </div>
-            </OverlayPanel>
         </div>
     </div>
 </template>
