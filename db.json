@@ -2790,6 +2790,24 @@
       "message": "Naay announcement",
       "timestamp": "2025-09-14T01:25:00.754Z",
       "image": null
+    },
+    {
+      "id": "ba0b",
+      "eventId": "b342",
+      "message": "Lisud",
+      "timestamp": "2025-09-14T01:45:46.842Z",
+      "image": null,
+      "userId": 7,
+      "userName": "Admin"
+    },
+    {
+      "id": "58a2",
+      "eventId": "8e8c",
+      "message": "Ako ang principal",
+      "timestamp": "2025-09-14T01:49:03.470Z",
+      "image": null,
+      "userId": 9,
+      "userName": "Principal"
     }
   ]
 }

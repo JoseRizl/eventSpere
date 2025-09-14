@@ -372,6 +372,8 @@ const addAnnouncement = async () => {
     message: newAnnouncement.value.message,
     timestamp: new Date().toISOString(),
     image: imageUrl,
+    userId: user.value.id,
+    userName: user.value.name
   };
 
   try {
@@ -750,7 +752,7 @@ const getBracketIndex = (bracketId) => {
                     <h1 v-else class="text-xl font-bold">{{ eventDetails.title }}</h1>
 
                         <button
-                            v-if="user?.name === 'Admin'"
+                            v-if="user?.name === 'Admin' || user?.name === 'Principal'"
                             @click="toggleEdit"
                             class="px-4 py-2 rounded bg-gray-600 text-white hover:bg-gray-700 ml-4"
                         >
@@ -1072,7 +1074,7 @@ const getBracketIndex = (bracketId) => {
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold">Event Announcements</h2>
         <Button
-          v-if="user?.name === 'Admin'"
+          v-if="user?.name === 'Admin' || user?.name === 'Principal'"
           label="Add Announcement"
           icon="pi pi-plus"
           class="p-button-sm"
@@ -1089,7 +1091,7 @@ const getBracketIndex = (bracketId) => {
           <!-- wrapper guarantees reliable positioning despite internal Button padding -->
           <div class="absolute top-2 right-2 z-10">
             <Button
-              v-if="user?.name === 'Admin'"
+              v-if="user?.name === 'Admin' || user?.name === 'Principal'"
               icon="pi pi-trash"
               class="p-button-text p-button-danger p-button-icon-only !p-2"
               @click="promptDeleteAnnouncement(announcement)"
@@ -1105,7 +1107,7 @@ const getBracketIndex = (bracketId) => {
               shape="circle"
               size="small"
             />
-            <span class="text-gray-600 text-sm font-semibold">{{user?.name}}</span>
+            <span class="text-gray-600 text-sm font-semibold">{{ announcement.userName || 'Admin' }}</span>
           </div>
 
           <p class="text-gray-800 text-base whitespace-pre-line">{{ announcement.message }}</p>
@@ -1239,7 +1241,7 @@ const getBracketIndex = (bracketId) => {
                             :key="matchIdx"
                             :id="`match-${roundIdx}-${matchIdx}`"
                             :class="['match']"
-                            @click="user?.name === 'Admin' && openMatchDialog(getBracketIndex(bracket.id), roundIdx, matchIdx, match, 'single')"
+                            @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openMatchDialog(getBracketIndex(bracket.id), roundIdx, matchIdx, match, 'single')"
                         >
                             <div class="player-box">
                                 <span
@@ -1284,7 +1286,7 @@ const getBracketIndex = (bracketId) => {
                             :key="`round-${roundIdx}-${matchIdx}`"
                             :id="`round-match-${roundIdx}-${matchIdx}`"
                             :class="['match']"
-                            @click="user?.name === 'Admin' && openRoundRobinMatchDialog(getBracketIndex(bracket.id), roundIdx, matchIdx, match)"
+                            @click="user?.name === 'Admin' || user?.name === 'SportsManager' && openRoundRobinMatchDialog(getBracketIndex(bracket.id), roundIdx, matchIdx, match)"
                             >
                             <div class="player-box">
                                 <span
@@ -1321,7 +1323,7 @@ const getBracketIndex = (bracketId) => {
                         <div class="standings-section">
                         <div class="standings-header-row">
                             <h3>Standings</h3>
-                            <button v-if="user?.name === 'Admin'"
+                            <button v-if="user?.name === 'Admin' || user?.name === 'SportsManager'"
                             @click="openScoringConfigDialog"
                             class="scoring-config-btn"
                             title="Configure scoring system"
@@ -1386,7 +1388,7 @@ const getBracketIndex = (bracketId) => {
                                 :key="`winners-${roundIdx}-${matchIdx}`"
                                 :id="`winners-match-${roundIdx}-${matchIdx}`"
                                 :class="['match']"
-                                @click="user?.name === 'Admin' && openMatchDialog(getBracketIndex(bracket.id), roundIdx, matchIdx, match, 'winners')"
+                                @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openMatchDialog(getBracketIndex(bracket.id), roundIdx, matchIdx, match, 'winners')"
                             >
                                 <div class="player-box">
                                 <span
@@ -1446,7 +1448,7 @@ const getBracketIndex = (bracketId) => {
                                 :key="`losers-${roundIdx}-${matchIdx}`"
                                 :id="`losers-match-${roundIdx}-${matchIdx}`"
                                 :class="['match']"
-                                @click="user?.name === 'Admin' && openMatchDialog(getBracketIndex(bracket.id), roundIdx + bracket.matches.winners.length, matchIdx, match, 'losers')"
+                                @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openMatchDialog(getBracketIndex(bracket.id), roundIdx + bracket.matches.winners.length, matchIdx, match, 'losers')"
                             >
                                 <div class="player-box">
                                 <span
@@ -1500,7 +1502,7 @@ const getBracketIndex = (bracketId) => {
                         <div v-for="(match, matchIdx) in bracket.matches.grand_finals" :key="`grand-finals-${matchIdx}`"
                             :id="`grand-finals-match-${matchIdx}`"
                             :class="['match']"
-                            @click="user?.name === 'Admin' && openMatchDialog(getBracketIndex(bracket.id), bracket.matches.winners.length + bracket.matches.losers.length, matchIdx, match, 'grand_finals')"
+                            @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openMatchDialog(getBracketIndex(bracket.id), bracket.matches.winners.length + bracket.matches.losers.length, matchIdx, match, 'grand_finals')"
                         >
                             <div class="player-box">
                             <span

@@ -431,7 +431,7 @@ const confirmDeleteAnnouncement = async () => {
               shape="circle"
               size="small"
             />
-            <span class="text-gray-600 text-sm font-semibold">{{ user?.name }}</span>
+            <span class="text-gray-600 text-sm font-semibold">{{ announcement.userName || 'Admin' }}</span>
           </div>
           <div v-if="announcement.event" class="mb-3">
             <span class="text-sm text-gray-600">For event:</span>
