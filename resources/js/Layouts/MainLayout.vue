@@ -3,7 +3,7 @@ import { Link, useForm, usePage, router } from '@inertiajs/vue3';
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
 import { format, subMonths } from 'date-fns';
-import OverlayPanel from 'primevue/overlaypanel';
+import Popover from 'primevue/popover';
 import Badge from 'primevue/badge';
 import Toast from 'primevue/toast';
 import Menu from 'primevue/menu';
@@ -295,7 +295,7 @@ onUnmounted(() => {
                                 <i class="pi pi-bell text-lg" />
                                 <Badge v-if="hasUnreadNotifications" severity="danger" class="absolute top-1 right-1 !p-0 !w-2 !h-2"></Badge>
                             </button>
-                            <OverlayPanel ref="op" :showCloseIcon="true" appendTo="self">
+                            <Popover ref="op">
                                 <div class="w-80">
                                     <div class="flex justify-between items-center mb-2">
                                         <h3 class="font-bold text-center flex-1">Notifications</h3>
@@ -329,7 +329,7 @@ onUnmounted(() => {
                                         <button @click="loadMore" class="text-sm font-semibold text-blue-600 hover:underline p-2 w-full">Load More</button>
                                     </div>
                                 </div>
-                            </OverlayPanel>
+                            </Popover>
 
                             <button @click="toggleProfileMenu" aria-haspopup="true" aria-controls="profile_menu" v-ripple class="relative overflow-hidden border-0 bg-transparent flex items-center justify-center px-3 py-2 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-md cursor-pointer transition-colors duration-200">
                                 <Avatar :image="user ? 'https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png' : undefined" :icon="!user ? 'pi pi-user' : undefined" class="mr-2" shape="circle" />
