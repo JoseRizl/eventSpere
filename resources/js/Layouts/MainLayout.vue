@@ -23,6 +23,7 @@ let poller = null;
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
+const allUsers = computed(() => page.props.all_users || []);
 const toast = useToast();
 
 const sideBarItems = computed(() => {
@@ -186,6 +187,11 @@ const pollForUpdates = async (isInitialLoad = false) => {
             return map;
         }, {});
 
+        const employeesMap = allUsers.value.reduce((map, emp) => {
+            map[emp.id] = emp;
+            return map;
+        }, {});
+
         // Process announcements
         const oneMonthAgo = subMonths(new Date(), 1);
         const announcementNotifications = eventAnnouncementsResponse.data.map(ann => ({
@@ -195,6 +201,7 @@ const pollForUpdates = async (isInitialLoad = false) => {
             data: {
                 ...ann,
                 event: eventMap[ann.eventId],
+                employee: employeesMap[ann.userId] || { name: 'Admin' }
             },
             message: ann.message,
             title: eventMap[ann.eventId] ? `Announcement: ${eventMap[ann.eventId]?.title}` : 'General Announcement',

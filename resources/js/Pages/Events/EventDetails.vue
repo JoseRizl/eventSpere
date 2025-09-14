@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue';
-import { parse, format, parseISO, isValid, addDays } from 'date-fns';
+import { parse, format, parseISO, isValid, addDays, endOfDay, isWithinInterval } from 'date-fns';
 import { usePage, router, Link } from '@inertiajs/vue3';
 import axios from 'axios';
 import LoadingSpinner from '@/Components/LoadingSpinner.vue';
@@ -14,6 +14,7 @@ import InputSwitch from 'primevue/inputswitch';
 import Button from 'primevue/button';
 import Select from 'primevue/select';
 import Textarea from 'primevue/textarea';
+import DatePicker from 'primevue/datepicker';
 
 // Inertia props
 const { props } = usePage();
@@ -39,6 +40,59 @@ const showDeleteScheduleConfirm = ref(false);
 const originalEventDetails = ref(null);
 const searchQuery = ref('');
 const scheduleToDelete = ref(null);
+
+// Announcement search
+const announcementSearchQuery = ref('');
+const announcementStartDateFilter = ref(null);
+const announcementEndDateFilter = ref(null);
+const showAnnouncementDateFilter = ref(false);
+
+const filteredEventAnnouncements = computed(() => {
+  let announcements = eventAnnouncements.value;
+
+  // Filter by search query
+  const query = announcementSearchQuery.value.toLowerCase().trim();
+  if (query) {
+    announcements = announcements.filter(announcement => {
+      const messageMatch = announcement.message?.toLowerCase().includes(query);
+      return messageMatch;
+    });
+  }
+
+  // Filter by date range
+  if (announcementStartDateFilter.value || announcementEndDateFilter.value) {
+    announcements = announcements.filter(ann => {
+      const annDate = new Date(ann.timestamp);
+      if (isNaN(annDate.getTime())) return false;
+
+      const filterStart = announcementStartDateFilter.value ? new Date(announcementStartDateFilter.value) : null;
+      const filterEnd = announcementEndDateFilter.value ? endOfDay(new Date(announcementEndDateFilter.value)) : null;
+
+      if (filterStart && !filterEnd) return annDate >= filterStart;
+      if (!filterStart && filterEnd) return annDate <= filterEnd;
+      if (filterStart && filterEnd) return isWithinInterval(annDate, { start: filterStart, end: filterEnd });
+      return true;
+    });
+  }
+
+  return announcements;
+});
+
+const toggleAnnouncementDateFilter = () => {
+  showAnnouncementDateFilter.value = !showAnnouncementDateFilter.value;
+};
+
+const clearAnnouncementDateFilter = () => {
+  announcementStartDateFilter.value = null;
+  announcementEndDateFilter.value = null;
+};
+
+const clearAnnouncementFilters = () => {
+  announcementSearchQuery.value = '';
+  announcementStartDateFilter.value = null;
+  announcementEndDateFilter.value = null;
+  showAnnouncementDateFilter.value = false;
+};
 
 // Event-specific announcements
 const eventAnnouncements = ref([]);
@@ -322,7 +376,16 @@ const fetchEventAnnouncements = async () => {
   if (!props.event?.id) return;
   try {
     const response = await axios.get(`http://localhost:3000/event_announcements?eventId=${props.event.id}`);
-    eventAnnouncements.value = response.data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    const employeesMap = employees.value.reduce((map, emp) => {
+        map[emp.id] = emp;
+        return map;
+    }, {});
+
+    eventAnnouncements.value = response.data.map(ann => ({
+        ...ann,
+        employee: employeesMap[ann.userId] || { name: 'Admin' }
+    })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
   } catch (error) {
     console.error('Error fetching event announcements:', error);
   }
@@ -373,12 +436,15 @@ const addAnnouncement = async () => {
     timestamp: new Date().toISOString(),
     image: imageUrl,
     userId: user.value.id,
-    userName: user.value.name
   };
 
   try {
     const response = await axios.post('http://localhost:3000/event_announcements', payload);
-    eventAnnouncements.value.unshift(response.data);
+    const newAnn = {
+        ...response.data,
+        employee: { name: user.value.name }
+    };
+    eventAnnouncements.value.unshift(newAnn);
     showAddAnnouncementModal.value = false;
     successMessage.value = 'Announcement posted successfully!';
     showSuccessDialog.value = true;
@@ -1082,9 +1148,58 @@ const getBracketIndex = (bracketId) => {
         />
       </div>
 
-      <div v-if="eventAnnouncements.length > 0" class="space-y-6">
+      <!-- Filters for Announcements -->
+      <div class="mb-4">
+        <div class="search-wrapper">
+            <div class="p-input-icon-left w-full">
+                <i class="pi pi-search" />
+                <InputText
+                    v-model="announcementSearchQuery"
+                    placeholder="Search by message..."
+                    class="w-full"
+                />
+            </div>
+            <Button
+                icon="pi pi-calendar"
+                class="p-button-outlined date-filter-btn"
+                @click="toggleAnnouncementDateFilter"
+                :class="{ 'p-button-primary': showAnnouncementDateFilter }"
+                v-tooltip.top="'Filter by date'"
+            />
+            <Button v-if="announcementSearchQuery || announcementStartDateFilter || announcementEndDateFilter" icon="pi pi-times" class="p-button-rounded p-button-text p-button-danger" @click="clearAnnouncementFilters" v-tooltip.top="'Clear All Filters'" />
+        </div>
+      </div>
+
+      <!-- Date Filter Calendar -->
+      <div v-if="showAnnouncementDateFilter" class="date-filter-container mb-4">
+          <div class="date-range-wrapper">
+            <div class="date-input-group">
+              <label>From:</label>
+              <DatePicker
+                v-model="announcementStartDateFilter"
+                dateFormat="M-dd-yy"
+                :showIcon="true"
+                placeholder="Start date"
+                class="date-filter-calendar"
+              />
+            </div>
+            <div class="date-input-group">
+              <label>To:</label>
+              <DatePicker
+                v-model="announcementEndDateFilter"
+                dateFormat="M-dd-yy"
+                :showIcon="true"
+                placeholder="End date"
+                class="date-filter-calendar"
+              />
+            </div>
+          </div>
+          <Button v-if="announcementStartDateFilter || announcementEndDateFilter" icon="pi pi-times" class="p-button-text p-button-rounded clear-date-btn" @click="clearAnnouncementDateFilter" v-tooltip.top="'Clear date filter'" />
+      </div>
+
+      <div v-if="filteredEventAnnouncements.length > 0" class="space-y-6">
         <div
-          v-for="announcement in eventAnnouncements"
+          v-for="announcement in filteredEventAnnouncements"
           :key="announcement.id"
           class="p-4 bg-gray-50 rounded-lg shadow-sm border border-gray-200 relative"
         >
@@ -1107,7 +1222,7 @@ const getBracketIndex = (bracketId) => {
               shape="circle"
               size="small"
             />
-            <span class="text-gray-600 text-sm font-semibold">{{ announcement.userName || 'Admin' }}</span>
+            <span class="text-gray-600 text-sm font-semibold">{{ announcement.employee?.name || 'Admin' }}</span>
           </div>
 
           <p class="text-gray-800 text-base whitespace-pre-line">{{ announcement.message }}</p>
@@ -1125,6 +1240,9 @@ const getBracketIndex = (bracketId) => {
         </div>
       </div>
 
+      <div v-else-if="announcementSearchQuery || announcementStartDateFilter || announcementEndDateFilter" class="text-center text-gray-500 py-8">
+        <p>No announcements found matching your search or filter.</p>
+      </div>
       <div v-else class="text-center text-gray-500 py-8">
         <p>No announcements for this event yet.</p>
       </div>
@@ -1828,9 +1946,85 @@ const getBracketIndex = (bracketId) => {
   transform: translateY(-50%);
   color: #6c757d;
 }
-
 .search-container .p-input-icon-left .p-inputtext {
   width: 100%;
   padding-left: 2.5rem;
+}
+
+.search-wrapper {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
+}
+
+.search-wrapper .p-input-icon-left {
+  position: relative;
+  width: 100%;
+}
+
+.search-wrapper .p-input-icon-left i {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+}
+
+.search-wrapper .p-input-icon-left .p-inputtext {
+  width: 100%;
+  padding-left: 2.5rem;
+}
+
+.date-filter-btn {
+  min-width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.date-filter-container {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.date-range-wrapper {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.date-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+
+.date-input-group label {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.date-filter-calendar {
+  width: 100%;
+}
+
+.clear-date-btn {
+  align-self: flex-end;
+  color: #dc3545;
+}
+
+.clear-date-btn:hover {
+  background-color: rgba(220, 53, 69, 0.1);
 }
 </style>

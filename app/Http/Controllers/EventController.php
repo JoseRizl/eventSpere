@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Models\Event;
+use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\File;
 use App\Models\Category;
@@ -31,8 +32,8 @@ class EventController extends Controller
         return response()->json([
             'events_prop' => $events,
             'tags_prop' => $data['tags'] ?? [],
-            'committees_prop' => $data['committees'] ?? [],
-            'employees_prop' => $data['employees'] ?? [],
+            'committees_prop' => $data['committees'] ?? [], // Assuming committees are still in db.json
+            'employees_prop' => User::all(['id', 'name']),
             'categories_prop' => $data['category'] ?? [],
         ]);
     }
@@ -40,8 +41,8 @@ class EventController extends Controller
     return Inertia::render('List/EventList', [
         'events_prop' => $events,
         'tags_prop' => $data['tags'] ?? [],
-        'committees_prop' => $data['committees'] ?? [],
-        'employees_prop' => $data['employees'] ?? [],
+        'committees_prop' => $data['committees'] ?? [], // Assuming committees are still in db.json
+        'employees_prop' => User::all(['id', 'name']),
         'categories_prop' => $data['category'] ?? [],
     ]);
 }
@@ -133,7 +134,7 @@ class EventController extends Controller
             'event' => $event,
             'tags' => $data['tags'] ?? [],
             'committees' => $data['committees'] ?? [],
-            'employees' => $data['employees'] ?? [],
+            'employees' => User::all(['id', 'name']),
             'categories' => $data['category'] ?? [],
             'relatedEvents' => $relatedEvents,
         ]);

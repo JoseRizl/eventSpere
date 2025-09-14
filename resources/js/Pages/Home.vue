@@ -1,13 +1,18 @@
 <script setup>
 import { ref, onMounted, computed, watch, nextTick } from "vue";
 import axios from "axios";
-import { format, isWithinInterval, isSameMonth, parse } from "date-fns";
+import { format, isWithinInterval, isSameMonth, parse, areIntervalsOverlapping, endOfDay } from "date-fns";
 import { Link, usePage, router } from "@inertiajs/vue3";
 import EventCalendar from '@/Components/EventCalendar.vue';
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 import SuccessDialog from '@/Components/SuccessDialog.vue';
 import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import Avatar from 'primevue/avatar';
+import InputText from 'primevue/inputtext';
+import DatePicker from 'primevue/datepicker';
+import Button from 'primevue/button';
+import Tag from 'primevue/tag';
+import Card from 'primevue/card';
 
 const allNews = ref([]);
 const now = new Date();
@@ -28,7 +33,13 @@ const announcementToDelete = ref(null);
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
+const allUsers = computed(() => page.props.all_users || []);
 const currentView = ref('events'); // 'events' or 'announcements'
+
+const searchQuery = ref('');
+const startDateFilter = ref(null);
+const endDateFilter = ref(null);
+const showDateFilter = ref(false);
 
 const getFullDateTime = (dateInput, timeStr) => {
   if (!dateInput) return null;
@@ -54,9 +65,51 @@ const getFullDateTime = (dateInput, timeStr) => {
   return date;
 };
 
+const filteredNews = computed(() => {
+    let news = allNews.value;
+
+    // Filter by search query
+    if (searchQuery.value) {
+        const query = searchQuery.value.toLowerCase().trim();
+        news = news.filter(event => {
+            const title = event.title?.toLowerCase() || '';
+            const description = event.description?.toLowerCase() || '';
+            return title.includes(query) || description.includes(query);
+        });
+    }
+
+    // Filter by date range
+    if (startDateFilter.value || endDateFilter.value) {
+        news = news.filter(event => {
+            const eventStart = getFullDateTime(event.startDate, event.startTime);
+            const eventEnd = getFullDateTime(event.endDate || event.startDate, event.endTime || '23:59');
+            if (!eventStart || !eventEnd) return false;
+
+            const filterStart = startDateFilter.value ? new Date(startDateFilter.value) : null;
+            const filterEnd = endDateFilter.value ? endOfDay(new Date(endDateFilter.value)) : null;
+
+            if (filterStart && filterEnd) {
+                return areIntervalsOverlapping(
+                    { start: eventStart, end: eventEnd },
+                    { start: filterStart, end: filterEnd }
+                );
+            }
+            if (filterStart) {
+                return eventEnd >= filterStart;
+            }
+            if (filterEnd) {
+                return eventStart <= filterEnd;
+            }
+            return true;
+        });
+    }
+
+    return news;
+});
+
 const ongoingEvents = computed(() => {
   const now = new Date();
-  const events = allNews.value.filter((news) => {
+  const events = filteredNews.value.filter((news) => {
     const start = getFullDateTime(news.startDate, news.startTime);
     // If no end date, it's a single-day event. If no end time, assume it lasts till end of day.
     const end = getFullDateTime(news.endDate || news.startDate, news.endTime || '23:59');
@@ -124,7 +177,7 @@ const getUpcomingSeverity = (event) => {
 
 const eventsThisMonth = computed(() => {
   const now = new Date();
-  const events = allNews.value.filter((news) => {
+  const events = filteredNews.value.filter((news) => {
     const start = getFullDateTime(news.startDate, news.startTime);
     const end = getFullDateTime(news.endDate || news.startDate, news.endTime || '23:59');
 
@@ -140,7 +193,7 @@ const eventsThisMonth = computed(() => {
 
 const upcomingEvents = computed(() => {
   const now = new Date();
-  const events = allNews.value.filter((news) => {
+  const events = filteredNews.value.filter((news) => {
     const start = getFullDateTime(news.startDate, news.startTime);
     if (!start) return false;
     // Event is in the future and not in the current month.
@@ -151,13 +204,42 @@ const upcomingEvents = computed(() => {
   return events.sort((a, b) => getFullDateTime(a.startDate, a.startTime) - getFullDateTime(b.startDate, b.startTime));
 });
 
+const filteredAnnouncements = computed(() => {
+    let announcements = eventAnnouncements.value;
+
+    if (searchQuery.value) {
+        const query = searchQuery.value.toLowerCase().trim();
+        announcements = announcements.filter(ann => {
+            const messageMatch = ann.message?.toLowerCase().includes(query);
+            const eventTitleMatch = ann.event?.title?.toLowerCase().includes(query);
+            return messageMatch || eventTitleMatch;
+        });
+    }
+
+    if (startDateFilter.value || endDateFilter.value) {
+        announcements = announcements.filter(ann => {
+            const annDate = new Date(ann.timestamp);
+            if (isNaN(annDate.getTime())) return false;
+
+            const filterStart = startDateFilter.value ? new Date(startDateFilter.value) : null;
+            const filterEnd = endDateFilter.value ? endOfDay(new Date(endDateFilter.value)) : null;
+
+            if (filterStart && !filterEnd) return annDate >= filterStart;
+            if (!filterStart && filterEnd) return annDate <= filterEnd;
+            if (filterStart && filterEnd) return isWithinInterval(annDate, { start: filterStart, end: filterEnd });
+            return true;
+        });
+    }
+    return announcements;
+});
+
 // Fetch announcements and news
 onMounted(async () => {
   try {
     const [eventsResponse, sportsResponse, eventAnnouncementsResponse] = await Promise.all([
         axios.get("http://localhost:3000/events"),
         axios.get("http://localhost:3000/sports"),
-        axios.get("http://localhost:3000/event_announcements")
+        axios.get("http://localhost:3000/event_announcements"),
     ]);
 
     allNews.value = [...eventsResponse.data, ...sportsResponse.data]
@@ -175,9 +257,15 @@ onMounted(async () => {
         return map;
     }, {});
 
+    const employeesMap = allUsers.value.reduce((map, emp) => {
+        map[emp.id] = emp;
+        return map;
+    }, {});
+
     eventAnnouncements.value = eventAnnouncementsResponse.data.map(ann => ({
         ...ann,
         event: eventMap[ann.eventId],
+        employee: employeesMap[ann.userId] || { name: 'Admin' },
         formattedTimestamp: format(new Date(ann.timestamp), "MMMM dd, yyyy HH:mm"),
     })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
@@ -219,6 +307,22 @@ const confirmDeleteAnnouncement = async () => {
   }
 };
 
+const toggleDateFilter = () => {
+  showDateFilter.value = !showDateFilter.value;
+};
+
+const clearDateFilter = () => {
+    startDateFilter.value = null;
+    endDateFilter.value = null;
+};
+
+const clearFilters = () => {
+    searchQuery.value = '';
+    startDateFilter.value = null;
+    endDateFilter.value = null;
+    showDateFilter.value = false;
+};
+
 </script>
 
 <template>
@@ -229,7 +333,8 @@ const confirmDeleteAnnouncement = async () => {
     <!-- View Toggle -->
     <div class="w-full max-w-5xl mt-8">
       <div class="flex border-b">
-        <button
+        <div class="flex items-center">
+          <button
           @click="currentView = 'events'"
           :class="[
             'px-4 py-2 font-semibold transition-colors duration-200',
@@ -239,8 +344,8 @@ const confirmDeleteAnnouncement = async () => {
           ]"
         >
           Events
-        </button>
-        <button
+          </button>
+          <button
           @click="currentView = 'announcements'"
           :class="[
             'px-4 py-2 font-semibold transition-colors duration-200',
@@ -250,166 +355,219 @@ const confirmDeleteAnnouncement = async () => {
           ]"
         >
           Announcements
-        </button>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="mt-4">
+        <div class="search-wrapper">
+            <div class="p-input-icon-left">
+                <i class="pi pi-search" />
+                <InputText v-model="searchQuery" :placeholder="currentView === 'events' ? 'Search by title or description...' : 'Search by message or event...'" class="w-full" />
+            </div>
+            <Button
+                icon="pi pi-calendar"
+                class="p-button-outlined date-filter-btn"
+                @click="toggleDateFilter"
+                :class="{ 'p-button-primary': showDateFilter }"
+                v-tooltip.top="'Filter by date'"
+            />
+            <Button v-if="searchQuery || startDateFilter || endDateFilter" icon="pi pi-times" class="p-button-rounded p-button-text p-button-danger" @click="clearFilters" v-tooltip.top="'Clear All Filters'" />
+        </div>
+      </div>
+
+      <!-- Date Filter Calendar -->
+      <div v-if="showDateFilter" class="date-filter-container mt-2">
+          <div class="date-range-wrapper">
+            <div class="date-input-group">
+              <label>From:</label>
+              <DatePicker
+                v-model="startDateFilter"
+                dateFormat="M-dd-yy"
+                :showIcon="true"
+                placeholder="Start date"
+                class="date-filter-calendar"
+              />
+            </div>
+            <div class="date-input-group">
+              <label>To:</label>
+              <DatePicker
+                v-model="endDateFilter"
+                dateFormat="M-dd-yy"
+                :showIcon="true"
+                placeholder="End date"
+                class="date-filter-calendar"
+              />
+            </div>
+          </div>
+          <Button v-if="startDateFilter || endDateFilter" icon="pi pi-times" class="p-button-text p-button-rounded clear-date-btn" @click="clearDateFilter" v-tooltip.top="'Clear date filter'" />
       </div>
     </div>
 
     <!-- Conditional Content -->
-    <div v-if="currentView === 'events'">
-      <!-- Ongoing Events -->
-      <div v-if="ongoingEvents.length > 0" class="w-full max-w-5xl mt-8">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-semibold">Ongoing Events</h2>
-          <Button
-            size="small"
-            :icon="showOngoingEvents ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
-            :label="showOngoingEvents ? 'Hide' : 'Show'"
-            @click="showOngoingEvents = !showOngoingEvents"
-            class="p-button-text"
-          />
-        </div>
-        <div v-if="showOngoingEvents">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div v-for="(event, index) in ongoingEvents" :key="'ongoing-' + index" class="group relative h-full">
-              <Link :href="route('event.details', { id: event.id })" preserve-scroll class="block h-full">
-                <Card class="h-full flex flex-col justify-between min-h-[280px]">
-                  <template #header>
-                    <div class="h-40 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
-                      <div class="absolute inset-0 bg-gradient-to-b from-gray-900/20 to-transparent z-10"></div>
-                      <img v-if="event.image" :src="event.image" class="h-full w-full object-cover" alt="Event image"/>
-                      <img v-else src="/resources/images/NCSlogo.png" class="w-24 h-24 object-contain opacity-50" alt="Event Placeholder" />
-                      <Tag v-if="isNewEvent(event)" value="NEW" severity="success" class="absolute top-2 right-2 z-20"/>
-                    </div>
-                  </template>
-                  <template #title>
-                    <h3 class="text-lg font-medium overflow-hidden line-clamp-1 cursor-help" v-tooltip.top="event.title">{{ event.title }}</h3>
-                  </template>
-                  <template #subtitle>
-                    <div class="flex items-center gap-2">
-                      <span class="text-sm text-gray-500">{{ event.formattedDate }}</span>
-                      <Tag :value="getUpcomingTag(event)" :severity="getUpcomingSeverity(event)" class="text-xs"/>
-                    </div>
-                  </template>
-                  <template #content>
-                    <div class="flex-1 mb-2 overflow-hidden h-[calc(1.5rem)]">
-                      <p class="text-sm text-gray-600 line-clamp-1">{{ event.description }}</p>
-                    </div>
-                  </template>
-                  <template #footer>
-                    <div class="flex justify-end mt-2 z-20">
-                      <Button label="View Details" icon="pi pi-info-circle" class="p-button-text p-button-sm" @click.stop="$inertia.visit(route('event.details', { id: event.id }))"/>
-                    </div>
-                  </template>
-                </Card>
-              </Link>
+    <div v-if="currentView === 'events'" class="w-full max-w-5xl">
+      <div v-if="!filteredNews.length && (searchQuery || startDateFilter || endDateFilter)" class="w-full max-w-5xl mt-8 flex flex-col items-center justify-center py-10 bg-gray-50 rounded-lg shadow-inner border border-dashed border-gray-300 text-center text-gray-500">
+        <span class="text-4xl mb-2">🧐</span>
+        <span class="font-semibold text-lg">No Events Found</span>
+        <span class="text-sm">Try adjusting your search or date filters.</span>
+      </div>
+      <div v-else>
+        <!-- Ongoing Events -->
+        <div v-if="ongoingEvents.length > 0" class="w-full max-w-5xl mt-8">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Ongoing Events</h2>
+            <Button
+              size="small"
+              :icon="showOngoingEvents ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+              :label="showOngoingEvents ? 'Hide' : 'Show'"
+              @click="showOngoingEvents = !showOngoingEvents"
+              class="p-button-text"
+            />
+          </div>
+          <div v-if="showOngoingEvents">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div v-for="(event, index) in ongoingEvents" :key="'ongoing-' + index" class="group relative h-full">
+                <Link :href="route('event.details', { id: event.id })" preserve-scroll class="block h-full">
+                  <Card class="h-full flex flex-col justify-between min-h-[280px]">
+                    <template #header>
+                      <div class="h-40 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
+                        <div class="absolute inset-0 bg-gradient-to-b from-gray-900/20 to-transparent z-10"></div>
+                        <img v-if="event.image" :src="event.image" class="h-full w-full object-cover" alt="Event image"/>
+                        <img v-else src="/resources/images/NCSlogo.png" class="w-24 h-24 object-contain opacity-50" alt="Event Placeholder" />
+                        <Tag v-if="isNewEvent(event)" value="NEW" severity="success" class="absolute top-2 right-2 z-20"/>
+                      </div>
+                    </template>
+                    <template #title>
+                      <h3 class="text-lg font-medium overflow-hidden line-clamp-1 cursor-help" v-tooltip.top="event.title">{{ event.title }}</h3>
+                    </template>
+                    <template #subtitle>
+                      <div class="flex items-center gap-2">
+                        <span class="text-sm text-gray-500">{{ event.formattedDate }}</span>
+                        <Tag :value="getUpcomingTag(event)" :severity="getUpcomingSeverity(event)" class="text-xs"/>
+                      </div>
+                    </template>
+                    <template #content>
+                      <div class="flex-1 mb-2 overflow-hidden h-[calc(1.5rem)]">
+                        <p class="text-sm text-gray-600 line-clamp-1">{{ event.description }}</p>
+                      </div>
+                    </template>
+                    <template #footer>
+                      <div class="flex justify-end mt-2 z-20">
+                        <Button label="View Details" icon="pi pi-info-circle" class="p-button-text p-button-sm" @click.stop="$inertia.visit(route('event.details', { id: event.id }))"/>
+                      </div>
+                    </template>
+                  </Card>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Events This Month -->
-      <div v-if="eventsThisMonth.length > 0" class="w-full max-w-5xl mt-8">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-semibold">Events This Month</h2>
-          <Button size="small" :icon="showEventsThisMonth ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" :label="showEventsThisMonth ? 'Hide' : 'Show'" @click="showEventsThisMonth = !showEventsThisMonth" class="p-button-text"/>
-        </div>
-        <div v-if="showEventsThisMonth">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div v-for="(event, index) in eventsThisMonth" :key="'month-' + index" class="group relative h-full">
-              <Link :href="route('event.details', { id: event.id })" preserve-scroll class="block h-full">
-                <Card class="h-full flex flex-col justify-between min-h-[280px]">
-                  <template #header>
-                    <div class="h-40 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
-                      <div class="absolute inset-0 bg-gradient-to-b from-gray-900/20 to-transparent z-10"></div>
-                      <img v-if="event.image" :src="event.image" class="h-full w-full object-cover" alt="Event image"/>
-                      <img v-else src="/resources/images/NCSlogo.png" class="w-24 h-24 object-contain opacity-50" alt="Event Placeholder" />
-                      <Tag v-if="isNewEvent(event)" value="NEW" severity="success" class="absolute top-2 right-2 z-20"/>
-                    </div>
-                  </template>
-                  <template #title>
-                    <h3 class="text-lg font-medium overflow-hidden line-clamp-1 cursor-help" v-tooltip.top="event.title">{{ event.title }}</h3>
-                  </template>
-                  <template #subtitle>
-                    <div class="flex items-center gap-2">
-                      <span class="text-sm text-gray-500">{{ event.formattedDate }}</span>
-                      <Tag :value="getUpcomingTag(event)" :severity="getUpcomingSeverity(event)" class="text-xs"/>
-                    </div>
-                  </template>
-                  <template #content>
-                    <div class="flex-1 mb-2 overflow-hidden h-[calc(1.5rem)]">
-                      <p class="text-sm text-gray-600 line-clamp-1">{{ event.description }}</p>
-                    </div>
-                  </template>
-                  <template #footer>
-                    <div class="flex justify-end mt-2 z-20">
-                      <Button label="View Details" icon="pi pi-info-circle" class="p-button-text p-button-sm" @click.stop="$inertia.visit(route('event.details', { id: event.id }))"/>
-                    </div>
-                  </template>
-                </Card>
-              </Link>
+        <!-- Events This Month -->
+        <div v-if="eventsThisMonth.length > 0" class="w-full max-w-5xl mt-8">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Events This Month</h2>
+            <Button size="small" :icon="showEventsThisMonth ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" :label="showEventsThisMonth ? 'Hide' : 'Show'" @click="showEventsThisMonth = !showEventsThisMonth" class="p-button-text"/>
+          </div>
+          <div v-if="showEventsThisMonth">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div v-for="(event, index) in eventsThisMonth" :key="'month-' + index" class="group relative h-full">
+                <Link :href="route('event.details', { id: event.id })" preserve-scroll class="block h-full">
+                  <Card class="h-full flex flex-col justify-between min-h-[280px]">
+                    <template #header>
+                      <div class="h-40 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
+                        <div class="absolute inset-0 bg-gradient-to-b from-gray-900/20 to-transparent z-10"></div>
+                        <img v-if="event.image" :src="event.image" class="h-full w-full object-cover" alt="Event image"/>
+                        <img v-else src="/resources/images/NCSlogo.png" class="w-24 h-24 object-contain opacity-50" alt="Event Placeholder" />
+                        <Tag v-if="isNewEvent(event)" value="NEW" severity="success" class="absolute top-2 right-2 z-20"/>
+                      </div>
+                    </template>
+                    <template #title>
+                      <h3 class="text-lg font-medium overflow-hidden line-clamp-1 cursor-help" v-tooltip.top="event.title">{{ event.title }}</h3>
+                    </template>
+                    <template #subtitle>
+                      <div class="flex items-center gap-2">
+                        <span class="text-sm text-gray-500">{{ event.formattedDate }}</span>
+                        <Tag :value="getUpcomingTag(event)" :severity="getUpcomingSeverity(event)" class="text-xs"/>
+                      </div>
+                    </template>
+                    <template #content>
+                      <div class="flex-1 mb-2 overflow-hidden h-[calc(1.5rem)]">
+                        <p class="text-sm text-gray-600 line-clamp-1">{{ event.description }}</p>
+                      </div>
+                    </template>
+                    <template #footer>
+                      <div class="flex justify-end mt-2 z-20">
+                        <Button label="View Details" icon="pi pi-info-circle" class="p-button-text p-button-sm" @click.stop="$inertia.visit(route('event.details', { id: event.id }))"/>
+                      </div>
+                    </template>
+                  </Card>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Upcoming Events -->
-      <div v-if="upcomingEvents.length > 0" class="w-full max-w-5xl mt-8">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-semibold">Upcoming Events</h2>
-          <Button size="small" :icon="showUpcomingEvents ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" :label="showUpcomingEvents ? 'Hide' : 'Show'" @click="showUpcomingEvents = !showUpcomingEvents" class="p-button-text"/>
-        </div>
-        <div v-if="showUpcomingEvents">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div v-for="(event, index) in upcomingEvents" :key="'upcoming-' + index" class="group relative h-full">
-              <Link :href="route('event.details', { id: event.id })" preserve-scroll class="block h-full">
-                <Card class="h-full flex flex-col justify-between min-h-[280px]">
-                  <template #header>
-                    <div class="h-40 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
-                      <div class="absolute inset-0 bg-gradient-to-b from-gray-900/20 to-transparent z-10"></div>
-                      <img v-if="event.image" :src="event.image" class="h-full w-full object-cover" alt="Event image"/>
-                      <img v-else src="/resources/images/NCSlogo.png" class="w-24 h-24 object-contain opacity-50" alt="Event Placeholder" />
-                      <Tag v-if="isNewEvent(event)" value="NEW" severity="success" class="absolute top-2 right-2 z-20"/>
-                    </div>
-                  </template>
-                  <template #title>
-                    <h3 class="text-lg font-medium overflow-hidden line-clamp-1 cursor-help" v-tooltip.top="event.title">{{ event.title }}</h3>
-                  </template>
-                  <template #subtitle>
-                    <div class="flex items-center gap-2">
-                      <span class="text-sm text-gray-500">{{ event.formattedDate }}</span>
-                      <Tag :value="getUpcomingTag(event)" :severity="getUpcomingSeverity(event)" class="text-xs"/>
-                    </div>
-                  </template>
-                  <template #content>
-                    <div class="flex-1 mb-2 overflow-hidden h-[calc(1.5rem)]">
-                      <p class="text-sm text-gray-600 line-clamp-1">{{ event.description }}</p>
-                    </div>
-                  </template>
-                  <template #footer>
-                    <div class="flex justify-end mt-2 z-20">
-                      <Button label="View Details" icon="pi pi-info-circle" class="p-button-text p-button-sm" @click.stop="$inertia.visit(route('event.details', { id: event.id }))"/>
-                    </div>
-                  </template>
-                </Card>
-              </Link>
+        <!-- Upcoming Events -->
+        <div v-if="upcomingEvents.length > 0" class="w-full max-w-5xl mt-8">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Upcoming Events</h2>
+            <Button size="small" :icon="showUpcomingEvents ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" :label="showUpcomingEvents ? 'Hide' : 'Show'" @click="showUpcomingEvents = !showUpcomingEvents" class="p-button-text"/>
+          </div>
+          <div v-if="showUpcomingEvents">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div v-for="(event, index) in upcomingEvents" :key="'upcoming-' + index" class="group relative h-full">
+                <Link :href="route('event.details', { id: event.id })" preserve-scroll class="block h-full">
+                  <Card class="h-full flex flex-col justify-between min-h-[280px]">
+                    <template #header>
+                      <div class="h-40 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
+                        <div class="absolute inset-0 bg-gradient-to-b from-gray-900/20 to-transparent z-10"></div>
+                        <img v-if="event.image" :src="event.image" class="h-full w-full object-cover" alt="Event image"/>
+                        <img v-else src="/resources/images/NCSlogo.png" class="w-24 h-24 object-contain opacity-50" alt="Event Placeholder" />
+                        <Tag v-if="isNewEvent(event)" value="NEW" severity="success" class="absolute top-2 right-2 z-20"/>
+                      </div>
+                    </template>
+                    <template #title>
+                      <h3 class="text-lg font-medium overflow-hidden line-clamp-1 cursor-help" v-tooltip.top="event.title">{{ event.title }}</h3>
+                    </template>
+                    <template #subtitle>
+                      <div class="flex items-center gap-2">
+                        <span class="text-sm text-gray-500">{{ event.formattedDate }}</span>
+                        <Tag :value="getUpcomingTag(event)" :severity="getUpcomingSeverity(event)" class="text-xs"/>
+                      </div>
+                    </template>
+                    <template #content>
+                      <div class="flex-1 mb-2 overflow-hidden h-[calc(1.5rem)]">
+                        <p class="text-sm text-gray-600 line-clamp-1">{{ event.description }}</p>
+                      </div>
+                    </template>
+                    <template #footer>
+                      <div class="flex justify-end mt-2 z-20">
+                        <Button label="View Details" icon="pi pi-info-circle" class="p-button-text p-button-sm" @click.stop="$inertia.visit(route('event.details', { id: event.id }))"/>
+                      </div>
+                    </template>
+                  </Card>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Event Calendar -->
-    <div class="w-full max-w-5xl">
-        <h2 class="text-2xl font-bold mb-6 mt-8 text-center">Event Calendar</h2>
-      <EventCalendar :events="allNews" />
-    </div>
+        <!-- Event Calendar -->
+        <div class="w-full max-w-5xl">
+            <h2 class="text-2xl font-bold mb-6 mt-8 text-center">Event Calendar</h2>
+          <EventCalendar :events="filteredNews" />
+        </div>
+      </div>
     </div>
 
     <!-- Announcement Board -->
     <div v-if="currentView === 'announcements'" class="w-full max-w-5xl mt-8">
       <h2 class="text-xl font-semibold mb-5">Announcement Board</h2>
-      <div v-if="eventAnnouncements.length" class="space-y-6">
+      <div v-if="filteredAnnouncements.length" class="space-y-6">
         <div
-          v-for="announcement in eventAnnouncements"
+          v-for="announcement in filteredAnnouncements"
           :key="announcement.id"
           :id="`announcement-${announcement.id}`"
           @click="announcement.event && router.visit(route('event.details', { id: announcement.event.id, view: 'announcements' }))"
@@ -431,7 +589,7 @@ const confirmDeleteAnnouncement = async () => {
               shape="circle"
               size="small"
             />
-            <span class="text-gray-600 text-sm font-semibold">{{ announcement.userName || 'Admin' }}</span>
+            <span class="text-gray-600 text-sm font-semibold">{{ announcement.employee?.name || 'Admin' }}</span>
           </div>
           <div v-if="announcement.event" class="mb-3">
             <span class="text-sm text-gray-600">For event:</span>
@@ -449,11 +607,16 @@ const confirmDeleteAnnouncement = async () => {
           <p class="text-sm text-gray-500 mt-4 text-right">{{ announcement.formattedTimestamp }}</p>
         </div>
       </div>
-      <p v-else class="flex flex-col items-center justify-center py-10 bg-gray-50 rounded-lg shadow-inner border border-dashed border-gray-300 text-center text-gray-500">
+      <div v-else-if="searchQuery || startDateFilter || endDateFilter" class="flex flex-col items-center justify-center py-10 bg-gray-50 rounded-lg shadow-inner border border-dashed border-gray-300 text-center text-gray-500">
+        <span class="text-4xl mb-2">🧐</span>
+        <span class="font-semibold text-lg">No Announcements Found</span>
+        <span class="text-sm">Try adjusting your search or date filters.</span>
+      </div>
+      <div v-else class="flex flex-col items-center justify-center py-10 bg-gray-50 rounded-lg shadow-inner border border-dashed border-gray-300 text-center text-gray-500">
         <span class="text-4xl mb-2">📢</span>
         <span class="font-semibold text-lg">No announcements yet</span>
         <span class="text-sm">Check back later for updates.</span>
-      </p>
+      </div>
     </div>
 
     <!-- Dialogs -->
@@ -549,5 +712,82 @@ const confirmDeleteAnnouncement = async () => {
 .highlight {
   background-color: #e9d5ff; /* light purple */
   transition: background-color 0.5s ease-out;
+}
+
+.search-wrapper {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
+}
+
+.search-wrapper .p-input-icon-left {
+  position: relative;
+  width: 100%;
+}
+
+.search-wrapper .p-input-icon-left i {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+}
+
+.search-wrapper .p-input-icon-left .p-inputtext {
+  width: 100%;
+  padding-left: 2.5rem;
+}
+
+.date-filter-btn {
+  min-width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.date-filter-container {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.date-range-wrapper {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.date-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+
+.date-input-group label {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.date-filter-calendar {
+  width: 100%;
+}
+
+.clear-date-btn {
+  align-self: flex-end;
+  color: #dc3545;
+}
+
+.clear-date-btn:hover {
+  background-color: rgba(220, 53, 69, 0.1);
 }
 </style>
