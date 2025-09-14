@@ -68,12 +68,12 @@ const sideBarItems = computed(() => {
     },
   ];
 
-  const userRole = user.value?.name;
+  const userRole = user.value?.role;
 
   return allItems.filter(item => {
     if (item.separator) return true;
     if (!item.roles) return true;
-    return userRole && item.roles.includes(userRole);
+    return user.value && item.roles.includes(user.value.role);
   });
 });
 
@@ -335,7 +335,7 @@ onUnmounted(() => {
                                 <Avatar :image="user ? 'https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png' : undefined" :icon="!user ? 'pi pi-user' : undefined" class="mr-2" shape="circle" />
                                 <span class="inline-flex flex-col items-start">
                                     <span class="font-bold text-xs">{{ user?.name || 'Guest' }}</span>
-                                    <span class="text-xs">{{ user ? 'Role' : 'Account' }}</span>
+                                    <span class="text-xs">{{ user?.role || 'Account' }}</span>
                                 </span>
                             </button>
                             <Menu ref="profileMenu" id="profile_menu" :model="profileMenuItems" :popup="true" appendTo="self" :pt="{ root: { style: menuStyle } }" />

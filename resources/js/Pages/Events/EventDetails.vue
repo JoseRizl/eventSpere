@@ -757,7 +757,7 @@ const getBracketIndex = (bracketId) => {
     <div class="min-h-screen bg-gray-200 py-8 px-4">
         <div class="max-w-6xl mx-auto mt-4">
             <!-- Back Button for non-management -->
-            <div v-if="!user || !['Admin', 'Principal', 'SportsManager'].includes(user.name)" class="mb-4">
+            <div v-if="!user || !['Admin', 'Principal', 'SportsManager'].includes(user.role)" class="mb-4">
                 <Button icon="pi pi-arrow-left" label="Back" @click="goBack" class="p-button-text" />
             </div>
 
@@ -818,7 +818,7 @@ const getBracketIndex = (bracketId) => {
                     <h1 v-else class="text-xl font-bold">{{ eventDetails.title }}</h1>
 
                         <button
-                            v-if="user?.name === 'Admin' || user?.name === 'Principal'"
+                            v-if="user?.role === 'Admin' || user?.role === 'Principal'"
                             @click="toggleEdit"
                             class="px-4 py-2 rounded bg-gray-600 text-white hover:bg-gray-700 ml-4"
                         >
@@ -1140,7 +1140,7 @@ const getBracketIndex = (bracketId) => {
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold">Event Announcements</h2>
         <Button
-          v-if="user?.name === 'Admin' || user?.name === 'Principal'"
+          v-if="user?.role === 'Admin' || user?.role === 'Principal'"
           label="Add Announcement"
           icon="pi pi-plus"
           class="p-button-sm"
@@ -1204,9 +1204,8 @@ const getBracketIndex = (bracketId) => {
           class="p-4 bg-gray-50 rounded-lg shadow-sm border border-gray-200 relative"
         >
           <!-- wrapper guarantees reliable positioning despite internal Button padding -->
-          <div class="absolute top-2 right-2 z-10">
+          <div v-if="user?.role === 'Admin' || user?.role === 'Principal'" class="absolute top-2 right-2 z-10">
             <Button
-              v-if="user?.name === 'Admin' || user?.name === 'Principal'"
               icon="pi pi-trash"
               class="p-button-text p-button-danger p-button-icon-only !p-2"
               @click="promptDeleteAnnouncement(announcement)"
@@ -1358,8 +1357,8 @@ const getBracketIndex = (bracketId) => {
                             v-for="(match, matchIdx) in round"
                             :key="matchIdx"
                             :id="`match-${roundIdx}-${matchIdx}`"
-                            :class="['match']"
-                            @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openMatchDialog(getBracketIndex(bracket.id), roundIdx, matchIdx, match, 'single')"
+                            :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
+                            @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && openMatchDialog(getBracketIndex(bracket.id), roundIdx, matchIdx, match, 'single')"
                         >
                             <div class="player-box">
                                 <span
@@ -1403,8 +1402,8 @@ const getBracketIndex = (bracketId) => {
                             v-for="(match, matchIdx) in round"
                             :key="`round-${roundIdx}-${matchIdx}`"
                             :id="`round-match-${roundIdx}-${matchIdx}`"
-                            :class="['match']"
-                            @click="user?.name === 'Admin' || user?.name === 'SportsManager' && openRoundRobinMatchDialog(getBracketIndex(bracket.id), roundIdx, matchIdx, match)"
+                            :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
+                            @click="user?.role === 'Admin' || user?.role === 'SportsManager' && openRoundRobinMatchDialog(getBracketIndex(bracket.id), roundIdx, matchIdx, match)"
                             >
                             <div class="player-box">
                                 <span
@@ -1440,8 +1439,8 @@ const getBracketIndex = (bracketId) => {
                         <!-- Round Robin Standings -->
                         <div class="standings-section">
                         <div class="standings-header-row">
-                            <h3>Standings</h3>
-                            <button v-if="user?.name === 'Admin' || user?.name === 'SportsManager'"
+                            <h3 class="text-lg font-semibold">Standings</h3>
+                            <button v-if="user?.role === 'Admin' || user?.role === 'SportsManager'"
                             @click="openScoringConfigDialog"
                             class="scoring-config-btn"
                             title="Configure scoring system"
@@ -1505,8 +1504,8 @@ const getBracketIndex = (bracketId) => {
                                 v-for="(match, matchIdx) in round"
                                 :key="`winners-${roundIdx}-${matchIdx}`"
                                 :id="`winners-match-${roundIdx}-${matchIdx}`"
-                                :class="['match']"
-                                @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openMatchDialog(getBracketIndex(bracket.id), roundIdx, matchIdx, match, 'winners')"
+                                :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
+                                @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && openMatchDialog(getBracketIndex(bracket.id), roundIdx, matchIdx, match, 'winners')"
                             >
                                 <div class="player-box">
                                 <span
@@ -1565,8 +1564,8 @@ const getBracketIndex = (bracketId) => {
                                 v-for="(match, matchIdx) in round"
                                 :key="`losers-${roundIdx}-${matchIdx}`"
                                 :id="`losers-match-${roundIdx}-${matchIdx}`"
-                                :class="['match']"
-                                @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openMatchDialog(getBracketIndex(bracket.id), roundIdx + bracket.matches.winners.length, matchIdx, match, 'losers')"
+                                :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
+                                @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && openMatchDialog(getBracketIndex(bracket.id), roundIdx + bracket.matches.winners.length, matchIdx, match, 'losers')"
                             >
                                 <div class="player-box">
                                 <span
@@ -1619,8 +1618,8 @@ const getBracketIndex = (bracketId) => {
 
                         <div v-for="(match, matchIdx) in bracket.matches.grand_finals" :key="`grand-finals-${matchIdx}`"
                             :id="`grand-finals-match-${matchIdx}`"
-                            :class="['match']"
-                            @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openMatchDialog(getBracketIndex(bracket.id), bracket.matches.winners.length + bracket.matches.losers.length, matchIdx, match, 'grand_finals')"
+                            :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
+                            @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && openMatchDialog(getBracketIndex(bracket.id), bracket.matches.winners.length + bracket.matches.losers.length, matchIdx, match, 'grand_finals')"
                         >
                             <div class="player-box">
                             <span

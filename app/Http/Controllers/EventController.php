@@ -33,7 +33,7 @@ class EventController extends Controller
             'events_prop' => $events,
             'tags_prop' => $data['tags'] ?? [],
             'committees_prop' => $data['committees'] ?? [], // Assuming committees are still in db.json
-            'employees_prop' => User::all(['id', 'name']),
+            'employees_prop' => User::all(['id', 'name', 'role']),
             'categories_prop' => $data['category'] ?? [],
         ]);
     }
@@ -42,7 +42,7 @@ class EventController extends Controller
         'events_prop' => $events,
         'tags_prop' => $data['tags'] ?? [],
         'committees_prop' => $data['committees'] ?? [], // Assuming committees are still in db.json
-        'employees_prop' => User::all(['id', 'name']),
+        'employees_prop' => User::all(['id', 'name', 'role']),
         'categories_prop' => $data['category'] ?? [],
     ]);
 }
@@ -134,7 +134,7 @@ class EventController extends Controller
             'event' => $event,
             'tags' => $data['tags'] ?? [],
             'committees' => $data['committees'] ?? [],
-            'employees' => User::all(['id', 'name']),
+            'employees' => User::all(['id', 'name', 'role']),
             'categories' => $data['category'] ?? [],
             'relatedEvents' => $relatedEvents,
         ]);

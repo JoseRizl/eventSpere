@@ -143,7 +143,7 @@ onMounted(() => {
                 />
             </div>
           </div>
-          <button v-if="user?.name === 'Admin' || user?.name === 'SportsManager'" class="create-button" @click="openDialog">Create Bracket</button>
+          <button v-if="user?.role === 'Admin' || user?.role === 'SportsManager'" class="create-button" @click="openDialog">Create Bracket</button>
         </div>
 
       <!-- Loading Skeleton -->
@@ -201,7 +201,7 @@ onMounted(() => {
             <button @click="toggleBracket(brackets.indexOf(bracket))" class="toggle-button">
               {{ expandedBrackets[brackets.indexOf(bracket)] ? 'Hide Bracket' : 'Show Bracket' }}
             </button>
-            <button v-if="user?.name === 'Admin' || user?.name === 'SportsManager'" @click="removeBracket(brackets.indexOf(bracket))" class="delete-button">Delete Bracket</button>
+            <button v-if="user?.role === 'Admin' || user?.role === 'SportsManager'" @click="removeBracket(brackets.indexOf(bracket))" class="delete-button">Delete Bracket</button>
           </div>
 
           <div v-if="expandedBrackets[brackets.indexOf(bracket)]">
@@ -231,8 +231,8 @@ onMounted(() => {
                   v-for="(match, matchIdx) in round"
                   :key="matchIdx"
                   :id="`match-${roundIdx}-${matchIdx}`"
-                  :class="['match']"
-                  @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openMatchDialog(brackets.indexOf(bracket), roundIdx, matchIdx, match, 'single')"
+                  :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
+                  @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && openMatchDialog(brackets.indexOf(bracket), roundIdx, matchIdx, match, 'single')"
                 >
                   <div class="player-box">
                       <span
@@ -276,8 +276,8 @@ onMounted(() => {
                     v-for="(match, matchIdx) in round"
                     :key="`round-${roundIdx}-${matchIdx}`"
                     :id="`round-match-${roundIdx}-${matchIdx}`"
-                    :class="['match']"
-                    @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openRoundRobinMatchDialog(brackets.indexOf(bracket), roundIdx, matchIdx, match)"
+                    :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
+                    @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && openRoundRobinMatchDialog(brackets.indexOf(bracket), roundIdx, matchIdx, match)"
                   >
                     <div class="player-box">
                       <span
@@ -313,8 +313,8 @@ onMounted(() => {
               <!-- Round Robin Standings -->
               <div class="standings-section">
                 <div class="standings-header-row">
-                  <h3>Standings</h3>
-                  <button v-if="user?.name === 'Admin' || user?.name === 'SportsManager'"
+                  <h3 class="text-lg font-semibold">Standings</h3>
+                  <button v-if="user?.role === 'Admin' || user?.role === 'SportsManager'"
                     @click="openScoringConfigDialog"
                     class="scoring-config-btn"
                     title="Configure scoring system"
@@ -378,8 +378,8 @@ onMounted(() => {
                       v-for="(match, matchIdx) in round"
                       :key="`winners-${roundIdx}-${matchIdx}`"
                       :id="`winners-match-${roundIdx}-${matchIdx}`"
-                      :class="['match']"
-                                @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openMatchDialog(brackets.indexOf(bracket), roundIdx, matchIdx, match, 'winners')"
+                      :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
+                                @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && openMatchDialog(brackets.indexOf(bracket), roundIdx, matchIdx, match, 'winners')"
                     >
                       <div class="player-box">
                         <span
@@ -438,8 +438,8 @@ onMounted(() => {
                       v-for="(match, matchIdx) in round"
                       :key="`losers-${roundIdx}-${matchIdx}`"
                       :id="`losers-match-${roundIdx}-${matchIdx}`"
-                      :class="['match']"
-                                @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openMatchDialog(brackets.indexOf(bracket), roundIdx + bracket.matches.winners.length, matchIdx, match, 'losers')"
+                      :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
+                                @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && openMatchDialog(brackets.indexOf(bracket), roundIdx + bracket.matches.winners.length, matchIdx, match, 'losers')"
                     >
                       <div class="player-box">
                         <span
@@ -492,8 +492,8 @@ onMounted(() => {
 
                   <div v-for="(match, matchIdx) in bracket.matches.grand_finals" :key="`grand-finals-${matchIdx}`"
                     :id="`grand-finals-match-${matchIdx}`"
-                    :class="['match']"
-                    @click="(user?.name === 'Admin' || user?.name === 'SportsManager') && openMatchDialog(brackets.indexOf(bracket), bracket.matches.winners.length + bracket.matches.losers.length, matchIdx, match, 'grand_finals')"
+                    :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
+                    @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && openMatchDialog(brackets.indexOf(bracket), bracket.matches.winners.length + bracket.matches.losers.length, matchIdx, match, 'grand_finals')"
                   >
                     <div class="player-box">
                       <span

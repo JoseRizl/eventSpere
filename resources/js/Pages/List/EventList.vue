@@ -17,7 +17,7 @@
             v-tooltip.top="'Filter by date'"
           />
         </div>
-        <button v-if="user?.name === 'Admin' || user?.name === 'Principal'" class="create-button" @click="openCreateModal">Create Event</button>
+        <button v-if="user?.role === 'Admin' || user?.role === 'Principal'" class="create-button" @click="openCreateModal">Create Event</button>
       </div>
 
       <!-- Date Filter Calendar - Moved outside search-wrapper -->
@@ -79,8 +79,8 @@
         <Column header="Category" style="width:15%;"><template #body><Skeleton /></template></Column>
         <Column header="Start Date & Time" style="width:20%;"><template #body><Skeleton /></template></Column>
         <Column header="End Date & Time" style="width:20%;"><template #body><Skeleton /></template></Column>
-        <Column v-if="user?.name === 'Admin' || user?.name === 'Principal'" header="Actions" style="width:10%;" body-class="text-center"><template #body><div class="flex justify-center gap-2"><Skeleton shape="circle" size="2rem" /><Skeleton shape="circle" size="2rem" /></div></template></Column>
-        <Column v-if="user?.name === 'Admin' || user?.name === 'Principal'" header="Tasks" style="width:15%;" body-class="text-center"><template #body><div class="flex justify-center gap-2"><Skeleton shape="circle" size="2rem" /></div></template></Column>
+        <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Actions" style="width:10%;" body-class="text-center"><template #body><div class="flex justify-center gap-2"><Skeleton shape="circle" size="2rem" /><Skeleton shape="circle" size="2rem" /></div></template></Column>
+        <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Tasks" style="width:15%;" body-class="text-center"><template #body><div class="flex justify-center gap-2"><Skeleton shape="circle" size="2rem" /></div></template></Column>
       </DataTable>
 
       <DataTable v-else :value="filteredEvents" class="p-datatable-striped">
@@ -149,7 +149,7 @@
           </template>
         </Column>
 
-        <Column v-if="user?.name === 'Admin' || user?.name === 'Principal'" header="Actions" style="width:10%;" body-class="text-center">
+        <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Actions" style="width:10%;" body-class="text-center">
           <template #body="{ data }">
             <div class="action-buttons">
               <Button icon="pi pi-pen-to-square" class="p-button-rounded p-button-info" @click="editEvent(data)" v-tooltip.top="'Edit Event'"/>
@@ -158,7 +158,7 @@
           </template>
         </Column>
 
-        <Column v-if="user?.name === 'Admin' || user?.name === 'Principal'" header="Tasks" style="width:15%;" body-class="text-center">
+        <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Tasks" style="width:15%;" body-class="text-center">
         <template #body="{ data }">
             <Button icon="pi pi-list" class="p-button-rounded p-button-warning" @click="openTaskModal(data)" v-tooltip.top="'Manage Tasks'"/>
         </template>
