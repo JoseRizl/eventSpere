@@ -556,7 +556,6 @@
             "color": "#452020"
         }
     ],
-    "sports": [],
     "category": [
         {
             "id": "1",
@@ -2779,7 +2778,6 @@
             "committeeId": 2
         }
     ],
-    "categories": [],
     "event_announcements": [
         {
             "id": "754b",

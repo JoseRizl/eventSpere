@@ -173,13 +173,12 @@ const markAllAsRead = () => {
 
 const pollForUpdates = async (isInitialLoad = false) => {
     try {
-        const [eventsResponse, sportsResponse, eventAnnouncementsResponse] = await Promise.all([
+        const [eventsResponse, eventAnnouncementsResponse] = await Promise.all([
             axios.get("http://localhost:3000/events"),
-            axios.get("http://localhost:3000/sports"),
             axios.get("http://localhost:3000/event_announcements")
         ]);
 
-        const allEvents = [...eventsResponse.data, ...sportsResponse.data]
+        const allEvents = [...eventsResponse.data]
           .filter((event) => !event.archived);
 
         const eventMap = allEvents.reduce((map, event) => {

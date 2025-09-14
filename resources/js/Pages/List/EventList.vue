@@ -658,7 +658,6 @@
         dateError.value = "";
         };
       const events = computed(() => page.props.events_prop || []);
-      const sports = ref([]);
       const categories = computed(() => page.props.categories_prop || []);
       const initialLoading = ref(true);
       const isEditModalVisible = ref(false);
@@ -712,9 +711,8 @@
         });
 
         const allEvents = (events.value || []).map(processItem);
-        const allSports = (sports.value || []).map(processItem);
 
-        return [...allEvents, ...allSports].sort((a, b) => {
+        return allEvents.sort((a, b) => {
             const dateA = a.startDateTime ? new Date(a.startDateTime) : new Date("1970-01-01");
             const dateB = b.startDateTime ? new Date(b.startDateTime) : new Date("1970-01-01");
             return dateB - dateA;
@@ -1046,16 +1044,9 @@
 
     onMounted(async () => {
         initialLoading.value = true;
-        try {
-            // Data from Inertia props is already available in computed properties.
-            // We only need to fetch data from other sources if any.
-            const sportsResponse = await axios.get("http://localhost:3000/sports");
-            sports.value = sportsResponse.data;
-        } catch (error) {
-            console.error("Error fetching sports data:", error);
-        } finally {
-            initialLoading.value = false;
-        }
+        // Data is now passed as props on initial visit.
+        // We just need to switch off the loading indicator after mount.
+        initialLoading.value = false;
     });
 
        // Open Task Modal

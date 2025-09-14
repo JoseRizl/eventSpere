@@ -236,13 +236,12 @@ const filteredAnnouncements = computed(() => {
 // Fetch announcements and news
 onMounted(async () => {
   try {
-    const [eventsResponse, sportsResponse, eventAnnouncementsResponse] = await Promise.all([
+    const [eventsResponse, eventAnnouncementsResponse] = await Promise.all([
         axios.get("http://localhost:3000/events"),
-        axios.get("http://localhost:3000/sports"),
         axios.get("http://localhost:3000/event_announcements"),
     ]);
 
-    allNews.value = [...eventsResponse.data, ...sportsResponse.data]
+    allNews.value = [...eventsResponse.data]
       .filter((news) => !news.archived)
       .map((news) => ({
         ...news,
