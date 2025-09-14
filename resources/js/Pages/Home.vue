@@ -11,6 +11,7 @@ import Avatar from 'primevue/avatar';
 import InputText from 'primevue/inputtext';
 import DatePicker from 'primevue/datepicker';
 import Button from 'primevue/button';
+import Carousel from 'primevue/carousel';
 import Tag from 'primevue/tag';
 import Card from 'primevue/card';
 
@@ -204,6 +205,45 @@ const upcomingEvents = computed(() => {
   return events.sort((a, b) => getFullDateTime(a.startDate, a.startTime) - getFullDateTime(b.startDate, b.startTime));
 });
 
+const carouselEvents = computed(() => {
+  const getStatus = (event) => {
+    const now = new Date();
+    const start = getFullDateTime(event.startDate, event.startTime);
+    const end = getFullDateTime(event.endDate || event.startDate, event.endTime || '23:59');
+    if (!start || !end) return 3; // Invalid dates are treated as ended
+
+    if (isWithinInterval(now, { start, end })) return 1; // Ongoing
+    if (start > now) return 2; // Upcoming
+    return 3; // Ended
+  };
+
+  return [...filteredNews.value].sort((a, b) => {
+    const statusA = getStatus(a);
+    const statusB = getStatus(b);
+
+    if (statusA !== statusB) {
+      return statusA - statusB;
+    }
+
+    const startA = getFullDateTime(a.startDate, a.startTime);
+    const startB = getFullDateTime(b.startDate, b.startTime);
+    const endA = getFullDateTime(a.endDate || a.startDate, a.endTime || '23:59');
+    const endB = getFullDateTime(b.endDate || b.startDate, b.endTime || '23:59');
+
+    // For ongoing and upcoming, sort by start date (closest to today first)
+    if (statusA === 1 || statusA === 2) {
+      return startA - startB;
+    }
+
+    // For ended, sort by end date (most recently ended first)
+    if (statusA === 3) {
+      return endB - endA;
+    }
+
+    return 0;
+  });
+});
+
 const filteredAnnouncements = computed(() => {
     let announcements = eventAnnouncements.value;
 
@@ -328,6 +368,28 @@ const clearFilters = () => {
   <div class="min-h-screen flex flex-col items-center bg-gray-100 py-8 px-4">
     <!-- News and Update Title -->
     <h1 class="text-2xl font-bold mt-6 text-center">News and Updates</h1>
+
+    <!-- Carousel Banner -->
+    <div v-if="carouselEvents.length > 0" class="w-full max-w-6xl mx-auto mt-8">
+        <Carousel :value="carouselEvents" :numVisible="1" :numScroll="1" circular :autoplayInterval="5000">
+            <template #item="slotProps">
+                <div class="relative w-full h-64 md:h-80 bg-gray-700 rounded-lg shadow-lg overflow-hidden mx-2">
+                    <Link :href="route('event.details', { id: slotProps.data.id })">
+                        <img v-if="slotProps.data.image" :src="slotProps.data.image" :alt="slotProps.data.title" class="w-full h-full object-cover">
+                        <div v-else class="w-full h-full bg-gray-300 flex items-center justify-center">
+                            <img src="/resources/images/NCSlogo.png" class="w-32 h-32 object-contain opacity-50" alt="Event Placeholder" />
+                        </div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 p-6 text-white">
+                            <Tag :value="getUpcomingTag(slotProps.data)" :severity="getUpcomingSeverity(slotProps.data)" class="mb-2" />
+                            <h2 class="text-2xl md:text-3xl font-bold line-clamp-2">{{ slotProps.data.title }}</h2>
+                            <p class="text-sm mt-1">{{ slotProps.data.formattedDate }}</p>
+                        </div>
+                    </Link>
+                </div>
+            </template>
+        </Carousel>
+    </div>
 
     <!-- View Toggle -->
     <div class="w-full max-w-5xl mt-8">
