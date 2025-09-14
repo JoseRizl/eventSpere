@@ -126,8 +126,6 @@ const {
   handleByeRounds,
   updateLines,
   isFinalRound,
-  isSemifinalRound,
-  isQuarterfinalRound,
   getRoundRobinStandings,
   isRoundRobinConcluded,
   openMatchDialog,
@@ -1319,7 +1317,7 @@ const getBracketIndex = (bracketId) => {
                         <div v-for="(round, roundIdx) in bracket.matches" :key="roundIdx"
                         :class="['round', `round-${roundIdx + 1}`]">
                         <h3>
-                            {{ isFinalRound(getBracketIndex(bracket.id), roundIdx) ? 'Final Round' : isSemifinalRound(getBracketIndex(bracket.id), roundIdx) ? 'Semifinal' : isQuarterfinalRound(getBracketIndex(bracket.id), roundIdx) ? 'Quarterfinal' : `Round ${roundIdx + 1}` }}
+                            {{ isFinalRound(getBracketIndex(bracket.id), roundIdx) ? 'Final Round' : `Round ${roundIdx + 1}` }}
                         </h3>
 
                         <!-- Matches Display -->
@@ -1451,7 +1449,7 @@ const getBracketIndex = (bracketId) => {
                     <div v-else-if="bracket.type === 'Double Elimination'" class="double-elimination-bracket">
                         <!-- Winners Bracket -->
                         <div class="bracket-section winners">
-                        <h3>Winners Bracket</h3>
+                        <h3>Upper Bracket</h3>
                         <div class="bracket">
                             <svg class="connection-lines winners-lines">
                             <g v-for="(line, i) in bracket.lines?.winners" :key="`winners-${i}`">
@@ -1511,7 +1509,7 @@ const getBracketIndex = (bracketId) => {
 
                         <!-- Losers Bracket -->
                         <div class="bracket-section losers" style="overflow-x: auto;">
-                        <h3>Losers Bracket</h3>
+                        <h3>Lower Bracket</h3>
                         <div class="bracket">
                             <svg class="connection-lines losers-lines">
                             <g v-for="(line, i) in bracket.lines?.losers" :key="`losers-${i}`">

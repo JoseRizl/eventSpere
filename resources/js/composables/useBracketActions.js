@@ -1223,8 +1223,6 @@ export function useBracketActions(state) {
   };
 
   const isFinalRound = (bracketIdx, roundIdx) => roundIdx === brackets.value[bracketIdx].matches.length - 1;
-  const isSemifinalRound = (bracketIdx, roundIdx) => roundIdx === brackets.value[bracketIdx].matches.length - 2;
-  const isQuarterfinalRound = (bracketIdx, roundIdx) => roundIdx === brackets.value[bracketIdx].matches.length - 3;
 
   const confirmDeleteBracket = async () => {
     if (deleteBracketIdx.value !== null) {
@@ -1899,8 +1897,6 @@ export function useBracketActions(state) {
     removeBracket,
     calculateByes,
     isFinalRound,
-    isSemifinalRound,
-    isQuarterfinalRound,
     confirmDeleteBracket,
     cancelDeleteBracket,
     saveBrackets,
