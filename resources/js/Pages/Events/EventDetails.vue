@@ -13,6 +13,7 @@ import InputText from 'primevue/inputtext';
 import InputSwitch from 'primevue/inputswitch';
 import Button from 'primevue/button';
 import Select from 'primevue/select';
+import Avatar from 'primevue/avatar';
 import Textarea from 'primevue/textarea';
 import DatePicker from 'primevue/datepicker';
 
@@ -837,132 +838,91 @@ const getBracketIndex = (bracketId) => {
                     <p v-else class="text-gray-700 whitespace-pre-line text-sm" v-html="formattedDescription"></p>
                     </div>
 
-                    <!-- Venue and Category -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <!-- Venue -->
-                        <div>
-                            <template v-if="editMode">
-                                <label class="text-sm font-medium mb-1">Venue</label>
-                                <InputText
-                                    v-model="eventDetails.venue"
-                                    class="w-full"
-                                    placeholder="Enter event venue (e.g., Conference Room A)"
-                                />
-                            </template>
-                            <p v-else>
-                                <strong>Venue:</strong> {{ eventDetails.venue || 'Not specified' }}
-                            </p>
-                        </div>
-                        <!-- Category -->
-                        <div>
-                            <template v-if="editMode">
-                                <label class="text-sm font-medium mb-1">Category</label>
-                                <Select v-model="eventDetails.category_id"
-                                    :options="categories"
-                                    optionLabel="title"
-                                    optionValue="id"
-                                    placeholder="Select a category"
-                                    class="w-full"
-                                />
-                            </template>
-                            <p v-else><strong>Category:</strong> {{ categoryMap[eventDetails.category_id] || 'Uncategorized' }}</p>
-                        </div>
-                    </div>
-
-                    <!-- Tags -->
-                    <div class="flex gap-2 flex-wrap">
-                    <div v-if="editMode" class="w-full">
-                        <MultiSelect
-                        v-model="normalizedTags"
-                        :options="tags"
-                        optionLabel="name"
-                        optionValue="id"
-                        display="chip"
-                        placeholder="Select tags"
-                        class="w-full"
-                        >
-                        <!-- Selected Chip Template -->
-                        <template #chip="slotProps">
-                            <div
-                            class="flex items-center gap-2 px-2 py-1 rounded text-white text-xs"
-                            :style="{ backgroundColor: slotProps.value.color }"
-                            >
-                            {{ slotProps.value.name }}
-                            <button
-                                type="button"
-                                class="text-white hover:text-gray-200"
-                                @click.stop="removeTag(slotProps.value)"
-                                v-tooltip.top="'Remove Tag'"
-                            >
-                                ✕
-                            </button>
+                    <!-- Details Section -->
+                    <div class="border-t border-gray-200 pt-4 mt-4">
+                        <div v-if="editMode" class="space-y-4">
+                            <!-- Edit Mode: Venue and Category -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-sm font-medium mb-1">Venue</label>
+                                    <InputText v-model="eventDetails.venue" class="w-full" placeholder="Enter event venue" />
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium mb-1">Category</label>
+                                    <Select v-model="eventDetails.category_id" :options="categories" optionLabel="title" optionValue="id" placeholder="Select a category" class="w-full" />
+                                </div>
                             </div>
-                        </template>
-                        </MultiSelect>
-                    </div>
-                    <div v-else class="flex gap-2 flex-wrap">
-                        <span
-                        v-for="tag in eventDetails.tags"
-                        :key="tag.id"
-                        :style="{ backgroundColor: tag.color, color: '#fff' }"
-                        class="text-xs py-1 px-2 rounded mr-2"
-                        >
-                        {{ tag.name }}
-                        </span>
-                    </div>
-                    </div>
 
-                    <!-- Dates and Times -->
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                    <template v-if="editMode">
-                        <!-- Start Date -->
-                        <div class="flex flex-col">
-                        <label class="text-sm font-medium mb-1">Start Date</label>
-                        <DatePicker
-                            v-model="startDateModel"
-                            dateFormat="MM-dd-yy"
-                            showIcon
-                            class="w-full"
-                        />
-                        </div>
+                            <!-- Edit Mode: Tags -->
+                            <div>
+                                <label class="text-sm font-medium mb-1">Tags</label>
+                                <MultiSelect v-model="normalizedTags" :options="tags" optionLabel="name" optionValue="id" display="chip" placeholder="Select tags" class="w-full">
+                                    <template #chip="slotProps">
+                                        <div class="flex items-center gap-2 px-2 py-1 rounded text-white text-xs" :style="{ backgroundColor: slotProps.value.color }">
+                                            {{ slotProps.value.name }}
+                                            <button type="button" class="text-white hover:text-gray-200" @click.stop="removeTag(slotProps.value)" v-tooltip.top="'Remove Tag'">✕</button>
+                                        </div>
+                                    </template>
+                                </MultiSelect>
+                            </div>
 
-                        <!-- Start Time -->
-                        <div class="flex flex-col">
-                        <label class="text-sm font-medium mb-1">Start Time</label>
-                        <input
-                            type="time"
-                            v-model="eventDetails.startTime"
-                            class="border p-2 rounded"
-                        />
+                            <!-- Edit Mode: Dates and Times -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="flex flex-col"><label class="text-sm font-medium mb-1">Start Date</label><DatePicker v-model="startDateModel" dateFormat="M-dd-yy" showIcon class="w-full" /></div>
+                                <div class="flex flex-col"><label class="text-sm font-medium mb-1">Start Time</label><input type="time" v-model="eventDetails.startTime" class="border p-2 rounded" /></div>
+                                <div class="flex flex-col"><label class="text-sm font-medium mb-1">End Date</label><DatePicker v-model="endDateModel" dateFormat="M-dd-yy" showIcon class="w-full" /></div>
+                                <div class="flex flex-col"><label class="text-sm font-medium mb-1">End Time</label><input type="time" v-model="eventDetails.endTime" class="border p-2 rounded" /></div>
+                            </div>
                         </div>
+                        <div v-else>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-4 text-sm text-gray-700">
+                                <!-- Date & Time -->
+                                <div class="flex items-start gap-3">
+                                    <i class="pi pi-calendar mt-1 text-gray-500 text-lg"></i>
+                                    <div>
+                                        <strong class="block text-gray-800 font-semibold">Date & Time</strong>
+                                        <span v-if="eventDetails.startDate === eventDetails.endDate">
+                                            {{ formatDisplayDate(eventDetails.startDate) }} from {{ formatDisplayTime(eventDetails.startTime) }} to {{ formatDisplayTime(eventDetails.endTime) }}
+                                        </span>
+                                        <span v-else>
+                                            From {{ formatDisplayDate(eventDetails.startDate) }} at {{ formatDisplayTime(eventDetails.startTime) }}<br>
+                                            to {{ formatDisplayDate(eventDetails.endDate) }} at {{ formatDisplayTime(eventDetails.endTime) }}
+                                        </span>
+                                    </div>
+                                </div>
 
-                        <!-- End Date -->
-                        <div class="flex flex-col">
-                        <label class="text-sm font-medium mb-1">End Date</label>
-                        <DatePicker
-                            v-model="endDateModel"
-                            dateFormat="MM-dd-yy"
-                            showIcon
-                            class="w-full"
-                        />
-                        </div>
+                                <!-- Venue -->
+                                <div class="flex items-start gap-3">
+                                    <i class="pi pi-map-marker mt-1 text-gray-500 text-lg"></i>
+                                    <div>
+                                        <strong class="block text-gray-800 font-semibold">Venue</strong>
+                                        <span>{{ eventDetails.venue || 'Not specified' }}</span>
+                                    </div>
+                                </div>
 
-                        <!-- End Time -->
-                        <div class="flex flex-col">
-                        <label class="text-sm font-medium mb-1">End Time</label>
-                        <input
-                            type="time"
-                            v-model="eventDetails.endTime"
-                            class="border p-2 rounded"
-                        />
+                                <!-- Category -->
+                                <div class="flex items-start gap-3">
+                                    <i class="pi pi-bookmark mt-1 text-gray-500 text-lg"></i>
+                                    <div>
+                                        <strong class="block text-gray-800 font-semibold">Category</strong>
+                                        <span>{{ categoryMap[eventDetails.category_id] || 'Uncategorized' }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Tags -->
+                                <div v-if="eventDetails.tags && eventDetails.tags.length > 0" class="flex items-start gap-3">
+                                    <i class="pi pi-tags mt-1 text-gray-500 text-lg"></i>
+                                    <div>
+                                        <strong class="block text-gray-800 font-semibold">Tags</strong>
+                                        <div class="flex gap-2 flex-wrap mt-1">
+                                            <span v-for="tag in eventDetails.tags" :key="tag.id" :style="{ backgroundColor: tag.color, color: '#fff' }" class="text-xs font-semibold py-1 px-2 rounded">
+                                                {{ tag.name }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </template>
-                    <template v-else>
-                        <p><strong>Start Date:</strong> {{ formatDisplayDate(eventDetails.startDate) }}</p>
-                        <p><strong>Start Time:</strong> {{ formatDisplayTime(eventDetails.startTime) }}</p>
-                        <p><strong>End Date:</strong> {{ formatDisplayDate(eventDetails.endDate) }}</p>
-                        <p><strong>End Time:</strong> {{ formatDisplayTime(eventDetails.endTime) }}</p>
-                    </template>
                     </div>
 
                     <!-- Error Message -->
@@ -972,7 +932,7 @@ const getBracketIndex = (bracketId) => {
 
                     <!-- Committee -->
                     <div v-if="editMode || (eventDetails.tasks && eventDetails.tasks.length > 0)">
-                    <h2 class="font-semibold mb-1">Committee:</h2>
+                    <h2 class="font-semibold mb-2">Tasks & Committees:</h2>
             <div v-if="editMode">
             <div v-for="(taskItem, index) in eventDetails.tasks" :key="index" class="space-y-2 mb-4 p-3 border rounded">
                 <!-- Committee Selection -->
@@ -1050,12 +1010,22 @@ const getBracketIndex = (bracketId) => {
                 <i class="pi pi-plus mr-1"></i> Add Committee Task
             </button>
             </div>
-            <div v-else class="space-y-1 pl-4 text-sm">
-            <p v-for="(taskItem, index) in eventDetails.tasks" :key="index">
-                {{ taskItem.employees?.map(e => e.name).join(', ') || 'No employees selected' }}
-                ({{ taskItem.committee?.name || 'No committee selected' }}):
-                {{ taskItem.task || 'No task specified' }}
-            </p>
+            <div v-else class="space-y-3">
+                <div v-for="(taskItem, index) in eventDetails.tasks" :key="index" class="p-3 border rounded-lg bg-gray-50/50">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-semibold text-gray-800">{{ taskItem.task || 'No task specified' }}</p>
+                            <p class="text-xs text-gray-500">{{ taskItem.committee?.name || 'No committee' }}</p>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex items-center gap-2 flex-wrap">
+                        <span v-if="!taskItem.employees || taskItem.employees.length === 0" class="text-gray-500 italic text-xs">No employees assigned</span>
+                        <div v-else v-for="employee in taskItem.employees" :key="employee.id" class="flex items-center gap-2 bg-white rounded-full px-2 py-1 border shadow-sm" v-tooltip.top="employee.name">
+                            <Avatar :label="employee.name ? employee.name.split(' ').map(n => n[0]).join('').toUpperCase() : '?'" shape="circle" size="small" />
+                            <span class="text-xs font-medium text-gray-700">{{ employee.name }}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
