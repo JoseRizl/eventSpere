@@ -34,6 +34,7 @@ export function useBracketState() {
   const showDeleteConfirmDialog = ref(false);
   const deleteBracketIdx = ref(null);
   const showSuccessDialog = ref(false);
+  const bracketViewModes = ref({});
   const successMessage = ref('');
 
   const currentGameNumber = computed(() => `Game ${currentMatchIndex.value + 1}`);
@@ -76,6 +77,7 @@ export function useBracketState() {
     deleteBracketIdx,
     showSuccessDialog,
     successMessage,
+    bracketViewModes,
     currentGameNumber,
     currentWinnersMatchIndex,
     currentLosersMatchIndex,

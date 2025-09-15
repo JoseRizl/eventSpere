@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, computed, ref } from 'vue';
 import Dialog from 'primevue/dialog';
+import { format, parse, parseISO, isValid } from 'date-fns';
 import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
 import Button from 'primevue/button';
@@ -34,6 +35,7 @@ const {
   showSuccessDialog,
   successMessage,
   showRoundRobinMatchDialog,
+  bracketViewModes,
   selectedRoundRobinMatch,
   selectedRoundRobinMatchData,
   showMatchUpdateConfirmDialog,
@@ -65,6 +67,8 @@ const {
   closeScoringConfigDialog,
   saveScoringConfig,
 } = useBracketActions(state);
+
+const { setBracketViewMode, getAllMatches } = useBracketActions(state);
 
 const filteredBrackets = computed(() => {
   if (!searchQuery.value) {
@@ -106,6 +110,29 @@ const truncateNameRoundRobin = (name) => {
   return name.length > 15 ? name.substring(0, 15) + '...' : name;
 };
 
+// Helper functions for date and time formatting
+const formatDisplayDate = (dateString) => {
+  if (!dateString) return '';
+  try {
+    let date = parseISO(dateString);
+    if (!isValid(date)) {
+      date = parse(dateString, 'MMM-dd-yyyy', new Date());
+    }
+    return isValid(date) ? format(date, 'MMM-dd-yyyy') : 'Invalid Date';
+  } catch {
+    return 'Invalid Date';
+  }
+};
+
+const formatDisplayTime = (timeString) => {
+  if (!timeString) return '';
+  try {
+    const parsed = parse(timeString, 'HH:mm', new Date());
+    return format(parsed, 'hh:mm a');
+  } catch {
+    return 'Invalid Time';
+  }
+};
 // using composable increaseScore/decreaseScore
 
 // using composable editParticipant
@@ -202,8 +229,22 @@ onMounted(() => {
             <button v-if="user?.role === 'Admin' || user?.role === 'SportsManager'" @click="removeBracket(brackets.indexOf(bracket))" class="delete-button">Delete Bracket</button>
           </div>
 
-          <div v-if="expandedBrackets[brackets.indexOf(bracket)]">
-            <!-- Single Elimination Display -->
+          <div v-if="expandedBrackets[brackets.indexOf(bracket)]" class="bracket-content-wrapper">
+            <div class="view-toggle-buttons">
+                <Button
+                    :label="'Bracket View'"
+                    :class="['p-button-sm', bracketViewModes[brackets.indexOf(bracket)] !== 'matches' ? 'p-button-primary' : 'p-button-outlined']"
+                    @click="setBracketViewMode(brackets.indexOf(bracket), 'bracket')"
+                />
+                <Button
+                    :label="'Matches View'"
+                    :class="['p-button-sm', bracketViewModes[brackets.indexOf(bracket)] === 'matches' ? 'p-button-primary' : 'p-button-outlined']"
+                    @click="setBracketViewMode(brackets.indexOf(bracket), 'matches')"
+                />
+            </div>
+
+            <!-- Bracket View -->
+            <div v-show="bracketViewModes[brackets.indexOf(bracket)] !== 'matches'">
             <div v-if="bracket.type === 'Single Elimination'" class="bracket">
               <svg class="connection-lines">
                 <line
@@ -520,8 +561,40 @@ onMounted(() => {
                 </div>
               </div>
             </div>
+            </div>
 
-
+            <!-- Matches Card View -->
+            <div v-if="bracketViewModes[brackets.indexOf(bracket)] === 'matches'" class="matches-card-view">
+                <div v-for="match in getAllMatches(bracket)" :key="match.id" class="match-card-item">
+                    <div class="match-card-header">
+                        <span class="match-date">{{ formatDisplayDate(bracket.event.startDate) }}</span>
+                        <span :class="['match-status', `status-${match.status}`]">{{ match.status }}</span>
+                    </div>
+                    <div class="match-card-body">
+                        <div class="players-scores">
+                            <div class="player">
+                                <span class="player-name">{{ truncateNameElimination(match.players[0].name) }}</span>
+                                <span class="player-score">{{ match.players[0].score }}</span>
+                            </div>
+                            <div class="vs-separator">vs</div>
+                            <div class="player">
+                                <span class="player-name">{{ truncateNameElimination(match.players[1].name) }}</span>
+                                <span class="player-score">{{ match.players[1].score }}</span>
+                            </div>
+                        </div>
+                        <div class="time-venue">
+                            <div class="info-item">
+                                <i class="pi pi-clock"></i>
+                                <span>{{ formatDisplayTime(bracket.event.startTime) }}</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="pi pi-map-marker"></i>
+                                <span>{{ bracket.event.venue }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
           </div>
         </div>
       </div>

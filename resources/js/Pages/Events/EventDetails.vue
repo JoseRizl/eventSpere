@@ -120,6 +120,7 @@ const {
   showScoringConfigDialog,
   standingsRevision,
 } = bracketState;
+const { bracketViewModes } = bracketState;
 
 const {
   fetchBrackets,
@@ -138,6 +139,8 @@ const {
   closeScoringConfigDialog,
   saveScoringConfig,
   toggleBracket,
+  setBracketViewMode,
+  getAllMatches,
 } = useBracketActions(bracketState);
 
 const relatedBrackets = computed(() => {
@@ -1298,8 +1301,21 @@ const getBracketIndex = (bracketId) => {
                     />
                 </div>
 
-                <div v-if="expandedBrackets[getBracketIndex(bracket.id)]">
-                    <!-- Single Elimination Display -->
+                <div v-if="expandedBrackets[getBracketIndex(bracket.id)]" class="bracket-content-wrapper">
+                    <div class="view-toggle-buttons">
+                        <Button
+                            :label="'Bracket View'"
+                            :class="['p-button-sm', bracketViewModes[getBracketIndex(bracket.id)] !== 'matches' ? 'p-button-primary' : 'p-button-outlined']"
+                            @click="setBracketViewMode(getBracketIndex(bracket.id), 'bracket')"
+                        />
+                        <Button
+                            :label="'Matches View'"
+                            :class="['p-button-sm', bracketViewModes[getBracketIndex(bracket.id)] === 'matches' ? 'p-button-primary' : 'p-button-outlined']"
+                            @click="setBracketViewMode(getBracketIndex(bracket.id), 'matches')"
+                        />
+                    </div>
+                    <!-- Bracket View -->
+                    <div v-show="bracketViewModes[getBracketIndex(bracket.id)] !== 'matches'">
                     <div v-if="bracket.type === 'Single Elimination'" class="bracket">
                         <svg class="connection-lines">
                         <line
@@ -1620,6 +1636,40 @@ const getBracketIndex = (bracketId) => {
                         </div>
                     </div>
                     </div>
+                    </div>
+
+                    <!-- Matches Card View -->
+                    <div v-if="bracketViewModes[getBracketIndex(bracket.id)] === 'matches'" class="matches-card-view">
+                        <div v-for="match in getAllMatches(bracket)" :key="match.id" class="match-card-item">
+                            <div class="match-card-header">
+                                <span class="match-date">{{ formatDisplayDate(bracket.event.startDate) }}</span>
+                                <span :class="['match-status', `status-${match.status}`]">{{ match.status }}</span>
+                            </div>
+                            <div class="match-card-body">
+                                <div class="players-scores">
+                                    <div class="player">
+                                        <span class="player-name">{{ truncateNameElimination(match.players[0].name) }}</span>
+                                        <span class="player-score">{{ match.players[0].score }}</span>
+                                    </div>
+                                    <div class="vs-separator">vs</div>
+                                    <div class="player">
+                                        <span class="player-name">{{ truncateNameElimination(match.players[1].name) }}</span>
+                                        <span class="player-score">{{ match.players[1].score }}</span>
+                                    </div>
+                                </div>
+                                <div class="time-venue">
+                                    <div class="info-item">
+                                        <i class="pi pi-clock"></i>
+                                        <span>{{ formatDisplayTime(bracket.event.startTime) }}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="pi pi-map-marker"></i>
+                                        <span>{{ bracket.event.venue }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1879,6 +1929,11 @@ const getBracketIndex = (bracketId) => {
 </template>
 
 <style scoped>
+.bracket-content-wrapper {
+    margin-top: 1rem;
+}
+
+
 .bracket-toggle-button {
     width: 2.5rem;
     height: 2.5rem;

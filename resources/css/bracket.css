@@ -726,6 +726,139 @@
   background-color: #e8f5e9;
 }
 
+.bracket-content-wrapper {
+    margin-top: 1rem;
+}
+
+.view-toggle-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.matches-card-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.match-card-item {
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+}
+
+.match-card-item:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.match-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 0.8rem;
+}
+
+.match-date {
+    color: #6c757d;
+}
+
+.match-status {
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-completed {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-ongoing {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.match-card-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    gap: 1rem;
+}
+
+.players-scores {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.player {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.player-name {
+    font-weight: 500;
+    color: #343a40;
+}
+
+.player-score {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #007bff;
+    min-width: 2rem;
+    text-align: right;
+}
+
+.vs-separator {
+    text-align: center;
+    color: #adb5bd;
+    font-style: italic;
+    font-size: 0.9rem;
+    margin: 0.25rem 0;
+}
+
+.time-venue {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+    font-size: 0.85rem;
+    color: #495057;
+    border-left: 1px solid #e9ecef;
+    padding-left: 1rem;
+    min-width: 120px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.info-item .pi {
+    color: #6c757d;
+}
+
 
 .loser-name {
   color: #ff4757 !important;

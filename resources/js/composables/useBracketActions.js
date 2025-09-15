@@ -35,6 +35,7 @@ export function useBracketActions(state) {
     showScoringConfigDialog,
     tempScoringConfig,
 
+    bracketViewModes,
   } = state;
 
   const bracketTypeOptions = state.bracketTypeOptions;
@@ -81,6 +82,25 @@ export function useBracketActions(state) {
     }
 
     showDialog.value = true;
+  };
+
+  const setBracketViewMode = (bracketIdx, mode) => {
+    bracketViewModes.value[bracketIdx] = mode;
+  };
+
+  const getAllMatches = (bracket) => {
+    if (!bracket || !bracket.matches) return [];
+    if (bracket.type === 'Single Elimination' || bracket.type === 'Round Robin') {
+        return bracket.matches.flat();
+    }
+    if (bracket.type === 'Double Elimination') {
+        return [
+            ...bracket.matches.winners.flat(),
+            ...bracket.matches.losers.flat(),
+            ...bracket.matches.grand_finals.flat()
+        ];
+    }
+    return [];
   };
 
   const handleByeRounds = (bracketIdx) => {
@@ -244,6 +264,7 @@ export function useBracketActions(state) {
       brackets.value.push(bracketData);
       if (bracketData.id) bracketActionLog.set(bracketData.id, []);
       expandedBrackets.value.push(false);
+      bracketViewModes.value[brackets.value.length - 1] = 'bracket';
       showDialog.value = false;
       handleByeRounds(brackets.value.length - 1);
       nextTick(() => updateLines(brackets.value.length - 1));
@@ -273,6 +294,10 @@ export function useBracketActions(state) {
         expandedBrackets.value = new Array(brackets.value.length).fill(false);
         for (const b of brackets.value) {
           if (b.id && !bracketActionLog.has(b.id)) bracketActionLog.set(b.id, []);
+        }
+        bracketViewModes.value = {};
+        for (let i = 0; i < brackets.value.length; i++) {
+            bracketViewModes.value[i] = 'bracket';
         }
       }
     } catch (error) {
@@ -1914,5 +1939,7 @@ export function useBracketActions(state) {
     closeScoringConfigDialog,
     saveScoringConfig,
     handleByeRounds,
+    setBracketViewMode,
+    getAllMatches,
   };
 }
