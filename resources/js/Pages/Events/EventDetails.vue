@@ -9,6 +9,7 @@ import SuccessDialog from '@/Components/SuccessDialog.vue';
 import { useBracketState } from '@/composables/useBracketState.js';
 import { useBracketActions } from '@/composables/useBracketActions.js';
 import Dialog from 'primevue/dialog';
+import MatchesView from '@/Components/MatchesView.vue';
 import InputText from 'primevue/inputtext';
 import InputSwitch from 'primevue/inputswitch';
 import SelectButton from 'primevue/selectbutton';
@@ -1693,41 +1694,12 @@ const getBracketIndex = (bracketId) => {
                                 aria-labelledby="match-status-filter"
                             />
                         </div>
-                        <div class="matches-card-view">
-                            <div v-for="match in getAllMatches(bracket, bracketMatchFilters[getBracketIndex(bracket.id)])"
-                            :key="match.id"
-                            :class="['match-card-item', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'editable' : '']"
-                             @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && openMatchEditorFromCard(getBracketIndex(bracket.id), match)"
-                        >
-                            <div class="match-card-header">
-                                <span class="match-date">{{ formatDisplayDate(match.date || bracket.event.startDate) }}</span>
-                                <span :class="['match-status', `status-${match.status}`]">{{ match.status }}</span>
-                            </div>
-                            <div class="match-card-body">
-                                <div class="players-scores">
-                                    <div class="player">
-                                        <span class="player-name">{{ truncateNameElimination(match.players[0].name) }}</span>
-                                        <span class="player-score">{{ match.players[0].score }}</span>
-                                    </div>
-                                    <div class="vs-separator">vs</div>
-                                    <div class="player">
-                                        <span class="player-name">{{ truncateNameElimination(match.players[1].name) }}</span>
-                                        <span class="player-score">{{ match.players[1].score }}</span>
-                                    </div>
-                                </div>
-                                <div class="time-venue">
-                                    <div class="info-item">
-                                        <i class="pi pi-clock"></i>
-                                        <span>{{ formatDisplayTime(match.time || bracket.event.startTime) }}</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <i class="pi pi-map-marker"></i>
-                                        <span>{{ match.venue || bracket.event.venue }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        </div>
+                        <MatchesView
+                            :bracket="bracket"
+                            :bracketIndex="getBracketIndex(bracket.id)"
+                            :user="user"
+                            :filter="bracketMatchFilters[getBracketIndex(bracket.id)]"
+                        />
                     </div>
                 </div>
             </div>

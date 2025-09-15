@@ -11,6 +11,7 @@ import DatePicker from 'primevue/datepicker';
 import { Link, usePage } from '@inertiajs/vue3';
 import Skeleton from 'primevue/skeleton';
 import SuccessDialog from '@/Components/SuccessDialog.vue';
+import MatchesView from '@/Components/MatchesView.vue';
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 import { useBracketState } from '@/composables/useBracketState.js';
 import { useBracketActions } from '@/composables/useBracketActions.js';
@@ -133,41 +134,6 @@ const truncateNameRoundRobin = (name) => {
   if (!name) return 'TBD';
   return name.length > 15 ? name.substring(0, 15) + '...' : name;
 };
-
-// Helper functions for date and time formatting
-const formatDisplayDate = (dateString) => {
-  if (!dateString) return '';
-  try {
-    let date = parseISO(dateString);
-    if (isValid(date)) return format(date, 'MMM-dd-yyyy');
-
-    date = parse(dateString, 'yyyy-MM-dd', new Date());
-    if (isValid(date)) return format(date, 'MMM-dd-yyyy');
-
-    date = parse(dateString, 'MMM-dd-yyyy', new Date());
-    return isValid(date) ? format(date, 'MMM-dd-yyyy') : 'Invalid Date';
-  } catch {
-    return 'Invalid Date';
-  }
-};
-
-const formatDisplayTime = (timeString) => {
-  if (!timeString) return '';
-  try {
-    const parsed = parse(timeString, 'HH:mm', new Date());
-    return format(parsed, 'hh:mm a');
-  } catch {
-    return 'Invalid Time';
-  }
-};
-// using composable increaseScore/decreaseScore
-
-// using composable editParticipant
-
-// using composable logic; local helper removed
-
-// using composable cancelEndMatch
-// using composable confirmEndMatch
 
 // Add onMounted hook to fetch brackets when component loads
 onMounted(async () => {
@@ -602,41 +568,12 @@ onMounted(async () => {
                         aria-labelledby="match-status-filter"
                     />
                 </div>
-                <div class="matches-card-view">
-                    <div v-for="match in getAllMatches(bracket, bracketMatchFilters[brackets.indexOf(bracket)])"
-                    :key="match.id"
-                    :class="['match-card-item', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'editable' : '']"
-                    @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && openMatchEditorFromCard(brackets.indexOf(bracket), match)"
-                >
-                    <div class="match-card-header">
-                        <span class="match-date">{{ formatDisplayDate(match.date || bracket.event.startDate) }}</span>
-                        <span :class="['match-status', `status-${match.status}`]">{{ match.status }}</span>
-                    </div>
-                    <div class="match-card-body">
-                        <div class="players-scores">
-                            <div class="player">
-                                <span class="player-name">{{ truncateNameElimination(match.players[0].name) }}</span>
-                                <span class="player-score">{{ match.players[0].score }}</span>
-                            </div>
-                            <div class="vs-separator">vs</div>
-                            <div class="player">
-                                <span class="player-name">{{ truncateNameElimination(match.players[1].name) }}</span>
-                                <span class="player-score">{{ match.players[1].score }}</span>
-                            </div>
-                        </div>
-                        <div class="time-venue">
-                            <div class="info-item">
-                                <i class="pi pi-clock"></i>
-                                        <span>{{ formatDisplayTime(match.time || bracket.event.startTime) }}</span>
-                            </div>
-                            <div class="info-item">
-                                <i class="pi pi-map-marker"></i>
-                                        <span>{{ match.venue || bracket.event.venue }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    </div>
-                </div>
+                <MatchesView
+                    :bracket="bracket"
+                    :bracketIndex="brackets.indexOf(bracket)"
+                    :user="user"
+                    :filter="bracketMatchFilters[brackets.indexOf(bracket)]"
+                />
             </div>
           </div>
         </div>
