@@ -5,7 +5,9 @@ import { format, parse, parseISO, isValid } from 'date-fns';
 import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
 import Button from 'primevue/button';
+import SelectButton from 'primevue/selectbutton';
 import InputSwitch from 'primevue/inputswitch';
+import DatePicker from 'primevue/datepicker';
 import { Link, usePage } from '@inertiajs/vue3';
 import Skeleton from 'primevue/skeleton';
 import SuccessDialog from '@/Components/SuccessDialog.vue';
@@ -34,11 +36,14 @@ const {
   bracketTypeOptions,
   showSuccessDialog,
   successMessage,
-  showRoundRobinMatchDialog,
+  showMatchEditorDialog,
   bracketViewModes,
-  selectedRoundRobinMatch,
-  selectedRoundRobinMatchData,
+  bracketMatchFilters,
+  selectedMatch,
+  selectedMatchData,
   showMatchUpdateConfirmDialog,
+  showGenericErrorDialog,
+  genericErrorMessage,
   roundRobinScoring,
   showScoringConfigDialog,
   standingsRevision,
@@ -58,17 +63,24 @@ const {
   getRoundRobinStandings,
   isRoundRobinConcluded,
   openMatchDialog,
-  openRoundRobinMatchDialog,
-  closeRoundRobinMatchDialog,
+  closeMatchEditorDialog,
   confirmMatchUpdate,
   cancelMatchUpdate,
   proceedWithMatchUpdate,
   openScoringConfigDialog,
   closeScoringConfigDialog,
   saveScoringConfig,
+  setBracketViewMode,
+  getAllMatches,
+  openMatchEditorFromCard,
+  setBracketMatchFilter
 } = useBracketActions(state);
 
-const { setBracketViewMode, getAllMatches } = useBracketActions(state);
+const matchStatusFilterOptions = ref([
+    { label: 'All', value: 'all' },
+    { label: 'Pending', value: 'pending' },
+    { label: 'Completed', value: 'completed' }
+]);
 
 const filteredBrackets = computed(() => {
   if (!searchQuery.value) {
@@ -83,19 +95,31 @@ const filteredBrackets = computed(() => {
 });
 
 const selectedBracket = computed(() => {
-  if (selectedRoundRobinMatch.value) {
-    return brackets.value[selectedRoundRobinMatch.value.bracketIdx];
+  if (selectedMatch.value) {
+    return brackets.value[selectedMatch.value.bracketIdx];
   }
   return null;
 });
 
-onMounted(async () => {
-  initialLoading.value = true;
-  try {
-    await fetchBrackets();
-  } finally {
-    initialLoading.value = false;
+const isMultiDayEvent = computed(() => {
+  if (selectedBracket.value?.event) {
+      return selectedBracket.value.event.startDate !== selectedBracket.value.event.endDate;
   }
+  return false;
+});
+
+const eventMinDate = computed(() => {
+    if (selectedBracket.value?.event?.startDate) {
+        return parseISO(selectedBracket.value.event.startDate);
+    }
+    return null;
+});
+
+const eventMaxDate = computed(() => {
+    if (selectedBracket.value?.event?.endDate) {
+        return parseISO(selectedBracket.value.event.endDate);
+    }
+    return null;
 });
 
 // Helper function to truncate names for elimination brackets (13 characters)
@@ -115,9 +139,12 @@ const formatDisplayDate = (dateString) => {
   if (!dateString) return '';
   try {
     let date = parseISO(dateString);
-    if (!isValid(date)) {
-      date = parse(dateString, 'MMM-dd-yyyy', new Date());
-    }
+    if (isValid(date)) return format(date, 'MMM-dd-yyyy');
+
+    date = parse(dateString, 'yyyy-MM-dd', new Date());
+    if (isValid(date)) return format(date, 'MMM-dd-yyyy');
+
+    date = parse(dateString, 'MMM-dd-yyyy', new Date());
     return isValid(date) ? format(date, 'MMM-dd-yyyy') : 'Invalid Date';
   } catch {
     return 'Invalid Date';
@@ -142,14 +169,14 @@ const formatDisplayTime = (timeString) => {
 // using composable cancelEndMatch
 // using composable confirmEndMatch
 
-
-
-
-// watchers handled in composable
-
 // Add onMounted hook to fetch brackets when component loads
-onMounted(() => {
-  fetchBrackets();
+onMounted(async () => {
+  initialLoading.value = true;
+  try {
+    await fetchBrackets();
+  } finally {
+    initialLoading.value = false;
+  }
 });
 
 </script>
@@ -315,8 +342,8 @@ onMounted(() => {
                     v-for="(match, matchIdx) in round"
                     :key="`round-${roundIdx}-${matchIdx}`"
                     :id="`round-match-${roundIdx}-${matchIdx}`"
-                    :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
-                    @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && openRoundRobinMatchDialog(brackets.indexOf(bracket), roundIdx, matchIdx, match)"
+                  :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
+                  @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && openMatchDialog(brackets.indexOf(bracket), roundIdx, matchIdx, match, 'round_robin')"
                   >
                     <div class="player-box">
                       <span
@@ -564,10 +591,25 @@ onMounted(() => {
             </div>
 
             <!-- Matches Card View -->
-            <div v-if="bracketViewModes[brackets.indexOf(bracket)] === 'matches'" class="matches-card-view">
-                <div v-for="match in getAllMatches(bracket)" :key="match.id" class="match-card-item">
+            <div v-if="bracketViewModes[brackets.indexOf(bracket)] === 'matches'">
+                <div class="match-filters">
+                    <SelectButton
+                        :modelValue="bracketMatchFilters[brackets.indexOf(bracket)]"
+                        @update:modelValue="val => setBracketMatchFilter(brackets.indexOf(bracket), val)"
+                        :options="matchStatusFilterOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        aria-labelledby="match-status-filter"
+                    />
+                </div>
+                <div class="matches-card-view">
+                    <div v-for="match in getAllMatches(bracket, bracketMatchFilters[brackets.indexOf(bracket)])"
+                    :key="match.id"
+                    :class="['match-card-item', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'editable' : '']"
+                    @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && openMatchEditorFromCard(brackets.indexOf(bracket), match)"
+                >
                     <div class="match-card-header">
-                        <span class="match-date">{{ formatDisplayDate(bracket.event.startDate) }}</span>
+                        <span class="match-date">{{ formatDisplayDate(match.date || bracket.event.startDate) }}</span>
                         <span :class="['match-status', `status-${match.status}`]">{{ match.status }}</span>
                     </div>
                     <div class="match-card-body">
@@ -585,13 +627,14 @@ onMounted(() => {
                         <div class="time-venue">
                             <div class="info-item">
                                 <i class="pi pi-clock"></i>
-                                <span>{{ formatDisplayTime(bracket.event.startTime) }}</span>
+                                        <span>{{ formatDisplayTime(match.time || bracket.event.startTime) }}</span>
                             </div>
                             <div class="info-item">
                                 <i class="pi pi-map-marker"></i>
-                                <span>{{ bracket.event.venue }}</span>
+                                        <span>{{ match.venue || bracket.event.venue }}</span>
                             </div>
                         </div>
+                    </div>
                     </div>
                 </div>
             </div>
@@ -678,6 +721,17 @@ onMounted(() => {
         :message="successMessage"
       />
 
+      <!-- Generic Error Dialog -->
+      <ConfirmationDialog
+        v-model:show="showGenericErrorDialog"
+        title="Error"
+        :message="genericErrorMessage"
+        confirmText="OK"
+        :show-cancel-button="false"
+        confirmButtonClass="bg-red-600 hover:bg-red-700"
+        @confirm="showGenericErrorDialog = false"
+      />
+
       <!-- Match Update Confirmation Dialog -->
       <ConfirmationDialog
         v-model:show="showMatchUpdateConfirmDialog"
@@ -740,10 +794,10 @@ onMounted(() => {
       </Dialog>
 
       <!-- Round Robin Match Dialog -->
-      <Dialog v-model:visible="showRoundRobinMatchDialog" header="Edit Match" modal :style="{ width: '500px' }">
-        <div v-if="selectedRoundRobinMatchData" class="round-robin-match-dialog">
+      <Dialog v-model:visible="showMatchEditorDialog" header="Edit Match" modal :style="{ width: '500px' }">
+        <div v-if="selectedMatchData" class="round-robin-match-dialog">
           <div class="match-info">
-            <h3>Round Robin Match</h3>
+            <h3>Match Details</h3>
             <p class="match-description">Edit player names, scores, and match status</p>
           </div>
 
@@ -751,9 +805,9 @@ onMounted(() => {
             <div class="player-input">
               <label>Player 1 Name:</label>
               <InputText
-                v-model="selectedRoundRobinMatchData.player1Name"
+                v-model="selectedMatchData.player1Name"
                 placeholder="Enter player name"
-                :disabled="selectedRoundRobinMatchData?.player1Name === 'BYE'"
+                :disabled="selectedMatchData?.player1Name === 'BYE'"
               />
             </div>
 
@@ -761,14 +815,14 @@ onMounted(() => {
               <label>Player 1 Score:</label>
               <div class="score-controls">
                 <Button
-                  @click="selectedRoundRobinMatchData.player1Score--"
-                  :disabled="selectedRoundRobinMatchData.player1Score <= 0"
+                  @click="selectedMatchData.player1Score--"
+                  :disabled="selectedMatchData.player1Score <= 0"
                   icon="pi pi-minus"
                   class="p-button-sm"
                 />
-                <span class="score-display">{{ selectedRoundRobinMatchData.player1Score }}</span>
+                <span class="score-display">{{ selectedMatchData.player1Score }}</span>
                 <Button
-                  @click="selectedRoundRobinMatchData.player1Score++"
+                  @click="selectedMatchData.player1Score++"
                   icon="pi pi-plus"
                   class="p-button-sm"
                 />
@@ -782,9 +836,9 @@ onMounted(() => {
             <div class="player-input">
               <label>Player 2 Name:</label>
               <InputText
-                v-model="selectedRoundRobinMatchData.player2Name"
+                v-model="selectedMatchData.player2Name"
                 placeholder="Enter player name"
-                :disabled="selectedRoundRobinMatchData?.player2Name === 'BYE'"
+                :disabled="selectedMatchData?.player2Name === 'BYE'"
               />
             </div>
 
@@ -792,14 +846,14 @@ onMounted(() => {
               <label>Player 2 Score:</label>
               <div class="score-controls">
                 <Button
-                  @click="selectedRoundRobinMatchData.player2Score--"
-                  :disabled="selectedRoundRobinMatchData.player2Score <= 0"
+                  @click="selectedMatchData.player2Score--"
+                  :disabled="selectedMatchData.player2Score <= 0"
                   icon="pi pi-minus"
                   class="p-button-sm"
                 />
-                <span class="score-display">{{ selectedRoundRobinMatchData.player2Score }}</span>
+                <span class="score-display">{{ selectedMatchData.player2Score }}</span>
                 <Button
-                  @click="selectedRoundRobinMatchData.player2Score++"
+                  @click="selectedMatchData.player2Score++"
                   icon="pi pi-plus"
                   class="p-button-sm"
                 />
@@ -807,20 +861,42 @@ onMounted(() => {
             </div>
           </div>
 
+          <div class="vs-divider"></div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="p-field">
+                <label>Date:</label>
+                <DatePicker v-model="selectedMatchData.date" dateFormat="yy-mm-dd" showIcon
+                    :minDate="eventMinDate"
+                    :maxDate="eventMaxDate"
+                    :disabled="!isMultiDayEvent"
+                    class="w-full"
+                />
+            </div>
+            <div class="p-field">
+                <label>Time:</label>
+                <InputText type="time" v-model="selectedMatchData.time" class="w-full" />
+            </div>
+          </div>
+           <div class="p-field">
+                <label>Venue:</label>
+                <InputText v-model="selectedMatchData.venue" class="w-full" />
+            </div>
+
           <div class="match-status-section">
             <label>Match Status:</label>
             <div class="status-toggle">
-              <span class="status-label" :class="{ 'active': selectedRoundRobinMatchData.status === 'pending' }">Pending</span>
+              <span class="status-label" :class="{ 'active': selectedMatchData.status === 'pending' }">Pending</span>
               <InputSwitch
-                :modelValue="selectedRoundRobinMatchData.status === 'completed'"
-                @update:modelValue="(value) => selectedRoundRobinMatchData.status = value ? 'completed' : 'pending'"
+                :modelValue="selectedMatchData.status === 'completed'"
+                @update:modelValue="(value) => selectedMatchData.status = value ? 'completed' : 'pending'"
                 class="status-switch"
               />
-              <span class="status-label" :class="{ 'active': selectedRoundRobinMatchData.status === 'completed' }">Completed</span>
+              <span class="status-label" :class="{ 'active': selectedMatchData.status === 'completed' }">Completed</span>
             </div>
           </div>
 
-          <div v-if="selectedRoundRobinMatchData.status === 'completed' && selectedRoundRobinMatchData.player1Score === selectedRoundRobinMatchData.player2Score"
+          <div v-if="selectedMatchData.status === 'completed' && selectedMatchData.player1Score === selectedMatchData.player2Score"
                :class="['tie-indicator', selectedBracket?.type !== 'Round Robin' ? 'tie-warning-bg' : '']">
             <i class="pi pi-exclamation-triangle"></i>
             <span v-if="selectedBracket?.type === 'Round Robin'">This match is a tie!</span>
@@ -830,7 +906,7 @@ onMounted(() => {
           <div class="dialog-actions">
             <Button
               label="Cancel"
-              @click="closeRoundRobinMatchDialog"
+              @click="closeMatchEditorDialog"
               class="p-button-secondary"
             />
             <Button

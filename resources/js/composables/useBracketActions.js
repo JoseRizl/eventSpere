@@ -1,5 +1,28 @@
 import { nextTick, watch } from 'vue';
 import axios from 'axios';
+import { format, parseISO, isValid, parse } from 'date-fns';
+
+const robustParseDate = (dateString) => {
+    if (!dateString) return new Date(NaN); // Return invalid date if no string
+
+    // ISO format e.g., 2023-10-27T10:00:00.000Z or 2023-10-27
+    let date = parseISO(dateString);
+    if (isValid(date)) return date;
+
+    // yyyy-MM-dd format
+    date = parse(dateString, 'yyyy-MM-dd', new Date());
+    if (isValid(date)) return date;
+
+    // MMM-dd-yyyy format e.g., Oct-27-2023
+    date = parse(dateString, 'MMM-dd-yyyy', new Date());
+    if (isValid(date)) return date;
+
+    // Fallback for other potential formats that Date.parse might handle
+    date = new Date(dateString);
+    if (isValid(date)) return date;
+
+    return new Date(NaN); // Return invalid date if all parsing fails
+};
 
 export function useBracketActions(state) {
   const {
@@ -26,16 +49,19 @@ export function useBracketActions(state) {
     currentLosersMatchIndex,
     currentGrandFinalsIndex,
     activeBracketSection,
-    showRoundRobinMatchDialog,
-    selectedRoundRobinMatch,
-    selectedRoundRobinMatchData,
+    showMatchEditorDialog,
+    selectedMatch,
+    selectedMatchData,
     showMatchUpdateConfirmDialog,
+    showGenericErrorDialog,
+    genericErrorMessage,
     roundRobinScoring,
     standingsRevision,
     showScoringConfigDialog,
     tempScoringConfig,
 
     bracketViewModes,
+    bracketMatchFilters,
   } = state;
 
   const bracketTypeOptions = state.bracketTypeOptions;
@@ -88,19 +114,41 @@ export function useBracketActions(state) {
     bracketViewModes.value[bracketIdx] = mode;
   };
 
-  const getAllMatches = (bracket) => {
-    if (!bracket || !bracket.matches) return [];
+  const getAllMatches = (bracket, filter = 'all') => {
+    let allMatches = [];
+    if (!bracket || !bracket.matches) return allMatches;
+
     if (bracket.type === 'Single Elimination' || bracket.type === 'Round Robin') {
-        return bracket.matches.flat();
-    }
-    if (bracket.type === 'Double Elimination') {
-        return [
+        allMatches = bracket.matches.flat();
+    } else if (bracket.type === 'Double Elimination') {
+        allMatches = [
             ...bracket.matches.winners.flat(),
             ...bracket.matches.losers.flat(),
             ...bracket.matches.grand_finals.flat()
         ];
+    } else {
+        return [];
     }
-    return [];
+
+    // Apply filter
+    let filteredMatches = allMatches;
+    if (filter && filter !== 'all') {
+        filteredMatches = allMatches.filter(match => match.status === filter);
+    }
+
+    // Apply sorting: ongoing -> pending -> completed
+    const statusOrder = { 'ongoing': 1, 'pending': 2, 'completed': 3 };
+    filteredMatches.sort((a, b) => {
+        const statusA = statusOrder[a.status] || 99;
+        const statusB = statusOrder[b.status] || 99;
+        return statusA !== statusB ? statusA - statusB : a.id - b.id;
+    });
+
+    return filteredMatches;
+  };
+
+  const setBracketMatchFilter = (bracketIdx, filter) => {
+    bracketMatchFilters.value[bracketIdx] = filter;
   };
 
   const handleByeRounds = (bracketIdx) => {
@@ -259,12 +307,21 @@ export function useBracketActions(state) {
       event: selectedEvent.value,
     };
 
+    // Populate match-specific details from the event
+    const populateEventDetails = (match) => {
+        match.date = selectedEvent.value.startDate;
+        match.time = selectedEvent.value.startTime;
+        match.venue = selectedEvent.value.venue;
+    };
+    Object.values(newBracket).flat().flat().forEach(populateEventDetails);
+
     try {
       await saveBrackets(bracketData);
       brackets.value.push(bracketData);
       if (bracketData.id) bracketActionLog.set(bracketData.id, []);
       expandedBrackets.value.push(false);
       bracketViewModes.value[brackets.value.length - 1] = 'bracket';
+      bracketMatchFilters.value[brackets.value.length - 1] = 'all';
       showDialog.value = false;
       handleByeRounds(brackets.value.length - 1);
       nextTick(() => updateLines(brackets.value.length - 1));
@@ -283,7 +340,21 @@ export function useBracketActions(state) {
           response.data.map(async (bracket) => {
             try {
               const eventDetails = await fetchEventDetails(bracket.event_id);
-              return { ...bracket, event: eventDetails || { title: 'Event not found' } };
+              const newBracket = { ...bracket, event: eventDetails || { title: 'Event not found' } };
+
+              const populateMatch = (match) => {
+                  if (!match.date) match.date = newBracket.event.startDate;
+                  if (!match.time) match.time = newBracket.event.startTime;
+                  if (!match.venue) match.venue = newBracket.event.venue;
+                  return match;
+              };
+
+              if (newBracket.matches && typeof newBracket.matches === 'object') {
+                  Object.values(newBracket.matches).forEach(part => {
+                      if (Array.isArray(part)) part.flat().forEach(populateMatch);
+                  });
+              }
+              return newBracket;
             } catch (error) {
               console.error(`Error fetching event details for bracket ${bracket.id}:`, error);
               return { ...bracket, event: { title: 'Event not found' } };
@@ -296,8 +367,10 @@ export function useBracketActions(state) {
           if (b.id && !bracketActionLog.has(b.id)) bracketActionLog.set(b.id, []);
         }
         bracketViewModes.value = {};
+        bracketMatchFilters.value = {};
         for (let i = 0; i < brackets.value.length; i++) {
             bracketViewModes.value[i] = 'bracket';
+            bracketMatchFilters.value[i] = 'all';
         }
       }
     } catch (error) {
@@ -355,6 +428,9 @@ export function useBracketActions(state) {
         status: 'pending',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        date: selectedEvent.value.startDate,
+        time: selectedEvent.value.startTime,
+        venue: selectedEvent.value.venue,
       };
       firstRound.push(match);
       if (match.players[0].name === 'BYE' || match.players[1].name === 'BYE') {
@@ -381,6 +457,9 @@ export function useBracketActions(state) {
         status: 'pending',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        date: selectedEvent.value.startDate,
+        time: selectedEvent.value.startTime,
+        venue: selectedEvent.value.venue,
       }));
       rounds.push(nextMatches);
       prevMatches = nextMatches;
@@ -439,6 +518,9 @@ export function useBracketActions(state) {
         status: 'pending',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        date: selectedEvent.value.startDate,
+        time: selectedEvent.value.startTime,
+        venue: selectedEvent.value.venue,
       };
       winnersFirstRound.push(match);
       if (match.players[0].name === 'BYE' || match.players[1].name === 'BYE') {
@@ -467,6 +549,9 @@ export function useBracketActions(state) {
         status: 'pending',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        date: selectedEvent.value.startDate,
+        time: selectedEvent.value.startTime,
+        venue: selectedEvent.value.venue,
       };
       firstLosersRound.push(match);
     }
@@ -492,6 +577,9 @@ export function useBracketActions(state) {
           status: 'pending',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
+          date: selectedEvent.value.startDate,
+          time: selectedEvent.value.startTime,
+          venue: selectedEvent.value.venue,
         };
         round.push(match);
       }
@@ -518,6 +606,9 @@ export function useBracketActions(state) {
         status: 'pending',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        date: selectedEvent.value.startDate,
+        time: selectedEvent.value.startTime,
+        venue: selectedEvent.value.venue,
       }));
       winnersRoundsArray.push(nextMatches);
       prevWinnersMatches = nextMatches;
@@ -538,6 +629,9 @@ export function useBracketActions(state) {
       status: 'pending',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
+      date: selectedEvent.value.startDate,
+      time: selectedEvent.value.startTime,
+      venue: selectedEvent.value.venue,
     }];
 
     return { winners: winnersRoundsArray, losers: losersRounds, grand_finals: grandFinals };
@@ -598,6 +692,9 @@ export function useBracketActions(state) {
           status: 'pending',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
+          date: selectedEvent.value.startDate,
+          time: selectedEvent.value.startTime,
+          venue: selectedEvent.value.venue,
         };
 
         // Auto-complete BYE matches
@@ -1419,25 +1516,55 @@ export function useBracketActions(state) {
   };
 
   const openMatchDialog = (bracketIdx, roundIdx, matchIdx, match, bracketType = 'round_robin') => {
-    selectedRoundRobinMatch.value = { bracketIdx, roundIdx, matchIdx, bracketType };
-    selectedRoundRobinMatchData.value = {
+    selectedMatch.value = { bracketIdx, roundIdx, matchIdx, bracketType };
+    const matchDate = match.date || brackets.value[bracketIdx].event.startDate;
+    selectedMatchData.value = {
       player1Name: match.players[0].name,
       player2Name: match.players[1].name,
       player1Score: match.players[0].score,
       player2Score: match.players[1].score,
-      status: match.status
+      status: match.status,
+      date: robustParseDate(matchDate),
+      time: match.time || brackets.value[bracketIdx].event.startTime,
+      venue: match.venue || brackets.value[bracketIdx].event.venue,
     };
-    showRoundRobinMatchDialog.value = true;
+    showMatchEditorDialog.value = true;
   };
 
-  const openRoundRobinMatchDialog = (bracketIdx, roundIdx, matchIdx, match) => {
-    openMatchDialog(bracketIdx, roundIdx, matchIdx, match, 'round_robin');
+  const findMatchIndices = (bracket, matchId) => {
+      if (bracket.type === 'Single Elimination' || bracket.type === 'Round Robin') {
+          for (let roundIdx = 0; roundIdx < bracket.matches.length; roundIdx++) {
+              const matchIdx = bracket.matches[roundIdx].findIndex(m => m.id === matchId);
+              if (matchIdx !== -1) {
+                  return { roundIdx, matchIdx, bracketType: bracket.type === 'Single Elimination' ? 'single' : 'round_robin' };
+              }
+          }
+      } else if (bracket.type === 'Double Elimination') {
+          for (let roundIdx = 0; roundIdx < bracket.matches.winners.length; roundIdx++) {
+              const matchIdx = bracket.matches.winners[roundIdx].findIndex(m => m.id === matchId);
+              if (matchIdx !== -1) return { roundIdx, matchIdx, bracketType: 'winners' };
+          }
+          for (let roundIdx = 0; roundIdx < bracket.matches.losers.length; roundIdx++) {
+              const matchIdx = bracket.matches.losers[roundIdx].findIndex(m => m.id === matchId);
+              if (matchIdx !== -1) return { roundIdx, matchIdx, bracketType: 'losers' };
+          }
+          const matchIdx = bracket.matches.grand_finals.findIndex(m => m.id === matchId);
+          if (matchIdx !== -1) return { roundIdx: 0, matchIdx, bracketType: 'grand_finals' };
+      }
+      return null;
+  };
+
+  const openMatchEditorFromCard = (bracketIdx, match) => {
+      const bracket = brackets.value[bracketIdx];
+      const indices = findMatchIndices(bracket, match.id);
+      if (indices) openMatchDialog(bracketIdx, indices.roundIdx, indices.matchIdx, match, indices.bracketType);
+      else console.error("Could not find match indices for", match);
   };
 
   const updateMatch = async () => {
-    if (!selectedRoundRobinMatch.value) return;
+    if (!selectedMatch.value) return;
 
-    const { bracketIdx, roundIdx, matchIdx, bracketType } = selectedRoundRobinMatch.value;
+    const { bracketIdx, roundIdx, matchIdx, bracketType } = selectedMatch.value;
     const bracket = brackets.value[bracketIdx];
 
     let match;
@@ -1448,8 +1575,8 @@ export function useBracketActions(state) {
         case 'winners':
           match = bracket.matches.winners[roundIdx][matchIdx];
           break;
-        case 'losers':
-          match = bracket.matches.losers[roundIdx - bracket.matches.winners.length][matchIdx];
+        case 'losers': // roundIdx is the direct index in the losers array
+          match = bracket.matches.losers[roundIdx][matchIdx];
           break;
         case 'grand_finals':
           match = bracket.matches.grand_finals[matchIdx];
@@ -1460,9 +1587,9 @@ export function useBracketActions(state) {
     }
 
     // Update player names directly
-    if (match.players[0].name !== selectedRoundRobinMatchData.value.player1Name) {
+    if (match.players[0].name !== selectedMatchData.value.player1Name) {
       const playerId = match.players[0].id;
-      const newName = selectedRoundRobinMatchData.value.player1Name;
+      const newName = selectedMatchData.value.player1Name;
 
       // Update player name across all matches in the bracket
       if (bracket.type === 'Single Elimination') {
@@ -1533,9 +1660,9 @@ export function useBracketActions(state) {
       }
     }
 
-    if (match.players[1].name !== selectedRoundRobinMatchData.value.player2Name) {
+    if (match.players[1].name !== selectedMatchData.value.player2Name) {
       const playerId = match.players[1].id;
-      const newName = selectedRoundRobinMatchData.value.player2Name;
+      const newName = selectedMatchData.value.player2Name;
 
       // Update player name across all matches in the bracket
       if (bracket.type === 'Single Elimination') {
@@ -1608,11 +1735,19 @@ export function useBracketActions(state) {
     }
 
     // Update scores
-    match.players[0].score = selectedRoundRobinMatchData.value.player1Score;
-    match.players[1].score = selectedRoundRobinMatchData.value.player2Score;
+    match.players[0].score = selectedMatchData.value.player1Score;
+    match.players[1].score = selectedMatchData.value.player2Score;
+
+    // Update date, time, venue
+    if (selectedMatchData.value.date instanceof Date && isValid(selectedMatchData.value.date)) {
+        match.date = format(selectedMatchData.value.date, 'yyyy-MM-dd');
+    }
+    match.time = selectedMatchData.value.time;
+    match.venue = selectedMatchData.value.venue;
+
 
     // Update match status
-    if (selectedRoundRobinMatchData.value.status === 'completed' && match.status !== 'completed') {
+    if (selectedMatchData.value.status === 'completed' && match.status !== 'completed') {
       // Check for ties in elimination brackets
       if ((bracket.type === 'Single Elimination' || bracket.type === 'Double Elimination') &&
           match.players[0].score === match.players[1].score) {
@@ -1836,7 +1971,7 @@ export function useBracketActions(state) {
           showWinnerDialog.value = true;
         }
       }
-    } else if (selectedRoundRobinMatchData.value.status !== 'completed' && match.status === 'completed') {
+    } else if (selectedMatchData.value.status !== 'completed' && match.status === 'completed') {
       // Undo the match
       match.players[0].completed = false;
       match.players[1].completed = false;
@@ -1853,19 +1988,24 @@ export function useBracketActions(state) {
       if (bracket.type === 'Single Elimination' || bracket.type === 'Double Elimination') {
         nextTick(() => updateLines(bracketIdx));
       }
-      showRoundRobinMatchDialog.value = false;
+      showMatchEditorDialog.value = false;
     } catch (error) {
       console.error('Error updating Round Robin match:', error);
     }
   };
 
-  const closeRoundRobinMatchDialog = () => {
-    showRoundRobinMatchDialog.value = false;
-    selectedRoundRobinMatch.value = null;
-    selectedRoundRobinMatchData.value = null;
+  const closeMatchEditorDialog = () => {
+    showMatchEditorDialog.value = false;
+    selectedMatch.value = null;
+    selectedMatchData.value = null;
   };
 
   const confirmMatchUpdate = () => {
+    if (selectedMatchData.value && !isValid(selectedMatchData.value.date)) {
+        genericErrorMessage.value = 'The selected date is invalid. Please choose a valid date.';
+        showGenericErrorDialog.value = true;
+        return;
+    }
     showMatchUpdateConfirmDialog.value = true;
   };
 
@@ -1929,9 +2069,8 @@ export function useBracketActions(state) {
     getRoundRobinStandings,
     isRoundRobinConcluded,
     openMatchDialog,
-    openRoundRobinMatchDialog,
     updateMatch,
-    closeRoundRobinMatchDialog,
+    closeMatchEditorDialog,
     confirmMatchUpdate,
     cancelMatchUpdate,
     proceedWithMatchUpdate,
@@ -1941,5 +2080,7 @@ export function useBracketActions(state) {
     handleByeRounds,
     setBracketViewMode,
     getAllMatches,
+    setBracketMatchFilter,
+    openMatchEditorFromCard,
   };
 }

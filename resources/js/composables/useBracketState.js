@@ -35,6 +35,7 @@ export function useBracketState() {
   const deleteBracketIdx = ref(null);
   const showSuccessDialog = ref(false);
   const bracketViewModes = ref({});
+  const bracketMatchFilters = ref({});
   const successMessage = ref('');
 
   const currentGameNumber = computed(() => `Game ${currentMatchIndex.value + 1}`);
@@ -46,10 +47,12 @@ export function useBracketState() {
 
   const bracketTypeOptions = ["Single Elimination", "Double Elimination", "Round Robin"];
 
-  const showRoundRobinMatchDialog = ref(false);
-  const selectedRoundRobinMatch = ref(null);
-  const selectedRoundRobinMatchData = ref(null);
+  const showMatchEditorDialog = ref(false);
+  const selectedMatch = ref(null);
+  const selectedMatchData = ref(null);
   const showMatchUpdateConfirmDialog = ref(false);
+  const showGenericErrorDialog = ref(false);
+  const genericErrorMessage = ref('');
 
   const roundRobinScoring = ref(loadScoringConfig());
   const showScoringConfigDialog = ref(false);
@@ -78,16 +81,19 @@ export function useBracketState() {
     showSuccessDialog,
     successMessage,
     bracketViewModes,
+    bracketMatchFilters,
     currentGameNumber,
     currentWinnersMatchIndex,
     currentLosersMatchIndex,
     currentGrandFinalsIndex,
     activeBracketSection,
     bracketTypeOptions,
-    showRoundRobinMatchDialog,
-    selectedRoundRobinMatch,
-    selectedRoundRobinMatchData,
+    showMatchEditorDialog,
+    selectedMatch,
+    selectedMatchData,
     showMatchUpdateConfirmDialog,
+    showGenericErrorDialog,
+    genericErrorMessage,
     roundRobinScoring,
     showScoringConfigDialog,
     tempScoringConfig,
