@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
-import { format, parse, parseISO, isValid } from 'date-fns';
+import { formatDisplayDate, formatDisplayTime } from '@/utils/dateUtils.js';
+import { truncate } from '@/utils/stringUtils.js';
 
 const props = defineProps({
     bracket: {
@@ -29,38 +30,6 @@ const props = defineProps({
     }
 });
 
-// Helper functions for this component's template
-const truncateNameElimination = (name) => {
-  if (!name) return 'TBD';
-  return name.length > 13 ? name.substring(0, 13) + '...' : name;
-};
-
-const formatDisplayDate = (dateString) => {
-  if (!dateString) return '';
-  try {
-    let date = parseISO(dateString);
-    if (isValid(date)) return format(date, 'MMM-dd-yyyy');
-
-    date = parse(dateString, 'yyyy-MM-dd', new Date());
-    if (isValid(date)) return format(date, 'MMM-dd-yyyy');
-
-    date = parse(dateString, 'MMM-dd-yyyy', new Date());
-    return isValid(date) ? format(date, 'MMM-dd-yyyy') : 'Invalid Date';
-  } catch {
-    return 'Invalid Date';
-  }
-};
-
-const formatDisplayTime = (timeString) => {
-  if (!timeString) return '';
-  try {
-    const parsed = parse(timeString, 'HH:mm', new Date());
-    return format(parsed, 'hh:mm a');
-  } catch {
-    return 'Invalid Time';
-  }
-};
-
 const matches = computed(() => {
     return props.getAllMatches(props.bracket, props.filter);
 });
@@ -81,12 +50,12 @@ const matches = computed(() => {
             <div class="match-card-body">
                 <div class="players-scores">
                     <div class="player">
-                        <span class="player-name">{{ truncateNameElimination(match.players[0].name) }}</span>
+                        <span class="player-name">{{ truncate(match.players[0].name, { length: 13 }) }}</span>
                         <span class="player-score">{{ match.players[0].score }}</span>
                     </div>
                     <div class="vs-separator">vs</div>
                     <div class="player">
-                        <span class="player-name">{{ truncateNameElimination(match.players[1].name) }}</span>
+                        <span class="player-name">{{ truncate(match.players[1].name, { length: 13 }) }}</span>
                         <span class="player-score">{{ match.players[1].score }}</span>
                     </div>
                 </div>

@@ -1,4 +1,6 @@
 <script setup>
+import { truncate } from '@/utils/stringUtils.js';
+
 const props = defineProps({
     bracket: {
         type: Object,
@@ -23,17 +25,6 @@ const props = defineProps({
     openScoringConfigDialog: { type: Function, required: true }
 });
 
-// Helper function to truncate names for elimination brackets (13 characters)
-const truncateNameElimination = (name) => {
-  if (!name) return 'TBD';
-  return name.length > 13 ? name.substring(0, 13) + '...' : name;
-};
-
-// Helper function to truncate names for Round Robin brackets (15 characters)
-const truncateNameRoundRobin = (name) => {
-  if (!name) return 'TBD';
-  return name.length > 15 ? name.substring(0, 15) + '...' : name;
-};
 </script>
 
 <template>
@@ -76,7 +67,7 @@ const truncateNameRoundRobin = (name) => {
                     'winner-name': match.winner_id === match.players[0].id
                 }"
                 >
-                {{ truncateNameElimination(match.players[0].name) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
+                {{ truncate(match.players[0].name, { length: 13 }) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
                 </span>
                 <hr />
                 <span
@@ -89,7 +80,7 @@ const truncateNameRoundRobin = (name) => {
                     'winner-name': match.winner_id === match.players[1].id
                 }"
                 >
-                {{ truncateNameElimination(match.players[1].name) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
+                {{ truncate(match.players[1].name, { length: 13 }) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
                 </span>
             </div>
         </div>
@@ -121,7 +112,7 @@ const truncateNameRoundRobin = (name) => {
                     'winner-name': match.winner_id === match.players[0].id
                 }"
                 >
-                {{ truncateNameRoundRobin(match.players[0].name) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
+                {{ truncate(match.players[0].name, { length: 15 }) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
                 </span>
                 <hr />
                 <span
@@ -134,7 +125,7 @@ const truncateNameRoundRobin = (name) => {
                     'winner-name': match.winner_id === match.players[1].id
                 }"
                 >
-                {{ truncateNameRoundRobin(match.players[1].name) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
+                {{ truncate(match.players[1].name, { length: 15 }) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
                 </span>
             </div>
             </div>
@@ -170,7 +161,7 @@ const truncateNameRoundRobin = (name) => {
             >
             <span class="rank">{{ index + 1 }}</span>
             <span class="player">
-                {{ truncateNameRoundRobin(player.name) }}
+                {{ truncate(player.name, { length: 15 }) }}
                 <i v-if="index === 0 && props.isRoundRobinConcluded(bracketIndex)" class="pi pi-crown winner-crown"></i>
             </span>
             <span class="wins">{{ player.wins }}</span>
@@ -223,7 +214,7 @@ const truncateNameRoundRobin = (name) => {
                     'winner-name': match.winner_id === match.players[0].id
                     }"
                 >
-                    {{ truncateNameElimination(match.players[0].name) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
+                    {{ truncate(match.players[0].name, { length: 13 }) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
                 </span>
                 <hr />
                 <span
@@ -236,7 +227,7 @@ const truncateNameRoundRobin = (name) => {
                     'winner-name': match.winner_id === match.players[1].id
                     }"
                 >
-                    {{ truncateNameElimination(match.players[1].name) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
+                    {{ truncate(match.players[1].name, { length: 13 }) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
                 </span>
                 </div>
             </div>
@@ -283,7 +274,7 @@ const truncateNameRoundRobin = (name) => {
                     'winner-name': match.winner_id === match.players[0].id
                     }"
                 >
-                    {{ truncateNameElimination(match.players[0].name) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
+                    {{ truncate(match.players[0].name, { length: 13 }) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
                 </span>
                 <hr />
                 <span
@@ -296,7 +287,7 @@ const truncateNameRoundRobin = (name) => {
                     'winner-name': match.winner_id === match.players[1].id
                     }"
                 >
-                    {{ truncateNameElimination(match.players[1].name) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
+                    {{ truncate(match.players[1].name, { length: 13 }) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
                 </span>
                 </div>
             </div>
@@ -335,7 +326,7 @@ const truncateNameRoundRobin = (name) => {
                     'tbd-text': (!match.players[0].name || match.players[0].name === 'TBD') || ((match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score)
                 }"
                 >
-                {{ truncateNameElimination(match.players[0].name) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
+                {{ truncate(match.players[0].name, { length: 13 }) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
                 </span>
                 <hr />
                 <span
@@ -346,7 +337,7 @@ const truncateNameRoundRobin = (name) => {
                     'tbd-text': (!match.players[1].name || match.players[1].name === 'TBD') || ((match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score)
                 }"
                 >
-                {{ truncateNameElimination(match.players[1].name) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
+                {{ truncate(match.players[1].name, { length: 13 }) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
                 </span>
             </div>
             </div>

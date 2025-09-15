@@ -1,8 +1,10 @@
 <script setup>
 import { ref, onMounted, computed, watch, nextTick } from "vue";
-import axios from "axios";
-import { format, isWithinInterval, isSameMonth, parse, areIntervalsOverlapping, endOfDay } from "date-fns";
+import { getFullDateTime } from '@/utils/dateUtils.js';
+import { loadToggleState, saveToggleState } from '@/utils/localStorage.js';
 import { Link, usePage, router } from "@inertiajs/vue3";
+import { useEvents } from '@/composables/useEvents.js';
+import { useAnnouncements } from '@/composables/useAnnouncements.js';
 import EventCalendar from '@/Components/EventCalendar.vue';
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 import SuccessDialog from '@/Components/SuccessDialog.vue';
@@ -14,16 +16,13 @@ import Button from 'primevue/button';
 import Carousel from 'primevue/carousel';
 import Tag from 'primevue/tag';
 import Card from 'primevue/card';
-
-const allNews = ref([]);
-const now = new Date();
+import { useFilters } from '@/composables/useFilters.js';
 const showEventsThisMonth = ref(loadToggleState('showEventsThisMonth', true));
 const saving = ref(false);
 const showSuccessDialog = ref(false);
 const successMessage = ref('');
 const showOngoingEvents = ref(loadToggleState('showOngoingEvents', true));
 const showUpcomingEvents = ref(loadToggleState('showUpcomingEvents', true));
-const eventAnnouncements = ref([]);
 watch(showEventsThisMonth, (val) => saveToggleState('showEventsThisMonth', val));
 watch(showOngoingEvents, (val) => saveToggleState('showOngoingEvents', val));
 watch(showUpcomingEvents, (val) => saveToggleState('showUpcomingEvents', val));
@@ -36,291 +35,25 @@ const page = usePage();
 const user = computed(() => page.props.auth.user);
 const allUsers = computed(() => page.props.all_users || []);
 const currentView = ref('events'); // 'events' or 'announcements'
+const {
+    searchQuery, startDateFilter, endDateFilter, showDateFilter,
+    toggleDateFilter, clearDateFilter, clearFilters
+} = useFilters();
 
-const searchQuery = ref('');
-const startDateFilter = ref(null);
-const endDateFilter = ref(null);
-const showDateFilter = ref(false);
+const {
+    allNews, fetchEvents, filteredNews, ongoingEvents, eventsThisMonth,
+    upcomingEvents, carouselEvents, isNewEvent, getUpcomingTag, getUpcomingSeverity
+} = useEvents({ searchQuery, startDateFilter, endDateFilter });
 
-const getFullDateTime = (dateInput, timeStr) => {
-  if (!dateInput) return null;
+const {
+    eventAnnouncements, fetchAnnouncements, filteredAnnouncements, deleteAnnouncement
+} = useAnnouncements({ searchQuery, startDateFilter, endDateFilter }, allNews);
 
-  let date;
-  if (typeof dateInput === 'string' && /^[A-Za-z]{3}-\d{2}-\d{4}$/.test(dateInput)) {
-    date = parse(dateInput, 'MMM-dd-yyyy', new Date());
-  } else {
-    date = new Date(dateInput);
-  }
-
-  if (isNaN(date.getTime())) return null;
-
-  if (timeStr) {
-    const [hours, minutes] = timeStr.split(':').map(Number);
-    if (!isNaN(hours) && !isNaN(minutes)) {
-      date.setHours(hours, minutes, 0, 0);
-    }
-  } else {
-    // If no time is provided, treat it as start of the day to avoid timezone issues with date-only strings
-    date.setHours(0, 0, 0, 0);
-  }
-  return date;
-};
-
-const filteredNews = computed(() => {
-    let news = allNews.value;
-
-    // Filter by search query
-    if (searchQuery.value) {
-        const query = searchQuery.value.toLowerCase().trim();
-        news = news.filter(event => {
-            const title = event.title?.toLowerCase() || '';
-            const description = event.description?.toLowerCase() || '';
-            return title.includes(query) || description.includes(query);
-        });
-    }
-
-    // Filter by date range
-    if (startDateFilter.value || endDateFilter.value) {
-        news = news.filter(event => {
-            const eventStart = getFullDateTime(event.startDate, event.startTime);
-            const eventEnd = getFullDateTime(event.endDate || event.startDate, event.endTime || '23:59');
-            if (!eventStart || !eventEnd) return false;
-
-            const filterStart = startDateFilter.value ? new Date(startDateFilter.value) : null;
-            const filterEnd = endDateFilter.value ? endOfDay(new Date(endDateFilter.value)) : null;
-
-            if (filterStart && filterEnd) {
-                return areIntervalsOverlapping(
-                    { start: eventStart, end: eventEnd },
-                    { start: filterStart, end: filterEnd }
-                );
-            }
-            if (filterStart) {
-                return eventEnd >= filterStart;
-            }
-            if (filterEnd) {
-                return eventStart <= filterEnd;
-            }
-            return true;
-        });
-    }
-
-    return news;
-});
-
-const ongoingEvents = computed(() => {
-  const now = new Date();
-  const events = filteredNews.value.filter((news) => {
-    const start = getFullDateTime(news.startDate, news.startTime);
-    // If no end date, it's a single-day event. If no end time, assume it lasts till end of day.
-    const end = getFullDateTime(news.endDate || news.startDate, news.endTime || '23:59');
-    return isWithinInterval(now, { start, end });
-  });
-
-  // Sort by start date (ascending)
-  return events.sort((a, b) => getFullDateTime(a.startDate, a.startTime) - getFullDateTime(b.startDate, b.startTime));
-});
-
-const isNewEvent = (event) => {
-  if (!event?.createdAt) return false; // Safely check if createdAt exists
-
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7); // 7 days ago
-
-  const createdAtDate = new Date(event.createdAt);
-  return createdAtDate > oneWeekAgo;
-};
-
-const getUpcomingTag = (event) => {
-  const { startDate, endDate, startTime, endTime } = event;
-  const now = new Date();
-
-  const startDateTime = getFullDateTime(startDate, startTime);
-  const endDateTime = getFullDateTime(endDate || startDate, endTime || startTime);
-
-  if (!startDateTime || !endDateTime) return 'Upcoming';
-
-  if (endDateTime < now) return 'Ended';
-  if (startDateTime <= now && now <= endDateTime) return 'Ongoing';
-
-  const diffMs = startDateTime - now;
-  const diffHours = diffMs / (1000 * 60 * 60);
-  const diffDays = diffHours / 24;
-
-  if (diffHours < 1) return 'Starting Soon';
-  if (diffHours < 24) return 'Today';
-  if (diffDays < 3) return 'Very Soon';
-  if (diffDays < 7) return 'This Week';
-  if (diffDays < 14) return 'Next Week';
-  if (diffDays < 30) return 'This Month';
-  return 'Upcoming';
-};
-
-const getUpcomingSeverity = (event) => {
-  const { startDate, endDate, startTime, endTime } = event;
-  const now = new Date();
-
-  const startDateTime = getFullDateTime(startDate, startTime);
-  const endDateTime = getFullDateTime(endDate || startDate, endTime || startTime);
-
-  if (!startDateTime || !endDateTime) return 'info'; // Default for invalid dates
-
-  if (endDateTime < now) return null; // Ended events have no severity
-  if (startDateTime <= now && now <= endDateTime) return 'success'; // Ongoing
-
-  const diffMs = startDateTime - now;
-  const diffHours = diffMs / (1000 * 60 * 60);
-
-  if (diffHours < 24 * 3) return 'danger'; // Less than 3 days
-  if (diffHours < 24 * 7) return 'warning'; // Less than 7 days
-  return 'info'; // Upcoming
-};
-
-const eventsThisMonth = computed(() => {
-  const now = new Date();
-  const events = filteredNews.value.filter((news) => {
-    const start = getFullDateTime(news.startDate, news.startTime);
-    const end = getFullDateTime(news.endDate || news.startDate, news.endTime || '23:59');
-
-    if (!start || !end) return false;
-
-    // Check if the event starts in the current month but is not currently ongoing.
-    return isSameMonth(start, now) && !isWithinInterval(now, { start, end });
-  });
-
-  // Sort by start date (ascending)
-  return events.sort((a, b) => getFullDateTime(a.startDate, a.startTime) - getFullDateTime(b.startDate, b.startTime));
-});
-
-const upcomingEvents = computed(() => {
-  const now = new Date();
-  const events = filteredNews.value.filter((news) => {
-    const start = getFullDateTime(news.startDate, news.startTime);
-    if (!start) return false;
-    // Event is in the future and not in the current month.
-    return start > now && !isSameMonth(start, now);
-  });
-
-  // Sort by start date (ascending)
-  return events.sort((a, b) => getFullDateTime(a.startDate, a.startTime) - getFullDateTime(b.startDate, b.startTime));
-});
-
-const carouselEvents = computed(() => {
-  const getStatus = (event) => {
-    const now = new Date();
-    const start = getFullDateTime(event.startDate, event.startTime);
-    const end = getFullDateTime(event.endDate || event.startDate, event.endTime || '23:59');
-    if (!start || !end) return 3; // Invalid dates are treated as ended
-
-    if (isWithinInterval(now, { start, end })) return 1; // Ongoing
-    if (start > now) return 2; // Upcoming
-    return 3; // Ended
-  };
-
-  return [...filteredNews.value].sort((a, b) => {
-    const statusA = getStatus(a);
-    const statusB = getStatus(b);
-
-    if (statusA !== statusB) {
-      return statusA - statusB;
-    }
-
-    const startA = getFullDateTime(a.startDate, a.startTime);
-    const startB = getFullDateTime(b.startDate, b.startTime);
-    const endA = getFullDateTime(a.endDate || a.startDate, a.endTime || '23:59');
-    const endB = getFullDateTime(b.endDate || b.startDate, b.endTime || '23:59');
-
-    // For ongoing and upcoming, sort by start date (closest to today first)
-    if (statusA === 1 || statusA === 2) {
-      return startA - startB;
-    }
-
-    // For ended, sort by end date (most recently ended first)
-    if (statusA === 3) {
-      return endB - endA;
-    }
-
-    return 0;
-  });
-});
-
-const filteredAnnouncements = computed(() => {
-    let announcements = eventAnnouncements.value;
-
-    if (searchQuery.value) {
-        const query = searchQuery.value.toLowerCase().trim();
-        announcements = announcements.filter(ann => {
-            const messageMatch = ann.message?.toLowerCase().includes(query);
-            const eventTitleMatch = ann.event?.title?.toLowerCase().includes(query);
-            return messageMatch || eventTitleMatch;
-        });
-    }
-
-    if (startDateFilter.value || endDateFilter.value) {
-        announcements = announcements.filter(ann => {
-            const annDate = new Date(ann.timestamp);
-            if (isNaN(annDate.getTime())) return false;
-
-            const filterStart = startDateFilter.value ? new Date(startDateFilter.value) : null;
-            const filterEnd = endDateFilter.value ? endOfDay(new Date(endDateFilter.value)) : null;
-
-            if (filterStart && !filterEnd) return annDate >= filterStart;
-            if (!filterStart && filterEnd) return annDate <= filterEnd;
-            if (filterStart && filterEnd) return isWithinInterval(annDate, { start: filterStart, end: filterEnd });
-            return true;
-        });
-    }
-    return announcements;
-});
-
-// Fetch announcements and news
 onMounted(async () => {
-  try {
-    const [eventsResponse, eventAnnouncementsResponse] = await Promise.all([
-        axios.get("http://localhost:3000/events"),
-        axios.get("http://localhost:3000/event_announcements"),
-    ]);
-
-    allNews.value = [...eventsResponse.data]
-      .filter((news) => !news.archived)
-      .map((news) => ({
-        ...news,
-        formattedDate: news.startDate
-          ? format(new Date(news.startDate), "MMMM dd, yyyy")
-          : "No date",
-      }))
-      .sort((a, b) => getFullDateTime(a.startDate, a.startTime) - getFullDateTime(b.startDate, b.startTime));
-
-    const eventMap = allNews.value.reduce((map, event) => {
-        map[event.id] = event;
-        return map;
-    }, {});
-
-    const employeesMap = allUsers.value.reduce((map, emp) => {
-        map[emp.id] = emp;
-        return map;
-    }, {});
-
-    eventAnnouncements.value = eventAnnouncementsResponse.data.map(ann => ({
-        ...ann,
-        event: eventMap[ann.eventId],
-        employee: employeesMap[ann.userId] || { name: 'Admin' },
-        formattedTimestamp: format(new Date(ann.timestamp), "MMMM dd, yyyy HH:mm"),
-    })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-  } catch (error) {
-    console.error("Error fetching news:", error);
-  }
+    await fetchEvents();
+    // fetchAnnouncements depends on allNews from fetchEvents
+    await fetchAnnouncements();
 });
-
-function loadToggleState(key, defaultValue) {
-  const saved = localStorage.getItem(key);
-  return saved !== null ? JSON.parse(saved) : defaultValue;
-}
-
-function saveToggleState(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
-}
 
 const promptDeleteAnnouncement = (announcement) => {
   announcementToDelete.value = announcement;
@@ -331,8 +64,7 @@ const confirmDeleteAnnouncement = async () => {
   if (!announcementToDelete.value) return;
   saving.value = true;
   try {
-    await axios.delete(`http://localhost:3000/event_announcements/${announcementToDelete.value.id}`);
-    eventAnnouncements.value = eventAnnouncements.value.filter(a => a.id !== announcementToDelete.value.id);
+    await deleteAnnouncement(announcementToDelete.value.id);
     successMessage.value = 'Announcement deleted successfully.';
     showSuccessDialog.value = true;
   } catch (error) {
@@ -344,22 +76,6 @@ const confirmDeleteAnnouncement = async () => {
     showDeleteAnnouncementConfirm.value = false;
     announcementToDelete.value = null;
   }
-};
-
-const toggleDateFilter = () => {
-  showDateFilter.value = !showDateFilter.value;
-};
-
-const clearDateFilter = () => {
-    startDateFilter.value = null;
-    endDateFilter.value = null;
-};
-
-const clearFilters = () => {
-    searchQuery.value = '';
-    startDateFilter.value = null;
-    endDateFilter.value = null;
-    showDateFilter.value = false;
 };
 
 </script>

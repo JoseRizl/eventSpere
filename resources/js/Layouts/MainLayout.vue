@@ -1,13 +1,11 @@
 <script setup>
 import { Link, useForm, usePage, router } from '@inertiajs/vue3';
-import { ref, computed, onMounted, onUnmounted } from 'vue';
-import axios from 'axios';
-import { format, subMonths } from 'date-fns';
+import { ref, computed } from 'vue';
 import Popover from 'primevue/popover';
 import Badge from 'primevue/badge';
 import Toast from 'primevue/toast';
 import Menu from 'primevue/menu';
-import { useToast } from 'primevue/usetoast';
+import { useNotifications } from '@/composables/useNotifications.js';
 
 // Ref
 const toggleMenu = ref(false);
@@ -16,15 +14,16 @@ const isSidebarCollapsed = ref(false);
 const op = ref();
 const profileMenu = ref();
 const menuStyle = ref({});
-const notifications = ref([]);
-const readNotificationIds = ref([]);
-const displayLimit = ref(10);
-let poller = null;
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
-const allUsers = computed(() => page.props.all_users || []);
-const toast = useToast();
+
+const {
+    notifications, unreadCount, hasUnreadNotifications,
+    displayedNotifications, showLoadMore, onNotificationClick,
+    markAllAsRead, loadMore, toggleNotifications
+} = useNotifications(op);
+
 
 const sideBarItems = computed(() => {
   const allItems = [
@@ -104,166 +103,6 @@ const toggleProfileMenu = (event) => {
     profileMenu.value.toggle(event);
 };
 
-const loadReadNotifications = () => {
-    const storedIds = localStorage.getItem('readNotificationIds');
-    if (storedIds) {
-        readNotificationIds.value = JSON.parse(storedIds);
-    }
-};
-
-const markNotificationAsRead = (notificationId) => {
-    if (!readNotificationIds.value.includes(notificationId)) {
-        readNotificationIds.value.push(notificationId);
-        localStorage.setItem('readNotificationIds', JSON.stringify(readNotificationIds.value));
-        // Update the notification in the list for immediate UI feedback
-        const notification = notifications.value.find(n => n.id === notificationId);
-        if (notification) {
-            notification.isRead = true;
-        }
-    }
-};
-
-const handleNotificationClick = (notification) => {
-    markNotificationAsRead(notification.id);
-    if (notification.link) {
-        router.visit(notification.link);
-        op.value.hide();
-    }
-};
-
-const toggleNotifications = (event) => {
-  op.value.toggle(event);
-  displayLimit.value = 10;
-};
-
-const displayedNotifications = computed(() => {
-    return notifications.value.slice(0, displayLimit.value);
-});
-
-const showLoadMore = computed(() => {
-    return notifications.value.length > displayLimit.value;
-});
-
-const playNotificationSound = () => {
-  // Ensure this runs only on the client
-  if (typeof window === 'undefined') return;
-  const audio = new Audio('/sounds/notification.mp3'); // Place notification.mp3 in your public/sounds/ directory
-  audio.play().catch(error => {
-    // Autoplay was prevented, which is common in browsers until a user interaction.
-    // We can silently ignore this as the visual cues are still present.
-    console.log("Notification sound was blocked by the browser.", error);
-  });
-};
-
-const loadMore = () => {
-    displayLimit.value += 10;
-};
-
-const unreadCount = computed(() => notifications.value.filter(n => !n.isRead).length);
-
-const hasUnreadNotifications = computed(() => unreadCount.value > 0);
-
-const markAllAsRead = () => {
-    notifications.value.forEach(n => {
-        if (!n.isRead) {
-            markNotificationAsRead(n.id);
-        }
-    });
-};
-
-const pollForUpdates = async (isInitialLoad = false) => {
-    try {
-        const [eventsResponse, eventAnnouncementsResponse] = await Promise.all([
-            axios.get("http://localhost:3000/events"),
-            axios.get("http://localhost:3000/event_announcements")
-        ]);
-
-        const allEvents = [...eventsResponse.data]
-          .filter((event) => !event.archived);
-
-        const eventMap = allEvents.reduce((map, event) => {
-            map[event.id] = event;
-            return map;
-        }, {});
-
-        const employeesMap = allUsers.value.reduce((map, emp) => {
-            map[emp.id] = emp;
-            return map;
-        }, {});
-
-        // Process announcements
-        const oneMonthAgo = subMonths(new Date(), 1);
-        const announcementNotifications = eventAnnouncementsResponse.data.map(ann => ({
-            id: `ann-${ann.id}`,
-            type: 'announcement',
-            timestamp: new Date(ann.timestamp),
-            data: {
-                ...ann,
-                event: eventMap[ann.eventId],
-                employee: employeesMap[ann.userId] || { name: 'Admin' }
-            },
-            message: ann.message,
-            title: eventMap[ann.eventId] ? `Announcement: ${eventMap[ann.eventId]?.title}` : 'General Announcement',
-            link: eventMap[ann.eventId] ? route('event.details', { id: eventMap[ann.eventId].id, view: 'announcements' }) : null,
-            formattedTimestamp: format(new Date(ann.timestamp), "MMMM dd, yyyy HH:mm"),
-        }));
-
-        // Process new events
-        const newEventNotifications = allEvents
-            .filter(event => event.createdAt) // only events with createdAt
-            .map(event => ({
-                id: `evt-${event.id}`,
-                type: 'newEvent',
-                timestamp: new Date(event.createdAt),
-                data: event,
-                message: `New event created: ${event.title}`,
-                title: 'New Event',
-                link: route('event.details', { id: event.id }),
-                formattedTimestamp: format(new Date(event.createdAt), "MMMM dd, yyyy HH:mm"),
-            }));
-
-        const allNotifications = [...announcementNotifications, ...newEventNotifications]
-            .filter(n => n.timestamp >= oneMonthAgo)
-            .sort((a, b) => b.timestamp - a.timestamp)
-            .map(n => ({
-                ...n,
-                isRead: readNotificationIds.value.includes(n.id)
-            }));
-
-        // Check for genuinely new notifications to show a toast
-        if (!isInitialLoad) {
-            const latestId = allNotifications[0]?.id;
-            const previousLatestId = notifications.value[0]?.id;
-
-            if (latestId && latestId !== previousLatestId) {
-                const newNotification = allNotifications[0];
-                toast.add({
-                    severity: 'info',
-                    summary: newNotification.type === 'announcement' ? 'New Announcement' : 'New Event',
-                    detail: newNotification.message.substring(0, 100) + (newNotification.message.length > 100 ? '...' : ''),
-                    life: 6000
-                });
-                playNotificationSound();
-            }
-        }
-        notifications.value = allNotifications;
-    } catch (error) {
-        console.error("Error fetching updates:", error);
-    }
-};
-
-onMounted(() => {
-    loadReadNotifications();
-    pollForUpdates(true);
-    // Poll for new updates every 10 seconds for a more responsive feel.
-    poller = setInterval(() => pollForUpdates(false), 10000);
-});
-
-onUnmounted(() => {
-    if (poller) {
-        clearInterval(poller);
-    }
-});
 </script>
 
 <template>
@@ -305,7 +144,7 @@ onUnmounted(() => {
                                         <li
                                         v-for="notification in displayedNotifications"
                                         :key="notification.id"
-                                        @click="handleNotificationClick(notification)"
+                                        @click="onNotificationClick(notification)"
                                         :class="[
                                             'group p-3 border-b flex justify-between items-start transition-colors duration-150',
                                             notification.link ? 'cursor-pointer' : '',
