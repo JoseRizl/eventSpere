@@ -1,7 +1,5 @@
 <script setup>
 import { computed } from 'vue';
-import { useBracketActions } from '@/composables/useBracketActions.js';
-import { useBracketState } from '@/composables/useBracketState.js';
 import { format, parse, parseISO, isValid } from 'date-fns';
 
 const props = defineProps({
@@ -20,11 +18,16 @@ const props = defineProps({
     filter: {
         type: String,
         default: 'all'
+    },
+    getAllMatches: {
+        type: Function,
+        required: true
+    },
+    openMatchEditorFromCard: {
+        type: Function,
+        required: true
     }
 });
-
-const state = useBracketState(); // Required to pass to useBracketActions
-const { getAllMatches, openMatchEditorFromCard } = useBracketActions(state);
 
 // Helper functions for this component's template
 const truncateNameElimination = (name) => {
@@ -59,7 +62,7 @@ const formatDisplayTime = (timeString) => {
 };
 
 const matches = computed(() => {
-    return getAllMatches(props.bracket, props.filter);
+    return props.getAllMatches(props.bracket, props.filter);
 });
 
 </script>
@@ -69,7 +72,7 @@ const matches = computed(() => {
         <div v-for="match in matches"
             :key="match.id"
             :class="['match-card-item', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'editable' : '']"
-            @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && openMatchEditorFromCard(bracketIndex, match)"
+            @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && props.openMatchEditorFromCard(bracketIndex, match)"
         >
             <div class="match-card-header">
                 <span class="match-date">{{ formatDisplayDate(match.date || bracket.event.startDate) }}</span>
