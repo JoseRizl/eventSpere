@@ -81,15 +81,15 @@ const confirmDeleteAnnouncement = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col py-8 px-4">
+  <div class="min-h-screen flex flex-col">
     <!-- News and Update Title -->
-    <h1 class="text-2xl font-bold mt-6 text-center">News and Updates</h1>
+    <!-- <h1 class="text-2xl font-bold mt-6 text-center">News and Updates</h1> -->
 
     <!-- Carousel Banner -->
-    <div v-if="carouselEvents.length > 0" class="w-full mx-auto mt-8">
-        <Carousel :value="carouselEvents" :numVisible="1" :numScroll="1" circular :autoplayInterval="5000">
+    <div v-if="carouselEvents.length > 0" class="w-full relative group/carousel">
+        <Carousel :value="carouselEvents" :numVisible="1" :numScroll="1" circular :autoplayInterval="5000" class="home-carousel">
             <template #item="slotProps">
-                <div class="relative w-full h-64 md:h-80 bg-gray-700 rounded-lg shadow-lg overflow-hidden mx-2">
+                <div class="relative w-full h-80 md:h-[500px] bg-gray-700 overflow-hidden">
                     <Link :href="route('event.details', { id: slotProps.data.id })">
                         <img v-if="slotProps.data.image" :src="slotProps.data.image" :alt="slotProps.data.title" class="w-full h-full object-cover">
                         <div v-else class="w-full h-full bg-gray-300 flex items-center justify-center">
@@ -107,8 +107,9 @@ const confirmDeleteAnnouncement = async () => {
         </Carousel>
     </div>
 
+    <div class="py-8 px-4">
     <!-- View Toggle -->
-    <div class="w-full mt-8">
+    <div class="w-full">
       <div class="flex border-b">
         <div class="flex items-center">
           <button
@@ -192,15 +193,17 @@ const confirmDeleteAnnouncement = async () => {
       <div v-else>
         <!-- Ongoing Events -->
         <div v-if="ongoingEvents.length > 0" class="w-full mt-8">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold">Ongoing Events</h2>
-            <Button
-              size="small"
-              :icon="showOngoingEvents ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
-              :label="showOngoingEvents ? 'Hide' : 'Show'"
-              @click="showOngoingEvents = !showOngoingEvents"
-              class="p-button-text"
-            />
+          <div class="relative flex justify-center items-center mb-4">
+            <h2 class="text-2xl font-bold">Ongoing Events</h2>
+            <div class="absolute right-0">
+                <Button
+                  size="small"
+                  :icon="showOngoingEvents ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+                  :label="showOngoingEvents ? 'Hide' : 'Show'"
+                  @click="showOngoingEvents = !showOngoingEvents"
+                  class="p-button-text"
+                />
+            </div>
           </div>
           <div v-if="showOngoingEvents">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -243,9 +246,11 @@ const confirmDeleteAnnouncement = async () => {
 
         <!-- Events This Month -->
         <div v-if="eventsThisMonth.length > 0" class="w-full mt-8">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold">Events This Month</h2>
-            <Button size="small" :icon="showEventsThisMonth ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" :label="showEventsThisMonth ? 'Hide' : 'Show'" @click="showEventsThisMonth = !showEventsThisMonth" class="p-button-text"/>
+          <div class="relative flex justify-center items-center mb-4">
+            <h2 class="text-2xl font-bold">Events This Month</h2>
+            <div class="absolute right-0">
+                <Button size="small" :icon="showEventsThisMonth ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" :label="showEventsThisMonth ? 'Hide' : 'Show'" @click="showEventsThisMonth = !showEventsThisMonth" class="p-button-text"/>
+            </div>
           </div>
           <div v-if="showEventsThisMonth">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -288,9 +293,11 @@ const confirmDeleteAnnouncement = async () => {
 
         <!-- Upcoming Events -->
         <div v-if="upcomingEvents.length > 0" class="w-full mt-8">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold">Upcoming Events</h2>
-            <Button size="small" :icon="showUpcomingEvents ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" :label="showUpcomingEvents ? 'Hide' : 'Show'" @click="showUpcomingEvents = !showUpcomingEvents" class="p-button-text"/>
+          <div class="relative flex justify-center items-center mb-4">
+            <h2 class="text-2xl font-bold">Upcoming Events</h2>
+            <div class="absolute right-0">
+                <Button size="small" :icon="showUpcomingEvents ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" :label="showUpcomingEvents ? 'Hide' : 'Show'" @click="showUpcomingEvents = !showUpcomingEvents" class="p-button-text"/>
+            </div>
           </div>
           <div v-if="showUpcomingEvents">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -396,6 +403,7 @@ const confirmDeleteAnnouncement = async () => {
       </div>
     </div>
 
+    </div>
     <!-- Dialogs -->
     <LoadingSpinner :show="saving" />
     <SuccessDialog
@@ -566,5 +574,57 @@ const confirmDeleteAnnouncement = async () => {
 
 .clear-date-btn:hover {
   background-color: rgba(220, 53, 69, 0.1);
+}
+
+:deep(.home-carousel .p-carousel-prev),
+:deep(.home-carousel .p-carousel-next) {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background-color: rgba(255, 255, 255, 0.3) !important;
+    border-radius: 50%;
+    width: 3rem;
+    height: 3rem;
+    color: black !important;
+    transition: background-color 0.2s, opacity 0.2s;
+    opacity: 0; /* Hide by default */
+}
+
+.group\/carousel:hover :deep(.home-carousel .p-carousel-prev),
+.group\/carousel:hover :deep(.home-carousel .p-carousel-next) {
+    opacity: 1; /* Show on hover of the container */
+}
+
+:deep(.home-carousel .p-carousel-prev:hover),
+:deep(.home-carousel .p-carousel-next:hover) {
+    background-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+:deep(.home-carousel .p-carousel-prev) {
+    left: 1rem;
+}
+
+:deep(.home-carousel .p-carousel-next) {
+    right: 1rem;
+}
+
+/* Adjust indicator position to be a bit higher */
+:deep(.home-carousel .p-carousel-indicator-list) {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    padding: 1rem;
+}
+
+/* Ensure indicators are clickable and visible */
+:deep(.home-carousel .p-carousel-indicator button) {
+    background-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+:deep(.home-carousel .p-carousel-indicator.p-highlight button) {
+    background-color: rgba(255, 255, 255, 0.9) !important;
 }
 </style>
