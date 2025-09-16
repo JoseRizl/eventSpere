@@ -744,7 +744,7 @@
                 "id": "9q07uds91",
                 "name": "Player 1",
                 "score": 1,
-                "completed": false,
+                "completed": true,
                 "created_at": "2025-09-12T10:08:42.534Z",
                 "updated_at": "2025-09-12T10:08:42.534Z"
               },
@@ -752,18 +752,20 @@
                 "id": "2nl1agcyk",
                 "name": "Player 3",
                 "score": 0,
-                "completed": false,
+                "completed": true,
                 "created_at": "2025-09-13T09:11:21.889Z",
                 "updated_at": "2025-09-13T09:11:21.889Z"
               }
             ],
-            "winner_id": null,
-            "status": "pending",
+            "winner_id": "9q07uds91",
+            "status": "completed",
             "created_at": "2025-09-07T09:39:27.852Z",
-            "updated_at": "2025-09-07T09:39:27.852Z",
+            "updated_at": "2025-09-16T03:24:45.466Z",
             "date": "2025-09-15",
             "time": "15:30",
-            "venue": "CR"
+            "venue": "CR",
+            "loser_id": "2nl1agcyk",
+            "is_tie": false
           },
           {
             "id": "t11pix0t5",
@@ -774,26 +776,28 @@
                 "id": "hbp52vtyg",
                 "name": "Player 5",
                 "score": 0,
-                "completed": false,
-                "created_at": "2025-09-15T01:10:56.724Z",
-                "updated_at": "2025-09-15T01:10:56.724Z"
+                "completed": true,
+                "created_at": "2025-09-16T03:24:40.142Z",
+                "updated_at": "2025-09-16T03:24:40.142Z"
               },
               {
                 "id": "xzj6g4jbp",
                 "name": "Player 6",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-15T01:10:56.724Z",
-                "updated_at": "2025-09-15T01:10:56.724Z"
+                "score": 1,
+                "completed": true,
+                "created_at": "2025-09-16T03:24:40.142Z",
+                "updated_at": "2025-09-16T03:24:40.142Z"
               }
             ],
-            "winner_id": null,
-            "status": "pending",
+            "winner_id": "xzj6g4jbp",
+            "status": "completed",
             "created_at": "2025-09-07T09:39:27.852Z",
-            "updated_at": "2025-09-07T09:39:27.852Z",
+            "updated_at": "2025-09-16T03:24:51.213Z",
             "date": "2025-09-15",
             "time": "15:45",
-            "venue": "Court"
+            "venue": "Court",
+            "loser_id": "hbp52vtyg",
+            "is_tie": false
           }
         ],
         [
@@ -803,140 +807,142 @@
             "match_number": 1,
             "players": [
               {
-                "id": null,
-                "name": "TBD",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-07T09:39:27.852Z",
-                "updated_at": "2025-09-07T09:39:27.852Z"
+                "id": "9q07uds91",
+                "name": "Player 1",
+                "score": 1,
+                "completed": true,
+                "created_at": "2025-09-16T03:24:45.466Z",
+                "updated_at": "2025-09-16T03:24:45.466Z"
               },
               {
-                "id": null,
-                "name": "TBD",
+                "id": "xzj6g4jbp",
+                "name": "Player 6",
                 "score": 0,
-                "completed": false,
-                "created_at": "2025-09-07T09:39:27.852Z",
-                "updated_at": "2025-09-07T09:39:27.852Z"
+                "completed": true,
+                "created_at": "2025-09-16T03:24:51.213Z",
+                "updated_at": "2025-09-16T03:24:51.213Z"
               }
             ],
-            "winner_id": null,
-            "status": "pending",
+            "winner_id": "9q07uds91",
+            "status": "completed",
             "created_at": "2025-09-07T09:39:27.852Z",
-            "updated_at": "2025-09-07T09:39:27.852Z",
-            "date": "Sep-15-2025",
+            "updated_at": "2025-09-16T03:24:55.506Z",
+            "date": "2025-09-15",
             "time": "15:00",
-            "venue": "Court"
+            "venue": "Court",
+            "loser_id": "xzj6g4jbp",
+            "is_tie": false
           }
         ]
       ],
       "lines": [
         {
-          "x1": 446.0000305175781,
-          "y1": 109.60000228881836,
-          "x2": 466.0000305175781,
-          "y2": 109.60000228881836
+          "x1": 470.0000305175781,
+          "y1": 111.38888931274414,
+          "x2": 490.0000305175781,
+          "y2": 111.38888931274414
         },
         {
-          "x1": 466.0000305175781,
-          "y1": 109.60000228881836,
-          "x2": 466.0000305175781,
-          "y2": 148.60000228881836
+          "x1": 490.0000305175781,
+          "y1": 111.38888931274414,
+          "x2": 490.0000305175781,
+          "y2": 150.38889694213867
         },
         {
-          "x1": 466.0000305175781,
-          "y1": 148.60000228881836,
-          "x2": 486.0000305175781,
-          "y2": 148.60000228881836
+          "x1": 490.0000305175781,
+          "y1": 150.38889694213867,
+          "x2": 510.0000305175781,
+          "y2": 150.38889694213867
         },
         {
-          "x1": 446.0000305175781,
-          "y1": 196.8000144958496,
-          "x2": 466.0000305175781,
-          "y2": 196.8000144958496
+          "x1": 470.0000305175781,
+          "y1": 199.38889694213867,
+          "x2": 490.0000305175781,
+          "y2": 199.38889694213867
         },
         {
-          "x1": 466.0000305175781,
-          "y1": 196.8000144958496,
-          "x2": 466.0000305175781,
-          "y2": 148.60000228881836
+          "x1": 490.0000305175781,
+          "y1": 199.38889694213867,
+          "x2": 490.0000305175781,
+          "y2": 150.38889694213867
         },
         {
-          "x1": 466.0000305175781,
-          "y1": 148.60000228881836,
-          "x2": 486.0000305175781,
-          "y2": 148.60000228881836
+          "x1": 490.0000305175781,
+          "y1": 150.38889694213867,
+          "x2": 510.0000305175781,
+          "y2": 150.38889694213867
         },
         {
-          "x1": 446.0000305175781,
-          "y1": 283.9999656677246,
-          "x2": 466.0000305175781,
-          "y2": 283.9999656677246
+          "x1": 470.0000305175781,
+          "y1": 287.3888816833496,
+          "x2": 490.0000305175781,
+          "y2": 287.3888816833496
         },
         {
-          "x1": 466.0000305175781,
-          "y1": 283.9999656677246,
-          "x2": 466.0000305175781,
-          "y2": 304.8000144958496
+          "x1": 490.0000305175781,
+          "y1": 287.3888816833496,
+          "x2": 490.0000305175781,
+          "y2": 307.3888816833496
         },
         {
-          "x1": 466.0000305175781,
-          "y1": 304.8000144958496,
-          "x2": 486.0000305175781,
-          "y2": 304.8000144958496
+          "x1": 490.0000305175781,
+          "y1": 307.3888816833496,
+          "x2": 510.0000305175781,
+          "y2": 307.3888816833496
         },
         {
-          "x1": 446.0000305175781,
-          "y1": 371.19997787475586,
-          "x2": 466.0000305175781,
-          "y2": 371.19997787475586
+          "x1": 470.0000305175781,
+          "y1": 375.3888816833496,
+          "x2": 490.0000305175781,
+          "y2": 375.3888816833496
         },
         {
-          "x1": 466.0000305175781,
-          "y1": 371.19997787475586,
-          "x2": 466.0000305175781,
-          "y2": 304.8000144958496
+          "x1": 490.0000305175781,
+          "y1": 375.3888816833496,
+          "x2": 490.0000305175781,
+          "y2": 307.3888816833496
         },
         {
-          "x1": 466.0000305175781,
-          "y1": 304.8000144958496,
-          "x2": 486.0000305175781,
-          "y2": 304.8000144958496
+          "x1": 490.0000305175781,
+          "y1": 307.3888816833496,
+          "x2": 510.0000305175781,
+          "y2": 307.3888816833496
         },
         {
-          "x1": 636.0000305175781,
-          "y1": 148.60000228881836,
-          "x2": 656.0000305175781,
-          "y2": 148.60000228881836
+          "x1": 660.0000305175781,
+          "y1": 150.38889694213867,
+          "x2": 680.0000305175781,
+          "y2": 150.38889694213867
         },
         {
-          "x1": 656.0000305175781,
-          "y1": 148.60000228881836,
-          "x2": 656.0000305175781,
-          "y2": 219.60000228881836
+          "x1": 680.0000305175781,
+          "y1": 150.38889694213867,
+          "x2": 680.0000305175781,
+          "y2": 219.16666793823242
         },
         {
-          "x1": 656.0000305175781,
-          "y1": 219.60000228881836,
-          "x2": 676.0000305175781,
-          "y2": 219.60000228881836
+          "x1": 680.0000305175781,
+          "y1": 219.16666793823242,
+          "x2": 700.0000305175781,
+          "y2": 219.16666793823242
         },
         {
-          "x1": 636.0000305175781,
-          "y1": 304.8000144958496,
-          "x2": 656.0000305175781,
-          "y2": 304.8000144958496
+          "x1": 660.0000305175781,
+          "y1": 307.3888816833496,
+          "x2": 680.0000305175781,
+          "y2": 307.3888816833496
         },
         {
-          "x1": 656.0000305175781,
-          "y1": 304.8000144958496,
-          "x2": 656.0000305175781,
-          "y2": 219.60000228881836
+          "x1": 680.0000305175781,
+          "y1": 307.3888816833496,
+          "x2": 680.0000305175781,
+          "y2": 219.16666793823242
         },
         {
-          "x1": 656.0000305175781,
-          "y1": 219.60000228881836,
-          "x2": 676.0000305175781,
-          "y2": 219.60000228881836
+          "x1": 680.0000305175781,
+          "y1": 219.16666793823242,
+          "x2": 700.0000305175781,
+          "y2": 219.16666793823242
         }
       ],
       "event": {
@@ -1475,816 +1481,6 @@
       }
     },
     {
-      "id": "915e",
-      "name": "Test",
-      "type": "Double Elimination",
-      "event_id": "24f0",
-      "status": "active",
-      "created_at": "2025-09-12T07:15:23.688Z",
-      "updated_at": "2025-09-12T07:15:23.688Z",
-      "matches": {
-        "winners": [
-          [
-            {
-              "id": "6d12pp9a7",
-              "round": 1,
-              "match_number": 1,
-              "bracket_type": "winners",
-              "players": [
-                {
-                  "id": "cg4crc1uc",
-                  "name": "Player 1",
-                  "score": 1,
-                  "completed": true,
-                  "created_at": "2025-09-12T07:15:23.688Z",
-                  "updated_at": "2025-09-12T07:15:23.688Z"
-                },
-                {
-                  "id": "ky4g4hhzw",
-                  "name": "Player 2",
-                  "score": 0,
-                  "completed": true,
-                  "created_at": "2025-09-12T07:15:23.688Z",
-                  "updated_at": "2025-09-12T07:15:23.688Z"
-                }
-              ],
-              "winner_id": "cg4crc1uc",
-              "loser_id": "ky4g4hhzw",
-              "status": "completed",
-              "created_at": "2025-09-12T07:15:23.688Z",
-              "updated_at": "2025-09-13T09:04:59.728Z",
-              "is_tie": false,
-              "date": "Sep-23-2025",
-              "time": "00:00",
-              "venue": "Campus ground"
-            },
-            {
-              "id": "im8qvr310",
-              "round": 1,
-              "match_number": 2,
-              "bracket_type": "winners",
-              "players": [
-                {
-                  "id": "3o2lmd4an",
-                  "name": "Player 3",
-                  "score": 0,
-                  "completed": true,
-                  "created_at": "2025-09-12T07:15:23.688Z",
-                  "updated_at": "2025-09-12T07:15:23.688Z"
-                },
-                {
-                  "id": "xgtelbq96",
-                  "name": "Player 4",
-                  "score": 1,
-                  "completed": true,
-                  "created_at": "2025-09-12T07:15:23.688Z",
-                  "updated_at": "2025-09-12T07:15:23.688Z"
-                }
-              ],
-              "winner_id": "xgtelbq96",
-              "loser_id": "3o2lmd4an",
-              "status": "completed",
-              "created_at": "2025-09-12T07:15:23.688Z",
-              "updated_at": "2025-09-16T02:26:30.637Z",
-              "date": "2025-09-23",
-              "time": "00:00",
-              "venue": "Principal Office",
-              "is_tie": false
-            },
-            {
-              "id": "gj7pew9bp",
-              "round": 1,
-              "match_number": 3,
-              "bracket_type": "winners",
-              "players": [
-                {
-                  "id": "pg8ry9rkx",
-                  "name": "Player 5",
-                  "score": 0,
-                  "completed": true,
-                  "created_at": "2025-09-12T07:15:23.688Z",
-                  "updated_at": "2025-09-12T07:15:23.688Z"
-                },
-                {
-                  "id": "fxfjhd3zi",
-                  "name": "BYE",
-                  "score": 0,
-                  "completed": true,
-                  "created_at": "2025-09-12T07:15:23.688Z",
-                  "updated_at": "2025-09-12T07:15:23.688Z"
-                }
-              ],
-              "winner_id": "pg8ry9rkx",
-              "loser_id": null,
-              "status": "completed",
-              "created_at": "2025-09-12T07:15:23.688Z",
-              "updated_at": "2025-09-12T07:15:23.688Z",
-              "date": "Sep-23-2025",
-              "time": "00:00",
-              "venue": "Campus ground"
-            },
-            {
-              "id": "0d364d8vq",
-              "round": 1,
-              "match_number": 4,
-              "bracket_type": "winners",
-              "players": [
-                {
-                  "id": "wg2ajhzbj",
-                  "name": "Player 6",
-                  "score": 0,
-                  "completed": true,
-                  "created_at": "2025-09-12T07:15:23.688Z",
-                  "updated_at": "2025-09-12T07:15:23.688Z"
-                },
-                {
-                  "id": "xszxuim8u",
-                  "name": "BYE",
-                  "score": 0,
-                  "completed": true,
-                  "created_at": "2025-09-12T07:15:23.688Z",
-                  "updated_at": "2025-09-12T07:15:23.688Z"
-                }
-              ],
-              "winner_id": "wg2ajhzbj",
-              "loser_id": null,
-              "status": "completed",
-              "created_at": "2025-09-12T07:15:23.688Z",
-              "updated_at": "2025-09-12T07:15:23.688Z",
-              "date": "Sep-23-2025",
-              "time": "00:00",
-              "venue": "Campus ground"
-            }
-          ],
-          [
-            {
-              "id": "fncn7piic",
-              "round": 2,
-              "match_number": 1,
-              "bracket_type": "winners",
-              "players": [
-                {
-                  "id": "cg4crc1uc",
-                  "name": "Player 1",
-                  "score": 1,
-                  "completed": true,
-                  "created_at": "2025-09-13T09:04:59.728Z",
-                  "updated_at": "2025-09-13T09:04:59.728Z"
-                },
-                {
-                  "id": "xgtelbq96",
-                  "name": "Player 4",
-                  "score": 0,
-                  "completed": true,
-                  "created_at": "2025-09-16T02:26:30.637Z",
-                  "updated_at": "2025-09-16T02:26:30.637Z"
-                }
-              ],
-              "winner_id": "cg4crc1uc",
-              "loser_id": "xgtelbq96",
-              "status": "completed",
-              "created_at": "2025-09-12T07:15:23.688Z",
-              "updated_at": "2025-09-16T02:28:15.481Z",
-              "date": "2025-09-23",
-              "time": "00:10",
-              "venue": "Court",
-              "is_tie": false
-            },
-            {
-              "id": "8zjo3l04g",
-              "round": 2,
-              "match_number": 2,
-              "bracket_type": "winners",
-              "players": [
-                {
-                  "id": "pg8ry9rkx",
-                  "name": "Player 5",
-                  "score": 0,
-                  "completed": false,
-                  "created_at": "2025-09-16T02:29:56.498Z",
-                  "updated_at": "2025-09-16T02:29:56.498Z"
-                },
-                {
-                  "id": "wg2ajhzbj",
-                  "name": "Player 6",
-                  "score": 0,
-                  "completed": false,
-                  "created_at": "2025-09-16T02:29:56.498Z",
-                  "updated_at": "2025-09-16T02:29:56.498Z"
-                }
-              ],
-              "winner_id": "wg2ajhzbj",
-              "loser_id": "pg8ry9rkx",
-              "status": "completed",
-              "created_at": "2025-09-12T07:15:23.688Z",
-              "updated_at": "2025-09-16T02:28:19.446Z",
-              "date": "2025-09-23",
-              "time": "00:20",
-              "venue": "Swimming Pool",
-              "is_tie": false
-            }
-          ],
-          [
-            {
-              "id": "eqzae568h",
-              "round": 3,
-              "match_number": 1,
-              "bracket_type": "winners",
-              "players": [
-                {
-                  "id": "cg4crc1uc",
-                  "name": "Player 1",
-                  "score": 1,
-                  "completed": true,
-                  "created_at": "2025-09-16T02:28:15.481Z",
-                  "updated_at": "2025-09-16T02:28:15.481Z"
-                },
-                {
-                  "id": "wg2ajhzbj",
-                  "name": "Player 6",
-                  "score": 2,
-                  "completed": true,
-                  "created_at": "2025-09-16T02:28:19.446Z",
-                  "updated_at": "2025-09-16T02:28:19.446Z"
-                }
-              ],
-              "winner_id": "wg2ajhzbj",
-              "loser_id": "cg4crc1uc",
-              "status": "completed",
-              "created_at": "2025-09-12T07:15:23.688Z",
-              "updated_at": "2025-09-16T02:29:36.050Z",
-              "date": "2025-09-23",
-              "time": "00:33",
-              "venue": "Campus ground",
-              "is_tie": false
-            }
-          ]
-        ],
-        "losers": [
-          [
-            {
-              "id": "5cmitv9td",
-              "round": 1,
-              "match_number": 1,
-              "bracket_type": "losers",
-              "players": [
-                {
-                  "id": "ky4g4hhzw",
-                  "name": "Player 2",
-                  "score": 1,
-                  "completed": true,
-                  "created_at": "2025-09-13T09:04:59.728Z",
-                  "updated_at": "2025-09-13T09:04:59.728Z"
-                },
-                {
-                  "id": "3o2lmd4an",
-                  "name": "Player 3",
-                  "score": 0,
-                  "completed": true,
-                  "created_at": "2025-09-16T02:26:30.638Z",
-                  "updated_at": "2025-09-16T02:26:30.638Z"
-                }
-              ],
-              "winner_id": "ky4g4hhzw",
-              "loser_id": "3o2lmd4an",
-              "status": "completed",
-              "created_at": "2025-09-12T07:15:23.688Z",
-              "updated_at": "2025-09-16T02:30:28.026Z",
-              "date": "2025-09-23",
-              "time": "00:00",
-              "venue": "Campus ground",
-              "is_tie": false
-            },
-            {
-              "id": "esngupljh",
-              "round": 1,
-              "match_number": 2,
-              "bracket_type": "losers",
-              "players": [
-                {
-                  "id": "xgtelbq96",
-                  "name": "Player 4",
-                  "score": 1,
-                  "completed": true,
-                  "created_at": "2025-09-16T02:28:15.481Z",
-                  "updated_at": "2025-09-16T02:28:15.481Z"
-                },
-                {
-                  "id": "pg8ry9rkx",
-                  "name": "Player 5",
-                  "score": 0,
-                  "completed": true,
-                  "created_at": "2025-09-16T02:28:19.446Z",
-                  "updated_at": "2025-09-16T02:28:19.446Z"
-                }
-              ],
-              "winner_id": "xgtelbq96",
-              "loser_id": "pg8ry9rkx",
-              "status": "completed",
-              "created_at": "2025-09-12T07:15:23.688Z",
-              "updated_at": "2025-09-16T02:30:32.040Z",
-              "date": "2025-09-23",
-              "time": "00:00",
-              "venue": "Campus ground",
-              "is_tie": false
-            },
-            {
-              "id": "blzytobi1",
-              "round": 1,
-              "match_number": 3,
-              "bracket_type": "losers",
-              "players": [
-                {
-                  "id": "cg4crc1uc",
-                  "name": "Player 1",
-                  "score": 0,
-                  "completed": true,
-                  "created_at": "2025-09-16T02:29:36.052Z",
-                  "updated_at": "2025-09-16T02:29:36.052Z"
-                },
-                {
-                  "id": "uhulw8cig",
-                  "name": "BYE",
-                  "score": 0,
-                  "completed": true,
-                  "created_at": "2025-09-16T02:28:23.326Z",
-                  "updated_at": "2025-09-16T02:28:23.326Z"
-                }
-              ],
-              "winner_id": "cg4crc1uc",
-              "loser_id": null,
-              "status": "completed",
-              "created_at": "2025-09-12T07:15:23.688Z",
-              "updated_at": "2025-09-12T07:15:23.688Z",
-              "date": "2025-09-23",
-              "time": "00:00",
-              "venue": "Campus ground"
-            },
-            {
-              "id": "2u7f18wv8",
-              "round": 1,
-              "match_number": 4,
-              "bracket_type": "losers",
-              "players": [
-                {
-                  "id": "evj10nmsl",
-                  "name": "BYE",
-                  "score": 0,
-                  "completed": true,
-                  "created_at": "2025-09-16T02:28:23.326Z",
-                  "updated_at": "2025-09-16T02:28:23.326Z"
-                },
-                {
-                  "id": "hbbz3mvr3",
-                  "name": "BYE",
-                  "score": 0,
-                  "completed": true,
-                  "created_at": "2025-09-16T02:28:23.326Z",
-                  "updated_at": "2025-09-16T02:28:23.326Z"
-                }
-              ],
-              "winner_id": "hbbz3mvr3",
-              "loser_id": null,
-              "status": "completed",
-              "created_at": "2025-09-12T07:15:23.688Z",
-              "updated_at": "2025-09-12T07:15:23.688Z",
-              "date": "Sep-23-2025",
-              "time": "00:00",
-              "venue": "Campus ground"
-            }
-          ],
-          [
-            {
-              "id": "82bpod58j",
-              "round": 2,
-              "match_number": 1,
-              "bracket_type": "losers",
-              "players": [
-                {
-                  "id": null,
-                  "name": "TBD",
-                  "score": 1,
-                  "completed": true,
-                  "created_at": "2025-09-12T07:15:23.688Z",
-                  "updated_at": "2025-09-12T07:15:23.688Z"
-                },
-                {
-                  "id": null,
-                  "name": "TBD",
-                  "score": 0,
-                  "completed": true,
-                  "created_at": "2025-09-12T07:15:23.688Z",
-                  "updated_at": "2025-09-12T07:15:23.688Z"
-                }
-              ],
-              "winner_id": null,
-              "loser_id": null,
-              "status": "completed",
-              "created_at": "2025-09-12T07:15:23.688Z",
-              "updated_at": "2025-09-16T02:30:35.880Z",
-              "date": "2025-09-23",
-              "time": "00:00",
-              "venue": "Campus ground",
-              "is_tie": false
-            },
-            {
-              "id": "bpdh8esjb",
-              "round": 2,
-              "match_number": 2,
-              "bracket_type": "losers",
-              "players": [
-                {
-                  "id": "cg4crc1uc",
-                  "name": "Player 1",
-                  "score": 0,
-                  "completed": true,
-                  "created_at": "2025-09-16T02:29:56.498Z",
-                  "updated_at": "2025-09-16T02:29:56.498Z"
-                },
-                {
-                  "id": "hbbz3mvr3",
-                  "name": "BYE",
-                  "score": 0,
-                  "completed": false,
-                  "created_at": "2025-09-16T02:29:56.498Z",
-                  "updated_at": "2025-09-16T02:29:56.498Z"
-                }
-              ],
-              "winner_id": "cg4crc1uc",
-              "loser_id": null,
-              "status": "completed",
-              "created_at": "2025-09-12T07:15:23.688Z",
-              "updated_at": "2025-09-12T07:15:23.688Z",
-              "date": "Sep-23-2025",
-              "time": "00:00",
-              "venue": "Campus ground"
-            }
-          ],
-          [
-            {
-              "id": "i2piqr7vy",
-              "round": 3,
-              "match_number": 1,
-              "bracket_type": "losers",
-              "players": [
-                {
-                  "id": null,
-                  "name": "TBD",
-                  "score": 0,
-                  "completed": false,
-                  "created_at": "2025-09-12T07:15:23.688Z",
-                  "updated_at": "2025-09-12T07:15:23.688Z"
-                },
-                {
-                  "id": "cg4crc1uc",
-                  "name": "Player 1",
-                  "score": 0,
-                  "completed": false,
-                  "created_at": "2025-09-16T02:29:56.498Z",
-                  "updated_at": "2025-09-16T02:29:56.498Z"
-                }
-              ],
-              "winner_id": null,
-              "loser_id": null,
-              "status": "pending",
-              "created_at": "2025-09-12T07:15:23.688Z",
-              "updated_at": "2025-09-12T07:15:23.688Z",
-              "date": "Sep-23-2025",
-              "time": "00:00",
-              "venue": "Campus ground"
-            }
-          ]
-        ],
-        "grand_finals": [
-          {
-            "id": "ftfe6ge8s",
-            "round": 1,
-            "match_number": 1,
-            "bracket_type": "grand_finals",
-            "players": [
-              {
-                "id": "wg2ajhzbj",
-                "name": "Player 6",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-16T02:29:36.051Z",
-                "updated_at": "2025-09-16T02:29:36.051Z"
-              },
-              {
-                "id": null,
-                "name": "TBD",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-12T07:15:23.688Z",
-                "updated_at": "2025-09-12T07:15:23.688Z"
-              }
-            ],
-            "winner_id": null,
-            "loser_id": null,
-            "status": "pending",
-            "created_at": "2025-09-12T07:15:23.688Z",
-            "updated_at": "2025-09-12T07:15:23.688Z",
-            "date": "Sep-23-2025",
-            "time": "00:00",
-            "venue": "Campus ground"
-          }
-        ]
-      },
-      "lines": {
-        "winners": [
-          {
-            "x1": 415.1111145019531,
-            "y1": 111.38888549804688,
-            "x2": 435.1111145019531,
-            "y2": 111.38888549804688
-          },
-          {
-            "x1": 435.1111145019531,
-            "y1": 111.38888549804688,
-            "x2": 435.1111145019531,
-            "y2": 150.38888549804688
-          },
-          {
-            "x1": 435.1111145019531,
-            "y1": 150.38888549804688,
-            "x2": 455.1111145019531,
-            "y2": 150.38888549804688
-          },
-          {
-            "x1": 415.1111145019531,
-            "y1": 199.3888931274414,
-            "x2": 435.1111145019531,
-            "y2": 199.3888931274414
-          },
-          {
-            "x1": 435.1111145019531,
-            "y1": 199.3888931274414,
-            "x2": 435.1111145019531,
-            "y2": 150.38888549804688
-          },
-          {
-            "x1": 435.1111145019531,
-            "y1": 150.38888549804688,
-            "x2": 455.1111145019531,
-            "y2": 150.38888549804688
-          },
-          {
-            "x1": 415.1111145019531,
-            "y1": 287.3888921737671,
-            "x2": 435.1111145019531,
-            "y2": 287.3888921737671
-          },
-          {
-            "x1": 435.1111145019531,
-            "y1": 287.3888921737671,
-            "x2": 435.1111145019531,
-            "y2": 307.3888921737671
-          },
-          {
-            "x1": 435.1111145019531,
-            "y1": 307.3888921737671,
-            "x2": 455.1111145019531,
-            "y2": 307.3888921737671
-          },
-          {
-            "x1": 415.1111145019531,
-            "y1": 375.3888931274414,
-            "x2": 435.1111145019531,
-            "y2": 375.3888931274414
-          },
-          {
-            "x1": 435.1111145019531,
-            "y1": 375.3888931274414,
-            "x2": 435.1111145019531,
-            "y2": 307.3888921737671
-          },
-          {
-            "x1": 435.1111145019531,
-            "y1": 307.3888921737671,
-            "x2": 455.1111145019531,
-            "y2": 307.3888921737671
-          },
-          {
-            "x1": 605.1111145019531,
-            "y1": 150.38888549804688,
-            "x2": 625.1111145019531,
-            "y2": 150.38888549804688
-          },
-          {
-            "x1": 625.1111145019531,
-            "y1": 150.38888549804688,
-            "x2": 625.1111145019531,
-            "y2": 221.3888931274414
-          },
-          {
-            "x1": 625.1111145019531,
-            "y1": 221.3888931274414,
-            "x2": 645.1111145019531,
-            "y2": 221.3888931274414
-          },
-          {
-            "x1": 605.1111145019531,
-            "y1": 307.3888921737671,
-            "x2": 625.1111145019531,
-            "y2": 307.3888921737671
-          },
-          {
-            "x1": 625.1111145019531,
-            "y1": 307.3888921737671,
-            "x2": 625.1111145019531,
-            "y2": 221.3888931274414
-          },
-          {
-            "x1": 625.1111145019531,
-            "y1": 221.3888931274414,
-            "x2": 645.1111145019531,
-            "y2": 221.3888931274414
-          }
-        ],
-        "losers": [
-          {
-            "x1": 415.1111145019531,
-            "y1": 131.38888549804688,
-            "x2": 435.1111145019531,
-            "y2": 131.38888549804688
-          },
-          {
-            "x1": 435.1111145019531,
-            "y1": 131.38888549804688,
-            "x2": 435.1111145019531,
-            "y2": 168.16668701171875
-          },
-          {
-            "x1": 435.1111145019531,
-            "y1": 168.16668701171875,
-            "x2": 455.1111145019531,
-            "y2": 168.16668701171875
-          },
-          {
-            "x1": 415.1111145019531,
-            "y1": 219.38888549804688,
-            "x2": 435.1111145019531,
-            "y2": 219.38888549804688
-          },
-          {
-            "x1": 435.1111145019531,
-            "y1": 219.38888549804688,
-            "x2": 435.1111145019531,
-            "y2": 168.16668701171875
-          },
-          {
-            "x1": 435.1111145019531,
-            "y1": 168.16668701171875,
-            "x2": 455.1111145019531,
-            "y2": 168.16668701171875
-          },
-          {
-            "x1": 415.1111145019531,
-            "y1": 307.388916015625,
-            "x2": 435.1111145019531,
-            "y2": 307.388916015625
-          },
-          {
-            "x1": 435.1111145019531,
-            "y1": 307.388916015625,
-            "x2": 435.1111145019531,
-            "y2": 325.16668701171875
-          },
-          {
-            "x1": 435.1111145019531,
-            "y1": 325.16668701171875,
-            "x2": 455.1111145019531,
-            "y2": 325.16668701171875
-          },
-          {
-            "x1": 415.1111145019531,
-            "y1": 395.388916015625,
-            "x2": 435.1111145019531,
-            "y2": 395.388916015625
-          },
-          {
-            "x1": 435.1111145019531,
-            "y1": 395.388916015625,
-            "x2": 435.1111145019531,
-            "y2": 325.16668701171875
-          },
-          {
-            "x1": 435.1111145019531,
-            "y1": 325.16668701171875,
-            "x2": 455.1111145019531,
-            "y2": 325.16668701171875
-          },
-          {
-            "x1": 605.1111145019531,
-            "y1": 168.16668701171875,
-            "x2": 625.1111450195312,
-            "y2": 168.16668701171875
-          },
-          {
-            "x1": 625.1111450195312,
-            "y1": 168.16668701171875,
-            "x2": 625.1111450195312,
-            "y2": 241.38888549804688
-          },
-          {
-            "x1": 625.1111450195312,
-            "y1": 241.38888549804688,
-            "x2": 645.1111755371094,
-            "y2": 241.38888549804688
-          },
-          {
-            "x1": 605.1111145019531,
-            "y1": 325.16668701171875,
-            "x2": 625.1111450195312,
-            "y2": 325.16668701171875
-          },
-          {
-            "x1": 625.1111450195312,
-            "y1": 325.16668701171875,
-            "x2": 625.1111450195312,
-            "y2": 241.38888549804688
-          },
-          {
-            "x1": 625.1111450195312,
-            "y1": 241.38888549804688,
-            "x2": 645.1111755371094,
-            "y2": 241.38888549804688
-          }
-        ],
-        "finals": []
-      },
-      "event": {
-        "id": "24f0",
-        "title": "Mag over think",
-        "venue": "Campus ground",
-        "description": "Nagtuo ang alimango na galupad ang isda?\n\nhttps://msunaawan.edu.ph/",
-        "category": "2",
-        "startDate": "Sep-23-2025",
-        "endDate": "Sep-26-2025",
-        "startTime": "00:00",
-        "endTime": "23:59",
-        "image": "data:image/png;base64,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",
-        "archived": false,
-        "tags": [
-          "1",
-          "2",
-          "3",
-          "4",
-          "6",
-          "68c359dddbe18",
-          "68c3a7ed412cf"
-        ],
-        "category_id": "3",
-        "type": "event",
-        "tasks": [
-          {
-            "committee": {
-              "id": "3"
-            },
-            "employees": [
-              {
-                "id": "11"
-              },
-              {
-                "id": "7"
-              }
-            ],
-            "task": "Mag overthink ug ayo"
-          },
-          {
-            "committee": {
-              "id": "1"
-            },
-            "employees": [
-              {
-                "id": "13"
-              }
-            ],
-            "task": "Tig sakop sa South China Sea"
-          }
-        ],
-        "schedules": [
-          {
-            "time": "01:30",
-            "activity": "Start"
-          }
-        ],
-        "isAllDay": true,
-        "scheduleLists": [
-          {
-            "day": 1,
-            "date": "Sep-23-2025",
-            "schedules": [
-              {
-                "time": "01:30",
-                "activity": "Start"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
       "id": "b588",
       "name": "No2",
       "type": "Round Robin",
@@ -2570,686 +1766,816 @@
       }
     },
     {
-      "id": "9b23",
-      "name": "dos",
-      "type": "Single Elimination",
-      "event_id": "b342",
+      "name": "2333",
+      "type": "Double Elimination",
+      "event_id": "24f0",
       "status": "active",
-      "created_at": "2025-09-13T13:40:00.679Z",
-      "updated_at": "2025-09-13T13:40:00.679Z",
-      "matches": [
-        [
+      "created_at": "2025-09-16T05:03:06.885Z",
+      "updated_at": "2025-09-16T05:03:06.885Z",
+      "matches": {
+        "winners": [
+          [
+            {
+              "id": "wao10r04t",
+              "round": 1,
+              "match_number": 1,
+              "bracket_type": "winners",
+              "players": [
+                {
+                  "id": "c5ynon6fc",
+                  "name": "Player 1",
+                  "score": 1,
+                  "completed": true,
+                  "created_at": "2025-09-16T05:03:06.883Z",
+                  "updated_at": "2025-09-16T05:03:06.883Z"
+                },
+                {
+                  "id": "8pcu0be9k",
+                  "name": "Player 237",
+                  "score": 0,
+                  "completed": true,
+                  "created_at": "2025-09-16T05:03:06.883Z",
+                  "updated_at": "2025-09-16T05:04:23.983Z"
+                }
+              ],
+              "winner_id": "c5ynon6fc",
+              "loser_id": "8pcu0be9k",
+              "status": "completed",
+              "created_at": "2025-09-16T05:03:06.884Z",
+              "updated_at": "2025-09-16T05:03:13.965Z",
+              "date": "2025-09-23",
+              "time": "00:00",
+              "venue": "Campus ground",
+              "is_tie": false
+            },
+            {
+              "id": "6npw1k5qk",
+              "round": 1,
+              "match_number": 2,
+              "bracket_type": "winners",
+              "players": [
+                {
+                  "id": "10tpigtg9",
+                  "name": "Player 3",
+                  "score": 1,
+                  "completed": true,
+                  "created_at": "2025-09-16T05:03:06.883Z",
+                  "updated_at": "2025-09-16T05:03:06.883Z"
+                },
+                {
+                  "id": "98wjieyei",
+                  "name": "Player 4",
+                  "score": 0,
+                  "completed": true,
+                  "created_at": "2025-09-16T05:03:06.883Z",
+                  "updated_at": "2025-09-16T05:03:06.883Z"
+                }
+              ],
+              "winner_id": "10tpigtg9",
+              "loser_id": "98wjieyei",
+              "status": "completed",
+              "created_at": "2025-09-16T05:03:06.884Z",
+              "updated_at": "2025-09-16T05:03:17.797Z",
+              "date": "2025-09-23",
+              "time": "00:00",
+              "venue": "Campus ground",
+              "is_tie": false
+            },
+            {
+              "id": "swps1sttn",
+              "round": 1,
+              "match_number": 3,
+              "bracket_type": "winners",
+              "players": [
+                {
+                  "id": "vwfzubchs",
+                  "name": "Player 5",
+                  "score": 1,
+                  "completed": true,
+                  "created_at": "2025-09-16T05:03:06.883Z",
+                  "updated_at": "2025-09-16T05:03:06.883Z"
+                },
+                {
+                  "id": "8i77i7wpy",
+                  "name": "Player 6",
+                  "score": 0,
+                  "completed": true,
+                  "created_at": "2025-09-16T05:03:06.883Z",
+                  "updated_at": "2025-09-16T05:03:06.883Z"
+                }
+              ],
+              "winner_id": "vwfzubchs",
+              "loser_id": "8i77i7wpy",
+              "status": "completed",
+              "created_at": "2025-09-16T05:03:06.884Z",
+              "updated_at": "2025-09-16T05:03:21.726Z",
+              "date": "2025-09-23",
+              "time": "00:00",
+              "venue": "Campus ground",
+              "is_tie": false
+            },
+            {
+              "id": "7wh2zu9q5",
+              "round": 1,
+              "match_number": 4,
+              "bracket_type": "winners",
+              "players": [
+                {
+                  "id": "jkhpfxkn8",
+                  "name": "Player 7",
+                  "score": 1,
+                  "completed": true,
+                  "created_at": "2025-09-16T05:03:06.883Z",
+                  "updated_at": "2025-09-16T05:03:06.883Z"
+                },
+                {
+                  "id": "zar3ye8yx",
+                  "name": "Player 8",
+                  "score": 0,
+                  "completed": true,
+                  "created_at": "2025-09-16T05:03:06.883Z",
+                  "updated_at": "2025-09-16T05:03:06.883Z"
+                }
+              ],
+              "winner_id": "jkhpfxkn8",
+              "loser_id": "zar3ye8yx",
+              "status": "completed",
+              "created_at": "2025-09-16T05:03:06.884Z",
+              "updated_at": "2025-09-16T05:03:25.849Z",
+              "date": "2025-09-23",
+              "time": "00:00",
+              "venue": "Campus ground",
+              "is_tie": false
+            }
+          ],
+          [
+            {
+              "id": "jqxp8uokf",
+              "round": 2,
+              "match_number": 1,
+              "bracket_type": "winners",
+              "players": [
+                {
+                  "id": "c5ynon6fc",
+                  "name": "Player 1",
+                  "score": 1,
+                  "completed": true,
+                  "created_at": "2025-09-16T05:03:13.966Z",
+                  "updated_at": "2025-09-16T05:03:13.966Z"
+                },
+                {
+                  "id": "10tpigtg9",
+                  "name": "Player 3",
+                  "score": 0,
+                  "completed": true,
+                  "created_at": "2025-09-16T05:03:17.798Z",
+                  "updated_at": "2025-09-16T05:03:17.798Z"
+                }
+              ],
+              "winner_id": "c5ynon6fc",
+              "loser_id": "10tpigtg9",
+              "status": "completed",
+              "created_at": "2025-09-16T05:03:06.885Z",
+              "updated_at": "2025-09-16T05:03:29.517Z",
+              "date": "2025-09-23",
+              "time": "00:00",
+              "venue": "Campus ground",
+              "is_tie": false
+            },
+            {
+              "id": "hr5381rlu",
+              "round": 2,
+              "match_number": 2,
+              "bracket_type": "winners",
+              "players": [
+                {
+                  "id": "vwfzubchs",
+                  "name": "Player 5",
+                  "score": 1,
+                  "completed": true,
+                  "created_at": "2025-09-16T05:03:21.726Z",
+                  "updated_at": "2025-09-16T05:03:21.726Z"
+                },
+                {
+                  "id": "jkhpfxkn8",
+                  "name": "Player 7",
+                  "score": 0,
+                  "completed": true,
+                  "created_at": "2025-09-16T05:03:25.850Z",
+                  "updated_at": "2025-09-16T05:03:25.850Z"
+                }
+              ],
+              "winner_id": "vwfzubchs",
+              "loser_id": "jkhpfxkn8",
+              "status": "completed",
+              "created_at": "2025-09-16T05:03:06.885Z",
+              "updated_at": "2025-09-16T05:03:33.831Z",
+              "date": "2025-09-23",
+              "time": "00:00",
+              "venue": "Campus ground",
+              "is_tie": false
+            }
+          ],
+          [
+            {
+              "id": "h5y2djdki",
+              "round": 3,
+              "match_number": 1,
+              "bracket_type": "winners",
+              "players": [
+                {
+                  "id": "c5ynon6fc",
+                  "name": "Player 1",
+                  "score": 1,
+                  "completed": true,
+                  "created_at": "2025-09-16T05:03:29.518Z",
+                  "updated_at": "2025-09-16T05:03:29.518Z"
+                },
+                {
+                  "id": "vwfzubchs",
+                  "name": "Player 5",
+                  "score": 0,
+                  "completed": true,
+                  "created_at": "2025-09-16T05:03:33.844Z",
+                  "updated_at": "2025-09-16T05:03:33.844Z"
+                }
+              ],
+              "winner_id": "c5ynon6fc",
+              "loser_id": "vwfzubchs",
+              "status": "completed",
+              "created_at": "2025-09-16T05:03:06.885Z",
+              "updated_at": "2025-09-16T05:03:37.462Z",
+              "date": "2025-09-23",
+              "time": "00:00",
+              "venue": "Campus ground",
+              "is_tie": false
+            }
+          ]
+        ],
+        "losers": [
+          [
+            {
+              "id": "ywtabwssk",
+              "round": 1,
+              "match_number": 1,
+              "bracket_type": "losers",
+              "players": [
+                {
+                  "id": "8pcu0be9k",
+                  "name": "Player 237",
+                  "score": 1,
+                  "completed": true,
+                  "created_at": "2025-09-16T05:03:13.966Z",
+                  "updated_at": "2025-09-16T05:04:23.983Z"
+                },
+                {
+                  "id": "98wjieyei",
+                  "name": "Player 4",
+                  "score": 0,
+                  "completed": true,
+                  "created_at": "2025-09-16T05:03:17.798Z",
+                  "updated_at": "2025-09-16T05:03:17.798Z"
+                }
+              ],
+              "winner_id": "8pcu0be9k",
+              "loser_id": "98wjieyei",
+              "status": "completed",
+              "created_at": "2025-09-16T05:03:06.884Z",
+              "updated_at": "2025-09-16T05:03:53.046Z",
+              "date": "2025-09-23",
+              "time": "00:00",
+              "venue": "Campus ground",
+              "is_tie": false
+            },
+            {
+              "id": "46u6ghee9",
+              "round": 1,
+              "match_number": 2,
+              "bracket_type": "losers",
+              "players": [
+                {
+                  "id": "8i77i7wpy",
+                  "name": "Player 6",
+                  "score": 1,
+                  "completed": true,
+                  "created_at": "2025-09-16T05:03:21.726Z",
+                  "updated_at": "2025-09-16T05:03:21.726Z"
+                },
+                {
+                  "id": "zar3ye8yx",
+                  "name": "Player 8",
+                  "score": 0,
+                  "completed": true,
+                  "created_at": "2025-09-16T05:03:25.850Z",
+                  "updated_at": "2025-09-16T05:03:25.850Z"
+                }
+              ],
+              "winner_id": "8i77i7wpy",
+              "loser_id": "zar3ye8yx",
+              "status": "completed",
+              "created_at": "2025-09-16T05:03:06.884Z",
+              "updated_at": "2025-09-16T05:04:07.809Z",
+              "date": "2025-09-23",
+              "time": "00:00",
+              "venue": "Campus ground",
+              "is_tie": false
+            },
+            {
+              "id": "q3plvhkj0",
+              "round": 1,
+              "match_number": 3,
+              "bracket_type": "losers",
+              "players": [
+                {
+                  "id": "10tpigtg9",
+                  "name": "Player 3",
+                  "score": 1,
+                  "completed": true,
+                  "created_at": "2025-09-16T05:03:29.518Z",
+                  "updated_at": "2025-09-16T05:03:29.518Z"
+                },
+                {
+                  "id": "jkhpfxkn8",
+                  "name": "Player 7",
+                  "score": 0,
+                  "completed": true,
+                  "created_at": "2025-09-16T05:03:33.844Z",
+                  "updated_at": "2025-09-16T05:03:33.844Z"
+                }
+              ],
+              "winner_id": "10tpigtg9",
+              "loser_id": "jkhpfxkn8",
+              "status": "completed",
+              "created_at": "2025-09-16T05:03:06.884Z",
+              "updated_at": "2025-09-16T05:16:54.102Z",
+              "date": "2025-09-23",
+              "time": "00:00",
+              "venue": "Campus ground",
+              "is_tie": false
+            },
+            {
+              "id": "i1fxjbpru",
+              "round": 1,
+              "match_number": 4,
+              "bracket_type": "losers",
+              "players": [
+                {
+                  "id": "vwfzubchs",
+                  "name": "Player 5",
+                  "score": 0,
+                  "completed": true,
+                  "created_at": "2025-09-16T05:03:37.463Z",
+                  "updated_at": "2025-09-16T05:03:37.463Z"
+                },
+                {
+                  "id": "80uzi12du",
+                  "name": "BYE",
+                  "score": 0,
+                  "completed": true,
+                  "created_at": "2025-09-16T05:03:37.463Z",
+                  "updated_at": "2025-09-16T05:03:37.463Z"
+                }
+              ],
+              "winner_id": "vwfzubchs",
+              "loser_id": null,
+              "status": "completed",
+              "created_at": "2025-09-16T05:03:06.884Z",
+              "updated_at": "2025-09-16T05:03:06.884Z",
+              "date": "Sep-23-2025",
+              "time": "00:00",
+              "venue": "Campus ground"
+            }
+          ],
+          [
+            {
+              "id": "7r5d1uxh1",
+              "round": 2,
+              "match_number": 1,
+              "bracket_type": "losers",
+              "players": [
+                {
+                  "id": null,
+                  "name": "TBD",
+                  "score": 0,
+                  "completed": false,
+                  "created_at": "2025-09-16T05:03:06.884Z",
+                  "updated_at": "2025-09-16T05:03:06.884Z"
+                },
+                {
+                  "id": null,
+                  "name": "TBD",
+                  "score": 0,
+                  "completed": false,
+                  "created_at": "2025-09-16T05:03:06.884Z",
+                  "updated_at": "2025-09-16T05:03:06.884Z"
+                }
+              ],
+              "winner_id": null,
+              "loser_id": null,
+              "status": "pending",
+              "created_at": "2025-09-16T05:03:06.884Z",
+              "updated_at": "2025-09-16T05:03:06.884Z",
+              "date": "Sep-23-2025",
+              "time": "00:00",
+              "venue": "Campus ground"
+            },
+            {
+              "id": "vx1d8xtyf",
+              "round": 2,
+              "match_number": 2,
+              "bracket_type": "losers",
+              "players": [
+                {
+                  "id": null,
+                  "name": "TBD",
+                  "score": 0,
+                  "completed": true,
+                  "created_at": "2025-09-16T05:03:06.884Z",
+                  "updated_at": "2025-09-16T05:03:06.884Z"
+                },
+                {
+                  "id": "vwfzubchs",
+                  "name": "Player 5",
+                  "score": 0,
+                  "completed": false,
+                  "created_at": "2025-09-16T05:16:46.294Z",
+                  "updated_at": "2025-09-16T05:16:46.294Z"
+                }
+              ],
+              "winner_id": null,
+              "loser_id": null,
+              "status": "completed",
+              "created_at": "2025-09-16T05:03:06.884Z",
+              "updated_at": "2025-09-16T05:03:06.884Z",
+              "date": "Sep-23-2025",
+              "time": "00:00",
+              "venue": "Campus ground"
+            }
+          ],
+          [
+            {
+              "id": "6lfl243h7",
+              "round": 3,
+              "match_number": 1,
+              "bracket_type": "losers",
+              "players": [
+                {
+                  "id": null,
+                  "name": "TBD",
+                  "score": 0,
+                  "completed": false,
+                  "created_at": "2025-09-16T05:03:06.884Z",
+                  "updated_at": "2025-09-16T05:03:06.884Z"
+                },
+                {
+                  "id": null,
+                  "name": "TBD",
+                  "score": 0,
+                  "completed": false,
+                  "created_at": "2025-09-16T05:03:37.463Z",
+                  "updated_at": "2025-09-16T05:03:37.463Z"
+                }
+              ],
+              "winner_id": null,
+              "loser_id": null,
+              "status": "pending",
+              "created_at": "2025-09-16T05:03:06.884Z",
+              "updated_at": "2025-09-16T05:03:06.884Z",
+              "date": "Sep-23-2025",
+              "time": "00:00",
+              "venue": "Campus ground"
+            }
+          ]
+        ],
+        "grand_finals": [
           {
-            "id": "rk1hn9s6r",
+            "id": "2b63zjnl7",
             "round": 1,
             "match_number": 1,
+            "bracket_type": "grand_finals",
             "players": [
               {
-                "id": "bfjqldy8s",
+                "id": "c5ynon6fc",
                 "name": "Player 1",
                 "score": 0,
                 "completed": false,
-                "created_at": "2025-09-13T13:40:00.679Z",
-                "updated_at": "2025-09-13T13:40:00.679Z"
-              },
-              {
-                "id": "y71arc030",
-                "name": "Player 2",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-13T13:40:00.679Z",
-                "updated_at": "2025-09-13T13:40:00.679Z"
-              }
-            ],
-            "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-09-13T13:40:00.679Z",
-            "updated_at": "2025-09-13T13:40:00.679Z"
-          },
-          {
-            "id": "bxwduq0ue",
-            "round": 1,
-            "match_number": 2,
-            "players": [
-              {
-                "id": "e8b5tarfq",
-                "name": "Player 3",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-13T13:40:00.679Z",
-                "updated_at": "2025-09-13T13:40:00.679Z"
-              },
-              {
-                "id": "yuzgbn92i",
-                "name": "Player 4",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-13T13:40:00.679Z",
-                "updated_at": "2025-09-13T13:40:00.679Z"
-              }
-            ],
-            "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-09-13T13:40:00.679Z",
-            "updated_at": "2025-09-13T13:40:00.679Z"
-          },
-          {
-            "id": "qq689mzyt",
-            "round": 1,
-            "match_number": 3,
-            "players": [
-              {
-                "id": "nyoc8q85c",
-                "name": "Player 5",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-13T13:40:00.679Z",
-                "updated_at": "2025-09-13T13:40:00.679Z"
-              },
-              {
-                "id": "025zk00bs",
-                "name": "Player 6",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-13T13:40:00.679Z",
-                "updated_at": "2025-09-13T13:40:00.679Z"
-              }
-            ],
-            "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-09-13T13:40:00.679Z",
-            "updated_at": "2025-09-13T13:40:00.679Z"
-          },
-          {
-            "id": "7uhs3odqp",
-            "round": 1,
-            "match_number": 4,
-            "players": [
-              {
-                "id": "v642a95da",
-                "name": "Player 7",
-                "score": 0,
-                "completed": true,
-                "created_at": "2025-09-13T13:40:00.679Z",
-                "updated_at": "2025-09-13T13:40:00.679Z"
-              },
-              {
-                "id": "vhmm9astn",
-                "name": "BYE",
-                "score": 0,
-                "completed": true,
-                "created_at": "2025-09-13T13:40:00.679Z",
-                "updated_at": "2025-09-13T13:40:00.679Z"
-              }
-            ],
-            "winner_id": "v642a95da",
-            "status": "completed",
-            "created_at": "2025-09-13T13:40:00.679Z",
-            "updated_at": "2025-09-13T13:40:00.679Z"
-          }
-        ],
-        [
-          {
-            "id": "3vb2562w6",
-            "round": 2,
-            "match_number": 1,
-            "players": [
-              {
-                "id": null,
-                "name": "TBD",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-13T13:40:00.679Z",
-                "updated_at": "2025-09-13T13:40:00.679Z"
+                "created_at": "2025-09-16T05:03:37.462Z",
+                "updated_at": "2025-09-16T05:03:37.462Z"
               },
               {
                 "id": null,
                 "name": "TBD",
                 "score": 0,
                 "completed": false,
-                "created_at": "2025-09-13T13:40:00.679Z",
-                "updated_at": "2025-09-13T13:40:00.679Z"
+                "created_at": "2025-09-16T05:03:06.885Z",
+                "updated_at": "2025-09-16T05:03:06.885Z"
               }
             ],
             "winner_id": null,
+            "loser_id": null,
             "status": "pending",
-            "created_at": "2025-09-13T13:40:00.679Z",
-            "updated_at": "2025-09-13T13:40:00.679Z"
-          },
-          {
-            "id": "g4wbdzwvh",
-            "round": 2,
-            "match_number": 2,
-            "players": [
-              {
-                "id": null,
-                "name": "TBD",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-13T13:40:00.679Z",
-                "updated_at": "2025-09-13T13:40:00.679Z"
-              },
-              {
-                "id": null,
-                "name": "TBD",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-13T13:40:00.679Z",
-                "updated_at": "2025-09-13T13:40:00.679Z"
-              }
-            ],
-            "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-09-13T13:40:00.679Z",
-            "updated_at": "2025-09-13T13:40:00.679Z"
-          }
-        ],
-        [
-          {
-            "id": "k4pkic4k8",
-            "round": 3,
-            "match_number": 1,
-            "players": [
-              {
-                "id": null,
-                "name": "TBD",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-13T13:40:00.679Z",
-                "updated_at": "2025-09-13T13:40:00.679Z"
-              },
-              {
-                "id": null,
-                "name": "TBD",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-13T13:40:00.679Z",
-                "updated_at": "2025-09-13T13:40:00.679Z"
-              }
-            ],
-            "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-09-13T13:40:00.679Z",
-            "updated_at": "2025-09-13T13:40:00.679Z"
+            "created_at": "2025-09-16T05:03:06.885Z",
+            "updated_at": "2025-09-16T05:03:06.885Z",
+            "date": "Sep-23-2025",
+            "time": "00:00",
+            "venue": "Campus ground"
           }
         ]
-      ],
-      "lines": [],
+      },
+      "lines": {
+        "winners": [
+          {
+            "x1": 439.1111145019531,
+            "y1": 111.38885498046875,
+            "x2": 459.1111145019531,
+            "y2": 111.38885498046875
+          },
+          {
+            "x1": 459.1111145019531,
+            "y1": 111.38885498046875,
+            "x2": 459.1111145019531,
+            "y2": 150.38885498046875
+          },
+          {
+            "x1": 459.1111145019531,
+            "y1": 150.38885498046875,
+            "x2": 479.1111145019531,
+            "y2": 150.38885498046875
+          },
+          {
+            "x1": 439.1111145019531,
+            "y1": 199.388916015625,
+            "x2": 459.1111145019531,
+            "y2": 199.388916015625
+          },
+          {
+            "x1": 459.1111145019531,
+            "y1": 199.388916015625,
+            "x2": 459.1111145019531,
+            "y2": 150.38885498046875
+          },
+          {
+            "x1": 459.1111145019531,
+            "y1": 150.38885498046875,
+            "x2": 479.1111145019531,
+            "y2": 150.38885498046875
+          },
+          {
+            "x1": 439.1111145019531,
+            "y1": 287.388916015625,
+            "x2": 459.1111145019531,
+            "y2": 287.388916015625
+          },
+          {
+            "x1": 459.1111145019531,
+            "y1": 287.388916015625,
+            "x2": 459.1111145019531,
+            "y2": 307.388916015625
+          },
+          {
+            "x1": 459.1111145019531,
+            "y1": 307.388916015625,
+            "x2": 479.1111145019531,
+            "y2": 307.388916015625
+          },
+          {
+            "x1": 439.1111145019531,
+            "y1": 375.388916015625,
+            "x2": 459.1111145019531,
+            "y2": 375.388916015625
+          },
+          {
+            "x1": 459.1111145019531,
+            "y1": 375.388916015625,
+            "x2": 459.1111145019531,
+            "y2": 307.388916015625
+          },
+          {
+            "x1": 459.1111145019531,
+            "y1": 307.388916015625,
+            "x2": 479.1111145019531,
+            "y2": 307.388916015625
+          },
+          {
+            "x1": 629.1111145019531,
+            "y1": 150.38885498046875,
+            "x2": 649.1111145019531,
+            "y2": 150.38885498046875
+          },
+          {
+            "x1": 649.1111145019531,
+            "y1": 150.38885498046875,
+            "x2": 649.1111145019531,
+            "y2": 221.388916015625
+          },
+          {
+            "x1": 649.1111145019531,
+            "y1": 221.388916015625,
+            "x2": 669.1111145019531,
+            "y2": 221.388916015625
+          },
+          {
+            "x1": 629.1111145019531,
+            "y1": 307.388916015625,
+            "x2": 649.1111145019531,
+            "y2": 307.388916015625
+          },
+          {
+            "x1": 649.1111145019531,
+            "y1": 307.388916015625,
+            "x2": 649.1111145019531,
+            "y2": 221.388916015625
+          },
+          {
+            "x1": 649.1111145019531,
+            "y1": 221.388916015625,
+            "x2": 669.1111145019531,
+            "y2": 221.388916015625
+          }
+        ],
+        "losers": [
+          {
+            "x1": 439.1111145019531,
+            "y1": 129.1666259765625,
+            "x2": 459.1111145019531,
+            "y2": 129.1666259765625
+          },
+          {
+            "x1": 459.1111145019531,
+            "y1": 129.1666259765625,
+            "x2": 459.1111145019531,
+            "y2": 170.388916015625
+          },
+          {
+            "x1": 459.1111145019531,
+            "y1": 170.388916015625,
+            "x2": 479.1111145019531,
+            "y2": 170.388916015625
+          },
+          {
+            "x1": 439.1111145019531,
+            "y1": 217.1666259765625,
+            "x2": 459.1111145019531,
+            "y2": 217.1666259765625
+          },
+          {
+            "x1": 459.1111145019531,
+            "y1": 217.1666259765625,
+            "x2": 459.1111145019531,
+            "y2": 170.388916015625
+          },
+          {
+            "x1": 459.1111145019531,
+            "y1": 170.388916015625,
+            "x2": 479.1111145019531,
+            "y2": 170.388916015625
+          },
+          {
+            "x1": 439.1111145019531,
+            "y1": 305.1666259765625,
+            "x2": 459.1111145019531,
+            "y2": 305.1666259765625
+          },
+          {
+            "x1": 459.1111145019531,
+            "y1": 305.1666259765625,
+            "x2": 459.1111145019531,
+            "y2": 327.388916015625
+          },
+          {
+            "x1": 459.1111145019531,
+            "y1": 327.388916015625,
+            "x2": 479.1111145019531,
+            "y2": 327.388916015625
+          },
+          {
+            "x1": 439.1111145019531,
+            "y1": 393.1666259765625,
+            "x2": 459.1111145019531,
+            "y2": 393.1666259765625
+          },
+          {
+            "x1": 459.1111145019531,
+            "y1": 393.1666259765625,
+            "x2": 459.1111145019531,
+            "y2": 327.388916015625
+          },
+          {
+            "x1": 459.1111145019531,
+            "y1": 327.388916015625,
+            "x2": 479.1111145019531,
+            "y2": 327.388916015625
+          },
+          {
+            "x1": 629.1111145019531,
+            "y1": 170.388916015625,
+            "x2": 649.1111450195312,
+            "y2": 170.388916015625
+          },
+          {
+            "x1": 649.1111450195312,
+            "y1": 170.388916015625,
+            "x2": 649.1111450195312,
+            "y2": 241.388916015625
+          },
+          {
+            "x1": 649.1111450195312,
+            "y1": 241.388916015625,
+            "x2": 669.1111755371094,
+            "y2": 241.388916015625
+          },
+          {
+            "x1": 629.1111145019531,
+            "y1": 327.388916015625,
+            "x2": 649.1111450195312,
+            "y2": 327.388916015625
+          },
+          {
+            "x1": 649.1111450195312,
+            "y1": 327.388916015625,
+            "x2": 649.1111450195312,
+            "y2": 241.388916015625
+          },
+          {
+            "x1": 649.1111450195312,
+            "y1": 241.388916015625,
+            "x2": 669.1111755371094,
+            "y2": 241.388916015625
+          }
+        ],
+        "finals": []
+      },
       "event": {
-        "title": "123",
-        "description": "123",
-        "image": "data:image/svg+xml;base64,CiAgICAgICAgICAgICAgICAgICAgPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgICAgICAgICAgICAgICAgICAgICAgIHdpZHRoPSIxMTQiCiAgICAgICAgICAgICAgICAgICAgICAgIGhlaWdodD0iNzMiPgogICAgICAgICAgICAgICAgICAgIDxpbWFnZSBocmVmPSJkYXRhOmltYWdlL2pwZWc7YmFzZTY0LC85ai80QUFRU2taSlJnQUJBUUFBQVFBQkFBRC80Z0hZU1VORFgxQlNUMFpKVEVVQUFRRUFBQUhJQUFBQUFBUXdBQUJ0Ym5SeVVrZENJRmhaV2lBSDRBQUJBQUVBQUFBQUFBQmhZM053QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQVFBQTl0WUFBUUFBQUFEVExRQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFsa1pYTmpBQUFBOEFBQUFDUnlXRmxhQUFBQkZBQUFBQlJuV0ZsYUFBQUJLQUFBQUJSaVdGbGFBQUFCUEFBQUFCUjNkSEIwQUFBQlVBQUFBQlJ5VkZKREFBQUJaQUFBQUNoblZGSkRBQUFCWkFBQUFDaGlWRkpEQUFBQlpBQUFBQ2hqY0hKMEFBQUJqQUFBQUR4dGJIVmpBQUFBQUFBQUFBRUFBQUFNWlc1VlV3QUFBQWdBQUFBY0FITUFVZ0JIQUVKWVdWb2dBQUFBQUFBQWI2SUFBRGoxQUFBRGtGaFpXaUFBQUFBQUFBQmltUUFBdDRVQUFCamFXRmxhSUFBQUFBQUFBQ1NnQUFBUGhBQUF0czlZV1ZvZ0FBQUFBQUFBOXRZQUFRQUFBQURUTFhCaGNtRUFBQUFBQUFRQUFBQUNabVlBQVBLbkFBQU5XUUFBRTlBQUFBcGJBQUFBQUFBQUFBQnRiSFZqQUFBQUFBQUFBQUVBQUFBTVpXNVZVd0FBQUNBQUFBQWNBRWNBYndCdkFHY0FiQUJsQUNBQVNRQnVBR01BTGdBZ0FESUFNQUF4QURiLzJ3QkRBQVlFQlFZRkJBWUdCUVlIQndZSUNoQUtDZ2tKQ2hRT0R3d1FGeFFZR0JjVUZoWWFIU1VmR2hzakhCWVdJQ3dnSXlZbktTb3BHUjh0TUMwb01DVW9LU2ovMndCREFRY0hCd29JQ2hNS0NoTW9HaFlhS0Nnb0tDZ29LQ2dvS0Nnb0tDZ29LQ2dvS0Nnb0tDZ29LQ2dvS0Nnb0tDZ29LQ2dvS0Nnb0tDZ29LQ2dvS0Nnb0tDai93QUFSQ0FCSkFISURBU0lBQWhFQkF4RUIvOFFBSEFBQkFBSURBUUVCQUFBQUFBQUFBQUFBQUFVR0FRUUhBd2dDLzhRQU5oQUFBQVlCQWdRREJRY0VBd0FBQUFBQUFBRUNBd1FGRVFZU0J5RXhVUk1VWVNKQmNZR1JDQlVqUWtOU29SWWtKVEp5b3ZIL3hBQVpBUUVCQVFFQkFRQUFBQUFBQUFBQUFBQUFBUUlEQkFYL3hBQW9FUUFDQWdFQ0JBWURBUUFBQUFBQUFBQUFBUUlSQXlFeEJCSWlRUk15VWJIQjhHR2gwZUgvMmdBTUF3RUFBaEVERVFBL0FQcWtBeUdRQUFNaGtBQURJWkFBQXlHUUFBTWhrQUFESVpBQUF5R1FBQU1nQU1BQWlOVzJjcW0wOU5zWU1MenowWkJ1ZUFTOXBxU1hYQjk4Q3hYTTZRU3Nsd0VQcEcvaTZuMDdDdDRCL2d5VWJ0dWVhRmREU2ZxUjhoRFVtdFB2dlhOclIxMFB4SU5XZ3ZNejkvc2s0ZjZaRjd6Ni9RL1FkUEJuY2sxNWR5OHIxTGlBaktPK3JMNXVRdW9tTlNreDNUWmROQi82ckxxUmpCMzlZV29DcFBObys5RGE4YnkvUGRzL2NNK0hOTnhyVkNuc1NnRFJ1N2FEUjFqMWhheUV4b2JPTjdxdWljbVJGL0prTmVicU9vZzFFZXptVDJXWVVoS1ZzdUxQSGlFb3NwMmwxTXpJK2dpaEpxMGhUSllCVmthOG9mRWFUSWt1eEV1bVJOdVNtRnRJVVo5UGFVV0JZNUVwaU5GWEpmZWJiam9UdlU0cFdFa252a1dXT1VmTWcwMXVld0NueE5jTldhVGRvcWl6c29oR1pGSmJiSkRhL3dEaWFqTEpmQWJsSnJDdHRMUlZXNFQ4RzFTbmY1T1dqdzFxVDNUN2xGOEJwNE1pN2JGNVdXUUJWci9WN1ZSckNob0RpdVBQV3UvRGlUTERaSkl6eVpmSXhhUm1lT1VFcFNXK3E5aU5OYmdBQVlJQmd5SlJHU2lJeVBrWkdNZ0FQbmJVVnpaY0lMKzlwNjZNNC9XWHFUazA2VTh5WmtxTWtxUjhDeVgvQUY5UmJQS0h3djRNU1RVcnhMdVdXWEhENXFkbHZjdm5qUDBTUGJqWnMvcVBoNXZTUi81alBNdmR0LzhBQjQ2OWh2NjI0cFVtbThTbXFlcWJWWVMzMjhvM080SWtKU3J1Um1YMVBzUHJLU3lSaE9lMjcvUExvdjRkN3RKdjdSRzhPYXRmRGpYa0Nra0xWNVhVRmVsMGpXZWY3eHNzckxQcVJuL0EyN2l5aFUvMmhreTdCdzIyenBqU1NpU2F1ZTh2Y1JEMTR0YUpmajZiUmUwODYxbDIxSzhpYkhRL0pVOWtrcUxlUkVmdjI4L2xnZWRCTmN1T044RzFURmVialNhRXNtdEJrU1ZtcEpta3o3bHpHbE5aYnpOMzB5VDdkdFAxN0Z1K28vWEczVjFKWjhNTHlKRmtxY2ZjUWpZazJWbGt5Y1NmVXlFTnd5eHFqaVdSV0g0c1RUdFRFYWlNcUxLVXJVeTJhbDQ3KzBmUDBJWHZqdXk0L3dBS3IxcU95dDExYUd5U2hDY21mNGllaEVLanArQkwwWnFDczFTVVI5Nmx0NnFLMVA4QUNiTlM0cnFXa0VTbEpMbnR3a3M5dVljTzRQaDNHT2pkMXIzcGU2dENGT0ZJNjllVlVTNnFaVmRQWlE3SGtObTJwS2l6akpkUzlTSHpCRzFGWTNPaU5QYVBsUHVLYlhmT1Y3emhxNXVSMmlTb2tHZnhXUmZCSTcxZWEvcW1heDM3a2NWYVdhMEdVZUxGUWExcVdaY3M5aTdtWTVtL3d2dGFqaHRWekl6WlBhbGdXS3JoNWxCNTNtdkJMYlQzTWtrbjRtbjFHT0I1Y1dtYlMycXYxOVNZK256SGU0a2RxSkZhanhtMHRzdEpKQ0VKTEJFUmRDSEt2dEd4L0thVGdhamlHYk5wVVRtWEdYazhsYlZLSktrL0E4a2Z5RjQwM3ErbnZhMXVVeE1aYWNOSmVLdzZva0xhVjcwcVNmTWh6L2kxS1BYenRmb3pUS2lsRTVLUS9ZeTIvYWFqTklQT0RWMDNHZlBIcDZqejhOam5qNGhPYXFucjgvZTVpQ2FscVNzWWl2dUxsSllxU1JKaVVmbU5wZmxXOGZMK053NmFLdHBxdFlZMUpiU296OFoxcExURU5DRzE3bE5rMmsrU3V4NU1Xa2N1SW56U1NXeVgrL0ptYnNBQUR6bVFBQUFJdTVvYTI1a1FYN0tLaDkyQzc0MGRTdjAxOXkrZ2xBQVZ5YlZNV0FBQkFBQUFCZ2twU1ptU1NJejdFTWdBQWpKdEJVVG5qZG1Wa041MCtxMXNwTXorZUJ0d29VV0N6NFVLTXpIYS9hMGdrbDlDR3dBcmsycWJGa1pUME5iVHlKejliRlF3N05kOFo5U2Z6cjdpVEFBYmNuYkYyQUFCQVp3R0FBQU1CZ0FBREFZQUFBd0dBQUFNQmdBQURBWUFBQXdHQUFBTUFBQUQvOWs9IgogICAgICAgICAgICAgICAgICAgICAgICAgICAgd2lkdGg9IjEwMCUiCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBoZWlnaHQ9IjEwMCUiCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCBtZWV0Ii8+CiAgICAgICAgICAgICAgICAgICAgPC9zdmc+",
-        "category_id": "3",
-        "venue": "Gym",
-        "startDate": "Aug-30-2025",
-        "endDate": "Sep-12-2025",
+        "id": "24f0",
+        "title": "Mag over think",
+        "venue": "Campus ground",
+        "description": "Nagtuo ang alimango na galupad ang isda?\n\nhttps://msunaawan.edu.ph/",
+        "category": "2",
+        "startDate": "Sep-23-2025",
+        "endDate": "Sep-26-2025",
         "startTime": "00:00",
         "endTime": "23:59",
-        "isAllDay": true,
+        "image": "data:image/png;base64,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",
         "archived": false,
         "tags": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "6",
+          "68c359dddbe18",
+          "68c3a7ed412cf"
+        ],
+        "category_id": "3",
+        "type": "event",
+        "tasks": [
           {
-            "id": "68c359dddbe18",
-            "name": "213",
-            "color": "#b53f3f"
+            "committee": {
+              "id": "3"
+            },
+            "employees": [
+              {
+                "id": "11"
+              },
+              {
+                "id": "7"
+              }
+            ],
+            "task": "Mag overthink ug ayo"
+          },
+          {
+            "committee": {
+              "id": "1"
+            },
+            "employees": [
+              {
+                "id": "13"
+              }
+            ],
+            "task": "Tig sakop sa South China Sea"
           }
         ],
-        "id": "b342",
-        "createdAt": "2025-09-11T23:24:33.482566Z",
-        "tasks": [],
-        "scheduleLists": [],
-        "type": "event"
-      }
-    },
-    {
-      "id": "c77c",
-      "name": "23",
-      "type": "Single Elimination",
-      "event_id": "b342",
-      "status": "active",
-      "created_at": "2025-09-14T10:51:53.229Z",
-      "updated_at": "2025-09-14T10:51:53.229Z",
-      "matches": [
-        [
+        "schedules": [
           {
-            "id": "606i4pfe7",
-            "round": 1,
-            "match_number": 1,
-            "players": [
-              {
-                "id": "2j33o79th",
-                "name": "Player 1",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              },
-              {
-                "id": "gje9d8t3v",
-                "name": "Player 2",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              }
-            ],
-            "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-09-14T10:51:53.228Z",
-            "updated_at": "2025-09-14T10:51:53.228Z"
-          },
-          {
-            "id": "2gzvna432",
-            "round": 1,
-            "match_number": 2,
-            "players": [
-              {
-                "id": "2902w6vsi",
-                "name": "Player 3",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              },
-              {
-                "id": "xpf1zujr5",
-                "name": "Player 4",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              }
-            ],
-            "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-09-14T10:51:53.228Z",
-            "updated_at": "2025-09-14T10:51:53.228Z"
-          },
-          {
-            "id": "vho73kye8",
-            "round": 1,
-            "match_number": 3,
-            "players": [
-              {
-                "id": "gid8igb53",
-                "name": "Player 5",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              },
-              {
-                "id": "arg7pqa7v",
-                "name": "Player 6",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              }
-            ],
-            "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-09-14T10:51:53.228Z",
-            "updated_at": "2025-09-14T10:51:53.228Z"
-          },
-          {
-            "id": "ex8atafqa",
-            "round": 1,
-            "match_number": 4,
-            "players": [
-              {
-                "id": "kxlc2zp7y",
-                "name": "Player 7",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              },
-              {
-                "id": "l0izapspk",
-                "name": "Player 8",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              }
-            ],
-            "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-09-14T10:51:53.228Z",
-            "updated_at": "2025-09-14T10:51:53.228Z"
-          },
-          {
-            "id": "bh0pwgb1u",
-            "round": 1,
-            "match_number": 5,
-            "players": [
-              {
-                "id": "63hogx0my",
-                "name": "Player 9",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              },
-              {
-                "id": "gp9fu7egk",
-                "name": "Player 10",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              }
-            ],
-            "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-09-14T10:51:53.228Z",
-            "updated_at": "2025-09-14T10:51:53.228Z"
-          },
-          {
-            "id": "nxy7nfxyd",
-            "round": 1,
-            "match_number": 6,
-            "players": [
-              {
-                "id": "kxkeo0veq",
-                "name": "Player 11",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              },
-              {
-                "id": "jn53qcdhk",
-                "name": "Player 12",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              }
-            ],
-            "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-09-14T10:51:53.228Z",
-            "updated_at": "2025-09-14T10:51:53.228Z"
-          },
-          {
-            "id": "ivbna987i",
-            "round": 1,
-            "match_number": 7,
-            "players": [
-              {
-                "id": "6moawz0fz",
-                "name": "Player 13",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              },
-              {
-                "id": "13rbn76gv",
-                "name": "Player 14",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              }
-            ],
-            "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-09-14T10:51:53.228Z",
-            "updated_at": "2025-09-14T10:51:53.228Z"
-          },
-          {
-            "id": "iyyku3hj5",
-            "round": 1,
-            "match_number": 8,
-            "players": [
-              {
-                "id": "g57w1zbv0",
-                "name": "Player 15",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              },
-              {
-                "id": "y5bk1f6u6",
-                "name": "Player 16",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              }
-            ],
-            "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-09-14T10:51:53.228Z",
-            "updated_at": "2025-09-14T10:51:53.228Z"
+            "time": "01:30",
+            "activity": "Start"
           }
         ],
-        [
+        "isAllDay": true,
+        "scheduleLists": [
           {
-            "id": "6mcemrpqo",
-            "round": 2,
-            "match_number": 1,
-            "players": [
+            "day": 1,
+            "date": "Sep-23-2025",
+            "schedules": [
               {
-                "id": null,
-                "name": "TBD",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              },
-              {
-                "id": null,
-                "name": "TBD",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
+                "time": "01:30",
+                "activity": "Start"
               }
-            ],
-            "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-09-14T10:51:53.228Z",
-            "updated_at": "2025-09-14T10:51:53.228Z"
-          },
-          {
-            "id": "pwq609drx",
-            "round": 2,
-            "match_number": 2,
-            "players": [
-              {
-                "id": null,
-                "name": "TBD",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              },
-              {
-                "id": null,
-                "name": "TBD",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              }
-            ],
-            "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-09-14T10:51:53.228Z",
-            "updated_at": "2025-09-14T10:51:53.228Z"
-          },
-          {
-            "id": "1cfvj4xu5",
-            "round": 2,
-            "match_number": 3,
-            "players": [
-              {
-                "id": null,
-                "name": "TBD",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              },
-              {
-                "id": null,
-                "name": "TBD",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              }
-            ],
-            "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-09-14T10:51:53.228Z",
-            "updated_at": "2025-09-14T10:51:53.228Z"
-          },
-          {
-            "id": "cw5guhgr1",
-            "round": 2,
-            "match_number": 4,
-            "players": [
-              {
-                "id": null,
-                "name": "TBD",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              },
-              {
-                "id": null,
-                "name": "TBD",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              }
-            ],
-            "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-09-14T10:51:53.228Z",
-            "updated_at": "2025-09-14T10:51:53.228Z"
-          }
-        ],
-        [
-          {
-            "id": "7oxzw97b9",
-            "round": 3,
-            "match_number": 1,
-            "players": [
-              {
-                "id": null,
-                "name": "TBD",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              },
-              {
-                "id": null,
-                "name": "TBD",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              }
-            ],
-            "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-09-14T10:51:53.228Z",
-            "updated_at": "2025-09-14T10:51:53.228Z"
-          },
-          {
-            "id": "ggbzncyhi",
-            "round": 3,
-            "match_number": 2,
-            "players": [
-              {
-                "id": null,
-                "name": "TBD",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              },
-              {
-                "id": null,
-                "name": "TBD",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.228Z",
-                "updated_at": "2025-09-14T10:51:53.228Z"
-              }
-            ],
-            "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-09-14T10:51:53.228Z",
-            "updated_at": "2025-09-14T10:51:53.228Z"
-          }
-        ],
-        [
-          {
-            "id": "w6i5jrzl6",
-            "round": 4,
-            "match_number": 1,
-            "players": [
-              {
-                "id": null,
-                "name": "TBD",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.229Z",
-                "updated_at": "2025-09-14T10:51:53.229Z"
-              },
-              {
-                "id": null,
-                "name": "TBD",
-                "score": 0,
-                "completed": false,
-                "created_at": "2025-09-14T10:51:53.229Z",
-                "updated_at": "2025-09-14T10:51:53.229Z"
-              }
-            ],
-            "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-09-14T10:51:53.229Z",
-            "updated_at": "2025-09-14T10:51:53.229Z"
+            ]
           }
         ]
-      ],
-      "lines": [],
-      "event": {
-        "title": "123",
-        "description": "123",
-        "image": "data:image/svg+xml;base64,CiAgICAgICAgICAgICAgICAgICAgPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgICAgICAgICAgICAgICAgICAgICAgIHdpZHRoPSIxMTQiCiAgICAgICAgICAgICAgICAgICAgICAgIGhlaWdodD0iNzMiPgogICAgICAgICAgICAgICAgICAgIDxpbWFnZSBocmVmPSJkYXRhOmltYWdlL2pwZWc7YmFzZTY0LC85ai80QUFRU2taSlJnQUJBUUFBQVFBQkFBRC80Z0hZU1VORFgxQlNUMFpKVEVVQUFRRUFBQUhJQUFBQUFBUXdBQUJ0Ym5SeVVrZENJRmhaV2lBSDRBQUJBQUVBQUFBQUFBQmhZM053QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQVFBQTl0WUFBUUFBQUFEVExRQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFsa1pYTmpBQUFBOEFBQUFDUnlXRmxhQUFBQkZBQUFBQlJuV0ZsYUFBQUJLQUFBQUJSaVdGbGFBQUFCUEFBQUFCUjNkSEIwQUFBQlVBQUFBQlJ5VkZKREFBQUJaQUFBQUNoblZGSkRBQUFCWkFBQUFDaGlWRkpEQUFBQlpBQUFBQ2hqY0hKMEFBQUJqQUFBQUR4dGJIVmpBQUFBQUFBQUFBRUFBQUFNWlc1VlV3QUFBQWdBQUFBY0FITUFVZ0JIQUVKWVdWb2dBQUFBQUFBQWI2SUFBRGoxQUFBRGtGaFpXaUFBQUFBQUFBQmltUUFBdDRVQUFCamFXRmxhSUFBQUFBQUFBQ1NnQUFBUGhBQUF0czlZV1ZvZ0FBQUFBQUFBOXRZQUFRQUFBQURUTFhCaGNtRUFBQUFBQUFRQUFBQUNabVlBQVBLbkFBQU5XUUFBRTlBQUFBcGJBQUFBQUFBQUFBQnRiSFZqQUFBQUFBQUFBQUVBQUFBTVpXNVZVd0FBQUNBQUFBQWNBRWNBYndCdkFHY0FiQUJsQUNBQVNRQnVBR01BTGdBZ0FESUFNQUF4QURiLzJ3QkRBQVlFQlFZRkJBWUdCUVlIQndZSUNoQUtDZ2tKQ2hRT0R3d1FGeFFZR0JjVUZoWWFIU1VmR2hzakhCWVdJQ3dnSXlZbktTb3BHUjh0TUMwb01DVW9LU2ovMndCREFRY0hCd29JQ2hNS0NoTW9HaFlhS0Nnb0tDZ29LQ2dvS0Nnb0tDZ29LQ2dvS0Nnb0tDZ29LQ2dvS0Nnb0tDZ29LQ2dvS0Nnb0tDZ29LQ2dvS0Nnb0tDai93QUFSQ0FCSkFISURBU0lBQWhFQkF4RUIvOFFBSEFBQkFBSURBUUVCQUFBQUFBQUFBQUFBQUFVR0FRUUhBd2dDLzhRQU5oQUFBQVlCQWdRREJRY0VBd0FBQUFBQUFBRUNBd1FGRVFZU0J5RXhVUk1VWVNKQmNZR1JDQlVqUWtOU29SWWtKVEp5b3ZIL3hBQVpBUUVCQVFFQkFRQUFBQUFBQUFBQUFBQUFBUUlEQkFYL3hBQW9FUUFDQWdFQ0JBWURBUUFBQUFBQUFBQUFBUUlSQXlFeEJCSWlRUk15VWJIQjhHR2gwZUgvMmdBTUF3RUFBaEVERVFBL0FQcWtBeUdRQUFNaGtBQURJWkFBQXlHUUFBTWhrQUFESVpBQUF5R1FBQU1nQU1BQWlOVzJjcW0wOU5zWU1MenowWkJ1ZUFTOXBxU1hYQjk4Q3hYTTZRU3Nsd0VQcEcvaTZuMDdDdDRCL2d5VWJ0dWVhRmREU2ZxUjhoRFVtdFB2dlhOclIxMFB4SU5XZ3ZNejkvc2s0ZjZaRjd6Ni9RL1FkUEJuY2sxNWR5OHIxTGlBaktPK3JMNXVRdW9tTlNreDNUWmROQi82ckxxUmpCMzlZV29DcFBObys5RGE4YnkvUGRzL2NNK0hOTnhyVkNuc1NnRFJ1N2FEUjFqMWhheUV4b2JPTjdxdWljbVJGL0prTmVicU9vZzFFZXptVDJXWVVoS1ZzdUxQSGlFb3NwMmwxTXpJK2dpaEpxMGhUSllCVmthOG9mRWFUSWt1eEV1bVJOdVNtRnRJVVo5UGFVV0JZNUVwaU5GWEpmZWJiam9UdlU0cFdFa252a1dXT1VmTWcwMXVld0NueE5jTldhVGRvcWl6c29oR1pGSmJiSkRhL3dEaWFqTEpmQWJsSnJDdHRMUlZXNFQ4RzFTbmY1T1dqdzFxVDNUN2xGOEJwNE1pN2JGNVdXUUJWci9WN1ZSckNob0RpdVBQV3UvRGlUTERaSkl6eVpmSXhhUm1lT1VFcFNXK3E5aU5OYmdBQVlJQmd5SlJHU2lJeVBrWkdNZ0FQbmJVVnpaY0lMKzlwNjZNNC9XWHFUazA2VTh5WmtxTWtxUjhDeVgvQUY5UmJQS0h3djRNU1RVcnhMdVdXWEhENXFkbHZjdm5qUDBTUGJqWnMvcVBoNXZTUi81alBNdmR0LzhBQjQ2OWh2NjI0cFVtbThTbXFlcWJWWVMzMjhvM080SWtKU3J1Um1YMVBzUHJLU3lSaE9lMjcvUExvdjRkN3RKdjdSRzhPYXRmRGpYa0Nra0xWNVhVRmVsMGpXZWY3eHNzckxQcVJuL0EyN2l5aFUvMmhreTdCdzIyenBqU1NpU2F1ZTh2Y1JEMTR0YUpmajZiUmUwODYxbDIxSzhpYkhRL0pVOWtrcUxlUkVmdjI4L2xnZWRCTmN1T044RzFURmVialNhRXNtdEJrU1ZtcEpta3o3bHpHbE5aYnpOMzB5VDdkdFAxN0Z1K28vWEczVjFKWjhNTHlKRmtxY2ZjUWpZazJWbGt5Y1NmVXlFTnd5eHFqaVdSV0g0c1RUdFRFYWlNcUxLVXJVeTJhbDQ3KzBmUDBJWHZqdXk0L3dBS3IxcU95dDExYUd5U2hDY21mNGllaEVLanArQkwwWnFDczFTVVI5Nmx0NnFLMVA4QUNiTlM0cnFXa0VTbEpMbnR3a3M5dVljTzRQaDNHT2pkMXIzcGU2dENGT0ZJNjllVlVTNnFaVmRQWlE3SGtObTJwS2l6akpkUzlTSHpCRzFGWTNPaU5QYVBsUHVLYlhmT1Y3emhxNXVSMmlTb2tHZnhXUmZCSTcxZWEvcW1heDM3a2NWYVdhMEdVZUxGUWExcVdaY3M5aTdtWTVtL3d2dGFqaHRWekl6WlBhbGdXS3JoNWxCNTNtdkJMYlQzTWtrbjRtbjFHT0I1Y1dtYlMycXYxOVNZK256SGU0a2RxSkZhanhtMHRzdEpKQ0VKTEJFUmRDSEt2dEd4L0thVGdhamlHYk5wVVRtWEdYazhsYlZLSktrL0E4a2Z5RjQwM3ErbnZhMXVVeE1aYWNOSmVLdzZva0xhVjcwcVNmTWh6L2kxS1BYenRmb3pUS2lsRTVLUS9ZeTIvYWFqTklQT0RWMDNHZlBIcDZqejhOam5qNGhPYXFucjgvZTVpQ2FscVNzWWl2dUxsSllxU1JKaVVmbU5wZmxXOGZMK053NmFLdHBxdFlZMUpiU296OFoxcExURU5DRzE3bE5rMmsrU3V4NU1Xa2N1SW56U1NXeVgrL0ptYnNBQUR6bVFBQUFJdTVvYTI1a1FYN0tLaDkyQzc0MGRTdjAxOXkrZ2xBQVZ5YlZNV0FBQkFBQUFCZ2twU1ptU1NJejdFTWdBQWpKdEJVVG5qZG1Wa041MCtxMXNwTXorZUJ0d29VV0N6NFVLTXpIYS9hMGdrbDlDR3dBcmsycWJGa1pUME5iVHlKejliRlF3N05kOFo5U2Z6cjdpVEFBYmNuYkYyQUFCQVp3R0FBQU1CZ0FBREFZQUFBd0dBQUFNQmdBQURBWUFBQXdHQUFBTUFBQUQvOWs9IgogICAgICAgICAgICAgICAgICAgICAgICAgICAgd2lkdGg9IjEwMCUiCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBoZWlnaHQ9IjEwMCUiCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCBtZWV0Ii8+CiAgICAgICAgICAgICAgICAgICAgPC9zdmc+",
-        "category_id": "3",
-        "venue": "Gym",
-        "startDate": "Aug-30-2025",
-        "endDate": "Sep-12-2025",
-        "startTime": "00:00",
-        "endTime": "23:59",
-        "isAllDay": true,
-        "archived": false,
-        "tags": [
-          {
-            "id": "68c359dddbe18",
-            "name": "213",
-            "color": "#b53f3f"
-          }
-        ],
-        "id": "b342",
-        "createdAt": "2025-09-11T23:24:33.482566Z",
-        "tasks": [],
-        "scheduleLists": [],
-        "type": "event"
-      }
+      },
+      "id": "f1dc"
     }
   ],
   "announcements": [

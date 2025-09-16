@@ -257,8 +257,8 @@ onMounted(async () => {
                     :bracketIndex="brackets.indexOf(bracket)"
                     :user="user"
                     :filter="bracketMatchFilters[brackets.indexOf(bracket)]"
-                    :getAllMatches="getAllMatches"
                     :openMatchEditorFromCard="openMatchEditorFromCard"
+                    :isFinalRound="isFinalRound"
                 />
             </div>
           </div>

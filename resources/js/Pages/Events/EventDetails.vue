@@ -1381,8 +1381,8 @@ const getBracketIndex = (bracketId) => {
                             :bracketIndex="getBracketIndex(bracket.id)"
                             :user="user"
                             :filter="bracketMatchFilters[getBracketIndex(bracket.id)]"
-                            :getAllMatches="getAllMatches"
                             :openMatchEditorFromCard="openMatchEditorFromCard"
+                            :isFinalRound="isFinalRound"
                         />
                     </div>
                 </div>
