@@ -1,6 +1,6 @@
 <script setup>
 import { Link, useForm, usePage, router } from '@inertiajs/vue3';
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import Badge from 'primevue/badge';
 import Toast from 'primevue/toast';
 import Popover from 'primevue/popover';
@@ -10,6 +10,7 @@ import { useNotifications } from '@/composables/useNotifications.js';
 // Ref
 const isCollapsed = ref(false);
 const op = ref();
+const openDropdown = ref(null);
 const profileMenu = ref();
 const hideHeader = ref(false);
 
@@ -32,42 +33,60 @@ const {
     markAllAsRead, loadMore, toggleNotifications
 } = useNotifications(op);
 
+const logout = () => {
+    const form = useForm({});
+    form.post(route('logout'));
+};
 
 const sideBarItems = computed(() => {
   const allItems = [
     {
       label: 'Dashboard',
       icon: 'pi pi-chart-bar',
-      route: route('dashboard'),
+      routeName: 'dashboard',
       roles: ['Principal', 'Admin'],
     },
     {
       label: 'News and Updates',
       icon: 'pi pi-home',
-      route: route('home'),
+      routeName: 'home',
     },
     {
       label: 'Events',
       icon: 'pi pi-calendar-clock',
-      route: route('events.index'),
+      routeName: 'events.index',
       roles: ['Admin', 'Principal'],
     },
     {
       label: 'Brackets',
       icon: 'pi pi-ticket',
-      route: route('bracket'),
+      routeName: 'bracket',
       roles: ['Admin', 'SportsManager'],
     },
     {
-      label: 'Categories',
+      label: 'Labels',
       icon: 'pi pi-palette',
-      route: route('category.list'),
       roles: ['Admin', 'Principal'],
+      routeName: 'category.list',
+      items: [
+        {
+          label: 'Categories',
+          icon: 'pi pi-bookmark',
+          routeName: 'category.list',
+          routeParams: { view: 'categories' },
+        },
+        {
+          label: 'Tags',
+          icon: 'pi pi-tags',
+          routeName: 'category.list',
+          routeParams: { view: 'tags' },
+        },
+      ],
     },
     {
       label: 'Archive',
       icon: 'pi pi-folder',
-      route: route('archive'),
+      routeName: 'archive',
       roles: ['Admin', 'Principal'],
     },
     {
@@ -77,7 +96,6 @@ const sideBarItems = computed(() => {
       roles: ['Principal', 'Admin', 'SportsManager'],
     },
   ];
-
   return allItems.filter(item => {
     if (!item.roles) return true;
     return user.value && item.roles.includes(user.value.role);
@@ -88,10 +106,25 @@ const toggleSidebar = () => {
     isCollapsed.value = !isCollapsed.value;
 };
 
-const logout = () => {
-    const form = useForm({});
-    form.post(route('logout'));
+const toggleDropdown = (label) => {
+    if (isCollapsed.value) {
+        isCollapsed.value = false;
+        // After sidebar expands, open the dropdown
+        nextTick(() => {
+            openDropdown.value = label;
+        });
+    } else {
+        openDropdown.value = openDropdown.value === label ? null : label;
+    }
 };
+
+// Auto-open dropdown on page load/navigation
+watch(() => page.url, () => {
+    const activeItem = sideBarItems.value.find(item =>
+        item.items && item.items.some(subItem => route().current(subItem.routeName, subItem.routeParams))
+    );
+    if (activeItem) openDropdown.value = activeItem.label;
+}, { immediate: true });
 
 const profileMenuItems = computed(() => (user.value ? [
     {
@@ -139,18 +172,41 @@ onMounted(() => {
 
             <!-- Navigation -->
             <nav class="mt-6 px-4">
-                <div v-for="(item, index) in sideBarItems" :key="index" class="mb-3">
-                    <Link v-if="item.route"
-                        :href="item.route"
+                <div v-for="(item, index) in sideBarItems" :key="index" class="mb-3 transition-all duration-300">
+                    <!-- Dropdown Menu Item -->
+                    <div v-if="item.items">
+                        <button @click="toggleDropdown(item.label)"
+                            class="flex items-center justify-between w-full p-4 rounded-2xl transition-all duration-300 transform hover:scale-102 shadow-lg"
+                            :class="isActive(item.routeName) ? 'bg-blue-500 text-white shadow-xl border-2 border-blue-400' : 'bg-white/80 text-blue-700 hover:bg-blue-100 hover:text-blue-800 border-2 border-transparent'">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <i :class="item.icon" class="text-2xl"></i>
+                                </div>
+                                <span v-show="!isCollapsed" class="ml-4 text-base font-semibold">{{ item.label }}</span>
+                            </div>
+                            <i v-show="!isCollapsed" :class="['pi', openDropdown === item.label ? 'pi-chevron-down' : 'pi-chevron-right', 'transition-transform duration-200']"></i>
+                        </button>
+                        <div v-if="openDropdown === item.label && !isCollapsed" class="mt-2 pl-8 space-y-1 bg-white/50 rounded-lg py-2">
+                            <Link v-for="subItem in item.items" :key="subItem.label" :href="route(subItem.routeName, subItem.routeParams)"
+                                class="flex items-center p-2 rounded-lg transition-colors"
+                                :class="route().current(subItem.routeName, subItem.routeParams) ? 'bg-blue-200 text-blue-800 font-semibold' : 'text-gray-600 hover:bg-blue-100'">
+                                <i :class="subItem.icon" class="mr-3"></i>
+                                <span>{{ subItem.label }}</span>
+                            </Link>
+                        </div>
+                    </div>
+                    <!-- Regular Link Item -->
+                    <Link v-else-if="item.routeName"
+                        :href="route(item.routeName)"
                         class="flex items-center p-4 rounded-2xl transition-all duration-300 transform hover:scale-102 shadow-lg"
-                        :class="isActive(item.route) ? 'bg-blue-500 text-white shadow-xl border-2 border-blue-400' : 'bg-white/80 text-blue-700 hover:bg-blue-100 hover:text-blue-800 border-2 border-transparent'">
+                        :class="isActive(item.routeName) ? 'bg-blue-500 text-white shadow-xl border-2 border-blue-400' : 'bg-white/80 text-blue-700 hover:bg-blue-100 hover:text-blue-800 border-2 border-transparent'">
                         <div class="flex-shrink-0">
                             <i :class="item.icon" class="text-2xl"></i>
                         </div>
                         <span v-show="!isCollapsed" class="ml-4 text-base font-semibold">{{ item.label }}</span>
                     </Link>
-
-                    <button v-else @click="item.action"
+                    <!-- Action Button Item -->
+                    <button v-else-if="item.action" @click="item.action"
                         class="flex items-center w-full text-blue-700 bg-red-100/80 hover:bg-red-200 rounded-2xl p-4 transition-all duration-300 transform hover:scale-102 shadow-lg border-2 border-red-300">
                         <div class="flex-shrink-0">
                             <i :class="item.icon" class="text-2xl"></i>
@@ -218,7 +274,6 @@ onMounted(() => {
                             <img :src="user.profile_pic || 'https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png'"
                                     class="h-10 w-10 rounded-full object-cover border-2 border-blue-300 shadow-lg"
                                     alt="Profile Picture"/>
-                            <div class="absolute -bottom-1 -right-1 text-sm animate-pulse">⭐</div>
                         </div>
                         <div class="ml-3" v-show="!isCollapsed">
                             <div class="text-lg font-bold text-gray-800">{{ user.name }}</div>

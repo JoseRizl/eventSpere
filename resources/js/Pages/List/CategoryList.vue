@@ -1,5 +1,5 @@
 <script>
-import { defineComponent, ref, onMounted, computed, watch } from "vue";
+import { defineComponent, ref, onMounted, computed } from "vue";
 import { router, usePage } from '@inertiajs/vue3';
 import Toast from 'primevue/toast';
 import { useToast } from '@/composables/useToast';
@@ -26,7 +26,7 @@ export default defineComponent({
     const isCreateModalVisible = ref(false);
     const selectedItem = ref(null);
     const newItem = ref({ title: "", description: "", color: "#800080" });
-    const showTags = ref(localStorage.getItem("showTags") === "true");
+    const showTags = ref(false); // Default to categories, will be updated on mount
     const searchQuery = ref("");
     const initialLoading = ref(true);
     const saving = ref(false);
@@ -69,6 +69,10 @@ export default defineComponent({
 
     // Fetch data on mount
     onMounted(async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const view = urlParams.get('view');
+      showTags.value = view === 'tags';
+
       initialLoading.value = true;
       await fetchData();
       initialLoading.value = false;
@@ -248,16 +252,6 @@ export default defineComponent({
       }
     };
 
-    // Toggle between categories and tags
-    const toggleView = () => {
-      showTags.value = !showTags.value;
-      localStorage.setItem("showTags", showTags.value);
-    };
-
-    watch(showTags, (newVal) => {
-      localStorage.setItem("showTags", newVal);
-    });
-
     return {
       categories,
       tags,
@@ -274,7 +268,6 @@ export default defineComponent({
       createItem,
       newItem,
       isItemInUse,
-      toggleView,
       toast,
       saving,
       initialLoading,
@@ -312,12 +305,6 @@ export default defineComponent({
         </div>
       </div>
       <div class="flex gap-2">
-        <Button
-          :label="showTags ? 'Show Categories' : 'Show Tags'"
-          icon="pi pi-tags"
-          class="p-button-secondary"
-          @click="toggleView"
-        />
         <button class="create-button" @click="openCreateModal">Create</button>
       </div>
     </div>
