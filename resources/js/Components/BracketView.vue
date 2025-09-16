@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue';
 import { truncate } from '@/utils/stringUtils.js';
 
 const props = defineProps({
@@ -25,6 +26,53 @@ const props = defineProps({
     openScoringConfigDialog: { type: Function, required: true }
 });
 
+const ongoingRoundIdentifier = computed(() => {
+    const bracket = props.bracket;
+    if (!bracket || !bracket.matches) return null;
+
+    if (bracket.type === 'Single Elimination' || bracket.type === 'Round Robin') {
+        const rounds = bracket.matches;
+        for (let i = 0; i < rounds.length; i++) {
+            if (rounds[i] && rounds[i].some(match => match.status !== 'completed')) {
+                const part = bracket.type === 'Single Elimination' ? 'single' : 'round_robin';
+                return { part, roundIdx: i };
+            }
+        }
+    } else if (bracket.type === 'Double Elimination') {
+        // Check Winners bracket
+        const winnersRounds = bracket.matches.winners;
+        if (winnersRounds) {
+            for (let i = 0; i < winnersRounds.length; i++) {
+                if (winnersRounds[i] && winnersRounds[i].some(match => match.status !== 'completed')) {
+                    return { part: 'winners', roundIdx: i };
+                }
+            }
+        }
+
+        // If winners bracket is complete, check Losers bracket
+        const losersRounds = bracket.matches.losers;
+        if (losersRounds) {
+            for (let i = 0; i < losersRounds.length; i++) {
+                if (losersRounds[i] && losersRounds[i].some(match => match.status !== 'completed')) {
+                    return { part: 'losers', roundIdx: i };
+                }
+            }
+        }
+
+        // If both are complete, check Grand Finals
+        const grandFinals = bracket.matches.grand_finals;
+        if (grandFinals && grandFinals.some(match => match.status !== 'completed')) {
+            return { part: 'grand_finals', roundIdx: 0 };
+        }
+    }
+
+    return null; // All matches are completed
+});
+
+const isRoundOngoing = (bracketPart, roundIdx) => {
+    if (!ongoingRoundIdentifier.value) return false;
+    return ongoingRoundIdentifier.value.part === bracketPart && ongoingRoundIdentifier.value.roundIdx === roundIdx;
+};
 </script>
 
 <template>
@@ -43,7 +91,7 @@ const props = defineProps({
         </svg>
 
         <div v-for="(round, roundIdx) in bracket.matches" :key="roundIdx"
-        :class="['round', `round-${roundIdx + 1}`]">
+        :class="['round', `round-${roundIdx + 1}`, { 'round-ongoing': isRoundOngoing('single', roundIdx) }]">
         <h3>
             {{ props.isFinalRound(bracketIndex, roundIdx) ? 'Final Round' : `Round ${roundIdx + 1}` }}
         </h3>
@@ -91,7 +139,7 @@ const props = defineProps({
     <div v-else-if="bracket.type === 'Round Robin'" class="round-robin-bracket">
         <div class="bracket">
         <div v-for="(round, roundIdx) in bracket.matches" :key="`round-${roundIdx}`"
-            :class="['round', `round-${roundIdx + 1}`]">
+            :class="['round', `round-${roundIdx + 1}`, { 'round-ongoing': isRoundOngoing('round_robin', roundIdx) }]">
             <h3>Round {{ roundIdx + 1 }}</h3>
 
             <div
@@ -177,7 +225,7 @@ const props = defineProps({
     <div v-else-if="bracket.type === 'Double Elimination'" class="double-elimination-bracket">
         <!-- Winners Bracket -->
         <div class="bracket-section winners">
-        <h3>Winners Bracket</h3>
+        <h3>Upper Bracket</h3>
         <div class="bracket">
             <svg class="connection-lines winners-lines">
             <g v-for="(line, i) in bracket.lines?.winners" :key="`winners-${i}`">
@@ -193,8 +241,8 @@ const props = defineProps({
             </svg>
 
             <div v-for="(round, roundIdx) in bracket.matches.winners" :key="`winners-${roundIdx}`"
-            :class="['round', `round-${roundIdx + 1}`]">
-            <h4>Round {{ roundIdx + 1 }}</h4>
+            :class="['round', `round-${roundIdx + 1}`, { 'round-ongoing': isRoundOngoing('winners', roundIdx) }]">
+            <h3>Round {{ roundIdx + 1 }}</h3>
 
             <div
                 v-for="(match, matchIdx) in round"
@@ -237,7 +285,7 @@ const props = defineProps({
 
         <!-- Losers Bracket -->
         <div class="bracket-section losers">
-        <h3>Losers Bracket</h3>
+        <h3>Lower Bracket</h3>
         <div class="bracket">
             <svg class="connection-lines losers-lines">
             <g v-for="(line, i) in bracket.lines?.losers" :key="`losers-${i}`">
@@ -253,8 +301,8 @@ const props = defineProps({
             </svg>
 
             <div v-for="(round, roundIdx) in bracket.matches.losers" :key="`losers-${roundIdx}`"
-            :class="['round', `round-${roundIdx + 1}`]">
-            <h4>Round {{ roundIdx + 1 }}</h4>
+            :class="['round', `round-${roundIdx + 1}`, { 'round-ongoing': isRoundOngoing('losers', roundIdx) }]">
+            <h3>Round {{ roundIdx + 1 }}</h3>
 
             <div
                 v-for="(match, matchIdx) in round"
@@ -297,7 +345,9 @@ const props = defineProps({
 
         <!-- Grand Finals -->
         <div class="bracket-section grand-finals">
-        <h3>Finals</h3>
+        <div :class="{ 'round-ongoing': isRoundOngoing('grand_finals', 0) }">
+            <h3>Finals</h3>
+        </div>
         <div class="bracket">
             <svg class="connection-lines finals-lines">
             <g v-for="(line, i) in bracket.lines?.finals" :key="`finals-${i}`">
