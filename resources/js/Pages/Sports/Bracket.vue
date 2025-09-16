@@ -103,6 +103,25 @@ const selectedBracket = computed(() => {
   return null;
 });
 
+const isMatchDataInvalid = computed(() => {
+    if (!selectedMatchData.value || !selectedBracket.value) return true;
+
+    const { status, player1Score, player2Score, player1Name, player2Name } = selectedMatchData.value;
+    const bracketType = selectedBracket.value.type;
+
+    // Check for ties in elimination brackets
+    if (status === 'completed' && player1Score === player2Score && (bracketType === 'Single Elimination' || bracketType === 'Double Elimination')) {
+        return true;
+    }
+
+    // Check for empty player names
+    if (player1Name.trim() === '' || player2Name.trim() === '') {
+        return true;
+    }
+
+    return false;
+});
+
 const isMultiDayEvent = computed(() => {
   if (selectedBracket.value?.event) {
       return selectedBracket.value.event.startDate !== selectedBracket.value.event.endDate;
@@ -536,6 +555,7 @@ onMounted(async () => {
               label="Update Match"
               @click="confirmMatchUpdate"
               class="p-button-success"
+              :disabled="isMatchDataInvalid"
             />
           </div>
         </div>

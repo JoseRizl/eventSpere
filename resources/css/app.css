@@ -326,11 +326,7 @@
 .category-list-container,
 .archive-list-container,
 .bracket-container {
-  max-width: 1200px;
-  margin-right: auto;
-  margin-left: auto;
-  padding-left: 0;
-  padding-right: 0;
+  width: 100%;
 }
 
 .event-list-container .p-datatable,

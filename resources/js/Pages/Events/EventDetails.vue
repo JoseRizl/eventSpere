@@ -174,6 +174,25 @@ const selectedBracketForDialog = computed(() => {
   return null;
 });
 
+const isMatchDataInvalid = computed(() => {
+    if (!selectedMatchData.value || !selectedBracketForDialog.value) return true;
+
+    const { status, player1Score, player2Score, player1Name, player2Name } = selectedMatchData.value;
+    const bracketType = selectedBracketForDialog.value.type;
+
+    // Check for ties in elimination brackets
+    if (status === 'completed' && player1Score === player2Score && (bracketType === 'Single Elimination' || bracketType === 'Double Elimination')) {
+        return true;
+    }
+
+    // Check for empty player names
+    if (player1Name.trim() === '' || player2Name.trim() === '') {
+        return true;
+    }
+
+    return false;
+});
+
 const isMultiDayEvent = computed(() => {
   if (selectedBracketForDialog.value?.event) {
       return selectedBracketForDialog.value.event.startDate !== selectedBracketForDialog.value.event.endDate;
@@ -792,7 +811,7 @@ const getBracketIndex = (bracketId) => {
 
 <template>
     <div class="min-h-screen py-8 px-4">
-        <div class="max-w-6xl mx-auto mt-4">
+        <div class="mx-auto mt-4">
             <!-- Back Button for non-management -->
             <div v-if="!user || !['Admin', 'Principal', 'SportsManager'].includes(user.role)" class="mb-4">
                 <Button icon="pi pi-arrow-left" label="Back" @click="goBack" class="p-button-text" />
@@ -825,7 +844,7 @@ const getBracketIndex = (bracketId) => {
 
         </div>
 
-        <div class="max-w-6xl mx-auto mt-4">
+        <div class="mx-auto mt-4">
             <div class="flex flex-col md:flex-row gap-6">
                 <!-- Main content (left side) - takes remaining space -->
                 <div class="flex-1">
@@ -1304,7 +1323,7 @@ const getBracketIndex = (bracketId) => {
         </div>
 
       <!-- Brackets Section -->
-      <div v-if="relatedBrackets.length > 0" class="max-w-6xl mx-auto mt-6">
+      <div v-if="relatedBrackets.length > 0" class="mx-auto mt-6">
         <h2 class="text-xl font-bold mb-4">Games</h2>
         <div v-if="relatedBrackets.length > 1" class="search-container mb-4" style="max-width: 300px;">
             <div class="p-input-icon-left w-full">
@@ -1670,6 +1689,7 @@ const getBracketIndex = (bracketId) => {
             label="Update Match"
             @click="confirmMatchUpdate"
             class="p-button-success"
+            :disabled="isMatchDataInvalid"
         />
         </div>
     </div>

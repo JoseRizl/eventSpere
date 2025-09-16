@@ -59,7 +59,7 @@ const sideBarItems = computed(() => {
       roles: ['Admin', 'SportsManager'],
     },
     {
-      label: 'Categories/Tags',
+      label: 'Categories',
       icon: 'pi pi-palette',
       route: route('category.list'),
       roles: ['Admin', 'Principal'],

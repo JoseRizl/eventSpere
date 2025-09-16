@@ -81,12 +81,12 @@ const confirmDeleteAnnouncement = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col items-center py-8 px-4">
+  <div class="min-h-screen flex flex-col py-8 px-4">
     <!-- News and Update Title -->
     <h1 class="text-2xl font-bold mt-6 text-center">News and Updates</h1>
 
     <!-- Carousel Banner -->
-    <div v-if="carouselEvents.length > 0" class="w-full max-w-6xl mx-auto mt-8">
+    <div v-if="carouselEvents.length > 0" class="w-full mx-auto mt-8">
         <Carousel :value="carouselEvents" :numVisible="1" :numScroll="1" circular :autoplayInterval="5000">
             <template #item="slotProps">
                 <div class="relative w-full h-64 md:h-80 bg-gray-700 rounded-lg shadow-lg overflow-hidden mx-2">
@@ -108,7 +108,7 @@ const confirmDeleteAnnouncement = async () => {
     </div>
 
     <!-- View Toggle -->
-    <div class="w-full max-w-5xl mt-8">
+    <div class="w-full mt-8">
       <div class="flex border-b">
         <div class="flex items-center">
           <button
@@ -183,15 +183,15 @@ const confirmDeleteAnnouncement = async () => {
     </div>
 
     <!-- Conditional Content -->
-    <div v-if="currentView === 'events'" class="w-full max-w-5xl">
-      <div v-if="!filteredNews.length && (searchQuery || startDateFilter || endDateFilter)" class="w-full max-w-5xl mt-8 flex flex-col items-center justify-center py-10 bg-gray-50 rounded-lg shadow-inner border border-dashed border-gray-300 text-center text-gray-500">
+    <div v-if="currentView === 'events'" class="w-full">
+      <div v-if="!filteredNews.length && (searchQuery || startDateFilter || endDateFilter)" class="w-full mt-8 flex flex-col items-center justify-center py-10 bg-gray-50 rounded-lg shadow-inner border border-dashed border-gray-300 text-center text-gray-500">
         <span class="text-4xl mb-2">🧐</span>
         <span class="font-semibold text-lg">No Events Found</span>
         <span class="text-sm">Try adjusting your search or date filters.</span>
       </div>
       <div v-else>
         <!-- Ongoing Events -->
-        <div v-if="ongoingEvents.length > 0" class="w-full max-w-5xl mt-8">
+        <div v-if="ongoingEvents.length > 0" class="w-full mt-8">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Ongoing Events</h2>
             <Button
@@ -242,7 +242,7 @@ const confirmDeleteAnnouncement = async () => {
         </div>
 
         <!-- Events This Month -->
-        <div v-if="eventsThisMonth.length > 0" class="w-full max-w-5xl mt-8">
+        <div v-if="eventsThisMonth.length > 0" class="w-full mt-8">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Events This Month</h2>
             <Button size="small" :icon="showEventsThisMonth ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" :label="showEventsThisMonth ? 'Hide' : 'Show'" @click="showEventsThisMonth = !showEventsThisMonth" class="p-button-text"/>
@@ -287,7 +287,7 @@ const confirmDeleteAnnouncement = async () => {
         </div>
 
         <!-- Upcoming Events -->
-        <div v-if="upcomingEvents.length > 0" class="w-full max-w-5xl mt-8">
+        <div v-if="upcomingEvents.length > 0" class="w-full mt-8">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Upcoming Events</h2>
             <Button size="small" :icon="showUpcomingEvents ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" :label="showUpcomingEvents ? 'Hide' : 'Show'" @click="showUpcomingEvents = !showUpcomingEvents" class="p-button-text"/>
@@ -332,7 +332,7 @@ const confirmDeleteAnnouncement = async () => {
         </div>
 
         <!-- Event Calendar -->
-        <div class="w-full max-w-5xl">
+        <div class="w-full">
             <h2 class="text-2xl font-bold mb-6 mt-8 text-center">Event Calendar</h2>
           <EventCalendar :events="filteredNews" />
         </div>
@@ -340,7 +340,7 @@ const confirmDeleteAnnouncement = async () => {
     </div>
 
     <!-- Announcement Board -->
-    <div v-if="currentView === 'announcements'" class="w-full max-w-5xl mt-8">
+    <div v-if="currentView === 'announcements'" class="w-full mt-8">
       <h2 class="text-xl font-semibold mb-5">Announcement Board</h2>
       <div v-if="filteredAnnouncements.length" class="space-y-6">
         <div
