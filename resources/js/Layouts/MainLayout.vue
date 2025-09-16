@@ -17,11 +17,21 @@ const hideHeader = ref(false);
 const page = usePage();
 const user = computed(() => page.props.auth.user);
 
-const backgroundClass = computed(() => {
+const backgroundStyle = computed(() => {
+  const patternUrl = "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.12'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")";
+
   if (user.value) {
-    return 'bg-gradient-to-br from-blue-50 via-white to-blue-100 relative overflow-hidden';
+    // This creates the same gradient as 'bg-gradient-to-br from-blue-50 via-indigo-50 to-white'
+    const gradient = 'linear-gradient(to bottom right, #eff6ff, #eef2ff, #ffffff)';
+    return {
+      backgroundImage: `${patternUrl}, ${gradient}`
+    };
   }
-  return 'bg-gray-100';
+  // This is 'bg-blue-100'
+  return {
+    backgroundImage: patternUrl,
+    backgroundColor: '#dbeafe'
+  };
 });
 
 // Check if a route is currently active
@@ -89,12 +99,6 @@ const sideBarItems = computed(() => {
       routeName: 'archive',
       roles: ['Admin', 'Principal'],
     },
-    {
-      label: 'Logout',
-      icon: 'pi pi-sign-out',
-      action: logout,
-      roles: ['Principal', 'Admin', 'SportsManager'],
-    },
   ];
   return allItems.filter(item => {
     if (!item.roles) return true;
@@ -151,7 +155,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div :class="[backgroundClass, 'flex min-h-screen']">
+    <div :style="backgroundStyle" :class="['flex min-h-screen', user ? 'relative overflow-hidden' : '']">
         <Toast position="bottom-right" />
 
         <!-- Background Design Elements -->
@@ -162,7 +166,7 @@ onMounted(() => {
         </template>
 
         <!-- Sidebar -->
-        <div v-if="user && !hideHeader" :class="[ 'fixed top-0 left-0 h-screen bg-gradient-to-b from-blue-50 to-indigo-100 shadow-xl flex flex-col transition-all duration-300 overflow-y-auto rounded-r-3xl border-r-4 border-blue-200', isCollapsed ? 'w-20' : 'w-56' ]">
+        <div v-if="user && !hideHeader" :class="[ 'fixed top-0 left-0 h-screen bg-gradient-to-b from-blue-50 to-indigo-100 shadow-xl flex flex-col transition-all duration-300 overflow-y-auto rounded-r-xl border-r-4 border-blue-200', isCollapsed ? 'w-20' : 'w-56' ]">
             <!-- Sidebar Header -->
             <div class="p-4 border-b border-blue-200 flex items-center justify-center">
                 <button @click="toggleSidebar" class="p-3 bg-blue-100 hover:bg-blue-200 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-md">
@@ -171,7 +175,7 @@ onMounted(() => {
             </div>
 
             <!-- Navigation -->
-            <nav class="mt-6 px-4">
+            <nav class="mt-6 px-4 flex-grow">
                 <div v-for="(item, index) in sideBarItems" :key="index" class="mb-3 transition-all duration-300">
                     <!-- Dropdown Menu Item -->
                     <div v-if="item.items">
@@ -205,22 +209,23 @@ onMounted(() => {
                         </div>
                         <span v-show="!isCollapsed" class="ml-4 text-base font-semibold">{{ item.label }}</span>
                     </Link>
-                    <!-- Action Button Item -->
-                    <button v-else-if="item.action" @click="item.action"
-                        class="flex items-center w-full text-blue-700 bg-red-100/80 hover:bg-red-200 rounded-2xl p-4 transition-all duration-300 transform hover:scale-102 shadow-lg border-2 border-red-300">
-                        <div class="flex-shrink-0">
-                            <i :class="item.icon" class="text-2xl"></i>
-                        </div>
-                        <span v-show="!isCollapsed" class="ml-4 text-base font-semibold">{{ item.label }}</span>
-                    </button>
                 </div>
             </nav>
+
+            <!-- Logout Section -->
+            <div v-if="user && ['Principal', 'Admin', 'SportsManager'].includes(user.role)" class="px-4 py-4">
+                <hr class="border-blue-200 mb-4">
+                <button @click="logout" class="flex items-center w-full text-gray-600 bg-white/80 hover:bg-gray-100 rounded-2xl p-4 transition-all duration-300 transform hover:scale-102 shadow-lg border-2 border-transparent">
+                    <div class="flex-shrink-0"><i class="pi pi-sign-out text-2xl"></i></div>
+                    <span v-show="!isCollapsed" class="ml-4 text-base font-semibold">Logout</span>
+                </button>
+            </div>
         </div>
 
         <!-- Main Content -->
         <div :class="['flex-1 transition-all duration-300 flex flex-col h-screen', user && !hideHeader ? (isCollapsed ? 'ml-20' : 'ml-56') : '']">
             <!-- Top Navbar -->
-            <nav v-if="!hideHeader" class="bg-gradient-to-r from-white via-blue-50 to-purple-50 shadow-xl sticky top-0 w-full px-6 py-3 flex justify-between items-center z-40 rounded-b-3xl border-b-4 border-blue-200 backdrop-blur-sm">
+            <nav v-if="!hideHeader" class="bg-gradient-to-r from-white via-blue-50 to-purple-50 shadow-xl sticky top-0 w-full px-6 py-3 flex justify-between items-center z-40 rounded-b-xl border-b-4 border-blue-200 backdrop-blur-sm">
                 <div class="flex items-center space-x-4">
                      <Link :href="route('home')" class="flex items-center gap-3 text-surface-800 dark:text-surface-0 no-underline">
                         <Avatar image="/images/NCSlogo.png" shape="circle" class="menubar-logo" />
@@ -229,8 +234,8 @@ onMounted(() => {
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <button @click="toggleNotifications" v-ripple :class="['relative p-ripple p-2 rounded-full hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors duration-200 text-slate-600', { 'notification-bell-ring': hasUnreadNotifications }]">
-                        <i class="pi pi-bell text-lg" />
+                    <button @click="toggleNotifications" v-ripple :class="['relative p-ripple flex items-center justify-center h-10 w-10 rounded-full hover:bg-blue-100 transition-all duration-300 transform hover:scale-105 text-slate-600', { 'notification-bell-ring': hasUnreadNotifications }]">
+                        <i class="pi pi-bell text-xl" />
                         <Badge v-if="hasUnreadNotifications" severity="danger" class="absolute top-1 right-1 !p-0 !w-2 !h-2"></Badge>
                     </button>
                     <Popover ref="op">
@@ -283,13 +288,7 @@ onMounted(() => {
                             </div>
                         </div>
                     </div>
-                    <div v-else class="flex items-center cursor-pointer hover:bg-blue-100 rounded-xl transition-all duration-300 transform hover:scale-105 p-2" @click="toggleProfileMenu">
-                        <Avatar icon="pi pi-user" class="h-10 w-10" shape="circle" />
-                        <div class="ml-3" v-show="!isCollapsed">
-                            <div class="text-lg font-bold text-gray-800">Guest</div>
-                            <div class="text-sm font-semibold text-blue-600">Account</div>
-                        </div>
-                    </div>
+
                     <Popover ref="profileMenu">
                         <div class="w-48 p-2">
                             <button
