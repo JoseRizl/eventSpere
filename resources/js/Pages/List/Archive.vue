@@ -87,8 +87,8 @@
       <Column header="Actions" style="width:10%;" body-class="text-center">
         <template #body="{ data }">
           <div class="action-buttons">
-            <Button icon="pi pi-undo" class="p-button-rounded p-button-success" @click="restoreEvent(data)" v-tooltip.top="'Restore Event'"/>
-            <Button icon="pi pi-trash" class="p-button-rounded p-button-danger" @click="deleteEventPermanently(data)" v-tooltip.top="'Delete Event'"/>
+            <Button icon="pi pi-undo" class="p-button-rounded p-button-text action-btn-success" @click="restoreEvent(data)" v-tooltip.top="'Restore Event'"/>
+            <Button icon="pi pi-trash" class="p-button-rounded p-button-text action-btn-danger" @click="deleteEventPermanently(data)" v-tooltip.top="'Delete Event'"/>
           </div>
         </template>
       </Column>

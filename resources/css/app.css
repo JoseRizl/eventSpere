@@ -132,7 +132,7 @@
       }
       .venue {
         font-weight: 600;
-        color: #ca8a04; /* A nice yellow, Tailwind's yellow-600 */
+        color: #4A5568; /* Tailwind's gray-700 */
       }
 
       .flex.justify-content-between {
@@ -209,6 +209,33 @@
         display: flex;
         gap: 0.5rem;
         justify-content: flex-start;
+      }
+
+      .action-btn-info,
+      .action-btn-danger,
+      .action-btn-warning,
+      .action-btn-success {
+        color: black !important;
+      }
+
+      .action-btn-info:hover {
+        background-color: #0dcaf0 !important; /* PrimeVue info color */
+        color: white !important;
+      }
+
+      .action-btn-danger:hover {
+        background-color: #dc3545 !important; /* PrimeVue danger color */
+        color: white !important;
+      }
+
+      .action-btn-warning:hover {
+        background-color: #ffc107 !important; /* PrimeVue warning color */
+        color: white !important;
+      }
+
+      .action-btn-success:hover {
+        background-color: #198754 !important; /* PrimeVue success color */
+        color: white !important;
       }
 
       .p-button-rounded {

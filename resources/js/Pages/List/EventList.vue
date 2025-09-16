@@ -152,15 +152,15 @@
         <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Actions" style="width:10%;" body-class="text-center">
           <template #body="{ data }">
             <div class="action-buttons">
-              <Button icon="pi pi-pen-to-square" class="p-button-rounded p-button-info" @click="editEvent(data)" v-tooltip.top="'Edit Event'"/>
-              <Button icon="pi pi-folder" class="p-button-rounded p-button-danger" @click="archiveEvent(data)" v-tooltip.top="'Archive Event'"/>
+              <Button icon="pi pi-pen-to-square" class="p-button-rounded p-button-text action-btn-info" @click="editEvent(data)" v-tooltip.top="'Edit Event'"/>
+              <Button icon="pi pi-folder" class="p-button-rounded p-button-text action-btn-danger" @click="archiveEvent(data)" v-tooltip.top="'Archive Event'"/>
             </div>
           </template>
         </Column>
 
         <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Tasks" style="width:15%;" body-class="text-center">
         <template #body="{ data }">
-            <Button icon="pi pi-list" class="p-button-rounded p-button-warning" @click="openTaskModal(data)" v-tooltip.top="'Manage Tasks'"/>
+            <Button icon="pi pi-list" class="p-button-rounded p-button-text action-btn-warning" @click="openTaskModal(data)" v-tooltip.top="'Manage Tasks'"/>
         </template>
         </Column>
 

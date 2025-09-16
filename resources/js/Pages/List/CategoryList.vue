@@ -334,7 +334,7 @@ export default defineComponent({
     </div>
 
     <DataTable v-else :value="filteredItems" class="p-datatable-striped">
-      <Column field="title" :header="showTags ? 'Tag Name' : 'Category Name'" style="width:30%;" sortable>
+      <Column :field="showTags ? 'name' : 'title'" :header="showTags ? 'Tag Name' : 'Category Name'" style="width:30%;" sortable>
         <template #body="{ data }">
           <div v-if="showTags" class="flex items-center gap-2">
             <span
@@ -347,15 +347,10 @@ export default defineComponent({
         </template>
       </Column>
 
-      <Column field="description" header="Description" style="width:40%;" v-if="!showTags">
+      <Column :field="showTags ? 'color' : 'description'" :header="showTags ? 'Color' : 'Description'" style="width:40%;" sortable>
         <template #body="{ data }">
-          {{ data.description || "No description available" }}
-        </template>
-      </Column>
-
-      <Column field="color" header="Color" style="width:20%;" v-if="showTags">
-        <template #body="{ data }">
-          {{ data.color }}
+          <span v-if="showTags">{{ data.color }}</span>
+          <span v-else>{{ data.description || "No description available" }}</span>
         </template>
       </Column>
 
@@ -364,13 +359,13 @@ export default defineComponent({
           <div class="action-buttons">
             <Button
               icon="pi pi-pen-to-square"
-              class="p-button-rounded p-button-info"
+              class="p-button-rounded p-button-text action-btn-info"
               @click="openEditModal(data)"
               v-tooltip.top="`Edit ${showTags ? 'Tag' : 'Category'}`"
             />
             <Button
               icon="pi pi-trash"
-              class="p-button-rounded p-button-danger"
+              class="p-button-rounded p-button-text action-btn-danger"
               @click="deleteItem(data.id)"
               :disabled="isItemInUse(data.id)"
               v-tooltip.top="isItemInUse(data.id) ? `${showTags ? 'Tag' : 'Category'} is in use and cannot be deleted` : `Delete ${showTags ? 'Tag' : 'Category'}`"
