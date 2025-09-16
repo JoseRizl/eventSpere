@@ -791,7 +791,7 @@ const getBracketIndex = (bracketId) => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-200 py-8 px-4">
+    <div class="min-h-screen py-8 px-4">
         <div class="max-w-6xl mx-auto mt-4">
             <!-- Back Button for non-management -->
             <div v-if="!user || !['Admin', 'Principal', 'SportsManager'].includes(user.role)" class="mb-4">

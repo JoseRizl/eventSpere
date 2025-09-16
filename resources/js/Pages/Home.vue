@@ -81,7 +81,7 @@ const confirmDeleteAnnouncement = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col items-center bg-gray-100 py-8 px-4">
+  <div class="min-h-screen flex flex-col items-center py-8 px-4">
     <!-- News and Update Title -->
     <h1 class="text-2xl font-bold mt-6 text-center">News and Updates</h1>
 

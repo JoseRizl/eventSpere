@@ -1,22 +1,30 @@
 <script setup>
 import { Link, useForm, usePage, router } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
-import Popover from 'primevue/popover';
+import { ref, computed, onMounted } from 'vue';
 import Badge from 'primevue/badge';
 import Toast from 'primevue/toast';
-import Menu from 'primevue/menu';
+import Popover from 'primevue/popover';
+import Avatar from 'primevue/avatar';
 import { useNotifications } from '@/composables/useNotifications.js';
 
 // Ref
-const toggleMenu = ref(false);
-const menuBarItems = ref([]);
-const isSidebarCollapsed = ref(false);
+const isCollapsed = ref(false);
 const op = ref();
 const profileMenu = ref();
-const menuStyle = ref({});
+const hideHeader = ref(false);
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
+
+const backgroundClass = computed(() => {
+  if (user.value) {
+    return 'bg-gradient-to-br from-blue-50 via-white to-blue-100 relative overflow-hidden';
+  }
+  return 'bg-gray-100';
+});
+
+// Check if a route is currently active
+const isActive = (routeName) => route().current(routeName);
 
 const {
     notifications, unreadCount, hasUnreadNotifications,
@@ -28,9 +36,6 @@ const {
 const sideBarItems = computed(() => {
   const allItems = [
     {
-      separator: true,
-    },
-    {
       label: 'Dashboard',
       icon: 'pi pi-chart-bar',
       route: route('dashboard'),
@@ -38,7 +43,7 @@ const sideBarItems = computed(() => {
     },
     {
       label: 'News and Updates',
-      icon: 'pi pi-objects-column',
+      icon: 'pi pi-home',
       route: route('home'),
     },
     {
@@ -65,19 +70,22 @@ const sideBarItems = computed(() => {
       route: route('archive'),
       roles: ['Admin', 'Principal'],
     },
+    {
+      label: 'Logout',
+      icon: 'pi pi-sign-out',
+      action: logout,
+      roles: ['Principal', 'Admin', 'SportsManager'],
+    },
   ];
 
-  const userRole = user.value?.role;
-
   return allItems.filter(item => {
-    if (item.separator) return true;
     if (!item.roles) return true;
     return user.value && item.roles.includes(user.value.role);
   });
 });
 
 const toggleSidebar = () => {
-    isSidebarCollapsed.value = !isSidebarCollapsed.value;
+    isCollapsed.value = !isCollapsed.value;
 };
 
 const logout = () => {
@@ -99,238 +107,162 @@ const profileMenuItems = computed(() => (user.value ? [
     }
 ]));
 const toggleProfileMenu = (event) => {
-    menuStyle.value = { width: `${event.currentTarget.offsetWidth}px` };
     profileMenu.value.toggle(event);
 };
+
+onMounted(() => {
+  hideHeader.value = window.hideHeader || false;
+  window.setHideHeader = (val) => { hideHeader.value = val; };
+});
 
 </script>
 
 <template>
-    <div class="bg-gray-100">
+    <div :class="[backgroundClass, 'flex min-h-screen']">
         <Toast position="bottom-right" />
-        <div class="flex flex-col md:flex-row">
-            <header id="main-header" class="fixed top-0 left-0 right-0 z-[1100] w-full">
-                <Menubar :model="menuBarItems" class="w-full md:w-100 !border-l-0 !rounded-none">
-                    <template #start>
-                        <div class="flex items-center gap-4">
-                            <button
-                                v-if="user"
-                                @click="toggleSidebar"
-                                class="p-2 rounded-md hover:bg-gray-200 transition-colors duration-200 flex items-center justify-center"
-                                style="height: 2.25rem; width: 2.25rem;"
-                                v-tooltip="isSidebarCollapsed ? 'Expand Menu' : 'Collapse Menu'"
-                            >
-                                <i class="pi pi-bars text-lg"></i>
-                            </button>
-                            <Link :href="route('home')" class="flex items-center gap-3 text-surface-800 dark:text-surface-0 no-underline">
-                                <Avatar image="/images/NCSlogo.png" shape="circle" class="menubar-logo" />
-                                <span class="text-xl font-semibold">Event Sphere</span>
-                            </Link>
+
+        <!-- Background Design Elements -->
+        <template v-if="user">
+            <div class="absolute -z-10 top-16 right-16 w-40 h-40 bg-gradient-to-br from-blue-200/10 to-indigo-300/10 rounded-full blur-2xl animate-pulse"></div>
+            <div class="absolute -z-10 bottom-20 left-20 w-32 h-32 bg-gradient-to-br from-purple-200/10 to-pink-300/10 rounded-full blur-xl animate-pulse" style="animation-delay: 1.5s;"></div>
+            <div class="absolute -z-10 top-1/2 left-1/3 w-24 h-24 bg-gradient-to-br from-indigo-200/10 to-blue-300/10 rounded-full blur-lg animate-pulse" style="animation-delay: 2.5s;"></div>
+        </template>
+
+        <!-- Sidebar -->
+        <div v-if="user && !hideHeader" :class="[ 'fixed top-0 left-0 h-screen bg-gradient-to-b from-blue-50 to-indigo-100 shadow-xl flex flex-col transition-all duration-300 overflow-y-auto rounded-r-3xl border-r-4 border-blue-200', isCollapsed ? 'w-20' : 'w-56' ]">
+            <!-- Sidebar Header -->
+            <div class="p-4 border-b border-blue-200 flex items-center justify-center">
+                <button @click="toggleSidebar" class="p-3 bg-blue-100 hover:bg-blue-200 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-md">
+                    <i class="pi pi-bars text-xl text-blue-700"></i>
+                </button>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="mt-6 px-4">
+                <div v-for="(item, index) in sideBarItems" :key="index" class="mb-3">
+                    <Link v-if="item.route"
+                        :href="item.route"
+                        class="flex items-center p-4 rounded-2xl transition-all duration-300 transform hover:scale-102 shadow-lg"
+                        :class="isActive(item.route) ? 'bg-blue-500 text-white shadow-xl border-2 border-blue-400' : 'bg-white/80 text-blue-700 hover:bg-blue-100 hover:text-blue-800 border-2 border-transparent'">
+                        <div class="flex-shrink-0">
+                            <i :class="item.icon" class="text-2xl"></i>
                         </div>
-                    </template>
-                    <template #end>
-                        <div class="flex items-center gap-2 mr-2">
-                            <button @click="toggleNotifications" v-ripple :class="['relative p-ripple p-2 rounded-full hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors duration-200 text-slate-600', { 'notification-bell-ring': hasUnreadNotifications }]">
-                                <i class="pi pi-bell text-lg" />
-                                <Badge v-if="hasUnreadNotifications" severity="danger" class="absolute top-1 right-1 !p-0 !w-2 !h-2"></Badge>
-                            </button>
-                            <Popover ref="op">
-                                <div class="w-80">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <h3 class="font-bold text-center flex-1">Notifications</h3>
-                                        <button @click="markAllAsRead" v-if="unreadCount > 0" class="text-sm text-blue-600 hover:underline p-1">Mark all as read</button>
-                                    </div>
-                                    <ul v-if="notifications.length > 0" class="max-h-96 overflow-y-auto announcement-list">
-                                        <li
-                                        v-for="notification in displayedNotifications"
-                                        :key="notification.id"
-                                        @click="onNotificationClick(notification)"
-                                        :class="[
-                                            'group p-3 border-b flex justify-between items-start transition-colors duration-150',
-                                            notification.link ? 'cursor-pointer' : '',
-                                            !notification.isRead ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-100'
-                                        ]"
-                                        >
-                                        <div class="flex-1 min-w-0">
-                                            <span class="text-xs font-semibold text-blue-600 group-hover:underline block truncate">
-                                                {{ notification.title }}
-                                            </span>
-                                            <p class="break-words text-sm w-full">{{ notification.message }}</p>
-                                            <p class="text-xs text-gray-500 mt-2">{{ notification.formattedTimestamp }}</p>
-                                        </div>
-                                        <div class="flex-shrink-0 ml-2" v-if="!notification.isRead">
-                                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-1"></div>
-                                        </div>
-                                        </li>
-                                    </ul>
-                                    <p v-else class="text-center text-sm text-gray-500 py-4">You're all caught up!</p>
-                                    <div v-if="showLoadMore" class="text-center mt-2">
-                                        <button @click="loadMore" class="text-sm font-semibold text-blue-600 hover:underline p-2 w-full">Load More</button>
-                                    </div>
+                        <span v-show="!isCollapsed" class="ml-4 text-base font-semibold">{{ item.label }}</span>
+                    </Link>
+
+                    <button v-else @click="item.action"
+                        class="flex items-center w-full text-blue-700 bg-red-100/80 hover:bg-red-200 rounded-2xl p-4 transition-all duration-300 transform hover:scale-102 shadow-lg border-2 border-red-300">
+                        <div class="flex-shrink-0">
+                            <i :class="item.icon" class="text-2xl"></i>
+                        </div>
+                        <span v-show="!isCollapsed" class="ml-4 text-base font-semibold">{{ item.label }}</span>
+                    </button>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div :class="['flex-1 transition-all duration-300 flex flex-col h-screen', user && !hideHeader ? (isCollapsed ? 'ml-20' : 'ml-56') : '']">
+            <!-- Top Navbar -->
+            <nav v-if="!hideHeader" class="bg-gradient-to-r from-white via-blue-50 to-purple-50 shadow-xl sticky top-0 w-full px-6 py-3 flex justify-between items-center z-40 rounded-b-3xl border-b-4 border-blue-200 backdrop-blur-sm">
+                <div class="flex items-center space-x-4">
+                     <Link :href="route('home')" class="flex items-center gap-3 text-surface-800 dark:text-surface-0 no-underline">
+                        <Avatar image="/images/NCSlogo.png" shape="circle" class="menubar-logo" />
+                        <span class="text-xl font-semibold">Event Sphere</span>
+                    </Link>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button @click="toggleNotifications" v-ripple :class="['relative p-ripple p-2 rounded-full hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors duration-200 text-slate-600', { 'notification-bell-ring': hasUnreadNotifications }]">
+                        <i class="pi pi-bell text-lg" />
+                        <Badge v-if="hasUnreadNotifications" severity="danger" class="absolute top-1 right-1 !p-0 !w-2 !h-2"></Badge>
+                    </button>
+                    <Popover ref="op">
+                        <div class="w-80">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="font-bold text-center flex-1">Notifications</h3>
+                                <button @click="markAllAsRead" v-if="unreadCount > 0" class="text-sm text-blue-600 hover:underline p-1">Mark all as read</button>
+                            </div>
+                            <ul v-if="notifications.length > 0" class="max-h-96 overflow-y-auto announcement-list">
+                                <li
+                                v-for="notification in displayedNotifications"
+                                :key="notification.id"
+                                @click="onNotificationClick(notification)"
+                                :class="[
+                                    'group p-3 border-b flex justify-between items-start transition-colors duration-150',
+                                    notification.link ? 'cursor-pointer' : '',
+                                    !notification.isRead ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-100'
+                                ]"
+                                >
+                                <div class="flex-1 min-w-0">
+                                    <span class="text-xs font-semibold text-blue-600 group-hover:underline block truncate">
+                                        {{ notification.title }}
+                                    </span>
+                                    <p class="break-words text-sm w-full">{{ notification.message }}</p>
+                                    <p class="text-xs text-gray-500 mt-2">{{ notification.formattedTimestamp }}</p>
                                 </div>
-                            </Popover>
-
-                            <button @click="toggleProfileMenu" aria-haspopup="true" aria-controls="profile_menu" v-ripple class="relative overflow-hidden border-0 bg-transparent flex items-center justify-center px-3 py-2 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-md cursor-pointer transition-colors duration-200">
-                                <Avatar :image="user ? 'https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png' : undefined" :icon="!user ? 'pi pi-user' : undefined" class="mr-2" shape="circle" />
-                                <span class="inline-flex flex-col items-start">
-                                    <span class="font-bold text-xs">{{ user?.name || 'Guest' }}</span>
-                                    <span class="text-xs">{{ user?.role || 'Account' }}</span>
-                                </span>
-                            </button>
-                            <Menu ref="profileMenu" id="profile_menu" :model="profileMenuItems" :popup="true" appendTo="self" :pt="{ root: { style: menuStyle } }" />
+                                <div class="flex-shrink-0 ml-2" v-if="!notification.isRead">
+                                    <div class="w-2 h-2 bg-blue-500 rounded-full mt-1"></div>
+                                </div>
+                                </li>
+                            </ul>
+                            <p v-else class="text-center text-sm text-gray-500 py-4">You're all caught up!</p>
+                            <div v-if="showLoadMore" class="text-center mt-2">
+                                <button @click="loadMore" class="text-sm font-semibold text-blue-600 hover:underline p-2 w-full">Load More</button>
+                            </div>
                         </div>
-                    </template>
-                </Menubar>
-            </header>
-            <aside v-if="user" id="main-sidebar" :class="[
-                'fixed top-0 left-0 h-screen',
-                isSidebarCollapsed ? 'sidebar-collapsed' : 'sidebar-expanded'
-            ]" style="padding-top:3.5rem;">
-                <div class="card flex flex-col h-full">
-                    <!-- Sidebar Menu - Collapsible -->
-                    <TieredMenu
-                        :model="sideBarItems"
-                        :class="[
-                            'w-full hidden h-full !rounded-none lg:block',
-                            isSidebarCollapsed ? 'menu-collapsed' : ''
-                        ]"
-                    >
-                        <template #item="{ item, props, hasSubmenu }">
-                            <Link
-                                v-if="item.route"
-                                v-ripple
-                                :href="item.route"
-                                class="flex items-center cursor-pointer text-surface-700 dark:text-surface-0 px-4 py-2"
-                                v-tooltip="isSidebarCollapsed ? item.label : ''"
-                            >
-                                <span :class="item.icon" />
-                                <span v-if="!isSidebarCollapsed" class="ml-2">{{ item.label }}</span>
-                                <Badge v-if="item.badge" class="ml-auto" :value="item.badge" />
-                            </Link>
-                            <a
-                                v-else
-                                v-ripple
-                                @click="item.action"
-                                :href="item.url"
-                                :target="item.target"
-                                v-bind="props.action"
-                                v-tooltip="isSidebarCollapsed ? item.label : ''"
-                            >
-                                <span :class="item.icon" />
-                                <span v-if="!isSidebarCollapsed" class="ml-2">{{ item.label }}</span>
-                                <span v-if="hasSubmenu" class="pi pi-angle-right ml-auto" />
-                            </a>
-                        </template>
-                    </TieredMenu>
-                </div>
-            </aside>
+                    </Popover>
 
-            <!-- Main Content -->
-            <main class="flex-1">
-                <div id="main-content-wrapper" :class="[
-                    'md:mt-12 px-4 py-4',
-                    user ? (isSidebarCollapsed ? 'lg:ml-[48px]' : 'lg:ml-60') : ''
-                ]">
-                    <slot />
+                    <div v-if="user" class="flex items-center cursor-pointer hover:bg-blue-100 rounded-xl transition-all duration-300 transform hover:scale-105 p-2" @click="toggleProfileMenu">
+                        <div class="relative">
+                            <img :src="user.profile_pic || 'https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png'"
+                                    class="h-10 w-10 rounded-full object-cover border-2 border-blue-300 shadow-lg"
+                                    alt="Profile Picture"/>
+                            <div class="absolute -bottom-1 -right-1 text-sm animate-pulse">⭐</div>
+                        </div>
+                        <div class="ml-3" v-show="!isCollapsed">
+                            <div class="text-lg font-bold text-gray-800">{{ user.name }}</div>
+                            <div class="text-sm font-semibold text-blue-600 capitalize flex items-center">
+                                <span class="mr-1">🎓</span>
+                                {{ user.role }}
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="flex items-center cursor-pointer hover:bg-blue-100 rounded-xl transition-all duration-300 transform hover:scale-105 p-2" @click="toggleProfileMenu">
+                        <Avatar icon="pi pi-user" class="h-10 w-10" shape="circle" />
+                        <div class="ml-3" v-show="!isCollapsed">
+                            <div class="text-lg font-bold text-gray-800">Guest</div>
+                            <div class="text-sm font-semibold text-blue-600">Account</div>
+                        </div>
+                    </div>
+                    <Popover ref="profileMenu">
+                        <div class="w-48 p-2">
+                            <button
+                                v-for="item in profileMenuItems"
+                                :key="item.label"
+                                @click="item.command"
+                                class="w-full text-left p-2 hover:bg-gray-100 rounded-md flex items-center gap-2 transition-colors duration-150"
+                            >
+                                <i :class="item.icon" class="text-gray-500"></i>
+                                <span class="font-medium text-gray-700">{{ item.label }}</span>
+                            </button>
+                        </div>
+                    </Popover>
                 </div>
+            </nav>
+
+            <!-- Page Content -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <slot />
             </main>
-
         </div>
     </div>
 </template>
 
 <style scoped>
-/* Sidebar width for expanded/collapsed */
-.sidebar-expanded {
-    width: 240px;
-}
-.sidebar-collapsed {
-    width: 48px;
-}
-
-/* Transition for sidebar width and main content margin */
-#main-sidebar, #main-content-wrapper {
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Ensure sidebar background collapses with sidebar */
-.card {
-    width: 100%;
-    min-width: 0;
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Add hover effect for sidebar items */
-:deep(.p-tieredmenu .p-menuitem-link:hover) {
-    background-color: rgba(0, 0, 0, 0.04);
-}
-
-/* Menu item styles */
-:deep(.p-tieredmenu .p-menuitem-link) {
-    justify-content: flex-start;
-    padding: 0.75rem 1rem;
-}
-
-/* Remove menu item background in collapsed mode except on hover */
-:deep(.p-tieredmenu.menu-collapsed .p-menuitem-link) {
-    background: transparent !important;
-}
-
-/* On hover, show background only behind the icon */
-:deep(.p-tieredmenu.menu-collapsed .p-menuitem-link:hover) {
-    background-color: rgba(0, 0, 0, 0.04) !important;
-}
-
-/* Collapsed menu styles */
-:deep(.p-tieredmenu.menu-collapsed .p-menuitem-link span[class^="pi-"]) {
-    margin: 0 auto;
-    display: block;
-    text-align: center;
-}
-
-/* Burger button styles */
-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #6c757d;
-}
-
-button:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-    color: #495057;
-}
-
 .menubar-logo {
     width: 2.25rem;
     height: 2.25rem;
-}
-
-/* Ensure icons are visible and clickable */
-:deep(.p-tieredmenu .p-menuitem-link span[class^="pi-"]) {
-    font-size: 1.25rem;
-    min-width: 1.5rem;
-    text-align: center;
-}
-
-/* Add hover effect for icons */
-:deep(.p-tieredmenu .p-menuitem-link:hover span[class^="pi-"]) {
-    color: #7e0bc1;
-}
-
-/* Menubar title styles */
-:deep(.p-menubar .p-menubar-start) {
-    margin-right: 1rem;
-}
-
-:deep(.p-menubar .p-menubar-start .text-xl) {
-    color: #495057;
-    font-weight: 600;
-}
-
-:deep(.p-menubar .p-menubar-start .flex) {
-    align-items: center;
-    gap: 0.75rem;
 }
 
 .announcement-list::-webkit-scrollbar {
@@ -378,5 +310,22 @@ button:hover {
 
 .no-underline {
   text-decoration: none;
+}
+
+.sidebar-expanded {
+    width: 14rem; /* w-56 */
+}
+.sidebar-collapsed {
+    width: 5rem; /* w-20 */
+}
+
+:deep(.p-toast-message-info) {
+    border: 0;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+:deep(.p-toast-message-info .p-toast-message-content) {
+    background: #4f46e5; /* indigo-600 */
+    color: #ffffff;
 }
 </style>
