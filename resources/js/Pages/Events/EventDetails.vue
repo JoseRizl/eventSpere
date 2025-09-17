@@ -1355,7 +1355,7 @@ const getBracketIndex = (bracketId) => {
                     />
                 </div>
 
-                <div v-if="expandedBrackets[getBracketIndex(bracket.id)]" class="bracket-content-wrapper">
+                <div v-if="expandedBrackets[getBracketIndex(bracket.id)]" class="bracket-content-wrapper" :id="`bracket-content-${bracket.id}`">
                     <div class="view-toggle-buttons">
                         <Button
                             :label="'Bracket View'"

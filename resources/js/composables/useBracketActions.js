@@ -1253,19 +1253,36 @@ export function useBracketActions(state) {
     return null;
   };
 
-  const updateLines = (bracketIdx) => {
+const updateLines = (bracketIdx) => {
     const bracket = brackets.value[bracketIdx];
-    bracket.lines = bracket.type === 'Single Elimination' ? [] : { winners: [], losers: [], finals: [] };
+    if (!bracket) return;
+
+    // Reset lines
+    if (bracket.type === 'Single Elimination') {
+        bracket.lines = [];
+    } else if (bracket.type === 'Double Elimination') {
+        bracket.lines = { winners: [], losers: [], finals: [] };
+    } else {
+        return; // No lines for Round Robin
+    }
+
     nextTick(() => {
-      const container = document.querySelector('.bracket');
-      if (!container) return;
-      const containerRect = container.getBoundingClientRect();
+      const bracketContentEl = document.getElementById(`bracket-content-${bracket.id}`);
+      if (!bracketContentEl) {
+        console.warn(`Could not find bracket container for ID: bracket-content-${bracket.id}`);
+        return;
+      }
+
       if (bracket.type === 'Single Elimination') {
+        const svgContainer = bracketContentEl.querySelector('.bracket > .connection-lines');
+        if (!svgContainer) return;
+        const containerRect = svgContainer.getBoundingClientRect();
+
         for (let round = 0; round < bracket.matches.length - 1; round++) {
           const current = bracket.matches[round];
           current.forEach((match, i) => {
-            const fromEl = document.getElementById(`match-${round}-${i}`);
-            const toEl = document.getElementById(`match-${round + 1}-${Math.floor(i / 2)}`);
+            const fromEl = document.getElementById(`match-${bracketIdx}-${round}-${i}`);
+            const toEl = document.getElementById(`match-${bracketIdx}-${round + 1}-${Math.floor(i / 2)}`);
             if (!fromEl || !toEl) return;
             const fromRect = fromEl.getBoundingClientRect();
             const toRect = toEl.getBoundingClientRect();
@@ -1282,14 +1299,15 @@ export function useBracketActions(state) {
           });
         }
       } else if (bracket.type === 'Double Elimination') {
-        const winnersContainer = document.querySelector('.winners-lines');
+        // Winners Bracket Lines
+        const winnersContainer = bracketContentEl.querySelector('.winners .connection-lines');
         if (winnersContainer) {
           const winnersRect = winnersContainer.getBoundingClientRect();
           for (let round = 0; round < bracket.matches.winners.length - 1; round++) {
             const current = bracket.matches.winners[round];
             current.forEach((match, i) => {
-              const fromEl = document.getElementById(`winners-match-${round}-${i}`);
-              const toEl = document.getElementById(`winners-match-${round + 1}-${Math.floor(i / 2)}`);
+              const fromEl = document.getElementById(`winners-match-${bracketIdx}-${round}-${i}`);
+              const toEl = document.getElementById(`winners-match-${bracketIdx}-${round + 1}-${Math.floor(i / 2)}`);
               if (!fromEl || !toEl) return;
               const fromRect = fromEl.getBoundingClientRect();
               const toRect = toEl.getBoundingClientRect();
@@ -1306,14 +1324,16 @@ export function useBracketActions(state) {
             });
           }
         }
-        const losersContainer = document.querySelector('.losers-lines');
+
+        // Losers Bracket Lines
+        const losersContainer = bracketContentEl.querySelector('.losers .connection-lines');
         if (losersContainer) {
           const losersRect = losersContainer.getBoundingClientRect();
           for (let round = 0; round < bracket.matches.losers.length - 1; round++) {
             const current = bracket.matches.losers[round];
             current.forEach((match, i) => {
-              const fromEl = document.getElementById(`losers-match-${round}-${i}`);
-              const toEl = document.getElementById(`losers-match-${round + 1}-${Math.floor(i / 2)}`);
+              const fromEl = document.getElementById(`losers-match-${bracketIdx}-${round}-${i}`);
+              const toEl = document.getElementById(`losers-match-${bracketIdx}-${round + 1}-${Math.floor(i / 2)}`);
               if (!fromEl || !toEl) return;
               const fromRect = fromEl.getBoundingClientRect();
               const toRect = toEl.getBoundingClientRect();
@@ -1330,6 +1350,7 @@ export function useBracketActions(state) {
             });
           }
         }
+
       }
     });
   };

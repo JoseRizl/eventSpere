@@ -361,27 +361,15 @@
   z-index: 1;
 }
 
-.winners-lines {
-  stroke: #0077B3; /* Primary color */
-}
-
-.losers-lines {
-  stroke: #dc3545;
-}
-
-.finals-lines {
-  stroke: #28a745;
-}
-
 /* Winners Bracket */
 .bracket-section.winners {
-  border-right: 2px solid #0077B3; /* Primary color */
+  border-right: 2px solid #000;
   padding-right: 20px;
 }
 
 /* Losers Bracket */
 .bracket-section.losers {
-  border-left: 2px solid #dc3545;
+  border-left: 2px solid #000;
   padding-left: 20px;
 }
 
@@ -392,14 +380,13 @@
 
 /* Grand Finals */
 .bracket-section.grand-finals {
-  border-top: 2px solid #28a745;
   padding-top: 20px;
   margin-top: 20px;
 }
 
 .grand-finals .match {
   background-color: #f8f9fa;
-  border: 2px solid #28a745;
+  border: 2px solid #000;
   transition: all 0.3s ease;
 }
 
@@ -602,7 +589,7 @@
 }
 
 .losers .match {
-  border-color: #dc3545;
+  border-color: #000;
 }
 
 /* Match Highlight */
@@ -662,13 +649,13 @@
 
 /* TBD text styling - consistent across all sections */
 .tbd-text {
-  color: #6f42c1 !important;
+  color: gray !important;
   font-style: italic;
 }
 
 /* Ensure TBD text overrides winner/loser colors */
 .player-box .tbd-text {
-  color: #6f42c1 !important;
+  color: gray !important;
 }
 
 /* Additional specificity for TBD - override all possible winner/loser combinations */
@@ -676,21 +663,21 @@
 .player-box .tbd-text.loser-name,
 .player-box .tbd-text.winner.completed,
 .player-box .tbd-text.loser.completed {
-  color: #6f42c1 !important;
+  color: gray !important;
 }
 
 /* Override any existing winner/loser/tie color rules */
 .bracket .player-box span.tbd-text.winner,
 .bracket .player-box span.tbd-text.loser,
 .bracket .player-box span.tbd-text.tie {
-  color: #6f42c1 !important;
+  color: gray !important;
   background-color: #f8f9fa !important;
   border: 1px solid #dee2e6 !important;
 }
 
 /* Override the general .winner class specifically for TBD */
 .bracket .player-box span.tbd-text.winner {
-  color: #6f42c1 !important;
+  color: gray !important;
 }
 
 /* Ensure facing-bye styling takes precedence over winner/loser colors */

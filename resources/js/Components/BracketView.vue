@@ -100,7 +100,7 @@ const isRoundOngoing = (bracketPart, roundIdx) => {
         <div
             v-for="(match, matchIdx) in round"
             :key="matchIdx"
-            :id="`match-${roundIdx}-${matchIdx}`"
+            :id="`match-${bracketIndex}-${roundIdx}-${matchIdx}`"
             :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
             @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'single')"
         >
@@ -227,7 +227,7 @@ const isRoundOngoing = (bracketPart, roundIdx) => {
         <div class="bracket-section winners">
         <h3>Upper Bracket</h3>
         <div class="bracket">
-            <svg class="connection-lines winners-lines">
+            <svg class="connection-lines">
             <g v-for="(line, i) in bracket.lines?.winners" :key="`winners-${i}`">
                 <line
                 :x1="line.x1"
@@ -247,7 +247,7 @@ const isRoundOngoing = (bracketPart, roundIdx) => {
             <div
                 v-for="(match, matchIdx) in round"
                 :key="`winners-${roundIdx}-${matchIdx}`"
-                :id="`winners-match-${roundIdx}-${matchIdx}`"
+                :id="`winners-match-${bracketIndex}-${roundIdx}-${matchIdx}`"
                 :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
                 @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'winners')"
             >
@@ -287,7 +287,7 @@ const isRoundOngoing = (bracketPart, roundIdx) => {
         <div class="bracket-section losers">
         <h3>Lower Bracket</h3>
         <div class="bracket">
-            <svg class="connection-lines losers-lines">
+            <svg class="connection-lines">
             <g v-for="(line, i) in bracket.lines?.losers" :key="`losers-${i}`">
                 <line
                 :x1="line.x1"
@@ -307,7 +307,7 @@ const isRoundOngoing = (bracketPart, roundIdx) => {
             <div
                 v-for="(match, matchIdx) in round"
                 :key="`losers-${roundIdx}-${matchIdx}`"
-                :id="`losers-match-${roundIdx}-${matchIdx}`"
+                :id="`losers-match-${bracketIndex}-${roundIdx}-${matchIdx}`"
                 :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
                 @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'losers')"
             >
@@ -349,7 +349,7 @@ const isRoundOngoing = (bracketPart, roundIdx) => {
             <h3>Finals</h3>
         </div>
         <div class="bracket">
-            <svg class="connection-lines finals-lines">
+            <svg class="connection-lines">
             <g v-for="(line, i) in bracket.lines?.finals" :key="`finals-${i}`">
                 <line
                 :x1="line.x1"
@@ -363,7 +363,7 @@ const isRoundOngoing = (bracketPart, roundIdx) => {
             </svg>
 
             <div v-for="(match, matchIdx) in bracket.matches.grand_finals" :key="`grand-finals-${matchIdx}`"
-            :id="`grand-finals-match-${matchIdx}`"
+            :id="`grand-finals-match-${bracketIndex}-${matchIdx}`"
             :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
             @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && props.openMatchDialog(bracketIndex, 0, matchIdx, match, 'grand_finals')"
             >

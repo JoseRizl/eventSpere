@@ -230,7 +230,7 @@ onMounted(async () => {
             <button v-if="user?.role === 'Admin' || user?.role === 'SportsManager'" @click="removeBracket(brackets.indexOf(bracket))" class="delete-button">Delete Bracket</button>
           </div>
 
-          <div v-if="expandedBrackets[brackets.indexOf(bracket)]" class="bracket-content-wrapper">
+          <div v-if="expandedBrackets[brackets.indexOf(bracket)]" class="bracket-content-wrapper" :id="`bracket-content-${bracket.id}`">
             <div class="view-toggle-buttons">
                 <Button
                     :label="'Bracket View'"
