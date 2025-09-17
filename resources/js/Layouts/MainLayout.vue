@@ -38,10 +38,44 @@ const backgroundStyle = computed(() => {
 const isActive = (routeName) => route().current(routeName);
 
 const {
-    notifications, unreadCount, hasUnreadNotifications,
-    displayedNotifications, showLoadMore, onNotificationClick,
-    markAllAsRead, loadMore, toggleNotifications
+    notifications,
+    unreadCount,
+    hasUnreadNotifications: userHasUnread,
+    displayedNotifications,
+    showLoadMore,
+    onNotificationClick,
+    markAllAsRead,
+    loadMore,
+    toggleNotifications: originalToggleNotifications
 } = useNotifications(op);
+
+// --- Guest Notification Logic ---
+const guestHasOpenedNotifications = ref(false);
+onMounted(() => {
+    if (!user.value) {
+        guestHasOpenedNotifications.value = sessionStorage.getItem('guestHasOpenedNotifications') === 'true';
+    }
+});
+
+const hasUnreadNotifications = computed(() => {
+    if (user.value) return userHasUnread.value;
+    // For guests, "unread" means there are notifications and they haven't opened the panel this session.
+    return notifications.value.length > 0 && !guestHasOpenedNotifications.value;
+});
+
+const isNotificationRead = (notification) => {
+    if (user.value) return notification.isRead;
+    // For guests, all notifications are considered "read" once the panel is opened.
+    return guestHasOpenedNotifications.value;
+};
+
+const toggleNotifications = (event) => {
+    originalToggleNotifications(event);
+    if (!user.value) {
+        guestHasOpenedNotifications.value = true;
+        sessionStorage.setItem('guestHasOpenedNotifications', 'true');
+    }
+};
 
 const logout = () => {
     const form = useForm({});
@@ -131,18 +165,9 @@ watch(() => page.url, () => {
 }, { immediate: true });
 
 const profileMenuItems = computed(() => (user.value ? [
-    {
-        label: 'Logout',
-        icon: 'pi pi-sign-out',
-        command: logout
-    }
-] : [
-    {
-        label: 'Login',
-        icon: 'pi pi-sign-in',
-        command: () => router.visit(route('login'))
-    }
-]));
+    { label: 'Logout', icon: 'pi pi-sign-out', command: logout }
+] : []));
+
 const toggleProfileMenu = (event) => {
     profileMenu.value.toggle(event);
 };
@@ -166,12 +191,12 @@ onMounted(() => {
         </template>
 
         <!-- Top Navbar -->
-        <nav v-if="!hideHeader" class="bg-white/95 backdrop-blur-sm shadow-sm sticky top-0 w-full px-4 h-16 flex justify-between items-center z-50 border-b border-gray-200">
+        <nav class="bg-white/95 backdrop-blur-sm shadow-sm sticky top-0 w-full px-4 h-16 flex justify-between items-center z-50 border-b border-gray-200">
             <div class="flex items-center space-x-4">
-                <button @click="toggleSidebar" class="p-2 rounded-full hover:bg-gray-200 transition-colors">
+                <button v-if="user && !hideHeader" @click="toggleSidebar" class="p-2 rounded-full hover:bg-gray-200 transition-colors">
                     <i class="pi pi-bars text-xl text-gray-600"></i>
                 </button>
-                    <Link :href="route('home')" class="flex items-center gap-3 text-surface-800 dark:text-surface-0 no-underline">
+                <Link :href="route('home')" class="flex items-center gap-3 text-surface-800 dark:text-surface-0 no-underline">
                     <Avatar image="/images/NCSlogo.png" shape="circle" class="menubar-logo" />
                     <span class="text-xl font-semibold">Event Sphere</span>
                 </Link>
@@ -186,7 +211,7 @@ onMounted(() => {
                     <div class="w-80">
                         <div class="flex justify-between items-center mb-2">
                             <h3 class="font-bold text-center flex-1">Notifications</h3>
-                            <button @click="markAllAsRead" v-if="unreadCount > 0" class="text-sm text-blue-600 hover:underline p-1">Mark all as read</button>
+                            <button @click="markAllAsRead" v-if="user && unreadCount > 0" class="text-sm text-blue-600 hover:underline p-1">Mark all as read</button>
                         </div>
                         <ul v-if="notifications.length > 0" class="max-h-96 overflow-y-auto announcement-list">
                             <li
@@ -196,7 +221,7 @@ onMounted(() => {
                             :class="[
                                 'group p-3 border-b flex justify-between items-start transition-colors duration-150',
                                 notification.link ? 'cursor-pointer' : '',
-                                !notification.isRead ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-100'
+                                !isNotificationRead(notification) ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-100'
                             ]"
                             >
                             <div class="flex-1 min-w-0">
@@ -206,7 +231,7 @@ onMounted(() => {
                                 <p class="break-words text-sm w-full">{{ notification.message }}</p>
                                 <p class="text-xs text-gray-500 mt-2">{{ notification.formattedTimestamp }}</p>
                             </div>
-                            <div class="flex-shrink-0 ml-2" v-if="!notification.isRead">
+                            <div class="flex-shrink-0 ml-2" v-if="!isNotificationRead(notification)">
                                 <div class="w-2 h-2 bg-blue-500 rounded-full mt-1"></div>
                             </div>
                             </li>
@@ -218,7 +243,7 @@ onMounted(() => {
                     </div>
                 </Popover>
 
-                <div v-if="user" class="flex items-center cursor-pointer hover:bg-gray-200 rounded-full transition-colors p-1" @click="toggleProfileMenu">
+                <div v-if="user && !hideHeader" class="flex items-center cursor-pointer hover:bg-gray-200 rounded-full transition-colors p-1" @click="toggleProfileMenu">
                     <div class="relative">
                         <img :src="user.profile_pic || 'https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png'"
                                 class="h-8 w-8 rounded-full object-cover"
@@ -232,9 +257,6 @@ onMounted(() => {
                         </div>
                     </div>
                 </div>
-                <Link v-else :href="route('login')" class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors font-semibold">
-                    Login
-                </Link>
                 <Popover ref="profileMenu">
                     <div class="w-48 p-2">
                         <button

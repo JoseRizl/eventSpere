@@ -91,7 +91,7 @@ const confirmDeleteAnnouncement = async () => {
             <template #item="slotProps">
                 <div class="relative w-full h-80 md:h-[500px] bg-gray-700 overflow-hidden">
                     <Link :href="route('event.details', { id: slotProps.data.id })">
-                        <img v-if="slotProps.data.image" :src="slotProps.data.image" :alt="slotProps.data.title" class="w-full h-full object-cover">
+                        <img v-if="slotProps.data.image" :src="slotProps.data.image" :alt="slotProps.data.title" class="w-full h-full object-cover transition-transform duration-300 group-hover/carousel:scale-105">
                         <div v-else class="w-full h-full bg-gray-300 flex items-center justify-center">
                             <img src="/resources/images/NCSlogo.png" class="w-32 h-32 object-contain opacity-50" alt="Event Placeholder" />
                         </div>
@@ -206,20 +206,20 @@ const confirmDeleteAnnouncement = async () => {
             </div>
           </div>
           <div v-if="showOngoingEvents">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               <div v-for="(event, index) in ongoingEvents" :key="'ongoing-' + index" class="group relative h-full">
                 <Link :href="route('event.details', { id: event.id })" preserve-scroll class="block h-full">
-                  <Card class="h-full flex flex-col justify-between min-h-[280px]">
+                  <Card class="h-full flex flex-col justify-between compact-event-card">
                     <template #header>
-                      <div class="h-40 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
+                      <div class="h-36 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
                         <div class="absolute inset-0 bg-gradient-to-b from-gray-900/20 to-transparent z-10"></div>
-                        <img v-if="event.image" :src="event.image" class="h-full w-full object-cover" alt="Event image"/>
+                        <img v-if="event.image" :src="event.image" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" alt="Event image"/>
                         <img v-else src="/resources/images/NCSlogo.png" class="w-24 h-24 object-contain opacity-50" alt="Event Placeholder" />
                         <Tag v-if="isNewEvent(event)" value="NEW" severity="success" class="absolute top-2 right-2 z-20"/>
                       </div>
                     </template>
                     <template #title>
-                      <h3 class="text-lg font-medium overflow-hidden line-clamp-1 cursor-help" v-tooltip.top="event.title">{{ event.title }}</h3>
+                      <h3 class="text-base font-medium overflow-hidden line-clamp-1 cursor-help" v-tooltip.top="event.title">{{ event.title }}</h3>
                     </template>
                     <template #subtitle>
                       <div class="flex items-center gap-2">
@@ -228,12 +228,12 @@ const confirmDeleteAnnouncement = async () => {
                       </div>
                     </template>
                     <template #content>
-                      <div class="flex-1 mb-2 overflow-hidden h-[calc(1.5rem)]">
-                        <p class="text-sm text-gray-600 line-clamp-1">{{ event.description }}</p>
+                      <div class="flex-1 overflow-hidden h-10 flex items-center">
+                        <p class="text-sm text-gray-600 line-clamp-2">{{ event.description }}</p>
                       </div>
                     </template>
                     <template #footer>
-                      <div class="flex justify-end mt-2 z-20">
+                      <div class="flex justify-end z-20">
                         <Button label="View Details" icon="pi pi-info-circle" class="p-button-text p-button-sm" @click.stop="$inertia.visit(route('event.details', { id: event.id }))"/>
                       </div>
                     </template>
@@ -253,20 +253,20 @@ const confirmDeleteAnnouncement = async () => {
             </div>
           </div>
           <div v-if="showEventsThisMonth">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               <div v-for="(event, index) in eventsThisMonth" :key="'month-' + index" class="group relative h-full">
                 <Link :href="route('event.details', { id: event.id })" preserve-scroll class="block h-full">
-                  <Card class="h-full flex flex-col justify-between min-h-[280px]">
+                  <Card class="h-full flex flex-col justify-between compact-event-card">
                     <template #header>
-                      <div class="h-40 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
+                      <div class="h-36 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
                         <div class="absolute inset-0 bg-gradient-to-b from-gray-900/20 to-transparent z-10"></div>
-                        <img v-if="event.image" :src="event.image" class="h-full w-full object-cover" alt="Event image"/>
+                        <img v-if="event.image" :src="event.image" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" alt="Event image"/>
                         <img v-else src="/resources/images/NCSlogo.png" class="w-24 h-24 object-contain opacity-50" alt="Event Placeholder" />
                         <Tag v-if="isNewEvent(event)" value="NEW" severity="success" class="absolute top-2 right-2 z-20"/>
                       </div>
                     </template>
                     <template #title>
-                      <h3 class="text-lg font-medium overflow-hidden line-clamp-1 cursor-help" v-tooltip.top="event.title">{{ event.title }}</h3>
+                      <h3 class="text-base font-medium overflow-hidden line-clamp-1 cursor-help" v-tooltip.top="event.title">{{ event.title }}</h3>
                     </template>
                     <template #subtitle>
                       <div class="flex items-center gap-2">
@@ -275,12 +275,12 @@ const confirmDeleteAnnouncement = async () => {
                       </div>
                     </template>
                     <template #content>
-                      <div class="flex-1 mb-2 overflow-hidden h-[calc(1.5rem)]">
-                        <p class="text-sm text-gray-600 line-clamp-1">{{ event.description }}</p>
+                      <div class="flex-1 overflow-hidden h-10 flex items-center">
+                        <p class="text-sm text-gray-600 line-clamp-2">{{ event.description }}</p>
                       </div>
                     </template>
                     <template #footer>
-                      <div class="flex justify-end mt-2 z-20">
+                      <div class="flex justify-end z-20">
                         <Button label="View Details" icon="pi pi-info-circle" class="p-button-text p-button-sm" @click.stop="$inertia.visit(route('event.details', { id: event.id }))"/>
                       </div>
                     </template>
@@ -300,20 +300,20 @@ const confirmDeleteAnnouncement = async () => {
             </div>
           </div>
           <div v-if="showUpcomingEvents">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               <div v-for="(event, index) in upcomingEvents" :key="'upcoming-' + index" class="group relative h-full">
                 <Link :href="route('event.details', { id: event.id })" preserve-scroll class="block h-full">
-                  <Card class="h-full flex flex-col justify-between min-h-[280px]">
+                  <Card class="h-full flex flex-col justify-between compact-event-card">
                     <template #header>
-                      <div class="h-40 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
+                      <div class="h-36 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
                         <div class="absolute inset-0 bg-gradient-to-b from-gray-900/20 to-transparent z-10"></div>
-                        <img v-if="event.image" :src="event.image" class="h-full w-full object-cover" alt="Event image"/>
+                        <img v-if="event.image" :src="event.image" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" alt="Event image"/>
                         <img v-else src="/resources/images/NCSlogo.png" class="w-24 h-24 object-contain opacity-50" alt="Event Placeholder" />
                         <Tag v-if="isNewEvent(event)" value="NEW" severity="success" class="absolute top-2 right-2 z-20"/>
                       </div>
                     </template>
                     <template #title>
-                      <h3 class="text-lg font-medium overflow-hidden line-clamp-1 cursor-help" v-tooltip.top="event.title">{{ event.title }}</h3>
+                      <h3 class="text-base font-medium overflow-hidden line-clamp-1 cursor-help" v-tooltip.top="event.title">{{ event.title }}</h3>
                     </template>
                     <template #subtitle>
                       <div class="flex items-center gap-2">
@@ -322,12 +322,12 @@ const confirmDeleteAnnouncement = async () => {
                       </div>
                     </template>
                     <template #content>
-                      <div class="flex-1 mb-2 overflow-hidden h-[calc(1.5rem)]">
-                        <p class="text-sm text-gray-600 line-clamp-1">{{ event.description }}</p>
+                      <div class="flex-1 overflow-hidden h-10 flex items-center">
+                        <p class="text-sm text-gray-600 line-clamp-2">{{ event.description }}</p>
                       </div>
                     </template>
                     <template #footer>
-                      <div class="flex justify-end mt-2 z-20">
+                      <div class="flex justify-end z-20">
                         <Button label="View Details" icon="pi pi-info-circle" class="p-button-text p-button-sm" @click.stop="$inertia.visit(route('event.details', { id: event.id }))"/>
                       </div>
                     </template>
@@ -435,27 +435,6 @@ const confirmDeleteAnnouncement = async () => {
   z-index: 20;
 }
 
-.h-40 {
-  position: relative;
-  background-color: #f3f4f6;
-}
-
-.h-40 img {
-  transition: transform 0.3s ease;
-}
-
-.h-40:hover img {
-  transform: scale(1.05);
-}
-
-.h-40::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
-  pointer-events: none;
-}
-
 /* Remove menu item background in collapsed mode except on hover */
 :deep(.p-tieredmenu.menu-collapsed .p-menuitem-link) {
   background: transparent !important;
@@ -466,16 +445,21 @@ const confirmDeleteAnnouncement = async () => {
   background-color: rgba(0, 0, 0, 0.04) !important;
 }
 
-/* Card styles */
-.min-h-\[280px\] {
-  min-height: 280px;
+:deep(.compact-event-card .p-card-body) {
+    padding: 0.75rem 1rem;
+    gap: 0.5rem;
+}
+:deep(.compact-event-card .p-card-subtitle) {
+    margin-bottom: 0.25rem;
+}
+:deep(.compact-event-card .p-card-content) {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+}
+:deep(.compact-event-card .p-card-footer) {
+    padding-top: 0;
 }
 
-.h-\[calc\(1\.5rem\)\] {
-  height: 1.5rem;
-}
-
-/* Custom scrollbar for announcements list */
 .max-h-96.overflow-y-auto::-webkit-scrollbar {
   width: 6px;
 }
@@ -504,7 +488,7 @@ const confirmDeleteAnnouncement = async () => {
   gap: 10px;
   align-items: center;
   width: 100%;
-  max-width: 400px;
+  max-width: 500px;
 }
 
 .search-wrapper .p-input-icon-left {
@@ -539,15 +523,14 @@ const confirmDeleteAnnouncement = async () => {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  width: 100%;
-  max-width: 400px;
+  max-width: 500px;
 }
 
 .date-range-wrapper {
   display: flex;
-  flex-direction: row;
   gap: 10px;
   align-items: flex-start;
+  width: 100%;
 }
 
 .date-input-group {
@@ -619,12 +602,31 @@ const confirmDeleteAnnouncement = async () => {
     padding: 1rem;
 }
 
-/* Ensure indicators are clickable and visible */
 :deep(.home-carousel .p-carousel-indicator button) {
     background-color: rgba(255, 255, 255, 0.4) !important;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    transition: width 0.3s ease, background-color 0.3s ease;
 }
 
 :deep(.home-carousel .p-carousel-indicator.p-highlight button) {
     background-color: rgba(255, 255, 255, 0.9) !important;
+    width: 2rem;
+    border-radius: 9999px;
+}
+
+@media (max-width: 480px) {
+  .search-wrapper {
+    flex-wrap: wrap;
+    max-width: 100%;
+  }
+  .date-filter-container {
+    max-width: 100%;
+  }
+  .date-range-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 </style>
