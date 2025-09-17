@@ -1592,15 +1592,18 @@ const getBracketIndex = (bracketId) => {
             <div class="score-controls">
             <Button
                 @click="selectedMatchData.player1Score--"
-                :disabled="selectedMatchData.player1Score <= 0"
+                :disabled="selectedMatchData.player1Score <= 0 || selectedMatchData.status === 'completed'"
                 icon="pi pi-minus"
                 class="p-button-sm"
+                v-tooltip="{ value: 'Scores cannot be changed for a completed match.', disabled: selectedMatchData.status !== 'completed' }"
             />
             <span class="score-display">{{ selectedMatchData.player1Score }}</span>
             <Button
                 @click="selectedMatchData.player1Score++"
+                :disabled="selectedMatchData.status === 'completed'"
                 icon="pi pi-plus"
                 class="p-button-sm"
+                v-tooltip="{ value: 'Scores cannot be changed for a completed match.', disabled: selectedMatchData.status !== 'completed' }"
             />
             </div>
         </div>
@@ -1623,15 +1626,18 @@ const getBracketIndex = (bracketId) => {
             <div class="score-controls">
             <Button
                 @click="selectedMatchData.player2Score--"
-                :disabled="selectedMatchData.player2Score <= 0"
+                :disabled="selectedMatchData.player2Score <= 0 || selectedMatchData.status === 'completed'"
                 icon="pi pi-minus"
                 class="p-button-sm"
+                v-tooltip="{ value: 'Scores cannot be changed for a completed match.', disabled: selectedMatchData.status !== 'completed' }"
             />
             <span class="score-display">{{ selectedMatchData.player2Score }}</span>
             <Button
                 @click="selectedMatchData.player2Score++"
+                :disabled="selectedMatchData.status === 'completed'"
                 icon="pi pi-plus"
                 class="p-button-sm"
+                v-tooltip="{ value: 'Scores cannot be changed for a completed match.', disabled: selectedMatchData.status !== 'completed' }"
             />
             </div>
         </div>
