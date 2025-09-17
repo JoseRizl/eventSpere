@@ -599,23 +599,27 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Winner/Loser/Tie States */
-.winner {
-  color: #28a745;
+/* Unified Winner, Loser, and Tie States */
+.winner,
+.winner-name {
+  color: #2ed573 !important; /* A bright, clear green */
+  font-weight: 600 !important;
 }
 
-.loser {
-  color: #dc3545;
+.loser,
+.loser-name {
+  color: gray !important;
+  font-weight: 500 !important; /* Normal weight, not bold */
 }
 
 .tie {
-  color: #fd7e14 !important;
+  color: gray !important;
   font-weight: bold;
 }
 
 /* Ensure tie takes precedence over winner/loser in Round Robin */
 .round-robin-bracket .player-box span.tie {
-  color: #fd7e14 !important;
+  color: gray !important;
 }
 
 .bye-text {
@@ -763,8 +767,8 @@
 }
 
 .view-toggle-buttons .p-button.p-button-primary:hover {
-    background: #f0f0f0;
-    border-color: #f0f0f0;
+    background: #222da4; /* A more noticeable light blue */
+    border-color: #bfdbfe;
 }
 
 .view-toggle-buttons .p-button.p-button-outlined {
@@ -773,7 +777,9 @@
 }
 
 .view-toggle-buttons .p-button.p-button-outlined:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: #0077B3; /* Primary blue for high contrast */
+    color: #fff;
+    border-color: #0077B3;
 }
 
 .match-filters {
@@ -938,13 +944,13 @@
 
 
 .loser-name {
-  color: #ff4757 !important;
+  color: gray !important;
   font-weight: 600;
 }
 
 /* Ensure loser name stays red even after refresh */
 .player-box span.loser-name {
-  color: #ff4757 !important;
+  color: gray !important;
 }
 
   .winner-name {
@@ -964,7 +970,7 @@
   }
 
   .loser {
-    color: #ff4757;
+    color: gray;
     font-weight: 500;
   }
 
