@@ -40,7 +40,13 @@
       </div>
     </div>
 
-    <DataTable v-else :value="filteredEvents" class="p-datatable-striped">
+    <DataTable
+      v-else
+      :value="filteredEvents"
+      class="p-datatable-striped"
+      paginator :rows="10" :rowsPerPageOptions="[10, 20, 50]"
+      paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} archived events">
       <Column field="title" header="Event Name" style="width:20%;" sortable>
         <template #body="{ data }">
           <div class="flex items-center gap-2">

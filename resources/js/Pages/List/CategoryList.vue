@@ -41,6 +41,8 @@ export default defineComponent({
     const showCreateConfirm = ref(false);
     const showEditConfirm = ref(false);
 
+    const currentPageReportTemplate = computed(() => `Showing {first} to {last} of {totalRecords} ${showTags.value ? 'tags' : 'categories'}`);
+
     const normalizedEvents = computed(() => {
       return events.value.map(event => ({
         ...event,
@@ -282,6 +284,7 @@ export default defineComponent({
       showCreateConfirm,
       showEditConfirm,
       confirmDelete,
+      currentPageReportTemplate,
     };
   },
 });
@@ -333,7 +336,13 @@ export default defineComponent({
       </div>
     </div>
 
-    <DataTable v-else :value="filteredItems" class="p-datatable-striped">
+    <DataTable
+      v-else
+      :value="filteredItems"
+      class="p-datatable-striped"
+      paginator :rows="10" :rowsPerPageOptions="[10, 20, 50]"
+      paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+      :currentPageReportTemplate="currentPageReportTemplate">
       <Column :field="showTags ? 'name' : 'title'" :header="showTags ? 'Tag Name' : 'Category Name'" style="width:30%;" sortable>
         <template #body="{ data }">
           <div v-if="showTags" class="flex items-center gap-2">

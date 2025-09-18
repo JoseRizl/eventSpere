@@ -83,7 +83,13 @@
         <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Tasks" style="width:15%;" body-class="text-center"><template #body><div class="flex justify-center gap-2"><Skeleton shape="circle" size="2rem" /></div></template></Column>
       </DataTable>
 
-      <DataTable v-else :value="filteredEvents" class="p-datatable-striped">
+      <DataTable
+        v-else
+        :value="filteredEvents"
+        class="p-datatable-striped"
+        paginator :rows="10" :rowsPerPageOptions="[10, 20, 50]"
+        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} events">
         <Column field="title" header="Event Name" style="width:20%;" sortable>
           <template #body="{ data }">
             <div class="flex items-center gap-2">
