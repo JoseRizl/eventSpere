@@ -1079,8 +1079,8 @@
               {
                 "id": "cc5pcm12s",
                 "name": "Player 6",
-                "score": 0,
-                "completed": false,
+                "score": 1,
+                "completed": true,
                 "created_at": "2025-09-12T07:12:56.951Z",
                 "updated_at": "2025-09-12T07:12:56.951Z"
               },
@@ -1088,19 +1088,20 @@
                 "id": "e25vp3e2l",
                 "name": "Player 5",
                 "score": 0,
-                "completed": false,
+                "completed": true,
                 "created_at": "2025-09-12T07:12:56.951Z",
                 "updated_at": "2025-09-12T07:12:56.951Z"
               }
             ],
-            "winner_id": null,
-            "loser_id": null,
-            "status": "pending",
+            "winner_id": "cc5pcm12s",
+            "loser_id": "e25vp3e2l",
+            "status": "completed",
             "created_at": "2025-09-12T07:12:56.953Z",
-            "updated_at": "2025-09-12T07:12:56.953Z",
-            "date": "Aug-30-2025",
+            "updated_at": "2025-09-18T02:37:45.340Z",
+            "date": "2025-08-30",
             "time": "00:00",
-            "venue": "Gym"
+            "venue": "Gym",
+            "is_tie": false
           },
           {
             "id": "vjxgnx09l",
