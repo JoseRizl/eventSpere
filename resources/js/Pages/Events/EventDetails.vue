@@ -242,7 +242,8 @@ const eventDetails = ref({
       date: props.event.startDate,
       schedules: props.event.schedules || []
     }],
-    tags: (props.event.tags || []).map(tag => (typeof tag === 'object' && tag !== null) ? tag.id : tag),
+    // event.tags is now an array of tag objects from backend, convert to IDs for editing
+    tags: (props.event.tags || []).map(tag => tag.id),
     tasks: props.event.tasks?.map(task => {
       // Handle committee
       let committee = null;
@@ -655,7 +656,7 @@ const saveChanges = () => {
     endDate: eventDetails.value.endDate,
     startTime: eventDetails.value.startTime,
     endTime: eventDetails.value.endTime,
-    tags: eventDetails.value.tags || [],
+    tags: eventDetails.value.tags || [], // Only IDs
     scheduleLists: eventDetails.value.scheduleLists.map(list => ({
       day: list.day,
       date: list.date,

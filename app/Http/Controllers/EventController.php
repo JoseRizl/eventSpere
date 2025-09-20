@@ -21,25 +21,20 @@ class EventController extends Controller
 {
     $data = $this->jsonData;
     $tagsCollection = collect($data['tags'] ?? []);
+    $eventTags = collect($data['event_tags'] ?? []);
 
     $events = collect($data['events'] ?? [])
         ->where('archived', '!=', true)
         ->sortByDesc(function ($event) {
             return strtotime($event['startDate'] ?? '1970-01-01');
         })
-        ->map(function ($event) use ($tagsCollection) {
-            // Normalize tags for each event to ensure they are always full objects.
-            // This resolves inconsistencies where tags might be stored as IDs or partial objects.
-            $event['tags'] = collect($event['tags'] ?? [])->map(function ($tag) use ($tagsCollection) {
-                $tagId = is_array($tag) ? ($tag['id'] ?? null) : $tag;
-                if (!$tagId) return null;
-
-                return $tagsCollection->firstWhere('id', $tagId) ?? ['id' => $tagId, 'name' => 'Unknown Tag', 'color' => '#cccccc'];
-            })->filter()->values()->toArray();
-
+        ->map(function ($event) use ($tagsCollection, $eventTags) {
+            // Get tag IDs for this event from event_tags pseudo-table
+            $tagIds = $eventTags->where('event_id', $event['id'])->pluck('tag_id')->toArray();
+            // Resolve tag objects
+            $event['tags'] = collect($tagIds)->map(fn($tagId) => $tagsCollection->firstWhere('id', $tagId))->filter()->values()->toArray();
             return $event;
-        })->values()
-        ->toArray();
+        })->values()->toArray();
 
     if (request()->wantsJson()) {
         return response()->json([
@@ -65,18 +60,15 @@ class EventController extends Controller
         $json = File::get(base_path('db.json'));
         $data = json_decode($json, true);
 
+        $tagsCollection = collect($data['tags'] ?? []);
+        $eventTags = collect($data['event_tags'] ?? []);
+
         $event = collect($data['events'])->firstWhere('id', $id);
         $event['venue'] = $event['venue'] ?? null;
 
-        // Normalize tags to ensure they are all objects
-        $event['tags'] = collect($event['tags'] ?? [])->map(function($tag) use ($data) {
-            if (is_array($tag) && isset($tag['id'])) {
-                return $tag;
-            }
-            // If it's just an ID, find the corresponding tag object
-            $tagObj = collect($data['tags'])->firstWhere('id', $tag);
-            return $tagObj ?? ['id' => $tag, 'name' => 'Unknown Tag', 'color' => '#cccccc'];
-        })->values()->toArray();
+        // Get tag IDs for this event from event_tags pseudo-table
+        $tagIds = $eventTags->where('event_id', $event['id'])->pluck('tag_id')->toArray();
+        $event['tags'] = collect($tagIds)->map(fn($tagId) => $tagsCollection->firstWhere('id', $tagId))->filter()->values()->toArray();
 
         // Get current event's tag IDs
         $currentTagIds = collect($event['tags'])->pluck('id')->toArray();
@@ -85,13 +77,16 @@ class EventController extends Controller
         $relatedEvents = collect($data['events'])
             ->where('id', '!=', $id)
             ->where('archived', false)
-            ->filter(function ($relatedEvent) use ($currentTagIds) {
-                $relatedTagIds = collect($relatedEvent['tags'])->map(function($tag) {
-                    return is_array($tag) ? $tag['id'] : $tag;
-                })->toArray();
+            ->filter(function ($relatedEvent) use ($currentTagIds, $eventTags) {
+                $relatedTagIds = $eventTags->where('event_id', $relatedEvent['id'])->pluck('tag_id')->toArray();
                 return count(array_intersect($currentTagIds, $relatedTagIds)) > 0;
             })
             ->take(5)
+            ->map(function ($relatedEvent) use ($tagsCollection, $eventTags) {
+                $relatedTagIds = $eventTags->where('event_id', $relatedEvent['id'])->pluck('tag_id')->toArray();
+                $relatedEvent['tags'] = collect($relatedTagIds)->map(fn($tagId) => $tagsCollection->firstWhere('id', $tagId))->filter()->values()->toArray();
+                return $relatedEvent;
+            })
             ->values()
             ->toArray();
 
@@ -236,10 +231,22 @@ class EventController extends Controller
         $newEvent['scheduleLists'] = [];
         $newEvent['type'] = 'event';
 
-        // The 'tags' key from $validated already contains an array of IDs.
-        // We ensure it's at least an empty array if not present.
-        $newEvent['tags'] = $validated['tags'] ?? [];
+        // Remove tags from event object
+        unset($newEvent['tags']);
         array_unshift($data['events'], $newEvent);
+
+        // Update event_tags pseudo-table
+        $data['event_tags'] = collect($data['event_tags'] ?? [])
+            ->filter(fn($et) => $et['event_id'] !== $newEvent['id'])
+            ->values()
+            ->toArray();
+
+        foreach ($validated['tags'] ?? [] as $tagId) {
+            $data['event_tags'][] = [
+                'event_id' => $newEvent['id'],
+                'tag_id' => $tagId
+            ];
+        }
 
         File::put(base_path('db.json'), json_encode($data, JSON_PRETTY_PRINT));
 
@@ -342,6 +349,7 @@ class EventController extends Controller
         foreach ($this->jsonData['events'] as &$event) {
             if ($event['id'] == $id) {
                 $event = array_merge($event, $validated);
+                unset($event['tags']); // Remove tags from event object
 
                 // Normalize tasks to ensure consistent structure after merging
                 if (isset($validated['tasks'])) {
@@ -355,6 +363,19 @@ class EventController extends Controller
                 }
                 break;
             }
+        }
+
+        // Update event_tags pseudo-table
+        $this->jsonData['event_tags'] = collect($this->jsonData['event_tags'] ?? [])
+            ->filter(fn($et) => $et['event_id'] !== $id)
+            ->values()
+            ->toArray();
+
+        foreach ($validated['tags'] ?? [] as $tagId) {
+            $this->jsonData['event_tags'][] = [
+                'event_id' => $id,
+                'tag_id' => $tagId
+            ];
         }
 
         try {
@@ -398,14 +419,18 @@ class EventController extends Controller
 
         foreach ($data['events'] as &$event) {
             if ($event['id'] == $id) {
+                // Check if the event currently has tags in the event_tags table
+                $hasExistingTags = collect($this->jsonData['event_tags'] ?? [])->where('event_id', $id)->isNotEmpty();
+
                 // Safety feature: do not overwrite existing tags with an empty array from the list view.
                 // This prevents accidental removal of all tags.
-                if (isset($validated['tags']) && empty($validated['tags']) && !empty($event['tags'])) {
+                if (isset($validated['tags']) && empty($validated['tags']) && $hasExistingTags) {
                     unset($validated['tags']);
                 }
 
                 // Explicitly merge validated data to be more intentional about what is being updated.
                 $event = array_merge($event, $validated);
+                unset($event['tags']); // Remove tags from event object
 
                 // Normalize tasks to ensure consistent structure, which was missing.
                 if (isset($validated['tasks'])) {
@@ -427,6 +452,23 @@ class EventController extends Controller
                 return response()->json(['success' => false, 'error' => 'Event not found.'], 404);
             }
             return back()->with('error', 'Event not found.');
+        }
+
+        // Only update tags if the 'tags' key was passed in the validated data.
+        // The safety feature inside the loop would have unset 'tags' if it was an unsafe empty update.
+        if (array_key_exists('tags', $validated)) {
+            // Update event_tags pseudo-table
+            $data['event_tags'] = collect($data['event_tags'] ?? [])
+                ->filter(fn($et) => $et['event_id'] !== $id)
+                ->values()
+                ->toArray();
+
+            foreach (($validated['tags'] ?? []) as $tagId) {
+                $data['event_tags'][] = [
+                    'event_id' => $id,
+                    'tag_id' => $tagId
+                ];
+            }
         }
 
         File::put(base_path('db.json'), json_encode($data, JSON_PRETTY_PRINT));
