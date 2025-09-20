@@ -115,7 +115,6 @@ const {
   brackets,
   expandedBrackets,
   showWinnerDialog,
-  winnerMessage,
   showMatchEditorDialog,
   selectedMatch,
   selectedMatchData,
@@ -243,14 +242,7 @@ const eventDetails = ref({
       date: props.event.startDate,
       schedules: props.event.schedules || []
     }],
-    tags: props.event.tags?.map(tag => {
-      // Handle both cases: when tag is an object or just an ID
-      if (typeof tag === 'object' && tag !== null) {
-        return tag;
-      }
-      // If it's just an ID, find the corresponding tag object
-      return tagsMap.value[tag] || { id: tag, name: 'Unknown Tag', color: '#cccccc' };
-    }) || [],
+    tags: (props.event.tags || []).map(tag => (typeof tag === 'object' && tag !== null) ? tag.id : tag),
     tasks: props.event.tasks?.map(task => {
       // Handle committee
       let committee = null;
@@ -327,23 +319,8 @@ const categoryMap = computed(() => {
 });
 
 const removeTag = (tagToRemove) => {
-  normalizedTags.value = normalizedTags.value.filter(tag => tag.id !== tagToRemove.id);
+  eventDetails.value.tags = eventDetails.value.tags.filter(tagId => tagId !== tagToRemove.id);
 };
-
-const normalizedTags = computed({
-  get() {
-    return eventDetails.value.tags;
-  },
-  set(newTags) {
-    eventDetails.value.tags = newTags.map(tag => {
-      if (typeof tag === 'object' && tag !== null) {
-        return tag;
-      }
-      // If it's just an ID, find the corresponding tag object
-      return tagsMap.value[tag] || { id: tag, name: 'Unknown Tag', color: '#cccccc' };
-    });
-  }
-});
 
 const formattedDescription = computed(() => {
   const text = eventDetails.value.description;
@@ -678,7 +655,7 @@ const saveChanges = () => {
     endDate: eventDetails.value.endDate,
     startTime: eventDetails.value.startTime,
     endTime: eventDetails.value.endTime,
-    tags: eventDetails.value.tags.map(tag => tag.id),
+    tags: eventDetails.value.tags || [],
     scheduleLists: eventDetails.value.scheduleLists.map(list => ({
       day: list.day,
       date: list.date,
@@ -925,11 +902,14 @@ const getBracketIndex = (bracketId) => {
                             <!-- Edit Mode: Tags -->
                             <div>
                                 <label class="text-sm font-medium mb-1">Tags</label>
-                                <MultiSelect v-model="normalizedTags" :options="filteredTags" optionLabel="name" display="chip" placeholder="Select tags" class="w-full">
+                                <MultiSelect v-model="eventDetails.tags" :options="filteredTags" optionValue="id" optionLabel="name" display="chip" placeholder="Select tags" class="w-full">
                                     <template #chip="slotProps">
-                                        <div class="flex items-center gap-2 px-2 py-1 rounded text-white text-xs" :style="{ backgroundColor: slotProps.value.color }">
-                                            {{ slotProps.value.name }}
-                                            <button type="button" class="text-white hover:text-gray-200" @click.stop="removeTag(slotProps.value)" v-tooltip.top="'Remove Tag'">✕</button>
+                                        <div v-if="tagsMap[slotProps.value]" class="flex items-center gap-2 px-2 py-1 rounded text-white text-xs" :style="{ backgroundColor: tagsMap[slotProps.value].color }">
+                                            {{ tagsMap[slotProps.value].name }}
+                                            <button type="button" class="text-white hover:text-gray-200" @click.stop="removeTag(tagsMap[slotProps.value])" v-tooltip.top="'Remove Tag'">✕</button>
+                                        </div>
+                                        <div v-else class="flex items-center gap-2 px-2 py-1 rounded bg-gray-500 text-white text-xs">
+                                            {{ slotProps.value }}
                                         </div>
                                     </template>
                                 </MultiSelect>
@@ -984,8 +964,8 @@ const getBracketIndex = (bracketId) => {
                                     <div>
                                         <strong class="block text-gray-800 font-semibold">Tags</strong>
                                         <div class="flex gap-2 flex-wrap mt-1">
-                                            <span v-for="tag in eventDetails.tags" :key="tag.id" :style="{ backgroundColor: tag.color, color: '#fff' }" class="text-xs font-semibold py-1 px-2 rounded">
-                                                {{ tag.name }}
+                                            <span v-for="tagId in eventDetails.tags" :key="tagId" :style="{ backgroundColor: tagsMap[tagId]?.color || '#cccccc', color: '#fff' }" class="text-xs font-semibold py-1 px-2 rounded">
+                                                {{ tagsMap[tagId]?.name || 'Unknown' }}
                                             </span>
                                         </div>
                                     </div>
@@ -1517,10 +1497,6 @@ const getBracketIndex = (bracketId) => {
     />
 
     <!-- Dialogs from Bracket.vue -->
-    <!-- Winner Dialog -->
-    <Dialog v-model:visible="showWinnerDialog" header="Winner!" modal dismissableMask>
-        <p>{{ winnerMessage }}</p>
-    </Dialog>
 
     <!-- Match Update Confirmation Dialog -->
     <ConfirmationDialog

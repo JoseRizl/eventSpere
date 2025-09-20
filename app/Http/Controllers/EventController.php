@@ -20,12 +20,25 @@ class EventController extends Controller
     public function index()
 {
     $data = $this->jsonData;
+    $tagsCollection = collect($data['tags'] ?? []);
+
     $events = collect($data['events'] ?? [])
         ->where('archived', '!=', true)
         ->sortByDesc(function ($event) {
             return strtotime($event['startDate'] ?? '1970-01-01');
         })
-        ->values()
+        ->map(function ($event) use ($tagsCollection) {
+            // Normalize tags for each event to ensure they are always full objects.
+            // This resolves inconsistencies where tags might be stored as IDs or partial objects.
+            $event['tags'] = collect($event['tags'] ?? [])->map(function ($tag) use ($tagsCollection) {
+                $tagId = is_array($tag) ? ($tag['id'] ?? null) : $tag;
+                if (!$tagId) return null;
+
+                return $tagsCollection->firstWhere('id', $tagId) ?? ['id' => $tagId, 'name' => 'Unknown Tag', 'color' => '#cccccc'];
+            })->filter()->values()->toArray();
+
+            return $event;
+        })->values()
         ->toArray();
 
     if (request()->wantsJson()) {
@@ -223,11 +236,9 @@ class EventController extends Controller
         $newEvent['scheduleLists'] = [];
         $newEvent['type'] = 'event';
 
-        // Normalize tags to be objects if they are just IDs
-        $newEvent['tags'] = collect($validated['tags'] ?? [])->map(function($tagId) use ($data) {
-            return collect($data['tags'])->firstWhere('id', $tagId);
-        })->filter()->values()->toArray();
-
+        // The 'tags' key from $validated already contains an array of IDs.
+        // We ensure it's at least an empty array if not present.
+        $newEvent['tags'] = $validated['tags'] ?? [];
         array_unshift($data['events'], $newEvent);
 
         File::put(base_path('db.json'), json_encode($data, JSON_PRETTY_PRINT));
@@ -330,32 +341,18 @@ class EventController extends Controller
         // Update the event
         foreach ($this->jsonData['events'] as &$event) {
             if ($event['id'] == $id) {
-                // Normalize tasks to ensure consistent structure
-                $normalizedTasks = collect($validated['tasks'] ?? [])->map(function($task) {
-                    return [
-                        'committee' => isset($task['committee']['id']) ? ['id' => $task['committee']['id']] : null,
-                        'employees' => collect($task['employees'])->map(function($emp) {
-                            return ['id' => $emp['id']];
-                        })->toArray(),
-                        'task' => $task['task'] ?? ''
-                    ];
-                })->toArray();
+                $event = array_merge($event, $validated);
 
-                $event = [
-                    ...$event,
-                    'title' => $validated['title'],
-                    'description' => $validated['description'],
-                    'image' => $validated['image'] ?? $event['image'],
-                    'category_id' => $validated['category_id'] ?? ($event['category_id'] ?? null),
-                    'venue' => $validated['venue'],
-                    'startDate' => $validated['startDate'],
-                    'endDate' => $validated['endDate'],
-                    'startTime' => $validated['startTime'],
-                    'endTime' => $validated['endTime'],
-                    'tags' => $validated['tags'] ?? [],
-                    'scheduleLists' => $validated['scheduleLists'] ?? [],
-                    'tasks' => $normalizedTasks
-                ];
+                // Normalize tasks to ensure consistent structure after merging
+                if (isset($validated['tasks'])) {
+                    $event['tasks'] = collect($validated['tasks'])->map(function($task) {
+                        return [
+                            'committee' => isset($task['committee']['id']) ? ['id' => $task['committee']['id']] : null,
+                            'employees' => collect($task['employees'])->map(fn($emp) => ['id' => $emp['id']])->toArray(),
+                            'task' => $task['task'] ?? ''
+                        ];
+                    })->toArray();
+                }
                 break;
             }
         }
@@ -401,15 +398,14 @@ class EventController extends Controller
 
         foreach ($data['events'] as &$event) {
             if ($event['id'] == $id) {
+                // Safety feature: do not overwrite existing tags with an empty array from the list view.
+                // This prevents accidental removal of all tags.
+                if (isset($validated['tags']) && empty($validated['tags']) && !empty($event['tags'])) {
+                    unset($validated['tags']);
+                }
+
                 // Explicitly merge validated data to be more intentional about what is being updated.
                 $event = array_merge($event, $validated);
-
-                // Normalize tags to be objects
-                if (isset($validated['tags'])) {
-                    $event['tags'] = collect($validated['tags'])->map(function($tagId) use ($data) {
-                        return collect($data['tags'])->firstWhere('id', $tagId);
-                    })->filter()->values()->toArray();
-                }
 
                 // Normalize tasks to ensure consistent structure, which was missing.
                 if (isset($validated['tasks'])) {

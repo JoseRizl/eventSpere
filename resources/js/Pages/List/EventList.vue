@@ -290,13 +290,13 @@
                   id="tags"
                   v-model="newEvent.tags"
                   :options="filteredNewEventTags"
-                  dataKey="id"
+                  optionValue="id"
                   optionLabel="name"
                   placeholder="Select tags"
                   display="chip"
                   class="w-full"
                 />
-                <Button icon="pi pi-plus" class="p-button-secondary p-button-rounded" @click="openTagModal" v-tooltip.top="'Create New Tag'" />
+                <Button icon="pi pi-plus" class="p-button-secondary p-button-rounded" @click="openTagModal('create')" v-tooltip.top="'Create New Tag'" />
             </div>
           </div>
           <!-- Create Event Modal -->
@@ -455,36 +455,43 @@
           <!-- Tags Selection (Conditional) -->
           <div class="p-field" v-if="selectedEvent.category_id">
             <label for="edit-tags">Tags</label>
-            <MultiSelect
-              id="edit-tags"
-              v-model="selectedEvent.tags"
-              :options="filteredSelectedEventTags"
-              dataKey="id"
-              optionLabel="name"
-              placeholder="Select tags"
-              display="chip"
-            >
-              <!-- Option Template -->
-              <template #option="slotProps">
-                <div class="flex items-center gap-2">
-                  <div
-                    class="w-3 h-3 rounded-full"
-                    :style="{ backgroundColor: slotProps.option.color || '#800080' }"
-                  ></div>
-                  <span>{{ slotProps.option.name }}</span>
-                </div>
-              </template>
-              <!-- Selected Chip Template -->
-              <template #chip="slotProps">
-                <div
-                  class="flex items-center gap-2 px-2 py-1 rounded text-white text-xs"
-                  :style="{ backgroundColor: slotProps.value.color || '#800080' }"
+            <div class="flex items-center gap-2">
+                <MultiSelect
+                id="edit-tags"
+                v-model="selectedEvent.tags"
+                :options="filteredSelectedEventTags"
+                optionValue="id"
+                optionLabel="name"
+                placeholder="Select tags"
+                display="chip"
+                class="w-full"
                 >
-                  {{ slotProps.value.name }}
-                  <button type="button" class="text-white hover:text-gray-200" @click.stop="removeTag(slotProps.value)" v-tooltip.top="'Remove Tag'">✕</button>
-                </div>
-              </template>
-            </MultiSelect>
+                <!-- Option Template -->
+                <template #option="slotProps">
+                    <div class="flex items-center gap-2">
+                    <div
+                        class="w-3 h-3 rounded-full"
+                        :style="{ backgroundColor: slotProps.option.color || '#800080' }"
+                    ></div>
+                    <span>{{ slotProps.option.name }}</span>
+                    </div>
+                </template>
+                <!-- Selected Chip Template -->
+                <template #chip="slotProps">
+                    <div v-if="tagsMap[slotProps.value]"
+                        class="flex items-center gap-2 px-2 py-1 rounded text-white text-xs"
+                        :style="{ backgroundColor: tagsMap[slotProps.value].color || '#800080' }"
+                    >
+                        {{ tagsMap[slotProps.value].name }}
+                        <button type="button" class="text-white hover:text-gray-200" @click.stop="removeTag(tagsMap[slotProps.value])" v-tooltip.top="'Remove Tag'">✕</button>
+                    </div>
+                    <div v-else class="flex items-center gap-2 px-2 py-1 rounded bg-gray-500 text-white text-xs">
+                    {{ slotProps.value }}
+                    </div>
+                </template>
+                </MultiSelect>
+                <Button icon="pi pi-plus" class="p-button-secondary p-button-rounded" @click="openTagModal('edit')" v-tooltip.top="'Create New Tag'" />
+            </div>
           </div>
 
           <!-- Edit Event Modal -->
@@ -801,12 +808,10 @@
         });
       };
 
-     const openTagModal = () => {
-        newTag.value = {
-            name: '',
-            color: '#ff0000',
-            category_id: newEvent.value.category_id,
-        };
+     const openTagModal = (context = 'create') => {
+        tagCreationContext.value = context;
+        const categoryId = context === 'edit' ? selectedEvent.value.category_id : newEvent.value.category_id;
+        newTag.value = { name: '', color: '#ff0000', category_id: categoryId };
         isCreateTagModalVisible.value = true;
      };
 
@@ -829,7 +834,11 @@
          if (response.data.success) {
            const createdTag = response.data.tag;
            tags.value.push(createdTag);
-           newEvent.value.tags.push(createdTag);
+           if (tagCreationContext.value === 'edit') {
+               selectedEvent.value.tags.push(createdTag.id);
+           } else {
+               newEvent.value.tags.push(createdTag.id);
+           }
            isCreateTagModalVisible.value = false;
            successMessage.value = 'Tag created successfully!';
            showSuccessDialog.value = true;
@@ -896,7 +905,7 @@
           const payload = {
             ...newEvent.value,
             image: finalImage || defaultImage,
-            tags: Array.isArray(newEvent.value.tags) ? newEvent.value.tags.map(tag => tag.id) : [],
+            tags: newEvent.value.tags || [],
             startDate: newEvent.value.startDate
                 ? format(new Date(newEvent.value.startDate), "MMM-dd-yyyy")
                 : null,
@@ -1072,17 +1081,7 @@
         });
 
     const getEventTags = (eventTags) => {
-    if (!eventTags || !eventTags.length) return [];
-
-    // If tags are already objects, return them directly
-    if (typeof eventTags[0] === 'object') {
-        return eventTags;
-    }
-
-    // If tags are IDs, map them to their full objects
-    return eventTags
-        .map(tagId => normalizedTags.value[tagId])
-        .filter(tag => tag); // Filter out any undefined tags
+        return Array.isArray(eventTags) ? eventTags : [];
     };
 
     onMounted(async () => {
@@ -1288,19 +1287,12 @@
             return;
         }
 
-        // Robustly normalize tags to full objects, handling IDs, partial objects, or full objects.
-        const normalizedTags = (event.tags || []).map(tag => {
-            if (typeof tag === 'object' && tag !== null) {
-                const found = tags.value.find(t => t.id === tag.id);
-                return found || tag;
-            }
-            return tags.value.find(t => t.id === tag) || null;
-        }).filter(Boolean);
-
         selectedEvent.value = {
             ...event,
             venue: event.venue || "",
-            tags: normalizedTags,
+            tags: (event.tags || []).map(tag =>
+                typeof tag === 'object' && tag !== null ? tag.id : tag
+            ),
             startDate: event.startDate ? new Date(event.startDate) : null,
             endDate: event.endDate ? new Date(event.endDate) : null,
             image: event.image || defaultImage
@@ -1357,13 +1349,10 @@
         } else if (!selectedEvent.value.image) {
           finalImage = defaultImage;
         }
-        const normalizedTags = Array.isArray(selectedEvent.value.tags)
-          ? selectedEvent.value.tags.map(tag => tag?.id || tag)
-          : [];
         const payload = {
           ...selectedEvent.value,
           image: finalImage,
-          tags: normalizedTags,
+          tags: selectedEvent.value.tags || [],
           startDate: selectedEvent.value.startDate
             ? format(new Date(selectedEvent.value.startDate), "MMM-dd-yyyy")
             : null,
@@ -1429,7 +1418,7 @@
     };
 
     const removeTag = (tagToRemove) => {
-      selectedEvent.value.tags = selectedEvent.value.tags.filter(tag => tag.id !== tagToRemove.id);
+      selectedEvent.value.tags = selectedEvent.value.tags.filter(tagId => tagId !== tagToRemove.id);
     };
 
     const handleDescriptionClick = (event) => {
@@ -1527,6 +1516,7 @@
     const showSaveConfirm = ref(false);
     const eventToProcess = ref(null);
     const taskToDelete = ref(null);
+      const tagCreationContext = ref('create');
       const showCreateConfirm = ref(false);
 
     // Add watch for isAllDay changes
@@ -1608,6 +1598,7 @@
     showSaveConfirm,
     eventToProcess,
     taskToDelete,
+    tagCreationContext,
     confirmArchive,
     initialLoading,
     confirmDeleteTask,
