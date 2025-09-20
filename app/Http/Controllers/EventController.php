@@ -186,8 +186,31 @@ class EventController extends Controller
             }],
             'startTime' => 'required|date_format:H:i',
             'endTime' => 'required|date_format:H:i',
-            'tags' => 'nullable|array',
-            'tags.*' => ['sometimes', Rule::in($validTagIds)],
+            'tags' => ['nullable', 'array', function ($attribute, $value, $fail) use ($request, $validTagIds) {
+                if (empty($value)) {
+                    return;
+                }
+                $categoryId = $request->input('category_id');
+                if (!$categoryId) {
+                    $fail('A category must be selected to assign tags.');
+                    return;
+                }
+
+                $tagsForCategory = collect($this->jsonData['tags'])->where('category_id', $categoryId)->pluck('id')->all();
+
+                foreach ($value as $tagId) {
+                    if (!in_array($tagId, $validTagIds)) {
+                        $fail("The selected tag with id {$tagId} is invalid.");
+                        return;
+                    }
+                    if (!in_array($tagId, $tagsForCategory)) {
+                        $tag = collect($this->jsonData['tags'])->firstWhere('id', $tagId);
+                        $tagName = $tag['name'] ?? $tagId;
+                        $fail("The tag \"{$tagName}\" is not valid for the chosen category.");
+                        return;
+                    }
+                }
+            }],
             'isAllDay' => 'boolean',
             'archived' => 'boolean',
         ]);
@@ -262,8 +285,31 @@ class EventController extends Controller
                     $fail('The end time must be after the start time');
                 }
             }],
-            'tags' => 'nullable|array',
-            'tags.*' => ['required', Rule::in($validTagIds)],
+            'tags' => ['nullable', 'array', function ($attribute, $value, $fail) use ($request, $validTagIds) {
+                if (empty($value)) {
+                    return;
+                }
+                $categoryId = $request->input('category_id');
+                if (!$categoryId) {
+                    $fail('A category must be selected to assign tags.');
+                    return;
+                }
+
+                $tagsForCategory = collect($this->jsonData['tags'])->where('category_id', $categoryId)->pluck('id')->all();
+
+                foreach ($value as $tagId) {
+                    if (!in_array($tagId, $validTagIds)) {
+                        $fail("The selected tag with id {$tagId} is invalid.");
+                        return;
+                    }
+                    if (!in_array($tagId, $tagsForCategory)) {
+                        $tag = collect($this->jsonData['tags'])->firstWhere('id', $tagId);
+                        $tagName = $tag['name'] ?? $tagId;
+                        $fail("The tag \"{$tagName}\" is not valid for the chosen category.");
+                        return;
+                    }
+                }
+            }],
             'scheduleLists' => 'nullable|array',
             'scheduleLists.*.day' => 'required|integer|min:1',
             'scheduleLists.*.date' => ['required', 'string', function ($attribute, $value, $fail) {

@@ -31,10 +31,13 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $isTag = $request->has('name');
+        $validCategoryIds = array_column($this->jsonData['category'] ?? [], 'id');
+
         $data = $request->validate([
             $isTag ? 'name' : 'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'color' => $isTag ? 'required|string|regex:/^#[a-fA-F0-9]{6}$/' : 'nullable'
+            'color' => $isTag ? 'required|string|regex:/^#[a-fA-F0-9]{6}$/' : 'nullable',
+            'category_id' => $isTag ? ['nullable', \Illuminate\Validation\Rule::in($validCategoryIds)] : 'nullable'
         ]);
 
         $collection = $isTag ? 'tags' : 'category';
@@ -56,10 +59,13 @@ class CategoryController extends Controller
     public function update(Request $request, $id)
     {
         $isTag = $request->has('name');
+        $validCategoryIds = array_column($this->jsonData['category'] ?? [], 'id');
+
         $data = $request->validate([
             $isTag ? 'name' : 'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'color' => $isTag ? 'required|string|regex:/^#[a-fA-F0-9]{6}$/' : 'nullable'
+            'color' => $isTag ? 'required|string|regex:/^#[a-fA-F0-9]{6}$/' : 'nullable',
+            'category_id' => $isTag ? ['nullable', \Illuminate\Validation\Rule::in($validCategoryIds)] : 'nullable'
         ]);
 
         $collection = $isTag ? 'tags' : 'category';
@@ -121,9 +127,11 @@ class CategoryController extends Controller
                     });
                 });
             } else {
-                $isInUse = collect($this->jsonData['events'] ?? [])->contains(function ($event) use ($id) {
+                $eventUsingCategory = collect($this->jsonData['events'] ?? [])->contains(function ($event) use ($id) {
                     return $event['category_id'] === $id && !($event['archived'] ?? false);
                 });
+                $tagUsingCategory = collect($this->jsonData['tags'] ?? [])->contains('category_id', (string) $id);
+                $isInUse = $eventUsingCategory || $tagUsingCategory;
             }
 
             if ($isInUse) {

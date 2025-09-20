@@ -234,17 +234,6 @@ const tagsMap = computed(() => {
   }, {});
 });
 
-const categoryMap = computed(() => {
-  return categories.value.reduce((map, category) => {
-    map[category.id] = category.title;
-    return map;
-  }, {});
-});
-
-const removeTag = (tagToRemove) => {
-  normalizedTags.value = normalizedTags.value.filter(tag => tag.id !== tagToRemove.id);
-};
-
 const eventDetails = ref({
     ...props.event,
     venue: props.event.venue || '',
@@ -315,6 +304,31 @@ const eventDetails = ref({
       };
     }) || []
 });
+
+const filteredTags = computed(() => {
+  if (!eventDetails.value.category_id) {
+    return [];
+  }
+  return tags.value.filter(tag => tag.category_id == eventDetails.value.category_id);
+});
+
+watch(() => eventDetails.value.category_id, (newCategoryId, oldCategoryId) => {
+    if (newCategoryId !== oldCategoryId && editMode.value) {
+        // When category changes, clear selected tags as they might not be valid for the new category.
+        eventDetails.value.tags = [];
+    }
+});
+
+const categoryMap = computed(() => {
+  return categories.value.reduce((map, category) => {
+    map[category.id] = category.title;
+    return map;
+  }, {});
+});
+
+const removeTag = (tagToRemove) => {
+  normalizedTags.value = normalizedTags.value.filter(tag => tag.id !== tagToRemove.id);
+};
 
 const normalizedTags = computed({
   get() {
@@ -911,7 +925,7 @@ const getBracketIndex = (bracketId) => {
                             <!-- Edit Mode: Tags -->
                             <div>
                                 <label class="text-sm font-medium mb-1">Tags</label>
-                                <MultiSelect v-model="normalizedTags" :options="tags" optionLabel="name" optionValue="id" display="chip" placeholder="Select tags" class="w-full">
+                                <MultiSelect v-model="normalizedTags" :options="filteredTags" optionLabel="name" display="chip" placeholder="Select tags" class="w-full">
                                     <template #chip="slotProps">
                                         <div class="flex items-center gap-2 px-2 py-1 rounded text-white text-xs" :style="{ backgroundColor: slotProps.value.color }">
                                             {{ slotProps.value.name }}

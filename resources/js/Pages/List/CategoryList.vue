@@ -52,6 +52,13 @@ export default defineComponent({
       }));
     });
 
+    const categoryMap = computed(() => {
+      return categories.value.reduce((map, category) => {
+        map[category.id] = category.title;
+        return map;
+      }, {});
+    });
+
     // Add computed property for filtered items
     const filteredItems = computed(() => {
       const items = showTags.value ? tags.value : categories.value;
@@ -102,9 +109,12 @@ export default defineComponent({
           Array.isArray(event.tags) ? event.tags.includes(id) : false
         );
       } else {
-        return normalizedEvents.value.some(event =>
+        const eventUsingCategory = normalizedEvents.value.some(event =>
           event.category_id === id && event.archived === false
         );
+        const tagUsingCategory = tags.value.some(tag => tag.category_id == id);
+
+        return eventUsingCategory || tagUsingCategory;
       }
     };
 
@@ -155,7 +165,7 @@ export default defineComponent({
     // Open Create Modal
     const openCreateModal = () => {
       newItem.value = showTags.value
-        ? { name: "", color: "#800080" }
+        ? { name: "", color: "#800080", category_id: null }
         : { title: "", description: "" };
       isCreateModalVisible.value = true;
     };
@@ -285,6 +295,7 @@ export default defineComponent({
       showEditConfirm,
       confirmDelete,
       currentPageReportTemplate,
+      categoryMap,
     };
   },
 });
@@ -356,9 +367,9 @@ export default defineComponent({
         </template>
       </Column>
 
-      <Column :field="showTags ? 'color' : 'description'" :header="showTags ? 'Color' : 'Description'" style="width:40%;" sortable>
+      <Column :field="showTags ? 'category_id' : 'description'" :header="showTags ? 'Category' : 'Description'" style="width:40%;" sortable>
         <template #body="{ data }">
-          <span v-if="showTags">{{ data.color }}</span>
+          <span v-if="showTags">{{ categoryMap[data.category_id] || 'Uncategorized' }}</span>
           <span v-else>{{ data.description || "No description available" }}</span>
         </template>
       </Column>
@@ -406,6 +417,11 @@ export default defineComponent({
           />
         </div>
 
+        <div class="p-field" v-if="showTags">
+          <label for="tagCategory">Category</label>
+          <Select id="tagCategory" v-model="selectedItem.category_id" :options="categories" optionLabel="title" optionValue="id" placeholder="Select a category" class="w-full" />
+        </div>
+
         <div class="p-field" v-if="!showTags">
           <label for="description">Description</label>
           <Textarea
@@ -445,6 +461,12 @@ export default defineComponent({
             placeholder="Enter color code"
           />
         </div>
+
+        <div class="p-field" v-if="showTags">
+          <label for="newTagCategory">Category</label>
+          <Select id="newTagCategory" v-model="newItem.category_id" :options="categories" optionLabel="title" optionValue="id" placeholder="Select a category" class="w-full" />
+        </div>
+
 
         <div class="p-field" v-if="!showTags">
           <label for="newDescription">Description</label>

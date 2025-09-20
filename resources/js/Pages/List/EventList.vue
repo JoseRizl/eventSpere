@@ -260,23 +260,6 @@
             <InputText id="title" v-model="newEvent.title" placeholder="Enter event title" />
           </div>
 
-          <!-- Tags Selection -->
-          <div class="p-field">
-            <label for="tags">Tags</label>
-            <div class="flex items-center gap-2">
-                <MultiSelect
-                  id="tags"
-                  v-model="newEvent.tags"
-                  :options="tags"
-                  optionLabel="name"
-                  placeholder="Select tags"
-                  display="chip"
-                  class="w-full"
-                />
-                <Button icon="pi pi-plus" class="p-button-secondary p-button-rounded" @click="openTagModal" v-tooltip.top="'Create New Tag'" />
-            </div>
-          </div>
-
           <div class="p-field grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Venue -->
             <div>
@@ -296,6 +279,24 @@
                 placeholder="Select a category"
                 class="w-full"
               />
+            </div>
+          </div>
+
+          <!-- Tags Selection (Conditional) -->
+          <div class="p-field" v-if="newEvent.category_id">
+            <label for="tags">Tags</label>
+            <div class="flex items-center gap-2">
+                <MultiSelect
+                  id="tags"
+                  v-model="newEvent.tags"
+                  :options="filteredNewEventTags"
+                  dataKey="id"
+                  optionLabel="name"
+                  placeholder="Select tags"
+                  display="chip"
+                  class="w-full"
+                />
+                <Button icon="pi pi-plus" class="p-button-secondary p-button-rounded" @click="openTagModal" v-tooltip.top="'Create New Tag'" />
             </div>
           </div>
           <!-- Create Event Modal -->
@@ -409,6 +410,10 @@
                 <label for="tagColor">Tag Color</label>
                 <ColorPicker id="tagColor" v-model="newTag.color" />
             </div>
+            <div class="p-field">
+                <label for="tagCategory">Category</label>
+                <Select id="tagCategory" v-model="newTag.category_id" :options="categories" optionLabel="title" optionValue="id" placeholder="Select a category" class="w-full" disabled />
+            </div>
         </div>
         <template #footer>
             <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="isCreateTagModalVisible = false" />
@@ -423,50 +428,6 @@
           <div class="p-field">
             <label for="title">Event Title</label>
             <InputText id="title" v-model="selectedEvent.title" placeholder="Enter event title" />
-          </div>
-
-          <!-- Tags Selection -->
-          <div class="p-field">
-            <label for="tags">Tags</label>
-            <MultiSelect
-              id="tags"
-              v-model="selectedEvent.tags"
-              :options="tags"
-              optionLabel="name"
-              placeholder="Select tags"
-              display="chip"
-            >
-              <!-- Option Template -->
-              <template #option="slotProps">
-                <div class="flex items-center gap-2">
-                  <div
-                    class="w-3 h-3 rounded-full"
-                    :style="{ backgroundColor: slotProps.option.color || '#800080' }"
-                  ></div>
-                  <span>{{ slotProps.option.name }}</span>
-                </div>
-              </template>
-              <!-- Selected Chip Template -->
-              <template #chip="slotProps">
-                <div
-                  class="flex items-center gap-2 px-2 py-1 rounded text-white text-xs"
-                  :style="{ backgroundColor: slotProps.value.color || '#800080' }"
-                >
-                  <div
-                    class="w-2 h-2 rounded-full bg-white opacity-50"
-                  ></div>
-                  {{ slotProps.value.name }}
-                  <button
-                    type="button"
-                    class="text-white hover:text-gray-200"
-                    @click.stop="removeTag(slotProps.value)"
-                    v-tooltip.top="'Remove Tag'"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </template>
-            </MultiSelect>
           </div>
 
           <div class="p-field grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -490,6 +451,42 @@
               />
             </div>
           </div>
+
+          <!-- Tags Selection (Conditional) -->
+          <div class="p-field" v-if="selectedEvent.category_id">
+            <label for="edit-tags">Tags</label>
+            <MultiSelect
+              id="edit-tags"
+              v-model="selectedEvent.tags"
+              :options="filteredSelectedEventTags"
+              dataKey="id"
+              optionLabel="name"
+              placeholder="Select tags"
+              display="chip"
+            >
+              <!-- Option Template -->
+              <template #option="slotProps">
+                <div class="flex items-center gap-2">
+                  <div
+                    class="w-3 h-3 rounded-full"
+                    :style="{ backgroundColor: slotProps.option.color || '#800080' }"
+                  ></div>
+                  <span>{{ slotProps.option.name }}</span>
+                </div>
+              </template>
+              <!-- Selected Chip Template -->
+              <template #chip="slotProps">
+                <div
+                  class="flex items-center gap-2 px-2 py-1 rounded text-white text-xs"
+                  :style="{ backgroundColor: slotProps.value.color || '#800080' }"
+                >
+                  {{ slotProps.value.name }}
+                  <button type="button" class="text-white hover:text-gray-200" @click.stop="removeTag(slotProps.value)" v-tooltip.top="'Remove Tag'">✕</button>
+                </div>
+              </template>
+            </MultiSelect>
+          </div>
+
           <!-- Edit Event Modal -->
           <div class="p-field grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Start Date & Time -->
@@ -646,6 +643,7 @@
   import SuccessDialog from '@/Components/SuccessDialog.vue';
   import Skeleton from 'primevue/skeleton';
   import ColorPicker from 'primevue/colorpicker';
+  import Select from 'primevue/select';
 
   export default defineComponent({
     name: "EventList",
@@ -688,11 +686,6 @@
         to: null
       });
 
-      const newTag = ref({
-        name: "",
-        color: "#ff0000"
-      });
-
       const newEvent = ref({
         title: "",
         description: "",
@@ -706,6 +699,26 @@
         image: "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
         archived: false,
         isAllDay: false
+      });
+
+      const filteredNewEventTags = computed(() => {
+        if (!newEvent.value.category_id) {
+            return [];
+        }
+        return tags.value.filter(tag => tag.category_id == newEvent.value.category_id);
+      });
+
+      watch(() => newEvent.value.category_id, (newVal, oldVal) => {
+        if (newVal !== oldVal) {
+            newEvent.value.tags = [];
+        }
+      });
+
+      const filteredSelectedEventTags = computed(() => {
+        if (!selectedEvent.value?.category_id) {
+            return [];
+        }
+        return tags.value.filter(tag => tag.category_id == selectedEvent.value.category_id);
       });
 
       const combinedEvents = computed(() => {
@@ -744,6 +757,25 @@
         dateError.value = "";
       };
 
+      const tagsMap = computed(() => {
+        return tags.value.reduce((map, tag) => {
+            map[tag.id] = tag;
+            return map;
+        }, {});
+      });
+
+      const newTag = ref({
+        name: "",
+        color: "#ff0000",
+        category_id: null
+      });
+
+      watch(() => selectedEvent.value?.category_id, (newVal, oldVal) => {
+        if (selectedEvent.value && newVal !== oldVal) {
+            selectedEvent.value.tags = [];
+        }
+      });
+
       const formatDescription = (description) => {
         if (!description) return '';
 
@@ -770,8 +802,12 @@
       };
 
      const openTagModal = () => {
-       newTag.value = { name: '', color: '#ff0000' };
-       isCreateTagModalVisible.value = true;
+        newTag.value = {
+            name: '',
+            color: '#ff0000',
+            category_id: newEvent.value.category_id,
+        };
+        isCreateTagModalVisible.value = true;
      };
 
      const createTag = async () => {
@@ -786,7 +822,8 @@
        try {
          const response = await axios.post(route('category.store'), {
            name: newTag.value.name,
-           color: colorValue
+           color: colorValue,
+           category_id: newTag.value.category_id
          });
 
          if (response.data.success) {
@@ -1239,22 +1276,31 @@
 
       // Open Edit Modal
     const editEvent = (event) => {
-        // Convert tag IDs to full tag objects if needed
-        const normalizedTags = Array.isArray(event.tags)
-            ? event.tags.map(tag => {
-                // If tag is already an object, return it
-                if (typeof tag === 'object' && tag !== null) {
-                    return tag;
+        // Defensive: If tags are not loaded yet, wait and retry
+        if (!tags.value || tags.value.length === 0) {
+            // Wait for tags to be loaded, then retry
+            const unwatch = watch(tags, (newTags) => {
+                if (newTags && newTags.length > 0) {
+                    unwatch();
+                    editEvent(event); // Retry with tags loaded
                 }
-                // If tag is an ID, find the corresponding tag object
-                return tags.value.find(t => t.id === tag || t.id === tag.id);
-            }).filter(Boolean) // Remove any undefined entries
-            : [];
+            });
+            return;
+        }
+
+        // Robustly normalize tags to full objects, handling IDs, partial objects, or full objects.
+        const normalizedTags = (event.tags || []).map(tag => {
+            if (typeof tag === 'object' && tag !== null) {
+                const found = tags.value.find(t => t.id === tag.id);
+                return found || tag;
+            }
+            return tags.value.find(t => t.id === tag) || null;
+        }).filter(Boolean);
 
         selectedEvent.value = {
             ...event,
             venue: event.venue || "",
-            tags: normalizedTags, // Use normalized tags
+            tags: normalizedTags,
             startDate: event.startDate ? new Date(event.startDate) : null,
             endDate: event.endDate ? new Date(event.endDate) : null,
             image: event.image || defaultImage
@@ -1570,6 +1616,9 @@
     showCreateConfirm,
     confirmCreateEvent,
     formatDescription,
+    filteredNewEventTags,
+    tagsMap,
+    filteredSelectedEventTags,
     handleDescriptionClick,
     };
     },
