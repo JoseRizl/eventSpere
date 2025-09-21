@@ -6,7 +6,7 @@ import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
 import Button from 'primevue/button';
 import SelectButton from 'primevue/selectbutton';
-import InputSwitch from 'primevue/inputswitch';
+import ToggleSwitch from 'primevue/toggleswitch';
 import DatePicker from 'primevue/datepicker';
 import { Link, usePage } from '@inertiajs/vue3';
 import Skeleton from 'primevue/skeleton';
@@ -535,7 +535,7 @@ onMounted(async () => {
             <label>Match Status:</label>
             <div class="status-toggle">
               <span class="status-label" :class="{ 'active': selectedMatchData.status === 'pending' }">Pending</span>
-              <InputSwitch
+              <ToggleSwitch
                 :modelValue="selectedMatchData.status === 'completed'"
                 @update:modelValue="(value) => selectedMatchData.status = value ? 'completed' : 'pending'"
                 class="status-switch"

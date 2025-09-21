@@ -12,7 +12,7 @@ import Dialog from 'primevue/dialog';
 import BracketView from '@/Components/BracketView.vue';
 import MatchesView from '@/Components/MatchesView.vue';
 import InputText from 'primevue/inputtext';
-import InputSwitch from 'primevue/inputswitch';
+import ToggleSwitch from 'primevue/toggleswitch';
 import SelectButton from 'primevue/selectbutton';
 import Button from 'primevue/button';
 import Select from 'primevue/select';
@@ -1660,7 +1660,7 @@ const getBracketIndex = (bracketId) => {
         <label>Match Status:</label>
         <div class="status-toggle">
             <span class="status-label" :class="{ 'active': selectedMatchData.status === 'pending' }">Pending</span>
-            <InputSwitch
+            <ToggleSwitch
             :modelValue="selectedMatchData.status === 'completed'"
             @update:modelValue="(value) => selectedMatchData.status = value ? 'completed' : 'pending'"
             class="status-switch"

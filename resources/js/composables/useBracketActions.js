@@ -1807,86 +1807,47 @@ const updateLines = (bracketIdx) => {
         match.is_tie = false;
       }
 
+      const performedActions = [];
       // Handle bracket progression for elimination brackets
       if (bracket.type === 'Single Elimination') {
         if (roundIdx < bracket.matches.length - 1) {
           const nextRoundIdx = roundIdx + 1;
           const nextMatchIdx = Math.floor(matchIdx / 2);
           const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
-          if (bracket.matches[nextRoundIdx] && bracket.matches[nextRoundIdx][nextMatchIdx]) {
-            const nextMatch = bracket.matches[nextRoundIdx][nextMatchIdx];
-            nextMatch.players[nextPlayerPos] = {
-              ...winner,
-              score: 0,
-              completed: false,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            };
-          }
+          setPlayerWithLog(bracket, 'single', nextRoundIdx, nextMatchIdx, nextPlayerPos, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
         } else {
           // Final match completed
           winnerMessage.value = `Winner: ${winner.name}`;
           showWinnerDialog.value = true;
         }
       } else if (bracket.type === 'Double Elimination') {
-        const performedActions = [];
         if (bracketType === 'winners') {
           if (roundIdx < bracket.matches.winners.length - 1) {
             const nextRoundIdx = roundIdx + 1;
             const nextMatchIdx = Math.floor(matchIdx / 2);
             const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
-            if (bracket.matches.winners[nextRoundIdx] && bracket.matches.winners[nextRoundIdx][nextMatchIdx]) {
-              const nextMatch = bracket.matches.winners[nextRoundIdx][nextMatchIdx];
-              nextMatch.players[nextPlayerPos] = {
-                ...winner,
-                score: 0,
-                completed: false,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              };
-            }
+            setPlayerWithLog(bracket, 'winners', nextRoundIdx, nextMatchIdx, nextPlayerPos, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
           } else {
             // Winners bracket final - advance to grand finals
             const grandFinalsMatch = bracket.matches.grand_finals[0];
             if (grandFinalsMatch) {
-              grandFinalsMatch.players[0] = {
-                ...winner,
-                score: 0,
-                completed: false,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              };
+              setPlayerWithLog(bracket, 'grand_finals', 0, 0, 0, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
             }
 
             // Convert TBD players to BYE in losers bracket round 1
             const firstLosersRound = bracket.matches.losers[0];
             firstLosersRound.forEach(match => {
               if (match.players[0].name === 'TBD') {
-                match.players[0] = {
-                  id: generateId(),
-                  name: 'BYE',
-                  score: 0,
-                  completed: true,
-                  created_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString()
-                };
+                setPlayerWithLog(bracket, 'losers', 0, firstLosersRound.indexOf(match), 0, { id: generateId(), name: 'BYE', score: 0, completed: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
               }
               if (match.players[1].name === 'TBD') {
-                match.players[1] = {
-                  id: generateId(),
-                  name: 'BYE',
-                  score: 0,
-                  completed: true,
-                  created_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString()
-                };
+                setPlayerWithLog(bracket, 'losers', 0, firstLosersRound.indexOf(match), 1, { id: generateId(), name: 'BYE', score: 0, completed: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
               }
             });
 
             // Auto-complete BYE matches in losers bracket
             for (let r = 0; r < bracket.matches.losers.length - 1; r++) {
               const currentRound = bracket.matches.losers[r];
-              const nextRound = bracket.matches.losers[r + 1];
               currentRound.forEach((match, mIdx) => {
                 if (match.players[0].name === 'BYE' || match.players[1].name === 'BYE') {
                   const winner2 = match.players[0].name === 'BYE' ? match.players[1] : match.players[0];
@@ -1896,15 +1857,7 @@ const updateLines = (bracketIdx) => {
 
                   const nextMatchIdx2 = Math.floor(mIdx / 2);
                   const nextPlayerPos2 = mIdx % 2 === 0 ? 0 : 1;
-                  if (nextRound && nextRound[nextMatchIdx2]) {
-                    nextRound[nextMatchIdx2].players[nextPlayerPos2] = {
-                      ...winner2,
-                      score: 0,
-                      completed: false,
-                      created_at: new Date().toISOString(),
-                      updated_at: new Date().toISOString()
-                    };
-                  }
+                  setPlayerWithLog(bracket, 'losers', r + 1, nextMatchIdx2, nextPlayerPos2, { ...winner2, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
                 }
               });
             }
@@ -1938,51 +1891,25 @@ const updateLines = (bracketIdx) => {
                 updated_at: new Date().toISOString(),
               });
             }
-            bracket.matches.losers[losersRoundIdx][losersMatchIdx].players[losersPlayerPos] = {
-              ...loser,
-              score: 0,
-              completed: false,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            };
+            setPlayerWithLog(bracket, 'losers', losersRoundIdx, losersMatchIdx, losersPlayerPos, { ...loser, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
           }
         } else if (bracketType === 'losers') {
-          if (roundIdx < bracket.matches.winners.length + bracket.matches.losers.length - 1) {
-            const nextRoundIdx = roundIdx - bracket.matches.winners.length + 1;
+          if (roundIdx < bracket.matches.losers.length - 1) {
+            const nextRoundIdx = roundIdx + 1;
             const nextMatchIdx = Math.floor(matchIdx / 2);
             const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
             if (bracket.matches.losers[nextRoundIdx] && bracket.matches.losers[nextRoundIdx][nextMatchIdx]) {
-              const nextMatch = bracket.matches.losers[nextRoundIdx][nextMatchIdx];
-              nextMatch.players[nextPlayerPos] = {
-                ...winner,
-                score: 0,
-                completed: false,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              };
+              setPlayerWithLog(bracket, 'losers', nextRoundIdx, nextMatchIdx, nextPlayerPos, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
             }
-          }
-          if (roundIdx === bracket.matches.winners.length + bracket.matches.losers.length - 1) {
+          } else {
             // Losers bracket final - advance to grand finals
             const grandFinalsMatch = bracket.matches.grand_finals[0];
             if (grandFinalsMatch) {
               const winnersFinal = bracket.matches.winners[bracket.matches.winners.length - 1][0];
               if (winnersFinal.status === 'completed') {
-                grandFinalsMatch.players[1] = {
-                  ...winner,
-                  score: 0,
-                  completed: false,
-                  created_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString()
-                };
+                setPlayerWithLog(bracket, 'grand_finals', 0, 0, 1, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
               } else {
-                grandFinalsMatch.players[0] = {
-                  ...winner,
-                  score: 0,
-                  completed: false,
-                  created_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString()
-                };
+                setPlayerWithLog(bracket, 'grand_finals', 0, 0, 0, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
               }
             }
           }
@@ -1990,6 +1917,11 @@ const updateLines = (bracketIdx) => {
           // Grand finals completed
           winnerMessage.value = `Tournament Winner: ${winner.name}`;
           showWinnerDialog.value = true;
+        }
+        if (bracket.id && performedActions.length) {
+          const stack = bracketActionLog.get(bracket.id) || [];
+          stack.push(performedActions);
+          bracketActionLog.set(bracket.id, stack);
         }
       }
     } else if (selectedMatchData.value.status !== 'completed' && match.status === 'completed') {
