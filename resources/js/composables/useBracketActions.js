@@ -177,8 +177,8 @@ export function useBracketActions(state) {
         currentRound.forEach((match, matchIdx) => {
           if (match.players[0].name === 'BYE' || match.players[1].name === 'BYE') {
             const winner = match.players[0].name === 'BYE' ? match.players[1] : match.players[0];
-            if (winner.name === 'TBD' || winner.name === 'BYE') {
-                return; // Skip TBD vs BYE or BYE vs BYE
+            if (winner.name === 'TBD') {
+                return; // Skip TBD vs BYE
             }
 
             winner.completed = true;
@@ -207,8 +207,8 @@ export function useBracketActions(state) {
         currentRound.forEach((match, matchIdx) => {
           if (match.players[0].name === 'BYE' || match.players[1].name === 'BYE') {
             const winner = match.players[0].name === 'BYE' ? match.players[1] : match.players[0];
-            if (winner.name === 'TBD' || winner.name === 'BYE') {
-                return; // Skip TBD vs BYE or BYE vs BYE
+            if (winner.name === 'TBD') {
+                return; // Skip TBD vs BYE
             }
 
             winner.completed = true;
@@ -236,8 +236,8 @@ export function useBracketActions(state) {
         currentRound.forEach((match, matchIdx) => {
           if (match.players[0].name === 'BYE' || match.players[1].name === 'BYE') {
             const winner = match.players[0].name === 'BYE' ? match.players[1] : match.players[0];
-            if (winner.name === 'TBD' || winner.name === 'BYE') {
-                return; // Skip TBD vs BYE or BYE vs BYE
+            if (winner.name === 'TBD') {
+                return; // Skip TBD vs BYE
             }
 
             winner.completed = true;
@@ -245,7 +245,8 @@ export function useBracketActions(state) {
             match.winner_id = winner.id;
             const nextRoundIdx = roundIdx + 1;
             const nextMatchIdx = Math.floor(matchIdx / 2);
-            const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
+            const nextPlayerPos = matchIdx % 2;
+
             if (bracket.matches.losers[nextRoundIdx] && bracket.matches.losers[nextRoundIdx][nextMatchIdx]) {
               const nextMatch = bracket.matches.losers[nextRoundIdx][nextMatchIdx];
               nextMatch.players[nextPlayerPos] = {
@@ -500,6 +501,7 @@ export function useBracketActions(state) {
     const totalSlots = Math.pow(2, Math.ceil(Math.log2(numPlayers)));
     const totalByes = totalSlots - numPlayers;
 
+    // --- Create players & BYEs ---
     const players = Array.from({ length: numPlayers }, (_, i) => ({
       id: generateId(),
       name: `Player ${i + 1}`,
@@ -517,29 +519,22 @@ export function useBracketActions(state) {
       updated_at: new Date().toISOString(),
     }));
 
-    // Standard seeding for winners bracket: give BYEs to top seeds.
+    // Seeding order
     const seedToParticipant = new Map();
-    for (let i = 0; i < numPlayers; i++) {
-      seedToParticipant.set(i + 1, players[i]);
-    }
-    // Byes get the highest seed numbers, which means they will be paired against top seeds.
-    for (let i = 0; i < totalByes; i++) {
-      seedToParticipant.set(numPlayers + 1 + i, byes[i]);
-    }
+    for (let i = 0; i < numPlayers; i++) seedToParticipant.set(i + 1, players[i]);
+    for (let i = 0; i < totalByes; i++) seedToParticipant.set(numPlayers + 1 + i, byes[i]);
 
     const winnersSlots = Array(totalSlots).fill(null);
     const seedingOrder = getSeedingOrder(totalSlots);
     for (let i = 0; i < totalSlots; i++) {
-      const seed = seedingOrder[i];
-      const participant = seedToParticipant.get(seed);
-      winnersSlots[i] = participant;
+      winnersSlots[i] = seedToParticipant.get(seedingOrder[i]);
     }
 
-    const losersSlots = Array(totalSlots - 1).fill(null);
-
-    const winnersFirstRound = [];
+    // --- Winners Bracket Generation ---
+    const winnersRounds = [];
+    let currentRound = [];
     for (let i = 0; i < totalSlots; i += 2) {
-      const match = {
+      currentRound.push({
         id: generateId(),
         round: 1,
         match_number: i / 2 + 1,
@@ -553,80 +548,14 @@ export function useBracketActions(state) {
         date: selectedEvent.value.startDate,
         time: selectedEvent.value.startTime,
         venue: selectedEvent.value.venue,
-      };
-      winnersFirstRound.push(match);
-      if (match.players[0].name === 'BYE' || match.players[1].name === 'BYE') {
-        const winner = match.players[0].name === 'BYE' ? match.players[1] : match.players[0];
-        winner.completed = true;
-        match.status = 'completed';
-        match.winner_id = winner.id;
-      }
+      });
     }
+    winnersRounds.push(currentRound);
 
-    const winnersRounds = Math.ceil(Math.log2(totalSlots));
-    const losersRounds = [];
-    const firstLosersRound = [];
-    for (let i = 0; i < totalSlots / 2; i++) {
-      const match = {
+    while (currentRound.length > 1) {
+      const nextRound = Array.from({ length: Math.ceil(currentRound.length / 2) }, (_, i) => ({
         id: generateId(),
-        round: 1,
-        match_number: i + 1,
-        bracket_type: 'losers',
-        players: [
-          { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-          { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-        ],
-        winner_id: null,
-        loser_id: null,
-        status: 'pending',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        date: selectedEvent.value.startDate,
-        time: selectedEvent.value.startTime,
-        venue: selectedEvent.value.venue,
-      };
-      firstLosersRound.push(match);
-    }
-    losersRounds.push(firstLosersRound);
-
-    let currentRoundMatches = totalSlots / 2;
-    let losersRoundNumber = 2;
-    while (currentRoundMatches > 1) {
-      const nextRoundMatches = Math.ceil(currentRoundMatches / 2);
-      const round = [];
-      for (let i = 0; i < nextRoundMatches; i++) {
-        const match = {
-          id: generateId(),
-          round: losersRoundNumber,
-          match_number: i + 1,
-          bracket_type: 'losers',
-          players: [
-            { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-            { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-          ],
-          winner_id: null,
-          loser_id: null,
-          status: 'pending',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          date: selectedEvent.value.startDate,
-          time: selectedEvent.value.startTime,
-          venue: selectedEvent.value.venue,
-        };
-        round.push(match);
-      }
-      losersRounds.push(round);
-      currentRoundMatches = nextRoundMatches;
-      losersRoundNumber++;
-    }
-
-    const winnersRoundsArray = [winnersFirstRound];
-    let prevWinnersMatches = winnersFirstRound;
-    let winnersRoundNumber = 2;
-    while (prevWinnersMatches.length > 1) {
-      const nextMatches = Array.from({ length: Math.ceil(prevWinnersMatches.length / 2) }, (_, i) => ({
-        id: generateId(),
-        round: winnersRoundNumber,
+        round: winnersRounds.length + 1,
         match_number: i + 1,
         bracket_type: 'winners',
         players: [
@@ -642,23 +571,103 @@ export function useBracketActions(state) {
         time: selectedEvent.value.startTime,
         venue: selectedEvent.value.venue,
       }));
-      winnersRoundsArray.push(nextMatches);
-      prevWinnersMatches = nextMatches;
-      winnersRoundNumber++;
+      winnersRounds.push(nextRound);
+      currentRound = nextRound;
     }
 
+    // --- Losers Bracket Generation (dynamic) ---
+    const losersRounds = [];
+    const numWinnerRounds = winnersRounds.length;
+
+    // Step 1: Generate Losers Round 1 dynamically based on actual losers from Winners Round 1.
+    const wr1Matches = winnersRounds[0];
+    const wr1Losers = wr1Matches
+      .filter(m => m.players[0]?.name !== "BYE" && m.players[1]?.name !== "BYE")
+      .map(m => ({
+        id: null,
+        name: `Loser of WR1 M${m.match_number}`,
+        score: 0,
+        completed: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }));
+
+    const numMatchesInLR1 = Math.ceil(wr1Losers.length / 2);
+
+    if (numMatchesInLR1 > 0) {
+      const lr1 = [];
+      for (let i = 0; i < wr1Losers.length; i += 2) {
+        lr1.push({
+          id: generateId(),
+          round: 1,
+          match_number: lr1.length + 1,
+          bracket_type: 'losers',
+          players: [
+            wr1Losers[i],
+            wr1Losers[i + 1] || {
+              id: generateId(),
+              name: 'BYE',
+              score: 0,
+              completed: true,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            },
+          ],
+          winner_id: null, loser_id: null, status: 'pending',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          date: selectedEvent.value.startDate,
+          time: selectedEvent.value.startTime,
+          venue: selectedEvent.value.venue,
+        });
+      }
+      losersRounds.push(lr1);
+    }
+
+    // Step 2: Generate the rest of the losers bracket rounds with a standard structure.
+    const totalLoserRounds = 2 * (numWinnerRounds - 1);
+    // Start with match count from LR1, or from what LR2 would have if LR1 doesn't exist.
+    let matchCount = losersRounds.length > 0 ? losersRounds[0].length : totalSlots / 4;
+
+    for (let i = losersRounds.length; i < totalLoserRounds; i++) {
+      // `i` is the 0-based index of the round to generate.
+      // Match count halves for "minor" consolidation rounds (LR3, LR5, etc.), which are at even indices > 0.
+      if (i > 0 && i % 2 === 0) {
+        matchCount /= 2;
+      }
+
+      if (matchCount < 1) matchCount = 1;
+
+      const round = Array.from({ length: Math.floor(matchCount) }, (_, j) => ({
+        id: generateId(),
+        round: losersRounds.length + 1,
+        match_number: j + 1,
+        bracket_type: 'losers',
+        players: [
+          { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+          { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+        ],
+        winner_id: null, loser_id: null, status: 'pending',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        date: selectedEvent.value.startDate,
+        time: selectedEvent.value.startTime,
+        venue: selectedEvent.value.venue,
+      }));
+      losersRounds.push(round);
+    }
+
+    // --- Grand Finals ---
     const grandFinals = [{
       id: generateId(),
       round: 1,
       match_number: 1,
       bracket_type: 'grand_finals',
       players: [
-        { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-        { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+      { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+      { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
       ],
-      winner_id: null,
-      loser_id: null,
-      status: 'pending',
+      winner_id: null, loser_id: null, status: 'pending',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       date: selectedEvent.value.startDate,
@@ -666,7 +675,7 @@ export function useBracketActions(state) {
       venue: selectedEvent.value.venue,
     }];
 
-    return { winners: winnersRoundsArray, losers: losersRounds, grand_finals: grandFinals };
+    return { winners: winnersRounds, losers: losersRounds, grand_finals: grandFinals };
   };
 
   const generateRoundRobinBracket = () => {
@@ -748,541 +757,6 @@ export function useBracketActions(state) {
     }
 
     return rounds;
-  };
-
-  const increaseScore = async (bracketIdx, teamIdx) => {
-    const bracket = brackets.value[bracketIdx];
-    const { roundIdx, matchIdx, bracketType } = getRoundAndMatchIndices(bracketIdx, currentMatchIndex.value);
-    let match;
-    if (bracket.type === 'Single Elimination') {
-      match = bracket.matches[roundIdx][matchIdx];
-    } else if (bracket.type === 'Double Elimination') {
-      switch (bracketType) {
-        case 'winners':
-          match = bracket.matches.winners[roundIdx][matchIdx];
-          break;
-        case 'losers':
-          match = bracket.matches.losers[roundIdx - bracket.matches.winners.length][matchIdx];
-          break;
-        case 'grand_finals':
-          match = bracket.matches.grand_finals[matchIdx];
-          break;
-      }
-    }
-    if (match && match.status !== 'completed') {
-      match.players[teamIdx].score++;
-      match.players[teamIdx].updated_at = new Date().toISOString();
-      try { await saveBrackets(bracket); } catch (e) { console.error('Error updating score:', e); }
-    }
-  };
-
-  const decreaseScore = async (bracketIdx, teamIdx) => {
-    const bracket = brackets.value[bracketIdx];
-    const { roundIdx, matchIdx, bracketType } = getRoundAndMatchIndices(bracketIdx, currentMatchIndex.value);
-    let match;
-    if (bracket.type === 'Single Elimination') {
-      match = bracket.matches[roundIdx][matchIdx];
-    } else if (bracket.type === 'Double Elimination') {
-      switch (bracketType) {
-        case 'winners':
-          match = bracket.matches.winners[roundIdx][matchIdx];
-          break;
-        case 'losers':
-          match = bracket.matches.losers[roundIdx - bracket.matches.winners.length][matchIdx];
-          break;
-        case 'grand_finals':
-          match = bracket.matches.grand_finals[matchIdx];
-          break;
-      }
-    }
-    if (match && match.status !== 'completed' && match.players[teamIdx].score > 0) {
-      match.players[teamIdx].score--;
-      match.players[teamIdx].updated_at = new Date().toISOString();
-      try { await saveBrackets(bracket); } catch (e) { console.error('Error updating score:', e); }
-    }
-  };
-
-  const editParticipant = async (bracketIdx, roundIdx, matchIdx, teamIdx, bracketType = 'winners') => {
-    const newName = prompt('Enter new participant name:');
-    if (!newName) return;
-    const bracket = brackets.value[bracketIdx];
-    let match;
-    if (bracket.type === 'Single Elimination') {
-      match = bracket.matches[roundIdx][matchIdx];
-    } else if (bracket.type === 'Double Elimination') {
-      switch (bracketType) {
-        case 'winners':
-          match = bracket.matches.winners[roundIdx][matchIdx];
-          break;
-        case 'losers':
-          match = bracket.matches.losers[roundIdx - bracket.matches.winners.length][matchIdx];
-          break;
-        case 'grand_finals':
-          match = bracket.matches.grand_finals[matchIdx];
-          break;
-      }
-    } else if (bracket.type === 'Round Robin') {
-      match = bracket.matches[roundIdx][matchIdx];
-    }
-    if (match) {
-      const playerId = match.players[teamIdx].id;
-      for (let r = 0; r < (bracket.type === 'Single Elimination' ? bracket.matches.length : bracket.matches.winners.length); r++) {
-        const roundMatches = bracket.type === 'Single Elimination' ? bracket.matches[r] : bracket.matches.winners[r];
-        for (let m = 0; m < roundMatches.length; m++) {
-          if (roundMatches[m].players[0].id === playerId) {
-            roundMatches[m].players[0].name = newName; roundMatches[m].players[0].updated_at = new Date().toISOString();
-          }
-          if (roundMatches[m].players[1].id === playerId) {
-            roundMatches[m].players[1].name = newName; roundMatches[m].players[1].updated_at = new Date().toISOString();
-          }
-        }
-      }
-      if (bracket.type === 'Double Elimination') {
-        for (let r = 0; r < bracket.matches.losers.length; r++) {
-          for (let m = 0; m < bracket.matches.losers[r].length; m++) {
-            if (bracket.matches.losers[r][m].players[0].id === playerId) {
-              bracket.matches.losers[r][m].players[0].name = newName; bracket.matches.losers[r][m].players[0].updated_at = new Date().toISOString();
-            }
-            if (bracket.matches.losers[r][m].players[1].id === playerId) {
-              bracket.matches.losers[r][m].players[1].name = newName; bracket.matches.losers[r][m].players[1].updated_at = new Date().toISOString();
-            }
-          }
-        }
-        for (let m = 0; m < bracket.matches.grand_finals.length; m++) {
-          if (bracket.matches.grand_finals[m].players[0].id === playerId) {
-            bracket.matches.grand_finals[m].players[0].name = newName; bracket.matches.grand_finals[m].players[0].updated_at = new Date().toISOString();
-          }
-          if (bracket.matches.grand_finals[m].players[1].id === playerId) {
-            bracket.matches.grand_finals[m].players[1].name = newName; bracket.matches.grand_finals[m].players[1].updated_at = new Date().toISOString();
-          }
-        }
-      } else if (bracket.type === 'Round Robin') {
-        // Update player name across all Round Robin matches
-        for (let r = 0; r < bracket.matches.length; r++) {
-          for (let m = 0; m < bracket.matches[r].length; m++) {
-            if (bracket.matches[r][m].players[0].id === playerId) {
-              bracket.matches[r][m].players[0].name = newName;
-              bracket.matches[r][m].players[0].updated_at = new Date().toISOString();
-            }
-            if (bracket.matches[r][m].players[1].id === playerId) {
-              bracket.matches[r][m].players[1].name = newName;
-              bracket.matches[r][m].players[1].updated_at = new Date().toISOString();
-            }
-          }
-        }
-      }
-      try { await saveBrackets(bracket); } catch (e) { console.error('Error updating participant:', e); }
-    }
-  };
-
-  const cancelEndMatch = () => {
-    showConfirmDialog.value = false;
-    pendingBracketIdx.value = null;
-  };
-
-  const getRoundAndMatchIndices = (bracketIdx, currentIndex) => {
-    const bracket = brackets.value[bracketIdx];
-    if (bracket.type === 'Single Elimination') {
-      let accumulatedMatches = 0;
-      for (let roundIdx = 0; roundIdx < bracket.matches.length; roundIdx++) {
-        if (currentIndex < accumulatedMatches + bracket.matches[roundIdx].length) {
-          return { roundIdx, matchIdx: currentIndex - accumulatedMatches, bracketType: 'winners' };
-        }
-        accumulatedMatches += bracket.matches[roundIdx].length;
-      }
-      return { roundIdx: 0, matchIdx: 0, bracketType: 'winners' };
-    } else if (bracket.type === 'Double Elimination') {
-      switch (activeBracketSection.value) {
-        case 'winners': {
-          let winnersAccumulated = 0;
-          for (let roundIdx = 0; roundIdx < bracket.matches.winners.length; roundIdx++) {
-            if (currentWinnersMatchIndex.value < winnersAccumulated + bracket.matches.winners[roundIdx].length) {
-              return { roundIdx, matchIdx: currentWinnersMatchIndex.value - winnersAccumulated, bracketType: 'winners' };
-            }
-            winnersAccumulated += bracket.matches.winners[roundIdx].length;
-          }
-          break;
-        }
-        case 'losers': {
-          let losersAccumulated = 0;
-          for (let roundIdx = 0; roundIdx < bracket.matches.losers.length; roundIdx++) {
-            if (currentLosersMatchIndex.value < losersAccumulated + bracket.matches.losers[roundIdx].length) {
-              return { roundIdx: roundIdx + bracket.matches.winners.length, matchIdx: currentLosersMatchIndex.value - losersAccumulated, bracketType: 'losers' };
-            }
-            losersAccumulated += bracket.matches.losers[roundIdx].length;
-          }
-          break;
-        }
-        case 'grand_finals':
-          return { roundIdx: bracket.matches.winners.length + bracket.matches.losers.length, matchIdx: currentGrandFinalsIndex.value, bracketType: 'grand_finals' };
-      }
-    }
-    return { roundIdx: 0, matchIdx: 0, bracketType: 'winners' };
-  };
-
-  const confirmEndMatch = async () => {
-    if (pendingBracketIdx.value === null) return;
-    const idx = pendingBracketIdx.value;
-    const bracket = brackets.value[idx];
-    const { roundIdx, matchIdx, bracketType } = getRoundAndMatchIndices(idx, currentMatchIndex.value);
-
-    if (bracket.type === 'Single Elimination') {
-      const currentMatch = bracket.matches[roundIdx][matchIdx];
-      const winner = currentMatch.players[0].score >= currentMatch.players[1].score ? currentMatch.players[0] : currentMatch.players[1];
-      const loser = currentMatch.players[0].score >= currentMatch.players[1].score ? currentMatch.players[1] : currentMatch.players[0];
-      currentMatch.players[0].completed = true;
-      currentMatch.players[1].completed = true;
-      currentMatch.status = 'completed';
-      currentMatch.winner_id = winner.id;
-      currentMatch.loser_id = loser.id;
-      currentMatch.updated_at = new Date().toISOString();
-      try {
-        if (roundIdx < bracket.matches.length - 1) {
-          const nextRoundIdx = roundIdx + 1;
-          const nextMatchIdx = Math.floor(matchIdx / 2);
-          const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
-          if (bracket.matches[nextRoundIdx] && bracket.matches[nextRoundIdx][nextMatchIdx]) {
-            const nextMatch = bracket.matches[nextRoundIdx][nextMatchIdx];
-            nextMatch.players[nextPlayerPos] = { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
-          }
-        } else {
-          winnerMessage.value = `Winner: ${winner.name}`; showWinnerDialog.value = true;
-        }
-        await saveBrackets(bracket);
-        nextTick(() => updateLines(idx));
-      } catch (e) { console.error('Error concluding match:', e); }
-    } else if (bracket.type === 'Double Elimination') {
-      let currentMatch;
-      switch (bracketType) {
-        case 'winners': currentMatch = bracket.matches.winners[roundIdx][matchIdx]; break;
-        case 'losers': currentMatch = bracket.matches.losers[roundIdx - bracket.matches.winners.length][matchIdx]; break;
-        case 'grand_finals': currentMatch = bracket.matches.grand_finals[matchIdx]; break;
-      }
-      if (currentMatch) {
-        const winner = currentMatch.players[0].score >= currentMatch.players[1].score ? currentMatch.players[0] : currentMatch.players[1];
-        const loser = currentMatch.players[0].score >= currentMatch.players[1].score ? currentMatch.players[1] : currentMatch.players[0];
-        currentMatch.players[0].completed = true;
-        currentMatch.players[1].completed = true;
-        currentMatch.status = 'completed';
-        currentMatch.winner_id = winner.id;
-        currentMatch.loser_id = loser.id;
-        currentMatch.updated_at = new Date().toISOString();
-        try {
-          const performedActions = [];
-          if (bracketType === 'winners') {
-            if (roundIdx < bracket.matches.winners.length - 1) {
-              const nextRoundIdx = roundIdx + 1;
-              const nextMatchIdx = Math.floor(matchIdx / 2);
-              const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
-              setPlayerWithLog(bracket, 'winners', nextRoundIdx, nextMatchIdx, nextPlayerPos, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
-            } else {
-              const grandFinalsMatch = bracket.matches.grand_finals[0];
-              if (grandFinalsMatch) {
-                setPlayerWithLog(bracket, 'grand_finals', 0, 0, 0, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
-              }
-            }
-            // Map losers from winners bracket to losers round 1 in order, skipping BYE auto-completions
-            const losersRoundIdx = 0;
-            let totalLosers = 0;
-            for (let r = 0; r <= roundIdx; r++) {
-              for (let m = 0; m < bracket.matches.winners[r].length; m++) {
-                if (r === roundIdx && m === matchIdx) { break; }
-                if (bracket.matches.winners[r][m].loser_id) { totalLosers++; }
-              }
-            }
-            const losersMatchIdx = Math.floor(totalLosers / 2);
-            const losersPlayerPos = totalLosers % 2;
-            while (bracket.matches.losers[losersRoundIdx].length <= losersMatchIdx) {
-              bracket.matches.losers[losersRoundIdx].push({
-                id: generateId(), round: 1, match_number: bracket.matches.losers[losersRoundIdx].length + 1, bracket_type: 'losers',
-                players: [
-                  { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-                  { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-                ], winner_id: null, loser_id: null, status: 'pending', created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
-              });
-            }
-            if (loser.name !== 'BYE') {
-              setPlayerWithLog(bracket, 'losers', losersRoundIdx, losersMatchIdx, losersPlayerPos, { ...loser, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
-            }
-            if (roundIdx === bracket.matches.winners.length - 1) {
-              const firstLosersRound = bracket.matches.losers[0];
-              firstLosersRound.forEach(match => {
-                if (match.players[0].name === 'TBD') { match.players[0] = { id: generateId(), name: 'BYE', score: 0, completed: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }; }
-                if (match.players[1].name === 'TBD') { match.players[1] = { id: generateId(), name: 'BYE', score: 0, completed: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }; }
-              });
-              for (let r = 0; r < bracket.matches.losers.length - 1; r++) {
-                const currentRound = bracket.matches.losers[r];
-                const nextRound = bracket.matches.losers[r + 1];
-                currentRound.forEach((match, mIdx) => {
-                  if (match.players[0].name === 'BYE' || match.players[1].name === 'BYE') {
-                    const winner2 = match.players[0].name === 'BYE' ? match.players[1] : match.players[0];
-                    winner2.completed = true; match.status = 'completed'; match.winner_id = winner2.id;
-                    const nextMatchIdx2 = Math.floor(mIdx / 2);
-                    const nextPlayerPos2 = mIdx % 2 === 0 ? 0 : 1;
-                    setPlayerWithLog(bracket, 'losers', r + 1, nextMatchIdx2, nextPlayerPos2, { ...winner2, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
-                  }
-                });
-              }
-            }
-          } else if (bracketType === 'losers') {
-            if (roundIdx < bracket.matches.winners.length + bracket.matches.losers.length - 1) {
-              const nextRoundIdx = roundIdx - bracket.matches.winners.length + 1;
-              const nextMatchIdx = Math.floor(matchIdx / 2);
-              const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
-              setPlayerWithLog(bracket, 'losers', nextRoundIdx, nextMatchIdx, nextPlayerPos, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
-            }
-            if (roundIdx === bracket.matches.winners.length + bracket.matches.losers.length - 1) {
-              const grandFinalsMatch = bracket.matches.grand_finals[0];
-              if (grandFinalsMatch) {
-                const winnersFinal = bracket.matches.winners[bracket.matches.winners.length - 1][0];
-                if (winnersFinal.status === 'completed') {
-                  setPlayerWithLog(bracket, 'grand_finals', 0, 0, 1, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
-                } else {
-                  setPlayerWithLog(bracket, 'grand_finals', 0, 0, 0, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
-                }
-              }
-            }
-          } else if (bracketType === 'grand_finals') {
-            winnerMessage.value = `Tournament Winner: ${winner.name}`; showWinnerDialog.value = true;
-          }
-          await saveBrackets(bracket);
-          nextTick(() => updateLines(idx));
-          if (bracket.id && performedActions.length) {
-            const stack = bracketActionLog.get(bracket.id) || [];
-            stack.push(performedActions);
-            bracketActionLog.set(bracket.id, stack);
-          }
-        } catch (e) {
-          console.error('Error concluding match:', e);
-        }
-      }
-    }
-    showConfirmDialog.value = false;
-    pendingBracketIdx.value = null;
-  };
-
-  const undoConcludeMatch = async (bracketIdx) => {
-    const { roundIdx, matchIdx, bracketType } = getRoundAndMatchIndices(bracketIdx, currentMatchIndex.value);
-    const bracket = brackets.value[bracketIdx];
-    if (bracket.type === 'Single Elimination') {
-      const currentMatch = bracket.matches[roundIdx][matchIdx];
-      if (confirm('Are you sure you want to undo this match completion?')) {
-        currentMatch.players[0].completed = false;
-        currentMatch.players[1].completed = false;
-        currentMatch.status = 'pending';
-        currentMatch.winner_id = null;
-        currentMatch.updated_at = new Date().toISOString();
-        if (roundIdx < bracket.matches.length - 1) {
-          const nextRoundIdx = roundIdx + 1;
-          const nextMatchIdx = Math.floor(matchIdx / 2);
-          const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
-          bracket.matches[nextRoundIdx][nextMatchIdx].players[nextPlayerPos] = { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
-        }
-        try { await saveBrackets(bracket); nextTick(() => updateLines(bracketIdx)); } catch (e) { console.error('Error saving bracket after undoing match:', e); }
-      }
-    } else if (bracket.type === 'Double Elimination') {
-      let currentMatch;
-      switch (bracketType) {
-        case 'winners': currentMatch = bracket.matches.winners[roundIdx][matchIdx]; break;
-        case 'losers': currentMatch = bracket.matches.losers[roundIdx - bracket.matches.winners.length][matchIdx]; break;
-        case 'grand_finals': currentMatch = bracket.matches.grand_finals[matchIdx]; break;
-      }
-      if (currentMatch && confirm('Are you sure you want to undo this match completion?')) {
-        currentMatch.players[0].completed = false;
-        currentMatch.players[1].completed = false;
-        currentMatch.status = 'pending';
-        currentMatch.winner_id = null;
-        currentMatch.loser_id = null;
-        currentMatch.updated_at = new Date().toISOString();
-        try {
-          const stack = bracket.id ? bracketActionLog.get(bracket.id) : null;
-          if (stack && stack.length) {
-            const performedActions = stack.pop();
-            for (let i = performedActions.length - 1; i >= 0; i--) {
-              const a = performedActions[i];
-              if (a.type === 'slot') {
-                const match = resolveMatch(bracket, a.target.part, a.target.roundIdx, a.target.matchIdx);
-                if (match) match.players[a.target.playerPos] = deepClone(a.prevPlayer);
-              }
-            }
-          } else if (bracketType === 'winners') {
-            if (roundIdx < bracket.matches.winners.length - 1) {
-              const nextRoundIdx = roundIdx + 1;
-              const nextMatchIdx = Math.floor(matchIdx / 2);
-              const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
-              if (bracket.matches.winners[nextRoundIdx] && bracket.matches.winners[nextRoundIdx][nextMatchIdx]) {
-                bracket.matches.winners[nextRoundIdx][nextMatchIdx].players[nextPlayerPos] = { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
-              }
-            }
-            const losersRoundIdx = 0;
-            const losersMatchIdx = Math.floor(matchIdx / 2);
-            const losersPlayerPos = matchIdx % 2;
-            if (bracket.matches.losers[losersRoundIdx] && bracket.matches.losers[losersRoundIdx][losersMatchIdx]) {
-              bracket.matches.losers[losersRoundIdx][losersMatchIdx].players[losersPlayerPos] = { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
-            }
-          } else if (!stack && bracketType === 'losers') {
-            if (roundIdx < bracket.matches.winners.length + bracket.matches.losers.length - 1) {
-              const nextRoundIdx = roundIdx - bracket.matches.winners.length + 1;
-              const nextMatchIdx = Math.floor(matchIdx / 2);
-              const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
-              if (bracket.matches.losers[nextRoundIdx] && bracket.matches.losers[nextRoundIdx][nextMatchIdx]) {
-                bracket.matches.losers[nextRoundIdx][nextMatchIdx].players[nextPlayerPos] = { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
-              }
-            }
-            if (roundIdx === bracket.matches.winners.length + bracket.matches.losers.length - 1) {
-              const grandFinalsMatch = bracket.matches.grand_finals[0];
-              if (grandFinalsMatch) {
-                const winnersFinal = bracket.matches.winners[bracket.matches.winners.length - 1][0];
-                if (winnersFinal.status === 'completed') {
-                  grandFinalsMatch.players[1] = { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
-                } else {
-                  grandFinalsMatch.players[0] = { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
-                }
-              }
-            }
-          } else if (!stack && bracketType === 'grand_finals') {
-            // Keep grand finals participants; only status/winner fields were reset above
-          }
-          await saveBrackets(bracket);
-          nextTick(() => updateLines(bracketIdx));
-        } catch (e) { console.error('Error saving bracket after undoing match:', e); }
-      }
-    }
-  };
-
-  const isCurrentMatch = (bracketIdx, roundIdx, matchIdx, bracketType = 'winners') => {
-    const bracket = brackets.value[bracketIdx];
-    if (bracket.type === 'Single Elimination') {
-      const { roundIdx: currentRoundIdx, matchIdx: currentMatchIdx } = getRoundAndMatchIndices(bracketIdx, currentMatchIndex.value);
-      return roundIdx === currentRoundIdx && matchIdx === currentMatchIdx;
-    } else if (bracket.type === 'Double Elimination') {
-      if (bracketType !== activeBracketSection.value) return false;
-      switch (bracketType) {
-        case 'winners': {
-          let winnersAccumulated = 0;
-          for (let i = 0; i < roundIdx; i++) winnersAccumulated += bracket.matches.winners[i].length;
-          return winnersAccumulated + matchIdx === currentWinnersMatchIndex.value;
-        }
-        case 'losers': {
-          let losersAccumulated = 0;
-          const losersRoundIdx = roundIdx - bracket.matches.winners.length;
-          for (let i = 0; i < losersRoundIdx; i++) losersAccumulated += bracket.matches.losers[i].length;
-          return losersAccumulated + matchIdx === currentLosersMatchIndex.value;
-        }
-        case 'grand_finals':
-          return matchIdx === currentGrandFinalsIndex.value;
-      }
-    }
-    return false;
-  };
-
-  const navigateToMatch = (bracketIdx, roundIdx, matchIdx, bracketType = 'winners') => {
-    activeBracketIdx.value = bracketIdx;
-    const bracket = brackets.value[bracketIdx];
-    if (bracket.type === 'Single Elimination') {
-      let accumulatedMatches = 0;
-      for (let i = 0; i < roundIdx; i++) accumulatedMatches += bracket.matches[i].length;
-      currentMatchIndex.value = accumulatedMatches + matchIdx;
-    } else if (bracket.type === 'Double Elimination') {
-      activeBracketSection.value = bracketType;
-      switch (bracketType) {
-        case 'winners': {
-          let winnersAccumulated = 0;
-          for (let i = 0; i < roundIdx; i++) winnersAccumulated += bracket.matches.winners[i].length;
-          currentWinnersMatchIndex.value = winnersAccumulated + matchIdx; break;
-        }
-        case 'losers': {
-          let losersAccumulated = 0;
-          const losersRoundIdx = roundIdx - bracket.matches.winners.length;
-          for (let i = 0; i < losersRoundIdx; i++) losersAccumulated += bracket.matches.losers[i].length;
-          currentLosersMatchIndex.value = losersAccumulated + matchIdx; break;
-        }
-        case 'grand_finals': currentGrandFinalsIndex.value = matchIdx; break;
-      }
-    }
-  };
-
-  const showNextMatch = (bracketIdx) => {
-    activeBracketIdx.value = bracketIdx;
-    const bracket = brackets.value[bracketIdx];
-    if (bracket.type === 'Single Elimination') {
-      const totalMatches = bracket.matches.flat().length;
-      if (currentMatchIndex.value < totalMatches - 1) currentMatchIndex.value++;
-    } else if (bracket.type === 'Double Elimination') {
-      switch (activeBracketSection.value) {
-        case 'winners': {
-          const totalWinnersMatches = bracket.matches.winners.flat().length;
-          if (currentWinnersMatchIndex.value < totalWinnersMatches - 1) currentWinnersMatchIndex.value++;
-          break;
-        }
-        case 'losers': {
-          const totalLosersMatches = bracket.matches.losers.flat().length;
-          if (currentLosersMatchIndex.value < totalLosersMatches - 1) currentLosersMatchIndex.value++;
-          break;
-        }
-        case 'grand_finals': {
-          if (currentGrandFinalsIndex.value < bracket.matches.grand_finals.length - 1) currentGrandFinalsIndex.value++;
-          break;
-        }
-      }
-    }
-  };
-
-  const showPreviousMatch = (bracketIdx) => {
-    activeBracketIdx.value = bracketIdx;
-    const bracket = brackets.value[bracketIdx];
-    if (bracket.type === 'Single Elimination') {
-      if (currentMatchIndex.value > 0) currentMatchIndex.value--;
-    } else if (bracket.type === 'Double Elimination') {
-      switch (activeBracketSection.value) {
-        case 'winners': if (currentWinnersMatchIndex.value > 0) currentWinnersMatchIndex.value--; break;
-        case 'losers': if (currentLosersMatchIndex.value > 0) currentLosersMatchIndex.value--; break;
-        case 'grand_finals': if (currentGrandFinalsIndex.value > 0) currentGrandFinalsIndex.value--; break;
-      }
-    }
-  };
-
-  const currentMatch = (bracketIdx) => {
-    const bracket = brackets.value[bracketIdx];
-    if (bracket.type === 'Single Elimination') {
-      let accumulatedMatches = 0;
-      for (let roundIdx = 0; roundIdx < bracket.matches.length; roundIdx++) {
-        if (currentMatchIndex.value < accumulatedMatches + bracket.matches[roundIdx].length) {
-          const matchIdx = currentMatchIndex.value - accumulatedMatches;
-          return bracket.matches[roundIdx][matchIdx];
-        }
-        accumulatedMatches += bracket.matches[roundIdx].length;
-      }
-      return null;
-    } else if (bracket.type === 'Double Elimination') {
-      switch (activeBracketSection.value) {
-        case 'winners': {
-          let winnersAccumulated = 0;
-          for (let roundIdx = 0; roundIdx < bracket.matches.winners.length; roundIdx++) {
-            if (currentWinnersMatchIndex.value < winnersAccumulated + bracket.matches.winners[roundIdx].length) {
-              const matchIdx = currentWinnersMatchIndex.value - winnersAccumulated;
-              return bracket.matches.winners[roundIdx][matchIdx];
-            }
-            winnersAccumulated += bracket.matches.winners[roundIdx].length;
-          }
-          return null;
-        }
-        case 'losers': {
-          let losersAccumulated = 0;
-          for (let roundIdx = 0; roundIdx < bracket.matches.losers.length; roundIdx++) {
-            if (currentLosersMatchIndex.value < losersAccumulated + bracket.matches.losers[roundIdx].length) {
-              const matchIdx = currentLosersMatchIndex.value - losersAccumulated;
-              return bracket.matches.losers[roundIdx][matchIdx];
-            }
-            losersAccumulated += bracket.matches.losers[roundIdx].length;
-          }
-          return null;
-        }
-        case 'grand_finals':
-          return bracket.matches.grand_finals[currentGrandFinalsIndex.value];
-      }
-    }
-    return null;
   };
 
 const updateLines = (bracketIdx) => {
@@ -1437,45 +911,6 @@ const updateLines = (bracketIdx) => {
       }
     } catch (e) {
       console.error('Error saving bracket:', e);
-    }
-  };
-
-  const concludeMatch = (bracketIdx) => {
-    pendingBracketIdx.value = bracketIdx;
-    showConfirmDialog.value = true;
-  };
-
-  const getCurrentRound = (bracketIdx) => {
-    const bracket = brackets.value[bracketIdx];
-    if (bracket.type === 'Single Elimination') {
-      let totalMatches = 0;
-      for (let roundIdx = 0; roundIdx < bracket.matches.length; roundIdx++) {
-        totalMatches += bracket.matches[roundIdx].length;
-        if (currentMatchIndex.value < totalMatches) return roundIdx + 1;
-      }
-      return 1;
-    } else if (bracket.type === 'Double Elimination') {
-      const { roundIdx } = getRoundAndMatchIndices(bracketIdx, currentMatchIndex.value);
-      if (roundIdx < bracket.matches.winners.length) return `Winners Round ${roundIdx + 1}`;
-      if (roundIdx < bracket.matches.winners.length + bracket.matches.losers.length) return `Losers Round ${roundIdx - bracket.matches.winners.length + 1}`;
-      return 'Grand Finals';
-    }
-  };
-
-  const getTotalMatches = (bracketIdx) => {
-    const bracket = brackets.value[bracketIdx];
-    if (bracket.type === 'Single Elimination') return bracket.matches.flat().length;
-    if (bracket.type === 'Double Elimination') return bracket.matches.winners.reduce((s, r) => s + r.length, 0) + bracket.matches.losers.reduce((s, r) => s + r.length, 0) + bracket.matches.grand_finals.length;
-    return 0;
-  };
-
-  const navigateToSection = (bracketIdx, section) => {
-    activeBracketIdx.value = bracketIdx;
-    activeBracketSection.value = section;
-    switch (section) {
-      case 'winners': currentWinnersMatchIndex.value = 0; break;
-      case 'losers': currentLosersMatchIndex.value = 0; break;
-      case 'grand_finals': currentGrandFinalsIndex.value = 0; break;
     }
   };
 
@@ -1767,7 +1202,6 @@ const updateLines = (bracketIdx) => {
           if (bracket.matches.grand_finals[m].players[1].id === playerId) {
             bracket.matches.grand_finals[m].players[1].name = newName;
             bracket.matches.grand_finals[m].players[1].updated_at = new Date().toISOString();
-            bracket.matches.grand_finals[m].players[1].updated_at = new Date().toISOString();
           }
         }
       } else if (bracket.type === 'Round Robin') {
@@ -1863,75 +1297,81 @@ const updateLines = (bracketIdx) => {
             // Winners bracket final - advance to grand finals
             const grandFinalsMatch = bracket.matches.grand_finals[0];
             if (grandFinalsMatch) {
-              setPlayerWithLog(bracket, 'grand_finals', 0, 0, 0, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
-            }
-
-            // Convert TBD players to BYE in losers bracket round 1
-            const firstLosersRound = bracket.matches.losers[0];
-            firstLosersRound.forEach(match => {
-              if (match.players[0].name === 'TBD') {
-                setPlayerWithLog(bracket, 'losers', 0, firstLosersRound.indexOf(match), 0, { id: generateId(), name: 'BYE', score: 0, completed: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
-              }
-              if (match.players[1].name === 'TBD') {
-                setPlayerWithLog(bracket, 'losers', 0, firstLosersRound.indexOf(match), 1, { id: generateId(), name: 'BYE', score: 0, completed: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
-              }
-            });
-
-            // Auto-complete BYE matches in losers bracket
-            for (let r = 0; r < bracket.matches.losers.length - 1; r++) {
-              const currentRound = bracket.matches.losers[r];
-              currentRound.forEach((match, mIdx) => {
-                if (match.players[0].name === 'BYE' || match.players[1].name === 'BYE') {
-                  const winner2 = match.players[0].name === 'BYE' ? match.players[1] : match.players[0];
-                  winner2.completed = true;
-                  match.status = 'completed';
-                  match.winner_id = winner2.id;
-
-                  const nextMatchIdx2 = Math.floor(mIdx / 2);
-                  const nextPlayerPos2 = mIdx % 2 === 0 ? 0 : 1;
-                  setPlayerWithLog(bracket, 'losers', r + 1, nextMatchIdx2, nextPlayerPos2, { ...winner2, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
-                }
-              });
+              setPlayerWithLog(bracket, 'grand_finals', 0, 0, 0, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() }, performedActions);
             }
           }
           // Send loser to losers bracket
-          if (loser.name !== 'BYE') {
-            const losersRoundIdx = 0;
-            let totalLosers = 0;
-            for (let r = 0; r <= roundIdx; r++) {
-              for (let m = 0; m < bracket.matches.winners[r].length; m++) {
-                if (r === roundIdx && m === matchIdx) { break; }
-                if (bracket.matches.winners[r][m].loser_id) { totalLosers++; }
+          const newLoserPayload = loser.name === 'BYE'
+            ? { ...loser } // Keep BYE as is, it should be completed
+            : { ...loser, score: 0, completed: false, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() };
+
+          if (roundIdx === 0) { // Losers from Winners Round 1
+            // Find the index of this match among those that produce a loser.
+            // This is necessary because BYE matches in WR1 don't produce losers,
+            // which skews the original matchIdx.
+            const matchesWithLosers = bracket.matches.winners[0].filter(m => m.players[0]?.name !== "BYE" && m.players[1]?.name !== "BYE");
+            const loserIndex = matchesWithLosers.findIndex(m => m.id === match.id);
+
+            if (loserIndex !== -1) {
+              const losersRoundIdx = 0;
+              const losersMatchIdx = Math.floor(loserIndex / 2);
+              const losersPlayerPos = loserIndex % 2;
+              setPlayerWithLog(bracket, 'losers', losersRoundIdx, losersMatchIdx, losersPlayerPos, newLoserPayload, performedActions);
+            }
+          } else { // Losers from subsequent Winners Rounds
+            const losersRoundIdx = (roundIdx * 2) - 1;
+            const losersMatchIdx = matchIdx;
+            const losersPlayerPos = 1; // They play the winner of the previous losers round
+            setPlayerWithLog(bracket, 'losers', losersRoundIdx, losersMatchIdx, losersPlayerPos, newLoserPayload, performedActions);
+          }
+
+          // After a winners round match, check if the whole round is complete.
+          // If so, convert any remaining TBDs in the corresponding losers round to BYEs.
+          const currentWinnersRound = bracket.matches.winners[roundIdx];
+          const isWinnersRoundComplete = currentWinnersRound.every(m => m.status === 'completed' || m.players[0]?.name === 'BYE' || m.players[1]?.name === 'BYE');
+
+          if (isWinnersRoundComplete) {
+            if (roundIdx === 0) { // After Winners Round 1 is complete
+              const losersRound = bracket.matches.losers[0];
+              if (losersRound) {
+                losersRound.forEach((match, matchIndex) => {
+                  if (match.players[0].name === 'TBD') { setPlayerWithLog(bracket, 'losers', 0, matchIndex, 0, { id: generateId(), name: 'BYE', score: 0, completed: true, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() }, performedActions); }
+                  if (match.players[1].name === 'TBD') { setPlayerWithLog(bracket, 'losers', 0, matchIndex, 1, { id: generateId(), name: 'BYE', score: 0, completed: true, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() }, performedActions); }
+                });
+              }
+            } else { // After subsequent Winners Rounds (R2, R3, etc.) are complete
+              const losersRoundIdx = (roundIdx * 2) - 1;
+              const losersRound = bracket.matches.losers[losersRoundIdx];
+              if (losersRound) {
+                losersRound.forEach((match, matchIndex) => {
+                  if (match.players[1].name === 'TBD') { // Losers drop into player slot 1
+                     setPlayerWithLog(bracket, 'losers', losersRoundIdx, matchIndex, 1, { id: generateId(), name: 'BYE', score: 0, completed: true, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() }, performedActions);
+                  }
+                });
               }
             }
-            const losersMatchIdx = Math.floor(totalLosers / 2);
-            const losersPlayerPos = totalLosers % 2;
-            while (bracket.matches.losers[losersRoundIdx].length <= losersMatchIdx) {
-              bracket.matches.losers[losersRoundIdx].push({
-                id: generateId(),
-                round: 1,
-                match_number: bracket.matches.losers[losersRoundIdx].length + 1,
-                bracket_type: 'losers',
-                players: [
-                  { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-                  { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-                ],
-                winner_id: null,
-                loser_id: null,
-                status: 'pending',
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              });
-            }
-            setPlayerWithLog(bracket, 'losers', losersRoundIdx, losersMatchIdx, losersPlayerPos, { ...loser, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
           }
         } else if (bracketType === 'losers') {
           if (roundIdx < bracket.matches.losers.length - 1) {
             const nextRoundIdx = roundIdx + 1;
-            const nextMatchIdx = Math.floor(matchIdx / 2);
-            const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
+            let nextMatchIdx;
+            let nextPlayerPos;
+
+            // The structure of the losers bracket alternates.
+            // Rounds 0, 2, 4... feed into rounds 1, 3, 5... which often have the same number of matches.
+            // In this case, winner of match `i` advances to match `i`.
+            // Rounds 1, 3, 5... feed into rounds 2, 4, 6... which have half the number of matches.
+            // In this case, winners of matches `2i` and `2i+1` play each other.
+            if (roundIdx % 2 === 0) { // Advancing from a round like LR1 to LR2, or LR3 to LR4.
+              nextMatchIdx = matchIdx;
+              nextPlayerPos = 0; // Winners advance to the top slot of the next match.
+            } else { // Advancing from a round like LR2 to LR3, or LR4 to LR5.
+              nextMatchIdx = Math.floor(matchIdx / 2);
+              nextPlayerPos = matchIdx % 2;
+            }
+
             if (bracket.matches.losers[nextRoundIdx] && bracket.matches.losers[nextRoundIdx][nextMatchIdx]) {
-              setPlayerWithLog(bracket, 'losers', nextRoundIdx, nextMatchIdx, nextPlayerPos, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
+              setPlayerWithLog(bracket, 'losers', nextRoundIdx, nextMatchIdx, nextPlayerPos, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() }, performedActions);
             }
           } else {
             // Losers bracket final - advance to grand finals
@@ -1939,10 +1379,42 @@ const updateLines = (bracketIdx) => {
             if (grandFinalsMatch) {
               const winnersFinal = bracket.matches.winners[bracket.matches.winners.length - 1][0];
               if (winnersFinal.status === 'completed') {
-                setPlayerWithLog(bracket, 'grand_finals', 0, 0, 1, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
+                setPlayerWithLog(bracket, 'grand_finals', 0, 0, 1, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() }, performedActions);
               } else {
-                setPlayerWithLog(bracket, 'grand_finals', 0, 0, 0, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
+                setPlayerWithLog(bracket, 'grand_finals', 0, 0, 0, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() }, performedActions);
               }
+            }
+          }
+
+          // After a losers round match, check if the whole round is complete.
+          // If so, convert any remaining TBDs in the next losers round to BYEs.
+          const currentLosersRound = bracket.matches.losers[roundIdx];
+          const isLosersRoundComplete = currentLosersRound.every(m => m.status === 'completed' || m.players[0]?.name === 'BYE' || m.players[1]?.name === 'BYE');
+
+          if (isLosersRoundComplete && roundIdx < bracket.matches.losers.length - 1) {
+            const nextRoundIdx = roundIdx + 1;
+            const nextLosersRound = bracket.matches.losers[nextRoundIdx];
+
+            // When a losers round completes, check the next round for TBD slots that should now be BYEs.
+            if (nextLosersRound) {
+              nextLosersRound.forEach((match, matchIndex) => {
+                // For "major" rounds (odd index, e.g., LR2) that receive winners bracket losers,
+                // we should NOT convert the second player slot (players[1]) to a BYE here.
+                // That conversion is handled only when the corresponding WINNERS round is complete.
+                // We only handle players[0] here, which is fed by the current, completed losers round.
+                if (nextRoundIdx % 2 !== 0) { // e.g., advancing to LR2, LR4 (indices 1, 3, ...)
+                  if (match.players[0].name === 'TBD') {
+                    setPlayerWithLog(bracket, 'losers', nextRoundIdx, matchIndex, 0, { id: generateId(), name: 'BYE', score: 0, completed: true, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() }, performedActions);
+                  }
+                } else { // For "minor" consolidation rounds (even index, e.g., LR3, LR5, ...), both slots are fed from the previous losers round.
+                  if (match.players[0].name === 'TBD') {
+                    setPlayerWithLog(bracket, 'losers', nextRoundIdx, matchIndex, 0, { id: generateId(), name: 'BYE', score: 0, completed: true, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() }, performedActions);
+                  }
+                  if (match.players[1].name === 'TBD') {
+                    setPlayerWithLog(bracket, 'losers', nextRoundIdx, matchIndex, 1, { id: generateId(), name: 'BYE', score: 0, completed: true, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() }, performedActions);
+                  }
+                }
+              });
             }
           }
         } else if (bracketType === 'grand_finals') {
@@ -2042,12 +1514,6 @@ const updateLines = (bracketIdx) => {
     toggleBracket,
     createBracket,
     fetchBrackets,
-    editParticipant,
-    cancelEndMatch,
-    confirmEndMatch,
-    undoConcludeMatch,
-    getRoundAndMatchIndices,
-    isCurrentMatch,
     updateLines,
     removeBracket,
     calculateByes,

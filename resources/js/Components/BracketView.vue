@@ -180,6 +180,25 @@ const getPlayerStyling = (player, otherPlayer, match, part) => {
 
     return styling;
 };
+
+const getRoundRobinPlayerStyling = (player, otherPlayer, match) => {
+    if (!player || player.name === 'BYE' || player.name === 'TBD' || !player.id) {
+        return {
+            'bye-text': player.name === 'BYE',
+            'tbd-text': !player.name || player.name === 'TBD',
+        };
+    }
+
+    if (match.status !== 'completed') {
+        return { 'facing-bye': otherPlayer.name === 'BYE' };
+    }
+
+    return {
+        'winner-name': match.winner_id === player.id && !match.is_tie,
+        'loser-name': match.loser_id === player.id && !match.is_tie,
+        'tie-name': match.is_tie, // You may want to add a .tie-name style for ties
+    };
+};
 </script>
 
 <template>
@@ -244,27 +263,13 @@ const getPlayerStyling = (player, otherPlayer, match, part) => {
             >
             <div class="player-box">
                 <span
-                :class="{
-                    winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score > match.players[1].score,
-                    'bye-text': match.players[0].name === 'BYE',
-                    'facing-bye': match.players[1].name === 'BYE',
-                    'tbd-text': (!match.players[0].name || match.players[0].name === 'TBD') || ((match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && (match.players[0].score < match.players[1].score || (match.players[0].score === match.players[1].score && match.is_tie))),
-                    'loser-name': match.loser_id === match.players[0].id,
-                    'winner-name': match.winner_id === match.players[0].id
-                }"
+                :class="getRoundRobinPlayerStyling(match.players[0], match.players[1], match)"
                 >
                 {{ truncate(match.players[0].name, { length: 15 }) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
                 </span>
                 <hr />
                 <span
-                :class="{
-                    winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score > match.players[0].score,
-                    'bye-text': match.players[1].name === 'BYE',
-                    'facing-bye': match.players[0].name === 'BYE',
-                    'tbd-text': (!match.players[1].name || match.players[1].name === 'TBD') || ((match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && (match.players[1].score < match.players[0].score || (match.players[1].score === match.players[0].score && match.is_tie))),
-                    'loser-name': match.loser_id === match.players[1].id,
-                    'winner-name': match.winner_id === match.players[1].id
-                }"
+                :class="getRoundRobinPlayerStyling(match.players[1], match.players[0], match)"
                 >
                 {{ truncate(match.players[1].name, { length: 15 }) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
                 </span>
