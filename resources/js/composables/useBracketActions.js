@@ -64,6 +64,18 @@ export function useBracketActions(state) {
     bracketMatchFilters,
   } = state;
 
+  const getSeedingOrder = (n) => {
+    if (n <= 1) return [1];
+    if (n === 2) return [1, 2];
+    const prevOrder = getSeedingOrder(n / 2);
+    const newOrder = [];
+    for (const seed of prevOrder) {
+        newOrder.push(seed);
+        newOrder.push(n + 1 - seed);
+    }
+    return newOrder;
+  };
+
   const bracketTypeOptions = state.bracketTypeOptions;
 
   // Action log for precise undo of slot assignments per bracket
@@ -393,7 +405,7 @@ export function useBracketActions(state) {
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
   const generateBracket = () => {
-    const numPlayers = numberOfPlayers.value;
+    const numPlayers = parseInt(numberOfPlayers.value, 10);
     const totalSlots = Math.pow(2, Math.ceil(Math.log2(numPlayers)));
     const totalByes = totalSlots - numPlayers;
 
@@ -414,19 +426,22 @@ export function useBracketActions(state) {
       updated_at: new Date().toISOString(),
     }));
 
-    const slots = Array(totalSlots).fill(null);
-    let byeIndex = 0;
-    for (let i = totalSlots - 2; i >= 0; i -= 2) {
-      if (byeIndex < byes.length) {
-        slots[i + 1] = byes[byeIndex++];
-      }
+    // Standard seeding: give BYEs to top seeds.
+    const seedToParticipant = new Map();
+    for (let i = 0; i < numPlayers; i++) {
+      seedToParticipant.set(i + 1, players[i]);
+    }
+    // Byes get the highest seed numbers, which means they will be paired against top seeds.
+    for (let i = 0; i < totalByes; i++) {
+      seedToParticipant.set(numPlayers + 1 + i, byes[i]);
     }
 
-    let playerIndex = 0;
+    const slots = Array(totalSlots).fill(null);
+    const seedingOrder = getSeedingOrder(totalSlots);
     for (let i = 0; i < totalSlots; i++) {
-      if (!slots[i] && playerIndex < players.length) {
-        slots[i] = players[playerIndex++];
-      }
+      const seed = seedingOrder[i];
+      const participant = seedToParticipant.get(seed);
+      slots[i] = participant;
     }
 
     const firstRound = [];
@@ -481,7 +496,7 @@ export function useBracketActions(state) {
   };
 
   const generateDoubleEliminationBracket = () => {
-    const numPlayers = numberOfPlayers.value;
+    const numPlayers = parseInt(numberOfPlayers.value, 10);
     const totalSlots = Math.pow(2, Math.ceil(Math.log2(numPlayers)));
     const totalByes = totalSlots - numPlayers;
 
@@ -502,20 +517,25 @@ export function useBracketActions(state) {
       updated_at: new Date().toISOString(),
     }));
 
+    // Standard seeding for winners bracket: give BYEs to top seeds.
+    const seedToParticipant = new Map();
+    for (let i = 0; i < numPlayers; i++) {
+      seedToParticipant.set(i + 1, players[i]);
+    }
+    // Byes get the highest seed numbers, which means they will be paired against top seeds.
+    for (let i = 0; i < totalByes; i++) {
+      seedToParticipant.set(numPlayers + 1 + i, byes[i]);
+    }
+
     const winnersSlots = Array(totalSlots).fill(null);
-    const losersSlots = Array(totalSlots - 1).fill(null);
-    let byeIndex = 0;
-    for (let i = totalSlots - 2; i >= 0; i -= 2) {
-      if (byeIndex < byes.length) {
-        winnersSlots[i + 1] = byes[byeIndex++];
-      }
-    }
-    let playerIndex = 0;
+    const seedingOrder = getSeedingOrder(totalSlots);
     for (let i = 0; i < totalSlots; i++) {
-      if (!winnersSlots[i] && playerIndex < players.length) {
-        winnersSlots[i] = players[playerIndex++];
-      }
+      const seed = seedingOrder[i];
+      const participant = seedToParticipant.get(seed);
+      winnersSlots[i] = participant;
     }
+
+    const losersSlots = Array(totalSlots - 1).fill(null);
 
     const winnersFirstRound = [];
     for (let i = 0; i < totalSlots; i += 2) {
@@ -650,7 +670,7 @@ export function useBracketActions(state) {
   };
 
   const generateRoundRobinBracket = () => {
-    const numPlayers = numberOfPlayers.value;
+    const numPlayers = parseInt(numberOfPlayers.value, 10);
 
     // Ensure even number of participants by adding BYE when needed
     const adjustedNumPlayers = numPlayers % 2 === 0 ? numPlayers : numPlayers + 1;
