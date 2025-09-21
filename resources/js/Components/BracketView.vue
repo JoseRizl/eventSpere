@@ -73,6 +73,113 @@ const isRoundOngoing = (bracketPart, roundIdx) => {
     if (!ongoingRoundIdentifier.value) return false;
     return ongoingRoundIdentifier.value.part === bracketPart && ongoingRoundIdentifier.value.roundIdx === roundIdx;
 };
+
+const bracketAnalysis = computed(() => {
+    const bracket = props.bracket;
+    const analysis = {
+        singleElimWinnerId: null,
+        deWinnersWinnerId: null,
+        deLosersWinnerId: null,
+        deGrandFinalsWinnerId: null,
+        eliminatedPlayerIds: new Set(), // Players out of the tournament
+        demotedPlayerIds: new Set(), // Players who lost in winners and went to losers
+    };
+
+    if (!bracket.matches) return analysis;
+
+    if (bracket.type === 'Single Elimination') {
+        const allMatches = bracket.matches.flat();
+        allMatches.forEach(match => {
+            if (match.status === 'completed' && match.loser_id) {
+                analysis.eliminatedPlayerIds.add(match.loser_id);
+            }
+        });
+
+        const finalRound = bracket.matches[bracket.matches.length - 1];
+        if (finalRound && finalRound[0] && finalRound[0].status === 'completed') {
+            analysis.singleElimWinnerId = finalRound[0].winner_id;
+        }
+    } else if (bracket.type === 'Double Elimination') {
+        // Winners bracket: find winner and demoted players
+        if (bracket.matches.winners && bracket.matches.winners.length > 0) {
+            const finalWinnersMatch = bracket.matches.winners[bracket.matches.winners.length - 1][0];
+            if (finalWinnersMatch && finalWinnersMatch.status === 'completed') {
+                analysis.deWinnersWinnerId = finalWinnersMatch.winner_id;
+            }
+            bracket.matches.winners.flat().forEach(match => {
+                if (match.status === 'completed' && match.loser_id) {
+                    analysis.demotedPlayerIds.add(match.loser_id);
+                }
+            });
+        }
+
+        // Losers bracket: find winner and eliminated players
+        if (bracket.matches.losers && bracket.matches.losers.length > 0) {
+            const finalLosersMatch = bracket.matches.losers[bracket.matches.losers.length - 1][0];
+            if (finalLosersMatch && finalLosersMatch.status === 'completed') {
+                analysis.deLosersWinnerId = finalLosersMatch.winner_id;
+            }
+            bracket.matches.losers.flat().forEach(match => {
+                if (match.status === 'completed' && match.loser_id) {
+                    analysis.eliminatedPlayerIds.add(match.loser_id);
+                }
+            });
+        }
+
+        // Grand finals: find winner and final eliminated player
+        if (bracket.matches.grand_finals && bracket.matches.grand_finals.length > 0) {
+            const grandFinalsMatch = bracket.matches.grand_finals[0];
+            if (grandFinalsMatch && grandFinalsMatch.status === 'completed') {
+                analysis.deGrandFinalsWinnerId = grandFinalsMatch.winner_id;
+                if (grandFinalsMatch.loser_id) {
+                    analysis.eliminatedPlayerIds.add(grandFinalsMatch.loser_id);
+                }
+            }
+        }
+    }
+
+    return analysis;
+});
+
+const getPlayerStyling = (player, otherPlayer, match, part) => {
+    if (!player || player.name === 'BYE' || player.name === 'TBD' || !player.id) {
+        return {
+            'bye-text': player.name === 'BYE',
+            'tbd-text': !player.name || player.name === 'TBD',
+        };
+    }
+
+    const analysis = bracketAnalysis.value;
+    const bracket = props.bracket;
+    let styling = {
+        'facing-bye': otherPlayer.name === 'BYE'
+    };
+
+    let isEliminatedOrDemoted = false;
+    if (bracket.type === 'Single Elimination') {
+        isEliminatedOrDemoted = analysis.eliminatedPlayerIds.has(player.id);
+    } else if (bracket.type === 'Double Elimination') {
+        if (part === 'winners') {
+            isEliminatedOrDemoted = analysis.demotedPlayerIds.has(player.id);
+        } else if (part === 'losers' || part === 'grand_finals') {
+            isEliminatedOrDemoted = analysis.eliminatedPlayerIds.has(player.id);
+        }
+    }
+
+    // If a player has been eliminated or demoted from their bracket section,
+    // all their names in that section turn gray.
+    if (isEliminatedOrDemoted) {
+        styling['loser-name'] = true;
+        return styling;
+    }
+
+    // If they are still active in this section, style based on the individual match result.
+    if (match.status === 'completed' && match.winner_id === player.id) {
+        styling['winner-name'] = true;
+    }
+
+    return styling;
+};
 </script>
 
 <template>
@@ -106,27 +213,13 @@ const isRoundOngoing = (bracketPart, roundIdx) => {
         >
             <div class="player-box">
                 <span
-                :class="{
-                    winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score >= match.players[1].score,
-                    'bye-text': match.players[0].name === 'BYE',
-                    'facing-bye': match.players[1].name === 'BYE',
-                    'tbd-text': (!match.players[0].name || match.players[0].name === 'TBD') || ((match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score),
-                    'loser-name': match.loser_id === match.players[0].id,
-                    'winner-name': match.winner_id === match.players[0].id
-                }"
+                :class="getPlayerStyling(match.players[0], match.players[1], match, 'single')"
                 >
                 {{ truncate(match.players[0].name, { length: 13 }) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
                 </span>
                 <hr />
                 <span
-                :class="{
-                    winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score >= match.players[0].score,
-                    'bye-text': match.players[1].name === 'BYE',
-                    'facing-bye': match.players[0].name === 'BYE',
-                    'tbd-text': (!match.players[1].name || match.players[1].name === 'TBD') || ((match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score),
-                    'loser-name': match.loser_id === match.players[1].id,
-                    'winner-name': match.winner_id === match.players[1].id
-                }"
+                :class="getPlayerStyling(match.players[1], match.players[0], match, 'single')"
                 >
                 {{ truncate(match.players[1].name, { length: 13 }) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
                 </span>
@@ -253,27 +346,13 @@ const isRoundOngoing = (bracketPart, roundIdx) => {
             >
                 <div class="player-box">
                 <span
-                    :class="{
-                    winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score >= match.players[1].score,
-                    'bye-text': match.players[0].name === 'BYE',
-                    'facing-bye': match.players[1].name === 'BYE',
-                    'tbd-text': (!match.players[0].name || match.players[0].name === 'TBD') || ((match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score),
-                    'loser-name': match.loser_id === match.players[0].id,
-                    'winner-name': match.winner_id === match.players[0].id
-                    }"
+                    :class="getPlayerStyling(match.players[0], match.players[1], match, 'winners')"
                 >
                     {{ truncate(match.players[0].name, { length: 13 }) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
                 </span>
                 <hr />
                 <span
-                    :class="{
-                    winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score >= match.players[0].score,
-                    'bye-text': match.players[1].name === 'BYE',
-                    'facing-bye': match.players[0].name === 'BYE',
-                    'tbd-text': (!match.players[1].name || match.players[1].name === 'TBD') || ((match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score),
-                    'loser-name': match.loser_id === match.players[1].id,
-                    'winner-name': match.winner_id === match.players[1].id
-                    }"
+                    :class="getPlayerStyling(match.players[1], match.players[0], match, 'winners')"
                 >
                     {{ truncate(match.players[1].name, { length: 13 }) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
                 </span>
@@ -313,27 +392,13 @@ const isRoundOngoing = (bracketPart, roundIdx) => {
             >
                 <div class="player-box">
                 <span
-                    :class="{
-                    winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score >= match.players[1].score,
-                    'bye-text': match.players[0].name === 'BYE',
-                    'facing-bye': match.players[1].name === 'BYE',
-                    'tbd-text': (!match.players[0].name || match.players[0].name === 'TBD') || ((match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score),
-                    'loser-name': match.loser_id === match.players[0].id,
-                    'winner-name': match.winner_id === match.players[0].id
-                    }"
+                    :class="getPlayerStyling(match.players[0], match.players[1], match, 'losers')"
                 >
                     {{ truncate(match.players[0].name, { length: 13 }) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
                 </span>
                 <hr />
                 <span
-                    :class="{
-                    winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score >= match.players[0].score,
-                    'bye-text': match.players[1].name === 'BYE',
-                    'facing-bye': match.players[0].name === 'BYE',
-                    'tbd-text': (!match.players[1].name || match.players[1].name === 'TBD') || ((match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score),
-                    'loser-name': match.loser_id === match.players[1].id,
-                    'winner-name': match.winner_id === match.players[1].id
-                    }"
+                    :class="getPlayerStyling(match.players[1], match.players[0], match, 'losers')"
                 >
                     {{ truncate(match.players[1].name, { length: 13 }) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
                 </span>
@@ -369,23 +434,13 @@ const isRoundOngoing = (bracketPart, roundIdx) => {
             >
             <div class="player-box">
                 <span
-                :class="{
-                    winner: (match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score >= match.players[1].score,
-                    'bye-text': match.players[0].name === 'BYE',
-                    'facing-bye': match.players[1].name === 'BYE',
-                    'tbd-text': (!match.players[0].name || match.players[0].name === 'TBD') || ((match.players[0].name && match.players[0].name !== 'TBD') && match.players[0].completed && match.players[0].score < match.players[1].score)
-                }"
+                :class="getPlayerStyling(match.players[0], match.players[1], match, 'grand_finals')"
                 >
                 {{ truncate(match.players[0].name, { length: 13 }) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
                 </span>
                 <hr />
                 <span
-                :class="{
-                    winner: (match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score >= match.players[0].score,
-                    'bye-text': match.players[1].name === 'BYE',
-                    'facing-bye': match.players[0].name === 'BYE',
-                    'tbd-text': (!match.players[1].name || match.players[1].name === 'TBD') || ((match.players[1].name && match.players[1].name !== 'TBD') && match.players[1].completed && match.players[1].score < match.players[0].score)
-                }"
+                :class="getPlayerStyling(match.players[1], match.players[0], match, 'grand_finals')"
                 >
                 {{ truncate(match.players[1].name, { length: 13 }) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
                 </span>
