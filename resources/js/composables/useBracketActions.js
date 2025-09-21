@@ -165,6 +165,10 @@ export function useBracketActions(state) {
         currentRound.forEach((match, matchIdx) => {
           if (match.players[0].name === 'BYE' || match.players[1].name === 'BYE') {
             const winner = match.players[0].name === 'BYE' ? match.players[1] : match.players[0];
+            if (winner.name === 'TBD' || winner.name === 'BYE') {
+                return; // Skip TBD vs BYE or BYE vs BYE
+            }
+
             winner.completed = true;
             match.status = 'completed';
             match.winner_id = winner.id;
@@ -191,6 +195,10 @@ export function useBracketActions(state) {
         currentRound.forEach((match, matchIdx) => {
           if (match.players[0].name === 'BYE' || match.players[1].name === 'BYE') {
             const winner = match.players[0].name === 'BYE' ? match.players[1] : match.players[0];
+            if (winner.name === 'TBD' || winner.name === 'BYE') {
+                return; // Skip TBD vs BYE or BYE vs BYE
+            }
+
             winner.completed = true;
             match.status = 'completed';
             match.winner_id = winner.id;
@@ -216,6 +224,10 @@ export function useBracketActions(state) {
         currentRound.forEach((match, matchIdx) => {
           if (match.players[0].name === 'BYE' || match.players[1].name === 'BYE') {
             const winner = match.players[0].name === 'BYE' ? match.players[1] : match.players[0];
+            if (winner.name === 'TBD' || winner.name === 'BYE') {
+                return; // Skip TBD vs BYE or BYE vs BYE
+            }
+
             winner.completed = true;
             match.status = 'completed';
             match.winner_id = winner.id;
@@ -1933,6 +1945,11 @@ const updateLines = (bracketIdx) => {
       match.loser_id = null;
       // Note: Undoing bracket progression would be complex and might cause data inconsistencies
       // For now, we'll just undo the match status and let users manually fix if needed
+    }
+
+    // Process any resulting BYE matches before saving.
+    if (bracket.type === 'Single Elimination' || bracket.type === 'Double Elimination') {
+        handleByeRounds(bracketIdx);
     }
 
     try {
