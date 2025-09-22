@@ -629,4 +629,22 @@ const confirmDeleteAnnouncement = async () => {
     align-items: stretch;
   }
 }
+
+/* Custom Severity Tag Colors */
+:deep(.p-tag-success) {
+    background-color: #10B981; /* Tailwind green-500 */
+    color: #ffffff;
+}
+:deep(.p-tag-warning) {
+    background-color: #F59E0B; /* Tailwind amber-500 */
+    color: #ffffff;
+}
+:deep(.p-tag-danger) {
+    background-color: #EF4444; /* Tailwind red-500 */
+    color: #ffffff;
+}
+:deep(.p-tag-info) {
+    background-color: #3B82F6; /* Tailwind blue-500 */
+    color: #ffffff;
+}
 </style>

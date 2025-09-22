@@ -23,6 +23,14 @@ export function useEvents({ searchQuery, startDateFilter, endDateFilter }) {
         }
     };
 
+    const isEventOngoing = (event) => {
+        const now = new Date();
+        const start = getFullDateTime(event.startDate, event.startTime);
+        const end = getFullDateTime(event.endDate || event.startDate, event.endTime || '23:59');
+        if (!start || !end) return false;
+        return isWithinInterval(now, { start, end });
+    };
+
     const filteredNews = computed(() => {
         let news = allNews.value;
 
@@ -56,22 +64,18 @@ export function useEvents({ searchQuery, startDateFilter, endDateFilter }) {
     });
 
     const ongoingEvents = computed(() => {
-        const now = new Date();
-        const events = filteredNews.value.filter((news) => {
-            const start = getFullDateTime(news.startDate, news.startTime);
-            const end = getFullDateTime(news.endDate || news.startDate, news.endTime || '23:59');
-            return isWithinInterval(now, { start, end });
-        });
-        return events.sort((a, b) => getFullDateTime(a.startDate, a.startTime) - getFullDateTime(b.startDate, b.startTime));
+        return filteredNews.value
+            .filter(isEventOngoing)
+            .sort((a, b) => getFullDateTime(a.startDate, a.startTime) - getFullDateTime(b.startDate, b.startTime));
     });
 
     const eventsThisMonth = computed(() => {
         const now = new Date();
         const events = filteredNews.value.filter((news) => {
             const start = getFullDateTime(news.startDate, news.startTime);
-            const end = getFullDateTime(news.endDate || news.startDate, news.endTime || '23:59');
-            if (!start || !end) return false;
-            return isSameMonth(start, now) && !isWithinInterval(now, { start, end });
+            if (!start) return false;
+            // Exclude ongoing events, which are shown in their own section
+            return isSameMonth(start, now) && !isEventOngoing(news);
         });
         return events.sort((a, b) => getFullDateTime(a.startDate, a.startTime) - getFullDateTime(b.startDate, b.startTime));
     });
@@ -128,13 +132,12 @@ export function useEvents({ searchQuery, startDateFilter, endDateFilter }) {
         if (!startDateTime || !endDateTime) return 'Upcoming';
 
         if (endDateTime < now) return 'Ended';
-        if (startDateTime <= now && now <= endDateTime) return 'Ongoing';
+        if (isEventOngoing(event)) return 'Happening Now';
 
         const diffHours = differenceInHours(startDateTime, now);
         const diffDays = differenceInDays(startDateTime, now);
 
-        if (diffHours < 1) return 'Starting Soon';
-        if (diffHours < 24) return 'Today';
+        if (diffHours < 24) return 'Starting Soon';
         if (diffDays < 3) return 'Very Soon';
         if (diffDays < 7) return 'This Week';
         if (diffDays < 14) return 'Next Week';
@@ -152,7 +155,7 @@ export function useEvents({ searchQuery, startDateFilter, endDateFilter }) {
         if (!startDateTime || !endDateTime) return 'info'; // Default for invalid dates
 
         if (endDateTime < now) return null; // Ended events have no severity
-        if (startDateTime <= now && now <= endDateTime) return 'success'; // Ongoing
+        if (isEventOngoing(event)) return 'success'; // Ongoing
 
         const diffHours = differenceInHours(startDateTime, now);
 
