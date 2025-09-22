@@ -244,8 +244,16 @@ export function useBracketActions(state) {
             match.status = 'completed';
             match.winner_id = winner.id;
             const nextRoundIdx = roundIdx + 1;
-            const nextMatchIdx = Math.floor(matchIdx / 2);
-            const nextPlayerPos = matchIdx % 2;
+            let nextMatchIdx;
+            let nextPlayerPos;
+
+            if (roundIdx % 2 === 0) { // Advancing from LR1->LR2, LR3->LR4
+              nextMatchIdx = matchIdx;
+              nextPlayerPos = 0;
+            } else { // Advancing from LR2->LR3, LR4->LR5
+              nextMatchIdx = Math.floor(matchIdx / 2);
+              nextPlayerPos = matchIdx % 2;
+            }
 
             if (bracket.matches.losers[nextRoundIdx] && bracket.matches.losers[nextRoundIdx][nextMatchIdx]) {
               const nextMatch = bracket.matches.losers[nextRoundIdx][nextMatchIdx];
@@ -575,72 +583,23 @@ export function useBracketActions(state) {
       currentRound = nextRound;
     }
 
-    // --- Losers Bracket Generation (dynamic) ---
+    // --- Losers Bracket Generation ---
     const losersRounds = [];
     const numWinnerRounds = winnersRounds.length;
-
-    // Step 1: Generate Losers Round 1 dynamically based on actual losers from Winners Round 1.
-    const wr1Matches = winnersRounds[0];
-    const wr1Losers = wr1Matches
-      .filter(m => m.players[0]?.name !== "BYE" && m.players[1]?.name !== "BYE")
-      .map(m => ({
-        id: null,
-        name: `Loser of WR1 M${m.match_number}`,
-        score: 0,
-        completed: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }));
-
-    const numMatchesInLR1 = Math.ceil(wr1Losers.length / 2);
-
-    if (numMatchesInLR1 > 0) {
-      const lr1 = [];
-      for (let i = 0; i < wr1Losers.length; i += 2) {
-        lr1.push({
-          id: generateId(),
-          round: 1,
-          match_number: lr1.length + 1,
-          bracket_type: 'losers',
-          players: [
-            wr1Losers[i],
-            wr1Losers[i + 1] || {
-              id: generateId(),
-              name: 'BYE',
-              score: 0,
-              completed: true,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            },
-          ],
-          winner_id: null, loser_id: null, status: 'pending',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          date: selectedEvent.value.startDate,
-          time: selectedEvent.value.startTime,
-          venue: selectedEvent.value.venue,
-        });
-      }
-      losersRounds.push(lr1);
-    }
-
-    // Step 2: Generate the rest of the losers bracket rounds with a standard structure.
     const totalLoserRounds = 2 * (numWinnerRounds - 1);
-    // Start with match count from LR1, or from what LR2 would have if LR1 doesn't exist.
-    let matchCount = losersRounds.length > 0 ? losersRounds[0].length : totalSlots / 4;
 
-    for (let i = losersRounds.length; i < totalLoserRounds; i++) {
-      // `i` is the 0-based index of the round to generate.
-      // Match count halves for "minor" consolidation rounds (LR3, LR5, etc.), which are at even indices > 0.
-      if (i > 0 && i % 2 === 0) {
-        matchCount /= 2;
-      }
+    // Step 1: Generate the full, empty structure of the losers bracket based on total slots.
+    // This ensures the structure is correct regardless of the number of players or byes.
+    for (let i = 0; i < totalLoserRounds; i++) {
+      // The number of matches halves for every "minor" consolidation round (LR3, LR5, etc.)
+      // which are at even-numbered indices (i=2, 4, ...).
+      const matchCount = totalSlots / Math.pow(2, Math.floor(i / 2) + 2);
 
-      if (matchCount < 1) matchCount = 1;
+      if (matchCount < 1) continue;
 
-      const round = Array.from({ length: Math.floor(matchCount) }, (_, j) => ({
+      const round = Array.from({ length: matchCount }, (_, j) => ({
         id: generateId(),
-        round: losersRounds.length + 1,
+        round: i + 1,
         match_number: j + 1,
         bracket_type: 'losers',
         players: [
@@ -655,6 +614,35 @@ export function useBracketActions(state) {
         venue: selectedEvent.value.venue,
       }));
       losersRounds.push(round);
+    }
+
+    // Step 2: Populate Losers Round 1 with actual losers from Winners Round 1.
+    const wr1Matches = winnersRounds[0];
+    const wr1Losers = wr1Matches
+      .filter(m => m.players[0]?.name !== "BYE" && m.players[1]?.name !== "BYE")
+      .map(m => ({
+        id: null,
+        name: `Loser of WR1 M${m.match_number}`,
+        score: 0,
+        completed: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }));
+
+    if (losersRounds.length > 0 && losersRounds[0]) {
+      const lr1 = losersRounds[0];
+      let loserIndex = 0;
+      for (let i = 0; i < lr1.length; i++) {
+        // Player 1
+        lr1[i].players[0] = wr1Losers[loserIndex]
+          ? wr1Losers[loserIndex++]
+          : { id: generateId(), name: 'BYE', score: 0, completed: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+
+        // Player 2
+        lr1[i].players[1] = wr1Losers[loserIndex]
+          ? wr1Losers[loserIndex++]
+          : { id: generateId(), name: 'BYE', score: 0, completed: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+      }
     }
 
     // --- Grand Finals ---
@@ -839,7 +827,14 @@ const updateLines = (bracketIdx) => {
             const current = bracket.matches.losers[round];
             current.forEach((match, i) => {
               const fromEl = document.getElementById(`losers-match-${bracketIdx}-${round}-${i}`);
-              const toEl = document.getElementById(`losers-match-${bracketIdx}-${round + 1}-${Math.floor(i / 2)}`);
+              let nextMatchIdx;
+              // The structure of the losers bracket alternates.
+              if (round % 2 === 0) { // Advancing from a round like LR1 to LR2, or LR3 to LR4.
+                nextMatchIdx = i;
+              } else { // Advancing from a round like LR2 to LR3, or LR4 to LR5.
+                nextMatchIdx = Math.floor(i / 2);
+              }
+              const toEl = document.getElementById(`losers-match-${bracketIdx}-${round + 1}-${nextMatchIdx}`);
               if (!fromEl || !toEl) return;
               const fromRect = fromEl.getBoundingClientRect();
               const toRect = toEl.getBoundingClientRect();
