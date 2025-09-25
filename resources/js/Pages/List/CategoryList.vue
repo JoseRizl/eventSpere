@@ -435,8 +435,8 @@ export default defineComponent({
       </div>
 
       <template #footer>
-        <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="isEditModalVisible = false" />
-        <Button label="Save Changes" icon="pi pi-check" class="p-button-primary" @click="saveEditedItem" />
+        <button class="modal-button-secondary" @click="isEditModalVisible = false">Cancel</button>
+        <button class="modal-button-primary" @click="saveEditedItem">Save Changes</button>
       </template>
     </Dialog>
 
@@ -481,8 +481,8 @@ export default defineComponent({
       </div>
 
       <template #footer>
-        <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="isCreateModalVisible = false" />
-        <Button :label="`Create ${showTags ? 'Tag' : 'Category'}`" icon="pi pi-check" class="p-button-primary" @click="createItem" />
+        <button class="modal-button-secondary" @click="isCreateModalVisible = false">Cancel</button>
+        <button class="modal-button-primary" @click="createItem">{{ `Create ${showTags ? 'Tag' : 'Category'}` }}</button>
       </template>
     </Dialog>
 
@@ -517,6 +517,7 @@ export default defineComponent({
       v-model:show="showDeleteConfirm"
       :title="`Delete ${showTags ? 'Tag' : 'Category'}?`"
       :message="`Are you sure you want to delete this ${showTags ? 'tag' : 'category'}?`"
+      confirmButtonClass="modal-button-danger"
       @confirm="confirmDelete"
     />
   </div>
@@ -559,23 +560,6 @@ export default defineComponent({
 .search-container .p-input-icon-left .p-inputtext {
   width: 100%;
   padding-left: 2.5rem;
-}
-
-.create-button {
-  background: #7e0bc1;
-  color: white;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: bold;
-  margin: 0;
-  height: 40px;
-}
-
-.create-button:hover {
-  background-color: #6800b3e9;
 }
 
 .no-results-message {

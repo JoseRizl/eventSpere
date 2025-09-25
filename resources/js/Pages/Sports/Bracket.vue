@@ -318,7 +318,7 @@ onMounted(async () => {
           </div>
 
           <div class="button-container">
-            <Button label="Create Bracket" class="p-button-success" @click="createBracket" />
+            <button class="modal-button-primary w-full" @click="createBracket">Create Bracket</button>
           </div>
         </div>
       </Dialog>
@@ -424,12 +424,12 @@ onMounted(async () => {
             <Button
               label="Cancel"
               @click="closeScoringConfigDialog"
-              class="p-button-secondary"
+              class="modal-button-secondary"
             />
             <Button
               label="Save"
               @click="saveScoringConfig"
-              class="p-button-success"
+              class="modal-button-primary"
             />
           </div>
         </div>
@@ -555,12 +555,12 @@ onMounted(async () => {
             <Button
               label="Cancel"
               @click="closeMatchEditorDialog"
-              class="p-button-secondary"
+              class="modal-button-secondary"
             />
             <Button
               label="Update Match"
               @click="confirmMatchUpdate"
-              class="p-button-success"
+              class="modal-button-primary"
               :disabled="isMatchDataInvalid"
             />
           </div>

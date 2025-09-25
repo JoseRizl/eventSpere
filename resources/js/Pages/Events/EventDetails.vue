@@ -1485,8 +1485,8 @@ const getBracketIndex = (bracketId) => {
             </div>
         </div>
         <template #footer>
-            <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="showAddAnnouncementModal = false" />
-            <Button label="Post" icon="pi pi-check" @click="addAnnouncement" :loading="saving" />
+            <button class="modal-button-secondary" @click="showAddAnnouncementModal = false">Cancel</button>
+            <button class="modal-button-primary" @click="addAnnouncement" :disabled="saving">Post</button>
         </template>
     </Dialog>
 
@@ -1549,12 +1549,12 @@ const getBracketIndex = (bracketId) => {
         <Button
             label="Cancel"
             @click="closeScoringConfigDialog"
-            class="p-button-secondary"
+            class="modal-button-secondary"
         />
         <Button
             label="Save"
             @click="saveScoringConfig"
-            class="p-button-success"
+            class="modal-button-primary"
         />
         </div>
     </div>
@@ -1680,12 +1680,12 @@ const getBracketIndex = (bracketId) => {
         <Button
             label="Cancel"
             @click="closeMatchEditorDialog"
-            class="p-button-secondary"
+            class="modal-button-secondary"
         />
         <Button
             label="Update Match"
             @click="confirmMatchUpdate"
-            class="p-button-success"
+            class="modal-button-primary"
             :disabled="isMatchDataInvalid"
         />
         </div>

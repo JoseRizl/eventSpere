@@ -244,29 +244,55 @@
       }
 
       .create-button {
-        /* keep your original utilities but remove the solid bg color */
-        @apply text-white px-4 py-2.5 border-0 rounded-md cursor-pointer text-base font-bold my-5;
+        /* Base styles using Tailwind utilities */
+        @apply text-white px-4 py-2.5 border-0 rounded-md cursor-pointer text-base font-bold transition-all duration-200;
 
-        /* gradient background using Tailwind gradient utilities */
-        @apply bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-500;
+        /* Normal state: Subtle gradient from your base color to a slightly darker shade */
+        @apply bg-gradient-to-b from-[#0077B3] to-[#006da1];
+      }
 
-        /* subtle lift / depth */
-        box-shadow: 0 6px 18px rgba(79, 70, 229, 0.18);
-        transition: transform .12s ease, box-shadow .12s ease;
-        }
+      .create-button:hover {
+        /* Hover state: Subtle gradient from your hover color to a slightly darker shade */
+        @apply bg-gradient-to-b from-[#A4CBE1] to-[#9AC0D9] text-gray-800;
+      }
 
-        .create-button:hover {
-        /* darker gradient on hover */
-        @apply from-purple-700 via-indigo-700 to-pink-600;
-        transform: translateY(-2px);
-        }
+      .create-button:disabled {
+        /* Disabled state */
+        @apply bg-none bg-[#EEEEEE] text-gray-500 cursor-not-allowed;
+      }
 
-        /* optional: disabled look */
-        .create-button:disabled {
-        @apply opacity-60 cursor-not-allowed;
-        transform: none;
-        box-shadow: none;
-        }
+      .modal-button-primary {
+        /* Using the blue color scheme for standard primary actions */
+        @apply bg-[#0077B3] text-white px-4 py-2 rounded-md font-semibold transition-colors duration-200;
+      }
+
+      .modal-button-primary:hover {
+        @apply bg-[#A4CBE1] text-gray-800;
+      }
+
+      .modal-button-confirm {
+        @apply bg-green-600 text-white px-4 py-2 rounded-md font-semibold transition-colors duration-200;
+      }
+      .modal-button-confirm:hover {
+        @apply bg-green-700;
+      }
+
+      .modal-button-danger {
+        @apply bg-red-600 text-white px-4 py-2 rounded-md font-semibold transition-colors duration-200;
+      }
+      .modal-button-danger:hover {
+        @apply bg-red-700;
+      }
+
+
+      .modal-button-secondary {
+        @apply bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold transition-colors duration-200;
+      }
+
+      .modal-button-secondary:hover {
+        @apply bg-gray-300;
+      }
+
 
       textarea,
       input,
@@ -379,3 +405,7 @@ body.p-overflow-hidden #main-header,
 body.p-overflow-hidden #main-sidebar {
   padding-right: 0 !important; /* Remove padding compensation */
 }
+
+ .score-controls .p-button-sm {
+    border: none;
+  }

@@ -22,11 +22,11 @@ defineProps({
   },
   confirmButtonClass: {
     type: String,
-    default: 'bg-red-600 hover:bg-red-700'
+    default: 'modal-button-confirm' // Default to green for confirm actions
   },
   cancelButtonClass: {
     type: String,
-    default: 'bg-gray-300 hover:bg-gray-400'
+    default: '' // Default will be handled by modal-button-secondary
   }
 });
 
@@ -51,13 +51,13 @@ const handleCancel = () => {
       <div class="flex justify-end gap-2">
         <button
           @click="handleCancel"
-          :class="[cancelButtonClass, 'px-4 py-2 rounded text-gray-800']"
+          :class="['modal-button-secondary', cancelButtonClass]"
         >
           {{ cancelText }}
         </button>
         <button
           @click="handleConfirm"
-          :class="[confirmButtonClass, 'px-4 py-2 rounded text-white']"
+          :class="[confirmButtonClass]"
         >
           {{ confirmText }}
         </button>

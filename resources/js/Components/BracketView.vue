@@ -283,7 +283,7 @@ const getRoundRobinPlayerStyling = (player, otherPlayer, match) => {
         <div class="standings-header-row">
             <h3 class="text-lg font-semibold">Standings</h3>
             <button v-if="user?.role === 'Admin' || user?.role === 'SportsManager'"
-            @click="props.openScoringConfigDialog"
+            @click="props.openScoringConfigDialog(bracketIndex)"
             class="scoring-config-btn"
             title="Configure scoring system"
             >

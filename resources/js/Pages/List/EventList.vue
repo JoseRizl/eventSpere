@@ -246,8 +246,8 @@
   </div>
 
   <template #footer>
-    <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="isTaskModalVisible = false" />
-    <Button label="Save Tasks" icon="pi pi-check" class="p-button-primary" @click="saveTaskAssignments" />
+    <button class="modal-button-secondary" @click="isTaskModalVisible = false">Cancel</button>
+    <button class="modal-button-primary" @click="saveTaskAssignments">Save Tasks</button>
   </template>
 </Dialog>
 
@@ -394,8 +394,8 @@
         </div>
 
         <template #footer>
-          <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="isCreateModalVisible = false" />
-          <Button label="Create Event" icon="pi pi-check" class="p-button-primary" @click="createEvent" />
+          <button class="modal-button-secondary" @click="isCreateModalVisible = false">Cancel</button>
+          <button class="modal-button-primary" @click="createEvent">Create Event</button>
         </template>
       </Dialog>
 
@@ -416,8 +416,8 @@
             </div>
         </div>
         <template #footer>
-            <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="isCreateTagModalVisible = false" />
-            <Button label="Create" icon="pi pi-check" @click="createTag" :loading="saving" />
+            <button class="modal-button-secondary" @click="isCreateTagModalVisible = false">Cancel</button>
+            <button class="modal-button-primary" @click="createTag" :disabled="saving">Create</button>
         </template>
       </Dialog>
 
@@ -576,8 +576,8 @@
         </div>
 
         <template #footer>
-          <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="isEditModalVisible = false" />
-          <Button label="Save Changes" icon="pi pi-check" class="p-button-primary" @click="saveEditedEvent" />
+          <button class="modal-button-secondary" @click="isEditModalVisible = false">Cancel</button>
+          <button class="modal-button-primary" @click="saveEditedEvent">Save Changes</button>
         </template>
       </Dialog>
     </div>
@@ -604,7 +604,7 @@
       title="Archive Event?"
       :message="eventToProcess ? `Are you sure you want to archive '${eventToProcess.title}'?` : ''"
       confirmText="Yes, Archive"
-      confirmButtonClass="bg-yellow-600 hover:bg-yellow-700"
+      confirmButtonClass="modal-button-confirm bg-yellow-600 hover:bg-yellow-700"
       @confirm="confirmArchive"
     />
 
@@ -614,7 +614,7 @@
       title="Delete Task?"
       :message="taskToDelete ? `Are you sure you want to delete this task?` : ''"
       confirmText="Yes, Delete"
-      confirmButtonClass="bg-red-600 hover:bg-red-700"
+      confirmButtonClass="modal-button-danger"
       @confirm="confirmDeleteTask"
     />
 
@@ -624,7 +624,7 @@
       title="Save Changes?"
       :message="selectedEvent ? `Are you sure you want to save changes to '${selectedEvent.title}'?` : ''"
       confirmText="Yes, Save"
-      confirmButtonClass="bg-green-600 hover:bg-green-700"
+      confirmButtonClass="modal-button-confirm"
       @confirm="confirmSaveChanges"
     />
 
@@ -634,7 +634,7 @@
       title="Create Event?"
       message="Are you sure you want to create this event?"
       confirmText="Yes, Create"
-      confirmButtonClass="bg-green-600 hover:bg-green-700"
+      confirmButtonClass="modal-button-confirm"
       @confirm="confirmCreateEvent"
     />
 
@@ -1751,23 +1751,6 @@
   .date-filter-calendar {
     width: 100%;
   }
-}
-
-.create-button {
-  background: #7e0bc1;
-  color: white;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: bold;
-  margin: 0;
-  height: 40px;
-}
-
-.create-button:hover {
-  background-color: #6800b3e9;
 }
 
 .checkbox-container {
