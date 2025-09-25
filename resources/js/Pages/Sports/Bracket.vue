@@ -42,7 +42,6 @@ const {
   bracketMatchFilters,
   selectedMatch,
   selectedMatchData,
-  showMatchUpdateConfirmDialog,
   showGenericErrorDialog,
   genericErrorMessage,
   roundRobinScoring,
@@ -65,8 +64,6 @@ const {
   isRoundRobinConcluded,
   openMatchDialog,
   closeMatchEditorDialog,
-  confirmMatchUpdate,
-  cancelMatchUpdate,
   proceedWithMatchUpdate,
   openScoringConfigDialog,
   closeScoringConfigDialog,
@@ -76,6 +73,12 @@ const {
   openMatchEditorFromCard,
   setBracketMatchFilter
 } = useBracketActions(state);
+
+const confirmMatchUpdate = () => {
+    // This now just triggers the confirmation inside MatchEditorDialog
+    // The logic is handled there and it emits 'confirm' which is handled by proceedWithMatchUpdate
+    // This function is passed as a prop to MatchEditorDialog
+};
 
 const matchStatusFilterOptions = ref([
     { label: 'All', value: 'all' },
@@ -349,9 +352,9 @@ onMounted(async () => {
         v-model:show="showDeleteConfirmDialog"
         title="Confirm Deletion"
         message="Are you sure you want to delete this bracket?"
-        confirmText="Yes"
-        cancelText="No"
-        confirmButtonClass="bg-red-600 hover:bg-red-700"
+        confirmText="Yes, Delete"
+        cancelText="Cancel"
+        confirmButtonClass="modal-button-danger"
         @confirm="confirmDeleteBracket"
         @cancel="cancelDeleteBracket"
       />
@@ -371,19 +374,6 @@ onMounted(async () => {
         :show-cancel-button="false"
         confirmButtonClass="bg-red-600 hover:bg-red-700"
         @confirm="showGenericErrorDialog = false"
-      />
-
-      <!-- Match Update Confirmation Dialog -->
-      <ConfirmationDialog
-        v-model:show="showMatchUpdateConfirmDialog"
-        title="Confirm Match Update"
-        message="Are you sure you want to update this match? This action may trigger bracket progression and cannot be easily undone."
-        confirmText="Yes, Update Match"
-        cancelText="Cancel"
-        :style="{ zIndex: 1102 }"
-        confirmButtonClass="bg-green-600 hover:bg-green-700"
-        @confirm="proceedWithMatchUpdate"
-        @cancel="cancelMatchUpdate"
       />
 
       <!-- Scoring Configuration Dialog -->
@@ -439,7 +429,7 @@ onMounted(async () => {
         v-model:show="showMatchEditorDialog"
         v-model:matchData="selectedMatchData"
         :bracket="selectedBracket"
-        @confirm="confirmMatchUpdate"
+        @confirm="proceedWithMatchUpdate"
         @update:show="val => !val && closeMatchEditorDialog()"
       />
     </div>

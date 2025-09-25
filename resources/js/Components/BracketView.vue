@@ -196,7 +196,7 @@ const getRoundRobinPlayerStyling = (player, otherPlayer, match) => {
     return {
         'winner-name': match.winner_id === player.id && !match.is_tie,
         'loser-name': match.loser_id === player.id && !match.is_tie,
-        'tie-name': match.is_tie, // You may want to add a .tie-name style for ties
+        'tie': match.is_tie,
     };
 };
 </script>

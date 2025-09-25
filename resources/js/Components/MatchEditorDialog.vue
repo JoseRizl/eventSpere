@@ -1,11 +1,12 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { parseISO } from 'date-fns';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import ToggleSwitch from 'primevue/toggleswitch';
 import DatePicker from 'primevue/datepicker';
+import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 
 const props = defineProps({
     show: {
@@ -23,6 +24,8 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update:show', 'confirm', 'update:matchData']);
+
+const showUpdateConfirm = ref(false);
 
 const localMatchData = computed({
     get: () => props.matchData,
@@ -72,7 +75,12 @@ const closeModal = () => {
 };
 
 const confirmUpdate = () => {
+    showUpdateConfirm.value = true;
+};
+
+const proceedWithUpdate = () => {
     emit('confirm');
+    // The parent component will close the main dialog upon successful update.
 };
 </script>
 
@@ -92,9 +100,9 @@ const confirmUpdate = () => {
                 <div class="score-section">
                     <label>Player 1 Score:</label>
                     <div class="score-controls">
-                        <Button @click="localMatchData.player1Score--" :disabled="localMatchData.player1Score <= 0 || localMatchData.status === 'completed'" icon="pi pi-minus" class="p-button-sm" v-tooltip="{ value: 'Scores cannot be changed for a completed match.', disabled: localMatchData.status !== 'completed' }" />
+                        <Button @click="localMatchData.player1Score--" :disabled="localMatchData.player1Score <= 0 || localMatchData.status === 'completed'" icon="pi pi-minus" class="p-button-sm" severity="danger" v-tooltip="{ value: 'Scores cannot be changed for a completed match.', disabled: localMatchData.status !== 'completed' }" />
                         <span class="score-display">{{ localMatchData.player1Score }}</span>
-                        <Button @click="localMatchData.player1Score++" :disabled="localMatchData.status === 'completed'" icon="pi pi-plus" class="p-button-sm" v-tooltip="{ value: 'Scores cannot be changed for a completed match.', disabled: localMatchData.status !== 'completed' }" />
+                        <Button @click="localMatchData.player1Score++" :disabled="localMatchData.status === 'completed'" icon="pi pi-plus" class="p-button-sm" severity="success" v-tooltip="{ value: 'Scores cannot be changed for a completed match.', disabled: localMatchData.status !== 'completed' }" />
                     </div>
                 </div>
             </div>
@@ -109,9 +117,9 @@ const confirmUpdate = () => {
                 <div class="score-section">
                     <label>Player 2 Score:</label>
                     <div class="score-controls">
-                        <Button @click="localMatchData.player2Score--" :disabled="localMatchData.player2Score <= 0 || localMatchData.status === 'completed'" icon="pi pi-minus" class="p-button-sm" v-tooltip="{ value: 'Scores cannot be changed for a completed match.', disabled: localMatchData.status !== 'completed' }" />
+                        <Button @click="localMatchData.player2Score--" :disabled="localMatchData.player2Score <= 0 || localMatchData.status === 'completed'" icon="pi pi-minus" class="p-button-sm" severity="danger" v-tooltip="{ value: 'Scores cannot be changed for a completed match.', disabled: localMatchData.status !== 'completed' }" />
                         <span class="score-display">{{ localMatchData.player2Score }}</span>
-                        <Button @click="localMatchData.player2Score++" :disabled="localMatchData.status === 'completed'" icon="pi pi-plus" class="p-button-sm" v-tooltip="{ value: 'Scores cannot be changed for a completed match.', disabled: localMatchData.status !== 'completed' }" />
+                        <Button @click="localMatchData.player2Score++" :disabled="localMatchData.status === 'completed'" icon="pi pi-plus" class="p-button-sm" severity="success" v-tooltip="{ value: 'Scores cannot be changed for a completed match.', disabled: localMatchData.status !== 'completed' }" />
                     </div>
                 </div>
             </div>
@@ -153,6 +161,16 @@ const confirmUpdate = () => {
                 <button @click="confirmUpdate" class="modal-button-primary" :disabled="isMatchDataInvalid">Update Match</button>
             </div>
         </div>
+
+        <ConfirmationDialog
+            v-model:show="showUpdateConfirm"
+            title="Confirm Match Update"
+            message="Are you sure you want to update this match? This action may trigger bracket progression and cannot be easily undone."
+            confirmText="Yes, Update Match"
+            confirmButtonClass="modal-button-confirm"
+            @confirm="proceedWithUpdate"
+            :style="{ zIndex: 1102 }"
+        />
     </Dialog>
 </template>
 

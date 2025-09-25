@@ -293,6 +293,19 @@
         @apply bg-gray-300;
       }
 
+      .score-button-plus {
+        @apply bg-green-500 text-white transition-colors duration-200;
+      }
+      .score-button-plus:hover:not(:disabled) {
+        @apply bg-green-600;
+      }
+
+      .score-button-minus {
+        @apply bg-red-500 text-white transition-colors duration-200;
+      }
+      .score-button-minus:hover:not(:disabled) {
+        @apply bg-red-600;
+      }
 
       textarea,
       input,
