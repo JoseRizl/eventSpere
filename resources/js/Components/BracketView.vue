@@ -26,52 +26,53 @@ const props = defineProps({
     openScoringConfigDialog: { type: Function, required: true }
 });
 
-const ongoingRoundIdentifier = computed(() => {
+const ongoingRoundIdentifiers = computed(() => {
     const bracket = props.bracket;
-    if (!bracket || !bracket.matches) return null;
+    const identifiers = {
+        single: null,
+        round_robin: null,
+        winners: null,
+        losers: null,
+        grand_finals: null,
+    };
+
+    if (!bracket || !bracket.matches) return identifiers;
 
     if (bracket.type === 'Single Elimination' || bracket.type === 'Round Robin') {
         const rounds = bracket.matches;
+        const part = bracket.type === 'Single Elimination' ? 'single' : 'round_robin';
         for (let i = 0; i < rounds.length; i++) {
-            if (rounds[i] && rounds[i].some(match => match.status !== 'completed')) {
-                const part = bracket.type === 'Single Elimination' ? 'single' : 'round_robin';
-                return { part, roundIdx: i };
+            if (rounds[i] && rounds[i].some(match => match.status !== 'completed' && match.players[0].name !== 'TBD' && match.players[1].name !== 'TBD')) {
+                identifiers[part] = i;
+                break; // Found the first incomplete round
             }
         }
     } else if (bracket.type === 'Double Elimination') {
-        // Check Winners bracket
-        const winnersRounds = bracket.matches.winners;
-        if (winnersRounds) {
-            for (let i = 0; i < winnersRounds.length; i++) {
-                if (winnersRounds[i] && winnersRounds[i].some(match => match.status !== 'completed')) {
-                    return { part: 'winners', roundIdx: i };
+        const findOngoingRound = (rounds) => {
+            if (!rounds) return null;
+            for (let i = 0; i < rounds.length; i++) {
+                if (rounds[i] && rounds[i].some(match => match.status !== 'completed' && match.players[0].name !== 'TBD' && match.players[1].name !== 'TBD')) {
+                    return i;
                 }
             }
-        }
+            return null;
+        };
 
-        // If winners bracket is complete, check Losers bracket
-        const losersRounds = bracket.matches.losers;
-        if (losersRounds) {
-            for (let i = 0; i < losersRounds.length; i++) {
-                if (losersRounds[i] && losersRounds[i].some(match => match.status !== 'completed')) {
-                    return { part: 'losers', roundIdx: i };
-                }
-            }
-        }
-
-        // If both are complete, check Grand Finals
-        const grandFinals = bracket.matches.grand_finals;
-        if (grandFinals && grandFinals.some(match => match.status !== 'completed')) {
-            return { part: 'grand_finals', roundIdx: 0 };
+        identifiers.winners = findOngoingRound(bracket.matches.winners);
+        identifiers.losers = findOngoingRound(bracket.matches.losers);
+        // Grand finals is not an array of rounds, but a single array of matches.
+        // We check if any match in it is not completed.
+        if (bracket.matches.grand_finals && bracket.matches.grand_finals.some(match => match.status !== 'completed' && match.players[0].name !== 'TBD' && match.players[1].name !== 'TBD')) {
+            identifiers.grand_finals = 0;
         }
     }
 
-    return null; // All matches are completed
+    return identifiers;
 });
 
 const isRoundOngoing = (bracketPart, roundIdx) => {
-    if (!ongoingRoundIdentifier.value) return false;
-    return ongoingRoundIdentifier.value.part === bracketPart && ongoingRoundIdentifier.value.roundIdx === roundIdx;
+    const ongoingIndex = ongoingRoundIdentifiers.value[bracketPart];
+    return ongoingIndex !== null && ongoingIndex === roundIdx;
 };
 
 const bracketAnalysis = computed(() => {
