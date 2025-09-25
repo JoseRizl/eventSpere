@@ -10,9 +10,9 @@ import { useBracketState } from '@/composables/useBracketState.js';
 import { useBracketActions } from '@/composables/useBracketActions.js';
 import Dialog from 'primevue/dialog';
 import BracketView from '@/Components/BracketView.vue';
+import MatchEditorDialog from '@/Components/MatchEditorDialog.vue';
 import MatchesView from '@/Components/MatchesView.vue';
 import InputText from 'primevue/inputtext';
-import ToggleSwitch from 'primevue/toggleswitch';
 import SelectButton from 'primevue/selectbutton';
 import Button from 'primevue/button';
 import Select from 'primevue/select';
@@ -1560,137 +1560,13 @@ const getBracketIndex = (bracketId) => {
     </div>
     </Dialog>
 
-    <!-- Round Robin Match Dialog -->
-    <Dialog v-model:visible="showMatchEditorDialog" header="Edit Match" modal :style="{ width: '500px' }">
-    <div v-if="selectedMatchData" class="round-robin-match-dialog">
-        <div class="match-info">
-        <h3>Round Robin Match</h3>
-        <p class="match-description">Edit player names, scores, and match status</p>
-        </div>
-
-        <div class="player-section">
-        <div class="player-input">
-            <label>Player 1 Name:</label>
-            <InputText
-            v-model="selectedMatchData.player1Name"
-            placeholder="Enter player name"
-            :disabled="selectedMatchData?.player1Name === 'BYE'"
-            />
-        </div>
-
-        <div class="score-section">
-            <label>Player 1 Score:</label>
-            <div class="score-controls">
-            <Button
-                @click="selectedMatchData.player1Score--"
-                :disabled="selectedMatchData.player1Score <= 0 || selectedMatchData.status === 'completed'"
-                icon="pi pi-minus"
-                class="p-button-sm"
-                v-tooltip="{ value: 'Scores cannot be changed for a completed match.', disabled: selectedMatchData.status !== 'completed' }"
-            />
-            <span class="score-display">{{ selectedMatchData.player1Score }}</span>
-            <Button
-                @click="selectedMatchData.player1Score++"
-                :disabled="selectedMatchData.status === 'completed'"
-                icon="pi pi-plus"
-                class="p-button-sm"
-                v-tooltip="{ value: 'Scores cannot be changed for a completed match.', disabled: selectedMatchData.status !== 'completed' }"
-            />
-            </div>
-        </div>
-        </div>
-
-        <div class="vs-divider">VS</div>
-
-        <div class="player-section">
-        <div class="player-input">
-            <label>Player 2 Name:</label>
-            <InputText
-            v-model="selectedMatchData.player2Name"
-            placeholder="Enter player name"
-            :disabled="selectedMatchData?.player2Name === 'BYE'"
-            />
-        </div>
-
-        <div class="score-section">
-            <label>Player 2 Score:</label>
-            <div class="score-controls">
-            <Button
-                @click="selectedMatchData.player2Score--"
-                :disabled="selectedMatchData.player2Score <= 0 || selectedMatchData.status === 'completed'"
-                icon="pi pi-minus"
-                class="p-button-sm"
-                v-tooltip="{ value: 'Scores cannot be changed for a completed match.', disabled: selectedMatchData.status !== 'completed' }"
-            />
-            <span class="score-display">{{ selectedMatchData.player2Score }}</span>
-            <Button
-                @click="selectedMatchData.player2Score++"
-                :disabled="selectedMatchData.status === 'completed'"
-                icon="pi pi-plus"
-                class="p-button-sm"
-                v-tooltip="{ value: 'Scores cannot be changed for a completed match.', disabled: selectedMatchData.status !== 'completed' }"
-            />
-            </div>
-        </div>
-        </div>
-
-        <div class="vs-divider"></div>
-
-        <div class="grid grid-cols-2 gap-4">
-            <div class="p-field">
-                <label>Date:</label>
-                <DatePicker v-model="selectedMatchData.date" dateFormat="yy-mm-dd" showIcon
-                    :minDate="eventMinDate"
-                    :maxDate="eventMaxDate"
-                    :disabled="!isMultiDayEvent"
-                    class="w-full"
-                />
-            </div>
-            <div class="p-field">
-                <label>Time:</label>
-                <InputText type="time" v-model="selectedMatchData.time" class="w-full" />
-            </div>
-        </div>
-        <div class="p-field">
-            <label>Venue:</label>
-            <InputText v-model="selectedMatchData.venue" class="w-full" />
-        </div>
-
-        <div class="match-status-section">
-        <label>Match Status:</label>
-        <div class="status-toggle">
-            <span class="status-label" :class="{ 'active': selectedMatchData.status === 'pending' }">Pending</span>
-            <ToggleSwitch
-            :modelValue="selectedMatchData.status === 'completed'"
-            @update:modelValue="(value) => selectedMatchData.status = value ? 'completed' : 'pending'"
-            class="status-switch"
-            />
-            <span class="status-label" :class="{ 'active': selectedMatchData.status === 'completed' }">Completed</span>
-        </div>
-        </div>
-
-        <div v-if="selectedMatchData.status === 'completed' && selectedMatchData.player1Score === selectedMatchData.player2Score"
-            :class="['tie-indicator', selectedMatch?.bracketType !== 'round_robin' ? 'tie-warning-bg' : '']">
-        <i class="pi pi-exclamation-triangle"></i>
-        <span v-if="selectedMatch?.bracketType === 'round_robin'">This match is a tie!</span>
-        <span v-else class="tie-warning">Ties are not allowed in elimination brackets. Please adjust scores to determine a winner.</span>
-        </div>
-
-        <div class="dialog-actions">
-        <Button
-            label="Cancel"
-            @click="closeMatchEditorDialog"
-            class="modal-button-secondary"
-        />
-        <Button
-            label="Update Match"
-            @click="confirmMatchUpdate"
-            class="modal-button-primary"
-            :disabled="isMatchDataInvalid"
-        />
-        </div>
-    </div>
-    </Dialog>
+    <!-- Shared Match Editor Dialog -->
+    <MatchEditorDialog
+        v-model:show="showMatchEditorDialog"
+        v-model:matchData="selectedMatchData"
+        :bracket="selectedBracketForDialog"
+        @confirm="confirmMatchUpdate"
+    />
 </template>
 
 <style scoped>
