@@ -1455,7 +1455,6 @@ const getBracketIndex = (bracketId) => {
         title="Save Changes?"
         message="Are you sure you want to save your changes?"
         confirmText="Yes, Save"
-        confirmButtonClass="bg-blue-600 hover:bg-blue-700"
         @confirm="saveChanges"
       />
     </div>

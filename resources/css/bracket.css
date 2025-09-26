@@ -17,6 +17,8 @@
   display: flex;
   gap: 40px;
   align-items: flex-start;
+  overflow-x: auto;
+  padding-bottom: 1rem;
   justify-content: center;
 }
 
@@ -563,6 +565,7 @@
 .double-elimination-bracket {
   display: flex;
   flex-direction: column;
+  /* flex-direction: row; */
   gap: 40px;
   padding: 20px;
 }
@@ -1478,3 +1481,24 @@
   .tie-warning-bg i {
     color: #dc3545 !important;
   }
+
+@media (max-width: 768px) {
+    .double-elimination-bracket {
+        flex-direction: column;
+    }
+
+    .bracket-section.winners,
+    .bracket-section.losers {
+        border: none;
+        padding: 0;
+    }
+
+    .round-robin-bracket {
+        flex-direction: column;
+    }
+
+    .round-robin-bracket .bracket {
+        flex-direction: row;
+        flex-wrap: nowrap;
+    }
+}
