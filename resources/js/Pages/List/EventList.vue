@@ -367,6 +367,24 @@
             <label for="description">Description</label>
             <Textarea id="description" v-model="newEvent.description" rows="4" placeholder="Enter event description" autoResize />
           </div>
+
+          <!-- Memorandum File Upload -->
+          <div class="p-field">
+            <label for="memorandum">Memorandum</label>
+            <div v-if="newEvent.memorandum" class="flex items-center gap-2 p-2 border rounded-md bg-gray-100">
+                <i class="pi pi-file"></i>
+                <span class="flex-1">{{ newEvent.memorandum.filename }}</span>
+                <Button icon="pi pi-times" class="p-button-rounded p-button-danger p-button-text" @click="newEvent.memorandum = null" v-tooltip.top="'Remove Memorandum'"/>
+            </div>
+            <div v-else class="flex justify-center items-center border-2 border-dashed rounded-md p-4">
+                <input type="file" ref="memoFileInputCreate" @change="handleMemoUpload($event, false)" class="hidden" />
+                <Button
+                    label="Upload File"
+                    icon="pi pi-upload"
+                    class="p-button-sm p-button-outlined"
+                    @click="$refs.memoFileInputCreate.click()" />
+            </div>
+          </div>
         </div>
 
         <div class="p-field">
@@ -549,6 +567,24 @@
             <label for="description">Description</label>
             <Textarea id="description" v-model="selectedEvent.description" rows="4" placeholder="Enter event description" autoResize />
           </div>
+
+          <!-- Memorandum File Upload -->
+          <div class="p-field">
+            <label for="edit-memorandum">Memorandum</label>
+            <div v-if="selectedEvent.memorandum" class="flex items-center gap-2 p-2 border rounded-md bg-gray-100">
+                <i class="pi pi-file"></i>
+                <span class="flex-1">{{ selectedEvent.memorandum.filename }}</span>
+                <Button icon="pi pi-times" class="p-button-rounded p-button-danger p-button-text" @click="selectedEvent.memorandum = null" v-tooltip.top="'Remove Memorandum'"/>
+            </div>
+            <div v-else class="flex justify-center items-center border-2 border-dashed rounded-md p-4">
+                <input type="file" ref="memoFileInputEdit" @change="handleMemoUpload($event, true)" class="hidden" />
+                <Button
+                    label="Upload File"
+                    icon="pi pi-upload"
+                    class="p-button-sm p-button-outlined"
+                    @click="$refs.memoFileInputEdit.click()" />
+            </div>
+          </div>
         </div>
 
         <div class="p-field">
@@ -705,7 +741,8 @@
         tags: [],
         image: "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
         archived: false,
-        isAllDay: false
+        isAllDay: false,
+        memorandum: { type: 'text', content: '', filename: '' },
       });
 
       const filteredNewEventTags = computed(() => {
@@ -755,6 +792,7 @@
           endDate: null,
           startTime: "",
           endTime: "",
+          memorandum: null,
           tags: [],
           image: "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
           archived: false,
@@ -916,6 +954,7 @@
             endTime: newEvent.value.endTime.padStart(5, "0"),
             archived: false,
             createdAt: new Date().toISOString(),
+            memorandum: newEvent.value.memorandum,
         };
 
         await router.post(route('events.store'), payload, {
@@ -1361,6 +1400,7 @@
             : null,
           startTime: selectedEvent.value.startTime?.padStart(5, "0") || "00:00",
           endTime: selectedEvent.value.endTime?.padStart(5, "0") || "00:00",
+          memorandum: selectedEvent.value.memorandum,
         };
         await router.put(route('events.updateFromList', {id: selectedEvent.value.id}), payload, {
           onSuccess: () => {
@@ -1425,6 +1465,27 @@
       if (event.target.tagName === 'A') {
         event.stopPropagation();
       }
+    };
+
+    const handleMemoUpload = (event, isEdit) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const target = isEdit ? selectedEvent.value : newEvent.value;
+            target.memorandum = {
+                type: file.type.startsWith('image/') ? 'image' : 'file',
+                content: e.target.result,
+                filename: file.name,
+            };
+        };
+        reader.onerror = (err) => {
+            console.error("File reading error:", err);
+            errorMessage.value = "Failed to read the memorandum file.";
+            showErrorDialog.value = true;
+        };
+        reader.readAsDataURL(file);
     };
 
 // Add date filtering functionality
@@ -1611,6 +1672,7 @@
     tagsMap,
     filteredSelectedEventTags,
     handleDescriptionClick,
+    handleMemoUpload,
     };
     },
  });

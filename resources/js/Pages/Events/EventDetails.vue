@@ -20,8 +20,19 @@ import Avatar from 'primevue/avatar';
 import Textarea from 'primevue/textarea';
 import DatePicker from 'primevue/datepicker';
 
-// Inertia props
-const { props } = usePage();
+const props = defineProps({
+  event: Object,
+  tags: Array,
+  committees: Array,
+  employees: Array,
+  categories: Array,
+  relatedEvents: Array,
+  errors: Object,
+  all_users: Array, // Assuming this comes from shared props
+  auth: Object, // Assuming this comes from shared props
+});
+
+// Inertia props (now using defineProps)
 const user = computed(() => props.auth.user);
 const currentView = ref('details'); // 'details' or 'announcements'
 const bannerImageInput = ref(null);
@@ -35,12 +46,18 @@ const showErrorDialog = ref(false);
 const errorDialogMessage = ref('');
 const categories = ref(props.categories || []);
 const committees = ref(props.committees || []);
+
+const showMemoImageDialog = ref(false);
+const memoImageUrl = ref('');
+
 const employees = ref(props.employees || []);
 const filteredEmployees = ref([]);
 const relatedEvents = ref(props.relatedEvents || []);
 const showDeleteTaskConfirm = ref(false);
 const taskToDelete = ref(null);
 const showDeleteScheduleConfirm = ref(false);
+const memoFileInput = ref(null);
+const handlMemoUpload = ref(null);
 const originalEventDetails = ref(null);
 const searchQuery = ref('');
 const scheduleToDelete = ref(null);
@@ -173,6 +190,22 @@ const selectedBracketForDialog = computed(() => {
   return null;
 });
 
+const handleMemoUpload = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        eventDetails.value.memorandum = {
+            type: file.type.startsWith('image/') ? 'image' : 'file',
+            content: e.target.result,
+            filename: file.name,
+        };
+    };
+    reader.readAsDataURL(file);
+};
+
+
 const isMatchDataInvalid = computed(() => {
     if (!selectedMatchData.value || !selectedBracketForDialog.value) return true;
 
@@ -226,7 +259,8 @@ const filteredRelatedBrackets = computed(() => {
 });
 
 // Create a map of tags for quick lookup
-const tagsMap = computed(() => {
+const tagsMap = computed(() =>
+{
   return tags.value.reduce((map, tag) => {
     map[tag.id] = tag;
     return map;
@@ -279,6 +313,7 @@ const eventDetails = ref({
         // Handle legacy single employee format
         if (typeof task.employee === 'object') {
           if (task.employee.name) {
+
             employees = [task.employee];
           } else {
             const foundEmployee = employees.value.find(e => e.id == task.employee.id);
@@ -301,6 +336,10 @@ const eventDetails = ref({
 const filteredTags = computed(() => {
   if (!eventDetails.value.category_id) {
     return [];
+  }
+  // Initialize memorandum if it's null
+  if (editMode.value && !eventDetails.value.memorandum) {
+      eventDetails.value.memorandum = null;
   }
   return tags.value.filter(tag => tag.category_id == eventDetails.value.category_id);
 });
@@ -442,6 +481,22 @@ const fetchEventAnnouncements = async () => {
 const openAddAnnouncementModal = () => {
   newAnnouncement.value = { message: '', image: null, imagePreview: null };
   showAddAnnouncementModal.value = true;
+};
+
+const viewMemorandum = () => {
+    if (eventDetails.value.memorandum && eventDetails.value.memorandum.content) {
+    if (eventDetails.value.memorandum.type === 'image') {
+        memoImageUrl.value = eventDetails.value.memorandum.content;
+        showMemoImageDialog.value = true;
+    } else {
+        const link = document.createElement('a');
+        link.href = eventDetails.value.memorandum.content;
+        link.download = eventDetails.value.memorandum.filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+    }
 };
 
 const handleAnnouncementImageUpload = (event) => {
@@ -658,6 +713,7 @@ const saveChanges = () => {
     endTime: eventDetails.value.endTime,
     tags: eventDetails.value.tags || [], // Only IDs
     scheduleLists: eventDetails.value.scheduleLists.map(list => ({
+
       day: list.day,
       date: list.date,
       schedules: list.schedules.map(s => ({
@@ -669,7 +725,8 @@ const saveChanges = () => {
       committee: task.committee ? { id: task.committee.id } : null,
       employees: task.employees.map(emp => ({ id: emp.id })),
       task: task.task
-    }))
+    })),
+    memorandum: eventDetails.value.memorandum,
   };
 
   // Debug: log the payload before sending
@@ -802,6 +859,7 @@ const getBracketIndex = (bracketId) => {
 </script>
 
 <template>
+<div>
     <div class="min-h-screen py-8 px-4">
         <div class="mx-auto mt-4">
             <!-- Back Button for non-management -->
@@ -973,6 +1031,52 @@ const getBracketIndex = (bracketId) => {
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Memorandum -->
+                    <div class="border-t border-gray-200 pt-4 mt-4">
+                    <!-- Show title only if memorandum exists OR in edit mode -->
+                    <h2 v-if="eventDetails.memorandum || editMode" class="font-semibold mb-2">Memorandum</h2>
+
+                    <!-- Edit Mode -->
+                    <div v-if="editMode" class="space-y-2">
+                        <!-- If memorandum exists -->
+                        <div v-if="eventDetails.memorandum" class="flex items-center gap-2 p-2 border rounded-md bg-gray-100">
+                        <i class="pi pi-file"></i>
+                        <span class="flex-1 cursor-pointer text-blue-600 hover:underline" @click="viewMemorandum">
+                            {{ eventDetails.memorandum.filename }}
+                        </span>
+                        <Button
+                            icon="pi pi-times"
+                            class="p-button-rounded p-button-danger p-button-text"
+                            @click="eventDetails.memorandum = null"
+                            v-tooltip.top="'Remove Memorandum'"
+                        />
+                        </div>
+
+                        <!-- If no memorandum uploaded -->
+                        <div v-else class="flex justify-center items-center border-2 border-dashed rounded-md p-4">
+                        <input type="file" ref="memoFileInput" @change="handleMemoUpload" class="hidden" />
+                        <Button
+                            label="Upload Memorandum"
+                            icon="pi pi-upload"
+                            class="p-button-sm p-button-outlined"
+                            @click="$refs.memoFileInput.click()"
+                        />
+                        </div>
+                    </div>
+
+                    <!-- View Mode -->
+                    <div v-else>
+                        <div v-if="eventDetails.memorandum">
+                        <Button
+                            :label="`View ${eventDetails.memorandum.filename}`"
+                            icon="pi pi-eye"
+                            @click="viewMemorandum"
+                            class="p-button-secondary"
+                        />
+                        </div>
+                    </div>
                     </div>
 
                     <!-- Error Message -->
@@ -1566,6 +1670,11 @@ const getBracketIndex = (bracketId) => {
         :bracket="selectedBracketForDialog"
         @confirm="confirmMatchUpdate"
     />
+
+    <Dialog v-model:visible="showMemoImageDialog" modal :header="eventDetails.memorandum?.filename" :style="{ width: '90vw', maxWidth: '1200px' }">
+        <img :src="memoImageUrl" alt="Memorandum Image" class="w-full h-auto max-h-[80vh] object-contain" />
+    </Dialog>
+</div>
 </template>
 
 <style scoped>

@@ -221,6 +221,10 @@ class EventController extends Controller
             }],
             'isAllDay' => 'boolean',
             'archived' => 'boolean',
+            'memorandum' => 'nullable|array',
+            'memorandum.type' => 'required_with:memorandum|string|in:image,file',
+            'memorandum.content' => 'required_with:memorandum|string',
+            'memorandum.filename' => 'nullable|string',
         ]);
 
         $data = $this->jsonData;
@@ -342,7 +346,11 @@ class EventController extends Controller
             'tasks.*.committee.id' => ['nullable', Rule::in($validCommitteeIds)],
             'tasks.*.employees' => 'nullable|array',
             'tasks.*.employees.*.id' => ['nullable', Rule::in($validEmployeeIds)],
-            'tasks.*.task' => 'nullable|string|max:255'
+            'tasks.*.task' => 'nullable|string|max:255',
+            'memorandum' => 'nullable|array',
+            'memorandum.type' => 'required_with:memorandum|string|in:image,file',
+            'memorandum.content' => 'required_with:memorandum|string',
+            'memorandum.filename' => 'nullable|string',
         ]);
 
         // Update the event
@@ -411,7 +419,12 @@ class EventController extends Controller
             'tasks.*.committee.id' => ['nullable', Rule::in($validCommitteeIds)],
             'tasks.*.employees' => 'nullable|array',
             'tasks.*.employees.*.id' => ['nullable', Rule::in($validEmployeeIds)],
-            'tasks.*.task' => 'nullable|string|max:255'
+            'tasks.*.task' => 'nullable|string|max:255',
+            // Memorandum validation for list view update
+            'memorandum' => 'nullable|array',
+            'memorandum.type' => 'required_with:memorandum|string|in:image,file',
+            'memorandum.content' => 'required_with:memorandum|string',
+            'memorandum.filename' => 'nullable|string',
         ]);
 
         $data = $this->jsonData;
@@ -426,6 +439,12 @@ class EventController extends Controller
                 // This prevents accidental removal of all tags.
                 if (isset($validated['tags']) && empty($validated['tags']) && $hasExistingTags) {
                     unset($validated['tags']);
+                }
+
+                // Safety feature for memorandum: do not overwrite with null if not provided from list view
+                // This prevents accidental removal.
+                if (array_key_exists('memorandum', $validated) && is_null($validated['memorandum'])) {
+                    unset($validated['memorandum']);
                 }
 
                 // Explicitly merge validated data to be more intentional about what is being updated.
@@ -590,8 +609,8 @@ class EventController extends Controller
             return; // Cannot proceed without dates for cross-event check
         }
 
-        $eventStartDate = \DateTime::createFromFormat('M-d-Y', $eventStartDateStr);
-        $eventEndDate = \DateTime::createFromFormat('M-d-Y', $eventEndDateStr);
+        $eventStartDate = \DateTime::createFromFormat('M-d-y', $eventStartDateStr);
+        $eventEndDate = \DateTime::createFromFormat('M-d-y', $eventEndDateStr);
 
         if (!$eventStartDate || !$eventEndDate) {
             return; // Invalid date format, other validators will catch this.
@@ -619,8 +638,8 @@ class EventController extends Controller
                 })->whereNotNull()->contains($employeeId);
 
                 if ($isAssignedToOtherEvent && !empty($otherEvent['startDate']) && !empty($otherEvent['endDate'])) {
-                    $otherEventStartDate = \DateTime::createFromFormat('M-d-Y', $otherEvent['startDate']);
-                    $otherEventEndDate = \DateTime::createFromFormat('M-d-Y', $otherEvent['endDate']);
+                    $otherEventStartDate = \DateTime::createFromFormat('M-d-y', $otherEvent['startDate']);
+                    $otherEventEndDate = \DateTime::createFromFormat('M-d-y', $otherEvent['endDate']);
 
                     if ($otherEventStartDate && $otherEventEndDate && $eventStartDate <= $otherEventEndDate && $eventEndDate >= $otherEventStartDate) {
                         $fail("Employee \"{$employeeName}\" is already assigned to another event (\"{$otherEvent['title']}\") during this time period.");
