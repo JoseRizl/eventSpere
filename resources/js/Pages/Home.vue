@@ -83,7 +83,7 @@ const confirmDeleteAnnouncement = async () => {
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- News and Update Title -->
-    <!-- <h1 class="text-2xl font-bold mt-6 text-center">News and Updates</h1> -->
+    <!-- <h1 class="text-2xl font-bold mt-4 text-center">News and Updates</h1> -->
 
     <!-- Carousel Banner -->
     <div v-if="carouselEvents.length > 0" class="w-full relative group/carousel">
@@ -192,8 +192,8 @@ const confirmDeleteAnnouncement = async () => {
       </div>
       <div v-else>
         <!-- Ongoing Events -->
-        <div v-if="ongoingEvents.length > 0" class="w-full mt-8">
-          <div class="relative flex justify-center items-center mb-4">
+        <div v-if="ongoingEvents.length > 0" class="w-full mt-4">
+          <div class="relative flex justify-center items-center mb-2">
             <h2 class="text-2xl font-bold">Ongoing Events</h2>
             <div class="absolute right-0">
                 <Button
@@ -245,8 +245,8 @@ const confirmDeleteAnnouncement = async () => {
         </div>
 
         <!-- Events This Month -->
-        <div v-if="eventsThisMonth.length > 0" class="w-full mt-8">
-          <div class="relative flex justify-center items-center mb-4">
+        <div v-if="eventsThisMonth.length > 0" class="w-full mt-4">
+          <div class="relative flex justify-center items-center mb-2">
             <h2 class="text-2xl font-bold">Events This Month</h2>
             <div class="absolute right-0">
                 <Button size="small" :icon="showEventsThisMonth ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" :label="showEventsThisMonth ? 'Hide' : 'Show'" @click="showEventsThisMonth = !showEventsThisMonth" class="p-button-text"/>
@@ -292,8 +292,8 @@ const confirmDeleteAnnouncement = async () => {
         </div>
 
         <!-- Upcoming Events -->
-        <div v-if="upcomingEvents.length > 0" class="w-full mt-8">
-          <div class="relative flex justify-center items-center mb-4">
+        <div v-if="upcomingEvents.length > 0" class="w-full mt-4">
+          <div class="relative flex justify-center items-center mb-2">
             <h2 class="text-2xl font-bold">Upcoming Events</h2>
             <div class="absolute right-0">
                 <Button size="small" :icon="showUpcomingEvents ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" :label="showUpcomingEvents ? 'Hide' : 'Show'" @click="showUpcomingEvents = !showUpcomingEvents" class="p-button-text"/>
@@ -340,7 +340,7 @@ const confirmDeleteAnnouncement = async () => {
 
         <!-- Event Calendar -->
         <div class="w-full">
-            <h2 class="text-2xl font-bold mb-6 mt-8 text-center">Event Calendar</h2>
+            <h2 class="text-2xl font-bold mb-6 mt-6 text-center">Event Calendar</h2>
           <EventCalendar :events="filteredNews" />
         </div>
       </div>
