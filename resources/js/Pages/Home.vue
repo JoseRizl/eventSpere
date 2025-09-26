@@ -228,13 +228,11 @@ const confirmDeleteAnnouncement = async () => {
                       </div>
                     </template>
                     <template #content>
-                      <div class="flex-1 overflow-hidden h-10 flex items-center">
+                      <div class="relative flex-1 overflow-hidden h-10 flex items-center">
                         <p class="text-sm text-gray-600 line-clamp-2">{{ event.description }}</p>
-                      </div>
-                    </template>
-                    <template #footer>
-                      <div class="flex justify-end z-20">
-                        <Button label="View Details" icon="pi pi-info-circle" class="p-button-text p-button-sm" @click.stop="$inertia.visit(route('event.details', { id: event.id }))"/>
+                        <div class="absolute inset-0 bg-white/50 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                            <Button label="View Details" icon="pi pi-info-circle" class="p-button-text p-button-sm no-hover" @click.stop="$inertia.visit(route('event.details', { id: event.id }))"/>
+                        </div>
                       </div>
                     </template>
                   </Card>
@@ -275,13 +273,11 @@ const confirmDeleteAnnouncement = async () => {
                       </div>
                     </template>
                     <template #content>
-                      <div class="flex-1 overflow-hidden h-10 flex items-center">
+                      <div class="relative flex-1 overflow-hidden h-10 flex items-center">
                         <p class="text-sm text-gray-600 line-clamp-2">{{ event.description }}</p>
-                      </div>
-                    </template>
-                    <template #footer>
-                      <div class="flex justify-end z-20">
-                        <Button label="View Details" icon="pi pi-info-circle" class="p-button-text p-button-sm" @click.stop="$inertia.visit(route('event.details', { id: event.id }))"/>
+                        <div class="absolute inset-0 bg-white/50 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                            <Button label="View Details" icon="pi pi-info-circle" class="p-button-text p-button-sm no-hover" @click.stop="$inertia.visit(route('event.details', { id: event.id }))"/>
+                        </div>
                       </div>
                     </template>
                   </Card>
@@ -322,13 +318,11 @@ const confirmDeleteAnnouncement = async () => {
                       </div>
                     </template>
                     <template #content>
-                      <div class="flex-1 overflow-hidden h-10 flex items-center">
+                      <div class="relative flex-1 overflow-hidden h-10 flex items-center">
                         <p class="text-sm text-gray-600 line-clamp-2">{{ event.description }}</p>
-                      </div>
-                    </template>
-                    <template #footer>
-                      <div class="flex justify-end z-20">
-                        <Button label="View Details" icon="pi pi-info-circle" class="p-button-text p-button-sm" @click.stop="$inertia.visit(route('event.details', { id: event.id }))"/>
+                        <div class="absolute inset-0 bg-white/50 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                            <Button label="View Details" icon="pi pi-info-circle" class="p-button-text p-button-sm no-hover" @click.stop="$inertia.visit(route('event.details', { id: event.id }))"/>
+                        </div>
                       </div>
                     </template>
                   </Card>

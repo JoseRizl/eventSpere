@@ -238,6 +238,11 @@
         color: white !important;
       }
 
+      .no-hover:hover {
+        background-color: transparent !important;
+        color: inherit !important;
+      }
+
       .p-button-rounded {
         width: 2.5rem;
         height: 2.5rem;
