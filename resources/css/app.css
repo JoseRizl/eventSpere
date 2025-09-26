@@ -245,7 +245,7 @@
 
       .create-button {
         /* Base styles using Tailwind utilities */
-        @apply text-white px-4 py-2.5 border-0 rounded-md cursor-pointer text-base font-bold transition-all duration-200;
+        @apply text-white px-4 py-1.5 border-0 rounded-md cursor-pointer text-base font-semibold transition-all duration-200;
 
         /* Normal state: Subtle gradient from your base color to a slightly darker shade */
         @apply bg-gradient-to-b from-[#0077B3] to-[#006da1];
@@ -263,7 +263,7 @@
 
       .modal-button-primary {
         /* Using the blue color scheme for standard primary actions */
-        @apply bg-[#0077B3] text-white px-4 py-2 rounded-md font-semibold transition-colors duration-200;
+        @apply bg-[#0077B3] text-white px-4 py-2 rounded-md font-semibold transition-colors duration-200 text-base;
       }
 
       .modal-button-primary:hover {
@@ -271,14 +271,14 @@
       }
 
       .modal-button-confirm {
-        @apply bg-green-600 text-white px-4 py-2 rounded-md font-semibold transition-colors duration-200;
+        @apply bg-green-600 text-white px-4 py-2 rounded-md font-semibold transition-colors duration-200 text-base;
       }
       .modal-button-confirm:hover {
         @apply bg-green-700;
       }
 
       .modal-button-danger {
-        @apply bg-red-600 text-white px-4 py-2 rounded-md font-semibold transition-colors duration-200;
+        @apply bg-red-600 text-white px-4 py-2 rounded-md font-semibold transition-colors duration-200 text-base;
       }
       .modal-button-danger:hover {
         @apply bg-red-700;
@@ -286,7 +286,7 @@
 
 
       .modal-button-secondary {
-        @apply bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold transition-colors duration-200;
+        @apply bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold transition-colors duration-200 text-base;
       }
 
       .modal-button-secondary:hover {

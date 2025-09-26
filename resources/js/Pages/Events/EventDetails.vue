@@ -926,7 +926,8 @@ const getBracketIndex = (bracketId) => {
                         <button
                             v-if="user?.role === 'Admin' || user?.role === 'Principal'"
                             @click="toggleEdit"
-                            class="px-4 py-2 rounded bg-gray-600 text-white hover:bg-gray-700 ml-4"
+                            :class="editMode ? 'modal-button-danger' : 'create-button'"
+                            class="ml-4"
                         >
                             {{ editMode ? 'Cancel' : 'Edit Event' }}
                         </button>
@@ -1087,28 +1088,28 @@ const getBracketIndex = (bracketId) => {
                     <!-- Committee -->
                     <div v-if="editMode || (eventDetails.tasks && eventDetails.tasks.length > 0)">
                     <h2 class="font-semibold mb-2">Tasks & Committees:</h2>
-            <div v-if="editMode">
-            <div v-for="(taskItem, index) in eventDetails.tasks" :key="index" class="space-y-2 mb-4 p-3 border rounded">
-                <!-- Committee Selection -->
-                <div class="p-field">
-                <label class="block text-sm font-medium mb-1">Committee</label>
-                <Select
-                    v-model="taskItem.committee"
-                    :options="committees"
-                    optionLabel="name"
-                    placeholder="Select Committee"
-                    class="w-full"
-                    @change="updateFilteredEmployees(index)"
-                >
-                    <template #option="slotProps">
-                    <div>{{ slotProps.option.name }}</div>
-                    </template>
-                    <template #value="slotProps">
-                    <div v-if="slotProps.value">{{ slotProps.value.name }}</div>
-                    <span v-else>{{ slotProps.placeholder }}</span>
-                    </template>
-                </Select>
-                </div>
+                    <div v-if="editMode">
+                    <div v-for="(taskItem, index) in eventDetails.tasks" :key="index" class="space-y-2 mb-4 p-3 border rounded">
+                        <!-- Committee Selection -->
+                        <div class="p-field">
+                        <label class="block text-sm font-medium mb-1">Committee</label>
+                        <Select
+                            v-model="taskItem.committee"
+                            :options="committees"
+                            optionLabel="name"
+                            placeholder="Select Committee"
+                            class="w-full"
+                            @change="updateFilteredEmployees(index)"
+                        >
+                            <template #option="slotProps">
+                            <div>{{ slotProps.option.name }}</div>
+                            </template>
+                            <template #value="slotProps">
+                            <div v-if="slotProps.value">{{ slotProps.value.name }}</div>
+                            <span v-else>{{ slotProps.placeholder }}</span>
+                            </template>
+                        </Select>
+                        </div>
 
                 <!-- Employee Selection (only shows if committee is selected) -->
                 <div v-if="taskItem.committee" class="p-field">
@@ -1253,23 +1254,25 @@ const getBracketIndex = (bracketId) => {
                     <button
                     v-if="editMode"
                     @click="showSaveConfirmDialog = true"
-                    class="mt-4 self-end bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+                    class="mt-4 self-end modal-button-primary"
                     >
                     Save Changes
                     </button>
                 </div>
                     </div>
-                    <div v-if="currentView === 'announcements'">
-                        <div class="w-full bg-white rounded-lg shadow-md p-6">
+
+    <div v-if="currentView === 'announcements'">
+    <div class="w-full bg-white rounded-lg shadow-md p-6">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold">Event Announcements</h2>
-        <Button
+        <button
           v-if="user?.role === 'Admin' || user?.role === 'Principal'"
-          label="Add Announcement"
-          icon="pi pi-plus"
-          class="p-button-sm"
+          class="create-button flex items-center gap-2"
           @click="openAddAnnouncementModal"
-        />
+        >
+            <i class="pi pi-plus"></i>
+            <span>Add Announcement</span>
+        </button>
       </div>
 
       <!-- Filters for Announcements -->
@@ -1328,10 +1331,10 @@ const getBracketIndex = (bracketId) => {
           class="p-4 bg-gray-50 rounded-lg shadow-sm border border-gray-200 relative"
         >
           <!-- wrapper guarantees reliable positioning despite internal Button padding -->
-          <div v-if="user?.role === 'Admin' || user?.role === 'Principal'" class="absolute top-2 right-2 z-10">
+          <div v-if="user?.role === 'Admin' || user?.role === 'Principal'" class="absolute top-1 right-1 z-10">
             <Button
               icon="pi pi-trash"
-              class="p-button-text p-button-danger p-button-icon-only !p-2"
+              class="p-button-rounded p-button-text action-btn-danger"
               @click="promptDeleteAnnouncement(announcement)"
               aria-label="Delete announcement"
             />
