@@ -27,6 +27,10 @@ defineProps({
   cancelButtonClass: {
     type: String,
     default: '' // Default will be handled by modal-button-secondary
+  },
+  showCancelButton: {
+    type: Boolean,
+    default: true
   }
 });
 
@@ -50,6 +54,7 @@ const handleCancel = () => {
       <p class="text-sm text-gray-600 mb-4">{{ message }}</p>
       <div class="flex justify-end gap-2">
         <button
+          v-if="showCancelButton"
           @click="handleCancel"
           :class="['modal-button-secondary', cancelButtonClass]"
         >
