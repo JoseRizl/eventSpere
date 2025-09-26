@@ -609,8 +609,8 @@ class EventController extends Controller
             return; // Cannot proceed without dates for cross-event check
         }
 
-        $eventStartDate = \DateTime::createFromFormat('M-d-y', $eventStartDateStr);
-        $eventEndDate = \DateTime::createFromFormat('M-d-y', $eventEndDateStr);
+        $eventStartDate = \DateTime::createFromFormat('M-d-Y', $eventStartDateStr);
+        $eventEndDate = \DateTime::createFromFormat('M-d-Y', $eventEndDateStr);
 
         if (!$eventStartDate || !$eventEndDate) {
             return; // Invalid date format, other validators will catch this.
@@ -638,8 +638,8 @@ class EventController extends Controller
                 })->whereNotNull()->contains($employeeId);
 
                 if ($isAssignedToOtherEvent && !empty($otherEvent['startDate']) && !empty($otherEvent['endDate'])) {
-                    $otherEventStartDate = \DateTime::createFromFormat('M-d-y', $otherEvent['startDate']);
-                    $otherEventEndDate = \DateTime::createFromFormat('M-d-y', $otherEvent['endDate']);
+                    $otherEventStartDate = \DateTime::createFromFormat('M-d-Y', $otherEvent['startDate']);
+                    $otherEventEndDate = \DateTime::createFromFormat('M-d-Y', $otherEvent['endDate']);
 
                     if ($otherEventStartDate && $otherEventEndDate && $eventStartDate <= $otherEventEndDate && $eventEndDate >= $otherEventStartDate) {
                         $fail("Employee \"{$employeeName}\" is already assigned to another event (\"{$otherEvent['title']}\") during this time period.");
