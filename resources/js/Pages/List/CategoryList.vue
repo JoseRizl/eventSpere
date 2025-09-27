@@ -40,6 +40,9 @@ export default defineComponent({
     const itemToDelete = ref(null);
     const showCreateConfirm = ref(false);
     const showEditConfirm = ref(false);
+    const showUsageDialog = ref(false);
+    const usageDetails = ref({ events: [], tags: [] });
+    const currentItemName = ref('');
 
     const currentPageReportTemplate = computed(() => `Showing {first} to {last} of {totalRecords} ${showTags.value ? 'tags' : 'categories'}`);
 
@@ -118,6 +121,29 @@ export default defineComponent({
       }
     };
 
+    const getUsageDetails = (id) => {
+      const usage = { events: [], tags: [] };
+      if (showTags.value) {
+        // A tag is in use if an event uses it.
+        usage.events = normalizedEvents.value.filter(event =>
+          Array.isArray(event.tags) ? event.tags.includes(id) : false
+        );
+      } else {
+        // A category is in use if an event uses it OR a tag uses it.
+        usage.events = normalizedEvents.value.filter(event =>
+          event.category_id === id && event.archived === false
+        );
+        usage.tags = tags.value.filter(tag => tag.category_id == id);
+      }
+      return usage;
+    };
+
+    const openUsageDialog = (item) => {
+      usageDetails.value = getUsageDetails(item.id);
+      currentItemName.value = item.name || item.title;
+      showUsageDialog.value = true;
+    };
+
     // Open Edit Modal
     const openEditModal = (item) => {
       selectedItem.value = { ...item };
@@ -142,7 +168,6 @@ export default defineComponent({
             isEditModalVisible.value = false;
             successMessage.value = `${showTags.value ? 'Tag' : 'Category'} updated successfully!`;
             showSuccessDialog.value = true;
-            showSuccess(`${showTags.value ? 'Tag' : 'Category'} updated successfully!`);
           },
           onError: (errors) => {
             errorMessage.value = errors.message || 'Failed to update item';
@@ -194,7 +219,6 @@ export default defineComponent({
             // Show success message
             successMessage.value = `${showTags.value ? 'Tag' : 'Category'} created successfully!`;
             showSuccessDialog.value = true;
-            showSuccess(`${showTags.value ? 'Tag' : 'Category'} created successfully!`);
             // Fetch updated list
             fetchData();
           },
@@ -240,7 +264,6 @@ export default defineComponent({
             // Show success message after data is updated
             successMessage.value = `${showTags.value ? 'Tag' : 'Category'} deleted successfully!`;
             showSuccessDialog.value = true;
-            showSuccess(`${showTags.value ? 'Tag' : 'Category'} deleted successfully!`);
           },
           onError: (errors) => {
             errorMessage.value = errors.message || 'Failed to delete item';
@@ -295,6 +318,9 @@ export default defineComponent({
       showEditConfirm,
       confirmDelete,
       currentPageReportTemplate,
+      openUsageDialog,
+      showUsageDialog,
+      usageDetails,
       categoryMap,
     };
   },
@@ -383,12 +409,17 @@ export default defineComponent({
               @click="openEditModal(data)"
               v-tooltip.top="`Edit ${showTags ? 'Tag' : 'Category'}`"
             />
-            <Button
+            <Button v-if="!isItemInUse(data.id)"
               icon="pi pi-trash"
               class="p-button-rounded p-button-text action-btn-danger"
               @click="deleteItem(data.id)"
-              :disabled="isItemInUse(data.id)"
-              v-tooltip.top="isItemInUse(data.id) ? `${showTags ? 'Tag' : 'Category'} is in use and cannot be deleted` : `Delete ${showTags ? 'Tag' : 'Category'}`"
+              v-tooltip.top="`Delete ${showTags ? 'Tag' : 'Category'}`"
+            />
+            <Button v-else
+              icon="pi pi-info-circle"
+              class="p-button-rounded p-button-text p-button-help"
+              @click="openUsageDialog(data)"
+              v-tooltip.top="`${showTags ? 'Tag' : 'Category'} is in use. Click to see details.`"
             />
           </div>
         </template>
@@ -520,6 +551,34 @@ export default defineComponent({
       confirmButtonClass="modal-button-danger"
       @confirm="confirmDelete"
     />
+
+    <!-- Usage Details Dialog -->
+    <Dialog v-model:visible="showUsageDialog" modal :header="`${showTags ? 'Tag' : 'Category'} In Use`" :style="{ width: '450px' }">
+        <div class="p-fluid">
+            <p class="mb-4">
+                The {{ showTags ? 'tag' : 'category' }} <strong>'{{ currentItemName }}'</strong> cannot be deleted because it is currently in use by the following items:
+            </p>
+
+            <div v-if="usageDetails.events.length > 0" class="mb-4">
+                <h4 class="font-semibold mb-2">Events:</h4>
+                <ul class="list-disc pl-5 space-y-1 text-sm">
+                    <li v-for="event in usageDetails.events" :key="`event-${event.id}`">
+                        <a :href="route('event.details', { id: event.id })" target="_blank" class="text-blue-600 hover:underline">{{ event.title }}</a>
+                    </li>
+                </ul>
+            </div>
+
+            <div v-if="usageDetails.tags.length > 0">
+                <h4 class="font-semibold mb-2">Tags:</h4>
+                <ul class="list-disc pl-5 space-y-1 text-sm">
+                    <li v-for="tag in usageDetails.tags" :key="`tag-${tag.id}`" class="flex items-center gap-2">
+                        <span class="inline-block w-3 h-3 rounded-full" :style="{ backgroundColor: tag.color }"></span>
+                        <span>{{ tag.name }}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </Dialog>
   </div>
 </template>
 

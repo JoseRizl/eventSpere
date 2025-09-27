@@ -526,6 +526,12 @@
             "name": "Exam",
             "color": "#ff0000",
             "category_id": "1"
+        },
+        {
+            "id": "68d7d732a1e2c",
+            "name": "Lit",
+            "color": "#d5c834",
+            "category_id": "68d63045a4b4a"
         }
     ],
     "category": [
@@ -562,7 +568,7 @@
         {
             "id": "68d63045a4b4a",
             "title": "Cultural & Arts Events",
-            "description": null
+            "description": "Hfosanfmb sid sad asasf sdgsdf sadkljcxnjuoj rcbnbmn etyretuyioyt dgag w eqwfs qw cwvh vscqw sfvv cdfs v ngfd  bjd ascdsb Hfosanfmb sid sad asasf sdgsdf sadkljcxnjuoj rcbnbmn etyretuyioyt dgag w eqwfs qw cwvh vscqw sfvv cdfs v ngfd  bjd ascdsb"
         },
         {
             "id": "68d6308e324f7",
