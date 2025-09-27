@@ -10,6 +10,7 @@ import MultiSelect from 'primevue/multiselect';
 import SelectButton from 'primevue/selectbutton';
 import { Link, usePage } from '@inertiajs/vue3';
 import Skeleton from 'primevue/skeleton';
+import BracketCard from '@/Components/BracketCard.vue';
 import SuccessDialog from '@/Components/SuccessDialog.vue';
 import MatchesView from '@/Components/MatchesView.vue';
 import BracketView from '@/Components/BracketView.vue';
@@ -326,95 +327,30 @@ onMounted(async () => {
       </div>
 
       <!-- Bracket Display Section -->
-      <div v-else v-for="bracket in filteredBrackets" :key="bracket.id" class="bracket-section">
-        <div class="bracket-wrapper">
-                <div class="bracket-header">
-                    <div class="flex justify-between items-start">
-                        <div class="flex items-center gap-4">
-                            <h2>{{ bracket.name }}</h2>
-                            <div class="info-tags">
-                                <span :class="['bracket-tag', getBracketTypeClass(bracket.type)]">{{ bracket.type }}</span>
-                                <span :class="['bracket-tag', getBracketStats(bracket).status.class]">{{ getBracketStats(bracket).status.text }}</span>
-                            </div>
-                        </div>
-                        <div class="bracket-controls">
-                            <Button v-if="user?.role === 'Admin'" icon="pi pi-trash" @click="removeBracket(brackets.indexOf(bracket))" class="p-button-rounded p-button-text p-button-danger" v-tooltip.top="'Delete Bracket'" />
-                            <Button :icon="expandedBrackets[brackets.indexOf(bracket)] ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" @click="toggleBracket(brackets.indexOf(bracket))" class="p-button-rounded p-button-text" v-tooltip.top="expandedBrackets[brackets.indexOf(bracket)] ? 'Hide Bracket' : 'Show Bracket'" />
-                        </div>
-                    </div>
-
-                    <Link v-if="bracket.event" :href="route('event.details', { id: bracket.event_id })" class="event-link-container group">
-                        <img :src="bracket.event.image || '/placeholder-event.jpg'" :alt="bracket.event.title" class="event-link-icon" />
-                        <div class="event-link-info">
-                            <h4 class="event-link-title group-hover:text-blue-600">{{ bracket.event.title }}</h4>
-                            <p class="related-event-date">{{ formatDisplayDate(bracket.event.startDate) }}</p>
-                        </div>
-                    </Link>
-
-                    <div class="bracket-stats">
-                        <div class="stat-item">
-                            <i class="pi pi-users"></i>
-                            <span>{{ getBracketStats(bracket).participants }} Participants</span>
-                        </div>
-                        <div class="stat-item">
-                            <i class="pi pi-sitemap"></i>
-                            <span>{{ getBracketStats(bracket).rounds }} Rounds</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div v-if="expandedBrackets[brackets.indexOf(bracket)]" class="bracket-content-wrapper" :id="`bracket-content-${bracket.id}`">
-                    <div class="view-toggle-buttons">
-                        <Button
-                            :label="'Bracket View'"
-                            :class="['p-button-sm', bracketViewModes[brackets.indexOf(bracket)] !== 'matches' ? 'p-button-primary' : 'p-button-outlined']"
-                            @click="setBracketViewMode(brackets.indexOf(bracket), 'bracket')"
-                        />
-                        <Button
-                            :label="'Matches View'"
-                            :class="['p-button-sm', bracketViewModes[brackets.indexOf(bracket)] === 'matches' ? 'p-button-primary' : 'p-button-outlined']"
-                            @click="setBracketViewMode(brackets.indexOf(bracket), 'matches')"
-                        />
-                    </div>
-
-                    <!-- Bracket View -->
-                    <div v-show="bracketViewModes[brackets.indexOf(bracket)] !== 'matches'">
-                        <BracketView
-                            :bracket="bracket"
-                            :bracketIndex="brackets.indexOf(bracket)"
-                            :user="user"
-                            :standingsRevision="standingsRevision"
-                            :isFinalRound="isFinalRound"
-                            :openMatchDialog="openMatchDialog"
-                            :getRoundRobinStandings="getRoundRobinStandings"
-                            :isRoundRobinConcluded="isRoundRobinConcluded"
-                            :openScoringConfigDialog="openScoringConfigDialog"
-                        />
-                    </div>
-
-                    <!-- Matches Card View -->
-                    <div v-if="bracketViewModes[brackets.indexOf(bracket)] === 'matches'">
-                        <div class="match-filters">
-                            <SelectButton
-                                :modelValue="bracketMatchFilters[brackets.indexOf(bracket)]"
-                                @update:modelValue="val => setBracketMatchFilter(brackets.indexOf(bracket), val)"
-                                :options="matchStatusFilterOptions"
-                                optionLabel="label"
-                                optionValue="value"
-                                aria-labelledby="match-status-filter"
-                            />
-                        </div>
-                        <MatchesView
-                            :bracket="bracket"
-                            :bracketIndex="brackets.indexOf(bracket)"
-                            :user="user"
-                            :filter="bracketMatchFilters[brackets.indexOf(bracket)]"
-                            :openMatchEditorFromCard="openMatchEditorFromCard"
-                            :isFinalRound="isFinalRound"
-                        />
-                    </div>
-                </div>
-            </div>
+      <div v-else>
+          <BracketCard
+            v-for="bracket in filteredBrackets"
+            :key="bracket.id"
+            :bracket="bracket"
+            :bracketIndex="brackets.indexOf(bracket)"
+            :user="user"
+            :isExpanded="expandedBrackets[brackets.indexOf(bracket)]"
+            :viewMode="bracketViewModes[brackets.indexOf(bracket)]"
+            :matchFilter="bracketMatchFilters[brackets.indexOf(bracket)]"
+            :standingsRevision="standingsRevision"
+            :getBracketStats="getBracketStats"
+            :getBracketTypeClass="getBracketTypeClass"
+            :isFinalRound="isFinalRound"
+            :getRoundRobinStandings="getRoundRobinStandings"
+            :isRoundRobinConcluded="isRoundRobinConcluded"
+            :onOpenMatchDialog="openMatchDialog"
+            :onOpenScoringConfigDialog="openScoringConfigDialog"
+            :onOpenMatchEditorFromCard="openMatchEditorFromCard"
+            @toggle-bracket="toggleBracket"
+            @remove-bracket="removeBracket"
+            @set-view-mode="({ index, mode }) => setBracketViewMode(index, mode)"
+            @set-match-filter="({ index, filter }) => setBracketMatchFilter(index, filter)"
+          />
       </div>
 
       <!-- Dialog for Bracket Setup -->

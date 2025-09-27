@@ -9,6 +9,7 @@ import SuccessDialog from '@/Components/SuccessDialog.vue';
 import { useBracketState } from '@/composables/useBracketState.js';
 import { useBracketActions } from '@/composables/useBracketActions.js';
 import Dialog from 'primevue/dialog';
+import BracketCard from '@/Components/BracketCard.vue';
 import BracketView from '@/Components/BracketView.vue';
 import MatchEditorDialog from '@/Components/MatchEditorDialog.vue';
 import MatchesView from '@/Components/MatchesView.vue';
@@ -19,6 +20,7 @@ import Select from 'primevue/select';
 import Avatar from 'primevue/avatar';
 import Textarea from 'primevue/textarea';
 import DatePicker from 'primevue/datepicker';
+import MultiSelect from 'primevue/multiselect';
 
 const props = defineProps({
   event: Object,
@@ -166,6 +168,8 @@ const {
   setBracketMatchFilter,
   openMatchEditorFromCard,
   getBracketTypeClass,
+  getBracketStats,
+
 } = useBracketActions(bracketState);
 
 const relatedBrackets = computed(() => {
@@ -1445,70 +1449,31 @@ const getBracketIndex = (bracketId) => {
             </div>
             <p class="no-brackets-text">No games match your search criteria. Try adjusting your search terms.</p>
         </div>
-        <div v-else v-for="bracket in filteredRelatedBrackets" :key="bracket.id" class="bracket-section">
-            <div class="bracket-wrapper">
-                <div class="bracket-header" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-                    <h2>{{ bracket.name }} ({{ bracket.type }})</h2>
-                    <Button
-                        text
-                        rounded
-                        :icon="expandedBrackets[getBracketIndex(bracket.id)] ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
-                        @click="toggleBracket(getBracketIndex(bracket.id))"
-                        class="bracket-toggle-button"
-                    />
-                </div>
-
-                <div v-if="expandedBrackets[getBracketIndex(bracket.id)]" class="bracket-content-wrapper" :id="`bracket-content-${bracket.id}`">
-                    <div class="view-toggle-buttons">
-                        <Button
-                            :label="'Bracket View'"
-                            :class="['p-button-sm', bracketViewModes[getBracketIndex(bracket.id)] !== 'matches' ? 'p-button-primary' : 'p-button-outlined']"
-                            @click="setBracketViewMode(getBracketIndex(bracket.id), 'bracket')"
-                        />
-                        <Button
-                            :label="'Matches View'"
-                            :class="['p-button-sm', bracketViewModes[getBracketIndex(bracket.id)] === 'matches' ? 'p-button-primary' : 'p-button-outlined']"
-                            @click="setBracketViewMode(getBracketIndex(bracket.id), 'matches')"
-                        />
-                    </div>
-                    <!-- Bracket View -->
-                    <div v-show="bracketViewModes[getBracketIndex(bracket.id)] !== 'matches'">
-                        <BracketView
-                            :bracket="bracket"
-                            :bracketIndex="getBracketIndex(bracket.id)"
-                            :user="user"
-                            :standingsRevision="standingsRevision"
-                            :isFinalRound="isFinalRound"
-                            :openMatchDialog="openMatchDialog"
-                            :getRoundRobinStandings="getRoundRobinStandings"
-                            :isRoundRobinConcluded="isRoundRobinConcluded"
-                            :openScoringConfigDialog="openScoringConfigDialog"
-                        />
-                    </div>
-
-                    <!-- Matches Card View -->
-                    <div v-if="bracketViewModes[getBracketIndex(bracket.id)] === 'matches'">
-                        <div class="match-filters">
-                            <SelectButton
-                                :modelValue="bracketMatchFilters[getBracketIndex(bracket.id)]"
-                                @update:modelValue="val => setBracketMatchFilter(getBracketIndex(bracket.id), val)"
-                                :options="matchStatusFilterOptions"
-                                optionLabel="label"
-                                optionValue="value"
-                                aria-labelledby="match-status-filter"
-                            />
-                        </div>
-                        <MatchesView
-                            :bracket="bracket"
-                            :bracketIndex="getBracketIndex(bracket.id)"
-                            :user="user"
-                            :filter="bracketMatchFilters[getBracketIndex(bracket.id)]"
-                            :openMatchEditorFromCard="openMatchEditorFromCard"
-                            :isFinalRound="isFinalRound"
-                        />
-                    </div>
-                </div>
-            </div>
+        <div v-else>
+            <BracketCard
+                v-for="bracket in filteredRelatedBrackets"
+                :key="bracket.id"
+                :bracket="bracket"
+                :bracketIndex="getBracketIndex(bracket.id)"
+                :user="user"
+                :isExpanded="expandedBrackets[getBracketIndex(bracket.id)]"
+                :viewMode="bracketViewModes[getBracketIndex(bracket.id)]"
+                :matchFilter="bracketMatchFilters[getBracketIndex(bracket.id)]"
+                :standingsRevision="standingsRevision"
+                :getBracketStats="getBracketStats"
+                :getBracketTypeClass="getBracketTypeClass"
+                :isFinalRound="isFinalRound"
+                :getRoundRobinStandings="getRoundRobinStandings"
+                :isRoundRobinConcluded="isRoundRobinConcluded"
+                :onOpenMatchDialog="openMatchDialog"
+                :onOpenScoringConfigDialog="openScoringConfigDialog"
+                :onOpenMatchEditorFromCard="openMatchEditorFromCard"
+                @toggle-bracket="toggleBracket"
+                @set-view-mode="({ index, mode }) => setBracketViewMode(index, mode)"
+                @set-match-filter="({ index, filter }) => setBracketMatchFilter(index, filter)"
+                :showEventLink="false"
+                :showAdminControls="false"
+            />
         </div>
       </div>
 
