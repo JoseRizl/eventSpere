@@ -206,6 +206,12 @@ const getRoundRobinPlayerStyling = (player, otherPlayer, match) => {
     };
 };
 
+const getLineStroke = (line) => {
+    return line.isWinnerPath ? '#007bff' : 'black'; // Blue for winner, black for default
+};
+const getLineStrokeWidth = (line) => {
+    return line.isWinnerPath ? 3 : 2; // Thicker for winner
+};
 const screenToSVG = (svg, x, y) => {
     if (!svg) return { x: 0, y: 0 };
     const p = svg.createSVGPoint();
@@ -224,7 +230,46 @@ const updateBracketLines = () => {
     const bracket = props.bracket;
     const bracketIdx = props.bracketIndex;
 
-    const drawLinesFor = (matches, svgSelector, idPrefix) => {
+    // Determine winner IDs for different parts of the bracket
+    let tournamentWinnerId = null;
+    let upperBracketWinnerId = null;
+    let lowerBracketWinnerId = null;
+
+    if (bracket.type === 'Single Elimination') {
+        tournamentWinnerId = bracketAnalysis.value.singleElimWinnerId;
+    } else if (bracket.type === 'Double Elimination') {
+        tournamentWinnerId = bracketAnalysis.value.deGrandFinalsWinnerId;
+        upperBracketWinnerId = bracketAnalysis.value.deWinnersWinnerId;
+        lowerBracketWinnerId = bracketAnalysis.value.deLosersWinnerId;
+    }
+
+    // Create sets of all matches won by the relevant winners
+    const overallWinnerMatchIds = new Set();
+    if (tournamentWinnerId) { // This is for the final champion's path
+        const allMatches = [
+            ...(bracket.matches.winners?.flat() || []),
+            ...(bracket.matches.losers?.flat() || []),
+            ...(bracket.matches.grand_finals?.flat() || []),
+            ...(bracket.type === 'Single Elimination' ? bracket.matches.flat() : [])
+        ];
+        allMatches.forEach(m => { if (m.winner_id === tournamentWinnerId) overallWinnerMatchIds.add(m.id); });
+    }
+
+    const upperBracketWinnerMatchIds = new Set();
+    if (upperBracketWinnerId) { // This is for the upper bracket winner's path
+        (bracket.matches.winners?.flat() || []).forEach(m => {
+            if (m.winner_id === upperBracketWinnerId) upperBracketWinnerMatchIds.add(m.id);
+        });
+    }
+
+    const lowerBracketWinnerMatchIds = new Set();
+    if (lowerBracketWinnerId) { // This is for the lower bracket winner's path
+        (bracket.matches.losers?.flat() || []).forEach(m => {
+            if (m.winner_id === lowerBracketWinnerId) lowerBracketWinnerMatchIds.add(m.id);
+        });
+    }
+
+    const drawLinesFor = (matches, svgSelector, idPrefix, part) => {
         const svgEl = bracketContentRef.value.querySelector(svgSelector);
         if (!svgEl || !matches) return [];
 
@@ -247,17 +292,34 @@ const updateBracketLines = () => {
                     const fromPoint = screenToSVG(svgEl, fromRect.right, fromRect.top + fromRect.height / 2);
                     const toPoint = screenToSVG(svgEl, toRect.left, toRect.top + toRect.height / 2);
 
+                    let isWinnerLine = overallWinnerMatchIds.has(match.id);
+                    // For the winners bracket, also highlight the path of the upper bracket winner
+                    if (part === 'winners' && upperBracketWinnerMatchIds.has(match.id)) {
+                        isWinnerLine = true;
+                    }
+                    // For the losers bracket, also highlight the path of the lower bracket winner
+                    if (part === 'losers' && lowerBracketWinnerMatchIds.has(match.id)) {
+                        isWinnerLine = true;
+                    }
+                    // For the grand finals, the line from the upper bracket winner should be highlighted
+                    if (part === 'grand_finals' && upperBracketWinnerMatchIds.has(match.id)) {
+                        isWinnerLine = true;
+                    }
+
                     newLines.push({
                         x1: fromPoint.x, y1: fromPoint.y,
-                        x2: (fromPoint.x + toPoint.x) / 2, y2: fromPoint.y
+                        x2: (fromPoint.x + toPoint.x) / 2, y2: fromPoint.y,
+                        isWinnerPath: isWinnerLine
                     });
                     newLines.push({
                         x1: (fromPoint.x + toPoint.x) / 2, y1: fromPoint.y,
-                        x2: (fromPoint.x + toPoint.x) / 2, y2: toPoint.y
+                        x2: (fromPoint.x + toPoint.x) / 2, y2: toPoint.y,
+                        isWinnerPath: isWinnerLine
                     });
                     newLines.push({
                         x1: (fromPoint.x + toPoint.x) / 2, y1: toPoint.y,
-                        x2: toPoint.x, y2: toPoint.y
+                        x2: toPoint.x, y2: toPoint.y,
+                        isWinnerPath: isWinnerLine
                     });
                 }
             });
@@ -266,35 +328,11 @@ const updateBracketLines = () => {
     };
 
     if (bracket.type === 'Single Elimination') {
-        dynamicLines.value.single = drawLinesFor(bracket.matches, '.connection-lines', 'match');
+        dynamicLines.value.single = drawLinesFor(bracket.matches, '.connection-lines', 'match', 'single');
     } else if (bracket.type === 'Double Elimination') {
-        dynamicLines.value.winners = drawLinesFor(bracket.matches.winners, '.winners .connection-lines', 'winners-match');
-        dynamicLines.value.losers = drawLinesFor(bracket.matches.losers, '.losers .connection-lines', 'losers-match');
-
-        const svgEl = bracketContentRef.value.querySelector('.grand-finals .connection-lines');
-        if (svgEl) {
-            const newFinalsLines = [];
-            const winnerBracketFinalMatchEl = document.getElementById(`winners-match-${bracketIdx}-${bracket.matches.winners.length - 1}-0`);
-            const loserBracketFinalMatchEl = document.getElementById(`losers-match-${bracketIdx}-${bracket.matches.losers.length - 1}-0`);
-            const grandFinalMatchEl = document.getElementById(`grand-finals-match-${bracketIdx}-0`);
-
-            const drawFinalsLine = (fromEl, toEl, yOffsetMultiplier) => {
-                if (fromEl && toEl) {
-                    const fromRect = fromEl.getBoundingClientRect();
-                    const toRect = toEl.getBoundingClientRect();
-                    const fromPoint = screenToSVG(svgEl, fromRect.right, fromRect.top + fromRect.height / 2);
-                    const toPoint = screenToSVG(svgEl, toRect.left, toRect.top + toRect.height * yOffsetMultiplier);
-                    const midX = (fromPoint.x + toPoint.x) / 2;
-                    newFinalsLines.push({ x1: fromPoint.x, y1: fromPoint.y, x2: midX, y2: fromPoint.y });
-                    newFinalsLines.push({ x1: midX, y1: fromPoint.y, x2: midX, y2: toPoint.y });
-                    newFinalsLines.push({ x1: midX, y1: toPoint.y, x2: toPoint.x, y2: toPoint.y });
-                }
-            };
-
-            drawFinalsLine(winnerBracketFinalMatchEl, grandFinalMatchEl, 0.25);
-            drawFinalsLine(loserBracketFinalMatchEl, grandFinalMatchEl, 0.75);
-            dynamicLines.value.finals = newFinalsLines;
-        }
+        dynamicLines.value.winners = drawLinesFor(bracket.matches.winners, '.winners .connection-lines', 'winners-match', 'winners');
+        dynamicLines.value.losers = drawLinesFor(bracket.matches.losers, '.losers .connection-lines', 'losers-match', 'losers');
+        dynamicLines.value.finals = []; // Ensure finals lines are always empty
     }
 };
 
@@ -323,8 +361,8 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
             :y1="line.y1"
             :x2="line.x2"
             :y2="line.y2"
-            stroke="black"
-            stroke-width="2"
+            :stroke="getLineStroke(line)"
+            :stroke-width="getLineStrokeWidth(line)"
         />
         </svg>
 
@@ -339,6 +377,7 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
             v-for="(match, matchIdx) in round"
             :key="matchIdx"
             :id="`match-${bracketIndex}-${roundIdx}-${matchIdx}`"
+            :data-match-id="match.id"
             :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
             @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'single')"
         >
@@ -444,8 +483,8 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
                 :y1="line.y1"
                 :x2="line.x2"
                 :y2="line.y2"
-                stroke="black"
-                stroke-width="2"
+                :stroke="getLineStroke(line)"
+                :stroke-width="getLineStrokeWidth(line)"
                 />
             </g>
             </svg>
@@ -458,6 +497,7 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
                 v-for="(match, matchIdx) in round"
                 :key="`winners-${roundIdx}-${matchIdx}`"
                 :id="`winners-match-${bracketIndex}-${roundIdx}-${matchIdx}`"
+                :data-match-id="match.id"
                 :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
                 @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'winners')"
             >
@@ -490,8 +530,8 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
                 :y1="line.y1"
                 :x2="line.x2"
                 :y2="line.y2"
-                stroke="black"
-                stroke-width="2"
+                :stroke="getLineStroke(line)"
+                :stroke-width="getLineStrokeWidth(line)"
                 />
             </g>
             </svg>
@@ -504,6 +544,7 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
                 v-for="(match, matchIdx) in round"
                 :key="`losers-${roundIdx}-${matchIdx}`"
                 :id="`losers-match-${bracketIndex}-${roundIdx}-${matchIdx}`"
+                :data-match-id="match.id"
                 :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
                 @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'losers')"
             >
@@ -538,14 +579,15 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
                 :y1="line.y1"
                 :x2="line.x2"
                 :y2="line.y2"
-                stroke="black"
-                stroke-width="2"
+                :stroke="getLineStroke(line)"
+                :stroke-width="getLineStrokeWidth(line)"
                 />
             </g>
             </svg>
 
             <div v-for="(match, matchIdx) in bracket.matches.grand_finals" :key="`grand-finals-${matchIdx}`"
             :id="`grand-finals-match-${bracketIndex}-${matchIdx}`"
+            :data-match-id="match.id"
             :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
             @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && props.openMatchDialog(bracketIndex, 0, matchIdx, match, 'grand_finals')"
             >

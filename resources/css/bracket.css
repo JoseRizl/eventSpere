@@ -668,7 +668,7 @@
 /* Unified Winner, Loser, and Tie States */
 .winner,
 .winner-name {
-  color: #2ed573 !important; /* A bright, clear green */
+  color: #48ee8d !important; /* A bright, clear green */
   font-weight: 600 !important;
 }
 
@@ -1018,19 +1018,19 @@
   color: gray !important;
 }
 
-  .winner-name {
-  color: #2ed573 !important;
+.winner-name {
+  color: #007bff !important; /* A bright, clear blue */
   font-weight: 600;
 }
 
 /* Ensure winner name stays green even after refresh */
 .player-box span.winner-name {
-  color: #2ed573 !important;
+  color: #007bff !important; /* A bright, clear blue */
 }
 
   /* Keep existing styles for winners and other states */
   .winner {
-    color: #2ed573;
+    color: #007bff;
     font-weight: 500;
   }
 
