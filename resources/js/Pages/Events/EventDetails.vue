@@ -156,8 +156,6 @@ const {
   isRoundRobinConcluded,
   openMatchDialog,
   closeMatchEditorDialog,
-  confirmMatchUpdate,
-  cancelMatchUpdate,
   proceedWithMatchUpdate,
   openScoringConfigDialog,
   closeScoringConfigDialog,
@@ -1569,21 +1567,6 @@ const getBracketIndex = (bracketId) => {
         @confirm="confirmDeleteAnnouncement"
     />
 
-    <!-- Dialogs from Bracket.vue -->
-
-    <!-- Match Update Confirmation Dialog -->
-    <ConfirmationDialog
-    v-model:show="showMatchUpdateConfirmDialog"
-    title="Confirm Match Update"
-    message="Are you sure you want to update this match? This action may trigger bracket progression and cannot be easily undone."
-    confirmText="Yes, Update Match"
-    cancelText="Cancel"
-    :style="{ zIndex: 1102 }"
-    confirmButtonClass="bg-green-600 hover:bg-green-700"
-    @confirm="proceedWithMatchUpdate"
-    @cancel="cancelMatchUpdate"
-    />
-
     <!-- Scoring Configuration Dialog -->
     <Dialog v-model:visible="showScoringConfigDialog" header="Configure Scoring System" modal :style="{ width: '400px' }">
     <div class="scoring-config-dialog">
@@ -1637,7 +1620,7 @@ const getBracketIndex = (bracketId) => {
         v-model:show="showMatchEditorDialog"
         v-model:matchData="selectedMatchData"
         :bracket="selectedBracketForDialog"
-        @confirm="confirmMatchUpdate"
+        @confirm="proceedWithMatchUpdate"
     />
 
     <Dialog v-model:visible="showMemoImageDialog" modal :header="eventDetails.memorandum?.filename" :style="{ width: '90vw', maxWidth: '1200px' }">

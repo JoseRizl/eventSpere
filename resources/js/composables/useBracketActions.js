@@ -1503,21 +1503,9 @@ const updateLines = (bracketIdx) => {
     selectedMatchData.value = null;
   };
 
-  const confirmMatchUpdate = () => {
-    if (selectedMatchData.value && !isValid(selectedMatchData.value.date)) {
-        genericErrorMessage.value = 'The selected date is invalid. Please choose a valid date.';
-        showGenericErrorDialog.value = true;
-        return;
-    }
-    showMatchUpdateConfirmDialog.value = true;
-  };
-
-  const cancelMatchUpdate = () => {
-    showMatchUpdateConfirmDialog.value = false;
-  };
-
   const proceedWithMatchUpdate = async () => {
-    showMatchUpdateConfirmDialog.value = false;
+    // This is now the primary action called after the confirmation inside MatchEditorDialog.
+    // It directly proceeds to update the match.
     await updateMatch();
   };
 
@@ -1568,8 +1556,6 @@ const updateLines = (bracketIdx) => {
     openMatchDialog,
     updateMatch,
     closeMatchEditorDialog,
-    confirmMatchUpdate,
-    cancelMatchUpdate,
     proceedWithMatchUpdate,
     openScoringConfigDialog,
     closeScoringConfigDialog,
