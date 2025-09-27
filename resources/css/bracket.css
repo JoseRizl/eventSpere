@@ -15,19 +15,18 @@
 .bracket {
   position: relative;
   display: flex;
+  justify-content: center;
   gap: 40px;
-  align-items: flex-start;
   overflow-x: auto;
   padding-bottom: 1rem;
-  justify-content: center;
 }
 
 .round {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  position: relative;
+  justify-content: space-between; /* Align rounds to the top */
 }
+
 .round > h3 {
     margin: 0 0 15px 0;
     color: #495057;
@@ -47,8 +46,7 @@
   border-radius: 8px;
   text-align: center;
   width: 150px;
-  margin: 10px 0px;
-  margin-top: 10px;
+  min-height: 60px; /* Ensure a consistent base height for spacing calculations */
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
@@ -137,10 +135,6 @@
   transform: translateY(-50%);
 }
 
-.round .match {
-  margin-top: 0;
-}
-
 /* Balanced Line Design (Pairs only) */
 .round .match:nth-child(even)::before {
   top: 50%;
@@ -157,12 +151,10 @@
   display: none;
 }
 
-/* Round Spacing */
-.round-1 .match { margin-top: 0; margin-bottom: auto; }
-.round-2 .match { margin-top: 39px; margin-bottom: 30px;}
-.round-3 .match { margin-top: 110px; margin-bottom: 75px }
-.round-4 .match { margin-top: 250px; margin-bottom: 225px;}
-.round-5 .match { margin-top: 420px; margin-bottom: auto;}
+.round > .match:first-of-type {
+    margin-top: 20px; /* Add space between round header and first match */
+}
+
 
 /* Container & General Styling */
 .container {
@@ -645,6 +637,7 @@
 .double-elimination-bracket {
   display: flex;
   flex-direction: column;
+  align-items: center;
   /* flex-direction: row; */
   gap: 40px;
   padding: 20px;
@@ -779,7 +772,8 @@
 
 /* Ensure proper spacing for losers bracket */
 .losers .round {
-  margin-top: 20px;
+    justify-content: space-around;
+    gap: 20px;
 }
 
 /* Highlight matches with issues */
@@ -1343,7 +1337,7 @@
   .bracket .match,
   .double-elimination-bracket .match {
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
   .bracket .match:hover,

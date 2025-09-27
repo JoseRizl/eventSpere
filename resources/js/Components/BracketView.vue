@@ -224,6 +224,17 @@ const screenToSVG = (svg, x, y) => {
     return p;
 };
 
+const getMatchStyle = (roundIdx) => {
+    const matchHeight = 80;
+    const gap = 20;
+    const totalHeightOfOneMatchUnit = matchHeight + gap; // The space one match + its gap takes up.
+    const margin = (Math.pow(2, roundIdx - 1) * totalHeightOfOneMatchUnit) - (matchHeight / 2) - (gap / 2);
+    return {
+        marginTop: roundIdx === 0 ? '0px' : `${margin}px`,
+        marginBottom: roundIdx === 0 ? '0px' : `${margin}px`,
+    };
+};
+
 const updateBracketLines = () => {
     if (!bracketContentRef.value) return;
 
@@ -283,7 +294,18 @@ const updateBracketLines = () => {
         for (let round = 0; round < matches.length - 1; round++) {
             matches[round].forEach((match, i) => {
                 const fromEl = document.getElementById(`${idPrefix}-${bracketIdx}-${round}-${i}`);
-                const toEl = document.getElementById(`${idPrefix}-${bracketIdx}-${round + 1}-${Math.floor(i / 2)}`);
+
+                let nextMatchIdx;
+                // Losers bracket has a special progression structure.
+                // "Survival" rounds (LR2->LR3, LR4->LR5, etc.) have half the matches.
+                // "Drop-in" rounds (LR1->LR2, LR3->LR4, etc.) often have the same number of matches.
+                if (part === 'losers' && matches[round].length === matches[round + 1].length) {
+                    nextMatchIdx = i; // Winner of match `i` goes to match `i` in the next round.
+                } else {
+                    nextMatchIdx = Math.floor(i / 2); // Standard progression (2 matches feed into 1).
+                }
+
+                const toEl = document.getElementById(`${idPrefix}-${bracketIdx}-${round + 1}-${nextMatchIdx}`);
 
                 if (fromEl && toEl) {
                     const fromRect = fromEl.getBoundingClientRect();
@@ -327,13 +349,17 @@ const updateBracketLines = () => {
         return newLines;
     };
 
-    if (bracket.type === 'Single Elimination') {
-        dynamicLines.value.single = drawLinesFor(bracket.matches, '.connection-lines', 'match', 'single');
-    } else if (bracket.type === 'Double Elimination') {
-        dynamicLines.value.winners = drawLinesFor(bracket.matches.winners, '.winners .connection-lines', 'winners-match', 'winners');
-        dynamicLines.value.losers = drawLinesFor(bracket.matches.losers, '.losers .connection-lines', 'losers-match', 'losers');
-        dynamicLines.value.finals = []; // Ensure finals lines are always empty
-    }
+    // Use an async function to handle positioning and line drawing in order
+    const runUpdates = async () => {
+        if (bracket.type === 'Single Elimination') {
+            dynamicLines.value.single = drawLinesFor(bracket.matches, '.connection-lines', 'match', 'single');
+        } else if (bracket.type === 'Double Elimination') {
+            dynamicLines.value.winners = drawLinesFor(bracket.matches.winners, '.winners .connection-lines', 'winners-match', 'winners');
+            dynamicLines.value.losers = drawLinesFor(bracket.matches.losers, '.losers .connection-lines', 'losers-match', 'losers');
+            dynamicLines.value.finals = []; // Ensure finals lines are always empty
+        }
+    };
+    runUpdates();
 };
 
 onMounted(() => {
@@ -352,7 +378,7 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
 </script>
 
 <template>
-    <div v-if="bracket.type === 'Single Elimination'" class="bracket" ref="bracketContentRef">
+    <div v-if="bracket.type === 'Single Elimination'" class="bracket single-elimination" ref="bracketContentRef">
         <svg class="connection-lines">
         <line
             v-for="(line, i) in dynamicLines.single"
@@ -378,6 +404,7 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
             :key="matchIdx"
             :id="`match-${bracketIndex}-${roundIdx}-${matchIdx}`"
             :data-match-id="match.id"
+            :style="getMatchStyle(roundIdx)"
             :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
             @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'single')"
         >
@@ -498,6 +525,7 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
                 :key="`winners-${roundIdx}-${matchIdx}`"
                 :id="`winners-match-${bracketIndex}-${roundIdx}-${matchIdx}`"
                 :data-match-id="match.id"
+                      :style="getMatchStyle(roundIdx)"
                 :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
                 @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'winners')"
             >
