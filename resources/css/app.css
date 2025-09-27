@@ -211,6 +211,13 @@
         justify-content: flex-start;
       }
 
+      .bracket-controls .p-button.p-button-text {
+        color: black;
+      }
+      .bracket-controls .p-button.p-button-text.p-button-danger:hover {
+        background-color: #dc3545 !important;
+        color: white !important;
+      }
       .action-btn-info,
       .action-btn-danger,
       .action-btn-warning,

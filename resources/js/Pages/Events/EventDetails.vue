@@ -165,6 +165,7 @@ const {
   getAllMatches,
   setBracketMatchFilter,
   openMatchEditorFromCard,
+  getBracketTypeClass,
 } = useBracketActions(bracketState);
 
 const relatedBrackets = computed(() => {

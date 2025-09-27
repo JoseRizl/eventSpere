@@ -25,6 +25,87 @@ const robustParseDate = (dateString) => {
     return new Date(NaN); // Return invalid date if all parsing fails
 };
 
+const getAllMatches = (bracket, filter = 'all') => {
+    let allMatches = [];
+    if (!bracket || !bracket.matches) return allMatches;
+
+    if (bracket.type === 'Single Elimination' || bracket.type === 'Round Robin') {
+        allMatches = bracket.matches.flat();
+    } else if (bracket.type === 'Double Elimination') {
+        allMatches = [
+            ...bracket.matches.winners.flat(),
+            ...bracket.matches.losers.flat(),
+            ...(bracket.matches.grand_finals || []).flat()
+        ];
+    } else {
+        return [];
+    }
+
+    let filteredMatches = allMatches;
+    if (filter && filter !== 'all') {
+        filteredMatches = allMatches.filter(match => match.status === filter);
+    }
+
+    const statusOrder = { 'ongoing': 1, 'pending': 2, 'completed': 3 };
+    filteredMatches.sort((a, b) => {
+        const statusA = statusOrder[a.status] || 99;
+        const statusB = statusOrder[b.status] || 99;
+        return statusA !== statusB ? statusA - statusB : a.id - b.id;
+    });
+
+    return filteredMatches;
+};
+
+const getBracketStats = (bracket, roundRobinScoring) => {
+    const allMatches = getAllMatches(bracket);
+    if (!allMatches || allMatches.length === 0) {
+        return { status: { text: 'Upcoming', class: 'status-upcoming' }, participants: 0, rounds: 0 };
+    }
+
+    const hasScores = allMatches.some(m => m.players.some(p => p.score > 0));
+    const completedMatches = allMatches.filter(m => m.status === 'completed').length;
+    let status;
+
+    if (completedMatches === allMatches.length) {
+        status = { text: 'Completed', class: 'status-completed' };
+    } else if (completedMatches > 0 || hasScores) {
+        status = { text: 'Ongoing', class: 'status-ongoing' };
+    } else {
+        status = { text: 'Upcoming', class: 'status-upcoming' };
+    }
+
+    const players = new Set();
+    allMatches.forEach(match => {
+        match.players.forEach(player => {
+            if (player && player.name && player.name !== 'TBD' && player.name !== 'BYE') {
+                players.add(player.id);
+            }
+        });
+    });
+
+    let rounds = 0;
+    if (bracket.type === 'Single Elimination' || bracket.type === 'Round Robin') {
+        rounds = bracket.matches.length;
+    } else if (bracket.type === 'Double Elimination') {
+        rounds = bracket.matches.winners.length + bracket.matches.losers.length;
+    }
+
+    return {
+        status,
+        participants: players.size,
+        rounds
+    };
+};
+
+const getBracketTypeClass = (type) => {
+    switch (type) {
+        case 'Single Elimination': return 'type-single';
+        case 'Double Elimination': return 'type-double';
+        case 'Round Robin': return 'type-round-robin';
+        default: return '';
+    }
+};
+
 export function useBracketActions(state) {
   const {
     bracketName,
@@ -126,39 +207,6 @@ export function useBracketActions(state) {
 
   const setBracketViewMode = (bracketIdx, mode) => {
     bracketViewModes.value[bracketIdx] = mode;
-  };
-
-  const getAllMatches = (bracket, filter = 'all') => {
-    let allMatches = [];
-    if (!bracket || !bracket.matches) return allMatches;
-
-    if (bracket.type === 'Single Elimination' || bracket.type === 'Round Robin') {
-        allMatches = bracket.matches.flat();
-    } else if (bracket.type === 'Double Elimination') {
-        allMatches = [
-            ...bracket.matches.winners.flat(),
-            ...bracket.matches.losers.flat(),
-            ...bracket.matches.grand_finals.flat()
-        ];
-    } else {
-        return [];
-    }
-
-    // Apply filter
-    let filteredMatches = allMatches;
-    if (filter && filter !== 'all') {
-        filteredMatches = allMatches.filter(match => match.status === filter);
-    }
-
-    // Apply sorting: ongoing -> pending -> completed
-    const statusOrder = { 'ongoing': 1, 'pending': 2, 'completed': 3 };
-    filteredMatches.sort((a, b) => {
-        const statusA = statusOrder[a.status] || 99;
-        const statusB = statusOrder[b.status] || 99;
-        return statusA !== statusB ? statusA - statusB : a.id - b.id;
-    });
-
-    return filteredMatches;
   };
 
   const setBracketMatchFilter = (bracketIdx, filter) => {
@@ -1528,8 +1576,9 @@ const updateLines = (bracketIdx) => {
     saveScoringConfig,
     handleByeRounds,
     setBracketViewMode,
-    getAllMatches,
     setBracketMatchFilter,
     openMatchEditorFromCard,
+    getBracketStats,
+    getBracketTypeClass,
   };
 }
