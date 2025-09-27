@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\BracketController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -34,6 +35,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/events', [EventController::class, 'store'])->name('events.store');
     Route::put('/events/{id}/update-from-list', [EventController::class, 'updateFromList'])->name('events.updateFromList');
     Route::put('/events/{id}/archive', [EventController::class, 'archive'])->name('events.archive');
+
+    // API routes
+    Route::prefix('api')->name('api.')->group(function () {
+        Route::get('/events', [EventController::class, 'index'])->name('events.index'); // For fetching all events as JSON
+        Route::apiResource('brackets', BracketController::class)->except(['show', 'create', 'edit']);
+    });
 });
 
 

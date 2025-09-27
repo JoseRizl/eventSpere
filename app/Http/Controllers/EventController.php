@@ -37,13 +37,8 @@ class EventController extends Controller
         })->values()->toArray();
 
     if (request()->wantsJson()) {
-        return response()->json([
-            'events_prop' => $events,
-            'tags_prop' => $data['tags'] ?? [],
-            'committees_prop' => $data['committees'] ?? [], // Assuming committees are still in db.json
-            'employees_prop' => $data['employees'] ?? [],
-            'categories_prop' => $data['category'] ?? [],
-        ]);
+        // For API calls, just return the events array.
+        return response()->json($events);
     }
 
     return Inertia::render('List/EventList', [
@@ -136,6 +131,11 @@ class EventController extends Controller
                     'task' => $task['task'] ?? ''
                 ];
             }, $event['tasks']);
+        }
+
+        // If the request wants JSON, return only the event data.
+        if (request()->wantsJson()) {
+            return response()->json($event);
         }
 
         return Inertia::render('Events/EventDetails', [

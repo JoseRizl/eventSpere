@@ -1,5 +1,6 @@
 import { nextTick, watch } from 'vue';
 import axios from 'axios';
+import { router } from '@inertiajs/vue3';
 import { format, parseISO, isValid, parse } from 'date-fns';
 
 const robustParseDate = (dateString) => {
@@ -110,10 +111,11 @@ export function useBracketActions(state) {
     selectedEvent.value = null;
 
     try {
-      const response = await axios.get('http://localhost:3000/events');
+      // Use Laravel API route for events
+      const response = await axios.get(route('api.events.index'));
       events.value = response.data.filter(event => {
         const categoryId = parseInt(event.category_id);
-        return categoryId === 3 && !event.archived;
+        return categoryId === 3 && !event.archived; // Category 3 is 'Sports'
       });
     } catch (error) {
       console.error('Error fetching events:', error);
@@ -302,7 +304,8 @@ export function useBracketActions(state) {
 
   const fetchEventDetails = async (eventId) => {
     try {
-      const response = await axios.get(`http://localhost:3000/events/${eventId}`);
+      // Use Inertia's ability to fetch JSON from a page route
+      const response = await axios.get(route('event.details', { id: eventId }), { headers: { 'Accept': 'application/json' } });
       return response.data;
     } catch (error) {
       console.error('Error fetching event details:', error);
@@ -349,9 +352,10 @@ export function useBracketActions(state) {
     Object.values(newBracket).flat().flat().forEach(populateEventDetails);
 
     try {
-      await saveBrackets(bracketData);
-      brackets.value.push(bracketData);
-      if (bracketData.id) bracketActionLog.set(bracketData.id, []);
+      // Use Laravel API to store the new bracket
+      const response = await axios.post(route('api.brackets.store'), bracketData);
+      const savedBracket = response.data; // This now includes the 'event' object from the controller.
+      brackets.value.push(savedBracket);
       expandedBrackets.value.push(false);
       bracketViewModes.value[brackets.value.length - 1] = 'bracket';
       bracketMatchFilters.value[brackets.value.length - 1] = 'all';
@@ -367,11 +371,12 @@ export function useBracketActions(state) {
 
   const fetchBrackets = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/brackets');
+      // Use Laravel API to fetch brackets
+      const response = await axios.get(route('api.brackets.index'));
       if (response.data) {
         const bracketsWithEvents = await Promise.all(
           response.data.map(async (bracket) => {
-            try {
+            if (bracket.event_id) {
               const eventDetails = await fetchEventDetails(bracket.event_id);
               const newBracket = { ...bracket, event: eventDetails || { title: 'Event not found' } };
 
@@ -388,17 +393,13 @@ export function useBracketActions(state) {
                   });
               }
               return newBracket;
-            } catch (error) {
-              console.error(`Error fetching event details for bracket ${bracket.id}:`, error);
+            } else {
               return { ...bracket, event: { title: 'Event not found' } };
             }
           })
         );
         brackets.value = bracketsWithEvents;
         expandedBrackets.value = new Array(brackets.value.length).fill(false);
-        for (const b of brackets.value) {
-          if (b.id && !bracketActionLog.has(b.id)) bracketActionLog.set(b.id, []);
-        }
         bracketViewModes.value = {};
         bracketMatchFilters.value = {};
         for (let i = 0; i < brackets.value.length; i++) {
@@ -873,7 +874,7 @@ const updateLines = (bracketIdx) => {
       try {
         const bracket = brackets.value[deleteBracketIdx.value];
         if (bracket.id) {
-          await axios.delete(`http://localhost:3000/brackets/${bracket.id}`);
+          await axios.delete(route('api.brackets.destroy', { bracket: bracket.id }));
         }
         brackets.value.splice(deleteBracketIdx.value, 1);
         expandedBrackets.value.splice(deleteBracketIdx.value, 1);
@@ -898,13 +899,10 @@ const updateLines = (bracketIdx) => {
 
   const saveBrackets = async (bracketData) => {
     try {
-      if (bracketData.id) {
-        await axios.put(`http://localhost:3000/brackets/${bracketData.id}`, bracketData);
-      } else {
-        const response = await axios.post('http://localhost:3000/brackets', bracketData);
-        bracketData.id = response.data.id;
-      }
+      // Use Laravel API to update the bracket
+      await axios.put(route('api.brackets.update', { bracket: bracketData.id }), bracketData);
     } catch (e) {
+      // TODO: Add user-facing error handling
       console.error('Error saving bracket:', e);
     }
   };
