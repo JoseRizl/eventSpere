@@ -195,6 +195,14 @@
         @apply bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold text-center;
       }
 
+      .p-datatable .p-column-header-content {
+        @apply w-full text-center;
+      }
+
+      .center-header .p-column-header-content {
+        @apply justify-center;
+      }
+
       .p-datatable-striped tr:nth-child(odd) {
         background-color: #faf5ff; /* purple-50 */
       }
@@ -209,6 +217,7 @@
         display: flex;
         gap: 0.5rem;
         justify-content: flex-start;
+        align-items: flex-start;
       }
 
       .bracket-controls .p-button.p-button-text {

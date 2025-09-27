@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { truncate } from '@/utils/stringUtils.js';
 
 const props = defineProps({
@@ -25,6 +25,11 @@ const props = defineProps({
     isRoundRobinConcluded: { type: Function, required: true },
     openScoringConfigDialog: { type: Function, required: true }
 });
+
+const bracketContentRef = ref(null);
+let resizeObserver = null;
+
+const dynamicLines = ref({ single: [], winners: [], losers: [], finals: [] });
 
 const ongoingRoundIdentifiers = computed(() => {
     const bracket = props.bracket;
@@ -200,14 +205,120 @@ const getRoundRobinPlayerStyling = (player, otherPlayer, match) => {
         'tie': match.is_tie,
     };
 };
+
+const screenToSVG = (svg, x, y) => {
+    if (!svg) return { x: 0, y: 0 };
+    const p = svg.createSVGPoint();
+    p.x = x;
+    p.y = y;
+    const ctm = svg.getScreenCTM();
+    if (ctm) {
+        return p.matrixTransform(ctm.inverse());
+    }
+    return p;
+};
+
+const updateBracketLines = () => {
+    if (!bracketContentRef.value) return;
+
+    const bracket = props.bracket;
+    const bracketIdx = props.bracketIndex;
+
+    const drawLinesFor = (matches, svgSelector, idPrefix) => {
+        const svgEl = bracketContentRef.value.querySelector(svgSelector);
+        if (!svgEl || !matches) return [];
+
+        const newLines = [];
+        const bracketContainer = svgEl.closest('.bracket');
+        if (!bracketContainer) return [];
+
+        const containerRect = bracketContainer.getBoundingClientRect();
+        svgEl.setAttribute('viewBox', `0 0 ${containerRect.width} ${containerRect.height}`);
+
+        for (let round = 0; round < matches.length - 1; round++) {
+            matches[round].forEach((match, i) => {
+                const fromEl = document.getElementById(`${idPrefix}-${bracketIdx}-${round}-${i}`);
+                const toEl = document.getElementById(`${idPrefix}-${bracketIdx}-${round + 1}-${Math.floor(i / 2)}`);
+
+                if (fromEl && toEl) {
+                    const fromRect = fromEl.getBoundingClientRect();
+                    const toRect = toEl.getBoundingClientRect();
+
+                    const fromPoint = screenToSVG(svgEl, fromRect.right, fromRect.top + fromRect.height / 2);
+                    const toPoint = screenToSVG(svgEl, toRect.left, toRect.top + toRect.height / 2);
+
+                    newLines.push({
+                        x1: fromPoint.x, y1: fromPoint.y,
+                        x2: (fromPoint.x + toPoint.x) / 2, y2: fromPoint.y
+                    });
+                    newLines.push({
+                        x1: (fromPoint.x + toPoint.x) / 2, y1: fromPoint.y,
+                        x2: (fromPoint.x + toPoint.x) / 2, y2: toPoint.y
+                    });
+                    newLines.push({
+                        x1: (fromPoint.x + toPoint.x) / 2, y1: toPoint.y,
+                        x2: toPoint.x, y2: toPoint.y
+                    });
+                }
+            });
+        }
+        return newLines;
+    };
+
+    if (bracket.type === 'Single Elimination') {
+        dynamicLines.value.single = drawLinesFor(bracket.matches, '.connection-lines', 'match');
+    } else if (bracket.type === 'Double Elimination') {
+        dynamicLines.value.winners = drawLinesFor(bracket.matches.winners, '.winners .connection-lines', 'winners-match');
+        dynamicLines.value.losers = drawLinesFor(bracket.matches.losers, '.losers .connection-lines', 'losers-match');
+
+        const svgEl = bracketContentRef.value.querySelector('.grand-finals .connection-lines');
+        if (svgEl) {
+            const newFinalsLines = [];
+            const winnerBracketFinalMatchEl = document.getElementById(`winners-match-${bracketIdx}-${bracket.matches.winners.length - 1}-0`);
+            const loserBracketFinalMatchEl = document.getElementById(`losers-match-${bracketIdx}-${bracket.matches.losers.length - 1}-0`);
+            const grandFinalMatchEl = document.getElementById(`grand-finals-match-${bracketIdx}-0`);
+
+            const drawFinalsLine = (fromEl, toEl, yOffsetMultiplier) => {
+                if (fromEl && toEl) {
+                    const fromRect = fromEl.getBoundingClientRect();
+                    const toRect = toEl.getBoundingClientRect();
+                    const fromPoint = screenToSVG(svgEl, fromRect.right, fromRect.top + fromRect.height / 2);
+                    const toPoint = screenToSVG(svgEl, toRect.left, toRect.top + toRect.height * yOffsetMultiplier);
+                    const midX = (fromPoint.x + toPoint.x) / 2;
+                    newFinalsLines.push({ x1: fromPoint.x, y1: fromPoint.y, x2: midX, y2: fromPoint.y });
+                    newFinalsLines.push({ x1: midX, y1: fromPoint.y, x2: midX, y2: toPoint.y });
+                    newFinalsLines.push({ x1: midX, y1: toPoint.y, x2: toPoint.x, y2: toPoint.y });
+                }
+            };
+
+            drawFinalsLine(winnerBracketFinalMatchEl, grandFinalMatchEl, 0.25);
+            drawFinalsLine(loserBracketFinalMatchEl, grandFinalMatchEl, 0.75);
+            dynamicLines.value.finals = newFinalsLines;
+        }
+    }
+};
+
+onMounted(() => {
+    if (props.bracket.type !== 'Round Robin' && bracketContentRef.value) {
+        resizeObserver = new ResizeObserver(() => nextTick(updateBracketLines));
+        resizeObserver.observe(bracketContentRef.value);
+        nextTick(updateBracketLines);
+    }
+});
+
+onUnmounted(() => {
+    if (resizeObserver) resizeObserver.disconnect();
+});
+
+watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
 </script>
 
 <template>
-    <div v-if="bracket.type === 'Single Elimination'" class="bracket">
+    <div v-if="bracket.type === 'Single Elimination'" class="bracket" ref="bracketContentRef">
         <svg class="connection-lines">
         <line
-            v-for="(line, i) in bracket.lines"
-            :key="i"
+            v-for="(line, i) in dynamicLines.single"
+            :key="`dynamic-line-${i}`"
             :x1="line.x1"
             :y1="line.y1"
             :x2="line.x2"
@@ -321,13 +432,13 @@ const getRoundRobinPlayerStyling = (player, otherPlayer, match) => {
     </div>
 
     <!-- Double Elimination Display -->
-    <div v-else-if="bracket.type === 'Double Elimination'" class="double-elimination-bracket">
+    <div v-else-if="bracket.type === 'Double Elimination'" class="double-elimination-bracket" ref="bracketContentRef">
         <!-- Winners Bracket -->
         <div class="bracket-section winners">
         <h3>Upper Bracket</h3>
         <div class="bracket">
             <svg class="connection-lines">
-            <g v-for="(line, i) in bracket.lines?.winners" :key="`winners-${i}`">
+            <g v-for="(line, i) in dynamicLines.winners" :key="`dynamic-winners-${i}`">
                 <line
                 :x1="line.x1"
                 :y1="line.y1"
@@ -373,7 +484,7 @@ const getRoundRobinPlayerStyling = (player, otherPlayer, match) => {
         <h3>Lower Bracket</h3>
         <div class="bracket">
             <svg class="connection-lines">
-            <g v-for="(line, i) in bracket.lines?.losers" :key="`losers-${i}`">
+            <g v-for="(line, i) in dynamicLines.losers" :key="`dynamic-losers-${i}`">
                 <line
                 :x1="line.x1"
                 :y1="line.y1"
@@ -421,7 +532,7 @@ const getRoundRobinPlayerStyling = (player, otherPlayer, match) => {
         </div>
         <div class="bracket">
             <svg class="connection-lines">
-            <g v-for="(line, i) in bracket.lines?.finals" :key="`finals-${i}`">
+            <g v-for="(line, i) in dynamicLines.finals" :key="`dynamic-finals-${i}`">
                 <line
                 :x1="line.x1"
                 :y1="line.y1"
