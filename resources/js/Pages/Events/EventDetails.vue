@@ -468,7 +468,14 @@ watch(relatedBrackets, (newBrackets) => {
 });
 
 const goBack = () => {
-    window.history.back();
+    // A more robust way to go back.
+    // It checks if there's a previous page in the session history.
+    // If the user landed here directly, it provides a sensible fallback.
+    if (window.history.length > 2) {
+        window.history.back();
+    } else {
+        router.visit(route('home'));
+    }
 };
 
 const fetchEventAnnouncements = async () => {
@@ -884,44 +891,47 @@ const getBracketIndex = (bracketId) => {
 
 <template>
 <div>
-    <div class="min-h-screen py-8 px-4">
-        <div class="mx-auto mt-4">
-            <!-- Back Button for non-management -->
-            <div v-if="!user || !['Admin', 'Principal', 'SportsManager'].includes(user.role)" class="mb-4">
-                <Button icon="pi pi-arrow-left" label="Back" @click="goBack" class="p-button-text" />
-            </div>
-
-            <!-- Banner Image -->
-            <div class="w-full bg-gray-700 rounded-lg shadow-md overflow-hidden relative">
-                <template v-if="eventDetails?.image">
-                    <!-- Blurred Background -->
-                    <img
-                        :src="eventDetails.image"
-                        :alt="`${eventDetails.title} background`"
-                        class="absolute inset-0 w-full h-64 object-cover filter blur-lg scale-110"
-                    />
-                    <!-- Foreground Image -->
-                    <img
-                        :src="eventDetails.image"
-                        :alt="eventDetails.title"
-                        class="relative w-full h-64 object-contain"
-                    />
-                </template>
-                <div v-else class="w-full h-64 bg-gray-300 flex items-center justify-center">
-                    <span class="text-gray-500 text-lg">No Image Available</span>
-                </div>
-                <div v-if="editMode" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <input type="file" @change="handleBannerImageUpload" accept="image/*" class="hidden" ref="bannerImageInput" />
-                    <Button label="Change Image" icon="pi pi-upload" @click="$refs.bannerImageInput.click()" />
-                </div>
-            </div>
-
+    <div class="min-h-screen py-8 px-4 mx-auto">
+        <!-- Back Button for non-management -->
+        <div v-if="!user || !['Admin', 'Principal', 'SportsManager'].includes(user.role)" class="mb-4 -ml-2">
+            <Button
+                icon="pi pi-arrow-left"
+                @click="goBack"
+                class="p-button-secondary p-button-text p-button-rounded"
+                v-tooltip.bottom="'Back to previous page'"
+                aria-label="Back to previous page"
+            />
         </div>
 
-        <div class="mx-auto mt-4">
+        <div class="mt-4">
             <div class="flex flex-col md:flex-row gap-6">
                 <!-- Main content (left side) - takes remaining space -->
                 <div class="flex-1">
+                    <!-- Banner Image -->
+                    <div class="w-full bg-gray-700 rounded-lg shadow-md overflow-hidden relative mb-6">
+                        <template v-if="eventDetails?.image">
+                            <!-- Blurred Background -->
+                            <img
+                                :src="eventDetails.image"
+                                :alt="`${eventDetails.title} background`"
+                                class="absolute inset-0 w-full h-64 object-cover filter blur-lg scale-110"
+                            />
+                            <!-- Foreground Image -->
+                            <img
+                                :src="eventDetails.image"
+                                :alt="eventDetails.title"
+                                class="relative w-full h-64 object-contain"
+                            />
+                        </template>
+                        <div v-else class="w-full h-64 bg-gray-300 flex items-center justify-center">
+                            <span class="text-gray-500 text-lg">No Image Available</span>
+                        </div>
+                        <div v-if="editMode" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                            <input type="file" @change="handleBannerImageUpload" accept="image/*" class="hidden" ref="bannerImageInput" />
+                            <Button label="Change Image" icon="pi pi-upload" @click="$refs.bannerImageInput.click()" />
+                        </div>
+                    </div>
+
                     <!-- View Toggle -->
                     <div class="w-full mb-4">
                         <div class="flex border-b">
@@ -934,7 +944,7 @@ const getBracketIndex = (bracketId) => {
                         </div>
                     </div>
 
-                    <div v-if="currentView === 'details'">
+                    <div v-if="currentView === 'details'" class="space-y-6">
                         <!-- Event Details -->
                         <div v-if="eventDetails" class="bg-white shadow-md rounded-lg p-6 w-full flex flex-col space-y-4">
                     <!-- Title -->
@@ -1401,50 +1411,34 @@ const getBracketIndex = (bracketId) => {
                     </div>
                 </div>
 
-                <!-- Related events sidebar (right side) - fixed width, shown only on details view -->
-                <div v-if="currentView === 'details'" class="md:w-80 flex-shrink-0">
-                <div class="bg-white shadow-md rounded-lg p-4 sticky top-4">
-                    <h3 class="font-bold text-lg mb-4">Related Events</h3>
-
-                    <div v-if="normalizedRelatedEvents.length > 0" class="space-y-4">
-                    <div
-                        v-for="event in normalizedRelatedEvents"
-                        :key="event.id"
-                        class="cursor-pointer hover:bg-gray-50 rounded p-2 transition-colors"
-                        @click="router.visit(`/events/${event.id}`)"
-                    >
-                        <div class="flex gap-3">
-                        <div class="w-24 h-16 flex-shrink-0">
-                            <img
-                            :src="event.image || '/placeholder-event.jpg'"
-                            :alt="event.title"
-                            class="w-full h-full object-cover rounded"
-                            />
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <h4 class="font-medium text-sm truncate">{{ event.title }}</h4>
-                            <p class="text-xs text-gray-500 mt-1">
-                            {{ formatDisplayDate(event.startDate) }}
-                            </p>
-                            <div class="flex flex-wrap gap-1 mt-1">
-                            <span
-                                v-for="tag in event.tags?.slice(0, 2)"
-                                :key="tag.id"
-                                class="text-xs px-1.5 py-0.5 rounded"
-                                :style="{ backgroundColor: tag.color, color: '#fff' }"
+                <!-- Related events sidebar (right side) -->
+                <div v-if="currentView === 'details' && normalizedRelatedEvents.length > 0" class="md:w-80 flex-shrink-0">
+                    <div class="bg-white shadow-md rounded-lg p-4 sticky top-4">
+                        <h3 class="font-bold text-lg mb-4">Related Events</h3>
+                        <div class="space-y-4">
+                            <div
+                                v-for="event in normalizedRelatedEvents"
+                                :key="event.id"
+                                class="cursor-pointer hover:bg-gray-50 rounded p-2 transition-colors"
+                                @click="router.visit(`/events/${event.id}`)"
                             >
-                                {{ tag.name }}
-                            </span>
+                                <div class="flex gap-3">
+                                    <div class="w-24 h-16 flex-shrink-0">
+                                        <img :src="event.image || '/placeholder-event.jpg'" :alt="event.title" class="w-full h-full object-cover rounded" />
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="font-medium text-sm truncate">{{ event.title }}</h4>
+                                        <p class="text-xs text-gray-500 mt-1">{{ formatDisplayDate(event.startDate) }}</p>
+                                        <div class="flex flex-wrap gap-1 mt-1">
+                                            <span v-for="tag in event.tags?.slice(0, 2)" :key="tag.id" class="text-xs px-1.5 py-0.5 rounded" :style="{ backgroundColor: tag.color, color: '#fff' }">
+                                                {{ tag.name }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        </div>
                     </div>
-                    </div>
-
-                    <p v-else class="text-gray-500 text-sm">
-                    No related events found
-                    </p>
-                </div>
                 </div>
             </div>
         </div>

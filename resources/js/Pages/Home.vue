@@ -97,7 +97,7 @@ const confirmDeleteAnnouncement = async () => {
 
     <!-- Carousel Banner -->
     <div v-if="carouselEvents.length > 0" class="w-full relative group/carousel">
-        <Carousel :value="carouselEvents" :numVisible="1" :numScroll="1" circular :autoplayInterval="5000" class="home-carousel">
+        <Carousel :value="carouselEvents" :numVisible="1" :numScroll="1" circular :autoplayInterval="5000" :showIndicators="true" class="home-carousel">
             <template #item="slotProps">
                 <div class="relative w-full h-80 md:h-[500px] bg-gray-700 overflow-hidden">
                     <Link :href="route('event.details', { id: slotProps.data.id })">
@@ -205,18 +205,16 @@ const confirmDeleteAnnouncement = async () => {
       </div>
       <div v-else>
         <!-- Ongoing Events -->
-        <div v-if="ongoingEvents.length > 0" class="w-full mt-4">
-          <div class="relative flex justify-center items-center mb-2">
-            <h2 class="text-2xl font-bold">Ongoing Events</h2>
-            <div class="absolute right-0">
-                <Button
-                  size="small"
-                  :icon="showOngoingEvents ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
-                  :label="showOngoingEvents ? 'Hide' : 'Show'"
-                  @click="showOngoingEvents = !showOngoingEvents"
-                  class="p-button-text"
-                />
-            </div>
+        <div v-if="ongoingEvents.length > 0" class="w-full mt-6 bg-white/60 p-4 rounded-xl border border-gray-200/80 shadow-sm">
+          <div class="flex flex-col sm:flex-row justify-between items-center mb-2 gap-2">
+            <h2 class="text-2xl font-bold text-center sm:text-left flex-grow">Ongoing Events</h2>
+            <Button
+              size="small"
+              :icon="showOngoingEvents ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+              :label="showOngoingEvents ? 'Hide' : 'Show'"
+              @click="showOngoingEvents = !showOngoingEvents"
+              class="p-button-text"
+            />
           </div>
           <div v-if="showOngoingEvents">
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -256,12 +254,16 @@ const confirmDeleteAnnouncement = async () => {
         </div>
 
         <!-- Events This Month -->
-        <div v-if="eventsThisMonth.length > 0" class="w-full mt-4">
-          <div class="relative flex justify-center items-center mb-2">
-            <h2 class="text-2xl font-bold">Events This Month</h2>
-            <div class="absolute right-0">
-                <Button size="small" :icon="showEventsThisMonth ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" :label="showEventsThisMonth ? 'Hide' : 'Show'" @click="showEventsThisMonth = !showEventsThisMonth" class="p-button-text"/>
-            </div>
+        <div v-if="eventsThisMonth.length > 0" class="w-full mt-6 bg-white/60 p-4 rounded-xl border border-gray-200/80 shadow-sm">
+          <div class="flex flex-col sm:flex-row justify-between items-center mb-2 gap-2">
+            <h2 class="text-2xl font-bold text-center sm:text-left flex-grow">Events This Month</h2>
+            <Button
+              size="small"
+              :icon="showEventsThisMonth ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+              :label="showEventsThisMonth ? 'Hide' : 'Show'"
+              @click="showEventsThisMonth = !showEventsThisMonth"
+              class="p-button-text"
+            />
           </div>
           <div v-if="showEventsThisMonth">
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -301,12 +303,16 @@ const confirmDeleteAnnouncement = async () => {
         </div>
 
         <!-- Upcoming Events -->
-        <div v-if="upcomingEvents.length > 0" class="w-full mt-4">
-          <div class="relative flex justify-center items-center mb-2">
-            <h2 class="text-2xl font-bold">Upcoming Events</h2>
-            <div class="absolute right-0">
-                <Button size="small" :icon="showUpcomingEvents ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" :label="showUpcomingEvents ? 'Hide' : 'Show'" @click="showUpcomingEvents = !showUpcomingEvents" class="p-button-text"/>
-            </div>
+        <div v-if="upcomingEvents.length > 0" class="w-full mt-6 bg-white/60 p-4 rounded-xl border border-gray-200/80 shadow-sm">
+          <div class="flex flex-col sm:flex-row justify-between items-center mb-2 gap-2">
+            <h2 class="text-2xl font-bold text-center sm:text-left flex-grow">Upcoming Events</h2>
+            <Button
+              size="small"
+              :icon="showUpcomingEvents ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+              :label="showUpcomingEvents ? 'Hide' : 'Show'"
+              @click="showUpcomingEvents = !showUpcomingEvents"
+              class="p-button-text"
+            />
           </div>
           <div v-if="showUpcomingEvents">
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -506,8 +512,13 @@ const confirmDeleteAnnouncement = async () => {
   width: 100%;
 }
 
-:deep(.home-carousel .p-carousel-prev),
-:deep(.home-carousel .p-carousel-next) {
+.home-carousel {
+    position: relative;
+    width: 100%;
+}
+
+:deep(.home-carousel .p-carousel-prev-button),
+:deep(.home-carousel .p-carousel-next-button) {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
@@ -521,21 +532,21 @@ const confirmDeleteAnnouncement = async () => {
     opacity: 0; /* Hide by default */
 }
 
-.group\/carousel:hover :deep(.home-carousel .p-carousel-prev),
-.group\/carousel:hover :deep(.home-carousel .p-carousel-next) {
+.group\/carousel:hover :deep(.home-carousel .p-carousel-prev-button),
+.group\/carousel:hover :deep(.home-carousel .p-carousel-next-button) {
     opacity: 1; /* Show on hover of the container */
 }
 
-:deep(.home-carousel .p-carousel-prev:hover),
-:deep(.home-carousel .p-carousel-next:hover) {
+:deep(.home-carousel .p-carousel-prev-button:hover),
+:deep(.home-carousel .p-carousel-next-button:hover) {
     background-color: rgba(255, 255, 255, 0.7) !important;
 }
 
-:deep(.home-carousel .p-carousel-prev) {
+:deep(.home-carousel .p-carousel-prev-button) {
     left: 1rem;
 }
 
-:deep(.home-carousel .p-carousel-next) {
+:deep(.home-carousel .p-carousel-next-button) {
     right: 1rem;
 }
 
@@ -557,7 +568,8 @@ const confirmDeleteAnnouncement = async () => {
     transition: width 0.3s ease, background-color 0.3s ease;
 }
 
-:deep(.home-carousel .p-carousel-indicator.p-highlight button) {
+:deep(.home-carousel .p-carousel-indicator.p-highlight button),
+:deep(.home-carousel .p-carousel-indicator[data-p-active="true"] button) {
     background-color: rgba(255, 255, 255, 0.9) !important;
     width: 2rem;
     border-radius: 9999px;
