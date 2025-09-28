@@ -104,16 +104,13 @@
     <SuccessDialog
       v-model:show="showSuccessDialog"
       :message="successMessage" />
-    <!-- Error Dialog -->
-    <div v-if="showErrorDialog" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center" style="z-index: 9998;">
-      <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-        <h2 class="text-lg font-semibold text-red-700 mb-2">Error</h2>
-        <p class="text-sm text-gray-700 mb-4">{{ errorMessage }}</p>
-        <div class="flex justify-end">
-          <button @click="showErrorDialog = false" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Close</button>
-        </div>
-      </div>
-    </div>
+
+    <ConfirmationDialog
+      v-model:show="showErrorDialog"
+      title="Error"
+      :message="errorMessage"
+      confirmText="Close"
+      :showCancelButton="false" />
 
     <!-- Restore Confirmation Dialog -->
     <ConfirmationDialog
@@ -121,7 +118,6 @@
       title="Restore Event?"
       :message="eventToProcess ? `Are you sure you want to restore '${eventToProcess.title}'?` : ''"
       confirmText="Yes, Restore"
-      confirmButtonClass="bg-green-600 hover:bg-green-700"
       @confirm="confirmRestore"
     />
 
@@ -131,7 +127,7 @@
       title="Delete Event Permanently?"
       :message="eventToProcess ? `Are you sure you want to permanently delete '${eventToProcess.title}'? This action cannot be undone.` : ''"
       confirmText="Yes, Delete"
-      confirmButtonClass="bg-red-600 hover:bg-red-700"
+      confirmButtonClass="modal-button-danger"
       @confirm="confirmDelete"
     />
   </div>
