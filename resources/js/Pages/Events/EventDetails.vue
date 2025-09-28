@@ -737,34 +737,38 @@ const saveChanges = () => {
   };
 
   // First, save the main event details
-  router.post(`/events/${eventDetails.value.id}/update`, eventPayload, {
+  router.post(route('event.update', { id: eventDetails.value.id }), eventPayload, {
     preserveScroll: true,
-    // ... existing onFinish, onError, onSuccess handlers
-  });
-
-  // Then, save the tasks (this would eventually go to a TaskController)
-  router.put(route('tasks.updateForEvent', {id: eventDetails.value.id}), tasksPayload, {
-    preserveScroll: true,
-    onFinish: () => saving.value = false,
     onError: (errors) => {
       saving.value = false;
       const firstErrorKey = Object.keys(errors)[0];
-      let message = 'Failed to save event. Please check the form for errors.';
+      let message = 'Failed to save event details. Please check the form for errors.';
       if (firstErrorKey) {
           const errorValue = errors[firstErrorKey];
           message = Array.isArray(errorValue) ? errorValue[0] : errorValue;
-      } else if (errors.message) {
-          message = errors.message;
       }
       errorMessage.value = message;
       errorDialogMessage.value = message;
       showErrorDialog.value = true;
     },
     onSuccess: () => {
-      showSuccessDialog.value = true;
-      successMessage.value = 'The event was updated successfully.';
-      editMode.value = false;
-      router.reload({ only: ['event'] });
+      // If main event details save successfully, then save the tasks.
+      router.put(route('tasks.updateForEvent', { id: eventDetails.value.id }), tasksPayload, {
+        preserveScroll: true,
+        onFinish: () => saving.value = false, // End saving spinner only after both are done
+        onError: (taskErrors) => {
+          const errorMessages = Object.values(taskErrors).flat().join(' ');
+          errorMessage.value = `Event details saved, but failed to save tasks: ${errorMessages}`;
+          errorDialogMessage.value = errorMessage.value;
+          showErrorDialog.value = true;
+        },
+        onSuccess: () => {
+          showSuccessDialog.value = true;
+          successMessage.value = 'The event was updated successfully.';
+          editMode.value = false;
+          // No need to reload, the redirect from TaskController handles it.
+        }
+      });
     }
   });
 };

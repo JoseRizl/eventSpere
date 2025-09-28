@@ -274,8 +274,6 @@ class EventController extends Controller
         // Get valid IDs from JSON
         $validCategoryIds = array_column($this->jsonData['category'] ?? [], 'id');
         $validTagIds = array_column($this->jsonData['tags'] ?? [], 'id');
-        $validCommitteeIds = array_column($this->jsonData['committees'] ?? [], 'id');
-        $validEmployeeIds = array_column($this->jsonData['employees'] ?? [], 'id');
 
         // Custom validation rules
         $validated = $request->validate([
@@ -344,7 +342,6 @@ class EventController extends Controller
             'scheduleLists.*.schedules' => 'nullable|array',
             'scheduleLists.*.schedules.*.time' => 'nullable|date_format:H:i',
             'scheduleLists.*.schedules.*.activity' => 'nullable|string|max:255',
-            'tasks' => 'nullable|array', // We will no longer validate tasks here
             'memorandum' => 'nullable|array',
             'memorandum.type' => 'required_with:memorandum|string|in:image,file',
             'memorandum.content' => 'required_with:memorandum|string',
@@ -385,8 +382,6 @@ class EventController extends Controller
     {
         $validCategoryIds = array_column($this->jsonData['category'] ?? [], 'id');
         $validTagIds = array_column($this->jsonData['tags'] ?? [], 'id');
-        $validCommitteeIds = array_column($this->jsonData['committees'] ?? [], 'id');
-        $validEmployeeIds = array_column($this->jsonData['employees'] ?? [], 'id');
 
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
@@ -402,7 +397,6 @@ class EventController extends Controller
             'tags.*' => ['sometimes', Rule::in($validTagIds)],
             'isAllDay' => 'sometimes|boolean',
             'archived' => 'sometimes|boolean',
-            'tasks' => 'sometimes|nullable|array', // We will no longer validate tasks here
             // Memorandum validation for list view update
             'memorandum' => 'nullable|array',
             'memorandum.type' => 'required_with:memorandum|string|in:image,file',
