@@ -76,6 +76,12 @@ const handleSetMatchFilter = (filter) => emit('set-match-filter', { index: props
                     </div>
                 </div>
 
+                <!-- Winner Banner -->
+                <div v-if="getBracketStats(bracket).status.text === 'Completed' && getBracketStats(bracket).winnerName" class="winner-banner">
+                    <i class="pi pi-trophy"></i>
+                    <span>Winner: <strong>{{ getBracketStats(bracket).winnerName }}</strong></span>
+                </div>
+
                 <Link v-if="showEventLink && bracket.event" :href="route('event.details', { id: bracket.event_id })" class="event-link-container group">
                     <img :src="bracket.event.image || '/placeholder-event.jpg'" :alt="bracket.event.title" class="event-link-icon" />
                     <div class="event-link-info">
