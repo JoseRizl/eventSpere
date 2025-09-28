@@ -19,6 +19,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/events', [EventController::class, 'index'])->name('events.index');
     Route::put('/events/{id}/restore', [EventController::class, 'restore'])->name('events.restore');
     Route::delete('/events/{id}/permanent', [EventController::class, 'permanentDelete'])->name('events.permanent-delete');
+    Route::post('/events/update-default-image', [EventController::class, 'updateDefaultImage'])->name('events.updateDefaultImage');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 

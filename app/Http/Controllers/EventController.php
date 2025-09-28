@@ -20,6 +20,7 @@ class EventController extends Controller
     public function index()
 {
     $data = $this->jsonData;
+    $settings = $data['settings'] ?? ['defaultEventImage' => 'https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg'];
     $tagsCollection = collect($data['tags'] ?? []);
     $eventTags = collect($data['event_tags'] ?? []);
 
@@ -46,6 +47,7 @@ class EventController extends Controller
         'tags_prop' => $data['tags'] ?? [],
         'committees_prop' => $data['committees'] ?? [], // Assuming committees are still in db.json
         'employees_prop' => $data['employees'] ?? [],
+        'settings_prop' => $settings,
         'categories_prop' => $data['category'] ?? [],
     ]);
 }
@@ -648,5 +650,28 @@ class EventController extends Controller
                 }
             }
         }
+    }
+
+    public function updateDefaultImage(Request $request)
+    {
+        $request->validate([
+            'image' => 'required|string',
+        ]);
+
+        $newDefaultImage = $request->input('image');
+        $data = $this->jsonData; // Use a local variable for clarity
+
+        if (!isset($data['settings'])) {
+            $data['settings'] = [];
+        }
+
+        $data['settings']['defaultEventImage'] = $newDefaultImage;
+
+        File::put(base_path('db.json'), json_encode($data, JSON_PRETTY_PRINT));
+
+        return back()->with([
+            'success' => 'Default event image updated successfully.',
+            'settings_prop' => $data['settings'] // Pass back the modified local variable
+        ]);
     }
 }

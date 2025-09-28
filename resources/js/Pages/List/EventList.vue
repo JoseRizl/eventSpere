@@ -6,6 +6,7 @@
       <div class="search-container mb-4">
         <div class="search-wrapper">
           <div class="p-input-icon-left">
+            <input type="file" ref="defaultImageInput" @change="handleDefaultImageUpload" accept="image/*" class="hidden" />
             <i class="pi pi-search" />
             <InputText v-model="searchQuery" placeholder="Search events..." class="w-full" />
           </div>
@@ -412,8 +413,13 @@
         </div>
 
         <template #footer>
-          <button class="modal-button-secondary" @click="isCreateModalVisible = false">Cancel</button>
-          <button class="modal-button-primary" @click="createEvent">Create Event</button>
+            <div class="flex justify-between w-full">
+                <Button v-if="user?.role === 'Admin' || user?.role === 'Principal'" icon="pi pi-image" class="p-button-secondary" @click="$refs.defaultImageInput.click()" v-tooltip.top="'Change Default Image'" />
+                <div class="flex gap-2">
+                    <button class="modal-button-secondary" @click="isCreateModalVisible = false">Cancel</button>
+                    <button class="modal-button-primary" @click="createEvent">Create Event</button>
+                </div>
+            </div>
         </template>
       </Dialog>
 
@@ -717,11 +723,12 @@
       const employees = computed(() => page.props.employees_prop || []);
       const isConfirmModalVisible = ref(false);
       const confirmMessage = ref('');
-      const confirmAction = ref(() => {});
-      const cancelConfirmation = ref(() => {});
       const isCreateModalVisible = ref(false);
       const isCreateTagModalVisible = ref(false);
-      const defaultImage = "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg";
+      const defaultImage = computed(() =>
+        page.props.settings_prop?.defaultEventImage ||
+        'https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg'
+      );
       const searchQuery = ref("");
       const showDateFilter = ref(false);
       const dateRange = ref({
@@ -739,7 +746,7 @@
         startTime: "",
         endTime: "",
         tags: [],
-        image: "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+        image: defaultImage.value,
         archived: false,
         isAllDay: false,
         memorandum: { type: 'text', content: '', filename: '' },
@@ -794,7 +801,7 @@
           endTime: "",
           memorandum: null,
           tags: [],
-          image: "https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg",
+          image: defaultImage.value,
           archived: false,
           isAllDay: false
         };
@@ -942,7 +949,7 @@
         try {
           const payload = {
             ...newEvent.value,
-            image: finalImage || defaultImage,
+            image: finalImage || defaultImage.value,
             tags: newEvent.value.tags || [],
             startDate: newEvent.value.startDate
                 ? format(new Date(newEvent.value.startDate), "MMM-dd-yyyy")
@@ -1109,7 +1116,7 @@
         if (target.image && target.image.startsWith('blob:')) {
             URL.revokeObjectURL(target.image); // Clean up memory
         }
-        target.image = defaultImage;
+        target.image = defaultImage.value;
         };
 
       const normalizedTags = computed(() => {
@@ -1334,7 +1341,7 @@
             ),
             startDate: event.startDate ? new Date(event.startDate) : null,
             endDate: event.endDate ? new Date(event.endDate) : null,
-            image: event.image || defaultImage
+            image: event.image || defaultImage.value
         };
         isEditModalVisible.value = true;
     };
@@ -1376,9 +1383,9 @@
             const blob = await response.blob();
             finalImage = await new Promise((resolve, reject) => {
               const reader = new FileReader();
-              reader.onerror = reject;
               reader.onloadend = () => resolve(reader.result);
               reader.readAsDataURL(blob);
+              reader.onerror = reject;
             });
             URL.revokeObjectURL(blobUrl); // Revoke the blob URL after it has been read
           } catch (error) {
@@ -1386,7 +1393,7 @@
             finalImage = defaultImage;
           }
         } else if (!selectedEvent.value.image) {
-          finalImage = defaultImage;
+          finalImage = defaultImage.value;
         }
         const payload = {
           ...selectedEvent.value,
@@ -1484,6 +1491,45 @@
             console.error("File reading error:", err);
             errorMessage.value = "Failed to read the memorandum file.";
             showErrorDialog.value = true;
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleDefaultImageUpload = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const newDefaultImage = e.target.result;
+            saving.value = true;
+            try {
+                router.post(route('events.updateDefaultImage'), { image: newDefaultImage }, {
+                    preserveState: true,
+                    onSuccess: (updatedPage) => {
+                        // Manually update the prop to trigger computed properties
+                        page.props.settings_prop = updatedPage.props.settings_prop;
+
+                        // Explicitly update newEvent.value.image to reflect the new default
+                        // This ensures the preview in the create modal updates immediately.
+                        newEvent.value.image = updatedPage.props.settings_prop.defaultEventImage;
+
+                        successMessage.value = 'Default image updated successfully!';
+                        showSuccessDialog.value = true;
+                    },
+                    onError: (errors) => {
+                        errorMessage.value = errors.image || 'Failed to update default image.';
+                        showErrorDialog.value = true;
+                    }
+                });
+            } catch (error) {
+                console.error('Failed to update default image:', error);
+                errorMessage.value = 'An unexpected error occurred.';
+                showErrorDialog.value = true;
+            } finally { // This finally block is correctly placed
+                saving.value = false;
+                if (event.target) event.target.value = ''; // Reset file input
+            }
         };
         reader.readAsDataURL(file);
     };
@@ -1615,8 +1661,6 @@
     isTaskModalVisible,
     taskAssignments,
     committees,
-    employees,
-    filteredEmployees,
     openTaskModal,
     addTask,
     deleteTask,
@@ -1624,8 +1668,6 @@
     saveTaskAssignments,
     isConfirmModalVisible,
     confirmMessage,
-    confirmAction,
-    cancelConfirmation,
     dateError,
     isCreateModalVisible,
     isCreateTagModalVisible,
@@ -1672,8 +1714,12 @@
     tagsMap,
     filteredSelectedEventTags,
     handleDescriptionClick,
+    employees,
+    filteredEmployees,
     handleMemoUpload,
+    handleDefaultImageUpload,
     };
+
     },
  });
  </script>
