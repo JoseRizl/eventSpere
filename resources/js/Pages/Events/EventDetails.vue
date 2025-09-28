@@ -1291,7 +1291,7 @@ const getBracketIndex = (bracketId) => {
       </div>
 
       <!-- Filters for Announcements -->
-      <div class="mb-4">
+      <div class="mb-4 flex flex-wrap items-center gap-2">
         <div class="search-wrapper">
             <div class="p-input-icon-left w-full">
                 <i class="pi pi-search" />
@@ -1313,16 +1313,16 @@ const getBracketIndex = (bracketId) => {
       </div>
 
       <!-- Date Filter Calendar -->
-      <div v-if="showAnnouncementDateFilter" class="date-filter-container mb-4">
-          <div class="date-range-wrapper">
-            <div class="date-input-group">
+      <div v-if="showAnnouncementDateFilter" class="date-filter-container mb-4 max-w-md">
+          <div class="flex flex-col sm:flex-row gap-2">
+            <div class="flex-1">
               <label>From:</label>
               <DatePicker
                 v-model="announcementStartDateFilter"
                 dateFormat="M-dd-yy"
                 :showIcon="true"
                 placeholder="Start date"
-                class="date-filter-calendar"
+                class="w-full"
               />
             </div>
             <div class="date-input-group">
@@ -1332,7 +1332,7 @@ const getBracketIndex = (bracketId) => {
                 dateFormat="M-dd-yy"
                 :showIcon="true"
                 placeholder="End date"
-                class="date-filter-calendar"
+                class="w-full"
               />
             </div>
           </div>
@@ -1442,7 +1442,7 @@ const getBracketIndex = (bracketId) => {
       <!-- Brackets Section -->
       <div v-if="relatedBrackets.length > 0" class="mx-auto mt-6">
         <h2 class="text-xl font-bold mb-4">Games</h2>
-        <div v-if="relatedBrackets.length > 1" class="search-container mb-4" style="max-width: 300px;">
+        <div v-if="relatedBrackets.length > 1" class="mb-4 max-w-sm">
             <div class="p-input-icon-left w-full">
                 <i class="pi pi-search" />
                 <InputText
@@ -1664,27 +1664,10 @@ const getBracketIndex = (bracketId) => {
     color: #1F2937; /* gray-800 */
 }
 
-.search-container {
+.search-wrapper {
   display: flex;
-  justify-content: flex-start;
-  width: 100%;
-}
-
-.search-container .p-input-icon-left {
-  position: relative;
-  width: 100%;
-}
-
-.search-container .p-input-icon-left i {
-  position: absolute;
-  left: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #6c757d;
-}
-.search-container .p-input-icon-left .p-inputtext {
-  width: 100%;
-  padding-left: 2.5rem;
+  gap: 0.5rem;
+  align-items: center;
 }
 
 .search-wrapper {
@@ -1692,7 +1675,7 @@ const getBracketIndex = (bracketId) => {
   gap: 10px;
   align-items: center;
   width: 100%;
-  max-width: 400px;
+  max-width: 100%;
 }
 
 .search-wrapper .p-input-icon-left {
@@ -1724,16 +1707,6 @@ const getBracketIndex = (bracketId) => {
   padding: 15px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
-  max-width: 400px;
-}
-
-.date-range-wrapper {
-  display: flex;
-  flex-direction: row;
   gap: 10px;
   align-items: flex-start;
 }
@@ -1762,5 +1735,11 @@ const getBracketIndex = (bracketId) => {
 
 .clear-date-btn:hover {
   background-color: rgba(220, 53, 69, 0.1);
+}
+
+@media (min-width: 640px) {
+    .search-wrapper {
+        max-width: 400px;
+    }
 }
 </style>

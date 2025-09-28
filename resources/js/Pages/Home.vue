@@ -83,7 +83,7 @@ const confirmDeleteAnnouncement = async () => {
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- News and Update Title -->
-    <!-- <h1 class="text-2xl font-bold mt-4 text-center">News and Updates</h1> -->
+    <h1 class="text-2xl font-bold mt-4 text-center text-slate-800">News and Updates</h1>
 
     <!-- Carousel Banner -->
     <div v-if="carouselEvents.length > 0" class="w-full relative group/carousel">
@@ -108,6 +108,7 @@ const confirmDeleteAnnouncement = async () => {
     </div>
 
     <div class="py-8 px-4">
+
     <!-- View Toggle -->
     <div class="w-full">
       <div class="flex border-b">
@@ -139,8 +140,8 @@ const confirmDeleteAnnouncement = async () => {
 
       <!-- Filters -->
       <div class="mt-4">
-        <div class="search-wrapper">
-            <div class="p-input-icon-left">
+        <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full max-w-lg">
+            <div class="p-input-icon-left w-full sm:w-auto flex-grow">
                 <i class="pi pi-search" />
                 <InputText v-model="searchQuery" :placeholder="currentView === 'events' ? 'Search by title or description...' : 'Search by message or event...'" class="w-full" />
             </div>
@@ -156,9 +157,9 @@ const confirmDeleteAnnouncement = async () => {
       </div>
 
       <!-- Date Filter Calendar -->
-      <div v-if="showDateFilter" class="date-filter-container mt-2">
-          <div class="date-range-wrapper">
-            <div class="date-input-group">
+      <div v-if="showDateFilter" class="mt-2 bg-white p-4 rounded-lg shadow-md flex flex-col gap-2 max-w-lg">
+          <div class="flex flex-col sm:flex-row gap-2 items-start w-full">
+            <div class="flex flex-col gap-1 flex-1 w-full">
               <label>From:</label>
               <DatePicker
                 v-model="startDateFilter"
@@ -168,7 +169,7 @@ const confirmDeleteAnnouncement = async () => {
                 class="date-filter-calendar"
               />
             </div>
-            <div class="date-input-group">
+            <div class="flex flex-col gap-1 flex-1 w-full">
               <label>To:</label>
               <DatePicker
                 v-model="endDateFilter"
@@ -179,7 +180,7 @@ const confirmDeleteAnnouncement = async () => {
               />
             </div>
           </div>
-          <Button v-if="startDateFilter || endDateFilter" icon="pi pi-times" class="p-button-text p-button-rounded clear-date-btn" @click="clearDateFilter" v-tooltip.top="'Clear date filter'" />
+          <Button v-if="startDateFilter || endDateFilter" icon="pi pi-times" class="p-button-text p-button-rounded self-end text-red-500 hover:bg-red-500/10" @click="clearDateFilter" v-tooltip.top="'Clear date filter'" />
       </div>
     </div>
 
@@ -477,80 +478,14 @@ const confirmDeleteAnnouncement = async () => {
   transition: background-color 0.5s ease-out;
 }
 
-.search-wrapper {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  width: 100%;
-  max-width: 500px;
-}
-
-.search-wrapper .p-input-icon-left {
-  position: relative;
-  width: 100%;
-}
-
-.search-wrapper .p-input-icon-left i {
-  position: absolute;
-  left: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #6c757d;
-}
-
-.search-wrapper .p-input-icon-left .p-inputtext {
-  width: 100%;
-  padding-left: 2.5rem;
-}
-
 .date-filter-btn {
   min-width: 40px;
   height: 40px;
   flex-shrink: 0;
 }
 
-.date-filter-container {
-  background: white;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-width: 500px;
-}
-
-.date-range-wrapper {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-  width: 100%;
-}
-
-.date-input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  flex: 1;
-}
-
-.date-input-group label {
-  font-size: 0.9rem;
-  color: #666;
-  font-weight: 500;
-}
-
 .date-filter-calendar {
   width: 100%;
-}
-
-.clear-date-btn {
-  align-self: flex-end;
-  color: #dc3545;
-}
-
-.clear-date-btn:hover {
-  background-color: rgba(220, 53, 69, 0.1);
 }
 
 :deep(.home-carousel .p-carousel-prev),
@@ -608,20 +543,6 @@ const confirmDeleteAnnouncement = async () => {
     background-color: rgba(255, 255, 255, 0.9) !important;
     width: 2rem;
     border-radius: 9999px;
-}
-
-@media (max-width: 480px) {
-  .search-wrapper {
-    flex-wrap: wrap;
-    max-width: 100%;
-  }
-  .date-filter-container {
-    max-width: 100%;
-  }
-  .date-range-wrapper {
-    flex-direction: column;
-    align-items: stretch;
-  }
 }
 
 /* Custom Severity Tag Colors */
