@@ -564,6 +564,7 @@ class EventController extends Controller
             $json = File::get(base_path('db.json'));
             $data = json_decode($json, true);
 
+            // Filter out the event to be deleted
             $data['events'] = collect($data['events'])
                 ->filter(function($event) use ($id) {
                     return $event['id'] != $id;
@@ -571,8 +572,18 @@ class EventController extends Controller
                 ->values()
                 ->toArray();
 
+            // Also filter out any brackets associated with the deleted event
+            if (isset($data['brackets'])) {
+                $data['brackets'] = collect($data['brackets'])
+                    ->filter(function($bracket) use ($id) {
+                        return ($bracket['event_id'] ?? null) != $id;
+                    })
+                    ->values()
+                    ->toArray();
+            }
+
             File::put(base_path('db.json'), json_encode($data, JSON_PRETTY_PRINT));
-            return back()->with('success', 'Event permanently deleted');
+            return back()->with('success', 'Event and its associated brackets were permanently deleted.');
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to delete event');
         }

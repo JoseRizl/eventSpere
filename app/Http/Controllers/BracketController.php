@@ -31,7 +31,17 @@ class BracketController extends Controller
     public function index()
     {
         $jsonData = $this->readJson();
-        return response()->json($jsonData['brackets'] ?? []);
+        $brackets = $jsonData['brackets'] ?? [];
+        $events = collect($jsonData['events'] ?? [])->keyBy('id');
+
+        $activeBrackets = collect($brackets)->filter(function ($bracket) use ($events) {
+            // Check if the event exists and is not archived.
+            // If event_id is not set or event not found, we can decide to show or hide it.
+            // Here, we'll only show brackets with a valid, non-archived event.
+            return isset($bracket['event_id']) && $events->has($bracket['event_id']) && !$events->get($bracket['event_id'])['archived'];
+        })->values()->all();
+
+        return response()->json($activeBrackets);
     }
 
     /**
