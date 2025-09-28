@@ -95,9 +95,7 @@
 
       <Column field="description" header="Description" style="width:15%;">
         <template #body="{ data }">
-          <div class="description">
-            <div class="description line-clamp-3 whitespace-pre-line" v-html="formatDescription(data.description)" @click="handleDescriptionClick"></div>
-          </div>
+          <div class="description line-clamp-3 whitespace-pre-line" v-html="formatDescription(data.description)" @click="handleDescriptionClick"></div>
         </template>
       </Column>
 
@@ -598,15 +596,6 @@ export default defineComponent({
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100px; /* Adjust as needed */
-}
-
-.description {
-  max-height: 4.5em; /* Approx 3 lines of text */
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
 }
 
 .description a {
