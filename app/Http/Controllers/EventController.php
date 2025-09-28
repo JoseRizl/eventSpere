@@ -344,11 +344,7 @@ class EventController extends Controller
             'scheduleLists.*.schedules' => 'nullable|array',
             'scheduleLists.*.schedules.*.time' => 'nullable|date_format:H:i',
             'scheduleLists.*.schedules.*.activity' => 'nullable|string|max:255',
-            'tasks' => ['nullable', 'array', function ($attribute, $value, $fail) use ($request, $id) { $this->validateTaskAssignments($attribute, $value, $fail, $request, $id); }],
-            'tasks.*.committee.id' => ['nullable', Rule::in($validCommitteeIds)],
-            'tasks.*.employees' => 'nullable|array',
-            'tasks.*.employees.*.id' => ['nullable', Rule::in($validEmployeeIds)],
-            'tasks.*.task' => 'nullable|string|max:255',
+            'tasks' => 'nullable|array', // We will no longer validate tasks here
             'memorandum' => 'nullable|array',
             'memorandum.type' => 'required_with:memorandum|string|in:image,file',
             'memorandum.content' => 'required_with:memorandum|string',
@@ -359,18 +355,7 @@ class EventController extends Controller
         foreach ($this->jsonData['events'] as &$event) {
             if ($event['id'] == $id) {
                 $event = array_merge($event, $validated);
-                unset($event['tags']); // Remove tags from event object
-
-                // Normalize tasks to ensure consistent structure after merging
-                if (isset($validated['tasks'])) {
-                    $event['tasks'] = collect($validated['tasks'])->map(function($task) {
-                        return [
-                            'committee' => isset($task['committee']['id']) ? ['id' => $task['committee']['id']] : null,
-                            'employees' => collect($task['employees'])->map(fn($emp) => ['id' => $emp['id']])->toArray(),
-                            'task' => $task['task'] ?? ''
-                        ];
-                    })->toArray();
-                }
+                unset($event['tags']); // Tags are managed in event_tags table
                 break;
             }
         }
@@ -417,11 +402,7 @@ class EventController extends Controller
             'tags.*' => ['sometimes', Rule::in($validTagIds)],
             'isAllDay' => 'sometimes|boolean',
             'archived' => 'sometimes|boolean',
-            'tasks' => ['sometimes', 'nullable', 'array', function ($attribute, $value, $fail) use ($request, $id) { $this->validateTaskAssignments($attribute, $value, $fail, $request, $id); }],
-            'tasks.*.committee.id' => ['nullable', Rule::in($validCommitteeIds)],
-            'tasks.*.employees' => 'nullable|array',
-            'tasks.*.employees.*.id' => ['nullable', Rule::in($validEmployeeIds)],
-            'tasks.*.task' => 'nullable|string|max:255',
+            'tasks' => 'sometimes|nullable|array', // We will no longer validate tasks here
             // Memorandum validation for list view update
             'memorandum' => 'nullable|array',
             'memorandum.type' => 'required_with:memorandum|string|in:image,file',
@@ -451,18 +432,6 @@ class EventController extends Controller
 
                 // Explicitly merge validated data to be more intentional about what is being updated.
                 $event = array_merge($event, $validated);
-                unset($event['tags']); // Remove tags from event object
-
-                // Normalize tasks to ensure consistent structure, which was missing.
-                if (isset($validated['tasks'])) {
-                    $event['tasks'] = collect($validated['tasks'])->map(function($task) {
-                        return [
-                            'committee' => isset($task['committee']['id']) ? ['id' => $task['committee']['id']] : null,
-                            'employees' => collect($task['employees'])->map(fn($emp) => ['id' => $emp['id']])->toArray(),
-                            'task' => $task['task'] ?? ''
-                        ];
-                    })->toArray();
-                }
                 $eventFound = true;
                 break;
             }
@@ -586,80 +555,6 @@ class EventController extends Controller
             return back()->with('success', 'Event and its associated brackets were permanently deleted.');
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to delete event');
-        }
-    }
-
-    private function validateTaskAssignments(string $attribute, mixed $value, \Closure $fail, Request $request, ?string $eventId = null): void
-    {
-        $allEvents = collect($this->jsonData['events'] ?? []);
-        $currentEvent = $eventId ? $allEvents->firstWhere('id', $eventId) : null;
-
-        // Determine start and end dates for the event being validated
-        $eventStartDateStr = $request->input('startDate');
-        $eventEndDateStr = $request->input('endDate');
-
-        if ($currentEvent) {
-            $eventStartDateStr = $eventStartDateStr ?? $currentEvent['startDate'];
-            $eventEndDateStr = $eventEndDateStr ?? $currentEvent['endDate'];
-        }
-
-        // --- Check for duplicates within the same event ---
-        $employeeCounts = collect($value)->flatMap(function ($task) {
-            return collect($task['employees'] ?? [])->pluck('id');
-        })->filter()->countBy();
-
-        foreach ($employeeCounts as $employeeId => $count) {
-            if ($count > 1) {
-                $employee = collect($this->jsonData['employees'])->firstWhere('id', $employeeId);
-                $employeeName = $employee['name'] ?? 'Unknown Employee';
-                $fail("Employee \"{$employeeName}\" cannot be assigned to multiple tasks within the same event.");
-                return;
-            }
-        }
-
-        // --- Check for conflicts with other events ---
-        if (!$eventStartDateStr || !$eventEndDateStr) {
-            return; // Cannot proceed without dates for cross-event check
-        }
-
-        $eventStartDate = \DateTime::createFromFormat('M-d-Y', $eventStartDateStr);
-        $eventEndDate = \DateTime::createFromFormat('M-d-Y', $eventEndDateStr);
-
-        if (!$eventStartDate || !$eventEndDate) {
-            return; // Invalid date format, other validators will catch this.
-        }
-
-        $currentEmployeeIds = $employeeCounts->keys();
-
-        if ($currentEmployeeIds->isEmpty()) {
-            return; // No employees to check.
-        }
-
-        $otherEvents = $eventId
-            ? $allEvents->where('id', '!=', $eventId)->where('archived', '!=', true)
-            : $allEvents->where('archived', '!=', true);
-
-        foreach ($currentEmployeeIds as $employeeId) {
-            $employee = collect($this->jsonData['employees'])->firstWhere('id', $employeeId);
-            $employeeName = $employee['name'] ?? 'Unknown Employee';
-
-            foreach ($otherEvents as $otherEvent) {
-                $isAssignedToOtherEvent = collect($otherEvent['tasks'] ?? [])->flatMap(function ($task) {
-                    return collect($task['employees'] ?? [])->map(function ($emp) {
-                        return is_array($emp) ? ($emp['id'] ?? null) : $emp;
-                    });
-                })->whereNotNull()->contains($employeeId);
-
-                if ($isAssignedToOtherEvent && !empty($otherEvent['startDate']) && !empty($otherEvent['endDate'])) {
-                    $otherEventStartDate = \DateTime::createFromFormat('M-d-Y', $otherEvent['startDate']);
-                    $otherEventEndDate = \DateTime::createFromFormat('M-d-Y', $otherEvent['endDate']);
-
-                    if ($otherEventStartDate && $otherEventEndDate && $eventStartDate <= $otherEventEndDate && $eventEndDate >= $otherEventStartDate) {
-                        $fail("Employee \"{$employeeName}\" is already assigned to another event (\"{$otherEvent['title']}\") during this time period.");
-                        return;
-                    }
-                }
-            }
         }
     }
 

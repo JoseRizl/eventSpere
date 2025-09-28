@@ -1265,7 +1265,7 @@
             task: task.task
         }))
         };
-        await router.put(route('events.updateFromList', {id: selectedEvent.value.id}), updatedEvent, {
+        await router.put(route('tasks.updateForEvent', {id: selectedEvent.value.id}), updatedEvent, {
           onSuccess: () => {
             const index = combinedEvents.value.findIndex(event => event.id === selectedEvent.value.id);
             if (index !== -1) {

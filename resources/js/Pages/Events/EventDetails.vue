@@ -702,12 +702,12 @@ const saveChanges = () => {
     return;
   }
 
-  // Create clean payload without Vue internals
-  const payload = {
+  // Payload for the main event details
+  const eventPayload = {
     id: eventDetails.value.id,
     title: eventDetails.value.title,
     description: eventDetails.value.description,
-    image: eventDetails.value.image,
+    image: eventDetails.value.image, // This will be handled on the backend
     venue: eventDetails.value.venue,
     category_id: eventDetails.value.category_id,
     startDate: eventDetails.value.startDate,
@@ -724,18 +724,26 @@ const saveChanges = () => {
         activity: s.activity
       }))
     })),
+    memorandum: eventDetails.value.memorandum,
+  };
+
+  // Separate payload for tasks
+  const tasksPayload = {
     tasks: eventDetails.value.tasks.map(task => ({
       committee: task.committee ? { id: task.committee.id } : null,
       employees: task.employees.map(emp => ({ id: emp.id })),
       task: task.task
     })),
-    memorandum: eventDetails.value.memorandum,
   };
 
-  // Debug: log the payload before sending
-  console.log('Sending payload:', payload);
+  // First, save the main event details
+  router.post(`/events/${eventDetails.value.id}/update`, eventPayload, {
+    preserveScroll: true,
+    // ... existing onFinish, onError, onSuccess handlers
+  });
 
-  router.post(`/events/${eventDetails.value.id}/update`, payload, {
+  // Then, save the tasks (this would eventually go to a TaskController)
+  router.put(route('tasks.updateForEvent', {id: eventDetails.value.id}), tasksPayload, {
     preserveScroll: true,
     onFinish: () => saving.value = false,
     onError: (errors) => {
