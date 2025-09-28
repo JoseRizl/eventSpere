@@ -135,6 +135,11 @@ const matchStatusFilterOptions = ref([
 const filteredBrackets = computed(() => {
     let results = [...brackets.value];
 
+    // Exclude brackets from archived events
+    results = results.filter(bracket => {
+        return !bracket.event || !bracket.event.archived;
+    });
+
     // 1. Search Query Filter
     if (searchQuery.value) {
         const query = searchQuery.value.toLowerCase().trim();

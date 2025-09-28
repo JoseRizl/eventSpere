@@ -4,14 +4,38 @@
     <h1 class="title">Archived Events</h1>
 
     <div class="search-container mb-4">
-      <div class="p-input-icon-left">
-        <i class="pi pi-search" />
-        <InputText
-          v-model="searchQuery"
-          placeholder="Search archived events..."
-          class="w-full"
+      <div class="search-wrapper">
+        <div class="p-input-icon-left">
+          <i class="pi pi-search" />
+          <InputText
+            v-model="searchQuery"
+            placeholder="Search archived events..."
+            class="w-full"
+          />
+        </div>
+        <Button
+          icon="pi pi-calendar"
+          class="p-button-outlined date-filter-btn"
+          @click="toggleDateFilter"
+          :class="{ 'p-button-primary': showDateFilter }"
+          v-tooltip.top="'Filter by date'"
         />
       </div>
+    </div>
+
+    <!-- Date Filter Calendar -->
+    <div v-if="showDateFilter" class="date-filter-container mb-4">
+      <div class="date-range-wrapper">
+        <div class="date-input-group">
+          <label>From:</label>
+          <DatePicker v-model="dateRange.from" dateFormat="MM-dd-yy" :showIcon="true" placeholder="Start date" class="date-filter-calendar" />
+        </div>
+        <div class="date-input-group">
+          <label>To:</label>
+          <DatePicker v-model="dateRange.to" dateFormat="MM-dd-yy" :showIcon="true" placeholder="End date" class="date-filter-calendar" />
+        </div>
+      </div>
+      <Button icon="pi pi-times" class="p-button-text p-button-rounded clear-date-btn" @click="clearDateFilter" v-tooltip.top="'Clear date filter'" />
     </div>
 
     <DataTable v-if="initialLoading" :value="Array(5).fill({})" class="p-datatable-striped">
@@ -51,7 +75,20 @@
         <template #body="{ data }">
           <div class="flex items-center gap-2">
             <img v-if="data.image" :src="data.image" alt="Event Image" class="event-icon" />
-            <span>{{ data.title }}</span>
+            <Link
+              :href="route('event.details', { id: data.id })"
+              class="text-lg font-medium overflow-hidden line-clamp-2 hover:text-blue-600 transition-colors duration-200 cursor-pointer"
+              v-tooltip.top="data.title"
+            >
+              {{ data.title }}
+            </Link>
+          </div>
+
+          <!-- Tags Display -->
+          <div class="tags-container">
+            <span v-for="tag in getEventTags(data.tags)" :key="tag.id" class="tag" :style="{ backgroundColor: tag.color || '#800080' }">
+              {{ tag.name }}
+            </span>
           </div>
         </template>
       </Column>
@@ -59,7 +96,7 @@
       <Column field="description" header="Description" style="width:15%;">
         <template #body="{ data }">
           <div class="description">
-            {{ data.description }}
+            <div class="description line-clamp-3 whitespace-pre-line" v-html="formatDescription(data.description)" @click="handleDescriptionClick"></div>
           </div>
         </template>
       </Column>
@@ -135,8 +172,8 @@
 
 <script>
 import { defineComponent, ref, onMounted, computed, nextTick } from "vue";
-import { router, usePage } from '@inertiajs/vue3';
-import { format } from "date-fns";
+import { router, usePage, Link } from "@inertiajs/vue3";
+import { format, parse, isWithinInterval } from "date-fns";
 import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 import SuccessDialog from '@/Components/SuccessDialog.vue';
@@ -147,6 +184,7 @@ export default defineComponent({
   name: "Archive",
   components: {
     LoadingSpinner,
+    Link, // Add Link component
     ConfirmationDialog,
     SuccessDialog,
     Skeleton
@@ -155,6 +193,7 @@ export default defineComponent({
     const { showSuccess, showError } = useToast();
     const { props } = usePage(); // props are now fully utilized
     const archivedEvents = ref(props.archivedEvents || []);
+    const tags = ref(props.tags || []); // Assuming tags are passed as a prop
     const categories = ref(props.categories || []);
     const searchQuery = ref("");
     const initialLoading = ref(true);
@@ -166,13 +205,26 @@ export default defineComponent({
     const showRestoreConfirm = ref(false);
     const showDeleteConfirm = ref(false);
     const eventToProcess = ref(null);
+    const showDateFilter = ref(false);
+    const dateRange = ref({
+      from: null,
+      to: null,
+    });
+
+    const tagsMap = computed(() => {
+      return tags.value.reduce((map, tag) => {
+          map[tag.id] = tag;
+          return map;
+      }, {});
+    });
 
     // Add computed property for filtered events
     const filteredEvents = computed(() => {
-      if (!searchQuery.value) return archivedEvents.value;
+      let events = archivedEvents.value;
 
-      const query = searchQuery.value.toLowerCase().trim();
-      return archivedEvents.value.filter(event => {
+      if (searchQuery.value) {
+        const query = searchQuery.value.toLowerCase().trim();
+        events = events.filter(event => {
         if (!event) return false;
 
         const title = event.title?.toLowerCase() || '';
@@ -188,7 +240,36 @@ export default defineComponent({
           category.includes(query) ||
           tags.some(tag => tag.includes(query))
         );
-      });
+        });
+      }
+
+      // Apply date range filter
+      if (dateRange.value.from || dateRange.value.to) {
+        events = events.filter(event => {
+          if (!event.startDate) return false;
+
+          const eventDate = parse(event.startDate, 'MMM-dd-yyyy', new Date());
+
+          // If only from date is set
+          if (dateRange.value.from && !dateRange.value.to) {
+            return eventDate >= dateRange.value.from;
+          }
+
+          // If only to date is set
+          if (!dateRange.value.from && dateRange.value.to) {
+            return eventDate <= dateRange.value.to;
+          }
+
+          // If both dates are set
+          if (dateRange.value.from && dateRange.value.to) {
+            return isWithinInterval(eventDate, { start: dateRange.value.from, end: dateRange.value.to });
+          }
+
+          return true;
+        });
+      }
+
+      return events;
     });
 
     onMounted(() => {
@@ -211,6 +292,42 @@ export default defineComponent({
         return map;
       }, {})
     );
+
+    const getEventTags = (eventTags) => {
+      // Ensure eventTags is an array of tag objects, not just IDs
+      return Array.isArray(eventTags) ? eventTags : [];
+    };
+
+    const formatDescription = (description) => {
+      if (!description) return '';
+
+      const escapeHtml = (unsafe) => {
+        return unsafe
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      };
+      const escapedText = escapeHtml(description);
+
+      const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])|(\bwww\.[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])|(\b[A-Z0-9.-]+\.(com|org|net|gov|edu|io|co|us|ca|uk|de|fr|au|info|biz|me|tv|app|dev)\b([-A-Z0-9+&@#\/%?=~_|!:,.;]*))/gi;
+
+      return escapedText.replace(urlRegex, (url) => {
+        const unescapedUrlForHref = url.replace(/&amp;/g, '&');
+        let href = unescapedUrlForHref;
+        if (!href.match(/^(https?|ftp|file):\/\//i)) {
+          href = 'http://' + href;
+        }
+        return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">${url}</a>`;
+      });
+    };
+
+    const handleDescriptionClick = (event) => {
+      if (event.target.tagName === 'A') {
+        event.stopPropagation();
+      }
+    };
 
     // Restore Event
     const restoreEvent = (event) => {
@@ -292,6 +409,19 @@ export default defineComponent({
       }
     };
 
+    const toggleDateFilter = () => {
+      showDateFilter.value = !showDateFilter.value;
+      if (!showDateFilter.value) {
+        clearDateFilter();
+      }
+    };
+
+    const clearDateFilter = () => {
+      dateRange.value = { from: null, to: null };
+      // No need to set showDateFilter to false here, as this is for clearing, not toggling off.
+      // The toggle button will handle hiding it.
+    };
+
     return {
       archivedEvents,
       categoryMap,
@@ -310,18 +440,32 @@ export default defineComponent({
       errorMessage,
       showRestoreConfirm,
       showDeleteConfirm,
-      eventToProcess
+      eventToProcess,
+      showDateFilter,
+      dateRange,
+      tagsMap, // Expose tagsMap
+      getEventTags, // Expose getEventTags
+      formatDescription, // Expose formatDescription
+      toggleDateFilter,
+      clearDateFilter,
     };
   },
 });
 </script>
 
 <style scoped>
+.search-wrapper {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
+}
+
 .search-container {
   display: flex;
   justify-content: flex-start;
   width: 100%;
-  max-width: 400px;
 }
 
 .search-container .p-input-icon-left {
@@ -376,5 +520,101 @@ export default defineComponent({
   .search-container .p-input-icon-left {
     max-width: 100%;
   }
+}
+
+.date-filter-btn {
+  min-width: 40px;
+  height: 40px;
+}
+
+.date-filter-container {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 1rem;
+}
+
+.date-range-wrapper {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.date-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+
+.date-input-group label {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.date-filter-calendar {
+  width: 100%;
+}
+
+.clear-date-btn {
+  align-self: flex-end;
+  color: #dc3545;
+}
+
+.clear-date-btn:hover {
+  background-color: #dc3545;
+  color: white;
+}
+
+.event-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-right: 8px;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.tag {
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 12px;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px; /* Adjust as needed */
+}
+
+.description {
+  max-height: 4.5em; /* Approx 3 lines of text */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.description a {
+  color: #2563eb; /* Tailwind blue-600 */
+  text-decoration: underline;
+}
+
+.description a:hover {
+  color: #1d4ed8; /* Tailwind blue-700 */
 }
 </style>

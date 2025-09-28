@@ -27,6 +27,7 @@ const props = defineProps({
     onSetViewMode: Function,
     onSetMatchFilter: Function,
     onOpenMatchDialog: Function,
+    isArchived: Boolean,
     onOpenScoringConfigDialog: Function,
     onOpenMatchEditorFromCard: Function,
     // Configuration
@@ -66,11 +67,11 @@ const handleSetMatchFilter = (filter) => emit('set-match-filter', { index: props
                         <h2>{{ bracket.name }}</h2>
                         <div class="info-tags">
                             <span :class="['bracket-tag', getBracketTypeClass(bracket.type)]">{{ bracket.type }}</span>
-                            <span v-if="showEventLink" :class="['bracket-tag', getBracketStats(bracket).status.class]">{{ getBracketStats(bracket).status.text }}</span>
+                            <span :class="['bracket-tag', getBracketStats(bracket).status.class]">{{ getBracketStats(bracket).status.text }}</span>
                         </div>
                     </div>
                     <div class="bracket-controls">
-                        <Button v-if="showAdminControls && user?.role === 'Admin'" icon="pi pi-trash" @click="handleRemoveBracket" class="p-button-rounded p-button-text p-button-danger" v-tooltip.top="'Delete Bracket'" />
+                        <Button v-if="showAdminControls && user?.role === 'Admin' && !isArchived" icon="pi pi-trash" @click="handleRemoveBracket" class="p-button-rounded p-button-text p-button-danger" v-tooltip.top="'Delete Bracket'" />
                         <Button :icon="isExpanded ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" @click="handleToggleBracket" class="p-button-rounded p-button-text" v-tooltip.top="isExpanded ? 'Hide Bracket' : 'Show Bracket'" />
                     </div>
                 </div>
@@ -108,10 +109,10 @@ const handleSetMatchFilter = (filter) => emit('set-match-filter', { index: props
                         :user="user"
                         :standingsRevision="standingsRevision"
                         :isFinalRound="isFinalRound"
-                        :openMatchDialog="onOpenMatchDialog"
+                        :openMatchDialog="isArchived ? null : onOpenMatchDialog"
                         :getRoundRobinStandings="getRoundRobinStandings"
                         :isRoundRobinConcluded="isRoundRobinConcluded"
-                        :openScoringConfigDialog="onOpenScoringConfigDialog"
+                        :openScoringConfigDialog="isArchived ? null : onOpenScoringConfigDialog"
                     />
                 </div>
 
@@ -131,7 +132,7 @@ const handleSetMatchFilter = (filter) => emit('set-match-filter', { index: props
                         :bracketIndex="bracketIndex"
                         :user="user"
                         :filter="matchFilter"
-                        :openMatchEditorFromCard="onOpenMatchEditorFromCard"
+                        :openMatchEditorFromCard="isArchived ? null : onOpenMatchEditorFromCard"
                         :isFinalRound="isFinalRound"
                     />
                 </div>

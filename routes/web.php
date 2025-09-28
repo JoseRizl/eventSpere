@@ -13,7 +13,7 @@ Route::get('/events/{id}', [EventController::class, 'show'])->name('event.detail
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [EventController::class, 'dashboard'])->name('dashboard');
-    Route::inertia('/event-list', 'List/EventList')->name('event.list');
+    // Route::get('/event-list', [EventController::class, 'index'])->name('event.list');
     Route::get('/category-list', [CategoryController::class, 'index'])->name('category.list');
     Route::get('/archive', [EventController::class, 'getArchivedEvents'])->name('archive');
 
@@ -38,13 +38,16 @@ Route::middleware('auth')->group(function () {
     Route::put('/events/{id}/update-from-list', [EventController::class, 'updateFromList'])->name('events.updateFromList');
     Route::put('/events/{id}/archive', [EventController::class, 'archive'])->name('events.archive');
 
-    // New Task route
+    // Task routes - make sure these are properly accessible
+    Route::get('/events/{id}/tasks', [TaskController::class, 'index'])->name('tasks.index');
     Route::put('/events/{id}/tasks', [TaskController::class, 'updateForEvent'])->name('tasks.updateForEvent');
+    Route::get('/events/{eventId}/tasks/{taskId}', [TaskController::class, 'show'])->name('tasks.show');
 
     // API routes
     Route::prefix('api')->name('api.')->group(function () {
         Route::get('/events', [EventController::class, 'index'])->name('events.index'); // For fetching all events as JSON
         Route::apiResource('brackets', BracketController::class)->except(['show', 'create', 'edit']);
+        Route::apiResource('tasks', TaskController::class)->except(['show', 'create', 'edit']);
     });
 });
 

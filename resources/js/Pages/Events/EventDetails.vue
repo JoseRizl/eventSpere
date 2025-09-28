@@ -939,7 +939,7 @@ const getBracketIndex = (bracketId) => {
                     <h1 v-else class="text-xl font-bold">{{ eventDetails.title }}</h1>
 
                         <button
-                            v-if="user?.role === 'Admin' || user?.role === 'Principal'"
+                            v-if="(user?.role === 'Admin' || user?.role === 'Principal') && !eventDetails.archived"
                             @click="toggleEdit"
                             :class="editMode ? 'modal-button-danger' : 'create-button'"
                             class="ml-4"
@@ -1474,6 +1474,7 @@ const getBracketIndex = (bracketId) => {
                 :getBracketTypeClass="getBracketTypeClass"
                 :isFinalRound="isFinalRound"
                 :getRoundRobinStandings="getRoundRobinStandings"
+                :isArchived="eventDetails.archived"
                 :isRoundRobinConcluded="isRoundRobinConcluded"
                 :onOpenMatchDialog="openMatchDialog"
                 :onOpenScoringConfigDialog="openScoringConfigDialog"
