@@ -16,6 +16,7 @@ import Button from 'primevue/button';
 import Carousel from 'primevue/carousel';
 import Tag from 'primevue/tag';
 import Card from 'primevue/card';
+import Dialog from 'primevue/dialog';
 import { useFilters } from '@/composables/useFilters.js';
 const showEventsThisMonth = ref(loadToggleState('showEventsThisMonth', true));
 const saving = ref(false);
@@ -30,6 +31,15 @@ const showErrorDialog = ref(false);
 const errorMessage = ref('');
 const showDeleteAnnouncementConfirm = ref(false);
 const announcementToDelete = ref(null);
+
+// For viewing announcement images
+const showImageDialog = ref(false);
+const selectedImageUrl = ref('');
+
+const openImageDialog = (imageUrl) => {
+  selectedImageUrl.value = imageUrl;
+  showImageDialog.value = true;
+};
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
@@ -383,7 +393,8 @@ const confirmDeleteAnnouncement = async () => {
             v-if="announcement.image"
             :src="announcement.image"
             alt="Announcement image"
-            class="mt-4 rounded-lg max-w-md mx-auto h-auto shadow-md"
+            class="mt-4 rounded-lg max-w-full w-full md:max-w-md mx-auto h-auto shadow-md cursor-pointer hover:opacity-90 transition-opacity"
+            @click.stop="openImageDialog(announcement.image)"
           />
           <p class="text-sm text-gray-500 mt-4 text-right">{{ announcement.formattedTimestamp }}</p>
         </div>
@@ -424,6 +435,11 @@ const confirmDeleteAnnouncement = async () => {
       confirmButtonClass="bg-red-600 hover:bg-red-700"
       @confirm="confirmDeleteAnnouncement"
     />
+
+    <!-- Image Viewer Dialog -->
+    <Dialog v-model:visible="showImageDialog" modal header="Image" :style="{ width: '90vw', maxWidth: '1200px' }">
+        <img :src="selectedImageUrl" alt="Announcement Image" class="w-full h-auto max-h-[80vh] object-contain" />
+    </Dialog>
   </div>
 </template>
 

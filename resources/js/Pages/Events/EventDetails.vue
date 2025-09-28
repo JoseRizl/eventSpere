@@ -128,6 +128,15 @@ const newAnnouncement = ref({
 const showDeleteAnnouncementConfirm = ref(false);
 const announcementToDelete = ref(null);
 
+// For viewing announcement images
+const showImageDialog = ref(false);
+const selectedImageUrl = ref('');
+
+const openImageDialog = (imageUrl) => {
+  selectedImageUrl.value = imageUrl;
+  showImageDialog.value = true;
+};
+
 // Bracket logic
 const bracketState = useBracketState();
 const {
@@ -1372,7 +1381,8 @@ const getBracketIndex = (bracketId) => {
             v-if="announcement.image"
             :src="announcement.image"
             alt="Announcement image"
-            class="mt-4 rounded-lg max-w-full h-auto"
+            class="mt-4 rounded-lg max-w-full w-full md:max-w-md mx-auto h-auto cursor-pointer hover:opacity-90 transition-opacity"
+            @click="openImageDialog(announcement.image)"
           />
 
           <p class="text-xs text-gray-500 mt-2 text-right">
@@ -1638,6 +1648,11 @@ const getBracketIndex = (bracketId) => {
 
     <Dialog v-model:visible="showMemoImageDialog" modal :header="eventDetails.memorandum?.filename" :style="{ width: '90vw', maxWidth: '1200px' }">
         <img :src="memoImageUrl" alt="Memorandum Image" class="w-full h-auto max-h-[80vh] object-contain" />
+    </Dialog>
+
+    <!-- Image Viewer Dialog -->
+    <Dialog v-model:visible="showImageDialog" modal header="Image" :style="{ width: '90vw', maxWidth: '1200px' }">
+        <img :src="selectedImageUrl" alt="Announcement Image" class="w-full h-auto max-h-[80vh] object-contain" />
     </Dialog>
 </div>
 </template>
