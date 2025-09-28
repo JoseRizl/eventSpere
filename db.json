@@ -50,7 +50,24 @@
                     ]
                 }
             ],
-            "type": "event"
+            "type": "event",
+            "memorandum": null,
+            "tasks": [
+                {
+                    "committee": {
+                        "id": "1"
+                    },
+                    "employees": [
+                        {
+                            "id": "9"
+                        },
+                        {
+                            "id": "13"
+                        }
+                    ],
+                    "task": "Tig sukli"
+                }
+            ]
         },
         {
             "title": "Check",
@@ -3321,10 +3338,6 @@
             "tag_id": "3"
         },
         {
-            "event_id": "6174",
-            "tag_id": "68d62b95b02b3"
-        },
-        {
             "event_id": "313c",
             "tag_id": "1"
         },
@@ -3351,6 +3364,10 @@
         {
             "event_id": "5464",
             "tag_id": "68ce71a7e1884"
+        },
+        {
+            "event_id": "6174",
+            "tag_id": "68d62b95b02b3"
         }
     ],
     "settings": {

@@ -1,6 +1,6 @@
 <script setup>
 import { Link, useForm, usePage, router } from '@inertiajs/vue3';
-import { ref, computed, onMounted, watch, nextTick } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import Badge from 'primevue/badge';
 import Toast from 'primevue/toast';
 import Popover from 'primevue/popover';
@@ -8,11 +8,15 @@ import Avatar from 'primevue/avatar';
 import { useNotifications } from '@/composables/useNotifications.js';
 
 // Ref
-const isCollapsed = ref(false);
+const isDesktopCollapsed = ref(false);
+const isMobileSidebarOpen = ref(false);
+const isMobile = ref(window.innerWidth < 1024);
 const op = ref();
 const openDropdown = ref(null);
 const profileMenu = ref();
 const hideHeader = ref(false);
+
+const sidebarWidth = 'w-64';
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
@@ -141,12 +145,20 @@ const sideBarItems = computed(() => {
 });
 
 const toggleSidebar = () => {
-    isCollapsed.value = !isCollapsed.value;
+    if (isMobile.value) {
+        isMobileSidebarOpen.value = !isMobileSidebarOpen.value;
+    } else {
+        isDesktopCollapsed.value = !isDesktopCollapsed.value;
+    }
+};
+
+const closeMobileSidebar = () => {
+    isMobileSidebarOpen.value = false;
 };
 
 const toggleDropdown = (label) => {
-    if (isCollapsed.value) {
-        isCollapsed.value = false;
+    if (isDesktopCollapsed.value) {
+        isDesktopCollapsed.value = false;
         // After sidebar expands, open the dropdown
         nextTick(() => {
             openDropdown.value = label;
@@ -172,11 +184,26 @@ const toggleProfileMenu = (event) => {
     profileMenu.value.toggle(event);
 };
 
+const handleResize = () => {
+    const mobileState = window.innerWidth < 1024;
+    if (isMobile.value && !mobileState) {
+        // Transitioning from mobile to desktop
+        isMobileSidebarOpen.value = false; // Close mobile sidebar
+    }
+    isMobile.value = mobileState;
+};
+
 onMounted(() => {
   hideHeader.value = window.hideHeader || false;
   window.setHideHeader = (val) => { hideHeader.value = val; };
 });
 
+onMounted(() => {
+    window.addEventListener('resize', handleResize);
+});
+onUnmounted(() => {
+    window.removeEventListener('resize', handleResize);
+});
 </script>
 
 <template>
@@ -249,7 +276,7 @@ onMounted(() => {
                                 class="h-8 w-8 rounded-full object-cover"
                                 alt="Profile Picture"/>
                     </div>
-                    <div class="ml-2 hidden md:block" v-show="!isCollapsed">
+                    <div class="ml-2 hidden md:block" v-show="!isDesktopCollapsed">
                         <div class="text-sm font-bold text-gray-800">{{ user.name }}</div>
                         <div class="text-sm font-semibold text-blue-600 capitalize flex items-center">
                             <span class="mr-1">🎓</span>
@@ -274,8 +301,12 @@ onMounted(() => {
         </nav>
 
         <div class="flex flex-1 relative">
+            <!-- Mobile Sidebar Backdrop -->
+            <div v-if="isMobileSidebarOpen" @click="closeMobileSidebar" class="fixed inset-0 bg-black/30 z-50 lg:hidden"></div>
+
             <!-- Sidebar -->
-            <div v-if="user && !hideHeader" :class="[ 'fixed top-16 left-0 h-[calc(100vh-4rem)] bg-white/95 backdrop-blur-sm border-r border-gray-200 flex flex-col transition-all duration-300 overflow-y-auto', isCollapsed ? 'w-20' : 'w-64' ]">
+            <div v-if="user && !hideHeader" :class="[ 'bg-white/95 backdrop-blur-sm border-r border-gray-200 flex flex-col transition-transform lg:transition-all duration-300 overflow-y-auto z-40 lg:z-50',
+                'fixed top-16 h-[calc(100vh-4rem)]', isMobile ? (isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full') : (isDesktopCollapsed ? 'w-20' : sidebarWidth) ]">
                 <!-- Navigation -->
                 <nav class="px-3 pt-4 flex-grow">
                     <div v-for="(item, index) in sideBarItems" :key="index" class="mb-2">
@@ -288,11 +319,11 @@ onMounted(() => {
                                     <div class="flex-shrink-0">
                                         <i :class="item.icon" class="text-xl w-6 text-center"></i>
                                     </div>
-                                    <span v-show="!isCollapsed" class="ml-3 text-sm font-medium">{{ item.label }}</span>
+                                    <span v-show="!isDesktopCollapsed" class="ml-3 text-sm font-medium">{{ item.label }}</span>
                                 </div>
-                                <i v-show="!isCollapsed" :class="['pi', openDropdown === item.label ? 'pi-chevron-down' : 'pi-chevron-right', 'transition-transform duration-200 text-xs']"></i>
+                                <i v-show="!isDesktopCollapsed" :class="['pi', openDropdown === item.label ? 'pi-chevron-down' : 'pi-chevron-right', 'transition-transform duration-200 text-xs']"></i>
                             </button>
-                            <div v-if="openDropdown === item.label && !isCollapsed" class="mt-1 pl-6 space-y-1 py-1">
+                            <div v-if="openDropdown === item.label && !isDesktopCollapsed" class="mt-1 pl-6 space-y-1 py-1">
                                 <Link v-for="subItem in item.items" :key="subItem.label" :href="route(subItem.routeName, subItem.routeParams)"
                                     class="flex items-center p-2 rounded-md transition-colors text-sm"
                                     :class="route().current(subItem.routeName, subItem.routeParams) ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-500 hover:bg-gray-100'">
@@ -309,7 +340,7 @@ onMounted(() => {
                             <div class="flex-shrink-0">
                                 <i :class="item.icon" class="text-xl w-6 text-center"></i>
                             </div>
-                            <span v-show="!isCollapsed" class="ml-3 text-sm font-medium">{{ item.label }}</span>
+                            <span v-show="!isDesktopCollapsed" class="ml-3 text-sm font-medium">{{ item.label }}</span>
                         </Link>
                     </div>
                 </nav>
@@ -319,13 +350,13 @@ onMounted(() => {
                     <hr class="border-gray-200 mb-3">
                     <button @click="logout" class="flex items-center w-full text-gray-600 hover:bg-gray-100 rounded-lg p-3 transition-colors duration-200">
                         <div class="flex-shrink-0"><i class="pi pi-sign-out text-xl w-6 text-center"></i></div>
-                        <span v-show="!isCollapsed" class="ml-3 text-sm font-medium">Logout</span>
+                        <span v-show="!isDesktopCollapsed" class="ml-3 text-sm font-medium">Logout</span>
                     </button>
                 </div>
             </div>
 
             <!-- Page Content -->
-            <main :class="['flex-1 transition-all duration-300 p-4 sm:p-6 overflow-y-auto', user && !hideHeader ? (isCollapsed ? 'ml-20' : 'ml-64') : '']">
+            <main :class="['flex-1 transition-all duration-300 p-4 sm:p-6 lg:pt-22', user && !hideHeader ? (isDesktopCollapsed ? 'lg:ml-20' : 'lg:ml-64') : '']">
                 <slot />
             </main>
         </div>
