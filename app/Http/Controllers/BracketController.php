@@ -57,24 +57,24 @@ class BracketController extends Controller
         ]);
 
         $jsonData = $this->readJson();
-        $newBracket = $validated;
-        $newBracket['id'] = substr(md5(uniqid()), 0, 8); // Generate a unique ID
+
+        // Construct the new bracket with 'id' as the first key.
+        $newBracket = [
+            'id' => substr(md5(uniqid()), 0, 8), // Generate a unique ID
+        ] + $validated;
+
         $newBracket['created_at'] = now()->toISOString();
         $newBracket['updated_at'] = now()->toISOString();
-
-        // Fetch the event details to include in the response
-        $event = collect($jsonData['events'])->firstWhere('id', $validated['event_id']);
-        if ($event) {
-            $newBracket['event'] = $event;
-        }
 
         if (!isset($jsonData['brackets'])) {
             $jsonData['brackets'] = [];
         }
 
+        // The $newBracket only contains event_id, not the full event object.
         array_unshift($jsonData['brackets'], $newBracket);
         $this->writeJson($jsonData);
 
+        // The frontend will add the event object client-side for immediate display.
         return response()->json($newBracket, 201);
     }
 

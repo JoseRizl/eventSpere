@@ -376,19 +376,12 @@ export function useBracketActions(state) {
       newBracket = generateRoundRobinBracket();
     }
 
-    const bracketData = {
+    const payload = {
+      id: generateId(), // Set ID first
       name: bracketName.value,
       type: matchType.value,
       event_id: selectedEvent.value.id,
-      status: 'active',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
       matches: newBracket,
-      lines: matchType.value === 'Single Elimination' ? [] :
-            matchType.value === 'Round Robin' ? [] :
-            { winners: [], losers: [], finals: [] },
-      // Attach event details so UI can render immediately
-      event: selectedEvent.value,
     };
 
     // Populate match-specific details from the event
@@ -397,12 +390,15 @@ export function useBracketActions(state) {
         match.time = selectedEvent.value.startTime;
         match.venue = selectedEvent.value.venue;
     };
-    Object.values(newBracket).flat().flat().forEach(populateEventDetails);
+    Object.values(payload.matches).flat().flat().forEach(populateEventDetails);
 
     try {
       // Use Laravel API to store the new bracket
-      const response = await axios.post(route('api.brackets.store'), bracketData);
-      const savedBracket = response.data; // This now includes the 'event' object from the controller.
+      const response = await axios.post(route('api.brackets.store'), payload);
+      // The backend now returns a bracket without the event object.
+      // We'll add it back on the client-side for immediate display.
+      const savedBracket = { ...response.data, event: selectedEvent.value };
+
       brackets.value.push(savedBracket);
       expandedBrackets.value.push(false);
       bracketViewModes.value[brackets.value.length - 1] = 'bracket';
