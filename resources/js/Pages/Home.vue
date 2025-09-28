@@ -140,19 +140,21 @@ const confirmDeleteAnnouncement = async () => {
 
       <!-- Filters -->
       <div class="mt-4">
-        <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full max-w-lg">
-            <div class="p-input-icon-left w-full sm:w-auto flex-grow">
-                <i class="pi pi-search" />
-                <InputText v-model="searchQuery" :placeholder="currentView === 'events' ? 'Search by title or description...' : 'Search by message or event...'" class="w-full" />
+        <div class="flex items-center gap-2 w-full max-w-lg">
+            <div class="relative flex-grow">
+                <span class="search-icon">🔍</span>
+                <InputText v-model="searchQuery" :placeholder="currentView === 'events' ? 'Search events...' : 'Search announcements...'" class="w-full" />
+                <div class="absolute top-0 right-0 h-full flex items-center pr-2 gap-1">
+                    <Button
+                        icon="pi pi-calendar"
+                        class="p-button-text text-gray-500 hover:bg-gray-200"
+                        @click="toggleDateFilter"
+                        :class="{ 'text-purple-600': showDateFilter }"
+                        v-tooltip.top="'Filter by date'"
+                    />
+                    <Button v-if="searchQuery || startDateFilter || endDateFilter" icon="pi pi-times" class="p-button-text p-button-danger" @click="clearFilters" v-tooltip.top="'Clear All Filters'" />
+                </div>
             </div>
-            <Button
-                icon="pi pi-calendar"
-                class="p-button-outlined date-filter-btn"
-                @click="toggleDateFilter"
-                :class="{ 'p-button-primary': showDateFilter }"
-                v-tooltip.top="'Filter by date'"
-            />
-            <Button v-if="searchQuery || startDateFilter || endDateFilter" icon="pi pi-times" class="p-button-rounded p-button-text p-button-danger" @click="clearFilters" v-tooltip.top="'Clear All Filters'" />
         </div>
       </div>
 
@@ -478,12 +480,12 @@ const confirmDeleteAnnouncement = async () => {
   transition: background-color 0.5s ease-out;
 }
 
-.date-filter-btn {
-  min-width: 40px;
-  height: 40px;
-  flex-shrink: 0;
+.search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
 }
-
 .date-filter-calendar {
   width: 100%;
 }
@@ -543,6 +545,11 @@ const confirmDeleteAnnouncement = async () => {
     background-color: rgba(255, 255, 255, 0.9) !important;
     width: 2rem;
     border-radius: 9999px;
+}
+
+:deep(.p-inputtext) {
+    padding-left: 2.5rem; /* Space for search icon */
+    padding-right: 5.5rem; /* Space for action buttons */
 }
 
 /* Custom Severity Tag Colors */
