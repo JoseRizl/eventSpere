@@ -103,27 +103,13 @@ const handleSetMatchFilter = (filter) => emit('set-match-filter', { index: props
             </div>
 
             <div v-if="isExpanded" class="bracket-content-wrapper" :id="`bracket-content-${bracket.id}`">
-                <div class="view-toggle-buttons">
-                    <Button :label="'Bracket View'" :class="['p-button-sm', viewMode !== 'matches' ? 'p-button-primary' : 'p-button-outlined']" @click="handleSetViewMode('bracket')" />
-                    <Button :label="'Matches View'" :class="['p-button-sm', viewMode === 'matches' ? 'p-button-primary' : 'p-button-outlined']" @click="handleSetViewMode('matches')" />
-                </div>
+                <div class="filter-panel">
+                    <div class="view-toggle-buttons">
+                        <Button :label="'Bracket View'" :class="['p-button-sm', viewMode !== 'matches' ? 'p-button-primary' : 'p-button-outlined']" @click="handleSetViewMode('bracket')" />
+                        <Button :label="'Matches View'" :class="['p-button-sm', viewMode === 'matches' ? 'p-button-primary' : 'p-button-outlined']" @click="handleSetViewMode('matches')" />
+                    </div>
 
-                <div v-show="viewMode !== 'matches'">
-                    <BracketView
-                        :bracket="bracket"
-                        :bracketIndex="bracketIndex"
-                        :user="user"
-                        :standingsRevision="standingsRevision"
-                        :isFinalRound="isFinalRound"
-                        :openMatchDialog="isArchived ? null : onOpenMatchDialog"
-                        :getRoundRobinStandings="getRoundRobinStandings"
-                        :isRoundRobinConcluded="isRoundRobinConcluded"
-                        :openScoringConfigDialog="isArchived ? null : onOpenScoringConfigDialog"
-                    />
-                </div>
-
-                <div v-if="viewMode === 'matches'">
-                    <div class="match-filters">
+                    <div v-if="viewMode === 'matches'" class="match-filters">
                         <SelectButton
                             :modelValue="matchFilter"
                             @update:modelValue="handleSetMatchFilter"
@@ -133,15 +119,29 @@ const handleSetMatchFilter = (filter) => emit('set-match-filter', { index: props
                             aria-labelledby="match-status-filter"
                         />
                     </div>
-                    <MatchesView
-                        :bracket="bracket"
-                        :bracketIndex="bracketIndex"
-                        :user="user"
-                        :filter="matchFilter"
-                        :openMatchEditorFromCard="isArchived ? null : onOpenMatchEditorFromCard"
-                        :isFinalRound="isFinalRound"
-                    />
                 </div>
+
+               <BracketView
+                    v-show="viewMode !== 'matches'"
+                    :bracket="bracket"
+                    :bracketIndex="bracketIndex"
+                    :user="user"
+                    :standingsRevision="standingsRevision"
+                    :isFinalRound="isFinalRound"
+                    :openMatchDialog="isArchived || !user ? null : onOpenMatchDialog"
+                    :getRoundRobinStandings="getRoundRobinStandings"
+                    :isRoundRobinConcluded="isRoundRobinConcluded"
+                    :openScoringConfigDialog="isArchived || !user ? null : onOpenScoringConfigDialog"
+                />
+                <MatchesView
+                    v-if="viewMode === 'matches'"
+                    :bracket="bracket"
+                    :bracketIndex="bracketIndex"
+                    :user="user"
+                    :filter="matchFilter"
+                    :openMatchEditorFromCard="isArchived || !user ? null : onOpenMatchEditorFromCard"
+                    :isFinalRound="isFinalRound"
+                />
             </div>
         </div>
     </div>

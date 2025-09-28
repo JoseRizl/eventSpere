@@ -428,7 +428,7 @@ onMounted(() => {
 
   // Ensure tasks have proper committee/employee references
   fetchEventAnnouncements();
-  fetchBrackets();
+  fetchBrackets(props.event.id);
   if (eventDetails.value.tasks) {
     filteredEmployees.value = eventDetails.value.tasks.map(task => {
       // Find matching committee in committees list
@@ -1486,9 +1486,9 @@ const getBracketIndex = (bracketId) => {
                 :getRoundRobinStandings="getRoundRobinStandings"
                 :isArchived="eventDetails.archived"
                 :isRoundRobinConcluded="isRoundRobinConcluded"
-                :onOpenMatchDialog="openMatchDialog"
-                :onOpenScoringConfigDialog="openScoringConfigDialog"
-                :onOpenMatchEditorFromCard="openMatchEditorFromCard"
+                :onOpenMatchDialog="user ? openMatchDialog : null"
+                :onOpenScoringConfigDialog="user ? openScoringConfigDialog : null"
+                :onOpenMatchEditorFromCard="user ? openMatchEditorFromCard : null"
                 @toggle-bracket="toggleBracket"
                 @set-view-mode="({ index, mode }) => setBracketViewMode(index, mode)"
                 @set-match-filter="({ index, filter }) => setBracketMatchFilter(index, filter)"
@@ -1755,6 +1755,13 @@ const getBracketIndex = (bracketId) => {
 @media (min-width: 640px) {
     .search-wrapper {
         max-width: 400px;
+    }
+}
+
+@media (max-width: 420px) {
+    .search-wrapper {
+        flex-direction: column;
+        align-items: stretch;
     }
 }
 </style>

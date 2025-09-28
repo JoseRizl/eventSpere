@@ -367,10 +367,16 @@ export function useBracketActions(state) {
     }
   };
 
-  const fetchBrackets = async () => {
+  const fetchBrackets = async (eventId = null) => {
     try {
-      // Use Laravel API to fetch brackets
-      const response = await axios.get(route('api.brackets.index'));
+      let response;
+      if (eventId) {
+        // Fetch public brackets for a specific event
+        response = await axios.get(route('api.events.brackets', { event: eventId }));
+      } else {
+        // Fetch all brackets (requires auth)
+        response = await axios.get(route('api.brackets.index'));
+      }
       if (response.data) {
         const bracketsWithEvents = await Promise.all(
           response.data.map(async (bracket) => {

@@ -16,14 +16,13 @@ const props = defineProps({
         default: null
     },
     standingsRevision: {
-        type: Number,
-        required: true
+        type: Number
     },
     isFinalRound: { type: Function, required: true },
-    openMatchDialog: { type: Function, required: true },
-    getRoundRobinStandings: { type: Function, required: true },
-    isRoundRobinConcluded: { type: Function, required: true },
-    openScoringConfigDialog: { type: Function, required: true }
+    openMatchDialog: { type: Function, default: null },
+    getRoundRobinStandings: { type: Function },
+    isRoundRobinConcluded: { type: Function },
+    openScoringConfigDialog: { type: Function, default: null }
 });
 
 const bracketContentRef = ref(null);
@@ -378,50 +377,52 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
 </script>
 
 <template>
-    <div v-if="bracket.type === 'Single Elimination'" class="bracket single-elimination" ref="bracketContentRef">
-        <svg class="connection-lines">
-        <line
-            v-for="(line, i) in dynamicLines.single"
-            :key="`dynamic-line-${i}`"
-            :x1="line.x1"
-            :y1="line.y1"
-            :x2="line.x2"
-            :y2="line.y2"
-            :stroke="getLineStroke(line)"
-            :stroke-width="getLineStrokeWidth(line)"
-        />
-        </svg>
+    <div v-if="bracket.type === 'Single Elimination'" class="bracket-scroll-container">
+        <div class="bracket single-elimination" ref="bracketContentRef">
+            <svg class="connection-lines">
+            <line
+                v-for="(line, i) in dynamicLines.single"
+                :key="`dynamic-line-${i}`"
+                :x1="line.x1"
+                :y1="line.y1"
+                :x2="line.x2"
+                :y2="line.y2"
+                :stroke="getLineStroke(line)"
+                :stroke-width="getLineStrokeWidth(line)"
+            />
+            </svg>
 
-        <div v-for="(round, roundIdx) in bracket.matches" :key="roundIdx"
-        :class="['round', `round-${roundIdx + 1}`, { 'round-ongoing': isRoundOngoing('single', roundIdx) }]">
-        <h3>
-            {{ props.isFinalRound(bracketIndex, roundIdx) ? 'Final Round' : `Round ${roundIdx + 1}` }}
-        </h3>
+            <div v-for="(round, roundIdx) in bracket.matches" :key="roundIdx"
+            :class="['round', `round-${roundIdx + 1}`, { 'round-ongoing': isRoundOngoing('single', roundIdx) }]">
+            <h3>
+                {{ props.isFinalRound(bracketIndex, roundIdx) ? 'Final Round' : `Round ${roundIdx + 1}` }}
+            </h3>
 
-        <!-- Matches Display -->
-        <div
-            v-for="(match, matchIdx) in round"
-            :key="matchIdx"
-            :id="`match-${bracketIndex}-${roundIdx}-${matchIdx}`"
-            :data-match-id="match.id"
-            :style="getMatchStyle(roundIdx)"
-            :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
-            @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'single')"
-        >
-            <div class="player-box">
-                <span
-                :class="getPlayerStyling(match.players[0], match.players[1], match, 'single')"
-                >
-                {{ truncate(match.players[0].name, { length: 13 }) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
-                </span>
-                <hr />
-                <span
-                :class="getPlayerStyling(match.players[1], match.players[0], match, 'single')"
-                >
-                {{ truncate(match.players[1].name, { length: 13 }) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
-                </span>
+            <!-- Matches Display -->
+            <div
+                v-for="(match, matchIdx) in round"
+                :key="matchIdx"
+                :id="`match-${bracketIndex}-${roundIdx}-${matchIdx}`"
+                :data-match-id="match.id"
+                :style="getMatchStyle(roundIdx)"
+                :class="['match', (user && (user.role === 'Admin' || user.role === 'SportsManager')) ? 'cursor-pointer' : '']"
+                @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'single')"
+            >
+                <div class="player-box">
+                    <span
+                    :class="getPlayerStyling(match.players[0], match.players[1], match, 'single')"
+                    >
+                    {{ truncate(match.players[0].name, { length: 13 }) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
+                    </span>
+                    <hr />
+                    <span
+                    :class="getPlayerStyling(match.players[1], match.players[0], match, 'single')"
+                    >
+                    {{ truncate(match.players[1].name, { length: 13 }) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
+                    </span>
+                </div>
             </div>
-        </div>
+            </div>
         </div>
     </div>
 
@@ -436,8 +437,8 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
             v-for="(match, matchIdx) in round"
             :key="`round-${roundIdx}-${matchIdx}`"
             :id="`round-match-${roundIdx}-${matchIdx}`"
-            :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
-            @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'round_robin')"
+            :class="['match', (user && (user.role === 'Admin' || user.role === 'SportsManager')) ? 'cursor-pointer' : '']"
+            @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'round_robin')"
             >
             <div class="player-box">
                 <span
@@ -483,157 +484,159 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
             class="standings-row"
             :class="{ 'winner': index === 0 && props.isRoundRobinConcluded(bracketIndex) }"
             >
-            <span class="rank">{{ index + 1 }}</span>
-            <span class="player">
+            <span class="rank" data-label="Rank">{{ index + 1 }}</span>
+            <span class="player" data-label="Player">
                 {{ truncate(player.name, { length: 15 }) }}
                 <i v-if="index === 0 && props.isRoundRobinConcluded(bracketIndex)" class="pi pi-crown winner-crown"></i>
             </span>
-            <span class="wins">{{ player.wins }}</span>
-            <span class="draws">{{ player.draws }}</span>
-            <span class="losses">{{ player.losses }}</span>
-            <span class="points">{{ player.points }}</span>
+            <span class="wins" data-label="Wins">{{ player.wins }}</span>
+            <span class="draws" data-label="Draws">{{ player.draws }}</span>
+            <span class="losses" data-label="Losses">{{ player.losses }}</span>
+            <span class="points" data-label="Points">{{ player.points }}</span>
             </div>
         </div>
         </div>
     </div>
 
     <!-- Double Elimination Display -->
-    <div v-else-if="bracket.type === 'Double Elimination'" class="double-elimination-bracket" ref="bracketContentRef">
-        <!-- Winners Bracket -->
-        <div class="bracket-section winners">
-        <h3>Upper Bracket</h3>
-        <div class="bracket">
-            <svg class="connection-lines">
-            <g v-for="(line, i) in dynamicLines.winners" :key="`dynamic-winners-${i}`">
-                <line
-                :x1="line.x1"
-                :y1="line.y1"
-                :x2="line.x2"
-                :y2="line.y2"
-                :stroke="getLineStroke(line)"
-                :stroke-width="getLineStrokeWidth(line)"
-                />
-            </g>
-            </svg>
+    <div v-else-if="bracket.type === 'Double Elimination'" class="bracket-scroll-container">
+        <div class="double-elimination-bracket" ref="bracketContentRef">
+            <!-- Winners Bracket -->
+            <div class="bracket-section winners">
+            <h3>Upper Bracket</h3>
+            <div class="bracket">
+                <svg class="connection-lines">
+                <g v-for="(line, i) in dynamicLines.winners" :key="`dynamic-winners-${i}`">
+                    <line
+                    :x1="line.x1"
+                    :y1="line.y1"
+                    :x2="line.x2"
+                    :y2="line.y2"
+                    :stroke="getLineStroke(line)"
+                    :stroke-width="getLineStrokeWidth(line)"
+                    />
+                </g>
+                </svg>
 
-            <div v-for="(round, roundIdx) in bracket.matches.winners" :key="`winners-${roundIdx}`"
-            :class="['round', `round-${roundIdx + 1}`, { 'round-ongoing': isRoundOngoing('winners', roundIdx) }]">
-            <h3>Round {{ roundIdx + 1 }}</h3>
+                <div v-for="(round, roundIdx) in bracket.matches.winners" :key="`winners-${roundIdx}`"
+                :class="['round', `round-${roundIdx + 1}`, { 'round-ongoing': isRoundOngoing('winners', roundIdx) }]">
+                <h3>Round {{ roundIdx + 1 }}</h3>
 
-            <div
-                v-for="(match, matchIdx) in round"
-                :key="`winners-${roundIdx}-${matchIdx}`"
-                :id="`winners-match-${bracketIndex}-${roundIdx}-${matchIdx}`"
-                :data-match-id="match.id"
-                      :style="getMatchStyle(roundIdx)"
-                :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
-                @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'winners')"
-            >
-                <div class="player-box">
-                <span
-                    :class="getPlayerStyling(match.players[0], match.players[1], match, 'winners')"
+                <div
+                    v-for="(match, matchIdx) in round"
+                    :key="`winners-${roundIdx}-${matchIdx}`"
+                    :id="`winners-match-${bracketIndex}-${roundIdx}-${matchIdx}`"
+                    :data-match-id="match.id"
+                    :style="getMatchStyle(roundIdx)"
+                    :class="['match', (user && (user.role === 'Admin' || user.role === 'SportsManager')) ? 'cursor-pointer' : '']"
+                    @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'winners')"
                 >
-                    {{ truncate(match.players[0].name, { length: 13 }) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
-                </span>
-                <hr />
-                <span
-                    :class="getPlayerStyling(match.players[1], match.players[0], match, 'winners')"
-                >
-                    {{ truncate(match.players[1].name, { length: 13 }) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
-                </span>
+                    <div class="player-box">
+                    <span
+                        :class="getPlayerStyling(match.players[0], match.players[1], match, 'winners')"
+                    >
+                        {{ truncate(match.players[0].name, { length: 13 }) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
+                    </span>
+                    <hr />
+                    <span
+                        :class="getPlayerStyling(match.players[1], match.players[0], match, 'winners')"
+                    >
+                        {{ truncate(match.players[1].name, { length: 13 }) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
+                    </span>
+                    </div>
+                </div>
                 </div>
             </div>
             </div>
-        </div>
-        </div>
 
-        <!-- Losers Bracket -->
-        <div class="bracket-section losers">
-        <h3>Lower Bracket</h3>
-        <div class="bracket">
-            <svg class="connection-lines">
-            <g v-for="(line, i) in dynamicLines.losers" :key="`dynamic-losers-${i}`">
-                <line
-                :x1="line.x1"
-                :y1="line.y1"
-                :x2="line.x2"
-                :y2="line.y2"
-                :stroke="getLineStroke(line)"
-                :stroke-width="getLineStrokeWidth(line)"
-                />
-            </g>
-            </svg>
+            <!-- Losers Bracket -->
+            <div class="bracket-section losers">
+            <h3>Lower Bracket</h3>
+            <div class="bracket">
+                <svg class="connection-lines">
+                <g v-for="(line, i) in dynamicLines.losers" :key="`dynamic-losers-${i}`">
+                    <line
+                    :x1="line.x1"
+                    :y1="line.y1"
+                    :x2="line.x2"
+                    :y2="line.y2"
+                    :stroke="getLineStroke(line)"
+                    :stroke-width="getLineStrokeWidth(line)"
+                    />
+                </g>
+                </svg>
 
-            <div v-for="(round, roundIdx) in bracket.matches.losers" :key="`losers-${roundIdx}`"
-            :class="['round', `round-${roundIdx + 1}`, { 'round-ongoing': isRoundOngoing('losers', roundIdx) }]">
-            <h3>Round {{ roundIdx + 1 }}</h3>
+                <div v-for="(round, roundIdx) in bracket.matches.losers" :key="`losers-${roundIdx}`"
+                :class="['round', `round-${roundIdx + 1}`, { 'round-ongoing': isRoundOngoing('losers', roundIdx) }]">
+                <h3>Round {{ roundIdx + 1 }}</h3>
 
-            <div
-                v-for="(match, matchIdx) in round"
-                :key="`losers-${roundIdx}-${matchIdx}`"
-                :id="`losers-match-${bracketIndex}-${roundIdx}-${matchIdx}`"
-                :data-match-id="match.id"
-                :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
-                @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'losers')"
-            >
-                <div class="player-box">
-                <span
-                    :class="getPlayerStyling(match.players[0], match.players[1], match, 'losers')"
+                <div
+                    v-for="(match, matchIdx) in round"
+                    :key="`losers-${roundIdx}-${matchIdx}`"
+                    :id="`losers-match-${bracketIndex}-${roundIdx}-${matchIdx}`"
+                    :data-match-id="match.id"
+                    :class="['match', (user && (user.role === 'Admin' || user.role === 'SportsManager')) ? 'cursor-pointer' : '']"
+                    @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'losers')"
                 >
-                    {{ truncate(match.players[0].name, { length: 13 }) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
-                </span>
-                <hr />
-                <span
-                    :class="getPlayerStyling(match.players[1], match.players[0], match, 'losers')"
-                >
-                    {{ truncate(match.players[1].name, { length: 13 }) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
-                </span>
+                    <div class="player-box">
+                    <span
+                        :class="getPlayerStyling(match.players[0], match.players[1], match, 'losers')"
+                    >
+                        {{ truncate(match.players[0].name, { length: 13 }) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
+                    </span>
+                    <hr />
+                    <span
+                        :class="getPlayerStyling(match.players[1], match.players[0], match, 'losers')"
+                    >
+                        {{ truncate(match.players[1].name, { length: 13 }) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
+                    </span>
+                    </div>
+                </div>
                 </div>
             </div>
             </div>
-        </div>
-        </div>
 
-        <!-- Grand Finals -->
-        <div class="bracket-section grand-finals">
-        <div :class="{ 'round-ongoing': isRoundOngoing('grand_finals', 0) }">
-            <h3>Finals</h3>
-        </div>
-        <div class="bracket">
-            <svg class="connection-lines">
-            <g v-for="(line, i) in dynamicLines.finals" :key="`dynamic-finals-${i}`">
-                <line
-                :x1="line.x1"
-                :y1="line.y1"
-                :x2="line.x2"
-                :y2="line.y2"
-                :stroke="getLineStroke(line)"
-                :stroke-width="getLineStrokeWidth(line)"
-                />
-            </g>
-            </svg>
+            <!-- Grand Finals -->
+            <div class="bracket-section grand-finals">
+            <div :class="{ 'round-ongoing': isRoundOngoing('grand_finals', 0) }">
+                <h3>Finals</h3>
+            </div>
+            <div class="bracket">
+                <svg class="connection-lines">
+                <g v-for="(line, i) in dynamicLines.finals" :key="`dynamic-finals-${i}`">
+                    <line
+                    :x1="line.x1"
+                    :y1="line.y1"
+                    :x2="line.x2"
+                    :y2="line.y2"
+                    :stroke="getLineStroke(line)"
+                    :stroke-width="getLineStrokeWidth(line)"
+                    />
+                </g>
+                </svg>
 
-            <div v-for="(match, matchIdx) in bracket.matches.grand_finals" :key="`grand-finals-${matchIdx}`"
-            :id="`grand-finals-match-${bracketIndex}-${matchIdx}`"
-            :data-match-id="match.id"
-            :class="['match', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'cursor-pointer' : '']"
-            @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && props.openMatchDialog(bracketIndex, 0, matchIdx, match, 'grand_finals')"
-            >
-            <div class="player-box">
-                <span
-                :class="getPlayerStyling(match.players[0], match.players[1], match, 'grand_finals')"
+                <div v-for="(match, matchIdx) in bracket.matches.grand_finals" :key="`grand-finals-${matchIdx}`"
+                :id="`grand-finals-match-${bracketIndex}-${matchIdx}`"
+                :data-match-id="match.id"
+                :class="['match', (user && (user.role === 'Admin' || user.role === 'SportsManager')) ? 'cursor-pointer' : '']"
+                @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, 0, matchIdx, match, 'grand_finals')"
                 >
-                {{ truncate(match.players[0].name, { length: 13 }) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
-                </span>
-                <hr />
-                <span
-                :class="getPlayerStyling(match.players[1], match.players[0], match, 'grand_finals')"
-                >
-                {{ truncate(match.players[1].name, { length: 13 }) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
-                </span>
+                <div class="player-box">
+                    <span
+                    :class="getPlayerStyling(match.players[0], match.players[1], match, 'grand_finals')"
+                    >
+                    {{ truncate(match.players[0].name, { length: 13 }) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
+                    </span>
+                    <hr />
+                    <span
+                    :class="getPlayerStyling(match.players[1], match.players[0], match, 'grand_finals')"
+                    >
+                    {{ truncate(match.players[1].name, { length: 13 }) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
+                    </span>
+                </div>
+                </div>
             </div>
             </div>
-        </div>
         </div>
     </div>
 </template>

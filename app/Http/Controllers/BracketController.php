@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Event;
+use App\Models\Bracket;
 
 class BracketController extends Controller
 {
@@ -35,6 +37,21 @@ class BracketController extends Controller
 
         // The frontend will be responsible for filtering based on context (e.g., hiding archived on the main list)
         return response()->json($brackets);
+    }
+
+    /**
+     * Display a listing of the resource for a specific event.
+     *
+     * @param  \App\Models\Event  $event
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function indexForEvent($eventId)
+    {
+        $jsonData = $this->readJson();
+        $brackets = $jsonData['brackets'] ?? [];
+        $eventBrackets = array_filter($brackets, fn($b) => ($b['event_id'] ?? null) === $eventId);
+
+        return response()->json(array_values($eventBrackets));
     }
 
     /**

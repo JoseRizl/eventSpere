@@ -11,6 +11,9 @@ use Inertia\Inertia;
 Route::inertia('/', 'Home')->name('home');
 Route::get('/events/{id}', [EventController::class, 'show'])->name('event.details');
 
+// Public API route for fetching brackets for a specific event
+Route::get('/api/events/{event}/brackets', [BracketController::class, 'indexForEvent'])->name('api.events.brackets');
+
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [EventController::class, 'dashboard'])->name('dashboard');
     // Route::get('/event-list', [EventController::class, 'index'])->name('event.list');

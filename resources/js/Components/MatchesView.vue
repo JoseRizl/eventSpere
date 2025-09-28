@@ -22,7 +22,7 @@ const props = defineProps({
     },
     openMatchEditorFromCard: {
         type: Function,
-        required: true
+        default: null
     },
     isFinalRound: {
         type: Function,
@@ -126,8 +126,8 @@ const getMatchIdentifier = (match) => {
                 <div class="matches-grid">
                     <div v-for="match in group.matches"
                         :key="match.id"
-                        :class="['match-card-item', (user?.role === 'Admin' || user?.role === 'SportsManager') ? 'editable' : '']"
-                        @click="(user?.role === 'Admin' || user?.role === 'SportsManager') && props.openMatchEditorFromCard(bracketIndex, match)"
+                        :class="['match-card-item', (user && (user.role === 'Admin' || user.role === 'SportsManager')) ? 'editable' : '']"
+                        @click="props.openMatchEditorFromCard && props.openMatchEditorFromCard(bracketIndex, match)"
                     >
                         <div class="match-card-header">
                             <div>
@@ -139,12 +139,12 @@ const getMatchIdentifier = (match) => {
                         <div class="match-card-body">
                             <div class="players-scores">
                                 <div class="player">
-                                    <span class="player-name">{{ truncate(match.players[0].name, { length: 13 }) }}</span>
+                                    <span class="player-name">{{ truncate(match.players[0].name, { length: 12 }) }}</span>
                                     <span class="player-score">{{ match.players[0].score }}</span>
                                 </div>
                                 <div class="vs-separator">vs</div>
                                 <div class="player">
-                                    <span class="player-name">{{ truncate(match.players[1].name, { length: 13 }) }}</span>
+                                    <span class="player-name">{{ truncate(match.players[1].name, { length: 12 }) }}</span>
                                     <span class="player-score">{{ match.players[1].score }}</span>
                                 </div>
                             </div>
@@ -193,7 +193,7 @@ const getMatchIdentifier = (match) => {
 
 .matches-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1rem;
 }
 

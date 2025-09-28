@@ -15,10 +15,42 @@
 .bracket {
   position: relative;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start; /* Align rounds to the start */
   gap: 40px;
+  padding: 1rem; /* Add some padding inside the scroll container */
+}
+
+.bracket-scroll-container {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  overscroll-behavior-x: contain; /* Prevent page scroll when at the edge */
   padding-bottom: 1rem;
+  background-color: #f0f2f5; /* A light background for the scroll area */
+  border: 1px solid #e0e4e8;
+  border-radius: 8px;
+}
+
+/* Custom, more subtle scrollbar for the container */
+.bracket-scroll-container::-webkit-scrollbar {
+  height: 8px;
+}
+.bracket-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+.bracket-scroll-container::-webkit-scrollbar-thumb {
+  background: #ced4da;
+  border-radius: 4px;
+}
+
+/* Custom scrollbar for bracket view */
+.bracket::-webkit-scrollbar {
+  height: 8px;
+}
+.bracket::-webkit-scrollbar-track {
+  background: transparent;
+}
+.bracket::-webkit-scrollbar-thumb {
+  background: transparent;
 }
 
 .round {
@@ -819,32 +851,15 @@
     margin-bottom: 1.5rem;
 }
 
-.view-toggle-buttons .p-button.p-button-primary {
-    background: #fff;
-    color: #0077B3;
-    border-color: #fff;
-}
-
 .view-toggle-buttons .p-button.p-button-primary:hover {
     background: #222da4; /* A more noticeable light blue */
     border-color: #bfdbfe;
-}
-
-.view-toggle-buttons .p-button.p-button-outlined {
-    color: #fff;
-    border-color: #fff;
 }
 
 .view-toggle-buttons .p-button.p-button-outlined:hover {
     background: #0077B3; /* Primary blue for high contrast */
     color: #fff;
     border-color: #0077B3;
-}
-
-.match-filters {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 1.5rem;
 }
 
 .matches-card-view {
@@ -1576,28 +1591,6 @@
         flex-wrap: nowrap;
     }
 }
-
-.winner-banner {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    background-color: #d4edda; /* Light green background */
-    color: #155724; /* Dark green text */
-    padding: 10px 15px;
-    border-radius: 8px;
-    margin-top: 15px;
-    font-weight: 600;
-    font-size: 1.1rem;
-    border: 1px solid #c3e6cb;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.winner-banner i {
-    font-size: 1.5rem;
-    color: #28a745; /* Green trophy icon */
-}
-
 .event-link-container {
     display: flex;
     align-items: center;
@@ -1633,8 +1626,85 @@
     padding: 1rem;
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
-    justify-content: space-between;
+    gap: 0.5rem 1.5rem; /* row-gap column-gap */
+    justify-content: center;
     align-items: center;
     animation: fadeIn 0.3s;
+    border-bottom: 1px solid #dee2e6;
+    margin-bottom: 1rem;
+}
+
+/* Responsive Bracket Styles */
+@media (max-width: 768px) {
+    .bracket-header h2 {
+        font-size: 1.2rem;
+    }
+
+    .bracket-header .info-tags {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+
+    .bracket-tag {
+        font-size: 0.8rem;
+        padding: 0.15rem 0.5rem;
+    }
+
+    /* Ensure bracket has a min-width to allow scrolling */
+    .bracket {
+        min-width: 800px; /* Adjust as needed for better viewing */
+    }
+}
+
+@media (max-width: 768px) {
+    .double-elimination-bracket {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        /* Ensure it doesn't take full width on mobile to allow scrolling */
+        width: auto;
+        align-items: flex-start;
+    }
+    .bracket {
+        min-width: 600px;
+    }
+}
+
+/* Phone-specific styles */
+@media (max-width: 480px) {
+    /* Make Round Robin standings stack on small screens */
+    .standings-table {
+        font-size: 0.9rem;
+        display: block;
+    }
+    .standings-header {
+        display: none; /* Hide the header row */
+    }
+    .standings-row {
+        display: block;
+        padding: 10px;
+        border-bottom: 1px solid #e0e0e0;
+        display: grid;
+        grid-template-columns: 100px 1fr;
+        gap: 5px 10px;
+        align-items: center;
+    }
+    .standings-row span::before {
+        content: attr(data-label);
+        font-weight: bold;
+        display: inline-block;
+        color: #4b5563;
+    }
+    .standings-row .rank::before {
+        content: ''; /* Rank is already obvious */
+        display: none;
+    }
+    .standings-row .rank {
+        grid-column: 1 / 2;
+        grid-row: 1 / 3;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 }
