@@ -194,6 +194,7 @@ const getMatchIdentifier = (match) => {
 .matches-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    justify-content: center;
     gap: 1rem;
 }
 

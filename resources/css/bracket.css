@@ -15,7 +15,7 @@
 .bracket {
   position: relative;
   display: flex;
-  justify-content: flex-start; /* Align rounds to the start */
+  justify-content: center; /* Align rounds to the start */
   gap: 40px;
   padding: 1rem; /* Add some padding inside the scroll container */
 }
