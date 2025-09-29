@@ -93,7 +93,7 @@ const confirmDeleteAnnouncement = async () => {
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- News and Update Title -->
-    <h1 class="text-2xl font-bold mt-4 text-center text-slate-800">News and Updates</h1>
+    <!-- <h1 class="text-2xl font-bold mt-4 text-center text-slate-800">News and Updates</h1> -->
 
     <!-- Carousel Banner -->
     <div v-if="carouselEvents.length > 0" class="w-full relative group/carousel">
@@ -207,7 +207,7 @@ const confirmDeleteAnnouncement = async () => {
         <!-- Ongoing Events -->
         <div v-if="ongoingEvents.length > 0" class="w-full mt-6 bg-white/60 p-4 rounded-xl border border-gray-200/80 shadow-sm">
           <div class="flex flex-col sm:flex-row justify-between items-center mb-2 gap-2">
-            <h2 class="text-2xl font-bold text-center sm:text-left flex-grow">Ongoing Events</h2>
+            <h2 class="section-title text-center sm:text-left flex-grow">Ongoing Events</h2>
             <Button
               size="small"
               :icon="showOngoingEvents ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
@@ -224,7 +224,7 @@ const confirmDeleteAnnouncement = async () => {
                     <template #header>
                       <div class="h-36 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
                         <div class="absolute inset-0 bg-gradient-to-b from-gray-900/20 to-transparent z-10"></div>
-                        <img v-if="event.image" :src="event.image" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" alt="Event image"/>
+                        <img v-if="event.image" :src="event.image" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" alt="Event image" loading="lazy"/>
                         <img v-else src="/resources/images/NCSlogo.png" class="w-24 h-24 object-contain opacity-50" alt="Event Placeholder" />
                         <Tag v-if="isNewEvent(event)" value="NEW" severity="success" class="absolute top-2 right-2 z-20"/>
                       </div>
@@ -256,7 +256,7 @@ const confirmDeleteAnnouncement = async () => {
         <!-- Events This Month -->
         <div v-if="eventsThisMonth.length > 0" class="w-full mt-6 bg-white/60 p-4 rounded-xl border border-gray-200/80 shadow-sm">
           <div class="flex flex-col sm:flex-row justify-between items-center mb-2 gap-2">
-            <h2 class="text-2xl font-bold text-center sm:text-left flex-grow">Events This Month</h2>
+            <h2 class="section-title text-center sm:text-left flex-grow">Events This Month</h2>
             <Button
               size="small"
               :icon="showEventsThisMonth ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
@@ -273,7 +273,7 @@ const confirmDeleteAnnouncement = async () => {
                     <template #header>
                       <div class="h-36 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
                         <div class="absolute inset-0 bg-gradient-to-b from-gray-900/20 to-transparent z-10"></div>
-                        <img v-if="event.image" :src="event.image" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" alt="Event image"/>
+                        <img v-if="event.image" :src="event.image" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" alt="Event image" loading="lazy"/>
                         <img v-else src="/resources/images/NCSlogo.png" class="w-24 h-24 object-contain opacity-50" alt="Event Placeholder" />
                         <Tag v-if="isNewEvent(event)" value="NEW" severity="success" class="absolute top-2 right-2 z-20"/>
                       </div>
@@ -305,7 +305,7 @@ const confirmDeleteAnnouncement = async () => {
         <!-- Upcoming Events -->
         <div v-if="upcomingEvents.length > 0" class="w-full mt-6 bg-white/60 p-4 rounded-xl border border-gray-200/80 shadow-sm">
           <div class="flex flex-col sm:flex-row justify-between items-center mb-2 gap-2">
-            <h2 class="text-2xl font-bold text-center sm:text-left flex-grow">Upcoming Events</h2>
+            <h2 class="section-title text-center sm:text-left flex-grow">Upcoming Events</h2>
             <Button
               size="small"
               :icon="showUpcomingEvents ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
@@ -322,7 +322,7 @@ const confirmDeleteAnnouncement = async () => {
                     <template #header>
                       <div class="h-36 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
                         <div class="absolute inset-0 bg-gradient-to-b from-gray-900/20 to-transparent z-10"></div>
-                        <img v-if="event.image" :src="event.image" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" alt="Event image"/>
+                        <img v-if="event.image" :src="event.image" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" alt="Event image" loading="lazy"/>
                         <img v-else src="/resources/images/NCSlogo.png" class="w-24 h-24 object-contain opacity-50" alt="Event Placeholder" />
                         <Tag v-if="isNewEvent(event)" value="NEW" severity="success" class="absolute top-2 right-2 z-20"/>
                       </div>
@@ -353,7 +353,7 @@ const confirmDeleteAnnouncement = async () => {
 
         <!-- Event Calendar -->
         <div class="w-full">
-            <h2 class="text-2xl font-bold mb-6 mt-6 text-center">Event Calendar</h2>
+            <h2 class="section-title mb-6 mt-6 text-center">Event Calendar</h2>
           <EventCalendar :events="filteredNews" />
         </div>
       </div>
@@ -361,7 +361,7 @@ const confirmDeleteAnnouncement = async () => {
 
     <!-- Announcement Board -->
     <div v-if="currentView === 'announcements'" class="w-full mt-8">
-      <h2 class="text-xl font-semibold mb-5">Announcement Board</h2>
+      <h2 class="section-title mb-5 text-xl">Announcement Board</h2>
       <div v-if="filteredAnnouncements.length" class="space-y-6">
         <div
           v-for="announcement in filteredAnnouncements"

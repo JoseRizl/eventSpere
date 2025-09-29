@@ -999,16 +999,13 @@
         reader.onload = (e) => {
             const img = new Image();
             img.onload = () => {
-                const MAX_SIZE = 800; // Back to 800px for better storage
+                const MAX_WIDTH = 1920; // Increase max width for better banner quality
                 let width = img.width;
                 let height = img.height;
 
-                if (width > height && width > MAX_SIZE) {
-                    height *= MAX_SIZE / width;
-                    width = MAX_SIZE;
-                } else if (height > MAX_SIZE) {
-                    width *= MAX_SIZE / height;
-                    height = MAX_SIZE;
+                if (width > MAX_WIDTH) {
+                    height = (height / width) * MAX_WIDTH;
+                    width = MAX_WIDTH;
                 }
 
                 const canvas = document.createElement('canvas');
@@ -1022,24 +1019,9 @@
 
                 ctx.drawImage(img, 0, 0, width, height);
 
-                // Get compressed data with balanced quality
-                const compressedData = canvas.toDataURL('image/jpeg', 0.8);
-
-                // Create SVG wrapper for better scaling and storage
-                const svgContent = `
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                        width="${width}"
-                        height="${height}">
-                    <image href="${compressedData}"
-                            width="100%"
-                            height="100%"
-                            preserveAspectRatio="xMidYMid meet"/>
-                    </svg>`;
-
-                // Create final SVG blob
-                const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
-                const svgUrl = URL.createObjectURL(svgBlob);
-                selectedEvent.value.image = svgUrl;
+                // Get compressed data in WebP format for better quality and smaller file size
+                const compressedData = canvas.toDataURL('image/webp', 0.9);
+                selectedEvent.value.image = compressedData;
             };
             img.onerror = () => {
                 selectedEvent.value.image = defaultImage;
@@ -1060,50 +1042,28 @@
         reader.onload = (e) => {
             const img = new Image();
             img.onload = () => {
-                // Compression setup
-                const MAX_SIZE = 800; // Back to 800px for better storage
+                const MAX_WIDTH = 1920; // Increase max width for better banner quality
                 let width = img.width;
                 let height = img.height;
 
-                // Calculate new dimensions while maintaining aspect ratio
-                if (width > height && width > MAX_SIZE) {
-                    height *= MAX_SIZE / width;
-                    width = MAX_SIZE;
-                } else if (height > MAX_SIZE) {
-                    width *= MAX_SIZE / height;
-                    height = MAX_SIZE;
+                if (width > MAX_WIDTH) {
+                    height = (height / width) * MAX_WIDTH;
+                    width = MAX_WIDTH;
                 }
 
-                // Create canvas for compression
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 canvas.width = width;
                 canvas.height = height;
 
-                // Enable image smoothing for better quality
                 ctx.imageSmoothingEnabled = true;
                 ctx.imageSmoothingQuality = 'high';
 
                 ctx.drawImage(img, 0, 0, width, height);
 
-                // Get compressed data with balanced quality
-                const compressedData = canvas.toDataURL('image/jpeg', 0.8);
-
-                // Create SVG wrapper for better scaling and storage
-                const svgContent = `
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                        width="${width}"
-                        height="${height}">
-                    <image href="${compressedData}"
-                            width="100%"
-                            height="100%"
-                            preserveAspectRatio="xMidYMid meet"/>
-                    </svg>`;
-
-                // Create final SVG blob
-                const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
-                const svgUrl = URL.createObjectURL(svgBlob);
-                newEvent.value.image = svgUrl;
+                // Get compressed data in WebP format for better quality and smaller file size
+                const compressedData = canvas.toDataURL('image/webp', 0.9);
+                newEvent.value.image = compressedData;
             };
             img.src = e.target.result;
         };

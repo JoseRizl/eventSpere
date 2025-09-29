@@ -63,7 +63,7 @@ const stats = computed(() => [
 
 <template>
     <div>
-        <h1 class="text-2xl font-bold mb-6 text-slate-800">Dashboard</h1>
+        <h1 class="section-title mb-6">Dashboard</h1>
 
         <!-- Stats Boxes -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -82,7 +82,7 @@ const stats = computed(() => [
 
         <!-- Event Calendar -->
         <div class="bg-white p-6 rounded-lg shadow-lg">
-            <h2 class="text-2xl font-bold mb-4 text-center text-slate-700">Event Calendar</h2>
+            <h2 class="section-title mb-4 text-center">Event Calendar</h2>
             <EventCalendar :events="events" />
         </div>
     </div>

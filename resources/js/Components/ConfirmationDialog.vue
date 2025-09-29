@@ -62,7 +62,7 @@ const handleCancel = () => {
         </button>
         <button
           @click="handleConfirm"
-          :class="[confirmButtonClass]"
+          :class="['modal-button-primary', confirmButtonClass]"
         >
           {{ confirmText }}
         </button>

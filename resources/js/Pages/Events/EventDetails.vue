@@ -1298,7 +1298,7 @@ const getBracketIndex = (bracketId) => {
     <div v-if="currentView === 'announcements'">
     <div class="w-full bg-white rounded-lg shadow-md p-6">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-bold ">Event Announcements</h2>
+        <h2 class="section-title m-0 text-left">Event Announcements</h2>
         <button
           v-if="user?.role === 'Admin' || user?.role === 'Principal'"
           class="create-button flex items-center gap-2"
@@ -1445,7 +1445,7 @@ const getBracketIndex = (bracketId) => {
 
       <!-- Brackets Section -->
       <div v-if="relatedBrackets.length > 0" class="mx-auto mt-6">
-        <h2 class="text-xl font-bold mb-4 text-center">Games</h2>
+        <h2 class="section-title mb-0">Games</h2>
         <div v-if="relatedBrackets.length > 1" class="mb-4">
             <div class="search-wrapper">
                 <div class="p-input-icon-left w-full">
