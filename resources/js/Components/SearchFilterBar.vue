@@ -24,6 +24,14 @@ const props = defineProps({
   showClearButton: {
     type: Boolean,
     default: false,
+  },
+  filterIcon: {
+    type: String,
+    default: 'pi pi-calendar',
+  },
+  filterTooltip: {
+    type: String,
+    default: 'Filter by date',
   }
 });
 
@@ -40,7 +48,7 @@ const onInput = (event) => {
       <InputIcon class="pi pi-search"></InputIcon>
       <InputText :value="searchQuery" @input="onInput" :placeholder="placeholder" class="w-full" />
       <div v-if="showDateFilter || showClearButton" class="absolute top-1/2 right-2 -translate-y-1/2 flex items-center gap-1">
-        <Button v-if="showDateFilter" icon="pi pi-calendar" class="p-button-text text-gray-500 hover:bg-gray-200 !w-8 !h-8" @click="$emit('toggle-date-filter')" :class="{ 'text-purple-600': isDateFilterActive }" v-tooltip.top="'Filter by date'" />
+        <Button v-if="showDateFilter" :icon="filterIcon" class="p-button-text text-gray-500 hover:bg-gray-200 !w-8 !h-8 pi" @click="$emit('toggle-date-filter')" :class="{ 'text-purple-600': isDateFilterActive }" v-tooltip.top="filterTooltip" />
         <Button v-if="showClearButton" icon="pi pi-times" class="p-button-text p-button-danger !w-8 !h-8" @click="$emit('clear-filters')" v-tooltip.top="'Clear All Filters'" />
       </div>
     </IconField>

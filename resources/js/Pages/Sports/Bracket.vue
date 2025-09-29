@@ -4,12 +4,12 @@ import Dialog from 'primevue/dialog';
 import { format, parse, parseISO, isValid } from 'date-fns';
 import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
-import Button from 'primevue/button';
 import OverlayBadge from 'primevue/overlaybadge';
 import MultiSelect from 'primevue/multiselect';
 import SelectButton from 'primevue/selectbutton';
 import { Link, usePage } from '@inertiajs/vue3';
 import Skeleton from 'primevue/skeleton';
+import SearchFilterBar from '@/Components/SearchFilterBar.vue';
 import BracketCard from '@/Components/BracketCard.vue';
 import SuccessDialog from '@/Components/SuccessDialog.vue';
 import MatchesView from '@/Components/MatchesView.vue';
@@ -248,16 +248,16 @@ onMounted(async () => {
     <div class="bracket-container">
         <h1 class="title">Brackets</h1>
         <div class="toolbar-container mb-5">
-            <div class="search-and-filter-section">
-                <div class="search-container">
-                    <div class="p-input-icon-left w-full">
-                        <i class="pi pi-search" />
-                        <InputText v-model="searchQuery" placeholder="Search brackets..." class="w-full" />
-                    </div>
-                    <OverlayBadge :value="areFiltersActive ? '!' : null" severity="danger">
-                        <Button icon="pi pi-filter" class="p-button-outlined filter-toggle-btn" @click="showFilters = !showFilters" />
-                    </OverlayBadge>
-                </div>
+            <div class="search-container">
+                <SearchFilterBar
+                    v-model:searchQuery="searchQuery"
+                    placeholder="Search brackets..."
+                    :show-date-filter="true"
+                    :is-date-filter-active="showFilters"
+                    filter-icon="pi pi-filter"
+                    filter-tooltip="Show filters"
+                    @toggle-date-filter="showFilters = !showFilters"
+                />
             </div>
             <div class="action-section">
                 <button v-if="user?.role === 'Admin' || user?.role === 'SportsManager'" class="create-button" @click="openDialog">Create Bracket</button>
