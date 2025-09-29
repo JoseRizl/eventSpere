@@ -24,16 +24,37 @@ class EventController extends Controller
     $tagsCollection = collect($data['tags'] ?? []);
     $eventTags = collect($data['event_tags'] ?? []);
 
+    // Pre-load task-related data for efficiency
+    $allTasks = collect($data['tasks'] ?? []);
+    $allEmployees = collect($data['employees'] ?? []);
+    $allCommittees = collect($data['committees'] ?? []);
+    $taskEmployeeMap = collect($data['task_employee'] ?? [])->groupBy('task_id');
+
     $events = collect($data['events'] ?? [])
         ->where('archived', '!=', true)
         ->sortByDesc(function ($event) {
             return strtotime($event['startDate'] ?? '1970-01-01');
         })
-        ->map(function ($event) use ($tagsCollection, $eventTags) {
+        ->map(function ($event) use ($tagsCollection, $eventTags, $allTasks, $allEmployees, $allCommittees, $taskEmployeeMap) {
             // Get tag IDs for this event from event_tags pseudo-table
             $tagIds = $eventTags->where('event_id', $event['id'])->pluck('tag_id')->toArray();
             // Resolve tag objects
             $event['tags'] = collect($tagIds)->map(fn($tagId) => $tagsCollection->firstWhere('id', $tagId))->filter()->values()->toArray();
+
+            // Resolve tasks for this event
+            $event['tasks'] = $allTasks->where('event_id', $event['id'])->map(function ($task) use ($allEmployees, $allCommittees, $taskEmployeeMap) {
+                $committee = $allCommittees->firstWhere('id', $task['committee_id']);
+                $employeeIds = $taskEmployeeMap->get($task['id'], collect())->pluck('employee_id');
+                $employees = $allEmployees->whereIn('id', $employeeIds)->values()->toArray();
+
+                return [
+                    'id' => $task['id'],
+                    'task' => $task['description'], // Frontend expects 'task' key
+                    'committee' => $committee,
+                    'employees' => $employees,
+                ];
+            })->values()->toArray();
+
             return $event;
         })->values()->toArray();
 
@@ -86,54 +107,6 @@ class EventController extends Controller
             })
             ->values()
             ->toArray();
-
-        // Ensure tasks array exists and has proper structure
-        if (!isset($event['tasks']) || !is_array($event['tasks'])) {
-            $event['tasks'] = [];
-        } else {
-            // Ensure each task has the required structure with multiple employees
-            $event['tasks'] = array_map(function($task) use ($data) {
-                // Handle committee
-                $committee = null;
-                if (isset($task['committee'])) {
-                    if (is_array($task['committee']) && isset($task['committee']['id'])) {
-                        $committeeObj = collect($data['committees'])->firstWhere('id', $task['committee']['id']);
-                        $committee = $committeeObj ?? ['id' => $task['committee']['id'], 'name' => 'Unknown Committee'];
-                    } else {
-                        $committeeObj = collect($data['committees'])->firstWhere('id', $task['committee']);
-                        $committee = $committeeObj ?? ['id' => $task['committee'], 'name' => 'Unknown Committee'];
-                    }
-                }
-
-                // Handle employees array
-                $employees = [];
-                if (isset($task['employees']) && is_array($task['employees'])) {
-                    $employees = collect($task['employees'])->map(function($emp) use ($data) {
-                        if (is_array($emp) && isset($emp['id'])) {
-                            $empObj = collect($data['employees'])->firstWhere('id', $emp['id']);
-                            return $empObj ?? ['id' => $emp['id'], 'name' => 'Unknown Employee'];
-                        }
-                        $empObj = collect($data['employees'])->firstWhere('id', $emp);
-                        return $empObj ?? ['id' => $emp, 'name' => 'Unknown Employee'];
-                    })->values()->toArray();
-                } elseif (isset($task['employee'])) {
-                    // Handle legacy single employee format
-                    if (is_array($task['employee']) && isset($task['employee']['id'])) {
-                        $empObj = collect($data['employees'])->firstWhere('id', $task['employee']['id']);
-                        $employees = [$empObj ?? ['id' => $task['employee']['id'], 'name' => 'Unknown Employee']];
-                    } else {
-                        $empObj = collect($data['employees'])->firstWhere('id', $task['employee']);
-                        $employees = [$empObj ?? ['id' => $task['employee'], 'name' => 'Unknown Employee']];
-                    }
-                }
-
-                return [
-                    'committee' => $committee,
-                    'employees' => $employees,
-                    'task' => $task['task'] ?? ''
-                ];
-            }, $event['tasks']);
-        }
 
         // If the request wants JSON, return only the event data.
         if (request()->wantsJson()) {

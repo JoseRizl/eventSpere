@@ -1172,33 +1172,11 @@
       showDeleteTaskConfirm.value = true;
     };
 
-    const confirmDeleteTask = async () => {
-      if (!taskToDelete.value) return;
-      saving.value = true;
-
-      try {
+    const confirmDeleteTask = () => {
+      if (taskToDelete.value !== null) {
         taskAssignments.value.splice(taskToDelete.value.index, 1);
+        filteredEmployees.value.splice(taskToDelete.value.index, 1);
 
-        const updatedEvent = {
-          ...selectedEvent.value,
-          tasks: [...taskAssignments.value]
-        };
-
-        await axios.put(`http://localhost:3000/events/${selectedEvent.value.id}`, updatedEvent);
-
-        const eventIndex = combinedEvents.value.findIndex(event => event.id === selectedEvent.value.id);
-        if (eventIndex !== -1) {
-          combinedEvents.value[eventIndex].tasks = [...taskAssignments.value];
-        }
-
-        successMessage.value = 'Task deleted successfully!';
-        showSuccessDialog.value = true;
-      } catch (error) {
-        console.error("Error deleting task:", error);
-        errorMessage.value = 'Failed to delete task.';
-        showErrorDialog.value = true;
-      } finally {
-        saving.value = false;
         showDeleteTaskConfirm.value = false;
         taskToDelete.value = null;
       }
@@ -1215,37 +1193,34 @@
     };
 
     const saveTaskAssignments = async () => {
-        try {
-        const updatedEvent = {
-        ...selectedEvent.value,
+      saving.value = true;
+
+      // Prepare payload in the format expected by TaskController@updateForEvent
+      const tasksPayload = {
         tasks: taskAssignments.value.map(task => ({
-            committee: task.committee ? { id: task.committee.id } : null,
-            employees: task.employees.map(emp => ({ id: emp.id })),
-            task: task.task
-        }))
-        };
-        await router.put(route('tasks.updateForEvent', {id: selectedEvent.value.id}), updatedEvent, {
-          onSuccess: () => {
-            const index = combinedEvents.value.findIndex(event => event.id === selectedEvent.value.id);
-            if (index !== -1) {
-              combinedEvents.value[index].tasks = [...taskAssignments.value];
-            }
-            isTaskModalVisible.value = false;
-            successMessage.value = 'Tasks assigned successfully!';
-            showSuccessDialog.value = true;
-          },
-          onError: (errors) => {
-            const firstErrorKey = Object.keys(errors)[0];
-            const firstErrorMessage = firstErrorKey ? (Array.isArray(errors[firstErrorKey]) ? errors[firstErrorKey][0] : errors[firstErrorKey]) : 'Failed to save tasks.';
-            errorMessage.value = firstErrorMessage;
-            showErrorDialog.value = true;
-          },
-          preserveScroll: true
-        });
-      } catch (error) {
-        errorMessage.value = 'Failed to save tasks.';
-        showErrorDialog.value = true;
-      }
+          committee_id: task.committee ? task.committee.id : null,
+          employees: task.employees.map(emp => emp.id), // Send only IDs
+          description: task.task
+        })),
+      };
+
+      router.put(route('tasks.updateForEvent', { id: selectedEvent.value.id }), tasksPayload, {
+        preserveScroll: true,
+        onSuccess: () => {
+          isTaskModalVisible.value = false;
+          successMessage.value = 'Tasks updated successfully!';
+          showSuccessDialog.value = true;
+          // Inertia will automatically reload the page props, including the updated tasks.
+        },
+        onError: (errors) => {
+          const errorMessages = Object.values(errors).flat().join(' ');
+          errorMessage.value = `Failed to save tasks: ${errorMessages}`;
+          showErrorDialog.value = true;
+        },
+        onFinish: () => {
+          saving.value = false;
+        }
+      });
     };
 
 

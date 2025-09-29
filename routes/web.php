@@ -42,7 +42,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/events/{id}/archive', [EventController::class, 'archive'])->name('events.archive');
 
     // Task routes - make sure these are properly accessible
-    Route::get('/events/{id}/tasks', [TaskController::class, 'index'])->name('tasks.index');
+    // This route is now handled by the API route below
     Route::put('/events/{id}/tasks', [TaskController::class, 'updateForEvent'])->name('tasks.updateForEvent');
     Route::get('/events/{eventId}/tasks/{taskId}', [TaskController::class, 'show'])->name('tasks.show');
 
@@ -50,6 +50,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('api')->name('api.')->group(function () {
         Route::get('/events', [EventController::class, 'index'])->name('events.index'); // For fetching all events as JSON
         Route::apiResource('brackets', BracketController::class)->except(['show', 'create', 'edit']);
+        Route::get('/events/{eventId}/tasks', [TaskController::class, 'indexForEvent'])->name('events.tasks.indexForEvent');
         Route::apiResource('tasks', TaskController::class)->except(['show', 'create', 'edit']);
     });
 });

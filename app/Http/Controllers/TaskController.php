@@ -22,6 +22,33 @@ class TaskController extends Controller
         File::put($this->dbPath, json_encode($data, JSON_PRETTY_PRINT));
     }
 
+    public function indexForEvent($eventId)
+    {
+        $allTasks = collect($this->jsonData['tasks'] ?? []);
+        $allEmployees = collect($this->jsonData['employees'] ?? []);
+        $allCommittees = collect($this->jsonData['committees'] ?? []);
+        $taskEmployeeMap = collect($this->jsonData['task_employee'] ?? [])->groupBy('task_id');
+
+        $eventTasks = $allTasks->where('event_id', $eventId)->map(function ($task) use ($allEmployees, $allCommittees, $taskEmployeeMap) {
+            // Resolve committee
+            $committee = $allCommittees->firstWhere('id', $task['committee_id']);
+
+            // Resolve employees
+            $employeeIds = $taskEmployeeMap->get($task['id'], collect())->pluck('employee_id');
+            $employees = $allEmployees->whereIn('id', $employeeIds)->values()->toArray();
+
+            return [
+                'id' => $task['id'],
+                'task' => $task['description'], // Frontend expects 'task' key for description
+                'committee' => $committee,
+                'employees' => $employees,
+            ];
+        })->values()->toArray();
+
+        return response()->json($eventTasks);
+    }
+
+
     /**
      * Update all tasks for a specific event.
      * This replaces the task-handling logic from EventController@updateFromList.
@@ -32,34 +59,39 @@ class TaskController extends Controller
         $validEmployeeIds = array_column($this->jsonData['employees'] ?? [], 'id');
 
         $validated = $request->validate([
-            'tasks' => ['nullable', 'array', function ($attribute, $value, $fail) use ($request, $eventId) {
-                $this->validateTaskAssignments($attribute, $value, $fail, $request, $eventId);
-            }],
-            'tasks.*.committee.id' => ['nullable', Rule::in($validCommitteeIds)],
+            'tasks' => 'nullable|array',
+            'tasks.*.committee_id' => ['nullable', Rule::in($validCommitteeIds)],
             'tasks.*.employees' => 'nullable|array',
-            'tasks.*.employees.*.id' => ['nullable', Rule::in($validEmployeeIds)],
-            'tasks.*.task' => 'nullable|string|max:255',
+            'tasks.*.employees.*' => ['nullable', Rule::in($validEmployeeIds)],
+            'tasks.*.description' => 'nullable|string|max:255',
         ]);
 
-        $eventFound = false;
-        foreach ($this->jsonData['events'] as &$event) {
-            if ($event['id'] == $eventId) {
-                // Normalize tasks to ensure consistent structure before saving
-                $event['tasks'] = collect($validated['tasks'])->map(function ($task) {
-                    return [
-                        'committee' => isset($task['committee']['id']) ? ['id' => $task['committee']['id']] : null,
-                        'employees' => collect($task['employees'] ?? [])->map(fn ($emp) => ['id' => $emp['id']])->values()->toArray(),
-                        'task' => $task['task'] ?? ''
-                    ];
-                })->toArray();
-                $eventFound = true;
-                break;
-            }
-        }
+        // Remove existing tasks and employee assignments for this event
+        $this->jsonData['tasks'] = collect($this->jsonData['tasks'] ?? [])
+            ->filter(fn($task) => $task['event_id'] !== $eventId)
+            ->values()
+            ->toArray();
 
-        if (!$eventFound) {
-            return response()->json(['success' => false, 'error' => 'Event not found.'], 404);
-        }
+        $taskIdsForEvent = collect($this->jsonData['tasks'])->where('event_id', $eventId)->pluck('id')->all();
+        $this->jsonData['task_employee'] = collect($this->jsonData['task_employee'] ?? [])
+            ->filter(fn($assignment) => !in_array($assignment['task_id'], $taskIdsForEvent))
+            ->values()
+            ->toArray();
+
+        // Add the new\/updated tasks
+        collect($validated['tasks'])->each(function ($taskData) use ($eventId) {
+            $newTaskId = $eventId . '-' . substr(md5(uniqid(rand(), true)), 0, 4);
+            $this->jsonData['tasks'][] = [
+                'id' => $newTaskId,
+                'description' => $taskData['description'] ?? '',
+                'event_id' => $eventId,
+                'committee_id' => $taskData['committee_id'] ?? null,
+            ];
+
+            collect($taskData['employees'] ?? [])->each(function ($employeeId) use ($newTaskId) {
+                $this->jsonData['task_employee'][] = ['task_id' => $newTaskId, 'employee_id' => $employeeId];
+            });
+        });
 
         $this->writeJson($this->jsonData);
 

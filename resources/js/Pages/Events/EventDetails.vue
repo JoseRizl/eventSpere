@@ -37,6 +37,7 @@ const props = defineProps({
 
 // Inertia props (now using defineProps)
 const user = computed(() => props.auth.user);
+const tasks = ref([]);
 const currentView = ref('details'); // 'details' or 'announcements'
 const bannerImageInput = ref(null);
 const tags = ref(props.tags || []);
@@ -87,7 +88,7 @@ const filteredEventAnnouncements = computed(() => {
   if (announcementStartDateFilter.value || announcementEndDateFilter.value) {
     announcements = announcements.filter(ann => {
       const annDate = new Date(ann.timestamp);
-      if (isNaN(annDate.getTime())) return false;
+      if (isNaN(annDate.Wime())) return false;
 
       const filterStart = announcementStartDateFilter.value ? new Date(announcementStartDateFilter.value) : null;
       const filterEnd = announcementEndDateFilter.value ? endOfDay(new Date(announcementEndDateFilter.value)) : null;
@@ -136,6 +137,17 @@ const selectedImageUrl = ref('');
 const openImageDialog = (imageUrl) => {
   selectedImageUrl.value = imageUrl;
   showImageDialog.value = true;
+};
+
+const fetchTasks = async (eventId) => {
+    try {
+        const response = await axios.get(route('api.events.tasks.indexForEvent', { eventId }));
+        // The backend now returns the data in the correct format with full objects.
+        // We can directly assign it to eventDetails.tasks.
+        eventDetails.value.tasks = response.data;
+    } catch (error) {
+        console.error('Error fetching tasks:', error);
+    }
 };
 
 // Bracket logic
@@ -430,6 +442,7 @@ onMounted(() => {
   // Ensure tasks have proper committee/employee references
   fetchEventAnnouncements();
   fetchBrackets(props.event.id);
+  fetchTasks(props.event.id);
   if (eventDetails.value.tasks) {
     filteredEmployees.value = eventDetails.value.tasks.map(task => {
       // Find matching committee in committees list
@@ -747,9 +760,9 @@ const saveChanges = () => {
   // Separate payload for tasks
   const tasksPayload = {
     tasks: eventDetails.value.tasks.map(task => ({
-      committee: task.committee ? { id: task.committee.id } : null,
-      employees: task.employees.map(emp => ({ id: emp.id })),
-      task: task.task
+      committee_id: task.committee ? task.committee.id : null,
+      employees: task.employees.map(emp => emp.id), // Send only the employee ID
+      description: task.task
     })),
   };
 
