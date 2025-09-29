@@ -28,13 +28,15 @@ const backgroundStyle = computed(() => {
     // This creates the same gradient as 'bg-gradient-to-br from-blue-50 via-indigo-50 to-white'
     const gradient = 'linear-gradient(to bottom right, #eff6ff, #eef2ff, #ffffff)';
     return {
-      backgroundImage: `${patternUrl}, ${gradient}`
+      backgroundImage: `${patternUrl}, ${gradient}`,
+      backgroundAttachment: 'fixed'
     };
   }
   // This is 'bg-blue-100'
   return {
     backgroundImage: patternUrl,
-    backgroundColor: '#dbeafe'
+    backgroundColor: '#dbeafe',
+    backgroundAttachment: 'fixed'
   };
 });
 
@@ -207,7 +209,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div :style="backgroundStyle" :class="['min-h-screen flex flex-col', user ? 'relative' : '']">
+    <div :style="backgroundStyle" :class="['min-h-screen', user ? 'relative' : '']">
         <Toast position="bottom-right" />
 
         <!-- Background Design Elements -->
@@ -305,8 +307,8 @@ onUnmounted(() => {
             <div v-if="isMobileSidebarOpen" @click="closeMobileSidebar" class="fixed inset-0 bg-black/30 z-50 lg:hidden"></div>
 
             <!-- Sidebar -->
-            <div v-if="user && !hideHeader" :class="[ 'bg-white/95 backdrop-blur-sm border-r border-gray-200 flex flex-col transition-transform lg:transition-all duration-300 overflow-y-auto z-40 lg:z-50',
-                'fixed top-16 h-[calc(100vh-4rem)]', isMobile ? (isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full') : (isDesktopCollapsed ? 'w-20' : sidebarWidth) ]">
+            <div v-if="user && !hideHeader" :class="[ 'bg-white/95 backdrop-blur-sm border-r border-gray-200 flex flex-col transition-transform lg:transition-all duration-300 overflow-y-auto z-[60] lg:z-50',
+                'fixed top-16 h-[calc(100vh-4rem)]', isMobile ? (isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full') : (isDesktopCollapsed ? 'w-20' : sidebarWidth) ]" >
                 <!-- Navigation -->
                 <nav class="px-3 pt-4 flex-grow">
                     <div v-for="(item, index) in sideBarItems" :key="index" class="mb-2">
@@ -356,7 +358,7 @@ onUnmounted(() => {
             </div>
 
             <!-- Page Content -->
-            <main :class="['flex-1 transition-all duration-300 p-4 sm:p-6 lg:pt-22', user && !hideHeader ? (isDesktopCollapsed ? 'lg:ml-20' : 'lg:ml-64') : '']">
+            <main :class="['flex-1 transition-all duration-300 p-4 sm:p-6 lg:pt-22 min-w-0', user && !hideHeader ? (isDesktopCollapsed ? 'lg:ml-20' : 'lg:ml-64') : '']">
                 <slot />
             </main>
         </div>
