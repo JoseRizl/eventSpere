@@ -851,15 +851,39 @@
     margin-bottom: 1.5rem;
 }
 
-.view-toggle-buttons .p-button.p-button-primary:hover {
-    background: #222da4; /* A more noticeable light blue */
-    border-color: #bfdbfe;
+/* === Active/Selected State (Blue) === */
+.view-toggle-buttons .p-button.p-button-primary,
+.match-filters .p-selectbutton .p-button.p-highlight {
+    background: #0077B3 !important; /* Primary Blue */
+    border-color: #0077B3 !important;
+    color: #ffffff !important;
 }
 
-.view-toggle-buttons .p-button.p-button-outlined:hover {
-    background: #0077B3; /* Primary blue for high contrast */
-    color: #fff;
-    border-color: #0077B3;
+.view-toggle-buttons .p-button.p-button-primary:hover {
+    background: #006da1 !important; /* Darker Blue */
+    border-color: #006da1 !important;
+}
+
+.match-filters .p-selectbutton .p-button.p-highlight:hover {
+    background: #006da1 !important; /* Darker Blue */
+    border-color: #006da1 !important;
+}
+
+/* === Inactive/Unselected State (Outlined) === */
+.view-toggle-buttons .p-button.p-button-outlined,
+.match-filters .p-selectbutton .p-button {
+    background: #ffffff;
+    border-color: #0077B3 !important;
+    color: #0077B3 !important;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+/* === Hover on Inactive/Unselected State === */
+.view-toggle-buttons .p-button.p-button-outlined:hover,
+.match-filters .p-selectbutton .p-button:not(.p-highlight):hover {
+    background: #A4CBE1 !important; /* Light Blue */
+    color: #004a6e !important;
+    border-color: #A4CBE1 !important;
 }
 
 .matches-card-view {

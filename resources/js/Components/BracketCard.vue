@@ -103,13 +103,13 @@ const handleSetMatchFilter = (filter) => emit('set-match-filter', { index: props
             </div>
 
             <div v-if="isExpanded" class="bracket-content-wrapper" :id="`bracket-content-${bracket.id}`">
-                <div class="filter-panel">
+                <div class="filter-panel flex-col">
                     <div class="view-toggle-buttons">
                         <Button :label="'Bracket View'" :class="['p-button-sm', viewMode !== 'matches' ? 'p-button-primary' : 'p-button-outlined']" @click="handleSetViewMode('bracket')" />
                         <Button :label="'Matches View'" :class="['p-button-sm', viewMode === 'matches' ? 'p-button-primary' : 'p-button-outlined']" @click="handleSetViewMode('matches')" />
                     </div>
 
-                    <div v-if="viewMode === 'matches'" class="match-filters">
+                    <div v-if="viewMode === 'matches'" class="match-filters flex justify-center w-full">
                         <SelectButton
                             :modelValue="matchFilter"
                             @update:modelValue="handleSetMatchFilter"
