@@ -8,6 +8,7 @@ import { useAnnouncements } from '@/composables/useAnnouncements.js';
 import EventCalendar from '@/Components/EventCalendar.vue';
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 import SuccessDialog from '@/Components/SuccessDialog.vue';
+import SearchFilterBar from '@/Components/SearchFilterBar.vue';
 import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import Avatar from 'primevue/avatar';
 import InputText from 'primevue/inputtext';
@@ -150,22 +151,15 @@ const confirmDeleteAnnouncement = async () => {
 
       <!-- Filters -->
       <div class="mt-4">
-        <div class="flex items-center gap-2 w-full max-w-lg">
-            <div class="relative flex-grow">
-                <span class="search-icon">🔍</span>
-                <InputText v-model="searchQuery" :placeholder="currentView === 'events' ? 'Search events...' : 'Search announcements...'" class="w-full" />
-                <div class="absolute top-0 right-0 h-full flex items-center pr-2 gap-1">
-                    <Button
-                        icon="pi pi-calendar"
-                        class="p-button-text text-gray-500 hover:bg-gray-200"
-                        @click="toggleDateFilter"
-                        :class="{ 'text-purple-600': showDateFilter }"
-                        v-tooltip.top="'Filter by date'"
-                    />
-                    <Button v-if="searchQuery || startDateFilter || endDateFilter" icon="pi pi-times" class="p-button-text p-button-danger" @click="clearFilters" v-tooltip.top="'Clear All Filters'" />
-                </div>
-            </div>
-        </div>
+        <SearchFilterBar
+          v-model:searchQuery="searchQuery"
+          :placeholder="currentView === 'events' ? 'Search events...' : 'Search announcements...'"
+          :show-date-filter="true"
+          :is-date-filter-active="showDateFilter"
+          :show-clear-button="!!(searchQuery || startDateFilter || endDateFilter)"
+          @toggle-date-filter="toggleDateFilter"
+          @clear-filters="clearFilters"
+        />
       </div>
 
       <!-- Date Filter Calendar -->
@@ -502,12 +496,6 @@ const confirmDeleteAnnouncement = async () => {
   transition: background-color 0.5s ease-out;
 }
 
-.search-icon {
-    position: absolute;
-    left: 0.75rem;
-    top: 50%;
-    transform: translateY(-50%);
-}
 .date-filter-calendar {
   width: 100%;
 }
@@ -573,11 +561,6 @@ const confirmDeleteAnnouncement = async () => {
     background-color: rgba(255, 255, 255, 0.9) !important;
     width: 2rem;
     border-radius: 9999px;
-}
-
-:deep(.p-inputtext) {
-    padding-left: 2.5rem; /* Space for search icon */
-    padding-right: 5.5rem; /* Space for action buttons */
 }
 
 /* Custom Severity Tag Colors */

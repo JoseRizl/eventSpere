@@ -1,23 +1,18 @@
 <template>
     <div class="event-list-container">
         <LoadingSpinner :show="saving" />
+        <input type="file" ref="defaultImageInput" @change="handleDefaultImageUpload" accept="image/*" class="hidden" />
         <h1 class="title">Event List</h1>
 
       <div class="search-container mb-4">
-        <div class="search-wrapper">
-          <div class="p-input-icon-left">
-            <input type="file" ref="defaultImageInput" @change="handleDefaultImageUpload" accept="image/*" class="hidden" />
-            <i class="pi pi-search" />
-            <InputText v-model="searchQuery" placeholder="Search events..." class="w-full" />
-          </div>
-          <Button
-            icon="pi pi-calendar"
-            class="p-button-outlined date-filter-btn"
-            @click="toggleDateFilter"
-            :class="{ 'p-button-primary': showDateFilter }"
-            v-tooltip.top="'Filter by date'"
-          />
-        </div>
+        <SearchFilterBar
+          v-model:searchQuery="searchQuery"
+          placeholder="Search events..."
+          :show-date-filter="true"
+          :is-date-filter-active="showDateFilter"
+          :show-clear-button="false"
+          @toggle-date-filter="toggleDateFilter"
+        />
         <button v-if="user?.role === 'Admin' || user?.role === 'Principal'" class="create-button" @click="openCreateModal">Create Event</button>
       </div>
 
@@ -691,6 +686,7 @@
   import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
   import SuccessDialog from '@/Components/SuccessDialog.vue';
   import Skeleton from 'primevue/skeleton';
+  import SearchFilterBar from '@/Components/SearchFilterBar.vue';
   import ColorPicker from 'primevue/colorpicker';
   import Select from 'primevue/select';
 
@@ -701,6 +697,7 @@
       ConfirmationDialog,
       SuccessDialog,
       Link,
+      SearchFilterBar,
       Skeleton,
     },
     setup() {
@@ -1692,33 +1689,6 @@
   margin-bottom: 1rem;
 }
 
-.search-wrapper {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  width: 100%;
-  max-width: 400px;
-}
-
-.search-container .p-input-icon-left {
-  position: relative;
-  width: 100%;
-  max-width: 400px;
-}
-
-.search-container .p-input-icon-left i {
-  position: absolute;
-  left: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #6c757d;
-}
-
-.search-container .p-input-icon-left .p-inputtext {
-  width: 100%;
-  padding-left: 2.5rem;
-}
-
 @media (max-width: 768px) {
   .search-container .p-input-icon-left {
     max-width: 100%;
@@ -1753,11 +1723,6 @@
 .no-results-text {
   color: #555;
   margin: 5px 0 0 0;
-}
-
-.date-filter-btn {
-  min-width: 40px;
-  height: 40px;
 }
 
 .date-filter-container {

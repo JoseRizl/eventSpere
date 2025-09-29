@@ -9,6 +9,7 @@ import SuccessDialog from '@/Components/SuccessDialog.vue';
 import { useBracketState } from '@/composables/useBracketState.js';
 import { useBracketActions } from '@/composables/useBracketActions.js';
 import Dialog from 'primevue/dialog';
+import SearchFilterBar from '@/Components/SearchFilterBar.vue';
 import BracketCard from '@/Components/BracketCard.vue';
 import BracketView from '@/Components/BracketView.vue';
 import MatchEditorDialog from '@/Components/MatchEditorDialog.vue';
@@ -1311,24 +1312,15 @@ const getBracketIndex = (bracketId) => {
 
       <!-- Filters for Announcements -->
       <div class="mb-4 flex flex-wrap items-center gap-2">
-        <div class="search-wrapper">
-            <div class="p-input-icon-left w-full">
-                <i class="pi pi-search" />
-                <InputText
-                    v-model="announcementSearchQuery"
-                    placeholder="Search by message..."
-                    class="w-full"
-                />
-            </div>
-            <Button
-                icon="pi pi-calendar"
-                class="p-button-outlined date-filter-btn"
-                @click="toggleAnnouncementDateFilter"
-                :class="{ 'p-button-primary': showAnnouncementDateFilter }"
-                v-tooltip.top="'Filter by date'"
-            />
-            <Button v-if="announcementSearchQuery || announcementStartDateFilter || announcementEndDateFilter" icon="pi pi-times" class="p-button-rounded p-button-text p-button-danger" @click="clearAnnouncementFilters" v-tooltip.top="'Clear All Filters'" />
-        </div>
+        <SearchFilterBar
+          v-model:searchQuery="announcementSearchQuery"
+          placeholder="Search announcements..."
+          :show-date-filter="true"
+          :is-date-filter-active="showAnnouncementDateFilter"
+          :show-clear-button="!!(announcementSearchQuery || announcementStartDateFilter || announcementEndDateFilter)"
+          @toggle-date-filter="toggleAnnouncementDateFilter"
+          @clear-filters="clearAnnouncementFilters"
+        />
       </div>
 
       <!-- Date Filter Calendar -->
@@ -1673,38 +1665,6 @@ const getBracketIndex = (bracketId) => {
 
 .bracket-toggle-button:hover :deep(.pi) {
     color: #1F2937; /* gray-800 */
-}
-
-.search-wrapper {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.search-wrapper {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  width: 100%;
-  max-width: 100%;
-}
-
-.search-wrapper .p-input-icon-left {
-  position: relative;
-  width: 100%;
-}
-
-.search-wrapper .p-input-icon-left i {
-  position: absolute;
-  left: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #6c757d;
-}
-
-.search-wrapper .p-input-icon-left .p-inputtext {
-  width: 100%;
-  padding-left: 2.5rem;
 }
 
 .date-filter-btn {
