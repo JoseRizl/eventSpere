@@ -461,22 +461,23 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
         <div class="standings-section">
         <div class="standings-header-row">
             <h3 class="text-lg font-semibold">Standings</h3>
-            <button v-if="user?.role === 'Admin' || user?.role === 'SportsManager'"
-            @click="props.openScoringConfigDialog(bracketIndex)"
-            class="scoring-config-btn"
-            title="Configure scoring system"
-            >
-            <i class="pi pi-cog"></i>
-            </button>
         </div>
         <div class="standings-table">
             <div class="standings-header">
-            <span class="rank">Rank</span>
-            <span class="player">Player</span>
-            <span class="wins">Wins</span>
-            <span class="draws">Draws</span>
-            <span class="losses">Losses</span>
-            <span class="points">Points</span>
+                <span class="rank">Rank</span>
+                <span class="player">Player</span>
+                <span class="wins">Wins</span>
+                <span class="draws">Draws</span>
+                <span class="losses">Losses</span>
+                <span class="points flex items-center">
+                    Points
+                    <button v-if="user?.role === 'Admin' || user?.role === 'SportsManager'"
+                        @click="props.openScoringConfigDialog(bracketIndex)"
+                        class="scoring-config-btn ml-2"
+                        title="Configure scoring system">
+                        <i class="pi pi-cog"></i>
+                    </button>
+                </span>
             </div>
             <div
             v-for="(player, index) in (props.standingsRevision, props.getRoundRobinStandings(bracketIndex))"

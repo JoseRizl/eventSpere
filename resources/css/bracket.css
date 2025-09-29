@@ -1086,7 +1086,7 @@
     border: 1px solid #dee2e6;
     /* Ensure proper width constraint for horizontal scrolling */
     max-width: 100%;
-    overflow: hidden;
+    overflow-x: auto;
   }
 
   /* Add scrollbar styling for better UX */
@@ -1240,12 +1240,11 @@
   /* Ensure Round Robin doesn't inherit elimination bracket styles */
   .round-robin-bracket .bracket {
     display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
+    flex-direction: row !important; /* Keep as a row */
+    flex-wrap: nowrap !important; /* Prevent wrapping to new lines */
     gap: 5px !important;
     /* Override any inherited bracket styles */
     position: relative !important;
-    width: 100% !important;
     /* Remove any inherited flex properties that might cause exponential spacing */
     flex: none !important;
     /* Override any inherited alignment */
@@ -1253,7 +1252,8 @@
     justify-content: flex-start !important;
     /* Remove horizontal scroll since we're using rows */
     overflow-x: visible !important;
-    padding-bottom: 10px !important;
+    padding: 0 !important;
+    min-width: min-content; /* Ensure the container is wide enough for all rounds */
   }
 
   .round-robin-bracket .bracket {
@@ -1415,15 +1415,19 @@
 
   .standings-section {
     margin-top: 30px;
-    background: #f8f9fa;
+    background: transparent;
     border-radius: 8px;
     padding: 20px;
     border: 1px solid #dee2e6;
   }
+  .round-robin-bracket > .standings-section {
+    margin-top: 0;
+  }
 
   .standings-header-row {
     display: flex;
-    justify-content: space-between;
+    align-items: center;
+    justify-content: flex-start;
     align-items: center;
     margin-bottom: 20px;
   }
@@ -1445,6 +1449,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    margin-left: 0.75rem; /* Place it next to the title */
     transition: background-color 0.2s;
   }
 
@@ -1614,6 +1619,14 @@
         flex-direction: row;
         flex-wrap: nowrap;
     }
+
+    /* Make the scroll container full-width on mobile */
+    .round-robin-bracket {
+        width: calc(100% + 2rem); /* 100% + (padding * 2) */
+        margin-left: -1rem;
+        margin-right: -1rem;
+        border-radius: 0; /* Remove border-radius for full-width */
+    }
 }
 .event-link-container {
     display: flex;
@@ -1694,41 +1707,19 @@
     }
 }
 
-/* Phone-specific styles */
-@media (max-width: 480px) {
-    /* Make Round Robin standings stack on small screens */
-    .standings-table {
-        font-size: 0.9rem;
-        display: block;
-    }
-    .standings-header {
-        display: none; /* Hide the header row */
-    }
-    .standings-row {
-        display: block;
-        padding: 10px;
-        border-bottom: 1px solid #e0e0e0;
-        display: grid;
-        grid-template-columns: 100px 1fr;
-        gap: 5px 10px;
-        align-items: center;
-    }
-    .standings-row span::before {
-        content: attr(data-label);
-        font-weight: bold;
-        display: inline-block;
-        color: #4b5563;
-    }
-    .standings-row .rank::before {
-        content: ''; /* Rank is already obvious */
-        display: none;
-    }
-    .standings-row .rank {
-        grid-column: 1 / 2;
-        grid-row: 1 / 3;
-        font-size: 1.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+/* Responsive Standings Table */
+@media (max-width: 768px) {
+  .standings-section {
+    padding: 2rem;
+    border-radius: 0;
+  }
+
+  .standings-table {
+    min-width: 600px; /* Set a minimum width to prevent collapsing */
+  }
+
+  .standings-header .player,
+  .standings-row .player {
+    text-align: left; /* Align player names to the left */
+  }
 }
