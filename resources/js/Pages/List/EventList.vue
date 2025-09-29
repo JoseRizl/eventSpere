@@ -13,7 +13,9 @@
           :show-clear-button="false"
           @toggle-date-filter="toggleDateFilter"
         />
-        <button v-if="user?.role === 'Admin' || user?.role === 'Principal'" class="create-button" @click="openCreateModal">Create Event</button>
+        <button v-if="user?.role === 'Admin' || user?.role === 'Principal'" class="create-button" @click="openCreateModal">
+            Create<span class="hidden sm:inline"> Event</span>
+        </button>
       </div>
 
       <!-- Date Filter Calendar - Moved outside search-wrapper -->

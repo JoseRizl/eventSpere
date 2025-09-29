@@ -1415,10 +1415,8 @@
 
   .standings-section {
     margin-top: 30px;
-    background: transparent;
     border-radius: 8px;
     padding: 20px;
-    border: 1px solid #dee2e6;
   }
   .round-robin-bracket > .standings-section {
     margin-top: 0;
@@ -1690,7 +1688,7 @@
 
     /* Ensure bracket has a min-width to allow scrolling */
     .bracket {
-        min-width: 800px; /* Adjust as needed for better viewing */
+        min-width: 768px; /* Adjust as needed for better viewing */
     }
 }
 
@@ -1703,7 +1701,7 @@
         align-items: flex-start;
     }
     .bracket {
-        min-width: 600px;
+        min-width: 768px;
     }
 }
 

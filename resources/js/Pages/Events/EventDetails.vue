@@ -1306,7 +1306,7 @@ const getBracketIndex = (bracketId) => {
           @click="openAddAnnouncementModal"
         >
             <i class="pi pi-plus"></i>
-            <span>Add Announcement</span>
+            <span>Add<span class="hidden sm:inline"> Announcement</span></span>
         </button>
       </div>
 

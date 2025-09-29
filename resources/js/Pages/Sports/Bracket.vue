@@ -281,11 +281,11 @@ onMounted(async () => {
       <div v-if="initialLoading" key="loading-skeleton">
         <div v-for="i in 2" :key="i" class="bracket-section">
             <div class="bracket-wrapper">
-                <div class="bracket-header">
-                    <div class="flex justify-between items-start">
-                        <div class="flex items-center gap-4">
+                <div class="bracket-header responsive-skeleton-header">
+                    <div class="flex justify-between items-start w-full">
+                        <div class="flex-grow">
                             <Skeleton width="12rem" height="1.6rem" />
-                            <div class="info-tags flex gap-2">
+                            <div class="info-tags flex gap-2 mt-2">
                                 <Skeleton width="7rem" height="1.25rem" borderRadius="1rem" />
                                 <Skeleton width="5rem" height="1.25rem" borderRadius="1rem" />
                             </div>
@@ -296,7 +296,7 @@ onMounted(async () => {
                         </div>
                     </div>
 
-                    <div class="event-link-container group">
+                    <div class="event-link-container group mt-3">
                         <Skeleton shape="circle" size="2.5rem" />
                         <div class="event-link-info">
                             <Skeleton width="10rem" height="1.2rem" />
@@ -580,5 +580,21 @@ onMounted(async () => {
 .action-section {
     flex-shrink: 0;
 }
+
+@media (max-width: 768px) {
+    .responsive-skeleton-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 768px) { /* Breakpoint for filters to stack */
+    .filter-panel {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+}
+
 
 </style>
