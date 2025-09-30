@@ -87,9 +87,9 @@ const confirmDeleteAnnouncement = async () => {
     <div v-if="carouselEvents.length > 0" class="w-full relative group/carousel">
         <Carousel :value="carouselEvents" :numVisible="1" :numScroll="1" circular :autoplayInterval="5000" :showIndicators="true" class="home-carousel">
             <template #item="slotProps">
-                <div class="relative w-full h-80 md:h-[500px] bg-gray-700 overflow-hidden">
-                    <Link :href="route('event.details', { id: slotProps.data.id })">
-                        <img v-if="slotProps.data.image" :src="slotProps.data.image" :alt="slotProps.data.title" class="w-full h-full object-cover transition-transform duration-300 group-hover/carousel:scale-105">
+                <div class="relative w-full h-56 md:h-96 lg:h-[630px] bg-gray-700 overflow-hidden" @click.stop="router.visit(route('event.details', { id: slotProps.data.id }))">
+                    <Link :href="route('event.details', { id: slotProps.data.id })" preserve-scroll>
+                        <img v-if="slotProps.data.image" :src=" slotProps.data.image" :alt="slotProps.data.title" class="w-full h-full object-cover transition-transform duration-300 group-hover/carousel:scale-105" draggable="false">
                         <div v-else class="w-full h-full bg-gray-300 flex items-center justify-center">
                             <img src="/resources/images/NCSlogo.png" class="w-32 h-32 object-contain opacity-50" alt="Event Placeholder" />
                         </div>
@@ -424,7 +424,7 @@ const confirmDeleteAnnouncement = async () => {
     />
 
     <!-- Image Viewer Dialog -->
-    <Dialog v-model:visible="showImageDialog" modal header="Image" :style="{ width: '90vw', maxWidth: '1200px' }">
+    <Dialog v-model:visible="showImageDialog" modal :dismissableMask="true" header="Image" :style="{ width: '90vw', maxWidth: '1200px' }">
         <img :src="selectedImageUrl" alt="Announcement Image" class="w-full h-auto max-h-[80vh] object-contain" />
     </Dialog>
   </div>

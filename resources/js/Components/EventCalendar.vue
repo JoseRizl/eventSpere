@@ -17,7 +17,6 @@ import {
   endOfDay,
 } from 'date-fns';
 import { Link, router } from '@inertiajs/vue3';
-import Dialog from 'primevue/dialog';
 
 const props = defineProps({
   events: {
@@ -187,7 +186,7 @@ const calendarGrid = computed(() => {
     </div>
 
     <!-- Day Events Modal -->
-    <Dialog v-model:visible="showDayEventsModal" modal :header="selectedDay ? `Events for ${format(selectedDay.date, 'MMMM d, yyyy')}` : 'Events'" :style="{ width: '90vw', maxWidth: '500px' }">
+    <Dialog v-model:visible="showDayEventsModal" modal :dismissableMask="true" :header="selectedDay ? `Events for ${format(selectedDay.date, 'MMMM d, yyyy')}` : 'Events'" :style="{ width: '90vw', maxWidth: '500px' }">
         <div v-if="selectedDay" class="space-y-3 max-h-[60vh] overflow-y-auto p-1">
             <Link
                 v-for="event in selectedDay.events"

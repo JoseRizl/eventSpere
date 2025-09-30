@@ -1638,12 +1638,12 @@ const getBracketIndex = (bracketId) => {
         @confirm="proceedWithMatchUpdate"
     />
 
-    <Dialog v-model:visible="showMemoImageDialog" modal :header="eventDetails.memorandum?.filename" :style="{ width: '90vw', maxWidth: '1200px' }">
+    <Dialog v-model:visible="showMemoImageDialog" modal :dismissableMask="true" :header="eventDetails.memorandum?.filename" :style="{ width: '90vw', maxWidth: '1200px' }">
         <img :src="memoImageUrl" alt="Memorandum Image" class="w-full h-auto max-h-[80vh] object-contain" />
     </Dialog>
 
     <!-- Image Viewer Dialog -->
-    <Dialog v-model:visible="showImageDialog" modal header="Image" :style="{ width: '90vw', maxWidth: '1200px' }">
+    <Dialog v-model:visible="showImageDialog" modal :dismissableMask="true" header="Image" :style="{ width: '90vw', maxWidth: '1200px' }">
         <img :src="selectedImageUrl" alt="Announcement Image" class="w-full h-auto max-h-[80vh] object-contain" />
     </Dialog>
 </div>
