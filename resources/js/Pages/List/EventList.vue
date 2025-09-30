@@ -683,25 +683,11 @@
   import { defineComponent, ref, onMounted, computed, watch } from "vue";
   import { usePage, Link, router } from '@inertiajs/vue3';
   import axios from "axios";
-  import { parse, format, isWithinInterval } from "date-fns";
-  import LoadingSpinner from '@/Components/LoadingSpinner.vue';
-  import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
-  import SuccessDialog from '@/Components/SuccessDialog.vue';
-  import Skeleton from 'primevue/skeleton';
+  import { parse, format, isWithinInterval } from 'date-fns';
   import SearchFilterBar from '@/Components/SearchFilterBar.vue';
-  import ColorPicker from 'primevue/colorpicker';
-  import Select from 'primevue/select';
 
   export default defineComponent({
     name: "EventList",
-    components: {
-      LoadingSpinner,
-      ConfirmationDialog,
-      SuccessDialog,
-      Link,
-      SearchFilterBar,
-      Skeleton,
-    },
     setup() {
       const dateError = ref("");
       const page = usePage();

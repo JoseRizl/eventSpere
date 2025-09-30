@@ -1,24 +1,13 @@
 <script>
 import { defineComponent, ref, onMounted, computed } from "vue";
-import { router, usePage } from '@inertiajs/vue3';
-import Toast from 'primevue/toast';
-import { useToast } from '@/composables/useToast';
-import LoadingSpinner from '@/Components/LoadingSpinner.vue';
-import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
-import SuccessDialog from '@/Components/SuccessDialog.vue';
-import Skeleton from 'primevue/skeleton';
+import { router, usePage } from "@inertiajs/vue3";
+import { useToast } from "@/composables/useToast";
 
 export default defineComponent({
   name: "CategoryList",
-  components: {
-    LoadingSpinner,
-    ConfirmationDialog,
-    SuccessDialog,
-    Skeleton
-  },
   setup() {
     const { toast, showSuccess, showError } = useToast();
-    const { props, flash } = usePage();
+    const { props } = usePage();
     const categories = ref(props.categories || []);
     const tags = ref(props.tags || []);
     const events = ref(props.events || []);

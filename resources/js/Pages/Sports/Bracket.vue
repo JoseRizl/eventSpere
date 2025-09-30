@@ -1,23 +1,9 @@
 <script setup>
 import { onMounted, computed, ref } from 'vue';
-import Dialog from 'primevue/dialog';
-import { format, parse, parseISO, isValid } from 'date-fns';
-import InputText from 'primevue/inputtext';
-import Select from 'primevue/select';
-import OverlayBadge from 'primevue/overlaybadge';
-import MultiSelect from 'primevue/multiselect';
-import SelectButton from 'primevue/selectbutton';
-import { Link, usePage } from '@inertiajs/vue3';
-import Skeleton from 'primevue/skeleton';
-import SearchFilterBar from '@/Components/SearchFilterBar.vue';
+import { usePage } from '@inertiajs/vue3';
 import BracketCard from '@/Components/BracketCard.vue';
-import SuccessDialog from '@/Components/SuccessDialog.vue';
-import MatchesView from '@/Components/MatchesView.vue';
-import BracketView from '@/Components/BracketView.vue';
 import MatchEditorDialog from '@/Components/MatchEditorDialog.vue';
-import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 import { useBracketState } from '@/composables/useBracketState.js';
-import { formatDisplayDate } from '@/utils/dateUtils.js';
 import { useBracketActions } from '@/composables/useBracketActions.js';
 
 const page = usePage();

@@ -160,26 +160,13 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted, computed, nextTick } from "vue";
-import { router, usePage, Link } from "@inertiajs/vue3";
-import { format, parse, isWithinInterval } from "date-fns";
-import LoadingSpinner from '@/Components/LoadingSpinner.vue';
-import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
-import SuccessDialog from '@/Components/SuccessDialog.vue';
+import { defineComponent, ref, onMounted, computed } from "vue";
+import { router, usePage } from "@inertiajs/vue3";
+import { format, parse, isWithinInterval } from 'date-fns';
 import { useToast } from '@/composables/useToast';
-import Skeleton from 'primevue/skeleton';
-import SearchFilterBar from '@/Components/SearchFilterBar.vue';
 
 export default defineComponent({
   name: "Archive",
-  components: {
-    LoadingSpinner,
-    Link, // Add Link component
-    ConfirmationDialog,
-    SearchFilterBar,
-    SuccessDialog,
-    Skeleton
-  },
   setup() {
     const { showSuccess, showError } = useToast();
     const { props } = usePage(); // props are now fully utilized

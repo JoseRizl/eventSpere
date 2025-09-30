@@ -21,10 +21,10 @@ import 'primeicons/primeicons.css';
   import DataTable from 'primevue/datatable';
   import Column from 'primevue/column';
   import Dialog from 'primevue/dialog';
-  import Dropdown from 'primevue/dropdown';
   import Select from 'primevue/select';
   import Toast from 'primevue/toast';
   import ToastService from 'primevue/toastservice';
+  import Skeleton from 'primevue/skeleton';
 
 
 // Pinia
@@ -35,6 +35,12 @@ import axios from 'axios';
 
 // Main Layout
 import MainLayout from './Layouts/MainLayout.vue';
+
+// Common Custom Components
+import LoadingSpinner from './Components/LoadingSpinner.vue';
+import ConfirmationDialog from './Components/ConfirmationDialog.vue';
+import SuccessDialog from './Components/SuccessDialog.vue';
+import SearchFilterBar from './Components/SearchFilterBar.vue';
 
 // Initialize the Inertia App
 createInertiaApp({
@@ -89,9 +95,13 @@ createInertiaApp({
       .component('DataTable', DataTable)
       .component('Column', Column)
       .component('Dialog', Dialog)
-      .component('Dropdown', Dropdown)
       .component('Select', Select)
       .component('Toast', Toast)
+      .component('LoadingSpinner', LoadingSpinner)
+      .component('ConfirmationDialog', ConfirmationDialog)
+      .component('SuccessDialog', SuccessDialog)
+      .component('SearchFilterBar', SearchFilterBar)
+      .component('Skeleton', Skeleton)
 
       .mount(el);
 

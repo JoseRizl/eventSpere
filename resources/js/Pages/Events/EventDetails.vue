@@ -8,20 +8,11 @@ import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 import SuccessDialog from '@/Components/SuccessDialog.vue';
 import { useBracketState } from '@/composables/useBracketState.js';
 import { useBracketActions } from '@/composables/useBracketActions.js';
-import Dialog from 'primevue/dialog';
 import SearchFilterBar from '@/Components/SearchFilterBar.vue';
 import BracketCard from '@/Components/BracketCard.vue';
 import BracketView from '@/Components/BracketView.vue';
 import MatchEditorDialog from '@/Components/MatchEditorDialog.vue';
 import MatchesView from '@/Components/MatchesView.vue';
-import InputText from 'primevue/inputtext';
-import SelectButton from 'primevue/selectbutton';
-import Button from 'primevue/button';
-import Select from 'primevue/select';
-import Avatar from 'primevue/avatar';
-import Textarea from 'primevue/textarea';
-import DatePicker from 'primevue/datepicker';
-import MultiSelect from 'primevue/multiselect';
 
 const props = defineProps({
   event: Object,

@@ -1,23 +1,10 @@
 <script setup>
-import { ref, onMounted, computed, watch, nextTick } from "vue";
-import { getFullDateTime } from '@/utils/dateUtils.js';
+import { ref, onMounted, computed, watch } from "vue";
 import { loadToggleState, saveToggleState } from '@/utils/localStorage.js';
-import { Link, usePage, router } from "@inertiajs/vue3";
+import { usePage, router } from "@inertiajs/vue3";
 import { useEvents } from '@/composables/useEvents.js';
 import { useAnnouncements } from '@/composables/useAnnouncements.js';
 import EventCalendar from '@/Components/EventCalendar.vue';
-import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
-import SuccessDialog from '@/Components/SuccessDialog.vue';
-import SearchFilterBar from '@/Components/SearchFilterBar.vue';
-import LoadingSpinner from '@/Components/LoadingSpinner.vue';
-import Avatar from 'primevue/avatar';
-import InputText from 'primevue/inputtext';
-import DatePicker from 'primevue/datepicker';
-import Button from 'primevue/button';
-import Carousel from 'primevue/carousel';
-import Tag from 'primevue/tag';
-import Card from 'primevue/card';
-import Dialog from 'primevue/dialog';
 import { useFilters } from '@/composables/useFilters.js';
 const showEventsThisMonth = ref(loadToggleState('showEventsThisMonth', true));
 const saving = ref(false);

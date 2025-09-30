@@ -1,8 +1,4 @@
 <script setup>
-import { computed } from 'vue';
-import { Link } from '@inertiajs/vue3';
-import Button from 'primevue/button';
-import SelectButton from 'primevue/selectbutton';
 import BracketView from '@/Components/BracketView.vue';
 import MatchesView from '@/Components/MatchesView.vue';
 import { formatDisplayDate } from '@/utils/dateUtils.js';
