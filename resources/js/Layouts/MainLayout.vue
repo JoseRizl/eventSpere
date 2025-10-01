@@ -94,7 +94,7 @@ const sideBarItems = computed(() => {
       label: 'Dashboard',
       icon: 'pi pi-chart-bar',
       routeName: 'dashboard',
-      roles: ['Principal', 'Admin'],
+      roles: ['Principal'],
     },
     {
       label: 'Home',

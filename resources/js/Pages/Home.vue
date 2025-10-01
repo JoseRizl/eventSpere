@@ -87,7 +87,7 @@ const confirmDeleteAnnouncement = async () => {
     <div v-if="carouselEvents.length > 0" class="w-full relative group/carousel">
         <Carousel :value="carouselEvents" :numVisible="1" :numScroll="1" circular :autoplayInterval="5000" :showIndicators="true" class="home-carousel">
             <template #item="slotProps">
-                <div class="relative w-full h-56 md:h-96 lg:h-[630px] bg-gray-700 overflow-hidden" @click.stop="router.visit(route('event.details', { id: slotProps.data.id }))">
+                <div class="relative w-full h-56 md:h-96 lg:h-[400px] bg-gray-700 overflow-hidden" @click.stop="router.visit(route('event.details', { id: slotProps.data.id }))">
                     <Link :href="route('event.details', { id: slotProps.data.id })" preserve-scroll>
                         <img v-if="slotProps.data.image" :src=" slotProps.data.image" :alt="slotProps.data.title" class="w-full h-full object-cover transition-transform duration-300 group-hover/carousel:scale-105" draggable="false">
                         <div v-else class="w-full h-full bg-gray-300 flex items-center justify-center">

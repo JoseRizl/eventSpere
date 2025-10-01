@@ -621,33 +621,23 @@ export function useBracketActions(state) {
       losersRounds.push(round);
     }
 
-    // Step 2: Populate Losers Round 1 with actual losers from Winners Round 1.
-    const wr1Matches = winnersRounds[0];
-    const wr1Losers = wr1Matches
-      .filter(m => m.players[0]?.name !== "BYE" && m.players[1]?.name !== "BYE")
-      .map(m => ({
-        id: null,
-        name: `Loser of WR1 M${m.match_number}`,
-        score: 0,
-        completed: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }));
+    // Step 2: Populate Losers Bracket with placeholders for players dropping from Winners Bracket
+    for (let wrRoundIdx = 0; wrRoundIdx < winnersRounds.length - 1; wrRoundIdx++) {
+        const winnersRound = winnersRounds[wrRoundIdx];
+        winnersRound.forEach((wrMatch, wrMatchIdx) => {
+            const loserPlaceholder = {
+                id: null,
+                name: `Loser of WR${wrRoundIdx + 1} M${wrMatch.match_number}`,
+                score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+            };
 
-    if (losersRounds.length > 0 && losersRounds[0]) {
-      const lr1 = losersRounds[0];
-      let loserIndex = 0;
-      for (let i = 0; i < lr1.length; i++) {
-        // Player 1
-        lr1[i].players[0] = wr1Losers[loserIndex]
-          ? wr1Losers[loserIndex++]
-          : { id: generateId(), name: 'BYE', score: 0, completed: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
-
-        // Player 2
-        lr1[i].players[1] = wr1Losers[loserIndex]
-          ? wr1Losers[loserIndex++]
-          : { id: generateId(), name: 'BYE', score: 0, completed: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
-      }
+            const lrRoundIdx = (wrRoundIdx * 2);
+            const lrMatchIdx = wrMatchIdx;
+            const lrPlayerPos = 1; // Losers from winners always drop into the second player slot of their respective losers match
+            if (losersRounds[lrRoundIdx] && losersRounds[lrRoundIdx][lrMatchIdx]) {
+                losersRounds[lrRoundIdx][lrMatchIdx].players[lrPlayerPos] = loserPlaceholder;
+            }
+        });
     }
 
     // --- Grand Finals ---

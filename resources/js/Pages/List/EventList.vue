@@ -292,6 +292,7 @@
                   optionLabel="name"
                   placeholder="Select tags"
                   display="chip"
+                  :showToggleAll="false"
                   class="w-full"
                 />
                 <Button icon="pi pi-plus" class="p-button-secondary p-button-rounded" @click="openTagModal('create')" v-tooltip.top="'Create New Tag'" />
@@ -387,6 +388,9 @@
 
         <div class="p-field">
           <label for="image">Event Image</label>
+          <div v-if="newEvent.image" class="mt-2">
+            <img :src="newEvent.image" alt="Preview" class="preview-image" />
+          </div>
           <div class="flex align-items-center gap-2">
             <input
               type="file"
@@ -404,9 +408,6 @@
             />
           </div>
           <small class="p-text-secondary">Leave empty to use default image</small>
-          <div v-if="newEvent.image" class="mt-2">
-            <img :src="newEvent.image" alt="Preview" class="preview-image" />
-          </div>
         </div>
 
         <template #footer>
@@ -485,6 +486,7 @@
                 optionLabel="name"
                 placeholder="Select tags"
                 display="chip"
+                :showToggleAll="false"
                 class="w-full"
                 >
                 <!-- Option Template -->
@@ -592,6 +594,9 @@
 
         <div class="p-field">
           <label for="image">Event Image</label>
+          <div v-if="selectedEvent.image" class="mt-2">
+            <img :src="selectedEvent.image" alt="Preview" class="preview-image" />
+          </div>
           <div class="flex align-items-center gap-2">
             <input
               type="file"
@@ -609,9 +614,6 @@
             />
           </div>
           <small class="p-text-secondary">Leave empty to keep current image</small>
-          <div v-if="selectedEvent.image" class="mt-2">
-            <img :src="selectedEvent.image" alt="Preview" class="preview-image" />
-          </div>
         </div>
 
         <template #footer>

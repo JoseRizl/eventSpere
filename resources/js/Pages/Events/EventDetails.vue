@@ -1001,7 +1001,7 @@ const getBracketIndex = (bracketId) => {
                             <!-- Edit Mode: Tags -->
                             <div>
                                 <label class="text-sm font-medium mb-1">Tags</label>
-                                <MultiSelect v-model="eventDetails.tags" :options="filteredTags" optionValue="id" optionLabel="name" display="chip" placeholder="Select tags" class="w-full">
+                                <MultiSelect v-model="eventDetails.tags" :options="filteredTags" optionValue="id" optionLabel="name" display="chip" placeholder="Select tags" class="w-full" show-toggle-all="false">
                                     <template #chip="slotProps">
                                         <div v-if="tagsMap[slotProps.value]" class="flex items-center gap-2 px-2 py-1 rounded text-white text-xs" :style="{ backgroundColor: tagsMap[slotProps.value].color }">
                                             {{ tagsMap[slotProps.value].name }}
