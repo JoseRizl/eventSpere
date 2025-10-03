@@ -725,85 +725,108 @@ export function useBracketActions(state) {
   };
 
   const generateRoundRobinBracket = () => {
-    const numPlayers = parseInt(numberOfPlayers.value, 10);
+  const numPlayers = parseInt(numberOfPlayers.value, 10);
 
-    // Ensure even number of participants by adding BYE when needed
-    const adjustedNumPlayers = numPlayers % 2 === 0 ? numPlayers : numPlayers + 1;
+  // Ensure even number of participants by adding BYE when needed
+  const adjustedNumPlayers = numPlayers % 2 === 0 ? numPlayers : numPlayers + 1;
 
-    // Build players array and add BYE if necessary
-    const players = Array.from({ length: numPlayers }, (_, i) => ({
+  // Build players array and add BYE if necessary
+  const players = Array.from({ length: numPlayers }, (_, i) => ({
+    id: generateId(),
+    name: `Player ${i + 1}`,
+    score: 0,
+    completed: false,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  }));
+
+  if (adjustedNumPlayers > numPlayers) {
+    players.push({
       id: generateId(),
-      name: `Player ${i + 1}`,
+      name: 'BYE',
       score: 0,
-      completed: false,
+      completed: true,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-    }));
+    });
+  }
 
-    if (adjustedNumPlayers > numPlayers) {
-      players.push({
+  // Circle method: fix the first player, rotate others
+  const order = players.slice();
+  const rounds = [];
+  const numRounds = adjustedNumPlayers - 1;
+  const halfSize = adjustedNumPlayers / 2;
+
+  for (let round = 0; round < numRounds; round++) {
+    const roundMatches = [];
+
+    for (let i = 0; i < halfSize; i++) {
+      const a = order[i];
+      const b = order[adjustedNumPlayers - 1 - i];
+
+      const match = {
         id: generateId(),
-        name: 'BYE',
-        score: 0,
-        completed: true,
+        round: round + 1,
+        match_number: i + 1,
+        bracket_type: 'round_robin',
+        players: [{ ...a }, { ...b }],
+        winner_id: null,
+        loser_id: null,
+        status: 'pending',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-      });
-    }
+        date: selectedEvent.value.startDate,
+        time: selectedEvent.value.startTime,
+        venue: selectedEvent.value.venue,
+      };
 
-    // We'll pair by taking the current 'order' array and pairing i with (n-1-i).
-    // After each round rotate the whole array to the right by 1 so first slot changes.
-    const order = players.slice(); // working order
-    const rounds = [];
-    const numRounds = adjustedNumPlayers - 1;
-    const halfSize = adjustedNumPlayers / 2;
-
-    for (let round = 0; round < numRounds; round++) {
-      const roundMatches = [];
-
-      for (let i = 0; i < halfSize; i++) {
-        const a = order[i];
-        const b = order[adjustedNumPlayers - 1 - i];
-
-        const match = {
-          id: generateId(),
-          round: round + 1,
-          match_number: i + 1,
-          bracket_type: 'round_robin',
-          players: [
-            { ...a },
-            { ...b }
-          ],
-          winner_id: null,
-          loser_id: null,
-          status: 'pending',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          date: selectedEvent.value.startDate,
-          time: selectedEvent.value.startTime,
-          venue: selectedEvent.value.venue,
-        };
-
-        // Auto-complete BYE matches
-        if (match.players[0].name === 'BYE' || match.players[1].name === 'BYE') {
-          const winner = match.players[0].name === 'BYE' ? match.players[1] : match.players[0];
-          winner.completed = true;
-          match.status = 'completed';
-          match.winner_id = winner.id;
-          match.loser_id = match.players[0].name === 'BYE' ? match.players[0].id : match.players[1].id;
-        }
-
-        roundMatches.push(match);
+      // Auto-complete BYE matches
+      if (a.name === 'BYE' || b.name === 'BYE') {
+        const winner = a.name === 'BYE' ? b : a;
+        match.status = 'completed';
+        match.winner_id = winner.id;
+        match.loser_id = (a.name === 'BYE' ? a : b).id;
+        winner.completed = true;
       }
 
-      rounds.push(roundMatches);
-
-      // rotate entire order right by one element (so first position changes next round)
-      order.unshift(order.pop());
+      roundMatches.push(match);
     }
 
-    return rounds;
-  };
+    // --- NEW LOGIC: cycle Player 1’s match slot across rounds ---
+    if (roundMatches.length > 1) {
+        // Save original number of slots BEFORE removing P1's match
+        const originalSlots = roundMatches.length;
+
+        const p1Index = roundMatches.findIndex(m =>
+            m.players.some(p => p.name === 'Player 1')
+        );
+        if (p1Index !== -1) {
+            const [p1Match] = roundMatches.splice(p1Index, 1);
+
+            // Use originalSlots so we can place P1 into any of the original slots (including the last)
+            const newIndex = round % originalSlots;
+            roundMatches.splice(newIndex, 0, p1Match);
+        }
+    }
+
+
+    // Reassign match numbers sequentially
+    roundMatches.forEach((match, index) => {
+      match.match_number = index + 1;
+    });
+
+    rounds.push(roundMatches);
+
+    // Rotate players for next round (circle method)
+    const fixed = order[0];
+    const rest = order.slice(1);
+    rest.unshift(rest.pop()); // rotate right
+    order.splice(1, rest.length, ...rest);
+  }
+
+  return rounds;
+};
+
 
 const updateLines = (bracketIdx) => {
     const bracket = brackets.value[bracketIdx];

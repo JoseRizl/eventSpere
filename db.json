@@ -880,6 +880,926 @@
     },
     "brackets": [
         {
+            "id": "c75224cd",
+            "name": "8",
+            "type": "Round Robin",
+            "event_id": "24f0",
+            "matches": [
+                [
+                    {
+                        "id": "1qvtkdees",
+                        "round": 1,
+                        "match_number": 1,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "g43sfr998",
+                                "name": "Player 1",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.148Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "k7r8qf2vm",
+                                "name": "Player 8",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    },
+                    {
+                        "id": "eptunee80",
+                        "round": 1,
+                        "match_number": 2,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "8490kyw85",
+                                "name": "Player 2",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "pvxe11vvh",
+                                "name": "Player 7",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    },
+                    {
+                        "id": "nkj32mxis",
+                        "round": 1,
+                        "match_number": 3,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "m5a2z2rfj",
+                                "name": "Player 3",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "yoqnsnh3m",
+                                "name": "Player 6",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    },
+                    {
+                        "id": "qhwhmwvmh",
+                        "round": 1,
+                        "match_number": 4,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "uyuopeu1h",
+                                "name": "Player 4",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "akkip4pn0",
+                                "name": "Player 5",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    }
+                ],
+                [
+                    {
+                        "id": "l21fkptwd",
+                        "round": 2,
+                        "match_number": 1,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "k7r8qf2vm",
+                                "name": "Player 8",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "yoqnsnh3m",
+                                "name": "Player 6",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    },
+                    {
+                        "id": "jkaqt0y51",
+                        "round": 2,
+                        "match_number": 2,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "g43sfr998",
+                                "name": "Player 1",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.148Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "pvxe11vvh",
+                                "name": "Player 7",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    },
+                    {
+                        "id": "ew1787xia",
+                        "round": 2,
+                        "match_number": 3,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "8490kyw85",
+                                "name": "Player 2",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "akkip4pn0",
+                                "name": "Player 5",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    },
+                    {
+                        "id": "rjkx2l2x7",
+                        "round": 2,
+                        "match_number": 4,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "m5a2z2rfj",
+                                "name": "Player 3",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "uyuopeu1h",
+                                "name": "Player 4",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    }
+                ],
+                [
+                    {
+                        "id": "guiwjujkv",
+                        "round": 3,
+                        "match_number": 1,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "pvxe11vvh",
+                                "name": "Player 7",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "akkip4pn0",
+                                "name": "Player 5",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    },
+                    {
+                        "id": "19xkkozsj",
+                        "round": 3,
+                        "match_number": 2,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "k7r8qf2vm",
+                                "name": "Player 8",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "uyuopeu1h",
+                                "name": "Player 4",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    },
+                    {
+                        "id": "c1qrm4wk9",
+                        "round": 3,
+                        "match_number": 3,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "g43sfr998",
+                                "name": "Player 1",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.148Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "yoqnsnh3m",
+                                "name": "Player 6",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    },
+                    {
+                        "id": "anvwku7f3",
+                        "round": 3,
+                        "match_number": 4,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "8490kyw85",
+                                "name": "Player 2",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "m5a2z2rfj",
+                                "name": "Player 3",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    }
+                ],
+                [
+                    {
+                        "id": "3c8oxgxfs",
+                        "round": 4,
+                        "match_number": 1,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "yoqnsnh3m",
+                                "name": "Player 6",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "uyuopeu1h",
+                                "name": "Player 4",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    },
+                    {
+                        "id": "wq80qkugs",
+                        "round": 4,
+                        "match_number": 2,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "pvxe11vvh",
+                                "name": "Player 7",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "m5a2z2rfj",
+                                "name": "Player 3",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    },
+                    {
+                        "id": "ke8qy7erv",
+                        "round": 4,
+                        "match_number": 3,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "k7r8qf2vm",
+                                "name": "Player 8",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "8490kyw85",
+                                "name": "Player 2",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    },
+                    {
+                        "id": "ioj7te8qu",
+                        "round": 4,
+                        "match_number": 4,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "g43sfr998",
+                                "name": "Player 1",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.148Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "akkip4pn0",
+                                "name": "Player 5",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    }
+                ],
+                [
+                    {
+                        "id": "3l6lb09uq",
+                        "round": 5,
+                        "match_number": 1,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "g43sfr998",
+                                "name": "Player 1",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.148Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "uyuopeu1h",
+                                "name": "Player 4",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    },
+                    {
+                        "id": "f6udbcq1i",
+                        "round": 5,
+                        "match_number": 2,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "akkip4pn0",
+                                "name": "Player 5",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "m5a2z2rfj",
+                                "name": "Player 3",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    },
+                    {
+                        "id": "oiu9g0pjh",
+                        "round": 5,
+                        "match_number": 3,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "yoqnsnh3m",
+                                "name": "Player 6",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "8490kyw85",
+                                "name": "Player 2",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    },
+                    {
+                        "id": "026sy8wve",
+                        "round": 5,
+                        "match_number": 4,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "pvxe11vvh",
+                                "name": "Player 7",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "k7r8qf2vm",
+                                "name": "Player 8",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    }
+                ],
+                [
+                    {
+                        "id": "tjnfzpf3t",
+                        "round": 6,
+                        "match_number": 1,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "uyuopeu1h",
+                                "name": "Player 4",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "8490kyw85",
+                                "name": "Player 2",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    },
+                    {
+                        "id": "t1nbj0vir",
+                        "round": 6,
+                        "match_number": 2,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "g43sfr998",
+                                "name": "Player 1",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.148Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "m5a2z2rfj",
+                                "name": "Player 3",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    },
+                    {
+                        "id": "m4xoszlx4",
+                        "round": 6,
+                        "match_number": 3,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "akkip4pn0",
+                                "name": "Player 5",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "k7r8qf2vm",
+                                "name": "Player 8",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    },
+                    {
+                        "id": "inajt2fhv",
+                        "round": 6,
+                        "match_number": 4,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "yoqnsnh3m",
+                                "name": "Player 6",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "pvxe11vvh",
+                                "name": "Player 7",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    }
+                ],
+                [
+                    {
+                        "id": "r228r6a1r",
+                        "round": 7,
+                        "match_number": 1,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "m5a2z2rfj",
+                                "name": "Player 3",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "k7r8qf2vm",
+                                "name": "Player 8",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    },
+                    {
+                        "id": "8grjw599o",
+                        "round": 7,
+                        "match_number": 2,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "uyuopeu1h",
+                                "name": "Player 4",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "pvxe11vvh",
+                                "name": "Player 7",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    },
+                    {
+                        "id": "ysggqll39",
+                        "round": 7,
+                        "match_number": 3,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "g43sfr998",
+                                "name": "Player 1",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.148Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "8490kyw85",
+                                "name": "Player 2",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    },
+                    {
+                        "id": "bpuxs3p0v",
+                        "round": 7,
+                        "match_number": 4,
+                        "bracket_type": "round_robin",
+                        "players": [
+                            {
+                                "id": "akkip4pn0",
+                                "name": "Player 5",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            },
+                            {
+                                "id": "yoqnsnh3m",
+                                "name": "Player 6",
+                                "score": 0,
+                                "completed": false,
+                                "created_at": "2025-10-03T12:55:14.149Z",
+                                "updated_at": "2025-10-03T12:55:14.149Z"
+                            }
+                        ],
+                        "winner_id": null,
+                        "loser_id": null,
+                        "status": "pending",
+                        "created_at": "2025-10-03T12:55:14.149Z",
+                        "updated_at": "2025-10-03T12:55:14.149Z",
+                        "date": "Sep-23-2025",
+                        "time": "00:00",
+                        "venue": "Campus ground"
+                    }
+                ]
+            ],
+            "created_at": "2025-10-03T12:55:15.260641Z",
+            "updated_at": "2025-10-03T12:55:15.262364Z"
+        },
+        {
             "id": "fd237993",
             "name": "Soccer",
             "type": "Double Elimination",
@@ -1785,1974 +2705,6 @@
                     "y2": 258.60000228881836
                 }
             ]
-        },
-        {
-            "id": "d604c53f",
-            "name": "Volleyball",
-            "type": "Round Robin",
-            "event_id": "24f0",
-            "matches": [
-                [
-                    {
-                        "id": "dcvwelf24",
-                        "round": 1,
-                        "match_number": 1,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "4ckv3cjur",
-                                "name": "Player 1",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "udu00ux8r",
-                                "name": "Player 10",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "udiwie174",
-                        "round": 1,
-                        "match_number": 2,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "91zvmbrc3",
-                                "name": "Player 2",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "vs3uf9osd",
-                                "name": "Player 9",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "whwi5n739",
-                        "round": 1,
-                        "match_number": 3,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "8lvzun35p",
-                                "name": "Player 3",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "l9kzf1wdu",
-                                "name": "Player 8",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "3r08rtfps",
-                        "round": 1,
-                        "match_number": 4,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "q17naxbkw",
-                                "name": "Player 4",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "7mgdbnoks",
-                                "name": "Player 7",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "r6gyb11q8",
-                        "round": 1,
-                        "match_number": 5,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "kzom7ujxa",
-                                "name": "Player 5",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "3j7r721j4",
-                                "name": "Player 6",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    }
-                ],
-                [
-                    {
-                        "id": "xqdsqlzwk",
-                        "round": 2,
-                        "match_number": 1,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "udu00ux8r",
-                                "name": "Player 10",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "vs3uf9osd",
-                                "name": "Player 9",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "g7il0k6pq",
-                        "round": 2,
-                        "match_number": 2,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "4ckv3cjur",
-                                "name": "Player 1",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "l9kzf1wdu",
-                                "name": "Player 8",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "6gkxic5xu",
-                        "round": 2,
-                        "match_number": 3,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "91zvmbrc3",
-                                "name": "Player 2",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "7mgdbnoks",
-                                "name": "Player 7",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "2rhz3n4s0",
-                        "round": 2,
-                        "match_number": 4,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "8lvzun35p",
-                                "name": "Player 3",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "3j7r721j4",
-                                "name": "Player 6",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "rb94uhvim",
-                        "round": 2,
-                        "match_number": 5,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "q17naxbkw",
-                                "name": "Player 4",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "kzom7ujxa",
-                                "name": "Player 5",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    }
-                ],
-                [
-                    {
-                        "id": "2bmke27o3",
-                        "round": 3,
-                        "match_number": 1,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "vs3uf9osd",
-                                "name": "Player 9",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "l9kzf1wdu",
-                                "name": "Player 8",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "i6majhanq",
-                        "round": 3,
-                        "match_number": 2,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "udu00ux8r",
-                                "name": "Player 10",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "7mgdbnoks",
-                                "name": "Player 7",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "7lav0rfjw",
-                        "round": 3,
-                        "match_number": 3,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "4ckv3cjur",
-                                "name": "Player 1",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "3j7r721j4",
-                                "name": "Player 6",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "8r6a7hqov",
-                        "round": 3,
-                        "match_number": 4,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "91zvmbrc3",
-                                "name": "Player 2",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "kzom7ujxa",
-                                "name": "Player 5",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "4xakdx935",
-                        "round": 3,
-                        "match_number": 5,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "8lvzun35p",
-                                "name": "Player 3",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "q17naxbkw",
-                                "name": "Player 4",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    }
-                ],
-                [
-                    {
-                        "id": "bk50y0ybq",
-                        "round": 4,
-                        "match_number": 1,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "l9kzf1wdu",
-                                "name": "Player 8",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "7mgdbnoks",
-                                "name": "Player 7",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "xjkr9uupo",
-                        "round": 4,
-                        "match_number": 2,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "vs3uf9osd",
-                                "name": "Player 9",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "3j7r721j4",
-                                "name": "Player 6",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "gjsoum3sz",
-                        "round": 4,
-                        "match_number": 3,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "udu00ux8r",
-                                "name": "Player 10",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "kzom7ujxa",
-                                "name": "Player 5",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "6p2vj8n90",
-                        "round": 4,
-                        "match_number": 4,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "4ckv3cjur",
-                                "name": "Player 1",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "q17naxbkw",
-                                "name": "Player 4",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "6mwkazdfq",
-                        "round": 4,
-                        "match_number": 5,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "91zvmbrc3",
-                                "name": "Player 2",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "8lvzun35p",
-                                "name": "Player 3",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    }
-                ],
-                [
-                    {
-                        "id": "tk051rpyy",
-                        "round": 5,
-                        "match_number": 1,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "7mgdbnoks",
-                                "name": "Player 7",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "3j7r721j4",
-                                "name": "Player 6",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "4ci8jqibp",
-                        "round": 5,
-                        "match_number": 2,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "l9kzf1wdu",
-                                "name": "Player 8",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "kzom7ujxa",
-                                "name": "Player 5",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "hxo0qac7x",
-                        "round": 5,
-                        "match_number": 3,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "vs3uf9osd",
-                                "name": "Player 9",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "q17naxbkw",
-                                "name": "Player 4",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "jk3brwgpl",
-                        "round": 5,
-                        "match_number": 4,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "udu00ux8r",
-                                "name": "Player 10",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "8lvzun35p",
-                                "name": "Player 3",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "od3gy38df",
-                        "round": 5,
-                        "match_number": 5,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "4ckv3cjur",
-                                "name": "Player 1",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "91zvmbrc3",
-                                "name": "Player 2",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    }
-                ],
-                [
-                    {
-                        "id": "sxd9kyjq5",
-                        "round": 6,
-                        "match_number": 1,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "3j7r721j4",
-                                "name": "Player 6",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "kzom7ujxa",
-                                "name": "Player 5",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "u93mwvvoh",
-                        "round": 6,
-                        "match_number": 2,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "7mgdbnoks",
-                                "name": "Player 7",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "q17naxbkw",
-                                "name": "Player 4",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "9zskzsdoi",
-                        "round": 6,
-                        "match_number": 3,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "l9kzf1wdu",
-                                "name": "Player 8",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "8lvzun35p",
-                                "name": "Player 3",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "3q5wf3qgq",
-                        "round": 6,
-                        "match_number": 4,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "vs3uf9osd",
-                                "name": "Player 9",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "91zvmbrc3",
-                                "name": "Player 2",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "8c6sh33a9",
-                        "round": 6,
-                        "match_number": 5,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "udu00ux8r",
-                                "name": "Player 10",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "4ckv3cjur",
-                                "name": "Player 1",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    }
-                ],
-                [
-                    {
-                        "id": "zw9dwoujk",
-                        "round": 7,
-                        "match_number": 1,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "kzom7ujxa",
-                                "name": "Player 5",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "q17naxbkw",
-                                "name": "Player 4",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "2qbmou36m",
-                        "round": 7,
-                        "match_number": 2,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "3j7r721j4",
-                                "name": "Player 6",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "8lvzun35p",
-                                "name": "Player 3",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "gikd7omdr",
-                        "round": 7,
-                        "match_number": 3,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "7mgdbnoks",
-                                "name": "Player 7",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "91zvmbrc3",
-                                "name": "Player 2",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "vh9fnzrvg",
-                        "round": 7,
-                        "match_number": 4,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "l9kzf1wdu",
-                                "name": "Player 8",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "4ckv3cjur",
-                                "name": "Player 1",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "9fd1frjuk",
-                        "round": 7,
-                        "match_number": 5,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "vs3uf9osd",
-                                "name": "Player 9",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "udu00ux8r",
-                                "name": "Player 10",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    }
-                ],
-                [
-                    {
-                        "id": "jbmpfuh55",
-                        "round": 8,
-                        "match_number": 1,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "q17naxbkw",
-                                "name": "Player 4",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "8lvzun35p",
-                                "name": "Player 3",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "krihqctn3",
-                        "round": 8,
-                        "match_number": 2,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "kzom7ujxa",
-                                "name": "Player 5",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "91zvmbrc3",
-                                "name": "Player 2",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "072myl73g",
-                        "round": 8,
-                        "match_number": 3,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "3j7r721j4",
-                                "name": "Player 6",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "4ckv3cjur",
-                                "name": "Player 1",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "2x6p9arso",
-                        "round": 8,
-                        "match_number": 4,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "7mgdbnoks",
-                                "name": "Player 7",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "udu00ux8r",
-                                "name": "Player 10",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "7su0j2qfs",
-                        "round": 8,
-                        "match_number": 5,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "l9kzf1wdu",
-                                "name": "Player 8",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "vs3uf9osd",
-                                "name": "Player 9",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    }
-                ],
-                [
-                    {
-                        "id": "e6j2b7hr3",
-                        "round": 9,
-                        "match_number": 1,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "8lvzun35p",
-                                "name": "Player 3",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "91zvmbrc3",
-                                "name": "Player 2",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "urk5uxqbt",
-                        "round": 9,
-                        "match_number": 2,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "q17naxbkw",
-                                "name": "Player 4",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "4ckv3cjur",
-                                "name": "Player 1",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "iu7y0rjb5",
-                        "round": 9,
-                        "match_number": 3,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "kzom7ujxa",
-                                "name": "Player 5",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "udu00ux8r",
-                                "name": "Player 10",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "2zoj24lv6",
-                        "round": 9,
-                        "match_number": 4,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "3j7r721j4",
-                                "name": "Player 6",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "vs3uf9osd",
-                                "name": "Player 9",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    },
-                    {
-                        "id": "vhv4lx5pi",
-                        "round": 9,
-                        "match_number": 5,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "7mgdbnoks",
-                                "name": "Player 7",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            },
-                            {
-                                "id": "l9kzf1wdu",
-                                "name": "Player 8",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T06:13:01.370Z",
-                                "updated_at": "2025-10-01T06:13:01.370Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T06:13:01.370Z",
-                        "updated_at": "2025-10-01T06:13:01.370Z",
-                        "date": "Sep-23-2025",
-                        "time": "00:00",
-                        "venue": "Campus ground"
-                    }
-                ]
-            ],
-            "created_at": "2025-10-01T06:13:02.499623Z",
-            "updated_at": "2025-10-01T06:13:02.500487Z"
-        },
-        {
-            "id": "746da05d",
-            "name": "bbal",
-            "type": "Round Robin",
-            "event_id": "72f9",
-            "matches": [
-                [
-                    {
-                        "id": "edn5k1kyn",
-                        "round": 1,
-                        "match_number": 1,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "ae6lsc1y0",
-                                "name": "Player 1",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            },
-                            {
-                                "id": "f0bd7l1k1",
-                                "name": "Player 6",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T00:01:45.694Z",
-                        "updated_at": "2025-10-01T00:01:45.694Z",
-                        "date": "Sep-15-2025",
-                        "time": "15:00",
-                        "venue": "Court"
-                    },
-                    {
-                        "id": "wuvomj8v7",
-                        "round": 1,
-                        "match_number": 2,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "n9n6dcjyc",
-                                "name": "Player 2",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            },
-                            {
-                                "id": "k4i3e84nc",
-                                "name": "Player 5",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T00:01:45.694Z",
-                        "updated_at": "2025-10-01T00:01:45.694Z",
-                        "date": "Sep-15-2025",
-                        "time": "15:00",
-                        "venue": "Court"
-                    },
-                    {
-                        "id": "nl1dt1zft",
-                        "round": 1,
-                        "match_number": 3,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "nh6jvukb1",
-                                "name": "Player 3",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            },
-                            {
-                                "id": "xz43g69p8",
-                                "name": "Player 4",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T00:01:45.694Z",
-                        "updated_at": "2025-10-01T00:01:45.694Z",
-                        "date": "Sep-15-2025",
-                        "time": "15:00",
-                        "venue": "Court"
-                    }
-                ],
-                [
-                    {
-                        "id": "xe1jsddaa",
-                        "round": 2,
-                        "match_number": 1,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "f0bd7l1k1",
-                                "name": "Player 6",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            },
-                            {
-                                "id": "k4i3e84nc",
-                                "name": "Player 5",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T00:01:45.694Z",
-                        "updated_at": "2025-10-01T00:01:45.694Z",
-                        "date": "Sep-15-2025",
-                        "time": "15:00",
-                        "venue": "Court"
-                    },
-                    {
-                        "id": "iik0a3zwg",
-                        "round": 2,
-                        "match_number": 2,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "ae6lsc1y0",
-                                "name": "Player 1",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            },
-                            {
-                                "id": "xz43g69p8",
-                                "name": "Player 4",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T00:01:45.694Z",
-                        "updated_at": "2025-10-01T00:01:45.694Z",
-                        "date": "Sep-15-2025",
-                        "time": "15:00",
-                        "venue": "Court"
-                    },
-                    {
-                        "id": "qfhfs0nv9",
-                        "round": 2,
-                        "match_number": 3,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "n9n6dcjyc",
-                                "name": "Player 2",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            },
-                            {
-                                "id": "nh6jvukb1",
-                                "name": "Player 3",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T00:01:45.694Z",
-                        "updated_at": "2025-10-01T00:01:45.694Z",
-                        "date": "Sep-15-2025",
-                        "time": "15:00",
-                        "venue": "Court"
-                    }
-                ],
-                [
-                    {
-                        "id": "2xwjfr6m4",
-                        "round": 3,
-                        "match_number": 1,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "k4i3e84nc",
-                                "name": "Player 5",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            },
-                            {
-                                "id": "xz43g69p8",
-                                "name": "Player 4",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T00:01:45.694Z",
-                        "updated_at": "2025-10-01T00:01:45.694Z",
-                        "date": "Sep-15-2025",
-                        "time": "15:00",
-                        "venue": "Court"
-                    },
-                    {
-                        "id": "izx2c1933",
-                        "round": 3,
-                        "match_number": 2,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "f0bd7l1k1",
-                                "name": "Player 6",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            },
-                            {
-                                "id": "nh6jvukb1",
-                                "name": "Player 3",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T00:01:45.694Z",
-                        "updated_at": "2025-10-01T00:01:45.694Z",
-                        "date": "Sep-15-2025",
-                        "time": "15:00",
-                        "venue": "Court"
-                    },
-                    {
-                        "id": "coaibyys9",
-                        "round": 3,
-                        "match_number": 3,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "ae6lsc1y0",
-                                "name": "Player 1",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            },
-                            {
-                                "id": "n9n6dcjyc",
-                                "name": "Player 2",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T00:01:45.694Z",
-                        "updated_at": "2025-10-01T00:01:45.694Z",
-                        "date": "Sep-15-2025",
-                        "time": "15:00",
-                        "venue": "Court"
-                    }
-                ],
-                [
-                    {
-                        "id": "wt71mm7iz",
-                        "round": 4,
-                        "match_number": 1,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "xz43g69p8",
-                                "name": "Player 4",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            },
-                            {
-                                "id": "nh6jvukb1",
-                                "name": "Player 3",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T00:01:45.694Z",
-                        "updated_at": "2025-10-01T00:01:45.694Z",
-                        "date": "Sep-15-2025",
-                        "time": "15:00",
-                        "venue": "Court"
-                    },
-                    {
-                        "id": "aokuqt09n",
-                        "round": 4,
-                        "match_number": 2,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "k4i3e84nc",
-                                "name": "Player 5",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            },
-                            {
-                                "id": "n9n6dcjyc",
-                                "name": "Player 2",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T00:01:45.695Z",
-                        "updated_at": "2025-10-01T00:01:45.695Z",
-                        "date": "Sep-15-2025",
-                        "time": "15:00",
-                        "venue": "Court"
-                    },
-                    {
-                        "id": "gzjl2y6k0",
-                        "round": 4,
-                        "match_number": 3,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "f0bd7l1k1",
-                                "name": "Player 6",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            },
-                            {
-                                "id": "ae6lsc1y0",
-                                "name": "Player 1",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T00:01:45.695Z",
-                        "updated_at": "2025-10-01T00:01:45.695Z",
-                        "date": "Sep-15-2025",
-                        "time": "15:00",
-                        "venue": "Court"
-                    }
-                ],
-                [
-                    {
-                        "id": "lbzxbzin4",
-                        "round": 5,
-                        "match_number": 1,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "nh6jvukb1",
-                                "name": "Player 3",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            },
-                            {
-                                "id": "n9n6dcjyc",
-                                "name": "Player 2",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T00:01:45.695Z",
-                        "updated_at": "2025-10-01T00:01:45.695Z",
-                        "date": "Sep-15-2025",
-                        "time": "15:00",
-                        "venue": "Court"
-                    },
-                    {
-                        "id": "m2im23mf8",
-                        "round": 5,
-                        "match_number": 2,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "xz43g69p8",
-                                "name": "Player 4",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            },
-                            {
-                                "id": "ae6lsc1y0",
-                                "name": "Player 1",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T00:01:45.695Z",
-                        "updated_at": "2025-10-01T00:01:45.695Z",
-                        "date": "Sep-15-2025",
-                        "time": "15:00",
-                        "venue": "Court"
-                    },
-                    {
-                        "id": "03wnx4x7f",
-                        "round": 5,
-                        "match_number": 3,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "k4i3e84nc",
-                                "name": "Player 5",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            },
-                            {
-                                "id": "f0bd7l1k1",
-                                "name": "Player 6",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-01T00:01:45.694Z",
-                                "updated_at": "2025-10-01T00:01:45.694Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-01T00:01:45.695Z",
-                        "updated_at": "2025-10-01T00:01:45.695Z",
-                        "date": "Sep-15-2025",
-                        "time": "15:00",
-                        "venue": "Court"
-                    }
-                ]
-            ],
-            "created_at": "2025-10-01T00:01:46.191255Z",
-            "updated_at": "2025-10-01T00:01:46.191510Z"
         },
         {
             "id": "daeb4521",

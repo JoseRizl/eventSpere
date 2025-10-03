@@ -366,7 +366,7 @@ onMounted(async () => {
 
           <div class="p-field">
             <label for="numberOfPlayers">Number of Participants:</label>
-            <InputText v-model="numberOfPlayers" type="number" min="1" placeholder="4, 8, 16, 32" />
+            <InputText v-model="numberOfPlayers" type="number" min="1" placeholder="Insert number of teams" />
           </div>
 
           <div class="p-field">
