@@ -913,7 +913,7 @@ const getBracketIndex = (bracketId) => {
                 <!-- Main content (left side) - takes remaining space -->
                 <div class="flex-1">
                     <!-- Banner Image -->
-                    <div class="w-full bg-gray-700 rounded-lg shadow-md overflow-hidden relative mb-6">
+                    <div class="w-full bg-gray-800 rounded-lg shadow-md overflow-hidden relative mb-6">
                         <template v-if="eventDetails?.image">
                             <!-- Blurred Background -->
                             <img
@@ -980,7 +980,7 @@ const getBracketIndex = (bracketId) => {
                         class="w-full border rounded p-2"
                         placeholder="Event Description"
                     />
-                    <p v-else class="text-gray-700 whitespace-pre-line text-sm" v-html="formattedDescription"></p>
+                    <p v-else class="text-gray-800 whitespace-pre-line text-sm" v-html="formattedDescription"></p>
                     </div>
 
                     <!-- Details Section -->
@@ -1191,17 +1191,14 @@ const getBracketIndex = (bracketId) => {
                 <!-- Remove Task Button -->
                 <button
                 @click="promptDeleteTask(index)"
-                class="text-red-500 hover:text-red-700 text-sm flex items-center"
+                class="text-red-500 hover:text-red-700 text-sm flex items-center mt-2"
                 >
-                <i class="pi pi-trash mr-1"></i> Remove Task
+                <i class="pi pi-times mr-1"></i> Clear Task
                 </button>
             </div>
 
-            <button
-                @click="addCommitteeTask"
-                class="text-blue-500 hover:text-blue-700 text-sm flex items-center mt-2"
-            >
-                <i class="pi pi-plus mr-1"></i> Add Committee Task
+            <button @click="addCommitteeTask" class="text-blue-500 hover:text-blue-700 text-sm flex items-center mt-2">
+              <i class="pi pi-plus mr-1"></i> Add Committee Task
             </button>
             </div>
             <div v-else class="space-y-3">
@@ -1216,7 +1213,7 @@ const getBracketIndex = (bracketId) => {
                         <span v-if="!taskItem.employees || taskItem.employees.length === 0" class="text-gray-500 italic text-xs">No employees assigned</span>
                         <div v-else v-for="employee in taskItem.employees" :key="employee.id" class="flex items-center gap-2 bg-white rounded-full px-2 py-1 border shadow-sm" v-tooltip.top="employee.name">
                             <Avatar :label="employee.name ? employee.name.split(' ').map(n => n[0]).join('').toUpperCase() : '?'" shape="circle" size="small" />
-                            <span class="text-xs font-medium text-gray-700">{{ employee.name }}</span>
+                            <span class="text-xs font-medium text-gray-800">{{ employee.name }}</span>
                         </div>
                     </div>
                 </div>
@@ -1276,7 +1273,7 @@ const getBracketIndex = (bracketId) => {
                         <div class="space-y-4">
                         <div v-for="(list, listIndex) in eventDetails.scheduleLists" :key="listIndex" class="border rounded-lg p-4">
                             <h3 class="font-medium mb-2">Day {{ list.day }} ({{ formatDisplayDate(list.date) }})</h3>
-                            <ul class="list-disc pl-5 space-y-1 text-sm text-gray-700">
+                            <ul class="list-disc pl-5 space-y-1 text-sm text-gray-800">
                             <li v-for="(schedule, i) in list.schedules" :key="i">
                                 {{ schedule.time }} - {{ schedule.activity }}
                             </li>
@@ -1366,7 +1363,7 @@ const getBracketIndex = (bracketId) => {
               icon="pi pi-trash"
               class="p-button-rounded p-button-text action-btn-danger"
               @click="promptDeleteAnnouncement(announcement)"
-              aria-label="Delete announcement"
+              aria-label="Remove announcement"
             />
           </div>
 
@@ -1522,16 +1519,16 @@ const getBracketIndex = (bracketId) => {
       <!-- Delete Task Confirmation Dialog -->
       <ConfirmationDialog
         v-model:show="showDeleteTaskConfirm"
-        title="Delete Task?"
-        message="Are you sure you want to delete this task?"
+        title="Clear Task?"
+        message="Are you sure you want to clear this task?"
         @confirm="confirmDeleteTask"
       />
 
       <!-- Delete Schedule Confirmation Dialog -->
       <ConfirmationDialog
         v-model:show="showDeleteScheduleConfirm"
-        title="Delete Schedule?"
-        message="Are you sure you want to delete this schedule item?"
+        title="Clear Activity?"
+        message="Are you sure you want to clear this Activity?"
         @confirm="confirmDeleteSchedule"
       />
 
@@ -1577,8 +1574,8 @@ const getBracketIndex = (bracketId) => {
 
     <ConfirmationDialog
         v-model:show="showDeleteAnnouncementConfirm"
-        title="Delete Announcement?"
-        message="Are you sure you want to delete this announcement?"
+        title="Remove Announcement?"
+        message="Are you sure you want to remove this announcement?"
         @confirm="confirmDeleteAnnouncement"
     />
 

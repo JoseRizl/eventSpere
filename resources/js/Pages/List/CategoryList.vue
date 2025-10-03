@@ -371,21 +371,25 @@ export default defineComponent({
       :currentPageReportTemplate="currentPageReportTemplate">
       <Column :field="showTags ? 'name' : 'title'" :header="showTags ? 'Tag Name' : 'Category Name'" style="width:30%;" sortable>
         <template #body="{ data }">
-          <div v-if="showTags" class="flex items-center gap-2">
-            <span
-              class="inline-block w-4 h-4 rounded-full"
-              :style="{ backgroundColor: data.color }"
-            ></span>
-            {{ data.name }}
+          <div class="datatable-content">
+            <div v-if="showTags" class="flex items-center gap-2">
+              <span
+                class="inline-block w-4 h-4 rounded-full"
+                :style="{ backgroundColor: data.color }"
+              ></span>
+              {{ data.name }}
+            </div>
+            <span v-else>{{ data.title }}</span>
           </div>
-          <span v-else>{{ data.title }}</span>
         </template>
       </Column>
 
       <Column :field="showTags ? 'category_id' : 'description'" :header="showTags ? 'Category' : 'Description'" style="width:40%;" sortable>
         <template #body="{ data }">
-          <span v-if="showTags">{{ categoryMap[data.category_id] || 'Uncategorized' }}</span>
-          <span v-else>{{ data.description || "No description available" }}</span>
+          <div class="datatable-content">
+            <span v-if="showTags">{{ categoryMap[data.category_id] || 'Uncategorized' }}</span>
+            <span v-else>{{ data.description || "No description available" }}</span>
+          </div>
         </template>
       </Column>
 

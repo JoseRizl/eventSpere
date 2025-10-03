@@ -133,9 +133,8 @@
       .create-category-form h1 {
         text-align: center; /* Center align the title */
       }
-      .venue {
-        font-weight: 600;
-        color: #4A5568; /* Tailwind's gray-700 */
+      .datatable-content {
+        @apply text-[14px] text-gray-800;
       }
 
       .flex.justify-content-between {
@@ -192,6 +191,12 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         position: relative; /* Reset stacking context */
         z-index: 0; /* Ensure it doesn't interfere with sidebar popups */
+      }
+
+      .p-datatable .p-datatable-tbody > tr > td {
+        font-size: 16px;
+        color: #000;
+        font-family: "Poppins", sans-serif;
       }
 
       .p-datatable th {
@@ -348,16 +353,10 @@
         display: flex;
         flex-direction: column;
         align-items: flex-start;
-      }
+        color: rgba(31, 41, 55);
+        font-size: 14px;
+    }
 
-      .date {
-        font-weight: bold;
-      }
-
-      .time {
-        font-size: 12px;
-        color: #666;
-      }
       .empty-message {
         text-align: center;
         font-size: 1.2rem;
@@ -373,6 +372,8 @@
         text-overflow: ellipsis;    /* Adds '...' for overflow */
         max-height: 4.5em;          /* Adjust height based on your font size */
         line-height: 1.5em;         /* Ensures consistent line spacing */
+        font-size: 14px;
+        color: rgba(31, 41, 55);
       }
 
       .tags-container {

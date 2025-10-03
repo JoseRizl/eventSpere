@@ -94,7 +94,7 @@
               <img v-if="data.image" :src="data.image" alt="Event Image" class="event-icon" />
               <Link
                 :href="route('event.details', { id: data.id })"
-                class="text-lg font-medium overflow-hidden line-clamp-2 hover:text-blue-600 transition-colors duration-200 cursor-pointer"
+                class="text-base overflow-hidden line-clamp-2 text-gray-800 hover:text-blue-600 transition-colors duration-200 cursor-pointer"
                 v-tooltip.top="data.title"
               >
                 {{ data.title }}
@@ -117,21 +117,23 @@
 
         <Column field="description" header="Description" style="width:15%;" sortable>
           <template #body="{ data }">
-            <div class="description line-clamp-3 whitespace-pre-line" v-html="formatDescription(data.description)" @click="handleDescriptionClick"></div>
+            <div class="description" v-html="formatDescription(data.description)" @click="handleDescriptionClick"></div>
           </template>
         </Column>
 
         <Column field="venue" header="Venue" style="width:15%;" sortable>
         <template #body="{ data }">
-            <div class="venue">
-            {{ data.venue || "No venue specified" }}
+            <div class="datatable-content">
+            {{ data.venue || "" }}
             </div>
         </template>
         </Column>
 
         <Column field="category_id" header="Category" style="width:15%;" sortable>
           <template #body="{ data }">
-            {{ categoryMap[data.category_id] || "Uncategorized" }}
+            <div class="datatable-content">
+                {{ categoryMap[data.category_id] || "" }}
+            </div>
           </template>
         </Column>
 
@@ -236,11 +238,17 @@
       </div>
 
       <!-- Remove Task Button -->
-      <Button icon="pi pi-trash" class="p-button-danger p-button-text" @click="deleteTask(index)" v-tooltip.top="'Delete Task'"/>
+        <button
+            @click="deleteTask(index)"
+            class="text-red-500 hover:text-red-700 text-sm flex items-center mt-2">
+            <i class="pi pi-times mr-1"></i> Clear Task
+        </button>
     </div>
 
     <!-- Add Task Button -->
-    <Button label="Add Task" icon="pi pi-plus" class="p-button-secondary" @click="addTask" />
+    <button @click="addTask" class="text-blue-500 hover:text-blue-700 text-sm flex items-center mt-2">
+        <i class="pi pi-plus mr-1"></i> Add Task
+    </button>
   </div>
 
   <template #footer>
@@ -652,9 +660,9 @@
     <!-- Delete Task Confirmation Dialog -->
     <ConfirmationDialog
       v-model:show="showDeleteTaskConfirm"
-      title="Delete Task?"
-      :message="taskToDelete ? `Are you sure you want to delete this task?` : ''"
-      confirmText="Yes, Delete"
+      title="Clear Task?"
+      :message="taskToDelete ? `Are you sure you want to clear this task?` : ''"
+      confirmText="Yes, Clear"
       confirmButtonClass="modal-button-danger"
       @confirm="confirmDeleteTask"
     />
