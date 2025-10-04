@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue';
-import { formatDisplayDate, formatDisplayTime } from '@/utils/dateUtils.js';
+import { formatDisplayDate, formatDisplayTime } from '@/utils/dateUtils';
 import { truncate } from '@/utils/stringUtils.js';
 
 const props = defineProps({

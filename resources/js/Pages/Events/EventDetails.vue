@@ -79,7 +79,7 @@ const filteredEventAnnouncements = computed(() => {
   if (announcementStartDateFilter.value || announcementEndDateFilter.value) {
     announcements = announcements.filter(ann => {
       const annDate = new Date(ann.timestamp);
-      if (isNaN(annDate.Wime())) return false;
+      if (isNaN(annDate.getTime())) return false;
 
       const filterStart = announcementStartDateFilter.value ? new Date(announcementStartDateFilter.value) : null;
       const filterEnd = announcementEndDateFilter.value ? endOfDay(new Date(announcementEndDateFilter.value)) : null;
@@ -712,12 +712,10 @@ const saveChanges = () => {
   errorMessage.value = null;
   showErrorDialog.value = false;
 
-  // Validate dates and times
-  if (!validateDates() || !validateTimes()) {
+  const validationError = validateDatesAndTimes();
+  if (validationError) {
     saving.value = false;
-    errorMessage.value = !validateDates()
-      ? "End date cannot be earlier than start date"
-      : "End time must be after start time";
+    errorMessage.value = validationError;
     showErrorDialog.value = true;
     errorDialogMessage.value = errorMessage.value;
     return;
@@ -803,19 +801,30 @@ const formatDisplayTime = (timeString) => {
 
 // Date-related functions
 
-const validateDates = () => {
+const validateDatesAndTimes = () => {
   try {
-    const start = parse(eventDetails.value.startDate, 'MMM-dd-yyyy', new Date());
-    const end = parse(eventDetails.value.endDate, 'MMM-dd-yyyy', new Date());
-    return isValid(start) && isValid(end) && start <= end;
-  } catch {
-    return false;
-  }
-};
+    const startDate = formatDateForPicker(eventDetails.value.startDate);
+    const endDate = formatDateForPicker(eventDetails.value.endDate);
 
-const validateTimes = () => {
-  if (!eventDetails.value.startTime || !eventDetails.value.endTime) return true;
-  return eventDetails.value.startTime < eventDetails.value.endTime;
+    if (!startDate || !endDate || !isValid(startDate) || !isValid(endDate)) {
+      return "Invalid start or end date.";
+    }
+
+    if (endDate < startDate) {
+      return "End date cannot be earlier than start date.";
+    }
+
+    if (eventDetails.value.startTime && eventDetails.value.endTime) {
+        const startDateTime = getFullDateTime(startDate, eventDetails.value.startTime);
+        const endDateTime = getFullDateTime(endDate, eventDetails.value.endTime);
+        if (endDateTime <= startDateTime) {
+            return "End time must be after start time on the same day, or on a later day.";
+        }
+    }
+    return null; // No error
+  } catch {
+    return "An error occurred during date validation. Make sure end time/date is after start time/date.";
+  }
 };
 
 const formatDisplayDate = (dateString) => {
@@ -1495,26 +1504,6 @@ const getBracketIndex = (bracketId) => {
         v-model:show="showSuccessDialog"
         :message="successMessage"
       />
-      <!-- Error Dialog -->
-      <Dialog
-        v-model:visible="showErrorDialog"
-        modal
-        header="Error"
-        :style="{ width: '400px', zIndex: 9998 }"
-      >
-        <div class="flex items-center gap-3">
-          <i class="pi pi-exclamation-triangle text-red-500 text-2xl"></i>
-          <span>{{ errorDialogMessage }}</span>
-        </div>
-        <template #footer>
-          <Button
-            label="OK"
-            icon="pi pi-check"
-            @click="showErrorDialog = false"
-            class="p-button-text"
-          />
-        </template>
-      </Dialog>
 
       <!-- Delete Task Confirmation Dialog -->
       <ConfirmationDialog

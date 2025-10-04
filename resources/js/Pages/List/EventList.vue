@@ -893,29 +893,46 @@
 
      const createEvent = () => {
         resetErrors();
+        let hasError = false;
 
-        // Validate title
         if (!newEvent.value.title.trim()) {
             errorMessage.value = "Please enter a valid event title";
             showErrorDialog.value = true;
-            return;
+            hasError = true;
         }
 
-        // Validate dates
-        if (newEvent.value.startDate && newEvent.value.endDate) {
+        if (!newEvent.value.startDate || !newEvent.value.endDate) {
+            dateError.value = "Both start and end dates are required.";
+            hasError = true;
+        } else {
             const start = new Date(newEvent.value.startDate);
             const end = new Date(newEvent.value.endDate);
 
-            // Block if end date is BEFORE start date (allows same-day) and if end date is in the past
             if (end < start) {
-                dateError.value = "End date cannot be before start date";
-                return;
+                dateError.value = "End date cannot be before start date.";
+                hasError = true;
             }
-            const now = new Date();
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            if (end < today && start < today) {
-                dateError.value = "Event cannot be entirely in the past";
-                return;
+        }
+
+        if (!newEvent.value.isAllDay) {
+            if (!newEvent.value.startTime || !newEvent.value.endTime) {
+                dateError.value = (dateError.value ? dateError.value + ' ' : '') + "Start and end times are required for non-all-day events.";
+                hasError = true;
+            } else if (newEvent.value.startDate && newEvent.value.endDate && newEvent.value.startTime && newEvent.value.endTime) {
+                const startDateTime = new Date(`${format(new Date(newEvent.value.startDate), 'yyyy-MM-dd')}T${newEvent.value.startTime}`);
+                const endDateTime = new Date(`${format(new Date(newEvent.value.endDate), 'yyyy-MM-dd')}T${newEvent.value.endTime}`);
+                if (endDateTime <= startDateTime) {
+                    dateError.value = (dateError.value ? dateError.value + ' ' : '') + "End date/time must be after start date/time.";
+                    hasError = true;
+                }
+            }
+        }
+
+        if (hasError) {
+            // If we already showed a specific error, don't show the generic one.
+            if (!errorMessage.value) {
+                errorMessage.value = "Please correct the errors before creating the event.";
+                showErrorDialog.value = true;
             }
             if (end < start) {
                 dateError.value = "End date cannot be before start date";
@@ -1279,23 +1296,43 @@
     const saveEditedEvent = () => {
       if (!selectedEvent.value) return;
       resetErrors();
+      let hasError = false;
 
       if (!selectedEvent.value.title.trim()) {
         errorMessage.value = 'Please enter a valid event title';
         showErrorDialog.value = true;
-        return;
+        hasError = true;
       }
 
-      if (selectedEvent.value.startDate && selectedEvent.value.endDate) {
+      if (!selectedEvent.value.startDate || !selectedEvent.value.endDate) { // No changes here, just for context
+        dateError.value = "Both start and end dates are required.";
+        hasError = true;
+      } else {
         const start = new Date(selectedEvent.value.startDate);
         const end = new Date(selectedEvent.value.endDate);
 
         if (end < start) {
           dateError.value = "End date cannot be before start date";
-          return;
+          hasError = true;
         }
+      }
 
-        const now = new Date();
+      if (!selectedEvent.value.isAllDay) {
+        if (!selectedEvent.value.startTime || !selectedEvent.value.endTime) {
+            dateError.value = (dateError.value ? dateError.value + ' ' : '') + "Start and end times are required for non-all-day events.";
+            hasError = true;
+        } else if (selectedEvent.value.startDate && selectedEvent.value.endDate && selectedEvent.value.startTime && selectedEvent.value.endTime) {
+            const startDateTime = new Date(`${format(new Date(selectedEvent.value.startDate), 'yyyy-MM-dd')}T${selectedEvent.value.startTime}`);
+            const endDateTime = new Date(`${format(new Date(selectedEvent.value.endDate), 'yyyy-MM-dd')}T${selectedEvent.value.endTime}`);
+            if (endDateTime <= startDateTime) {
+                dateError.value = (dateError.value ? dateError.value + ' ' : '') + "End date/time must be after start date/time.";
+                hasError = true;
+            }
+        }
+      }
+
+      if (hasError) {
+        return; // Stop execution if there are validation errors
       }
 
       showSaveConfirm.value = true;

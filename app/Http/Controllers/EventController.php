@@ -152,12 +152,12 @@ class EventController extends Controller
             'venue' => 'nullable|string|max:255',
             'startDate' => ['nullable', 'string', function ($attribute, $value, $fail) {
                 if ($value && !preg_match('/^[A-Za-z]{3}-\d{2}-\d{4}$/', $value)) {
-                    $fail('The '.$attribute.' must be in MMM-DD-YYYY format.');
+                    $fail('The start date must be in MMM-DD-YYYY format.');
                 }
             }],
             'endDate' => ['nullable', 'string', function ($attribute, $value, $fail) use ($request) {
                 if ($value && !preg_match('/^[A-Za-z]{3}-\d{2}-\d{4}$/', $value)) {
-                    $fail('The '.$attribute.' must be in MMM-DD-YYYY format.');
+                    $fail('The end date must be in MMM-DD-YYYY format.');
                 }
                 if ($request->input('startDate') && $value) {
                     $startDate = \DateTime::createFromFormat('M-d-Y', $request->input('startDate'));
@@ -167,8 +167,16 @@ class EventController extends Controller
                     }
                 }
             }],
-            'startTime' => 'required|date_format:H:i',
-            'endTime' => 'required|date_format:H:i',
+            'startTime' => 'nullable|date_format:H:i',
+            'endTime' => 'nullable|date_format:H:i',
+            'isAllDay' => 'boolean',
+            'isAllDay' => ['required', 'boolean'],
+            'startTime' => ['required_if:isAllDay,false', 'nullable', 'date_format:H:i'],
+            'endTime' => ['required_if:isAllDay,false', 'nullable', 'date_format:H:i', function ($attribute, $value, $fail) use ($request) {
+                if ($request->input('startDate') == $request->input('endDate') && strtotime($value) <= strtotime($request->input('startTime'))) {
+                    $fail('The end time must be after the start time for single-day events.');
+                }
+            }],
             'tags' => ['nullable', 'array', function ($attribute, $value, $fail) use ($request, $validTagIds) {
                 if (empty($value)) {
                     return;
@@ -194,7 +202,6 @@ class EventController extends Controller
                     }
                 }
             }],
-            'isAllDay' => 'boolean',
             'archived' => 'boolean',
             'memorandum' => 'nullable|array',
             'memorandum.type' => 'required_with:memorandum|string|in:image,file',
@@ -273,10 +280,10 @@ class EventController extends Controller
                     $fail('The end date must be after or equal to the start date');
                 }
             }],
-            'startTime' => 'required|date_format:H:i',
-            'endTime' => ['required', 'date_format:H:i', function ($attribute, $value, $fail) use ($request) {
+            'startTime' => 'nullable|date_format:H:i',
+            'endTime' => ['nullable', 'date_format:H:i', function ($attribute, $value, $fail) use ($request) {
                 $startTime = $request->input('startTime');
-                if (strtotime($value) <= strtotime($startTime)) {
+                if ($request->input('startDate') == $request->input('endDate') && strtotime($value) <= strtotime($startTime)) {
                     $fail('The end time must be after the start time');
                 }
             }],
@@ -362,13 +369,19 @@ class EventController extends Controller
             'image' => 'nullable|string',
             'category_id' => ['nullable', Rule::in($validCategoryIds)],
             'venue' => 'nullable|string|max:255',
-            'startDate' => ['nullable', 'string'],
-            'endDate' => ['nullable', 'string'],
-            'startTime' => 'sometimes|required|date_format:H:i',
-            'endTime' => 'sometimes|required|date_format:H:i',
+            'startDate' => 'nullable|date_format:M-d-Y',
+            'endDate' => 'nullable|date_format:M-d-Y|after_or_equal:startDate',
+            'isAllDay' => 'sometimes|boolean',
+            'startTime' => ['sometimes', 'required_if:isAllDay,false', 'nullable', 'date_format:H:i'],
+            'endTime' => ['sometimes', 'required_if:isAllDay,false', 'nullable', 'date_format:H:i', function ($attribute, $value, $fail) use ($request) {
+                if ($request->input('startDate') && $request->input('endDate') && $request->input('startDate') == $request->input('endDate') && $request->input('startTime') && $value) {
+                    if (strtotime($value) <= strtotime($request->input('startTime'))) {
+                        $fail('The end time must be after the start time for single-day events.');
+                    }
+                }
+            }],
             'tags' => 'nullable|array',
             'tags.*' => ['sometimes', Rule::in($validTagIds)],
-            'isAllDay' => 'sometimes|boolean',
             'archived' => 'sometimes|boolean',
             // Memorandum validation for list view update
             'memorandum' => 'nullable|array',
