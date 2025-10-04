@@ -38,14 +38,16 @@ watch(() => props.show, (newVal) => {
         const isPlayer1Bye = localMatchData.value.player1Name === 'BYE';
         const isPlayer2Bye = localMatchData.value.player2Name === 'BYE';
 
-        if ((isPlayer1Bye || isPlayer2Bye) && localMatchData.value.status !== 'completed') {
+        if (isPlayer1Bye || isPlayer2Bye) {
             if (isPlayer1Bye) {
                 localMatchData.value.player1Score = 0;
                 localMatchData.value.player2Score = 1;
-            } else {
+            } else if (isPlayer2Bye) {
                 localMatchData.value.player1Score = 1;
                 localMatchData.value.player2Score = 0;
             }
+            // Automatically set the status to completed for any BYE match
+            // This simplifies the user flow, as a BYE match has a predetermined outcome.
             localMatchData.value.status = 'completed';
         }
     }

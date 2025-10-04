@@ -100,11 +100,21 @@ class BracketController extends Controller
             return response()->json(['message' => 'Bracket not found'], 404);
         }
 
-        $jsonData['brackets'][$bracketIndex] = array_merge($jsonData['brackets'][$bracketIndex], $request->all());
+        // Validate only the fields that are expected to be updated.
+        // This prevents the large 'event' object from being merged and saved.
+        $validated = $request->validate([
+            'name' => 'sometimes|string',
+            'type' => 'sometimes|string',
+            'event_id' => 'sometimes',
+            'matches' => 'sometimes|array',
+            // Add any other fields that can be updated by the user
+        ]);
+
+        $jsonData['brackets'][$bracketIndex] = array_merge($jsonData['brackets'][$bracketIndex], $validated);
         $jsonData['brackets'][$bracketIndex]['updated_at'] = now()->toISOString();
         $this->writeJson($jsonData);
 
-        return response()->json($jsonData['brackets'][$bracketIndex]);
+        return response()->json(collect($jsonData['brackets'][$bracketIndex])->except('event')->all());
     }
 
     /**
