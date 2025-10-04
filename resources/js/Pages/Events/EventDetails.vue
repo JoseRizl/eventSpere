@@ -13,6 +13,7 @@ import BracketCard from '@/Components/BracketCard.vue';
 import BracketView from '@/Components/BracketView.vue';
 import MatchEditorDialog from '@/Components/MatchEditorDialog.vue';
 import MatchesView from '@/Components/MatchesView.vue';
+import { getFullDateTime } from '@/utils/dateUtils.js';
 
 const props = defineProps({
   event: Object,
@@ -139,6 +140,19 @@ const fetchTasks = async (eventId) => {
     } catch (error) {
         console.error('Error fetching tasks:', error);
     }
+};
+
+const fetchActivities = async (eventId) => {
+  try {
+    const response = await axios.get(route('api.events.activities.indexForEvent', { eventId }));
+    const arr = Array.isArray(response.data) ? response.data : [];
+    eventDetails.value.activities = arr.map((a, idx) => ({
+      ...a,
+      __uid: a.__uid || `${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 8)}`
+    }));
+  } catch (error) {
+    console.error('Error fetching activities:', error);
+  }
 };
 
 // Bracket logic
@@ -287,11 +301,10 @@ const eventDetails = ref({
     ...props.event,
     venue: props.event.venue || '',
     category_id: props.event.category?.id || props.event.category_id,
-    scheduleLists: props.event.scheduleLists || [{
-      day: 1,
-      date: props.event.startDate,
-      schedules: props.event.schedules || []
-    }],
+    activities: (props.event.activities || []).map((a, idx) => ({
+      ...a,
+      __uid: a.__uid || `${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 8)}`
+    })),
     // event.tags is now an array of tag objects from backend, convert to IDs for editing
     tags: (props.event.tags || []).map(tag => tag.id),
     tasks: props.event.tasks?.map(task => {
@@ -434,6 +447,7 @@ onMounted(() => {
   fetchEventAnnouncements();
   fetchBrackets(props.event.id);
   fetchTasks(props.event.id);
+  fetchActivities(props.event.id);
   if (eventDetails.value.tasks) {
     filteredEmployees.value = eventDetails.value.tasks.map(task => {
       // Find matching committee in committees list
@@ -659,53 +673,45 @@ const confirmDeleteTask = () => {
   taskToDelete.value = null;
 };
 
-const totalDays = computed(() => {
-  if (!eventDetails.value.startDate || !eventDetails.value.endDate) return 1;
-  const start = parse(eventDetails.value.startDate, 'MMM-dd-yyyy', new Date());
-  const end = parse(eventDetails.value.endDate, 'MMM-dd-yyyy', new Date());
-  const diffTime = Math.abs(end - start);
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays + 1; // Include both start and end dates
-});
-
-const currentScheduleList = ref(0);
-
-const addScheduleList = () => {
-  if (eventDetails.value.scheduleLists.length >= totalDays.value) return;
-
-  const nextDay = eventDetails.value.scheduleLists.length + 1;
-  const startDate = parse(eventDetails.value.startDate, 'MMM-dd-yyyy', new Date());
-  const nextDate = addDays(startDate, nextDay - 1);
-
-  eventDetails.value.scheduleLists.push({
-    day: nextDay,
-    date: format(nextDate, 'MMM-dd-yyyy'),
-    schedules: []
+const addActivity = () => {
+  if (!Array.isArray(eventDetails.value.activities)) {
+    eventDetails.value.activities = [];
+  }
+  eventDetails.value.activities.push({
+    __uid: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    title: '',
+    date: eventDetails.value.startDate || '',
+    startTime: '',
+    endTime: '',
+    location: ''
   });
 };
 
-const removeScheduleList = (index) => {
-  if (eventDetails.value.scheduleLists.length <= 1) return;
-  eventDetails.value.scheduleLists.splice(index, 1);
-  if (currentScheduleList.value >= eventDetails.value.scheduleLists.length) {
-    currentScheduleList.value = eventDetails.value.scheduleLists.length - 1;
-  }
-};
-
-const addSchedule = () => {
-  eventDetails.value.scheduleLists[currentScheduleList.value].schedules.push({ time: '', activity: '' });
-};
-
-const promptDeleteSchedule = (index) => {
-  scheduleToDelete.value = index;
+const promptDeleteSchedule = (activity) => {
+  scheduleToDelete.value = activity;
   showDeleteScheduleConfirm.value = true;
 };
 
 const confirmDeleteSchedule = () => {
-  eventDetails.value.scheduleLists[currentScheduleList.value].schedules.splice(scheduleToDelete.value, 1);
+  if (Array.isArray(eventDetails.value.activities) && scheduleToDelete.value) {
+    const idx = eventDetails.value.activities.findIndex(a => (a.__uid && scheduleToDelete.value.__uid) ? a.__uid === scheduleToDelete.value.__uid : a === scheduleToDelete.value);
+    if (idx !== -1) {
+      eventDetails.value.activities.splice(idx, 1);
+    }
+  }
   showDeleteScheduleConfirm.value = false;
   scheduleToDelete.value = null;
 };
+
+const sortedActivities = computed(() => {
+  const activities = Array.isArray(eventDetails.value.activities) ? [...eventDetails.value.activities] : [];
+  return activities.sort((a, b) => {
+    const ad = formatDateForPicker(a.date) || new Date(0);
+    const bd = formatDateForPicker(b.date) || new Date(0);
+    if (ad.getTime() !== bd.getTime()) return ad - bd;
+    return (a.startTime || '').localeCompare(b.startTime || '');
+  });
+});
 
 const saveChanges = () => {
   saving.value = true;
@@ -734,16 +740,7 @@ const saveChanges = () => {
     startTime: eventDetails.value.startTime,
     endTime: eventDetails.value.endTime,
     tags: eventDetails.value.tags || [], // Only IDs
-    scheduleLists: eventDetails.value.scheduleLists.map(list => ({
-
-      day: list.day,
-      date: list.date,
-      schedules: list.schedules.map(s => ({
-        time: s.time.padStart(5, '0'),
-        activity: s.activity
-      }))
-    })),
-    memorandum: eventDetails.value.memorandum,
+        memorandum: eventDetails.value.memorandum,
   };
 
   // Separate payload for tasks
@@ -771,21 +768,37 @@ const saveChanges = () => {
       showErrorDialog.value = true;
     },
     onSuccess: () => {
-      // If main event details save successfully, then save the tasks.
-      router.put(route('tasks.updateForEvent', { id: eventDetails.value.id }), tasksPayload, {
+      // After saving main event details, save activities (normalized)
+      const activitiesPayload = {
+        activities: (eventDetails.value.activities || []).map(({ __uid, title, date, startTime, endTime, location }) => ({ title, date, startTime, endTime, location }))
+      };
+
+      router.put(route('events.activities.updateForEvent', { id: eventDetails.value.id }), activitiesPayload, {
         preserveScroll: true,
-        onFinish: () => saving.value = false, // End saving spinner only after both are done
-        onError: (taskErrors) => {
-          const errorMessages = Object.values(taskErrors).flat().join(' ');
-          errorMessage.value = `Event details saved, but failed to save tasks: ${errorMessages}`;
+        onError: (actErrors) => {
+          const actMsgs = Object.values(actErrors).flat().join(' ');
+          errorMessage.value = `Event details saved, but failed to save activities: ${actMsgs || ''}`.trim();
           errorDialogMessage.value = errorMessage.value;
           showErrorDialog.value = true;
         },
         onSuccess: () => {
-          showSuccessDialog.value = true;
-          successMessage.value = 'The event was updated successfully.';
-          editMode.value = false;
-          // No need to reload, the redirect from TaskController handles it.
+          // Then save the tasks
+          router.put(route('tasks.updateForEvent', { id: eventDetails.value.id }), tasksPayload, {
+            preserveScroll: true,
+            onFinish: () => saving.value = false, // End saving spinner only after both are done
+            onError: (taskErrors) => {
+              const errorMessages = Object.values(taskErrors).flat().join(' ');
+              errorMessage.value = `Event details saved, but failed to save tasks: ${errorMessages}`;
+              errorDialogMessage.value = errorMessage.value;
+              showErrorDialog.value = true;
+            },
+            onSuccess: () => {
+              showSuccessDialog.value = true;
+              successMessage.value = 'The event was updated successfully.';
+              editMode.value = false;
+              // No need to reload, the redirect from controllers handles it.
+            }
+          });
         }
       });
     }
@@ -815,12 +828,72 @@ const validateDatesAndTimes = () => {
     }
 
     if (eventDetails.value.startTime && eventDetails.value.endTime) {
-        const startDateTime = getFullDateTime(startDate, eventDetails.value.startTime);
-        const endDateTime = getFullDateTime(endDate, eventDetails.value.endTime);
-        if (endDateTime <= startDateTime) {
-            return "End time must be after start time on the same day, or on a later day.";
-        }
+      const startDateTime = getFullDateTime(startDate, eventDetails.value.startTime);
+      const endDateTime = getFullDateTime(endDate, eventDetails.value.endTime);
+      if (endDateTime <= startDateTime) {
+        return "End time must be after start time on the same day, or on a later day.";
+      }
     }
+
+    // Validate activities using date-only comparisons to avoid timezone drift
+    if (Array.isArray(eventDetails.value.activities)) {
+      const normalize = (d) => {
+        const dt = formatDateForPicker(d);
+        return dt ? format(dt, 'yyyy-MM-dd') : null;
+      };
+      const startY = normalize(eventDetails.value.startDate);
+      const endY = normalize(eventDetails.value.endDate);
+
+      for (let i = 0; i < eventDetails.value.activities.length; i++) {
+        const act = eventDetails.value.activities[i];
+        if (!act) continue;
+        const actY = normalize(act.date);
+        if (!actY || !startY || !endY || actY < startY || actY > endY) {
+          return `Activity ${i + 1}: date (${formatDisplayDate(act.date)}) must be within the event range (${formatDisplayDate(eventDetails.value.startDate)} - ${formatDisplayDate(eventDetails.value.endDate)}).`;
+        }
+        if (act.startTime && act.endTime) {
+          const sdt = getFullDateTime(act.date, act.startTime);
+          const edt = getFullDateTime(act.date, act.endTime);
+          if (!sdt || !edt || edt <= sdt) {
+            return `Activity ${i + 1}: end time must be after start time.`;
+          }
+        }
+
+        // Enforce activity times within event window if event has times
+        const eventStartDT = (eventDetails.value.startDate && eventDetails.value.startTime)
+          ? getFullDateTime(eventDetails.value.startDate, eventDetails.value.startTime)
+          : null;
+        const eventEndDT = (eventDetails.value.endDate && eventDetails.value.endTime)
+          ? getFullDateTime(eventDetails.value.endDate, eventDetails.value.endTime)
+          : null;
+
+        if (eventStartDT && act.startTime) {
+          const actStartDT = getFullDateTime(act.date, act.startTime);
+          if (actStartDT < eventStartDT) {
+            return `Activity ${i + 1}: start time must be on/after event start (${formatDisplayDate(eventDetails.value.startDate)} ${formatDisplayTime(eventDetails.value.startTime)}).`;
+          }
+        }
+        if (eventEndDT && act.startTime) {
+          const actStartDT = getFullDateTime(act.date, act.startTime);
+          if (actStartDT > eventEndDT) {
+            return `Activity ${i + 1}: start time must be on/before event end (${formatDisplayDate(eventDetails.value.endDate)} ${formatDisplayTime(eventDetails.value.endTime)}).`;
+          }
+        }
+        if (eventEndDT && act.endTime) {
+          const actEndDT = getFullDateTime(act.date, act.endTime);
+          if (actEndDT > eventEndDT) {
+            return `Activity ${i + 1}: end time must be on/before event end (${formatDisplayDate(eventDetails.value.endDate)} ${formatDisplayTime(eventDetails.value.endTime)}).`;
+          }
+        }
+        if (eventStartDT && act.endTime) {
+          const actEndDT = getFullDateTime(act.date, act.endTime);
+          if (actEndDT < eventStartDT) {
+            return `Activity ${i + 1}: end time must be on/after event start (${formatDisplayDate(eventDetails.value.startDate)} ${formatDisplayTime(eventDetails.value.startTime)}).`;
+          }
+        }
+      }
+    }
+
     return null; // No error
   } catch {
     return "An error occurred during date validation. Make sure end time/date is after start time/date.";
@@ -842,14 +915,22 @@ const formatDisplayDate = (dateString) => {
   }
 };
 
-const formatDateForPicker = (dateString) => {
-  if (!dateString) return null;
+const formatDateForPicker = (dateInput) => {
+  if (!dateInput) return null;
   try {
-    // Try parsing as ISO format first (yyyy-MM-dd)
-    let date = parseISO(dateString);
-    if (!isValid(date)) {
-      // If that fails, try parsing as MMM-dd-yyyy format
-      date = parse(dateString, 'MMM-dd-yyyy', new Date());
+    if (dateInput instanceof Date && isValid(dateInput)) {
+      return dateInput;
+    }
+    let date;
+    if (typeof dateInput === 'string') {
+      // Try parsing as ISO format first (yyyy-MM-dd)
+      date = parseISO(dateInput);
+      if (!isValid(date)) {
+        // If that fails, try parsing as MMM-dd-yyyy format
+        date = parse(dateInput, 'MMM-dd-yyyy', new Date());
+      }
+    } else {
+      date = new Date(dateInput);
     }
     return isValid(date) ? date : null;
   } catch {
@@ -884,6 +965,33 @@ const formattedStartDate = computed(() => {
 const formattedEndDate = computed(() => {
   return endDateModel.value ? format(endDateModel.value, 'MMM-dd-yyyy') : '';
 });
+
+// Helpers for activity time input bounds
+const dateOnlyStr = (d) => {
+  const dt = formatDateForPicker(d);
+  return dt ? format(dt, 'yyyy-MM-dd') : null;
+};
+
+const getActivityStartMin = (act) => {
+  if (!eventDetails.value.startTime) return null;
+  return dateOnlyStr(act.date) === dateOnlyStr(eventDetails.value.startDate) ? eventDetails.value.startTime : null;
+};
+
+const getActivityStartMax = (act) => {
+  if (!eventDetails.value.endTime) return null;
+  return dateOnlyStr(act.date) === dateOnlyStr(eventDetails.value.endDate) ? eventDetails.value.endTime : null;
+};
+
+const getActivityEndMin = (act) => {
+  if (act.startTime) return act.startTime;
+  if (!eventDetails.value.startTime) return null;
+  return dateOnlyStr(act.date) === dateOnlyStr(eventDetails.value.startDate) ? eventDetails.value.startTime : null;
+};
+
+const getActivityEndMax = (act) => {
+  if (!eventDetails.value.endTime) return null;
+  return dateOnlyStr(act.date) === dateOnlyStr(eventDetails.value.endDate) ? eventDetails.value.endTime : null;
+};
 
 // Normalize related events tags
 const normalizedRelatedEvents = computed(() => {
@@ -1128,10 +1236,6 @@ const getBracketIndex = (bracketId) => {
                     </div>
                     </div>
 
-                    <!-- Error Message -->
-                    <div v-if="errorMessage" class="text-red-500 text-sm mt-2">
-                    {{ errorMessage }}
-                    </div>
 
                     <!-- Committee -->
                     <div v-if="editMode || (eventDetails.tasks && eventDetails.tasks.length > 0)">
@@ -1229,70 +1333,51 @@ const getBracketIndex = (bracketId) => {
             </div>
         </div>
 
-                    <!-- Schedules -->
-                    <div v-if="editMode || (eventDetails.scheduleLists && eventDetails.scheduleLists.length > 0)">
-                    <h2 class="font-semibold mb-1">Event Schedules</h2>
+                    <!-- Activities -->
+                    <div v-if="editMode || (eventDetails.activities && eventDetails.activities.length > 0)">
+                    <h2 class="font-semibold mb-1">Activities</h2>
                     <div v-if="editMode">
-                        <!-- Schedule List Navigation -->
-                        <div class="flex items-center gap-4 mb-4">
-                        <div class="flex-1 flex gap-2 overflow-x-auto pb-2">
-                            <button
-                            v-for="(list, index) in eventDetails.scheduleLists"
-                            :key="index"
-                            @click="currentScheduleList = index"
-                            class="px-4 py-2 rounded whitespace-nowrap"
-                            :class="currentScheduleList === index ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300'"
-                            >
-                            Day {{ list.day }} ({{ formatDisplayDate(list.date) }})
-                            </button>
+                        <div v-for="(activity, i) in sortedActivities" :key="activity.__uid || i" class="flex flex-col md:flex-row items-center gap-2 mb-2">
+                            <InputText v-model="activity.title" placeholder="Activity title" class="flex-1" />
+                            <DatePicker
+                              :modelValue="formatDateForPicker(activity.date)"
+                              @update:modelValue="val => activity.date = val ? format(val, 'MMM-dd-yyyy') : ''"
+                              :minDate="startDateModel"
+                              :maxDate="endDateModel"
+                              dateFormat="M-dd-yy"
+                              showIcon
+                              class="w-full md:w-44"
+                            />
+                            <input v-model="activity.startTime" type="time" class="border p-1 rounded w-28" :min="getActivityStartMin(activity)" :max="getActivityStartMax(activity)" />
+                            <span>-</span>
+                            <input v-model="activity.endTime" type="time" class="border p-1 rounded w-28" :min="getActivityEndMin(activity)" :max="getActivityEndMax(activity)" />
+                            <InputText v-model="activity.location" placeholder="Location (optional)" class="flex-1" />
+                            <button @click="promptDeleteSchedule(activity)" class="text-red-500">✕</button>
                         </div>
-                        <div class="flex gap-2">
-                            <button
-                            @click="addScheduleList"
-                            :disabled="eventDetails.scheduleLists.length >= totalDays"
-                            class="px-3 py-2 rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                            :title="eventDetails.scheduleLists.length >= totalDays ? 'Maximum number of days reached' : 'Add new day'"
-                            >
-                            + Add Day
-                            </button>
-                            <button
-                            v-if="eventDetails.scheduleLists.length > 1"
-                            @click="removeScheduleList(currentScheduleList)"
-                            class="px-3 py-2 rounded bg-red-600 text-white hover:bg-red-700"
-                            >
-                            Remove Day
-                            </button>
-                        </div>
-                        </div>
-
-                        <!-- Current Day's Schedules -->
-                        <div v-if="eventDetails.scheduleLists && eventDetails.scheduleLists.length > 0" class="border rounded-lg p-4">
-                            <h3 class="font-medium mb-3">Day {{ eventDetails.scheduleLists[currentScheduleList].day }} Schedule</h3>
-                            <div v-for="(schedule, i) in eventDetails.scheduleLists[currentScheduleList].schedules" :key="i" class="flex items-center gap-2 mb-2">
-                                <input v-model="schedule.time" type="time" class="border p-1 rounded w-32" />
-                                <input v-model="schedule.activity" type="text" placeholder="Activity" class="border p-1 rounded flex-1" />
-                                <button @click="promptDeleteSchedule(i)" class="text-red-500">✕</button>
-                            </div>
-                            <button @click="addSchedule" class="text-blue-500 text-sm mt-2">+ Add Schedule</button>
-                        </div>
-                        <p v-else class="text-gray-500 italic p-4">No schedules. Add a day to start.</p>
+                        <button @click="addActivity" class="text-blue-500 text-sm mt-2">+ Add Activity</button>
                     </div>
                     <div v-else>
-                        <!-- View Mode for Schedules -->
-                        <div class="space-y-4">
-                        <div v-for="(list, listIndex) in eventDetails.scheduleLists" :key="listIndex" class="border rounded-lg p-4">
-                            <h3 class="font-medium mb-2">Day {{ list.day }} ({{ formatDisplayDate(list.date) }})</h3>
-                            <ul class="list-disc pl-5 space-y-1 text-sm text-gray-800">
-                            <li v-for="(schedule, i) in list.schedules" :key="i">
-                                {{ schedule.time }} - {{ schedule.activity }}
-                            </li>
-                            <li v-if="list.schedules.length === 0" class="text-gray-500 italic">
-                                No schedules for this day
-                            </li>
-                            </ul>
+                        <div v-if="sortedActivities.length > 0" class="space-y-2">
+                            <div v-for="(act, idx) in sortedActivities" :key="idx" class="flex items-center justify-between p-2 border rounded">
+                                <div class="flex items-center gap-3">
+                                    <i class="pi pi-clock text-gray-500"></i>
+                                    <div>
+                                        <div class="text-sm font-medium">{{ act.title || 'Untitled activity' }}</div>
+                                        <div class="text-xs text-gray-600">
+                                            {{ formatDisplayDate(act.date) }} • {{ formatDisplayTime(act.startTime) }} - {{ formatDisplayTime(act.endTime) }}
+                                            <span v-if="act.location"> • {{ act.location }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        </div>
+                        <p v-else class="text-gray-500 italic p-4">No activities.</p>
                     </div>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div v-if="errorMessage" class="text-red-500 text-sm mt-2">
+                    {{ errorMessage }}
                     </div>
 
                     <!-- Save Button -->

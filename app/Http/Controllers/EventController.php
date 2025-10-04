@@ -214,7 +214,7 @@ class EventController extends Controller
         $newEvent['id'] = substr(md5(uniqid()), 0, 4);
         $newEvent['createdAt'] = now()->toISOString();
         $newEvent['tasks'] = [];
-        $newEvent['scheduleLists'] = [];
+        $newEvent['activities'] = [];
         $newEvent['type'] = 'event';
 
         // Remove tags from event object
@@ -312,16 +312,30 @@ class EventController extends Controller
                     }
                 }
             }],
-            'scheduleLists' => 'nullable|array',
-            'scheduleLists.*.day' => 'required|integer|min:1',
-            'scheduleLists.*.date' => ['required', 'string', function ($attribute, $value, $fail) {
-                if (!preg_match('/^[A-Za-z]{3}-\d{2}-\d{4}$/', $value)) {
+            'activities' => 'nullable|array',
+            'activities.*.title' => 'nullable|string|max:255',
+            'activities.*.location' => 'nullable|string|max:255',
+            'activities.*.date' => ['required', 'string', function ($attribute, $value, $fail) use ($request) {
+                if (!preg_match('/^[A-Za-z]{3}-\\d{2}-\\d{4}$/', $value)) {
                     $fail('The '.$attribute.' must be in MMM-DD-YYYY format (e.g. May-28-2025)');
+                    return;
+                }
+                $eventStart = \DateTime::createFromFormat('M-d-Y', $request->input('startDate'));
+                $eventEnd = \DateTime::createFromFormat('M-d-Y', $request->input('endDate'));
+                $actDate = \DateTime::createFromFormat('M-d-Y', $value);
+                if ($eventStart && $eventEnd && $actDate && ($actDate < $eventStart || $actDate > $eventEnd)) {
+                    $fail('Each activity date must be within the event date range.');
                 }
             }],
-            'scheduleLists.*.schedules' => 'nullable|array',
-            'scheduleLists.*.schedules.*.time' => 'nullable|date_format:H:i',
-            'scheduleLists.*.schedules.*.activity' => 'nullable|string|max:255',
+            'activities.*.startTime' => 'nullable|date_format:H:i',
+            'activities.*.endTime' => ['nullable', 'date_format:H:i', function ($attribute, $value, $fail) use ($request) {
+                $parts = explode('.', $attribute);
+                $index = $parts[1] ?? null;
+                $start = $index !== null ? $request->input("activities.$index.startTime") : null;
+                if ($start && $value && strtotime($value) <= strtotime($start)) {
+                    $fail('Activity end time must be after start time.');
+                }
+            }],
             'memorandum' => 'nullable|array',
             'memorandum.type' => 'required_with:memorandum|string|in:image,file',
             'memorandum.content' => 'required_with:memorandum|string',

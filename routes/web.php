@@ -5,6 +5,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\BracketController;
+use App\Http\Controllers\ActivitiesController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -30,6 +31,7 @@ Route::middleware('auth')->group(function () {
     Route::inertia('/bracket', 'Sports/Bracket')->name('bracket');
 
     Route::post('/events/{id}/update', [EventController::class, 'update'])->name('event.update');
+    Route::put('/events/{id}/activities', [ActivitiesController::class, 'updateForEvent'])->name('events.activities.updateForEvent');
 
     // Category and Tag routes
     Route::post('/categories', [CategoryController::class, 'store'])->name('category.store');
@@ -51,6 +53,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/events', [EventController::class, 'index'])->name('events.index'); // For fetching all events as JSON
         Route::apiResource('brackets', BracketController::class)->except(['show', 'create', 'edit']);
         Route::get('/events/{eventId}/tasks', [TaskController::class, 'indexForEvent'])->name('events.tasks.indexForEvent');
+        Route::get('/events/{eventId}/activities', [ActivitiesController::class, 'indexForEvent'])->name('events.activities.indexForEvent');
         Route::apiResource('tasks', TaskController::class)->except(['show', 'create', 'edit']);
     });
 });
