@@ -108,6 +108,29 @@ class EventController extends Controller
             ->values()
             ->toArray();
 
+        // Preload normalized activities, tasks, and announcements for this event
+        $activities = collect($data['activities'] ?? [])->where('event_id', $id)->values()->toArray();
+        $tasksRaw = collect($data['tasks'] ?? [])->where('event_id', $id)->values();
+        $taskEmployeeMap = collect($data['task_employee'] ?? [])->groupBy('task_id');
+        $allEmployees = collect($data['employees'] ?? []);
+        $allCommittees = collect($data['committees'] ?? []);
+
+        $tasks = $tasksRaw->map(function ($task) use ($allEmployees, $allCommittees, $taskEmployeeMap) {
+            $committee = $allCommittees->firstWhere('id', $task['committee_id']);
+            $employeeIds = $taskEmployeeMap->get($task['id'], collect())->pluck('employee_id');
+            $employees = $allEmployees->whereIn('id', $employeeIds)->values()->toArray();
+            return [
+                'id' => $task['id'],
+                'task' => $task['description'],
+                'committee' => $committee,
+                'employees' => $employees,
+            ];
+        })->values()->toArray();
+
+        $announcements = collect($data['announcements'] ?? [])->where('event_id', $id)->sortByDesc(function ($a) {
+            return strtotime($a['timestamp'] ?? '1970-01-01T00:00:00Z');
+        })->values()->toArray();
+
         // If the request wants JSON, return only the event data.
         if (request()->wantsJson()) {
             return response()->json($event);
@@ -120,6 +143,9 @@ class EventController extends Controller
             'employees' => $data['employees'] ?? [],
             'categories' => $data['category'] ?? [],
             'relatedEvents' => $relatedEvents,
+            'preloadedActivities' => $activities,
+            'preloadedTasks' => $tasks,
+            'preloadedAnnouncements' => $announcements,
         ]);
     }
 
@@ -312,31 +338,7 @@ class EventController extends Controller
                     }
                 }
             }],
-            'activities' => 'nullable|array',
-            'activities.*.title' => 'nullable|string|max:255',
-            'activities.*.location' => 'nullable|string|max:255',
-            'activities.*.date' => ['required', 'string', function ($attribute, $value, $fail) use ($request) {
-                if (!preg_match('/^[A-Za-z]{3}-\\d{2}-\\d{4}$/', $value)) {
-                    $fail('The '.$attribute.' must be in MMM-DD-YYYY format (e.g. May-28-2025)');
-                    return;
-                }
-                $eventStart = \DateTime::createFromFormat('M-d-Y', $request->input('startDate'));
-                $eventEnd = \DateTime::createFromFormat('M-d-Y', $request->input('endDate'));
-                $actDate = \DateTime::createFromFormat('M-d-Y', $value);
-                if ($eventStart && $eventEnd && $actDate && ($actDate < $eventStart || $actDate > $eventEnd)) {
-                    $fail('Each activity date must be within the event date range.');
-                }
-            }],
-            'activities.*.startTime' => 'nullable|date_format:H:i',
-            'activities.*.endTime' => ['nullable', 'date_format:H:i', function ($attribute, $value, $fail) use ($request) {
-                $parts = explode('.', $attribute);
-                $index = $parts[1] ?? null;
-                $start = $index !== null ? $request->input("activities.$index.startTime") : null;
-                if ($start && $value && strtotime($value) <= strtotime($start)) {
-                    $fail('Activity end time must be after start time.');
-                }
-            }],
-            'memorandum' => 'nullable|array',
+                        'memorandum' => 'nullable|array',
             'memorandum.type' => 'required_with:memorandum|string|in:image,file',
             'memorandum.content' => 'required_with:memorandum|string',
             'memorandum.filename' => 'nullable|string',

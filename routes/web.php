@@ -6,6 +6,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\BracketController;
 use App\Http\Controllers\ActivitiesController;
+use App\Http\Controllers\AnnouncementsController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -32,6 +33,8 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/events/{id}/update', [EventController::class, 'update'])->name('event.update');
     Route::put('/events/{id}/activities', [ActivitiesController::class, 'updateForEvent'])->name('events.activities.updateForEvent');
+    Route::post('/events/{id}/announcements', [AnnouncementsController::class, 'storeForEvent'])->name('events.announcements.storeForEvent');
+    Route::delete('/events/{id}/announcements/{announcementId}', [AnnouncementsController::class, 'destroyForEvent'])->name('events.announcements.destroyForEvent');
 
     // Category and Tag routes
     Route::post('/categories', [CategoryController::class, 'store'])->name('category.store');
@@ -54,6 +57,7 @@ Route::middleware('auth')->group(function () {
         Route::apiResource('brackets', BracketController::class)->except(['show', 'create', 'edit']);
         Route::get('/events/{eventId}/tasks', [TaskController::class, 'indexForEvent'])->name('events.tasks.indexForEvent');
         Route::get('/events/{eventId}/activities', [ActivitiesController::class, 'indexForEvent'])->name('events.activities.indexForEvent');
+        Route::get('/events/{eventId}/announcements', [AnnouncementsController::class, 'indexForEvent'])->name('events.announcements.indexForEvent');
         Route::apiResource('tasks', TaskController::class)->except(['show', 'create', 'edit']);
     });
 });

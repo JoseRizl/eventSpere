@@ -14,6 +14,9 @@ import BracketView from '@/Components/BracketView.vue';
 import MatchEditorDialog from '@/Components/MatchEditorDialog.vue';
 import MatchesView from '@/Components/MatchesView.vue';
 import { getFullDateTime } from '@/utils/dateUtils.js';
+import { useActivities } from '@/composables/useActivities.js';
+import { useTasks } from '@/composables/useTasks.js';
+import { useAnnouncements } from '@/composables/useAnnouncements.js';
 
 const props = defineProps({
   event: Object,
@@ -25,6 +28,9 @@ const props = defineProps({
   errors: Object,
   all_users: Array, // Assuming this comes from shared props
   auth: Object, // Assuming this comes from shared props
+  preloadedActivities: Array,
+  preloadedTasks: Array,
+  preloadedAnnouncements: Array,
 });
 
 // Inertia props (now using defineProps)
@@ -113,6 +119,8 @@ const clearAnnouncementFilters = () => {
 
 // Event-specific announcements
 const eventAnnouncements = ref([]);
+const allNewsProxy = ref(props.relatedEvents || []); // placeholder for composable signature
+const { setAnnouncements } = useAnnouncements({ searchQuery: announcementSearchQuery, startDateFilter: ref(null), endDateFilter: ref(null) }, allNewsProxy);
 const showAddAnnouncementModal = ref(false);
 const newAnnouncement = ref({
   message: '',
@@ -131,21 +139,22 @@ const openImageDialog = (imageUrl) => {
   showImageDialog.value = true;
 };
 
+const { activities: activitiesState, fetchActivities: fetchActivitiesApi, saveActivities } = useActivities();
+const { tasks: tasksState, fetchTasks: fetchTasksApi, saveTasks } = useTasks();
+
 const fetchTasks = async (eventId) => {
-    try {
-        const response = await axios.get(route('api.events.tasks.indexForEvent', { eventId }));
-        // The backend now returns the data in the correct format with full objects.
-        // We can directly assign it to eventDetails.tasks.
-        eventDetails.value.tasks = response.data;
-    } catch (error) {
-        console.error('Error fetching tasks:', error);
-    }
+  try {
+    const data = await fetchTasksApi(eventId);
+    eventDetails.value.tasks = data;
+  } catch (error) {
+    console.error('Error fetching tasks:', error);
+  }
 };
 
 const fetchActivities = async (eventId) => {
   try {
-    const response = await axios.get(route('api.events.activities.indexForEvent', { eventId }));
-    const arr = Array.isArray(response.data) ? response.data : [];
+    const data = await fetchActivitiesApi(eventId);
+    const arr = Array.isArray(data) ? data : [];
     eventDetails.value.activities = arr.map((a, idx) => ({
       ...a,
       __uid: a.__uid || `${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 8)}`
@@ -443,11 +452,23 @@ onMounted(() => {
     currentView.value = 'announcements';
   }
 
+  // Preload tasks/activities/announcements from props to avoid initial GETs
+  if (Array.isArray(props.preloadedTasks)) {
+    eventDetails.value.tasks = props.preloadedTasks;
+  }
+  if (Array.isArray(props.preloadedActivities)) {
+    eventDetails.value.activities = props.preloadedActivities.map((a, idx) => ({ ...a, __uid: `${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 8)}` }));
+  }
+  if (Array.isArray(props.preloadedAnnouncements)) {
+    // Augment with employee names
+    const employeesMap = employees.value.reduce((map, emp) => { map[emp.id] = emp; return map; }, {});
+    eventAnnouncements.value = props.preloadedAnnouncements.map(ann => ({ ...ann, employee: employeesMap[ann.userId] || { name: 'Admin' } }));
+    setAnnouncements(eventAnnouncements.value.map(a => ({ ...a, event: props.event })));
+  }
+
   // Ensure tasks have proper committee/employee references
-  fetchEventAnnouncements();
   fetchBrackets(props.event.id);
-  fetchTasks(props.event.id);
-  fetchActivities(props.event.id);
+  // No initial GETs for tasks/activities/announcements; keep only mutations
   if (eventDetails.value.tasks) {
     filteredEmployees.value = eventDetails.value.tasks.map(task => {
       // Find matching committee in committees list
@@ -497,24 +518,7 @@ const goBack = () => {
     }
 };
 
-const fetchEventAnnouncements = async () => {
-  if (!props.event?.id) return;
-  try {
-    const response = await axios.get(`http://localhost:3000/event_announcements?eventId=${props.event.id}`);
-
-    const employeesMap = employees.value.reduce((map, emp) => {
-        map[emp.id] = emp;
-        return map;
-    }, {});
-
-    eventAnnouncements.value = response.data.map(ann => ({
-        ...ann,
-        employee: employeesMap[ann.userId] || { name: 'Admin' }
-    })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-  } catch (error) {
-    console.error('Error fetching event announcements:', error);
-  }
-};
+// Initial announcements are preloaded via props; no GET here to achieve zero client GETs.
 
 const openAddAnnouncementModal = () => {
   newAnnouncement.value = { message: '', image: null, imagePreview: null };
@@ -572,7 +576,6 @@ const addAnnouncement = async () => {
   }
 
   const payload = {
-    eventId: props.event.id,
     message: newAnnouncement.value.message,
     timestamp: new Date().toISOString(),
     image: imageUrl,
@@ -580,7 +583,7 @@ const addAnnouncement = async () => {
   };
 
   try {
-    const response = await axios.post('http://localhost:3000/event_announcements', payload);
+    const response = await axios.post(route('events.announcements.storeForEvent', { id: props.event.id }), payload);
     const newAnn = {
         ...response.data,
         employee: { name: user.value.name }
@@ -607,7 +610,8 @@ const confirmDeleteAnnouncement = async () => {
   if (!announcementToDelete.value) return;
   saving.value = true;
   try {
-    await axios.delete(`http://localhost:3000/event_announcements/${announcementToDelete.value.id}`);
+    await axios.delete(route('events.announcements.destroyForEvent', { id: props.event.id, announcementId: announcementToDelete.value.id }));
+    setAnnouncements(eventAnnouncements.value.filter(a => a.id !== announcementToDelete.value.id));
     eventAnnouncements.value = eventAnnouncements.value.filter(a => a.id !== announcementToDelete.value.id);
     successMessage.value = 'Announcement deleted.';
     showSuccessDialog.value = true;
@@ -767,40 +771,31 @@ const saveChanges = () => {
       errorDialogMessage.value = message;
       showErrorDialog.value = true;
     },
-    onSuccess: () => {
-      // After saving main event details, save activities (normalized)
-      const activitiesPayload = {
-        activities: (eventDetails.value.activities || []).map(({ __uid, title, date, startTime, endTime, location }) => ({ title, date, startTime, endTime, location }))
-      };
+    onSuccess: async () => {
+      try {
+        // Save activities via composable
+        const activitiesPayload = (eventDetails.value.activities || []).map(({ __uid, title, date, startTime, endTime, location }) => ({ title, date, startTime, endTime, location }));
+        await saveActivities(eventDetails.value.id, activitiesPayload);
 
-      router.put(route('events.activities.updateForEvent', { id: eventDetails.value.id }), activitiesPayload, {
-        preserveScroll: true,
-        onError: (actErrors) => {
-          const actMsgs = Object.values(actErrors).flat().join(' ');
-          errorMessage.value = `Event details saved, but failed to save activities: ${actMsgs || ''}`.trim();
-          errorDialogMessage.value = errorMessage.value;
-          showErrorDialog.value = true;
-        },
-        onSuccess: () => {
-          // Then save the tasks
-          router.put(route('tasks.updateForEvent', { id: eventDetails.value.id }), tasksPayload, {
-            preserveScroll: true,
-            onFinish: () => saving.value = false, // End saving spinner only after both are done
-            onError: (taskErrors) => {
-              const errorMessages = Object.values(taskErrors).flat().join(' ');
-              errorMessage.value = `Event details saved, but failed to save tasks: ${errorMessages}`;
-              errorDialogMessage.value = errorMessage.value;
-              showErrorDialog.value = true;
-            },
-            onSuccess: () => {
-              showSuccessDialog.value = true;
-              successMessage.value = 'The event was updated successfully.';
-              editMode.value = false;
-              // No need to reload, the redirect from controllers handles it.
-            }
-          });
-        }
-      });
+        // Save tasks via composable
+        const tasksPayloadArray = eventDetails.value.tasks.map(task => ({
+          committee_id: task.committee ? task.committee.id : null,
+          employees: (task.employees || []).map(emp => emp.id),
+          description: task.task
+        }));
+        await saveTasks(eventDetails.value.id, tasksPayloadArray);
+
+        showSuccessDialog.value = true;
+        successMessage.value = 'The event was updated successfully.';
+        editMode.value = false;
+      } catch (err) {
+        const msg = err?.response?.data?.message || err?.message || 'Failed to save related data.';
+        errorMessage.value = `Event details saved, but failed to save activities/tasks: ${msg}`;
+        errorDialogMessage.value = errorMessage.value;
+        showErrorDialog.value = true;
+      } finally {
+        saving.value = false;
+      }
     }
   });
 };

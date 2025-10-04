@@ -50,7 +50,7 @@ const {
 onMounted(async () => {
     await fetchEvents();
     // fetchAnnouncements depends on allNews from fetchEvents
-    await fetchAnnouncements();
+    fetchAnnouncements(); // fire-and-forget for faster initial render
 });
 
 const promptDeleteAnnouncement = (announcement) => {
