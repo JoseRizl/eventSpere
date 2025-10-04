@@ -25,6 +25,54 @@ const robustParseDate = (dateString) => {
     return new Date(NaN); // Return invalid date if all parsing fails
 };
 
+// Helpers for validating match date/time within event window
+const getFullDateTime = (dateInput, timeStr) => {
+    if (!dateInput) return null;
+    let d = dateInput instanceof Date ? dateInput : robustParseDate(dateInput);
+    if (!isValid(d)) return null;
+    if (typeof timeStr === 'string' && timeStr.length >= 4) {
+        const parsedTime = parse(timeStr.padStart(5, '0'), 'HH:mm', new Date());
+        if (isValid(parsedTime)) {
+            d = new Date(d.getFullYear(), d.getMonth(), d.getDate(), parsedTime.getHours(), parsedTime.getMinutes(), 0, 0);
+        }
+    } else {
+        d = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+    }
+    return d;
+};
+
+const dateOnlyStr = (d) => (d && isValid(d)) ? format(d, 'yyyy-MM-dd') : null;
+
+const validateMatchDateTime = (event, dateInput, timeStr) => {
+    if (!event) return null;
+    const evStart = robustParseDate(event.startDate);
+    const evEnd = robustParseDate(event.endDate || event.startDate);
+    const matchDate = dateInput instanceof Date ? dateInput : robustParseDate(dateInput);
+
+    if (!isValid(matchDate)) return 'Invalid match date.';
+    if (!isValid(evStart) || !isValid(evEnd)) return null; // No strict bounds if event dates invalid
+
+    const m = dateOnlyStr(matchDate);
+    const s = dateOnlyStr(evStart);
+    const e = dateOnlyStr(evEnd);
+    if ((s && m < s) || (e && m > e)) {
+        return `Match date (${format(matchDate, 'MMM-dd-yyyy')}) must be within the event range (${format(evStart, 'MMM-dd-yyyy')} - ${format(evEnd, 'MMM-dd-yyyy')}).`;
+    }
+
+    const evStartDT = getFullDateTime(event.startDate, event.startTime);
+    const evEndDT = getFullDateTime(event.endDate || event.startDate, event.endTime || event.startTime);
+    if (timeStr) {
+        const matchDT = getFullDateTime(matchDate, timeStr);
+        if (matchDT && evStartDT && matchDT < evStartDT) {
+            return `Match time must be on/after event start (${format(evStart, 'MMM-dd-yyyy')} ${event.startTime || '00:00'}).`;
+        }
+        if (matchDT && evEndDT && matchDT > evEndDT) {
+            return `Match time must be on/before event end (${format(evEnd, 'MMM-dd-yyyy')} ${event.endTime || '23:59'}).`;
+        }
+    }
+    return null;
+};
+
 const getBracketTypeClass = (type) => {
     switch (type) {
         case 'Single Elimination': return 'type-single';
@@ -1127,6 +1175,14 @@ const updateLines = (bracketIdx) => {
 
     const { bracketIdx, roundIdx, matchIdx, bracketType } = selectedMatch.value;
     const bracket = brackets.value[bracketIdx];
+
+    // Validate date/time against the parent event window
+    const validationError = validateMatchDateTime(bracket?.event, selectedMatchData.value?.date, selectedMatchData.value?.time);
+    if (validationError) {
+      genericErrorMessage.value = validationError;
+      showGenericErrorDialog.value = true;
+      return;
+    }
 
     let match;
     if (bracket.type === 'Single Elimination') {
