@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { parseISO } from 'date-fns';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
@@ -30,6 +30,25 @@ const showUpdateConfirm = ref(false);
 const localMatchData = computed({
     get: () => props.matchData,
     set: (value) => emit('update:matchData', value),
+});
+
+watch(() => props.show, (newVal) => {
+    if (newVal && localMatchData.value) {
+        // Pre-fill scores for BYE matches upon opening the dialog
+        const isPlayer1Bye = localMatchData.value.player1Name === 'BYE';
+        const isPlayer2Bye = localMatchData.value.player2Name === 'BYE';
+
+        if ((isPlayer1Bye || isPlayer2Bye) && localMatchData.value.status !== 'completed') {
+            if (isPlayer1Bye) {
+                localMatchData.value.player1Score = 0;
+                localMatchData.value.player2Score = 1;
+            } else {
+                localMatchData.value.player1Score = 1;
+                localMatchData.value.player2Score = 0;
+            }
+            localMatchData.value.status = 'completed';
+        }
+    }
 });
 
 const isMatchDataInvalid = computed(() => {

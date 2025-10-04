@@ -223,104 +223,8 @@ export function useBracketActions(state) {
       return;
     }
 
-    if (bracket.type === 'Single Elimination') {
-      for (let roundIdx = 0; roundIdx < bracket.matches.length - 1; roundIdx++) {
-        const currentRound = bracket.matches[roundIdx];
-        currentRound.forEach((match, matchIdx) => {
-          if (match.players[0].name === 'BYE' || match.players[1].name === 'BYE') {
-            const winner = match.players[0].name === 'BYE' ? match.players[1] : match.players[0];
-            if (winner.name === 'TBD') {
-                return; // Skip TBD vs BYE
-            }
-
-            winner.completed = true;
-            match.status = 'completed';
-            match.winner_id = winner.id;
-
-            const nextRoundIdx = roundIdx + 1;
-            const nextMatchIdx = Math.floor(matchIdx / 2);
-            const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
-            if (bracket.matches[nextRoundIdx] && bracket.matches[nextRoundIdx][nextMatchIdx]) {
-              const nextMatch = bracket.matches[nextRoundIdx][nextMatchIdx];
-              nextMatch.players[nextPlayerPos] = {
-                ...winner,
-                score: 0,
-                completed: false,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              };
-            }
-          }
-        });
-      }
-    } else if (bracket.type === 'Double Elimination') {
-      for (let roundIdx = 0; roundIdx < bracket.matches.winners.length - 1; roundIdx++) {
-        const currentRound = bracket.matches.winners[roundIdx];
-        currentRound.forEach((match, matchIdx) => {
-          if (match.players[0].name === 'BYE' || match.players[1].name === 'BYE') {
-            const winner = match.players[0].name === 'BYE' ? match.players[1] : match.players[0];
-            if (winner.name === 'TBD') {
-                return; // Skip TBD vs BYE
-            }
-
-            winner.completed = true;
-            match.status = 'completed';
-            match.winner_id = winner.id;
-            const nextRoundIdx = roundIdx + 1;
-            const nextMatchIdx = Math.floor(matchIdx / 2);
-            const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
-            if (bracket.matches.winners[nextRoundIdx] && bracket.matches.winners[nextRoundIdx][nextMatchIdx]) {
-              const nextMatch = bracket.matches.winners[nextRoundIdx][nextMatchIdx];
-              nextMatch.players[nextPlayerPos] = {
-                ...winner,
-                score: 0,
-                completed: false,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              };
-            }
-          }
-        });
-      }
-
-      for (let roundIdx = 0; roundIdx < bracket.matches.losers.length - 1; roundIdx++) {
-        const currentRound = bracket.matches.losers[roundIdx];
-        currentRound.forEach((match, matchIdx) => {
-          if (match.players[0].name === 'BYE' || match.players[1].name === 'BYE') {
-            const winner = match.players[0].name === 'BYE' ? match.players[1] : match.players[0];
-            if (winner.name === 'TBD') {
-                return; // Skip TBD vs BYE
-            }
-
-            winner.completed = true;
-            match.status = 'completed';
-            match.winner_id = winner.id;
-            const nextRoundIdx = roundIdx + 1;
-            let nextMatchIdx;
-            let nextPlayerPos;
-
-            if (roundIdx % 2 === 0) { // Advancing from LR1->LR2, LR3->LR4
-              nextMatchIdx = matchIdx;
-              nextPlayerPos = 0;
-            } else { // Advancing from LR2->LR3, LR4->LR5
-              nextMatchIdx = Math.floor(matchIdx / 2);
-              nextPlayerPos = matchIdx % 2;
-            }
-
-            if (bracket.matches.losers[nextRoundIdx] && bracket.matches.losers[nextRoundIdx][nextMatchIdx]) {
-              const nextMatch = bracket.matches.losers[nextRoundIdx][nextMatchIdx];
-              nextMatch.players[nextPlayerPos] = {
-                ...winner,
-                score: 0,
-                completed: false,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              };
-            }
-          }
-        });
-      }
-    }
+    // Auto-progression for BYE rounds in Single and Double Elimination is disabled.
+    // BYE matches will be handled in the MatchEditorDialog to prevent unexpected state changes.
   };
 
   const toggleBracket = (bracketIdx) => {
@@ -1423,9 +1327,23 @@ const updateLines = (bracketIdx) => {
           match.is_tie = false;
         }
       } else {
-        // Elimination brackets - no ties allowed (already checked above)
-        winner = match.players[0].score > match.players[1].score ? match.players[0] : match.players[1];
-        loser = match.players[0].score > match.players[1].score ? match.players[1] : match.players[0];
+        // Elimination brackets - handle BYE specially and prevent ties
+        const p0IsBye = match.players[0].name === 'BYE';
+        const p1IsBye = match.players[1].name === 'BYE';
+        if (p0IsBye || p1IsBye) {
+          if (p0IsBye) {
+            match.players[0].score = 0; // BYE score always 0
+            winner = match.players[1];
+            loser = match.players[0];
+          } else {
+            match.players[1].score = 0; // BYE score always 0
+            winner = match.players[0];
+            loser = match.players[1];
+          }
+        } else {
+          winner = match.players[0].score > match.players[1].score ? match.players[0] : match.players[1];
+          loser = match.players[0].score > match.players[1].score ? match.players[1] : match.players[0];
+        }
         match.winner_id = winner.id;
         match.loser_id = loser.id;
         match.is_tie = false;
