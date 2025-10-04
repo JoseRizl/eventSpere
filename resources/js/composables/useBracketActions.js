@@ -670,22 +670,51 @@ export function useBracketActions(state) {
     }
 
     // Step 2: Populate Losers Bracket with placeholders for players dropping from Winners Bracket
+    // Mapping rules (0-based indices):
+    // - WR1 (wrRoundIdx=0) losers drop into LR1 (lrRoundIdx=0), pairing sequential non-BYE WR1 matches: [0&1] -> LR1-0, [2&3] -> LR1-1, ...
+    //   We compress indices by skipping WR1 matches that are BYE vs someone (they produce no loser).
+    // - WRr (wrRoundIdx>=1) losers drop into LR(2r-1) with same match index and in the second player slot (index 1).
     for (let wrRoundIdx = 0; wrRoundIdx < winnersRounds.length - 1; wrRoundIdx++) {
         const winnersRound = winnersRounds[wrRoundIdx];
-        winnersRound.forEach((wrMatch, wrMatchIdx) => {
-            const loserPlaceholder = {
-                id: null,
-                name: `Loser of WR${wrRoundIdx + 1} M${wrMatch.match_number}`,
-                score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
-            };
 
-            const lrRoundIdx = (wrRoundIdx * 2);
-            const lrMatchIdx = wrMatchIdx;
-            const lrPlayerPos = 1; // Losers from winners always drop into the second player slot of their respective losers match
-            if (losersRounds[lrRoundIdx] && losersRounds[lrRoundIdx][lrMatchIdx]) {
-                losersRounds[lrRoundIdx][lrMatchIdx].players[lrPlayerPos] = loserPlaceholder;
-            }
-        });
+        if (wrRoundIdx === 0) {
+            // Handle WR1 -> LR1 with compression to skip BYE-only matches
+            let nonByeCounter = 0;
+            winnersRound.forEach((wrMatch) => {
+                const hasLoser = wrMatch.players[0]?.name !== 'BYE' && wrMatch.players[1]?.name !== 'BYE';
+                if (!hasLoser) return; // This WR1 match will never produce a loser
+
+                const lrRoundIdx = 0; // LR1
+                const lrMatchIdx = Math.floor(nonByeCounter / 2); // pair losers 0&1, 2&3, ...
+                const lrPlayerPos = nonByeCounter % 2; // 0 then 1 for each pair
+                nonByeCounter++;
+
+                const loserPlaceholder = {
+                    id: null,
+                    name: `Loser of WR1 M${wrMatch.match_number}`,
+                    score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+                };
+
+                if (losersRounds[lrRoundIdx] && losersRounds[lrRoundIdx][lrMatchIdx]) {
+                    losersRounds[lrRoundIdx][lrMatchIdx].players[lrPlayerPos] = loserPlaceholder;
+                }
+            });
+        } else {
+            // WR2+ -> LR(2r-1), same match index, loser goes to slot 1 (faces winner coming from previous LR round)
+            const lrRoundIdx = (wrRoundIdx * 2) - 1;
+            winnersRound.forEach((wrMatch, wrMatchIdx) => {
+                const lrMatchIdx = wrMatchIdx;
+                const lrPlayerPos = 1;
+                const loserPlaceholder = {
+                    id: null,
+                    name: `Loser of WR${wrRoundIdx + 1} M${wrMatch.match_number}`,
+                    score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+                };
+                if (losersRounds[lrRoundIdx] && losersRounds[lrRoundIdx][lrMatchIdx]) {
+                    losersRounds[lrRoundIdx][lrMatchIdx].players[lrPlayerPos] = loserPlaceholder;
+                }
+            });
+        }
     }
 
     // --- Grand Finals ---
