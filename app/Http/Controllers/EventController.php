@@ -368,9 +368,15 @@ class EventController extends Controller
 
         try {
             File::put(base_path('db.json'), json_encode($this->jsonData, JSON_PRETTY_PRINT));
+
+            if ($request->wantsJson()) {
+                return response()->json(['success' => true, 'message' => 'Event updated successfully.']);
+            }
+
             return back()->with('success', 'Event updated successfully.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Failed to save event: '.$e->getMessage());
+            $message = 'Failed to save event: '.$e->getMessage();
+            return $request->wantsJson() ? response()->json(['success' => false, 'error' => $message], 500) : back()->with('error', $message);
         }
     }
 

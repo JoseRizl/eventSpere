@@ -95,7 +95,11 @@ class TaskController extends Controller
 
         $this->writeJson($this->jsonData);
 
-        return redirect()->back()->with('success', 'Tasks updated successfully.');
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Tasks updated successfully.']);
+        }
+
+        return back()->with('success', 'Tasks updated successfully.');
     }
 
     /**

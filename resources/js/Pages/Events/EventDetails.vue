@@ -17,6 +17,7 @@ import { getFullDateTime } from '@/utils/dateUtils.js';
 import { useActivities } from '@/composables/useActivities.js';
 import { useTasks } from '@/composables/useTasks.js';
 import { useAnnouncements } from '@/composables/useAnnouncements.js';
+import { useMemorandum } from '@/composables/useMemorandum.js';
 
 const props = defineProps({
   event: Object,
@@ -29,6 +30,7 @@ const props = defineProps({
   all_users: Array, // Assuming this comes from shared props
   auth: Object, // Assuming this comes from shared props
   preloadedActivities: Array,
+  preloadedMemorandum: Object,
   preloadedTasks: Array,
   preloadedAnnouncements: Array,
 });
@@ -139,6 +141,11 @@ const openImageDialog = (imageUrl) => {
   showImageDialog.value = true;
 };
 
+// Memorandum composable
+const { memorandum: eventMemorandum, fetchMemorandum, saveMemorandum } = useMemorandum(props.event.id);
+const newMemorandumFile = ref(null);
+const newMemorandumPreview = ref(null);
+
 const { activities: activitiesState, fetchActivities: fetchActivitiesApi, saveActivities } = useActivities();
 const { tasks: tasksState, fetchTasks: fetchTasksApi, saveTasks } = useTasks();
 
@@ -230,18 +237,19 @@ const selectedBracketForDialog = computed(() => {
 });
 
 const handleMemoUpload = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+  const file = event.target.files[0];
+  if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        eventDetails.value.memorandum = {
-            type: file.type.startsWith('image/') ? 'image' : 'file',
-            content: e.target.result,
-            filename: file.name,
-        };
+  newMemorandumFile.value = file;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    newMemorandumPreview.value = {
+      type: file.type.startsWith('image/') ? 'image' : 'file',
+      content: e.target.result,
+      filename: file.name,
     };
-    reader.readAsDataURL(file);
+  };
+  reader.readAsDataURL(file);
 };
 
 
@@ -309,6 +317,7 @@ const tagsMap = computed(() =>
 const eventDetails = ref({
     ...props.event,
     venue: props.event.venue || '',
+    memorandum: props.event.memorandum || null,
     category_id: props.event.category?.id || props.event.category_id,
     activities: (props.event.activities || []).map((a, idx) => ({
       ...a,
@@ -463,6 +472,9 @@ onMounted(() => {
     // Augment with employee names
     const employeesMap = employees.value.reduce((map, emp) => { map[emp.id] = emp; return map; }, {});
     eventAnnouncements.value = props.preloadedAnnouncements.map(ann => ({ ...ann, employee: employeesMap[ann.userId] || { name: 'Admin' } }));
+    if (props.preloadedMemorandum) {
+      eventMemorandum.value = props.preloadedMemorandum;
+    }
     setAnnouncements(eventAnnouncements.value.map(a => ({ ...a, event: props.event })));
   }
 
@@ -526,14 +538,14 @@ const openAddAnnouncementModal = () => {
 };
 
 const viewMemorandum = () => {
-    if (eventDetails.value.memorandum && eventDetails.value.memorandum.content) {
-    if (eventDetails.value.memorandum.type === 'image') {
-        memoImageUrl.value = eventDetails.value.memorandum.content;
+    if (eventMemorandum.value && eventMemorandum.value.content) {
+    if (eventMemorandum.value.type === 'image') {
+        memoImageUrl.value = eventMemorandum.value.content;
         showMemoImageDialog.value = true;
     } else {
         const link = document.createElement('a');
-        link.href = eventDetails.value.memorandum.content;
-        link.download = eventDetails.value.memorandum.filename;
+        link.href = eventMemorandum.value.content;
+        link.download = eventMemorandum.value.filename;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -744,7 +756,6 @@ const saveChanges = () => {
     startTime: eventDetails.value.startTime,
     endTime: eventDetails.value.endTime,
     tags: eventDetails.value.tags || [], // Only IDs
-        memorandum: eventDetails.value.memorandum,
   };
 
   // Separate payload for tasks
@@ -757,7 +768,7 @@ const saveChanges = () => {
   };
 
   // First, save the main event details
-  router.post(route('event.update', { id: eventDetails.value.id }), eventPayload, {
+  router.put(route('event.update', { id: eventDetails.value.id }), eventPayload, {
     preserveScroll: true,
     onError: (errors) => {
       saving.value = false;
@@ -774,6 +785,17 @@ const saveChanges = () => {
     onSuccess: async () => {
       try {
         // Save activities via composable
+        if (newMemorandumFile.value) {
+          const memoContent = await toBase64(newMemorandumFile.value);
+          const memoPayload = {
+            type: newMemorandumFile.value.type.startsWith('image/') ? 'image' : 'file',
+            content: memoContent,
+            filename: newMemorandumFile.value.name,
+          };
+          await saveMemorandum(memoPayload);
+          newMemorandumFile.value = null;
+          newMemorandumPreview.value = null;
+        }
         const activitiesPayload = (eventDetails.value.activities || []).map(({ __uid, title, date, startTime, endTime, location }) => ({ title, date, startTime, endTime, location }));
         await saveActivities(eventDetails.value.id, activitiesPayload);
 

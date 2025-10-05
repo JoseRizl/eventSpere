@@ -31,7 +31,7 @@ Route::middleware('auth')->group(function () {
 
     Route::inertia('/bracket', 'Sports/Bracket')->name('bracket');
 
-    Route::post('/events/{id}/update', [EventController::class, 'update'])->name('event.update');
+    Route::put('/events/{id}/update', [EventController::class, 'update'])->name('event.update');
     Route::put('/events/{id}/activities', [ActivitiesController::class, 'updateForEvent'])->name('events.activities.updateForEvent');
     Route::post('/events/{id}/announcements', [AnnouncementsController::class, 'storeForEvent'])->name('events.announcements.storeForEvent');
     Route::delete('/events/{id}/announcements/{announcementId}', [AnnouncementsController::class, 'destroyForEvent'])->name('events.announcements.destroyForEvent');

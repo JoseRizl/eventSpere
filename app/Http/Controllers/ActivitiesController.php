@@ -43,7 +43,7 @@ class ActivitiesController extends Controller
         // Find current event for validation context
         $event = collect($this->jsonData['events'] ?? [])->firstWhere('id', $eventId);
         if (!$event) {
-            return back()->with('error', 'Event not found.');
+            return response()->json(['error' => 'Event not found.'], 404);
         }
 
         $validated = $request->validate([
@@ -129,6 +129,6 @@ class ActivitiesController extends Controller
 
         $this->writeJson($this->jsonData);
 
-        return redirect()->back()->with('success', 'Activities updated successfully.');
+        return response()->json(['success' => true, 'message' => 'Activities updated successfully.']);
     }
 }
