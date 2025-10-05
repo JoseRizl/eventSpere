@@ -126,9 +126,17 @@ class EventController extends JsonController
             ];
         })->values()->toArray();
 
-        $announcements = collect($data['announcements'] ?? [])->where('event_id', $id)->sortByDesc(function ($a) {
-            return strtotime($a['timestamp'] ?? '1970-01-01T00:00:00Z');
-        })->values()->toArray();
+        $announcementsRaw = collect($data['announcements'] ?? [])
+            ->where('event_id', $id)
+            ->sortByDesc(fn ($a) => strtotime($a['timestamp'] ?? '1970-01-01T00:00:00Z'))
+            ->values();
+        $userIds = $announcementsRaw->pluck('userId')->unique()->filter();
+        $users = User::whereIn('id', $userIds)->get()->keyBy('id');
+        $announcements = $announcementsRaw->map(function ($announcement) use ($users) {
+            $user = $users->get($announcement['userId']);
+            $announcement['employee'] = $user ? ['name' => $user->name] : ['name' => 'Admin'];
+            return $announcement;
+        })->toArray();
 
         // Find the memorandum for this event
         $memorandum = collect($data['memorandums'] ?? [])->firstWhere('event_id', (string) $id);

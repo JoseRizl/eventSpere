@@ -457,9 +457,7 @@ onMounted(() => {
   }
   if (Array.isArray(props.preloadedAnnouncements)) {
     // Augment with employee names
-    const employeesMap = employees.value.reduce((map, emp) => { map[emp.id] = emp; return map; }, {});
-    eventAnnouncements.value = props.preloadedAnnouncements.map(ann => ({ ...ann, employee: employeesMap[ann.userId] || { name: 'Admin' } }));
-    setAnnouncements(eventAnnouncements.value.map(a => ({ ...a, event: props.event })));
+    eventAnnouncements.value = props.preloadedAnnouncements;
   }
 
   // Ensure tasks have proper committee/employee references
@@ -580,10 +578,7 @@ const addAnnouncement = async () => {
 
   try {
     const response = await axios.post(route('events.announcements.storeForEvent', { id: props.event.id }), payload);
-    const newAnn = {
-        ...response.data,
-        employee: { name: user.value.name }
-    };
+    const newAnn = response.data; // Backend now returns announcement with employee info
     eventAnnouncements.value.unshift(newAnn);
     showAddAnnouncementModal.value = false;
     successMessage.value = 'Announcement posted successfully!';

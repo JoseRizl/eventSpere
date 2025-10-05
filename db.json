@@ -319,6 +319,14 @@
     ],
     "announcements": [
         {
+            "id": "f423-76c4",
+            "event_id": "f423",
+            "message": "Drugs",
+            "image": null,
+            "timestamp": "2025-10-05T06:17:11.068Z",
+            "userId": 9
+        },
+        {
             "id": "72f9-7827",
             "event_id": "72f9",
             "message": "winner bbal",

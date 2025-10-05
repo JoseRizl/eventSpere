@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User;
 use Illuminate\Support\Facades\File;
 
 class AnnouncementsController extends Controller
@@ -27,9 +28,17 @@ class AnnouncementsController extends Controller
             ->where('event_id', $eventId)
             ->sortByDesc(function ($a) {
                 return strtotime($a['timestamp'] ?? '1970-01-01T00:00:00Z');
-            })
-            ->values()
-            ->toArray();
+            })->values();
+
+        $userIds = $ann->pluck('userId')->unique()->filter();
+        $users = User::whereIn('id', $userIds)->get()->keyBy('id');
+
+        $ann = $ann->map(function ($announcement) use ($users) {
+            $user = $users->get($announcement['userId']);
+            $announcement['employee'] = $user ? ['name' => $user->name] : ['name' => 'Admin'];
+            return $announcement;
+        })->toArray();
+
         return response()->json($ann);
     }
 
@@ -59,6 +68,10 @@ class AnnouncementsController extends Controller
         $this->jsonData['announcements'] = $this->jsonData['announcements'] ?? [];
         array_unshift($this->jsonData['announcements'], $new);
         $this->writeJson($this->jsonData);
+
+        // Attach employee name for the response
+        $user = User::find($new['userId']);
+        $new['employee'] = $user ? ['name' => $user->name] : ['name' => 'Admin'];
 
         if ($request->wantsJson()) {
             return response()->json($new, 201);
