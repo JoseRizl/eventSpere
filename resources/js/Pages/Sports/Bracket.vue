@@ -246,7 +246,7 @@ onMounted(async () => {
                 />
             </div>
             <div class="action-section">
-                <button v-if="user?.role === 'Admin' || user?.role === 'SportsManager'" class="create-button" @click="openDialog">Create Bracket</button>
+                <button v-if="user?.role === 'Admin' " class="create-button" @click="openDialog">Create Bracket</button>
             </div>
         </div>
         <div v-if="showFilters" class="filter-panel mb-5">
@@ -410,8 +410,8 @@ onMounted(async () => {
       <ConfirmationDialog
         v-model:show="showDeleteConfirmDialog"
         title="Confirm Deletion"
-        message="Are you sure you want to delete this bracket?"
-        confirmText="Yes, Delete"
+        message="Are you sure you want to remove this bracket?"
+        confirmText="Yes, Remove Bracket"
         cancelText="Cancel"
         confirmButtonClass="modal-button-danger"
         @confirm="confirmDeleteBracket"

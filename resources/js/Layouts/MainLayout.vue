@@ -105,13 +105,13 @@ const sideBarItems = computed(() => {
       label: 'Events',
       icon: 'pi pi-calendar-clock',
       routeName: 'events.index',
-      roles: ['Admin', 'Principal'],
+      roles: ['Admin', 'Principal', 'TournamentManager'],
     },
     {
       label: 'Brackets',
       icon: 'pi pi-ticket',
       routeName: 'bracket',
-      roles: ['Admin', 'SportsManager'],
+      roles: ['Admin', 'TournamentManager'],
     },
     {
       label: 'Labels',
@@ -348,7 +348,7 @@ onUnmounted(() => {
                 </nav>
 
                 <!-- Logout Section -->
-                <div v-if="user && ['Principal', 'Admin', 'SportsManager'].includes(user.role)" class="px-3 py-3 mt-auto">
+                <div v-if="user && ['Principal', 'Admin', 'TournamentManager'].includes(user.role)" class="px-3 py-3 mt-auto">
                     <hr class="border-gray-200 mb-3">
                     <button @click="logout" class="flex items-center w-full text-gray-600 hover:bg-gray-100 rounded-lg p-3 transition-colors duration-200">
                         <div class="flex-shrink-0"><i class="pi pi-sign-out text-xl w-6 text-center"></i></div>

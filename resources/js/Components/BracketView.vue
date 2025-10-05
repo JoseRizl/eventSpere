@@ -405,7 +405,7 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
                 :id="`match-${bracketIndex}-${roundIdx}-${matchIdx}`"
                 :data-match-id="match.id"
                 :style="getMatchStyle(roundIdx)"
-                :class="['match', (user && (user.role === 'Admin' || user.role === 'SportsManager')) ? 'cursor-pointer' : '']"
+                :class="['match', (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
                 @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'single')"
             >
                 <div class="player-box">
@@ -437,7 +437,7 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
             v-for="(match, matchIdx) in round"
             :key="`round-${roundIdx}-${matchIdx}`"
             :id="`round-match-${roundIdx}-${matchIdx}`"
-            :class="['match', (user && (user.role === 'Admin' || user.role === 'SportsManager')) ? 'cursor-pointer' : '']"
+            :class="['match', (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
             @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'round_robin')"
             >
             <div class="player-box">
@@ -471,7 +471,7 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
                 <span class="losses">Losses</span>
                 <span class="points flex items-center">
                     Points
-                    <button v-if="user?.role === 'Admin' || user?.role === 'SportsManager'"
+                    <button v-if="user?.role === 'Admin' || user?.role === 'TournamentManager'"
                         @click="props.openScoringConfigDialog(bracketIndex)"
                         class="scoring-config-btn ml-2"
                         title="Configure scoring system">
@@ -529,7 +529,7 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
                     :id="`winners-match-${bracketIndex}-${roundIdx}-${matchIdx}`"
                     :data-match-id="match.id"
                     :style="getMatchStyle(roundIdx)"
-                    :class="['match', (user && (user.role === 'Admin' || user.role === 'SportsManager')) ? 'cursor-pointer' : '']"
+                    :class="['match', (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
                     @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'winners')"
                 >
                     <div class="player-box">
@@ -576,7 +576,7 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
                     :key="`losers-${roundIdx}-${matchIdx}`"
                     :id="`losers-match-${bracketIndex}-${roundIdx}-${matchIdx}`"
                     :data-match-id="match.id"
-                    :class="['match', (user && (user.role === 'Admin' || user.role === 'SportsManager')) ? 'cursor-pointer' : '']"
+                    :class="['match', (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
                     @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'losers')"
                 >
                     <div class="player-box">
@@ -619,7 +619,7 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
                 <div v-for="(match, matchIdx) in bracket.matches.grand_finals" :key="`grand-finals-${matchIdx}`"
                 :id="`grand-finals-match-${bracketIndex}-${matchIdx}`"
                 :data-match-id="match.id"
-                :class="['match', (user && (user.role === 'Admin' || user.role === 'SportsManager')) ? 'cursor-pointer' : '']"
+                :class="['match', (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
                 @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, 0, matchIdx, match, 'grand_finals')"
                 >
                 <div class="player-box">

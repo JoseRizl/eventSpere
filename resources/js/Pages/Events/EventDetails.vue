@@ -1025,7 +1025,7 @@ const getBracketIndex = (bracketId) => {
 <div>
     <div class="min-h-screen py-8 px-4 mx-auto">
         <!-- Back Button for non-management -->
-        <div v-if="!user || !['Admin', 'Principal', 'SportsManager'].includes(user.role)" class="mb-4 -ml-2">
+        <div v-if="!user || !['Admin', 'Principal', 'TournamentManager'].includes(user.role)" class="mb-4 -ml-2">
             <Button
                 icon="pi pi-arrow-left"
                 @click="goBack"
@@ -1543,17 +1543,13 @@ const getBracketIndex = (bracketId) => {
       <!-- Brackets Section -->
       <div v-if="relatedBrackets.length > 0" class="mx-auto mt-6">
         <h2 class="section-title mb-0">Games</h2>
-        <div v-if="relatedBrackets.length > 1" class="mb-4">
-            <div class="search-wrapper">
-                <div class="p-input-icon-left w-full">
-                    <i class="pi pi-search" />
-                    <InputText
-                        v-model="searchQuery"
-                        placeholder="Search games..."
-                        class="w-full"
-                    />
-                </div>
-            </div>
+        <div v-if="relatedBrackets.length > 1" class="my-4">
+            <SearchFilterBar
+                v-model:searchQuery="searchQuery"
+                placeholder="Search games..."
+                :show-date-filter="false"
+                :show-clear-button="!!searchQuery"
+                @clear-filters="searchQuery = ''" />
         </div>
         <div v-if="filteredRelatedBrackets.length === 0" class="no-brackets-message">
             <div class="icon-and-title">
