@@ -5,23 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Validation\Rule;
-
-class TaskController extends Controller
+class TaskController extends JsonController
 {
-    private $dbPath;
-    private $jsonData;
-
-    public function __construct()
-    {
-        $this->dbPath = base_path('db.json');
-        $this->jsonData = json_decode(File::get($this->dbPath), true);
-    }
-
-    private function writeJson(array $data)
-    {
-        File::put($this->dbPath, json_encode($data, JSON_PRETTY_PRINT));
-    }
-
     public function indexForEvent($eventId)
     {
         $allTasks = collect($this->jsonData['tasks'] ?? []);

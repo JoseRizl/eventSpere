@@ -9,14 +9,8 @@ use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\File;
 use App\Models\Category;
-
-class EventController extends Controller
+class EventController extends JsonController
 {
-    public function __construct()
-    {
-        $this->jsonData = json_decode(File::get(base_path('db.json')), true);
-    }
-
     public function index()
 {
     $data = $this->jsonData;
@@ -29,13 +23,14 @@ class EventController extends Controller
     $allEmployees = collect($data['employees'] ?? []);
     $allCommittees = collect($data['committees'] ?? []);
     $taskEmployeeMap = collect($data['task_employee'] ?? [])->groupBy('task_id');
+    $allMemorandums = collect($data['memorandums'] ?? [])->keyBy('event_id');
 
     $events = collect($data['events'] ?? [])
         ->where('archived', '!=', true)
         ->sortByDesc(function ($event) {
             return strtotime($event['startDate'] ?? '1970-01-01');
         })
-        ->map(function ($event) use ($tagsCollection, $eventTags, $allTasks, $allEmployees, $allCommittees, $taskEmployeeMap) {
+        ->map(function ($event) use ($tagsCollection, $eventTags, $allTasks, $allEmployees, $allCommittees, $taskEmployeeMap, $allMemorandums) {
             // Get tag IDs for this event from event_tags pseudo-table
             $tagIds = $eventTags->where('event_id', $event['id'])->pluck('tag_id')->toArray();
             // Resolve tag objects
@@ -55,6 +50,9 @@ class EventController extends Controller
                 ];
             })->values()->toArray();
 
+            // Resolve memorandum for this event
+            $event['memorandum'] = $allMemorandums->get($event['id']);
+
             return $event;
         })->values()->toArray();
 
@@ -70,6 +68,7 @@ class EventController extends Controller
         'employees_prop' => $data['employees'] ?? [],
         'settings_prop' => $settings,
         'categories_prop' => $data['category'] ?? [],
+        'memorandums_prop' => $data['memorandums'] ?? [],
     ]);
 }
 
@@ -131,8 +130,13 @@ class EventController extends Controller
             return strtotime($a['timestamp'] ?? '1970-01-01T00:00:00Z');
         })->values()->toArray();
 
+        // Find the memorandum for this event
+        $memorandum = collect($data['memorandums'] ?? [])->firstWhere('event_id', (string) $id);
+
         // If the request wants JSON, return only the event data.
         if (request()->wantsJson()) {
+            // Attach related data for API consumers
+            $event['memorandum'] = $memorandum;
             return response()->json($event);
         }
 
@@ -146,6 +150,7 @@ class EventController extends Controller
             'preloadedActivities' => $activities,
             'preloadedTasks' => $tasks,
             'preloadedAnnouncements' => $announcements,
+            'preloadedMemorandum' => $memorandum,
         ]);
     }
 
@@ -230,21 +235,19 @@ class EventController extends Controller
             }],
             'archived' => 'boolean',
             'memorandum' => 'nullable|array',
-            'memorandum.type' => 'required_with:memorandum|string|in:image,file',
-            'memorandum.content' => 'required_with:memorandum|string',
-            'memorandum.filename' => 'nullable|string',
         ]);
 
         $data = $this->jsonData;
         $newEvent = $validated;
         $newEvent['id'] = substr(md5(uniqid()), 0, 4);
         $newEvent['createdAt'] = now()->toISOString();
-        $newEvent['tasks'] = [];
-        $newEvent['activities'] = [];
         $newEvent['type'] = 'event';
 
-        // Remove tags from event object
+        // Remove tags and memorandum from event object as they are handled separately
         unset($newEvent['tags']);
+        $memorandumData = $validated['memorandum'] ?? null;
+        unset($newEvent['memorandum']);
+
         array_unshift($data['events'], $newEvent);
 
         // Update event_tags pseudo-table
@@ -260,12 +263,25 @@ class EventController extends Controller
             ];
         }
 
+        // Handle memorandum
+        if ($memorandumData) {
+            $data['memorandums'] = $data['memorandums'] ?? [];
+            $newMemo = $memorandumData;
+            $newMemo['id'] = (string) \Illuminate\Support\Str::uuid();
+            $newMemo['event_id'] = $newEvent['id'];
+            $data['memorandums'][] = $newMemo;
+        }
+
+
         File::put(base_path('db.json'), json_encode($data, JSON_PRETTY_PRINT));
 
         if ($request->wantsJson()) {
             return response()->json(['success' => true, 'event' => $newEvent]);
         }
-        return redirect()->route('events.index')->with('success', 'Event created successfully.');
+        return redirect()->route('events.index')->with([
+            'success' => 'Event created successfully.',
+            'event_id' => $newEvent['id'] // Pass the new event ID back
+        ]);
     }
 
     public function update(Request $request, $id)
@@ -338,10 +354,7 @@ class EventController extends Controller
                     }
                 }
             }],
-                        'memorandum' => 'nullable|array',
-            'memorandum.type' => 'required_with:memorandum|string|in:image,file',
-            'memorandum.content' => 'required_with:memorandum|string',
-            'memorandum.filename' => 'nullable|string',
+            'memorandum' => 'nullable|array', // Allow memorandum to be part of the update
         ]);
 
         // Update the event
@@ -349,6 +362,10 @@ class EventController extends Controller
             if ($event['id'] == $id) {
                 $event = array_merge($event, $validated);
                 unset($event['tags']); // Tags are managed in event_tags table
+                // Also unset memorandum as it's handled separately
+                if (array_key_exists('memorandum', $validated)) {
+                    unset($event['memorandum']);
+                }
                 break;
             }
         }
@@ -366,8 +383,29 @@ class EventController extends Controller
             ];
         }
 
+        // Handle memorandum update/creation/deletion from EventDetails
+        if (array_key_exists('memorandum', $request->all())) {
+            $memorandumData = $request->input('memorandum');
+            $this->jsonData['memorandums'] = $this->jsonData['memorandums'] ?? [];
+            $existingMemoIndex = collect($this->jsonData['memorandums'])->search(fn($memo) => $memo['event_id'] === $id);
+
+            if ($memorandumData) { // If new data is provided (create or update)
+                $newMemo = $memorandumData;
+                $newMemo['id'] = ($existingMemoIndex !== false) ? $this->jsonData['memorandums'][$existingMemoIndex]['id'] : (string) \Illuminate\Support\Str::uuid();
+                $newMemo['event_id'] = $id;
+
+                if ($existingMemoIndex !== false) {
+                    $this->jsonData['memorandums'][$existingMemoIndex] = $newMemo;
+                } else {
+                    $this->jsonData['memorandums'][] = $newMemo;
+                }
+            } elseif ($existingMemoIndex !== false) { // If no data is provided and one exists, delete it
+                array_splice($this->jsonData['memorandums'], $existingMemoIndex, 1);
+            }
+        }
+
         try {
-            File::put(base_path('db.json'), json_encode($this->jsonData, JSON_PRETTY_PRINT));
+            $this->writeJson($this->jsonData);
 
             if ($request->wantsJson()) {
                 return response()->json(['success' => true, 'message' => 'Event updated successfully.']);
@@ -405,11 +443,7 @@ class EventController extends Controller
             'tags' => 'nullable|array',
             'tags.*' => ['sometimes', Rule::in($validTagIds)],
             'archived' => 'sometimes|boolean',
-            // Memorandum validation for list view update
             'memorandum' => 'nullable|array',
-            'memorandum.type' => 'required_with:memorandum|string|in:image,file',
-            'memorandum.content' => 'required_with:memorandum|string',
-            'memorandum.filename' => 'nullable|string',
         ]);
 
         $data = $this->jsonData;
@@ -426,11 +460,8 @@ class EventController extends Controller
                     unset($validated['tags']);
                 }
 
-                // Safety feature for memorandum: do not overwrite with null if not provided from list view
-                // This prevents accidental removal.
-                if (array_key_exists('memorandum', $validated) && is_null($validated['memorandum'])) {
-                    unset($validated['memorandum']);
-                }
+                $memorandumData = $validated['memorandum'] ?? null;
+                unset($validated['memorandum']);
 
                 // Explicitly merge validated data to be more intentional about what is being updated.
                 $event = array_merge($event, $validated);
@@ -463,7 +494,29 @@ class EventController extends Controller
             }
         }
 
-        File::put(base_path('db.json'), json_encode($data, JSON_PRETTY_PRINT));
+        // Handle memorandum update/creation/deletion
+        if (array_key_exists('memorandum', $request->all())) {
+            $memorandumData = $request->input('memorandum');
+            $data['memorandums'] = $data['memorandums'] ?? [];
+            $existingMemoIndex = collect($data['memorandums'])->search(fn($memo) => $memo['event_id'] === $id);
+
+            if ($memorandumData) {
+                if ($existingMemoIndex !== false) {
+                    // Update existing
+                    $data['memorandums'][$existingMemoIndex] = array_merge($data['memorandums'][$existingMemoIndex], $memorandumData);
+                } else {
+                    // Create new
+                    $newMemo = $memorandumData;
+                    $newMemo['id'] = (string) \Illuminate\Support\Str::uuid();
+                    $newMemo['event_id'] = $id;
+                    $data['memorandums'][] = $newMemo;
+                }
+            } elseif ($existingMemoIndex !== false) {
+                array_splice($data['memorandums'], $existingMemoIndex, 1);
+            }
+        }
+
+        $this->writeJson($data);
 
         if ($request->wantsJson()) {
             return response()->json(['success' => true]);
@@ -480,7 +533,7 @@ class EventController extends Controller
             return $event;
         })->toArray();
 
-        File::put(base_path('db.json'), json_encode($this->jsonData, JSON_PRETTY_PRINT));
+        $this->writeJson($this->jsonData);
 
         if (request()->wantsJson()) {
             return response()->json(['success' => true]);
@@ -522,7 +575,7 @@ class EventController extends Controller
                 }
             }
 
-            File::put(base_path('db.json'), json_encode($data, JSON_PRETTY_PRINT));
+            $this->writeJson($data);
             return back()->with('success', 'Event restored successfully');
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to restore event');
@@ -553,7 +606,7 @@ class EventController extends Controller
                     ->toArray();
             }
 
-            File::put(base_path('db.json'), json_encode($data, JSON_PRETTY_PRINT));
+            $this->writeJson($data);
             return back()->with('success', 'Event and its associated brackets were permanently deleted.');
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to delete event');
@@ -575,7 +628,7 @@ class EventController extends Controller
 
         $data['settings']['defaultEventImage'] = $newDefaultImage;
 
-        File::put(base_path('db.json'), json_encode($data, JSON_PRETTY_PRINT));
+        $this->writeJson($data);
 
         return back()->with([
             'success' => 'Default event image updated successfully.',

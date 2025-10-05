@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\MemorandumController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TaskController;
@@ -59,6 +60,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/events/{eventId}/activities', [ActivitiesController::class, 'indexForEvent'])->name('events.activities.indexForEvent');
         Route::get('/events/{eventId}/announcements', [AnnouncementsController::class, 'indexForEvent'])->name('events.announcements.indexForEvent');
         Route::apiResource('tasks', TaskController::class)->except(['show', 'create', 'edit']);
+
+        // Memorandum API routes, note the parameter name change to 'event'
+        Route::post('/events/{event}/memorandum', [MemorandumController::class, 'storeOrUpdate'])->name('memorandum.storeOrUpdate');
+        Route::delete('/events/{event}/memorandum', [MemorandumController::class, 'destroy'])->name('memorandum.destroy');
     });
 });
 

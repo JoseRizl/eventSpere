@@ -60,8 +60,6 @@ const relatedEvents = ref(props.relatedEvents || []);
 const showDeleteTaskConfirm = ref(false);
 const taskToDelete = ref(null);
 const showDeleteScheduleConfirm = ref(false);
-const memoFileInput = ref(null);
-const handlMemoUpload = ref(null);
 const originalEventDetails = ref(null);
 const searchQuery = ref('');
 const scheduleToDelete = ref(null);
@@ -142,34 +140,11 @@ const openImageDialog = (imageUrl) => {
 };
 
 // Memorandum composable
-const { memorandum: eventMemorandum, fetchMemorandum, saveMemorandum } = useMemorandum(props.event.id);
+const { saveMemorandum, clearMemorandum } = useMemorandum();
 const newMemorandumFile = ref(null);
 const newMemorandumPreview = ref(null);
-
 const { activities: activitiesState, fetchActivities: fetchActivitiesApi, saveActivities } = useActivities();
 const { tasks: tasksState, fetchTasks: fetchTasksApi, saveTasks } = useTasks();
-
-const fetchTasks = async (eventId) => {
-  try {
-    const data = await fetchTasksApi(eventId);
-    eventDetails.value.tasks = data;
-  } catch (error) {
-    console.error('Error fetching tasks:', error);
-  }
-};
-
-const fetchActivities = async (eventId) => {
-  try {
-    const data = await fetchActivitiesApi(eventId);
-    const arr = Array.isArray(data) ? data : [];
-    eventDetails.value.activities = arr.map((a, idx) => ({
-      ...a,
-      __uid: a.__uid || `${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 8)}`
-    }));
-  } catch (error) {
-    console.error('Error fetching activities:', error);
-  }
-};
 
 // Bracket logic
 const bracketState = useBracketState();
@@ -189,6 +164,19 @@ const {
   standingsRevision,
 } = bracketState;
 const { bracketViewModes } = bracketState;
+
+const fetchActivities = async (eventId) => {
+  try {
+    const data = await fetchActivitiesApi(eventId);
+    const arr = Array.isArray(data) ? data : [];
+    eventDetails.value.activities = arr.map((a, idx) => ({
+      ...a,
+      __uid: a.__uid || `${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 8)}`
+    }));
+  } catch (error) {
+    console.error('Error fetching activities:', error);
+  }
+};
 
 const {
   fetchBrackets,
@@ -233,24 +221,7 @@ const selectedBracketForDialog = computed(() => {
         return bracket;
     }
   }
-  return null;
 });
-
-const handleMemoUpload = (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  newMemorandumFile.value = file;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    newMemorandumPreview.value = {
-      type: file.type.startsWith('image/') ? 'image' : 'file',
-      content: e.target.result,
-      filename: file.name,
-    };
-  };
-  reader.readAsDataURL(file);
-};
 
 
 const isMatchDataInvalid = computed(() => {
@@ -317,7 +288,7 @@ const tagsMap = computed(() =>
 const eventDetails = ref({
     ...props.event,
     venue: props.event.venue || '',
-    memorandum: props.event.memorandum || null,
+    memorandum: props.preloadedMemorandum || props.event.memorandum || null,
     category_id: props.event.category?.id || props.event.category_id,
     activities: (props.event.activities || []).map((a, idx) => ({
       ...a,
@@ -453,6 +424,22 @@ const toggleEdit = () => {
   editMode.value = !editMode.value;
 };
 
+const handleMemoUpload = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    eventDetails.value.memorandum = {
+      type: file.type.startsWith('image/') ? 'image' : 'file',
+      content: e.target.result,
+      filename: file.name,
+      isNew: true, // Flag to indicate it's a new upload
+    };
+  };
+  reader.readAsDataURL(file);
+};
+
 // Add this near your other initialization code
 onMounted(() => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -472,9 +459,6 @@ onMounted(() => {
     // Augment with employee names
     const employeesMap = employees.value.reduce((map, emp) => { map[emp.id] = emp; return map; }, {});
     eventAnnouncements.value = props.preloadedAnnouncements.map(ann => ({ ...ann, employee: employeesMap[ann.userId] || { name: 'Admin' } }));
-    if (props.preloadedMemorandum) {
-      eventMemorandum.value = props.preloadedMemorandum;
-    }
     setAnnouncements(eventAnnouncements.value.map(a => ({ ...a, event: props.event })));
   }
 
@@ -538,14 +522,14 @@ const openAddAnnouncementModal = () => {
 };
 
 const viewMemorandum = () => {
-    if (eventMemorandum.value && eventMemorandum.value.content) {
-    if (eventMemorandum.value.type === 'image') {
-        memoImageUrl.value = eventMemorandum.value.content;
+    if (eventDetails.value.memorandum && eventDetails.value.memorandum.content) {
+    if (eventDetails.value.memorandum.type === 'image') {
+        memoImageUrl.value = eventDetails.value.memorandum.content;
         showMemoImageDialog.value = true;
     } else {
         const link = document.createElement('a');
-        link.href = eventMemorandum.value.content;
-        link.download = eventMemorandum.value.filename;
+        link.href = eventDetails.value.memorandum.content;
+        link.download = eventDetails.value.memorandum.filename;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -785,19 +769,25 @@ const saveChanges = () => {
     onSuccess: async () => {
       try {
         // Save activities via composable
-        if (newMemorandumFile.value) {
-          const memoContent = await toBase64(newMemorandumFile.value);
-          const memoPayload = {
-            type: newMemorandumFile.value.type.startsWith('image/') ? 'image' : 'file',
-            content: memoContent,
-            filename: newMemorandumFile.value.name,
-          };
-          await saveMemorandum(memoPayload);
-          newMemorandumFile.value = null;
-          newMemorandumPreview.value = null;
+        // Check if memorandum has changed
+        const originalMemo = originalEventDetails.value.memorandum;
+        const currentMemo = eventDetails.value.memorandum;
+
+        if (currentMemo && currentMemo.isNew) {
+            // New memorandum uploaded
+            const memoPayload = {
+                type: currentMemo.type,
+                content: currentMemo.content,
+                filename: currentMemo.filename,
+            };
+            await saveMemorandum(eventDetails.value.id, memoPayload);
+        } else if (!currentMemo && originalMemo) {
+            // Memorandum was removed
+            await clearMemorandum(eventDetails.value.id);
         }
         const activitiesPayload = (eventDetails.value.activities || []).map(({ __uid, title, date, startTime, endTime, location }) => ({ title, date, startTime, endTime, location }));
         await saveActivities(eventDetails.value.id, activitiesPayload);
+
 
         // Save tasks via composable
         const tasksPayloadArray = eventDetails.value.tasks.map(task => ({
@@ -806,6 +796,7 @@ const saveChanges = () => {
           description: task.task
         }));
         await saveTasks(eventDetails.value.id, tasksPayloadArray);
+
 
         showSuccessDialog.value = true;
         successMessage.value = 'The event was updated successfully.';
@@ -1230,7 +1221,7 @@ const getBracketIndex = (bracketId) => {
 
                         <!-- If no memorandum uploaded -->
                         <div v-else class="flex justify-center items-center border-2 border-dashed rounded-md p-4">
-                        <input type="file" ref="memoFileInput" @change="handleMemoUpload" class="hidden" />
+                        <input type="file" ref="memoFileInput" @change="handleMemoUpload($event)" class="hidden" />
                         <Button
                             label="Upload Memorandum"
                             icon="pi pi-upload"

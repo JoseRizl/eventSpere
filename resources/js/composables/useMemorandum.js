@@ -1,38 +1,29 @@
 import { ref } from 'vue';
 import axios from 'axios';
+import { usePage } from '@inertiajs/vue3';
 
-export function useMemorandum(eventId) {
-  const memorandum = ref(null);
-  const loading = ref(false);
-  const error = ref(null);
+export function useMemorandum() {
+    const saving = ref(false);
+    const error = ref(null);
+    const page = usePage();
 
-  const fetchMemorandum = async () => {
-    loading.value = true;
-    error.value = null;
-    try {
-      const response = await axios.get(route('events.memorandum.show', { id: eventId }));
-      memorandum.value = response.data;
-    } catch (e) {
-      console.error('Error fetching memorandum:', e);
-      error.value = 'Failed to load memorandum.';
-      memorandum.value = null;
-    } finally {
-      loading.value = false;
-    }
-  };
+    const fetchMemorandum = async (eventId) => {
+        // This is a placeholder. In a real app, you might fetch this from an API endpoint.
+        // For now, we assume it's preloaded or we find it in the page props.
+        const memorandums = page.props.memorandums_prop || [];
+        return memorandums.find(memo => memo.event_id === eventId) || null;
+    };
 
-  const saveMemorandum = async (payload) => {
-    try {
-      const response = await axios.post(route('events.memorandum.store', { id: eventId }), payload);
-      memorandum.value = response.data;
-    } catch (e) {
-      console.error('Error saving memorandum:', e);
-      throw new Error('Failed to save memorandum.');
-    }
-  };
+    const saveMemorandum = async (eventId, payload) => {
+        saving.value = true;
+        error.value = null;
+        return axios.post(route('api.memorandum.storeOrUpdate', { event: eventId }), payload)
+            .finally(() => saving.value = false);
+    };
 
-  // Initial fetch is now handled by preloading via props, but this is here if needed.
-  // onMounted(fetchMemorandum);
+    const clearMemorandum = async (eventId) => {
+        return axios.delete(route('api.memorandum.destroy', { event: eventId }));
+    };
 
-  return { memorandum, loading, error, fetchMemorandum, saveMemorandum };
+    return { fetchMemorandum, saveMemorandum, clearMemorandum, saving, error };
 }

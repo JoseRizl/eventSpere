@@ -694,6 +694,7 @@
   import { usePage, Link, router } from '@inertiajs/vue3';
   import axios from "axios";
   import { parse, format, isWithinInterval } from 'date-fns';
+  import { useMemorandum } from '@/composables/useMemorandum.js';
   import SearchFilterBar from '@/Components/SearchFilterBar.vue';
 
   export default defineComponent({
@@ -744,8 +745,10 @@
         image: defaultImage.value,
         archived: false,
         isAllDay: false,
-        memorandum: { type: 'text', content: '', filename: '' },
       });
+
+      // Memorandum composable
+      const { saveMemorandum, clearMemorandum } = useMemorandum();
 
       const filteredNewEventTags = computed(() => {
         if (!newEvent.value.category_id) {
@@ -976,12 +979,21 @@
             memorandum: newEvent.value.memorandum,
         };
 
-        await router.post(route('events.store'), payload, {
-            onSuccess: () => {
+        // The router.post call will handle the main event data.
+        // We'll handle the memorandum in the onSuccess callback.
+        router.post(route('events.store'), payload, {
+            onSuccess: (page) => {
+                const createdEventId = page.props.flash.event_id;
+                if (createdEventId && newEvent.value.memorandum) {
+                    // If a memo was uploaded, save it using the composable
+                    saveMemorandum(createdEventId, newEvent.value.memorandum);
+                }
+
                 isCreateModalVisible.value = false;
                 successMessage.value = 'Event created successfully!';
                 showSuccessDialog.value = true;
             },
+
             onError: (errors) => {
                 const firstErrorKey = Object.keys(errors)[0];
                 const firstErrorMessage = firstErrorKey ? (Array.isArray(errors[firstErrorKey]) ? errors[firstErrorKey][0] : errors[firstErrorKey]) : 'Failed to create the event.';
@@ -1288,7 +1300,8 @@
             ),
             startDate: event.startDate ? new Date(event.startDate) : null,
             endDate: event.endDate ? new Date(event.endDate) : null,
-            image: event.image || defaultImage.value
+            image: event.image || defaultImage.value,
+            memorandum: event.memorandum || null,
         };
         isEditModalVisible.value = true;
     };
@@ -1338,6 +1351,7 @@
       showSaveConfirm.value = true;
     };
 
+    let originalMemorandum = null;
     const confirmSaveChanges = async () => {
       saving.value = true;
       try {
@@ -1376,8 +1390,18 @@
           endTime: selectedEvent.value.endTime?.padStart(5, "0") || "00:00",
           memorandum: selectedEvent.value.memorandum,
         };
-        await router.put(route('events.updateFromList', {id: selectedEvent.value.id}), payload, {
+
+        router.put(route('events.updateFromList', {id: selectedEvent.value.id}), payload, {
           onSuccess: () => {
+            const eventId = selectedEvent.value.id;
+            const currentMemo = selectedEvent.value.memorandum;
+
+            if (currentMemo && currentMemo.isNew) {
+                saveMemorandum(eventId, currentMemo);
+            } else if (!currentMemo && originalMemorandum) {
+                clearMemorandum(eventId);
+            }
+
             isEditModalVisible.value = false;
             successMessage.value = 'Event updated successfully!';
             showSuccessDialog.value = true;
@@ -1442,6 +1466,8 @@
     };
 
     const handleMemoUpload = (event, isEdit) => {
+        // This function now only needs to handle the file reading part.
+        // The save/clear logic is moved to the main save functions.
         const file = event.target.files[0];
         if (!file) return;
 
@@ -1452,6 +1478,7 @@
                 type: file.type.startsWith('image/') ? 'image' : 'file',
                 content: e.target.result,
                 filename: file.name,
+                isNew: true, // Flag to indicate it's a new upload
             };
         };
         reader.onerror = (err) => {
@@ -1461,6 +1488,11 @@
         };
         reader.readAsDataURL(file);
     };
+
+    // Store the original memorandum when opening the edit modal
+    watch(isEditModalVisible, (isVisible) => {
+        if (isVisible && selectedEvent.value) originalMemorandum = selectedEvent.value.memorandum;
+    });
 
     const handleDefaultImageUpload = async (event) => {
         const file = event.target.files[0];
