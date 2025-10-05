@@ -103,11 +103,11 @@
 
             <!-- Tags Display -->
             <div class="tags-container">
-            <span
+             <span
                 v-for="tag in getEventTags(data.tags)"
                 :key="tag.id"
                 class="tag"
-                :style="{ backgroundColor: tag.color || '#800080' }"
+                :style="{ backgroundColor: getTagColor(tag) }"
             >
                 {{ tag.name }}
             </span>
@@ -435,10 +435,6 @@
             <div class="p-field">
                 <label for="tagName">Tag Name</label>
                 <InputText id="tagName" v-model="newTag.name" />
-            </div>
-            <div class="p-field">
-                <label for="tagColor">Tag Color</label>
-                <ColorPicker id="tagColor" v-model="newTag.color" />
             </div>
             <div class="p-field">
                 <label for="tagCategory">Category</label>
@@ -864,13 +860,11 @@
          showErrorDialog.value = true;
          return;
        }
-       const colorValue = newTag.value.color.startsWith('#') ? newTag.value.color : `#${newTag.value.color}`;
 
        saving.value = true;
        try {
          const response = await axios.post(route('category.store'), {
            name: newTag.value.name,
-           color: colorValue,
            category_id: newTag.value.category_id
          });
 
@@ -1612,6 +1606,13 @@
       return events;
     });
 
+    const getTagColor = (tag) => {
+        if (!tag || !tag.category_id) return '#808080'; // Default gray
+        const category = categories.value.find(c => c.id == tag.category_id);
+        return category?.color || '#808080';
+    };
+
+
     const saving = ref(false);
     const showSuccessDialog = ref(false);
     const successMessage = ref('');
@@ -1717,6 +1718,7 @@
     filteredEmployees,
     handleMemoUpload,
     handleDefaultImageUpload,
+    getTagColor,
     };
 
     },

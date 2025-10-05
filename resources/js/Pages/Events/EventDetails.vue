@@ -276,6 +276,12 @@ const filteredRelatedBrackets = computed(() => {
   });
 });
 
+const getTagColor = (tag) => {
+    if (!tag || !tag.category_id) return '#808080'; // Default gray
+    const category = categories.value.find(c => c.id == tag.category_id);
+    return category?.color || '#808080';
+};
+
 // Create a map of tags for quick lookup
 const tagsMap = computed(() =>
 {
@@ -1011,7 +1017,8 @@ const normalizedRelatedEvents = computed(() => {
 
 const getBracketIndex = (bracketId) => {
     return brackets.value.findIndex(b => b.id === bracketId);
-}
+};
+
 </script>
 
 <template>
@@ -1183,7 +1190,7 @@ const getBracketIndex = (bracketId) => {
                                     <div>
                                         <strong class="block text-gray-800 font-semibold">Tags</strong>
                                         <div class="flex gap-2 flex-wrap mt-1">
-                                            <span v-for="tagId in eventDetails.tags" :key="tagId" :style="{ backgroundColor: tagsMap[tagId]?.color || '#cccccc', color: '#fff' }" class="text-xs font-semibold py-1 px-2 rounded">
+                                            <span v-for="tagId in eventDetails.tags" :key="tagId" :style="{ backgroundColor: getTagColor(tagsMap[tagId]) || '#cccccc', color: '#fff' }" class="text-xs font-semibold py-1 px-2 rounded">
                                                 {{ tagsMap[tagId]?.name || 'Unknown' }}
                                             </span>
                                         </div>
@@ -1520,7 +1527,7 @@ const getBracketIndex = (bracketId) => {
                                         <h4 class="font-medium text-sm truncate">{{ event.title }}</h4>
                                         <p class="text-xs text-gray-500 mt-1">{{ formatDisplayDate(event.startDate) }}</p>
                                         <div class="flex flex-wrap gap-1 mt-1">
-                                            <span v-for="tag in event.tags?.slice(0, 2)" :key="tag.id" class="text-xs px-1.5 py-0.5 rounded" :style="{ backgroundColor: tag.color, color: '#fff' }">
+                                            <span v-for="tag in event.tags?.slice(0, 2)" :key="tag.id" class="text-xs px-1.5 py-0.5 rounded" :style="{ backgroundColor: getTagColor(tag), color: '#fff' }">
                                                 {{ tag.name }}
                                             </span>
                                         </div>

@@ -59,8 +59,7 @@ export default defineComponent({
       const query = searchQuery.value.toLowerCase().trim();
       return items.filter(item => {
         if (showTags.value) {
-          return item.name?.toLowerCase().includes(query) ||
-                 item.color?.toLowerCase().includes(query);
+          return item.name?.toLowerCase().includes(query);
         } else {
           return item.title?.toLowerCase().includes(query) ||
                  item.description?.toLowerCase().includes(query);
@@ -372,14 +371,16 @@ export default defineComponent({
       <Column :field="showTags ? 'name' : 'title'" :header="showTags ? 'Tag Name' : 'Category Name'" style="width:30%;" sortable>
         <template #body="{ data }">
           <div class="datatable-content">
-            <div v-if="showTags" class="flex items-center gap-2">
-              <span
-                class="inline-block w-4 h-4 rounded-full"
-                :style="{ backgroundColor: data.color }"
-              ></span>
+            <div v-if="showTags">
               {{ data.name }}
             </div>
-            <span v-else>{{ data.title }}</span>
+            <div v-else class="flex items-center gap-2">
+                <span
+                    class="inline-block w-4 h-4 rounded-full"
+                    :style="{ backgroundColor: data.color || '#808080' }"
+                ></span>
+                <span>{{ data.title }}</span>
+            </div>
           </div>
         </template>
       </Column>
@@ -431,13 +432,12 @@ export default defineComponent({
           />
         </div>
 
-        <div class="p-field" v-if="showTags">
+        <div class="p-field" v-if="!showTags">
           <label for="color">Color</label>
-          <input
+          <ColorPicker
             id="color"
             v-model="selectedItem.color"
-            type="color"
-            placeholder="Enter color code"
+            class="w-full"
           />
         </div>
 
@@ -476,13 +476,12 @@ export default defineComponent({
           />
         </div>
 
-        <div class="p-field" v-if="showTags">
+        <div class="p-field" v-if="!showTags">
           <label for="newColor">Color</label>
-          <input
-            id="newColor"
-            v-model="newItem.color"
-            type="color"
-            placeholder="Enter color code"
+          <ColorPicker
+              id="newColor"
+              v-model="newItem.color"
+              class="w-full"
           />
         </div>
 
@@ -574,6 +573,83 @@ export default defineComponent({
     </Dialog>
   </div>
 </template>
+
+<style scoped>
+.category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.search-container {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 400px;
+}
+
+.search-container .p-input-icon-left {
+  position: relative;
+  width: 100%;
+}
+
+.search-container .p-input-icon-left i {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+}
+
+.search-container .p-input-icon-left .p-inputtext {
+  width: 100%;
+  padding-left: 2.5rem;
+}
+
+.no-results-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.icon-and-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.no-results-title {
+  color: #333;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.no-results-text {
+  color: #555;
+  margin: 5px 0 0 0;
+}
+
+@media (max-width: 768px) {
+  .search-container .p-input-icon-left {
+    max-width: 100%;
+  }
+}
+</style>
+
 
 <style scoped>
 .category-header {

@@ -14,7 +14,6 @@ class Tag extends Model
     protected $fillable = [
         'name',
         'description',
-        'color',
         'category_id',
     ];
 

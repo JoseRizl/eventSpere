@@ -206,85 +206,72 @@
         {
             "id": "1",
             "name": "Foundation Day",
-            "color": "#FF5733",
             "category_id": "2"
         },
         {
             "id": "2",
             "name": "Palakasan",
-            "color": "#33FF57",
             "category_id": "3"
         },
         {
             "id": "3",
             "name": "Buwan ng Wika",
-            "color": "#3357FF",
             "category_id": "1"
         },
         {
             "id": "4",
             "name": "Jolen Tournament",
-            "color": "#000000",
             "category_id": "3"
         },
         {
             "id": "6",
             "name": "Graduation",
-            "color": "#A4CBE1",
             "category_id": "1"
         },
         {
             "id": "68c3a7ed412cf",
             "name": "birtday",
-            "color": "#452020",
             "category_id": "4"
         },
         {
             "id": "68ce70245aae8",
             "name": "Holiday",
-            "color": "#800080",
             "category_id": "5e80"
         },
         {
             "id": "68ce71a7e1884",
             "name": "Nutrition Month",
-            "color": "#00bd3f",
             "category_id": "2"
         },
         {
             "id": "68d62b95b02b3",
             "name": "Awareness",
-            "color": "#e0e40c",
             "category_id": "68d62b2c7d0d7"
         },
         {
             "id": "68d67fc024129",
             "name": "Exam",
-            "color": "#ff0000",
             "category_id": "1"
-        },
-        {
-            "id": "68d7d732a1e2c",
-            "name": "Lit",
-            "color": "#d5c834",
-            "category_id": "68d63045a4b4a"
         }
     ],
     "category": [
         {
             "id": "1",
             "title": "Academics & Educational Events",
-            "description": "Academic events"
+            "description": "Academic events",
+            "color": "#f70a0a"
         },
         {
             "id": "2",
             "title": "Commemorative",
-            "description": "Honoring special events"
+            "description": "Honoring special events",
+            "color": "#ff4d00"
         },
         {
             "id": "3",
             "title": "Sports & Physical Activities",
-            "description": "Sporting events and competitions"
+            "description": "Sporting events and competitions",
+            "color": "#1500ff"
         },
         {
             "id": "4",
@@ -294,17 +281,20 @@
         {
             "id": "5e80",
             "title": "Seasonal & Community Events",
-            "description": "Seasonal Events"
+            "description": "Seasonal Events",
+            "color": "#a908d6"
         },
         {
             "id": "68d62b2c7d0d7",
             "title": "Awareness Campaign",
-            "description": "Public Awareness"
+            "description": "Public Awareness",
+            "color": "#ff005e"
         },
         {
             "id": "68d63045a4b4a",
             "title": "Cultural & Arts Events",
-            "description": "Hfosanfmb sid sad asasf sdgsdf sadkljcxnjuoj rcbnbmn etyretuyioyt dgag w eqwfs qw cwvh vscqw sfvv cdfs v ngfd  bjd ascdsb Hfosanfmb sid sad asasf sdgsdf sadkljcxnjuoj rcbnbmn etyretuyioyt dgag w eqwfs qw cwvh vscqw sfvv cdfs v ngfd  bjd ascdsb"
+            "description": "Hfosanfmb sid sad asasf sdgsdf sadkljcxnjuoj rcbnbmn etyretuyioyt dgag w eqwfs qw cwvh vscqw sfvv cdfs v ngfd  bjd ascdsb Hfosanfmb sid sad asasf sdgsdf sadkljcxnjuoj rcbnbmn etyretuyioyt dgag w eqwfs qw cwvh vscqw sfvv cdfs v ngfd  bjd ascdsb",
+            "color": "#00b7ff"
         },
         {
             "id": "68d6308e324f7",
@@ -314,7 +304,7 @@
         {
             "id": "68d630acc7578",
             "title": "Student Leadership & Development Activities",
-            "description": null
+            "description": "Student Leadership & Development Activities"
         }
     ],
     "announcements": [
