@@ -695,6 +695,7 @@
 
   export default defineComponent({
     name: "EventList",
+    inheritAttrs: false,
     setup() {
       const dateError = ref("");
       const page = usePage();
@@ -977,13 +978,32 @@
         // We'll handle the memorandum in the onSuccess callback.
         router.post(route('events.store'), payload, {
             onSuccess: (page) => {
-                const createdEventId = page.props.flash.event_id;
+                const createdEventId = page.props.flash?.event_id;
                 if (createdEventId && newEvent.value.memorandum) {
-                    // If a memo was uploaded, save it using the composable
-                    saveMemorandum(createdEventId, newEvent.value.memorandum);
+                    try {
+                      saveMemorandum(createdEventId, newEvent.value.memorandum);
+                    } catch (e) {
+                      console.error('Failed to save memorandum:', e);
+                    }
                 }
 
                 isCreateModalVisible.value = false;
+                // Reset newEvent state after successful creation
+                newEvent.value = {
+                  title: "",
+                  description: "",
+                  venue: "",
+                  category_id: null,
+                  startDate: null,
+                  endDate: null,
+                  startTime: "",
+                  endTime: "",
+                  memorandum: null,
+                  tags: [],
+                  image: defaultImage.value,
+                  archived: false,
+                  isAllDay: false
+                };
                 successMessage.value = 'Event created successfully!';
                 showSuccessDialog.value = true;
             },
