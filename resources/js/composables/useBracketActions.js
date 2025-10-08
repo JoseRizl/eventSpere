@@ -605,7 +605,7 @@ export function useBracketActions(state) {
                 const lrPlayerPos = 1;
                 const loserPlaceholder = {
                     id: null,
-                    name: `Loser of WR${wrRoundIdx + 1} M${wrMatch.match_number}`,
+                    name: `Loser of R${wrRoundIdx + 1} M${wrMatch.match_number}`,
                     score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
                 };
                 if (losersRounds[lrRoundIdx] && losersRounds[lrRoundIdx][lrMatchIdx]) {

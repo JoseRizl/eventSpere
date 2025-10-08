@@ -250,7 +250,7 @@ const getLoserMatchStyle = (roundIdx) => {
     const totalHeightOfOneMatchUnit = matchHeight + gap;
 
     // We adjust the exponent to account for the slower reduction in matches.
-    const margin = (Math.pow(2, Math.floor(roundIdx / 2))) * totalHeightOfOneMatchUnit - (totalHeightOfOneMatchUnit / 2);
+    const margin = (Math.pow(1.7, Math.floor(roundIdx / 2))) * totalHeightOfOneMatchUnit - (totalHeightOfOneMatchUnit / 2);
 
     return {
         marginTop: `${margin}px`,
