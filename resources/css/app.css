@@ -187,24 +187,38 @@
       }
 
       .p-datatable {
-        margin-top: 1rem;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        @apply mt-4 shadow-md rounded-lg overflow-hidden;
         position: relative; /* Reset stacking context */
         z-index: 0; /* Ensure it doesn't interfere with sidebar popups */
+        border: 1px solid #e5e7eb; /* gray-200 */
+        border-collapse: separate;
+        border-spacing: 0;
       }
 
       .p-datatable .p-datatable-tbody > tr > td {
-        font-size: 16px;
-        color: #000;
-        font-family: "Poppins", sans-serif;
+        @apply text-base text-gray-700;
+      }
+
+      .p-datatable .p-datatable-tbody > tr:not(.p-datatable-emptymessage):hover {
+        @apply bg-purple-100;
+        transition: background-color 0.2s ease-in-out;
+      }
+
+      .p-datatable .p-datatable-tbody > tr:last-child > td {
+        border-bottom: none; /* Remove border from the last row */
       }
 
       .p-datatable th {
-        @apply bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold text-center;
+        @apply bg-slate-50 text-slate-600 font-semibold text-base uppercase tracking-wider;
+        border-bottom: 2px solid #e5e7eb; /* gray-200 */
+      }
+
+      .p-datatable .p-sortable-column:focus-visible {
+        @apply shadow-none ring-2 ring-purple-500 ring-offset-0;
       }
 
       .p-datatable .p-column-header-content {
-        @apply w-full text-center;
+        @apply w-full justify-center;
       }
 
       .center-header .p-column-header-content {
@@ -212,7 +226,7 @@
       }
 
       .p-datatable-striped tr:nth-child(odd) {
-        background-color: #faf5ff; /* purple-50 */
+        background-color: #faf5ff9f; /* purple-50 */
       }
 
       .event-icon {
