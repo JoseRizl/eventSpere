@@ -227,10 +227,34 @@ const getMatchStyle = (roundIdx) => {
     const matchHeight = 80;
     const gap = 20;
     const totalHeightOfOneMatchUnit = matchHeight + gap; // The space one match + its gap takes up.
+
     const margin = (Math.pow(2, roundIdx - 1) * totalHeightOfOneMatchUnit) - (matchHeight / 2) - (gap / 2);
     return {
         marginTop: roundIdx === 0 ? '0px' : `${margin}px`,
         marginBottom: roundIdx === 0 ? '0px' : `${margin}px`,
+    };
+};
+
+const getLoserMatchStyle = (roundIdx) => {
+
+    if (roundIdx < 2) {
+        // For the first two rounds of the losers bracket, which often have a different structure,
+        // we can use the same logic as the winners bracket for consistent initial spacing.
+        return getMatchStyle(roundIdx);
+    }
+
+    // For subsequent rounds, the structure is more regular.
+    // The number of matches often halves every two rounds.
+    const matchHeight = 80;
+    const gap = 20;
+    const totalHeightOfOneMatchUnit = matchHeight + gap;
+
+    // We adjust the exponent to account for the slower reduction in matches.
+    const margin = (Math.pow(2, Math.floor(roundIdx / 2))) * totalHeightOfOneMatchUnit - (totalHeightOfOneMatchUnit / 2);
+
+    return {
+        marginTop: `${margin}px`,
+        marginBottom: `${margin}px`,
     };
 };
 
@@ -312,6 +336,16 @@ const updateBracketLines = () => {
 
                     const fromPoint = screenToSVG(svgEl, fromRect.right, fromRect.top + fromRect.height / 2);
                     const toPoint = screenToSVG(svgEl, toRect.left, toRect.top + toRect.height / 2);
+
+                    // If it's the first round and the vertical position is the same, draw a straight line.
+                    if (round === 0 && fromPoint.y === toPoint.y) {
+                        newLines.push({
+                            x1: fromPoint.x, y1: fromPoint.y,
+                            x2: toPoint.x, y2: toPoint.y,
+                            isWinnerPath: isWinnerLine
+                        });
+                        return; // Continue to the next match
+                    }
 
                     let isWinnerLine = overallWinnerMatchIds.has(match.id);
                     // For the winners bracket, also highlight the path of the upper bracket winner
@@ -576,6 +610,7 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
                     :key="`losers-${roundIdx}-${matchIdx}`"
                     :id="`losers-match-${bracketIndex}-${roundIdx}-${matchIdx}`"
                     :data-match-id="match.id"
+                    :style="getLoserMatchStyle(roundIdx)"
                     :class="['match', (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
                     @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'losers')"
                 >

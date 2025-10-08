@@ -589,7 +589,7 @@ export function useBracketActions(state) {
 
                 const loserPlaceholder = {
                     id: null,
-                    name: `Loser of WR1 M${wrMatch.match_number}`,
+                    name: `Loser of R1 M${wrMatch.match_number}`,
                     score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
                 };
 

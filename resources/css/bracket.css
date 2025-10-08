@@ -56,7 +56,7 @@
 .round {
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* Align rounds to the top */
+  justify-content: space-between;
 }
 
 .round > h3 {
@@ -151,10 +151,6 @@
   transition: color 0.2s ease-in-out;
 }
 
-.editable:hover {
-  color: #0056b3;
-}
-
 .match::before {
   top: 50%;
   right: 100%;
@@ -173,6 +169,10 @@
   transform: translateY(-50%);
 }
 
+.round > .match:first-of-type {
+    margin-top: 20px; /* Add space between round header and first match */
+}
+
 .round .match:nth-child(odd)::before {
   top: 50%;
   transform: translateY(-50%);
@@ -181,10 +181,6 @@
 /* Remove Line for Final Round */
 .round:last-child .match::after {
   display: none;
-}
-
-.round > .match:first-of-type {
-    margin-top: 20px; /* Add space between round header and first match */
 }
 
 
@@ -800,12 +796,6 @@
 .player-box .bye-text.winner-name,
 .player-box .bye-text.loser-name {
   color: #6c757d !important;
-}
-
-/* Ensure proper spacing for losers bracket */
-.losers .round {
-    justify-content: space-around;
-    gap: 20px;
 }
 
 /* Highlight matches with issues */
