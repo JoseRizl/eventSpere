@@ -426,23 +426,26 @@ export function useBracketActions(state) {
                 if (!match.venue) match.venue = newBracket.event.venue;
             });
 
-            // Reconstruct the nested `matches` structure from the flat list
-            if (bracket.type === 'Double Elimination') {
+            // Reconstruct the nested `matches` structure based on bracket type
+            if (newBracket.type === 'Double Elimination') {
                 const winnersMatches = bracketMatches.filter(m => m.bracket_type === 'winners');
                 const losersMatches = bracketMatches.filter(m => m.bracket_type === 'losers');
                 const grandFinalsMatches = bracketMatches.filter(m => m.bracket_type === 'grand_finals');
 
-                const groupByRound = (matches) => matches.reduce((acc, match) => {
-                    const round = match.round - 1;
-                    if (!acc[round]) acc[round] = [];
-                    acc[round].push(match);
-                    return acc;
-                }, []);
-
+                const groupByRound = (matches) => {
+                    if (!matches || matches.length === 0) return [];
+                    const roundsObj = matches.reduce((acc, match) => {
+                        // Use match.round as the key to avoid sparse arrays
+                        (acc[match.round] = acc[match.round] || []).push(match);
+                        return acc;
+                    }, {});
+                    // Convert the object of rounds into a dense array of rounds
+                    return Object.values(roundsObj).map(roundMatches => roundMatches.sort((a, b) => a.match_number - b.match_number));
+                };
                 newBracket.matches = {
                     winners: groupByRound(winnersMatches),
                     losers: groupByRound(losersMatches),
-                    grand_finals: grandFinalsMatches,
+                    grand_finals: groupByRound(grandFinalsMatches),
                 };
             } else {
                 newBracket.matches = bracketMatches.reduce((acc, match) => {

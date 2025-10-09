@@ -64,9 +64,10 @@ const ongoingRoundIdentifiers = computed(() => {
 
         identifiers.winners = findOngoingRound(bracket.matches.winners);
         identifiers.losers = findOngoingRound(bracket.matches.losers);
-        // Grand finals is not an array of rounds, but a single array of matches.
-        // We check if any match in it is not completed.
-        if (bracket.matches.grand_finals && bracket.matches.grand_finals.some(match => match.status !== 'completed' && match.players[0].name !== 'TBD' && match.players[1].name !== 'TBD')) {
+        // Grand finals is now an array of rounds, just like winners/losers.
+        // We check if any match in the first (and only) round is not completed.
+        const grandFinalsRound = bracket.matches.grand_finals?.[0];
+        if (grandFinalsRound && grandFinalsRound.some(match => match.status !== 'completed' && match.players[0].name !== 'TBD' && match.players[1].name !== 'TBD')) {
             identifiers.grand_finals = 0;
         }
     }
@@ -133,7 +134,8 @@ const bracketAnalysis = computed(() => {
 
         // Grand finals: find winner and final eliminated player
         if (bracket.matches.grand_finals && bracket.matches.grand_finals.length > 0) {
-            const grandFinalsMatch = bracket.matches.grand_finals[0];
+            // grand_finals is an array of rounds, so we get the first match of the first round.
+            const grandFinalsMatch = bracket.matches.grand_finals[0]?.[0];
             if (grandFinalsMatch && grandFinalsMatch.status === 'completed') {
                 analysis.deGrandFinalsWinnerId = grandFinalsMatch.winner_id;
                 if (grandFinalsMatch.loser_id) {
@@ -651,13 +653,14 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
                 </g>
                 </svg>
 
-                <div v-for="(match, matchIdx) in bracket.matches.grand_finals" :key="`grand-finals-${matchIdx}`"
-                :id="`grand-finals-match-${bracketIndex}-${matchIdx}`"
-                :data-match-id="match.id"
-                :class="['match', (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
-                @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, 0, matchIdx, match, 'grand_finals')"
-                >
-                <div class="player-box">
+                <div v-for="(round, roundIdx) in bracket.matches.grand_finals" :key="`gf-round-${roundIdx}`" class="round">
+                    <div v-for="(match, matchIdx) in round" :key="`grand-finals-${matchIdx}`"
+                        :id="`grand-finals-match-${bracketIndex}-${matchIdx}`"
+                        :data-match-id="match.id"
+                        :class="['match', (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
+                        @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'grand_finals')"
+                    >
+                    <div class="player-box">
                     <span
                     :class="getPlayerStyling(match.players[0], match.players[1], match, 'grand_finals')"
                     >
@@ -670,6 +673,7 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
                     {{ truncate(match.players[1].name, { length: 13 }) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
                     </span>
                 </div>
+                    </div>
                 </div>
             </div>
             </div>

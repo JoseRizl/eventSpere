@@ -59,55 +59,86 @@ class BracketController extends Controller
      * Returns array of match objects (unchanged).
      */
     private function flattenMatchesNode($matchesNode)
-    {
-        $out = [];
+{
+    $out = [];
 
-        if ($matchesNode === null) return $out;
+    if ($matchesNode === null) return $out;
+    if (!is_array($matchesNode)) return $out;
 
-        // If numeric indexed array
-        if (is_array($matchesNode) && array_values(array_keys($matchesNode)) === range(0, count($matchesNode) - 1)) {
-            // Could be either array of rounds (each item is an array) or flat array of matches
-            // If first element is array -> treat as rounds
-            if (isset($matchesNode[0]) && is_array($matchesNode[0])) {
+    // Numeric-indexed array? Could be array-of-rounds or flat array-of-matches.
+    $keys = array_keys($matchesNode);
+    $isNumericIndexed = ($keys === range(0, count($matchesNode) - 1));
+
+    if ($isNumericIndexed) {
+        // If first element is an array and looks like a match (has 'id' or 'players' keys), decide:
+        if (isset($matchesNode[0]) && is_array($matchesNode[0])) {
+            // Distinguish: if the *element* looks like a match (has 'id' or 'players' or 'match_number'), treat whole array as flat array-of-matches.
+            $first = $matchesNode[0];
+            $looksLikeMatch = is_array($first) && (isset($first['id']) || isset($first['players']) || isset($first['match_number']) || isset($first['round']));
+            if ($looksLikeMatch) {
+                // flat array of matches
+                foreach ($matchesNode as $m) {
+                    if (is_array($m)) $out[] = $m;
+                }
+            } else {
+                // array-of-rounds: flatten one level
                 foreach ($matchesNode as $roundMatches) {
                     if (!is_array($roundMatches)) continue;
                     foreach ($roundMatches as $m) {
                         if (is_array($m)) $out[] = $m;
                     }
                 }
-            } else {
-                // flat array of matches
-                foreach ($matchesNode as $m) {
-                    if (is_array($m)) $out[] = $m;
-                }
             }
-            return $out;
-        }
-
-        // If associative/object style: iterate keys (winners, losers, grand_finals, etc)
-        if (is_array($matchesNode)) {
-            foreach ($matchesNode as $sectionKey => $roundsOrMatches) {
-                if (is_array($roundsOrMatches) && isset($roundsOrMatches[0]) && is_array($roundsOrMatches[0])) {
-                    // outer array is rounds
-                    foreach ($roundsOrMatches as $roundMatches) {
-                        if (!is_array($roundMatches)) continue;
-                        foreach ($roundMatches as $m) {
-                            if (is_array($m)) $out[] = $m;
-                        }
-                    }
-                } else {
-                    // either flat array of match objects for this section, or single match
-                    if (is_array($roundsOrMatches)) {
-                        foreach ($roundsOrMatches as $m) {
-                            if (is_array($m)) $out[] = $m;
-                        }
-                    }
-                }
-            }
+        } else {
+            // empty / unexpected - nothing to do
         }
 
         return $out;
     }
+
+    // Associative array (object-like) e.g. ['winners' => [...], 'losers' => [...], 'grand_finals' => ...]
+    foreach ($matchesNode as $sectionKey => $roundsOrMatches) {
+        if (!is_array($roundsOrMatches)) continue;
+
+        // If first element of section is an array
+        if (isset($roundsOrMatches[0]) && is_array($roundsOrMatches[0])) {
+            // Could be either array-of-rounds OR flat array-of-matches
+            $first = $roundsOrMatches[0];
+            $firstLooksLikeMatch = is_array($first) && (isset($first['id']) || isset($first['players']) || isset($first['match_number']) || isset($first['round']));
+            if ($firstLooksLikeMatch) {
+                // It's a flat array-of-matches for this section
+                foreach ($roundsOrMatches as $m) {
+                    if (is_array($m)) {
+                        // annotate bracket_type for provenance (optional)
+                        $m['bracket_type'] = $m['bracket_type'] ?? $sectionKey;
+                        $out[] = $m;
+                    }
+                }
+            } else {
+                // It's array-of-rounds: iterate each round and push matches
+                foreach ($roundsOrMatches as $roundMatches) {
+                    if (!is_array($roundMatches)) continue;
+                    foreach ($roundMatches as $m) {
+                        if (is_array($m)) {
+                            $m['bracket_type'] = $m['bracket_type'] ?? $sectionKey;
+                            $out[] = $m;
+                        }
+                    }
+                }
+            }
+        } else {
+            // section is not numerically-indexed (fallback) - iterate safely
+            foreach ($roundsOrMatches as $m) {
+                if (is_array($m)) {
+                    $m['bracket_type'] = $m['bracket_type'] ?? $sectionKey;
+                    $out[] = $m;
+                }
+            }
+        }
+    }
+
+    return $out;
+}
 
     /**
      * Normalize and process incoming bracket data, separating it into tables.
