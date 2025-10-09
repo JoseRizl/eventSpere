@@ -144,7 +144,7 @@ export function useBracketActions(state) {
   const resolveMatch = (bracket, part, roundIdx, matchIdx) => {
     if (part === 'winners') return bracket.matches.winners[roundIdx]?.[matchIdx];
     if (part === 'losers') return bracket.matches.losers[roundIdx]?.[matchIdx];
-    if (part === 'grand_finals') return bracket.matches.grand_finals[matchIdx];
+    if (part === 'grand_finals') return bracket.matches.grand_finals[roundIdx]?.[matchIdx];
     if (part === 'single') return bracket.matches[roundIdx]?.[matchIdx];
     return undefined;
   };
@@ -741,22 +741,24 @@ export function useBracketActions(state) {
     }
 
     // --- Grand Finals ---
-    const grandFinals = [{
-      id: generateId(),
-      round: 1,
-      match_number: 1,
-      bracket_type: 'grand_finals',
-      players: [
-      { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-      { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-      ],
-      winner_id: null, loser_id: null, status: 'pending',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      date: selectedEvent.value.startDate,
-      time: selectedEvent.value.startTime,
-      venue: selectedEvent.value.venue,
-    }];
+    const grandFinals = [ // grandFinals is an array of rounds
+        [{
+            id: generateId(),
+            round: 1,
+            match_number: 1,
+            bracket_type: 'grand_finals',
+            players: [
+            { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+            { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+            ],
+            winner_id: null, loser_id: null, status: 'pending',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            date: selectedEvent.value.startDate,
+            time: selectedEvent.value.startTime,
+            venue: selectedEvent.value.venue,
+        }]
+    ];
 
     return { winners: winnersRounds, losers: losersRounds, grand_finals: grandFinals };
   };
@@ -1502,16 +1504,19 @@ const updateLines = (bracketIdx) => {
             setPlayerWithLog(bracket, 'winners', nextRoundIdx, nextMatchIdx, nextPlayerPos, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
           } else {
             // Winners bracket final - advance to grand finals
-            const grandFinalsMatch = bracket.matches.grand_finals[0];
+            const grandFinalsMatch = bracket.matches.grand_finals[0]?.[0];
             if (grandFinalsMatch) {
-              setPlayerWithLog(bracket, 'grand_finals', 0, 0, 0, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() }, performedActions);
+              // The winner of the upper bracket always goes to the top slot (position 0) of the Grand Finals.
+              setPlayerWithLog(bracket, 'grand_finals', 0, 0, 0, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
             }
           }
-          // Send loser to losers bracket
+          // Send loser to losers bracket.
+          // The loser of the Winners' Bracket final goes to the Losers' Bracket final.
           const newLoserPayload = loser.name === 'BYE'
             ? { ...loser } // Keep BYE as is, it should be completed
             : { ...loser, score: 0, completed: false, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() };
 
+          // This logic was incorrect for the final round. The loser of the final winners match goes to the final losers match.
           if (roundIdx === 0) { // Losers from Winners Round 1
             // Find the index of this match among those that produce a loser.
             // This is necessary because BYE matches in WR1 don't produce losers,
@@ -1526,10 +1531,16 @@ const updateLines = (bracketIdx) => {
               setPlayerWithLog(bracket, 'losers', losersRoundIdx, losersMatchIdx, losersPlayerPos, newLoserPayload, performedActions);
             }
           } else { // Losers from subsequent Winners Rounds
-            const losersRoundIdx = (roundIdx * 2) - 1;
-            const losersMatchIdx = matchIdx;
-            const losersPlayerPos = 1; // They play the winner of the previous losers round
-            setPlayerWithLog(bracket, 'losers', losersRoundIdx, losersMatchIdx, losersPlayerPos, newLoserPayload, performedActions);
+            if (roundIdx === bracket.matches.winners.length - 1) {
+                        // Loser of the final winners match goes to the final losers match, slot 0.
+                        const finalLosersRoundIdx = bracket.matches.losers.length - 1;
+                        setPlayerWithLog(bracket, 'losers', finalLosersRoundIdx, 0, 1, newLoserPayload, performedActions);
+                        } else {
+                        const losersRoundIdx = (roundIdx * 2) - 1;
+                        const losersMatchIdx = matchIdx;
+                        const losersPlayerPos = 1; // They play the winner of the previous losers round
+                        setPlayerWithLog(bracket, 'losers', losersRoundIdx, losersMatchIdx, losersPlayerPos, newLoserPayload, performedActions);
+                    }
           }
 
           // After a winners round match, check if the whole round is complete.
@@ -1551,9 +1562,16 @@ const updateLines = (bracketIdx) => {
               const losersRound = bracket.matches.losers[losersRoundIdx];
               if (losersRound) {
                 losersRound.forEach((match, matchIndex) => {
-                  if (match.players[1].name === 'TBD') { // Losers drop into player slot 1
-                     setPlayerWithLog(bracket, 'losers', losersRoundIdx, matchIndex, 1, { id: generateId(), name: 'BYE', score: 0, completed: true, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() }, performedActions);
-                  }
+                  // This is the round where losers from the winners' bracket drop down.
+                  // The second player slot (players[1]) is reserved for them.
+                  // We should NOT create a BYE in this slot, as it will be filled by a loser.
+                  // This is especially important for the final losers' match, which awaits the loser of the winners' final.
+                  // The previous logic was too aggressive and created a BYE here prematurely.
+                  // By simply not creating a BYE for `players[1]` in these specific rounds, we solve the issue.
+
+                  // The logic to place BYEs was too aggressive. The slot for the dropping winner's bracket loser
+                  // (players[1]) should remain 'TBD' until that match concludes. The logic to place the actual
+                  // loser already handles this. We can remove the automatic BYE creation for this slot.
                 });
               }
             }
@@ -1582,14 +1600,10 @@ const updateLines = (bracketIdx) => {
             }
           } else {
             // Losers bracket final - advance to grand finals
-            const grandFinalsMatch = bracket.matches.grand_finals[0];
+            const grandFinalsMatch = bracket.matches.grand_finals[0]?.[0];
             if (grandFinalsMatch) {
-              const winnersFinal = bracket.matches.winners[bracket.matches.winners.length - 1][0];
-              if (winnersFinal.status === 'completed') {
-                setPlayerWithLog(bracket, 'grand_finals', 0, 0, 1, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() }, performedActions);
-              } else {
-                setPlayerWithLog(bracket, 'grand_finals', 0, 0, 0, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() }, performedActions);
-              }
+              // The winner of the lower bracket always goes to the bottom slot (position 1) of the Grand Finals.
+              setPlayerWithLog(bracket, 'grand_finals', 0, 0, 1, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
             }
           }
 

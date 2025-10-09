@@ -126,13 +126,18 @@ class BracketController extends Controller
                     }
                 }
             }
-        } else {
-            // section is not numerically-indexed (fallback) - iterate safely
-            foreach ($roundsOrMatches as $m) {
-                if (is_array($m)) {
-                    $m['bracket_type'] = $m['bracket_type'] ?? $sectionKey;
-                    $out[] = $m;
+        } else { // Flat array of matches
+            // This handles cases like grand_finals which might be `[match]` instead of `[[match]]`
+            $first = $roundsOrMatches[0] ?? null;
+            $firstLooksLikeMatch = is_array($first) && (isset($first['id']) || isset($first['players']) || isset($first['match_number']) || isset($first['round']));
+            if ($firstLooksLikeMatch) {
+                foreach ($roundsOrMatches as $m) {
+                    if (is_array($m)) {
+                        $m['bracket_type'] = $m['bracket_type'] ?? $sectionKey;
+                        $out[] = $m;
+                    }
                 }
+
             }
         }
     }

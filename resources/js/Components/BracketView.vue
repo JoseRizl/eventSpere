@@ -320,12 +320,13 @@ const updateBracketLines = () => {
             matches[round].forEach((match, i) => {
                 const fromEl = document.getElementById(`${idPrefix}-${bracketIdx}-${round}-${i}`);
 
+                const nextRoundMatches = matches[round + 1];
+                if (!nextRoundMatches) return;
+
                 let nextMatchIdx;
-                // Losers bracket has a special progression structure.
-                // "Survival" rounds (LR2->LR3, LR4->LR5, etc.) have half the matches.
-                // "Drop-in" rounds (LR1->LR2, LR3->LR4, etc.) often have the same number of matches.
-                if (part === 'losers' && matches[round].length === matches[round + 1].length) {
-                    nextMatchIdx = i; // Winner of match `i` goes to match `i` in the next round.
+                // If the number of matches is the same, the winner progresses to the same match index.
+                if (matches[round].length === nextRoundMatches.length) {
+                    nextMatchIdx = i;
                 } else {
                     nextMatchIdx = Math.floor(i / 2); // Standard progression (2 matches feed into 1).
                 }
