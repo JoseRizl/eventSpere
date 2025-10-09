@@ -161,50 +161,70 @@ export function useBracketActions(state) {
     });
   };
 
+  // --- REPLACE the existing getAllMatches function with this robust version ---
+  const flattenMaybeRounds = (maybeRounds) => {
+    // Accepts:
+    // - null/undefined -> []
+    // - flat array of matches -> return that array
+    // - array of rounds -> e.g. [ [m,m], [m] ] -> flatten to [m,m,m]
+    if (!maybeRounds) return [];
+    if (!Array.isArray(maybeRounds)) return [];
+    // If first element is an array -> treat as rounds
+    if (maybeRounds.length > 0 && Array.isArray(maybeRounds[0])) {
+      return maybeRounds.flat();
+    }
+    // Otherwise treat as flat array of matches
+    return maybeRounds;
+  };
+
   const getAllMatches = (bracket, filter = 'all') => {
     let allMatches = [];
     if (!bracket || !bracket.matches) return allMatches;
 
-    if (bracket.type === 'Single Elimination' || bracket.type === 'Round Robin') {
-        allMatches = bracket.matches.flat();
-    } else if (bracket.type === 'Double Elimination') {
-        allMatches = [
-            ...bracket.matches.winners.flat(),
-            ...bracket.matches.losers.flat(),
-            ...(bracket.matches.grand_finals || []).flat()
-        ];
-    } else {
-        return [];
+    try {
+      if (bracket.type === 'Single Elimination' || bracket.type === 'Round Robin') {
+        // bracket.matches might be array-of-rounds or flat array
+        allMatches = flattenMaybeRounds(bracket.matches);
+      } else if (bracket.type === 'Double Elimination') {
+        const winners = flattenMaybeRounds(bracket.matches.winners);
+        const losers = flattenMaybeRounds(bracket.matches.losers);
+        // grand_finals may be flat array or array-of-rounds or missing
+        const grand = flattenMaybeRounds(bracket.matches.grand_finals || []);
+        allMatches = [...winners, ...losers, ...grand];
+      } else {
+        // unknown bracket type: try to flatten everything defensively
+        if (Array.isArray(bracket.matches)) {
+          allMatches = flattenMaybeRounds(bracket.matches);
+        } else if (typeof bracket.matches === 'object' && bracket.matches !== null) {
+          // collect any arrays inside bracket.matches and flatten them
+          Object.values(bracket.matches).forEach((val) => {
+            if (Array.isArray(val)) allMatches = [...allMatches, ...flattenMaybeRounds(val)];
+          });
+        }
+      }
+    } catch (err) {
+      // Fallback to an empty list on unexpected shape
+      console.warn('getAllMatches: unexpected bracket.matches shape', err, bracket.matches);
+      allMatches = [];
     }
 
+    // Apply filter if requested
     let filteredMatches = allMatches;
     if (filter && filter !== 'all') {
-        filteredMatches = allMatches.filter(match => match.status === filter);
+      filteredMatches = allMatches.filter(m => (m && m.status) ? m.status === filter : false);
     }
 
-    const statusOrder = { 'ongoing': 1, 'pending': 2, 'completed': 3 };
-    filteredMatches.sort((a, b) => (statusOrder[a.status] || 99) - (statusOrder[b.status] || 99));
+    // sort by round, then match_number if present (defensive)
+    filteredMatches.sort((a, b) => {
+      const ra = Number(a?.round ?? 0);
+      const rb = Number(b?.round ?? 0);
+      if (ra !== rb) return ra - rb;
+      const ma = Number(a?.match_number ?? a?.matchNumber ?? 0);
+      const mb = Number(b?.match_number ?? b?.matchNumber ?? 0);
+      return ma - mb;
+    });
+
     return filteredMatches;
-  };
-
-  const openDialog = async () => {
-    bracketName.value = "";
-    numberOfPlayers.value = null;
-    matchType.value = "";
-    selectedEvent.value = null;
-
-    try {
-      // Use Laravel API route for events
-      const response = await axios.get(route('api.events.index'));
-      events.value = response.data.filter(event => {
-        const categoryId = parseInt(event.category_id);
-        return categoryId === 3 && !event.archived; // Category 3 is 'Sports'
-      });
-    } catch (error) {
-      console.error('Error fetching events:', error);
-    }
-
-    showDialog.value = true;
   };
 
   const setBracketViewMode = (bracketIdx, mode) => {
@@ -407,14 +427,31 @@ export function useBracketActions(state) {
             });
 
             // Reconstruct the nested `matches` structure from the flat list
-            const composedMatches = bracketMatches.reduce((acc, match) => {
-                const round = match.round - 1;
-                if (!acc[round]) acc[round] = [];
-                acc[round].push(match);
-                return acc;
-            }, []);
+            if (bracket.type === 'Double Elimination') {
+                const winnersMatches = bracketMatches.filter(m => m.bracket_type === 'winners');
+                const losersMatches = bracketMatches.filter(m => m.bracket_type === 'losers');
+                const grandFinalsMatches = bracketMatches.filter(m => m.bracket_type === 'grand_finals');
 
-            newBracket.matches = composedMatches;
+                const groupByRound = (matches) => matches.reduce((acc, match) => {
+                    const round = match.round - 1;
+                    if (!acc[round]) acc[round] = [];
+                    acc[round].push(match);
+                    return acc;
+                }, []);
+
+                newBracket.matches = {
+                    winners: groupByRound(winnersMatches),
+                    losers: groupByRound(losersMatches),
+                    grand_finals: grandFinalsMatches,
+                };
+            } else {
+                newBracket.matches = bracketMatches.reduce((acc, match) => {
+                    const round = match.round - 1;
+                    if (!acc[round]) acc[round] = [];
+                    acc[round].push(match);
+                    return acc;
+                }, []);
+            }
             return newBracket;
           })
         );
@@ -434,6 +471,26 @@ export function useBracketActions(state) {
   };
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
+
+  const openDialog = async () => {
+    bracketName.value = "";
+    numberOfPlayers.value = null;
+    matchType.value = "";
+    selectedEvent.value = null;
+
+    try {
+      // Use Laravel API route for events
+      const response = await axios.get(route('api.events.index'));
+      events.value = response.data.filter(event => {
+        const categoryId = parseInt(event.category_id);
+        return categoryId === 3 && !event.archived; // Category 3 is 'Sports'
+      });
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
+
+    showDialog.value = true;
+  };
 
   const generateBracket = () => {
     const numPlayers = parseInt(numberOfPlayers.value, 10);

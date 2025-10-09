@@ -71,9 +71,9 @@ const groupedMatches = computed(() => {
         allMatchesUnsorted = bracket.matches.flat();
     } else if (bracket.type === 'Double Elimination') {
         allMatchesUnsorted = [
-            ...bracket.matches.winners.flat(),
-            ...bracket.matches.losers.flat(),
-            ...bracket.matches.grand_finals.flat()
+            ...(bracket.matches.winners || []).flat(),
+            ...(bracket.matches.losers || []).flat(),
+            ...(bracket.matches.grand_finals || []).flat()
         ];
     }
 
