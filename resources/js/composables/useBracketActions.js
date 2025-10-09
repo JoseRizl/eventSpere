@@ -1262,8 +1262,24 @@ const updateLines = (bracketIdx) => {
           match = bracket.matches.losers[roundIdx][matchIdx];
           break;
         case 'grand_finals':
-          match = bracket.matches.grand_finals[matchIdx];
-          break;
+          const grandFinals = bracket.matches.grand_finals;
+        if (!Array.isArray(grandFinals) || grandFinals.length === 0) {
+            console.error('Grand finals structure missing or malformed:', grandFinals);
+            return;
+        }
+
+        const grandRound = grandFinals[roundIdx] || grandFinals[0];
+        if (!Array.isArray(grandRound) || grandRound.length === 0) {
+            console.error('Grand finals round missing:', { roundIdx, grandFinals });
+            return;
+        }
+
+        match = grandRound[matchIdx] || grandRound[0];
+        if (!match) {
+            console.error('Grand finals match undefined:', { roundIdx, matchIdx, grandRound });
+            return;
+        }
+        break;
       }
     } else if (bracket.type === 'Round Robin') {
       match = bracket.matches[roundIdx][matchIdx];
