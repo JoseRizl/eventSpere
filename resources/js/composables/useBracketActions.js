@@ -301,17 +301,61 @@ export function useBracketActions(state) {
     try {
       // Use Laravel API to store the new bracket
       const response = await axios.post(route('api.brackets.store'), payload);
-      // The backend now returns a bracket without the event object.
-      // We'll add it back on the client-side for immediate display.
-      const savedBracket = { ...response.data, event: selectedEvent.value };
+      // Backend returns bracket record (id, name, type, event_id, etc).
+      // Build a composed bracket for immediate UI display using the client-side payload.matches
+      const savedRaw = response.data;
+      const savedBracket = {
+        ...savedRaw,
+        event: selectedEvent.value,
+        // payload.matches can be either:
+        // - array of rounds [ [m,m], [m] ] for single/round-robin
+        // - object { winners: [...], losers: [...], grand_finals: [...] } for double-elim
+        // We'll deep clone to avoid accidental refs
+        matches: JSON.parse(JSON.stringify(payload.matches))
+      };
 
+      // Ensure for Single/RoundRobin: matches is an array-of-rounds
+      if (savedBracket.type === 'Single Elimination' || savedBracket.type === 'Round Robin') {
+        if (!Array.isArray(savedBracket.matches)) {
+          // If someone passed a flat array, wrap into one round
+          savedBracket.matches = Array.isArray(savedBracket.matches) ? savedBracket.matches : [savedBracket.matches || []];
+        }
+      }
+
+      // For Double Elimination, ensure structure keys exist
+      if (savedBracket.type === 'Double Elimination') {
+        savedBracket.matches = savedBracket.matches || {};
+        savedBracket.matches.winners = savedBracket.matches.winners || [];
+        savedBracket.matches.losers = savedBracket.matches.losers || [];
+        savedBracket.matches.grand_finals = savedBracket.matches.grand_finals || [];
+      }
+
+      // Normalize each match player entries: ensure players array exists and has two slots
+      const normalizeMatchPlayers = (match) => {
+        if (!match.players || !Array.isArray(match.players)) match.players = [{ id: null, name: 'TBD', score: 0, completed: false }, { id: null, name: 'TBD', score: 0, completed: false }];
+        while (match.players.length < 2) match.players.push({ id: null, name: 'TBD', score: 0, completed: false });
+      };
+
+      if (savedBracket.type === 'Double Elimination') {
+        savedBracket.matches.winners.flat().forEach(normalizeMatchPlayers);
+        savedBracket.matches.losers.flat().forEach(normalizeMatchPlayers);
+        (savedBracket.matches.grand_finals || []).forEach(normalizeMatchPlayers);
+      } else {
+        (savedBracket.matches || []).flat().forEach(normalizeMatchPlayers);
+      }
+
+      // Insert into client state
       brackets.value.push(savedBracket);
       expandedBrackets.value.push(false);
-      bracketViewModes.value[brackets.value.length - 1] = 'bracket';
-      bracketMatchFilters.value[brackets.value.length - 1] = 'all';
+      const newIdx = brackets.value.length - 1;
+      bracketViewModes.value[newIdx] = 'bracket';
+      bracketMatchFilters.value[newIdx] = 'all';
       showDialog.value = false;
-      handleByeRounds(brackets.value.length - 1);
-      nextTick(() => updateLines(brackets.value.length - 1));
+
+      // Setup lines / BYE handling for the new bracket
+      handleByeRounds(newIdx);
+      nextTick(() => updateLines(newIdx));
+
       successMessage.value = 'Bracket created successfully!';
       showSuccessDialog.value = true;
     } catch (error) {
@@ -323,38 +367,59 @@ export function useBracketActions(state) {
     try {
       let response;
       if (eventId) {
-        // Fetch public brackets for a specific event
-        response = await axios.get(route('api.events.brackets', { event: eventId }));
+        // This route is not yet updated for normalized data, so we'll use the main one for now.
+        // We can filter client-side.
+        response = await axios.get(route('api.brackets.index'));
       } else {
         // Fetch all brackets (requires auth)
         response = await axios.get(route('api.brackets.index'));
       }
-      if (response.data) {
-        const bracketsWithEvents = await Promise.all(
-          response.data.map(async (bracket) => {
-            if (bracket.event_id) {
-              const eventDetails = await fetchEventDetails(bracket.event_id);
-              const newBracket = { ...bracket, event: eventDetails || { title: 'Event not found' } };
 
-              const populateMatch = (match) => {
-                  if (!match.date) match.date = newBracket.event.startDate;
-                  if (!match.time) match.time = newBracket.event.startTime;
-                  if (!match.venue) match.venue = newBracket.event.venue;
-                  return match;
-              };
+      if (response.data && response.data.brackets) {
+        const db = response.data;
+        const allMatches = db.matches || [];
+        const allMatchPlayers = db.matchPlayers || [];
 
-              if (newBracket.matches && typeof newBracket.matches === 'object') {
-                  Object.values(newBracket.matches).forEach(part => {
-                      if (Array.isArray(part)) part.flat().forEach(populateMatch);
-                  });
-              }
-              return newBracket;
-            } else {
-              return { ...bracket, event: { title: 'Event not found' } };
-            }
+        // Filter brackets if an eventId is provided
+        const sourceBrackets = eventId
+            ? db.brackets.filter(b => b.event_id === eventId)
+            : db.brackets;
+
+        const composedBrackets = await Promise.all(
+          sourceBrackets.map(async (bracket) => {
+            const eventDetails = await fetchEventDetails(bracket.event_id);
+            const newBracket = { ...bracket, event: eventDetails || { title: 'Event not found' } };
+
+            // Find matches for this bracket
+            const bracketMatches = allMatches.filter(m => m.bracket_id === bracket.id);
+
+            // Find and attach players to each match
+            bracketMatches.forEach(match => {
+                match.players = allMatchPlayers
+                    .filter(mp => mp.match_id === match.id)
+                    .sort((a, b) => a.slot - b.slot)
+                    .map(mp => ({ id: mp.player_id, name: mp.name, score: mp.score, completed: mp.completed }));
+
+                // Populate match details from the event if they are missing
+                if (!match.date) match.date = newBracket.event.startDate;
+                if (!match.time) match.time = newBracket.event.startTime;
+                if (!match.venue) match.venue = newBracket.event.venue;
+            });
+
+            // Reconstruct the nested `matches` structure from the flat list
+            const composedMatches = bracketMatches.reduce((acc, match) => {
+                const round = match.round - 1;
+                if (!acc[round]) acc[round] = [];
+                acc[round].push(match);
+                return acc;
+            }, []);
+
+            newBracket.matches = composedMatches;
+            return newBracket;
           })
         );
-        brackets.value = bracketsWithEvents;
+
+        brackets.value = composedBrackets;
         expandedBrackets.value = new Array(brackets.value.length).fill(false);
         bracketViewModes.value = {};
         bracketMatchFilters.value = {};
@@ -364,7 +429,7 @@ export function useBracketActions(state) {
         }
       }
     } catch (error) {
-      console.error('Error fetching brackets:', error);
+      console.error('Error fetching and composing brackets:', error);
     }
   };
 

@@ -973,2964 +973,469 @@
     },
     "brackets": [
         {
-            "id": "f7f7713a",
-            "name": "12",
-            "type": "Double Elimination",
-            "event_id": "6ee4",
-            "matches": {
-                "winners": [
-                    [
-                        {
-                            "id": "4e5leq41n",
-                            "round": 1,
-                            "match_number": 1,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": "yxm0vdka4",
-                                    "name": "Player 1",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": "3ianfsfp0",
-                                    "name": "BYE",
-                                    "score": 0,
-                                    "completed": true,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "4xk364szt",
-                            "round": 1,
-                            "match_number": 2,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": "3xbeey9h2",
-                                    "name": "Player 8",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": "dq15zqilr",
-                                    "name": "Player 9",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "r8tbvs5m6",
-                            "round": 1,
-                            "match_number": 3,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": "8aze0r3ge",
-                                    "name": "Player 4",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": "sznsr2r8g",
-                                    "name": "BYE",
-                                    "score": 0,
-                                    "completed": true,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "uhcj2javl",
-                            "round": 1,
-                            "match_number": 4,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": "l2p3yj09u",
-                                    "name": "Player 5",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": "q5912ixd8",
-                                    "name": "BYE",
-                                    "score": 0,
-                                    "completed": true,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "kuvzi6xkf",
-                            "round": 1,
-                            "match_number": 5,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": "uuelxofla",
-                                    "name": "Player 2",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": "4xnn9x5zk",
-                                    "name": "BYE",
-                                    "score": 0,
-                                    "completed": true,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "c3oh2e17k",
-                            "round": 1,
-                            "match_number": 6,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": "8dmwujitp",
-                                    "name": "Player 7",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": "ueis7xl9h",
-                                    "name": "Player 10",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "hxhf9qqi3",
-                            "round": 1,
-                            "match_number": 7,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": "2h0nykpup",
-                                    "name": "Player 3",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": "4gak6q80z",
-                                    "name": "BYE",
-                                    "score": 0,
-                                    "completed": true,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "b2t819kbn",
-                            "round": 1,
-                            "match_number": 8,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": "48j4p48vu",
-                                    "name": "Player 6",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": "gcgrxrrci",
-                                    "name": "BYE",
-                                    "score": 0,
-                                    "completed": true,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        }
-                    ],
-                    [
-                        {
-                            "id": "643gxwegb",
-                            "round": 2,
-                            "match_number": 1,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "oa3tnv8ao",
-                            "round": 2,
-                            "match_number": 2,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "5i8a313ld",
-                            "round": 2,
-                            "match_number": 3,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "4v97wpzy8",
-                            "round": 2,
-                            "match_number": 4,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        }
-                    ],
-                    [
-                        {
-                            "id": "k80r2rs2i",
-                            "round": 3,
-                            "match_number": 1,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "gfejn41tu",
-                            "round": 3,
-                            "match_number": 2,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        }
-                    ],
-                    [
-                        {
-                            "id": "ccvff2kok",
-                            "round": 4,
-                            "match_number": 1,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        }
-                    ]
-                ],
-                "losers": [
-                    [
-                        {
-                            "id": "ewmggfvro",
-                            "round": 1,
-                            "match_number": 1,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "Loser of R1 M2",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.858Z",
-                                    "updated_at": "2025-10-08T14:02:53.858Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "Loser of R1 M6",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.858Z",
-                                    "updated_at": "2025-10-08T14:02:53.858Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "ocq18v173",
-                            "round": 1,
-                            "match_number": 2,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "whmn3vrbg",
-                            "round": 1,
-                            "match_number": 3,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "u2bqzptr3",
-                            "round": 1,
-                            "match_number": 4,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        }
-                    ],
-                    [
-                        {
-                            "id": "972kfd007",
-                            "round": 2,
-                            "match_number": 1,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "Loser of R2 M1",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.858Z",
-                                    "updated_at": "2025-10-08T14:02:53.858Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "4o3c1pr4c",
-                            "round": 2,
-                            "match_number": 2,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "Loser of R2 M2",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.858Z",
-                                    "updated_at": "2025-10-08T14:02:53.858Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "9dsc6hrrj",
-                            "round": 2,
-                            "match_number": 3,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "Loser of R2 M3",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.858Z",
-                                    "updated_at": "2025-10-08T14:02:53.858Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "jvf34uyma",
-                            "round": 2,
-                            "match_number": 4,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "Loser of R2 M4",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.858Z",
-                                    "updated_at": "2025-10-08T14:02:53.858Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        }
-                    ],
-                    [
-                        {
-                            "id": "p414jnwxv",
-                            "round": 3,
-                            "match_number": 1,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "odlcbepcf",
-                            "round": 3,
-                            "match_number": 2,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        }
-                    ],
-                    [
-                        {
-                            "id": "rrdfs6x4x",
-                            "round": 4,
-                            "match_number": 1,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "Loser of R3 M1",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.858Z",
-                                    "updated_at": "2025-10-08T14:02:53.858Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "dejdzeqoo",
-                            "round": 4,
-                            "match_number": 2,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "Loser of R3 M2",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.858Z",
-                                    "updated_at": "2025-10-08T14:02:53.858Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        }
-                    ],
-                    [
-                        {
-                            "id": "6p06mj70d",
-                            "round": 5,
-                            "match_number": 1,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        }
-                    ],
-                    [
-                        {
-                            "id": "yg08nmjd1",
-                            "round": 6,
-                            "match_number": 1,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:53.857Z",
-                                    "updated_at": "2025-10-08T14:02:53.857Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:53.857Z",
-                            "updated_at": "2025-10-08T14:02:53.857Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        }
-                    ]
-                ],
-                "grand_finals": [
-                    {
-                        "id": "6871i7zdg",
-                        "round": 1,
-                        "match_number": 1,
-                        "bracket_type": "grand_finals",
-                        "players": [
-                            {
-                                "id": null,
-                                "name": "TBD",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T14:02:53.858Z",
-                                "updated_at": "2025-10-08T14:02:53.858Z"
-                            },
-                            {
-                                "id": null,
-                                "name": "TBD",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T14:02:53.858Z",
-                                "updated_at": "2025-10-08T14:02:53.858Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T14:02:53.858Z",
-                        "updated_at": "2025-10-08T14:02:53.858Z",
-                        "date": "Oct-22-2025",
-                        "time": "00:00",
-                        "venue": null
-                    }
-                ]
-            },
-            "created_at": "2025-10-08T14:02:54.592516Z",
-            "updated_at": "2025-10-08T14:02:54.592923Z"
-        },
-        {
-            "id": "124760f7",
-            "name": "ewq",
-            "type": "Double Elimination",
-            "event_id": "6ee4",
-            "matches": {
-                "winners": [
-                    [
-                        {
-                            "id": "clyg70ik6",
-                            "round": 1,
-                            "match_number": 1,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": "dtr6iylq9",
-                                    "name": "Player 1",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": "ww0j42cg5",
-                                    "name": "BYE",
-                                    "score": 0,
-                                    "completed": true,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "c5oeqv7lw",
-                            "round": 1,
-                            "match_number": 2,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": "9rmxxjuaz",
-                                    "name": "Player 8",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": "yza36j21p",
-                                    "name": "Player 9",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "bx7egbbat",
-                            "round": 1,
-                            "match_number": 3,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": "xdjm8azk1",
-                                    "name": "Player 4",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": "k9kqpnkng",
-                                    "name": "BYE",
-                                    "score": 0,
-                                    "completed": true,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "w0rz0tg1f",
-                            "round": 1,
-                            "match_number": 4,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": "nu8lf3ch0",
-                                    "name": "Player 5",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": "0qjfo9vru",
-                                    "name": "Player 12",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "5ed07sx43",
-                            "round": 1,
-                            "match_number": 5,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": "d3v6z6sst",
-                                    "name": "Player 2",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": "lnyne5ehk",
-                                    "name": "BYE",
-                                    "score": 0,
-                                    "completed": true,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "wqvv8trsm",
-                            "round": 1,
-                            "match_number": 6,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": "z870t9eoa",
-                                    "name": "Player 7",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": "o9m6lppjj",
-                                    "name": "Player 10",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "vdlns8uiy",
-                            "round": 1,
-                            "match_number": 7,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": "swhg3g0lq",
-                                    "name": "Player 3",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": "gjkaq7gk7",
-                                    "name": "BYE",
-                                    "score": 0,
-                                    "completed": true,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "nd6ca9cev",
-                            "round": 1,
-                            "match_number": 8,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": "2x3lafnpv",
-                                    "name": "Player 6",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": "t40zupilw",
-                                    "name": "Player 11",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        }
-                    ],
-                    [
-                        {
-                            "id": "h7dxs0tgr",
-                            "round": 2,
-                            "match_number": 1,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "fdwtt204p",
-                            "round": 2,
-                            "match_number": 2,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "v47klngj6",
-                            "round": 2,
-                            "match_number": 3,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "c9ch3xkfv",
-                            "round": 2,
-                            "match_number": 4,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        }
-                    ],
-                    [
-                        {
-                            "id": "669r0xh29",
-                            "round": 3,
-                            "match_number": 1,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "kz925lkjp",
-                            "round": 3,
-                            "match_number": 2,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        }
-                    ],
-                    [
-                        {
-                            "id": "71rp1vadu",
-                            "round": 4,
-                            "match_number": 1,
-                            "bracket_type": "winners",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        }
-                    ]
-                ],
-                "losers": [
-                    [
-                        {
-                            "id": "igribzi17",
-                            "round": 1,
-                            "match_number": 1,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "Loser of R1 M2",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "Loser of R1 M4",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "temdairve",
-                            "round": 1,
-                            "match_number": 2,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "Loser of R1 M6",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "Loser of R1 M8",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "1erv34h2c",
-                            "round": 1,
-                            "match_number": 3,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "d731cl36a",
-                            "round": 1,
-                            "match_number": 4,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        }
-                    ],
-                    [
-                        {
-                            "id": "hwxv5rbiq",
-                            "round": 2,
-                            "match_number": 1,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "Loser of R2 M1",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "5zu03gmqb",
-                            "round": 2,
-                            "match_number": 2,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "Loser of R2 M2",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "299q8o5le",
-                            "round": 2,
-                            "match_number": 3,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "Loser of R2 M3",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "kxxcfkidd",
-                            "round": 2,
-                            "match_number": 4,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "Loser of R2 M4",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        }
-                    ],
-                    [
-                        {
-                            "id": "xj0zmnyq2",
-                            "round": 3,
-                            "match_number": 1,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "t4mryhnz3",
-                            "round": 3,
-                            "match_number": 2,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        }
-                    ],
-                    [
-                        {
-                            "id": "l61xgit74",
-                            "round": 4,
-                            "match_number": 1,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "Loser of R3 M1",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        },
-                        {
-                            "id": "rk3hp3831",
-                            "round": 4,
-                            "match_number": 2,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "Loser of R3 M2",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        }
-                    ],
-                    [
-                        {
-                            "id": "9w94rebnp",
-                            "round": 5,
-                            "match_number": 1,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        }
-                    ],
-                    [
-                        {
-                            "id": "wpxb3b5dv",
-                            "round": 6,
-                            "match_number": 1,
-                            "bracket_type": "losers",
-                            "players": [
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                },
-                                {
-                                    "id": null,
-                                    "name": "TBD",
-                                    "score": 0,
-                                    "completed": false,
-                                    "created_at": "2025-10-08T14:02:42.833Z",
-                                    "updated_at": "2025-10-08T14:02:42.833Z"
-                                }
-                            ],
-                            "winner_id": null,
-                            "loser_id": null,
-                            "status": "pending",
-                            "created_at": "2025-10-08T14:02:42.833Z",
-                            "updated_at": "2025-10-08T14:02:42.833Z",
-                            "date": "Oct-22-2025",
-                            "time": "00:00",
-                            "venue": null
-                        }
-                    ]
-                ],
-                "grand_finals": [
-                    {
-                        "id": "5teneh3k3",
-                        "round": 1,
-                        "match_number": 1,
-                        "bracket_type": "grand_finals",
-                        "players": [
-                            {
-                                "id": null,
-                                "name": "TBD",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T14:02:42.833Z",
-                                "updated_at": "2025-10-08T14:02:42.833Z"
-                            },
-                            {
-                                "id": null,
-                                "name": "TBD",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T14:02:42.833Z",
-                                "updated_at": "2025-10-08T14:02:42.833Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T14:02:42.833Z",
-                        "updated_at": "2025-10-08T14:02:42.833Z",
-                        "date": "Oct-22-2025",
-                        "time": "00:00",
-                        "venue": null
-                    }
-                ]
-            },
-            "created_at": "2025-10-08T14:02:43.349881Z",
-            "updated_at": "2025-10-08T14:02:43.350062Z"
-        },
-        {
-            "id": "009c3174",
-            "name": "3",
-            "type": "Single Elimination",
-            "event_id": "9ab1",
-            "matches": [
-                [
-                    {
-                        "id": "ur5m9y3qb",
-                        "round": 1,
-                        "match_number": 1,
-                        "players": [
-                            {
-                                "id": "5qnlctdji",
-                                "name": "Player 1",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.585Z",
-                                "updated_at": "2025-10-08T13:57:48.585Z"
-                            },
-                            {
-                                "id": "wfhfot8v7",
-                                "name": "Player 16",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.585Z",
-                                "updated_at": "2025-10-08T13:57:48.585Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T13:57:48.585Z",
-                        "updated_at": "2025-10-08T13:57:48.585Z",
-                        "date": "Oct-29-2025",
-                        "time": "00:00",
-                        "venue": "Court"
-                    },
-                    {
-                        "id": "sx5i8cux1",
-                        "round": 1,
-                        "match_number": 2,
-                        "players": [
-                            {
-                                "id": "82tsh9cv9",
-                                "name": "Player 8",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.585Z",
-                                "updated_at": "2025-10-08T13:57:48.585Z"
-                            },
-                            {
-                                "id": "h6yyzes0v",
-                                "name": "Player 9",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.585Z",
-                                "updated_at": "2025-10-08T13:57:48.585Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T13:57:48.585Z",
-                        "updated_at": "2025-10-08T13:57:48.585Z",
-                        "date": "Oct-29-2025",
-                        "time": "00:00",
-                        "venue": "Court"
-                    },
-                    {
-                        "id": "sbds18ir3",
-                        "round": 1,
-                        "match_number": 3,
-                        "players": [
-                            {
-                                "id": "3gq1lqedz",
-                                "name": "Player 4",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.585Z",
-                                "updated_at": "2025-10-08T13:57:48.585Z"
-                            },
-                            {
-                                "id": "a8uta67sl",
-                                "name": "Player 13",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.585Z",
-                                "updated_at": "2025-10-08T13:57:48.585Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T13:57:48.585Z",
-                        "updated_at": "2025-10-08T13:57:48.585Z",
-                        "date": "Oct-29-2025",
-                        "time": "00:00",
-                        "venue": "Court"
-                    },
-                    {
-                        "id": "3v67216f7",
-                        "round": 1,
-                        "match_number": 4,
-                        "players": [
-                            {
-                                "id": "hrd9cw01h",
-                                "name": "Player 5",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.585Z",
-                                "updated_at": "2025-10-08T13:57:48.585Z"
-                            },
-                            {
-                                "id": "g5e1anb84",
-                                "name": "Player 12",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.585Z",
-                                "updated_at": "2025-10-08T13:57:48.585Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T13:57:48.585Z",
-                        "updated_at": "2025-10-08T13:57:48.585Z",
-                        "date": "Oct-29-2025",
-                        "time": "00:00",
-                        "venue": "Court"
-                    },
-                    {
-                        "id": "3ipwzlgqc",
-                        "round": 1,
-                        "match_number": 5,
-                        "players": [
-                            {
-                                "id": "x6cdspks1",
-                                "name": "Player 2",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.585Z",
-                                "updated_at": "2025-10-08T13:57:48.585Z"
-                            },
-                            {
-                                "id": "9sh7g0mmy",
-                                "name": "Player 15",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.585Z",
-                                "updated_at": "2025-10-08T13:57:48.585Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T13:57:48.585Z",
-                        "updated_at": "2025-10-08T13:57:48.585Z",
-                        "date": "Oct-29-2025",
-                        "time": "00:00",
-                        "venue": "Court"
-                    },
-                    {
-                        "id": "k8byxnq0o",
-                        "round": 1,
-                        "match_number": 6,
-                        "players": [
-                            {
-                                "id": "bdfm6zq4g",
-                                "name": "Player 7",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.585Z",
-                                "updated_at": "2025-10-08T13:57:48.585Z"
-                            },
-                            {
-                                "id": "l0xwt7h38",
-                                "name": "Player 10",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.585Z",
-                                "updated_at": "2025-10-08T13:57:48.585Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T13:57:48.585Z",
-                        "updated_at": "2025-10-08T13:57:48.585Z",
-                        "date": "Oct-29-2025",
-                        "time": "00:00",
-                        "venue": "Court"
-                    },
-                    {
-                        "id": "iqpqgqwpg",
-                        "round": 1,
-                        "match_number": 7,
-                        "players": [
-                            {
-                                "id": "iyka6db8m",
-                                "name": "Player 3",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.585Z",
-                                "updated_at": "2025-10-08T13:57:48.585Z"
-                            },
-                            {
-                                "id": "3vsx6ibwr",
-                                "name": "Player 14",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.585Z",
-                                "updated_at": "2025-10-08T13:57:48.585Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T13:57:48.586Z",
-                        "updated_at": "2025-10-08T13:57:48.586Z",
-                        "date": "Oct-29-2025",
-                        "time": "00:00",
-                        "venue": "Court"
-                    },
-                    {
-                        "id": "mflrexpyn",
-                        "round": 1,
-                        "match_number": 8,
-                        "players": [
-                            {
-                                "id": "qroq0mrtb",
-                                "name": "Player 6",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.585Z",
-                                "updated_at": "2025-10-08T13:57:48.585Z"
-                            },
-                            {
-                                "id": "nv7t736n4",
-                                "name": "Player 11",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.585Z",
-                                "updated_at": "2025-10-08T13:57:48.585Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T13:57:48.586Z",
-                        "updated_at": "2025-10-08T13:57:48.586Z",
-                        "date": "Oct-29-2025",
-                        "time": "00:00",
-                        "venue": "Court"
-                    }
-                ],
-                [
-                    {
-                        "id": "zpenhvi5a",
-                        "round": 2,
-                        "match_number": 1,
-                        "players": [
-                            {
-                                "id": null,
-                                "name": "TBD",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.586Z",
-                                "updated_at": "2025-10-08T13:57:48.586Z"
-                            },
-                            {
-                                "id": null,
-                                "name": "TBD",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.586Z",
-                                "updated_at": "2025-10-08T13:57:48.586Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T13:57:48.586Z",
-                        "updated_at": "2025-10-08T13:57:48.586Z",
-                        "date": "Oct-29-2025",
-                        "time": "00:00",
-                        "venue": "Court"
-                    },
-                    {
-                        "id": "8pz00ikhq",
-                        "round": 2,
-                        "match_number": 2,
-                        "players": [
-                            {
-                                "id": null,
-                                "name": "TBD",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.586Z",
-                                "updated_at": "2025-10-08T13:57:48.586Z"
-                            },
-                            {
-                                "id": null,
-                                "name": "TBD",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.586Z",
-                                "updated_at": "2025-10-08T13:57:48.586Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T13:57:48.586Z",
-                        "updated_at": "2025-10-08T13:57:48.586Z",
-                        "date": "Oct-29-2025",
-                        "time": "00:00",
-                        "venue": "Court"
-                    },
-                    {
-                        "id": "nze8xkgo7",
-                        "round": 2,
-                        "match_number": 3,
-                        "players": [
-                            {
-                                "id": null,
-                                "name": "TBD",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.586Z",
-                                "updated_at": "2025-10-08T13:57:48.586Z"
-                            },
-                            {
-                                "id": null,
-                                "name": "TBD",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.586Z",
-                                "updated_at": "2025-10-08T13:57:48.586Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T13:57:48.586Z",
-                        "updated_at": "2025-10-08T13:57:48.586Z",
-                        "date": "Oct-29-2025",
-                        "time": "00:00",
-                        "venue": "Court"
-                    },
-                    {
-                        "id": "9bop1s7i1",
-                        "round": 2,
-                        "match_number": 4,
-                        "players": [
-                            {
-                                "id": null,
-                                "name": "TBD",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.586Z",
-                                "updated_at": "2025-10-08T13:57:48.586Z"
-                            },
-                            {
-                                "id": null,
-                                "name": "TBD",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.586Z",
-                                "updated_at": "2025-10-08T13:57:48.586Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T13:57:48.586Z",
-                        "updated_at": "2025-10-08T13:57:48.586Z",
-                        "date": "Oct-29-2025",
-                        "time": "00:00",
-                        "venue": "Court"
-                    }
-                ],
-                [
-                    {
-                        "id": "qilw8rz0w",
-                        "round": 3,
-                        "match_number": 1,
-                        "players": [
-                            {
-                                "id": null,
-                                "name": "TBD",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.586Z",
-                                "updated_at": "2025-10-08T13:57:48.586Z"
-                            },
-                            {
-                                "id": null,
-                                "name": "TBD",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.586Z",
-                                "updated_at": "2025-10-08T13:57:48.586Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T13:57:48.586Z",
-                        "updated_at": "2025-10-08T13:57:48.586Z",
-                        "date": "Oct-29-2025",
-                        "time": "00:00",
-                        "venue": "Court"
-                    },
-                    {
-                        "id": "xy8e6o0ey",
-                        "round": 3,
-                        "match_number": 2,
-                        "players": [
-                            {
-                                "id": null,
-                                "name": "TBD",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.586Z",
-                                "updated_at": "2025-10-08T13:57:48.586Z"
-                            },
-                            {
-                                "id": null,
-                                "name": "TBD",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.586Z",
-                                "updated_at": "2025-10-08T13:57:48.586Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T13:57:48.586Z",
-                        "updated_at": "2025-10-08T13:57:48.586Z",
-                        "date": "Oct-29-2025",
-                        "time": "00:00",
-                        "venue": "Court"
-                    }
-                ],
-                [
-                    {
-                        "id": "fc46o3zv3",
-                        "round": 4,
-                        "match_number": 1,
-                        "players": [
-                            {
-                                "id": null,
-                                "name": "TBD",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.586Z",
-                                "updated_at": "2025-10-08T13:57:48.586Z"
-                            },
-                            {
-                                "id": null,
-                                "name": "TBD",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T13:57:48.586Z",
-                                "updated_at": "2025-10-08T13:57:48.586Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T13:57:48.586Z",
-                        "updated_at": "2025-10-08T13:57:48.586Z",
-                        "date": "Oct-29-2025",
-                        "time": "00:00",
-                        "venue": "Court"
-                    }
-                ]
-            ],
-            "created_at": "2025-10-08T13:57:49.263684Z",
-            "updated_at": "2025-10-08T13:57:49.264970Z"
-        },
-        {
-            "id": "ea181c7e",
-            "name": "Rr",
+            "id": "59676928",
+            "name": "rew",
             "type": "Round Robin",
             "event_id": "6ee4",
-            "matches": [
-                [
-                    {
-                        "id": "u6u96h9tu",
-                        "round": 1,
-                        "match_number": 1,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "nxa2mdp31",
-                                "name": "Player 1",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            },
-                            {
-                                "id": "qt823sgl3",
-                                "name": "BYE",
-                                "score": 0,
-                                "completed": true,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            }
-                        ],
-                        "winner_id": "nxa2mdp31",
-                        "loser_id": "qt823sgl3",
-                        "status": "completed",
-                        "created_at": "2025-10-08T02:28:57.078Z",
-                        "updated_at": "2025-10-08T02:28:57.078Z",
-                        "date": "Oct-22-2025",
-                        "time": "00:00",
-                        "venue": null
-                    },
-                    {
-                        "id": "3jxfa9jyr",
-                        "round": 1,
-                        "match_number": 2,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "wvf2z1va9",
-                                "name": "Player 2",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            },
-                            {
-                                "id": "z8bbtx4r9",
-                                "name": "Player 5",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T02:28:57.078Z",
-                        "updated_at": "2025-10-08T02:28:57.078Z",
-                        "date": "Oct-22-2025",
-                        "time": "00:00",
-                        "venue": null
-                    },
-                    {
-                        "id": "fa8qtzzx9",
-                        "round": 1,
-                        "match_number": 3,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "ssnblxtmy",
-                                "name": "Player 3",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            },
-                            {
-                                "id": "aafhjwit3",
-                                "name": "Player 4",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T02:28:57.078Z",
-                        "updated_at": "2025-10-08T02:28:57.078Z",
-                        "date": "Oct-22-2025",
-                        "time": "00:00",
-                        "venue": null
-                    }
-                ],
-                [
-                    {
-                        "id": "lpu5dw997",
-                        "round": 2,
-                        "match_number": 1,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "qt823sgl3",
-                                "name": "BYE",
-                                "score": 0,
-                                "completed": true,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            },
-                            {
-                                "id": "aafhjwit3",
-                                "name": "Player 4",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            }
-                        ],
-                        "winner_id": "aafhjwit3",
-                        "loser_id": "qt823sgl3",
-                        "status": "completed",
-                        "created_at": "2025-10-08T02:28:57.078Z",
-                        "updated_at": "2025-10-08T02:28:57.078Z",
-                        "date": "Oct-22-2025",
-                        "time": "00:00",
-                        "venue": null
-                    },
-                    {
-                        "id": "7ehol72o9",
-                        "round": 2,
-                        "match_number": 2,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "nxa2mdp31",
-                                "name": "Player 1",
-                                "score": 0,
-                                "completed": true,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            },
-                            {
-                                "id": "z8bbtx4r9",
-                                "name": "Player 5",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T02:28:57.078Z",
-                        "updated_at": "2025-10-08T02:28:57.078Z",
-                        "date": "Oct-22-2025",
-                        "time": "00:00",
-                        "venue": null
-                    },
-                    {
-                        "id": "j84vqsnjn",
-                        "round": 2,
-                        "match_number": 3,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "wvf2z1va9",
-                                "name": "Player 2",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            },
-                            {
-                                "id": "ssnblxtmy",
-                                "name": "Player 3",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T02:28:57.078Z",
-                        "updated_at": "2025-10-08T02:28:57.078Z",
-                        "date": "Oct-22-2025",
-                        "time": "00:00",
-                        "venue": null
-                    }
-                ],
-                [
-                    {
-                        "id": "4uljxuwpy",
-                        "round": 3,
-                        "match_number": 1,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "z8bbtx4r9",
-                                "name": "Player 5",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            },
-                            {
-                                "id": "ssnblxtmy",
-                                "name": "Player 3",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T02:28:57.078Z",
-                        "updated_at": "2025-10-08T02:28:57.078Z",
-                        "date": "Oct-22-2025",
-                        "time": "00:00",
-                        "venue": null
-                    },
-                    {
-                        "id": "z842f7342",
-                        "round": 3,
-                        "match_number": 2,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "qt823sgl3",
-                                "name": "BYE",
-                                "score": 0,
-                                "completed": true,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            },
-                            {
-                                "id": "wvf2z1va9",
-                                "name": "Player 2",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            }
-                        ],
-                        "winner_id": "wvf2z1va9",
-                        "loser_id": "qt823sgl3",
-                        "status": "completed",
-                        "created_at": "2025-10-08T02:28:57.078Z",
-                        "updated_at": "2025-10-08T02:28:57.078Z",
-                        "date": "Oct-22-2025",
-                        "time": "00:00",
-                        "venue": null
-                    },
-                    {
-                        "id": "7hsee04ei",
-                        "round": 3,
-                        "match_number": 3,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "nxa2mdp31",
-                                "name": "Player 1",
-                                "score": 0,
-                                "completed": true,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            },
-                            {
-                                "id": "aafhjwit3",
-                                "name": "Player 4",
-                                "score": 0,
-                                "completed": true,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T02:28:57.078Z",
-                        "updated_at": "2025-10-08T02:28:57.078Z",
-                        "date": "Oct-22-2025",
-                        "time": "00:00",
-                        "venue": null
-                    }
-                ],
-                [
-                    {
-                        "id": "cjwn2db0a",
-                        "round": 4,
-                        "match_number": 1,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "nxa2mdp31",
-                                "name": "Player 1",
-                                "score": 0,
-                                "completed": true,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            },
-                            {
-                                "id": "ssnblxtmy",
-                                "name": "Player 3",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T02:28:57.078Z",
-                        "updated_at": "2025-10-08T02:28:57.078Z",
-                        "date": "Oct-22-2025",
-                        "time": "00:00",
-                        "venue": null
-                    },
-                    {
-                        "id": "rsbmhau5z",
-                        "round": 4,
-                        "match_number": 2,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "aafhjwit3",
-                                "name": "Player 4",
-                                "score": 0,
-                                "completed": true,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            },
-                            {
-                                "id": "wvf2z1va9",
-                                "name": "Player 2",
-                                "score": 0,
-                                "completed": true,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T02:28:57.078Z",
-                        "updated_at": "2025-10-08T02:28:57.078Z",
-                        "date": "Oct-22-2025",
-                        "time": "00:00",
-                        "venue": null
-                    },
-                    {
-                        "id": "plrk05cv8",
-                        "round": 4,
-                        "match_number": 3,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "z8bbtx4r9",
-                                "name": "Player 5",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            },
-                            {
-                                "id": "qt823sgl3",
-                                "name": "BYE",
-                                "score": 0,
-                                "completed": true,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            }
-                        ],
-                        "winner_id": "z8bbtx4r9",
-                        "loser_id": "qt823sgl3",
-                        "status": "completed",
-                        "created_at": "2025-10-08T02:28:57.078Z",
-                        "updated_at": "2025-10-08T02:28:57.078Z",
-                        "date": "Oct-22-2025",
-                        "time": "00:00",
-                        "venue": null
-                    }
-                ],
-                [
-                    {
-                        "id": "3shtva0dz",
-                        "round": 5,
-                        "match_number": 1,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "ssnblxtmy",
-                                "name": "Player 3",
-                                "score": 0,
-                                "completed": false,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            },
-                            {
-                                "id": "qt823sgl3",
-                                "name": "BYE",
-                                "score": 0,
-                                "completed": true,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            }
-                        ],
-                        "winner_id": "ssnblxtmy",
-                        "loser_id": "qt823sgl3",
-                        "status": "completed",
-                        "created_at": "2025-10-08T02:28:57.078Z",
-                        "updated_at": "2025-10-08T02:28:57.078Z",
-                        "date": "Oct-22-2025",
-                        "time": "00:00",
-                        "venue": null
-                    },
-                    {
-                        "id": "2ovtoyyjf",
-                        "round": 5,
-                        "match_number": 2,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "nxa2mdp31",
-                                "name": "Player 1",
-                                "score": 0,
-                                "completed": true,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            },
-                            {
-                                "id": "wvf2z1va9",
-                                "name": "Player 2",
-                                "score": 0,
-                                "completed": true,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T02:28:57.078Z",
-                        "updated_at": "2025-10-08T02:28:57.078Z",
-                        "date": "Oct-22-2025",
-                        "time": "00:00",
-                        "venue": null
-                    },
-                    {
-                        "id": "xqbksdc9l",
-                        "round": 5,
-                        "match_number": 3,
-                        "bracket_type": "round_robin",
-                        "players": [
-                            {
-                                "id": "aafhjwit3",
-                                "name": "Player 4",
-                                "score": 0,
-                                "completed": true,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            },
-                            {
-                                "id": "z8bbtx4r9",
-                                "name": "Player 5",
-                                "score": 0,
-                                "completed": true,
-                                "created_at": "2025-10-08T02:28:57.078Z",
-                                "updated_at": "2025-10-08T02:28:57.078Z"
-                            }
-                        ],
-                        "winner_id": null,
-                        "loser_id": null,
-                        "status": "pending",
-                        "created_at": "2025-10-08T02:28:57.078Z",
-                        "updated_at": "2025-10-08T02:28:57.078Z",
-                        "date": "Oct-22-2025",
-                        "time": "00:00",
-                        "venue": null
-                    }
-                ]
-            ],
-            "created_at": "2025-10-08T02:28:57.773363Z",
-            "updated_at": "2025-10-08T02:28:57.774864Z"
+            "created_at": "2025-10-09T07:00:47.727966Z",
+            "updated_at": "2025-10-09T07:01:39.164864Z"
+        },
+        {
+            "id": "89144d68",
+            "name": "Jamal",
+            "type": "Single Elimination",
+            "event_id": "6ee4",
+            "created_at": "2025-10-09T02:23:52.307976Z",
+            "updated_at": "2025-10-09T06:59:06.987715Z"
         }
-    ]
+    ],
+    "players": [
+        {
+            "id": "7qxksrbzx",
+            "name": "Player 1"
+        },
+        {
+            "id": "y407zpomf",
+            "name": "Player 8"
+        },
+        {
+            "id": "fnx0fwalu",
+            "name": "Player 4"
+        },
+        {
+            "id": "im1zvvio8",
+            "name": "Player 5"
+        },
+        {
+            "id": "0d7vywrrz",
+            "name": "Player 2"
+        },
+        {
+            "id": "fq7bjs3je",
+            "name": "Player 7"
+        },
+        {
+            "id": "tbahxggu2",
+            "name": "Player 3"
+        },
+        {
+            "id": "h7f7xw5n2",
+            "name": "Player 6"
+        },
+        {
+            "id": "pe4jwx7a1",
+            "name": "Player 1"
+        },
+        {
+            "id": "llydwo5gu",
+            "name": "Player 4"
+        },
+        {
+            "id": "f4j5483o1",
+            "name": "Player 2"
+        },
+        {
+            "id": "b7qtofu7q",
+            "name": "Player 3"
+        }
+    ],
+    "matches": [
+        {
+            "id": "s3cne3pd9",
+            "round": 1,
+            "match_number": 1,
+            "winner_id": "7qxksrbzx",
+            "status": "completed",
+            "created_at": "2025-10-09T02:23:51.715Z",
+            "updated_at": "2025-10-09T06:59:06.526Z",
+            "date": "2025-10-22",
+            "time": "00:00",
+            "venue": null,
+            "bracket_id": "89144d68",
+            "loser_id": "y407zpomf",
+            "is_tie": false
+        },
+        {
+            "id": "lj34i1b2f",
+            "round": 1,
+            "match_number": 2,
+            "winner_id": null,
+            "status": "pending",
+            "created_at": "2025-10-09T02:23:51.715Z",
+            "updated_at": "2025-10-09T02:23:51.715Z",
+            "date": "Oct-22-2025",
+            "time": "00:00",
+            "venue": null,
+            "bracket_id": "89144d68"
+        },
+        {
+            "id": "jat6sk5df",
+            "round": 1,
+            "match_number": 3,
+            "winner_id": null,
+            "status": "pending",
+            "created_at": "2025-10-09T02:23:51.715Z",
+            "updated_at": "2025-10-09T02:23:51.715Z",
+            "date": "Oct-22-2025",
+            "time": "00:00",
+            "venue": null,
+            "bracket_id": "89144d68"
+        },
+        {
+            "id": "o5i8buezc",
+            "round": 1,
+            "match_number": 4,
+            "winner_id": null,
+            "status": "pending",
+            "created_at": "2025-10-09T02:23:51.715Z",
+            "updated_at": "2025-10-09T02:23:51.715Z",
+            "date": "Oct-22-2025",
+            "time": "00:00",
+            "venue": null,
+            "bracket_id": "89144d68"
+        },
+        {
+            "id": "tccohm8gb",
+            "round": 2,
+            "match_number": 1,
+            "winner_id": null,
+            "status": "pending",
+            "created_at": "2025-10-09T02:23:51.716Z",
+            "updated_at": "2025-10-09T02:23:51.716Z",
+            "date": "Oct-22-2025",
+            "time": "00:00",
+            "venue": null,
+            "bracket_id": "89144d68"
+        },
+        {
+            "id": "9iofy4llk",
+            "round": 2,
+            "match_number": 2,
+            "winner_id": null,
+            "status": "pending",
+            "created_at": "2025-10-09T02:23:51.716Z",
+            "updated_at": "2025-10-09T02:23:51.716Z",
+            "date": "Oct-22-2025",
+            "time": "00:00",
+            "venue": null,
+            "bracket_id": "89144d68"
+        },
+        {
+            "id": "vfbaqe9og",
+            "round": 3,
+            "match_number": 1,
+            "winner_id": null,
+            "status": "pending",
+            "created_at": "2025-10-09T02:23:51.716Z",
+            "updated_at": "2025-10-09T02:23:51.716Z",
+            "date": "Oct-22-2025",
+            "time": "00:00",
+            "venue": null,
+            "bracket_id": "89144d68"
+        },
+        {
+            "id": "rr8oamgjb",
+            "round": 1,
+            "match_number": 1,
+            "bracket_type": "round_robin",
+            "winner_id": "z4s8x96ju",
+            "loser_id": "l1xqsb7yz",
+            "status": "completed",
+            "created_at": "2025-10-09T07:00:47.191Z",
+            "updated_at": "2025-10-09T07:01:32.054Z",
+            "date": "2025-10-22",
+            "time": "00:00",
+            "venue": null,
+            "bracket_id": "59676928",
+            "is_tie": false
+        },
+        {
+            "id": "elh6ciul0",
+            "round": 1,
+            "match_number": 2,
+            "bracket_type": "round_robin",
+            "winner_id": "tvdtyzck5",
+            "loser_id": "6xuh8apen",
+            "status": "completed",
+            "created_at": "2025-10-09T07:00:47.191Z",
+            "updated_at": "2025-10-09T07:01:38.697Z",
+            "date": "2025-10-22",
+            "time": "00:00",
+            "venue": null,
+            "bracket_id": "59676928",
+            "is_tie": false
+        },
+        {
+            "id": "slafbyy6g",
+            "round": 2,
+            "match_number": 1,
+            "bracket_type": "round_robin",
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-10-09T07:00:47.191Z",
+            "updated_at": "2025-10-09T07:00:47.191Z",
+            "date": "Oct-22-2025",
+            "time": "00:00",
+            "venue": null,
+            "bracket_id": "59676928"
+        },
+        {
+            "id": "cgahobpov",
+            "round": 2,
+            "match_number": 2,
+            "bracket_type": "round_robin",
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-10-09T07:00:47.191Z",
+            "updated_at": "2025-10-09T07:00:47.191Z",
+            "date": "Oct-22-2025",
+            "time": "00:00",
+            "venue": null,
+            "bracket_id": "59676928"
+        },
+        {
+            "id": "pcbl74n7d",
+            "round": 3,
+            "match_number": 1,
+            "bracket_type": "round_robin",
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-10-09T07:00:47.191Z",
+            "updated_at": "2025-10-09T07:00:47.191Z",
+            "date": "Oct-22-2025",
+            "time": "00:00",
+            "venue": null,
+            "bracket_id": "59676928"
+        },
+        {
+            "id": "6deazb7e6",
+            "round": 3,
+            "match_number": 2,
+            "bracket_type": "round_robin",
+            "winner_id": null,
+            "loser_id": null,
+            "status": "pending",
+            "created_at": "2025-10-09T07:00:47.191Z",
+            "updated_at": "2025-10-09T07:00:47.191Z",
+            "date": "Oct-22-2025",
+            "time": "00:00",
+            "venue": null,
+            "bracket_id": "59676928"
+        }
+    ],
+    "matchPlayers": [
+        {
+            "match_id": "s3cne3pd9",
+            "player_id": "7qxksrbzx",
+            "name": "Luigi",
+            "slot": 1,
+            "score": 1,
+            "completed": true
+        },
+        {
+            "match_id": "s3cne3pd9",
+            "player_id": "y407zpomf",
+            "name": "Player 8",
+            "slot": 2,
+            "score": 0,
+            "completed": true
+        },
+        {
+            "match_id": "lj34i1b2f",
+            "player_id": "fnx0fwalu",
+            "name": "Player 4",
+            "slot": 1,
+            "score": 0,
+            "completed": false
+        },
+        {
+            "match_id": "lj34i1b2f",
+            "player_id": "im1zvvio8",
+            "name": "Player 5",
+            "slot": 2,
+            "score": 0,
+            "completed": false
+        },
+        {
+            "match_id": "jat6sk5df",
+            "player_id": "0d7vywrrz",
+            "name": "Player 2",
+            "slot": 1,
+            "score": 0,
+            "completed": false
+        },
+        {
+            "match_id": "jat6sk5df",
+            "player_id": "fq7bjs3je",
+            "name": "Player 7",
+            "slot": 2,
+            "score": 0,
+            "completed": false
+        },
+        {
+            "match_id": "o5i8buezc",
+            "player_id": "tbahxggu2",
+            "name": "Player 3",
+            "slot": 1,
+            "score": 0,
+            "completed": false
+        },
+        {
+            "match_id": "o5i8buezc",
+            "player_id": "h7f7xw5n2",
+            "name": "Player 6",
+            "slot": 2,
+            "score": 0,
+            "completed": false
+        },
+        {
+            "match_id": "tccohm8gb",
+            "player_id": "7qxksrbzx",
+            "name": "Luigi",
+            "slot": 1,
+            "score": 0,
+            "completed": false
+        },
+        {
+            "match_id": "tccohm8gb",
+            "player_id": null,
+            "name": "TBD",
+            "slot": 2,
+            "score": 0,
+            "completed": false
+        },
+        {
+            "match_id": "9iofy4llk",
+            "player_id": null,
+            "name": "TBD",
+            "slot": 1,
+            "score": 0,
+            "completed": false
+        },
+        {
+            "match_id": "9iofy4llk",
+            "player_id": null,
+            "name": "TBD",
+            "slot": 2,
+            "score": 0,
+            "completed": false
+        },
+        {
+            "match_id": "vfbaqe9og",
+            "player_id": null,
+            "name": "TBD",
+            "slot": 1,
+            "score": 0,
+            "completed": false
+        },
+        {
+            "match_id": "vfbaqe9og",
+            "player_id": null,
+            "name": "TBD",
+            "slot": 2,
+            "score": 0,
+            "completed": false
+        },
+        {
+            "match_id": "rr8oamgjb",
+            "player_id": "z4s8x96ju",
+            "name": "Mario",
+            "slot": 1,
+            "score": 2,
+            "completed": true
+        },
+        {
+            "match_id": "rr8oamgjb",
+            "player_id": "l1xqsb7yz",
+            "name": "Player 4",
+            "slot": 2,
+            "score": 0,
+            "completed": true
+        },
+        {
+            "match_id": "elh6ciul0",
+            "player_id": "tvdtyzck5",
+            "name": "Player 2",
+            "slot": 1,
+            "score": 1,
+            "completed": true
+        },
+        {
+            "match_id": "elh6ciul0",
+            "player_id": "6xuh8apen",
+            "name": "Player 3",
+            "slot": 2,
+            "score": 0,
+            "completed": true
+        },
+        {
+            "match_id": "slafbyy6g",
+            "player_id": "l1xqsb7yz",
+            "name": "Player 4",
+            "slot": 1,
+            "score": 0,
+            "completed": false
+        },
+        {
+            "match_id": "slafbyy6g",
+            "player_id": "tvdtyzck5",
+            "name": "Player 2",
+            "slot": 2,
+            "score": 0,
+            "completed": false
+        },
+        {
+            "match_id": "cgahobpov",
+            "player_id": "z4s8x96ju",
+            "name": "Mario",
+            "slot": 1,
+            "score": 0,
+            "completed": false
+        },
+        {
+            "match_id": "cgahobpov",
+            "player_id": "6xuh8apen",
+            "name": "Player 3",
+            "slot": 2,
+            "score": 0,
+            "completed": false
+        },
+        {
+            "match_id": "pcbl74n7d",
+            "player_id": "z4s8x96ju",
+            "name": "Mario",
+            "slot": 1,
+            "score": 0,
+            "completed": false
+        },
+        {
+            "match_id": "pcbl74n7d",
+            "player_id": "tvdtyzck5",
+            "name": "Player 2",
+            "slot": 2,
+            "score": 0,
+            "completed": false
+        },
+        {
+            "match_id": "6deazb7e6",
+            "player_id": "6xuh8apen",
+            "name": "Player 3",
+            "slot": 1,
+            "score": 0,
+            "completed": false
+        },
+        {
+            "match_id": "6deazb7e6",
+            "player_id": "l1xqsb7yz",
+            "name": "Player 4",
+            "slot": 2,
+            "score": 0,
+            "completed": false
+        }
+    ],
+    "matchLinks": [],
+    "standings": []
 }
