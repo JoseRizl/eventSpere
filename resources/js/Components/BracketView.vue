@@ -317,9 +317,18 @@ const updateBracketLines = () => {
         svgEl.setAttribute('viewBox', `0 0 ${containerRect.width} ${containerRect.height}`);
 
         const isWinnerLine = (match, part) => {
-            if (!match) return false;
-            if (overallWinnerMatchIds.has(match.id)) return true;
-
+            const resolveWinnerId = (match) => {
+            if (!match) return null;
+            if (match.winner_id) return match.winner_id;
+            // If explicit winner_id is missing, try to infer from scores (only if both scores exist)
+            const p0 = match.players?.[0];
+            const p1 = match.players?.[1];
+            if (!p0 || !p1) return null;
+            if (typeof p0.score === 'number' && typeof p1.score === 'number') {
+                return p0.score >= p1.score ? p0.id : p1.id;
+            }
+            return null;
+            };
             // For the winners bracket, also highlight the path of the upper bracket winner
             if (part === 'winners' && upperBracketWinnerMatchIds.has(match.id)) {
                 return true;
@@ -351,40 +360,33 @@ const updateBracketLines = () => {
 
                 const toEl = document.getElementById(`${idPrefix}-${bracketIdx}-${round + 1}-${nextMatchIdx}`);
 
-                if (fromEl && toEl) {
+                if (fromEl) {
+                    const toMatch = nextRoundMatches[nextMatchIdx];
                     const fromRect = fromEl.getBoundingClientRect();
-                    const toRect = toEl.getBoundingClientRect();
-
                     const fromPoint = screenToSVG(svgEl, fromRect.right, fromRect.top + fromRect.height / 2);
-                    const toPoint = screenToSVG(svgEl, toRect.left, toRect.top + toRect.height / 2);
 
-                    // If it's the first round and the vertical position is the same, draw a straight line.
-                    if (round === 0 && fromPoint.y === toPoint.y) {
+                    if (toEl && toMatch) {
+                        const toRect = toEl.getBoundingClientRect();
+                        const toPoint = screenToSVG(svgEl, toRect.left, toRect.top + toRect.height / 2);
+                        const winnerPath = isWinnerLine(match, toMatch);
+
                         newLines.push({
-                            x1: fromPoint.x, y1: fromPoint.y,
-                            x2: toPoint.x, y2: toPoint.y,
-                            isWinnerPath: isWinnerLine(match, part)
+                            x1: fromPoint.x, y1: fromPoint.y, x2: (fromPoint.x + toPoint.x) / 2, y2: fromPoint.y,
+                            isWinnerPath: winnerPath
                         });
-                        return; // Continue to the next match
+                        newLines.push({
+                            x1: (fromPoint.x + toPoint.x) / 2, y1: fromPoint.y, x2: (fromPoint.x + toPoint.x) / 2, y2: toPoint.y,
+                            isWinnerPath: winnerPath
+                        });
+                        newLines.push({
+                            x1: (fromPoint.x + toPoint.x) / 2, y1: toPoint.y, x2: toPoint.x, y2: toPoint.y,
+                            isWinnerPath: winnerPath
+                        });
+                    } else {
+                        // Draw a short line to indicate continuation if the next match element isn't found
+                        const toPoint = { x: fromPoint.x + 20, y: fromPoint.y };
+                        newLines.push({ x1: fromPoint.x, y1: fromPoint.y, x2: toPoint.x, y2: toPoint.y, isWinnerPath: false });
                     }
-
-                    const winnerPath = isWinnerLine(match, part);
-
-                    newLines.push({
-                        x1: fromPoint.x, y1: fromPoint.y,
-                        x2: (fromPoint.x + toPoint.x) / 2, y2: fromPoint.y,
-                        isWinnerPath: winnerPath
-                    });
-                    newLines.push({
-                        x1: (fromPoint.x + toPoint.x) / 2, y1: fromPoint.y,
-                        x2: (fromPoint.x + toPoint.x) / 2, y2: toPoint.y,
-                        isWinnerPath: winnerPath
-                    });
-                    newLines.push({
-                        x1: (fromPoint.x + toPoint.x) / 2, y1: toPoint.y,
-                        x2: toPoint.x, y2: toPoint.y,
-                        isWinnerPath: isWinnerLine
-                    });
                 }
             });
         }
