@@ -26,6 +26,7 @@
         "@vitejs/plugin-vue": "^5.2.1",
         "cors": "^2.8.5",
         "date-fns": "^4.1.0",
+        "json-server": "^0.17.4",
         "pinia": "^2.3.0",
         "primeicons": "^7.0.0",
         "primevue": "^4.2.4",
@@ -33,7 +34,6 @@
         "vue": "^3.5.13",
         "vue-router": "^4.5.0",
         "vue-tournament-bracket": "^3.0.0",
-        "ziggy": "^2.4.0",
-        "json-server": "^0.17.4"
+        "ziggy": "^2.4.0"
     }
 }

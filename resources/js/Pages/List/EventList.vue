@@ -13,6 +13,9 @@
           :show-clear-button="false"
           @toggle-date-filter="toggleDateFilter"
         />
+        <Button icon="pi pi-print" class="p-button-secondary" @click="printTable" v-tooltip.top="'Print Table'"
+          aria-label="Print Table"
+        />
         <button v-if="user?.role === 'Admin' || user?.role === 'Principal'" class="create-button" @click="openCreateModal">
             Create<span class="hidden sm:inline"> Event</span>
         </button>
@@ -84,7 +87,7 @@
       <DataTable
         v-else
         :value="filteredEvents"
-        class="p-datatable-striped" showGridlines
+        id="events-table" class="p-datatable-striped" showGridlines
         paginator :rows="10" :rowsPerPageOptions="[10, 20, 50]"
         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} events">
@@ -155,7 +158,7 @@
           </template>
         </Column>
 
-        <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Actions" style="width:10%;" body-class="text-center">
+        <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Actions" style="width:10%;" body-class="text-center print-hide" header-class="print-hide" >
           <template #body="{ data }">
             <div class="action-buttons">
               <Button icon="pi pi-pen-to-square" class="p-button-rounded p-button-text action-btn-info" @click="editEvent(data)" v-tooltip.top="'Edit Event'"/>
@@ -164,7 +167,7 @@
           </template>
         </Column>
 
-        <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Tasks" style="width:15%;" body-class="text-center">
+        <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Tasks" style="width:15%;" body-class="text-center print-hide" header-class="print-hide" >
         <template #body="{ data }">
             <Button icon="pi pi-list" class="p-button-rounded p-button-text action-btn-warning" @click="openTaskModal(data)" v-tooltip.top="'Manage Tasks'"/>
         </template>
@@ -686,7 +689,7 @@
   </template>
 
   <script>
-  import { defineComponent, ref, onMounted, computed, watch } from "vue";
+  import { defineComponent, ref, onMounted, computed, watch, nextTick } from "vue";
   import { usePage, Link, router } from '@inertiajs/vue3';
   import axios from "axios";
   import { parse, format, isWithinInterval } from 'date-fns';
@@ -728,6 +731,7 @@
         from: null,
         to: null
       });
+      const rowsPerPage = ref(10);
 
       const newEvent = ref({
         title: "",
@@ -1643,8 +1647,165 @@
     const showSaveConfirm = ref(false);
     const eventToProcess = ref(null);
     const taskToDelete = ref(null);
-      const tagCreationContext = ref('create');
-      const showCreateConfirm = ref(false);
+    const tagCreationContext = ref('create');
+    const showCreateConfirm = ref(false);
+
+    const printTable = async () => {
+    const originalRows = rowsPerPage.value;
+    rowsPerPage.value = filteredEvents.value.length;
+
+    await nextTick();
+
+    const table = document.querySelector('#events-table');
+    if (!table) {
+        rowsPerPage.value = originalRows;
+        return;
+    }
+
+    // Correct logo path (don’t use /public/)
+    const logoUrl = new URL('/images/NCSlogo.png', window.location.origin).href;
+
+    const printWindow = window.open('', '', 'width=1200,height=800');
+    const tableClone = table.cloneNode(true);
+
+    // Remove paginator and print-hidden columns
+    tableClone.querySelectorAll('.p-paginator, .print-hide').forEach(el => el.remove());
+
+    // Remove all event images (but keep logo)
+    tableClone.querySelectorAll('img').forEach(img => {
+        if (!img.classList.contains('school-logo')) img.remove();
+    });
+
+    // --- STRIP HEADERS: convert each <th> into plain text and remove attributes ---
+    tableClone.querySelectorAll('th').forEach(th => {
+        // Get the most likely title node (PrimeVue places title in .p-column-title or inside text)
+        const titleEl = th.querySelector('.p-column-title') || th.querySelector('.p-sortable-column-icon') || null;
+        const titleText = titleEl ? titleEl.textContent.trim() : th.textContent.trim();
+
+        // Remove all attributes from the th
+        const attrs = Array.from(th.attributes || []);
+        attrs.forEach(a => th.removeAttribute(a.name));
+
+        // Replace the inner HTML with the plain text title
+        th.innerHTML = '';
+        th.textContent = titleText;
+        // Ensure it has default styling (no interactive cursor)
+        th.style.cursor = 'default';
+    });
+
+    // Safety: also remove any leftover sortable icon elements anywhere
+    tableClone.querySelectorAll('.p-sortable-column-icon, .pi-sort-alt, .pi-sort-amount-up, .pi-sort-amount-down')
+        .forEach(icon => icon.remove());
+
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Event List</title>
+            <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            }
+            .print-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 1.5rem;
+                padding-bottom: 1rem;
+                border-bottom: 2px solid #dee2e6;
+            }
+            .header-left { display: flex; align-items: center; gap: 1rem; }
+            .header-text { display: flex; flex-direction: column; }
+            .school-logo { width: 80px; height: 80px; display: block; object-fit: contain; }
+            .school-name { font-size: 1.5rem; font-weight: bold; color: #334155; }
+            .report-title { font-size: 1.2rem; color: #475569; }
+            .print-date { font-size: 0.9rem; color: #64748b; text-align: right; }
+
+            table { width: 100%; border-collapse: collapse; font-size: 12px; }
+            th, td { border: 1px solid #dee2e6; padding: 0.5rem; text-align: left; }
+            th { font-weight: 600; background-color: #f8f9fa; }
+            .p-datatable-striped tr:nth-child(even) { background-color: #f8f9fa; }
+
+            a { color: inherit; text-decoration: none; }
+
+            /* Hide any remaining images in table (safety net) */
+            td img { display: none !important; }
+
+            /* Hide sort icons (extra safety for PrimeVue) */
+            .p-sortable-column-icon,
+            .pi-sort-alt,
+            .pi-sort-amount-up,
+            .pi-sort-amount-down {
+                display: none !important;
+            }
+
+            img { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+            @page {
+                size: landscape;
+                margin: 1in;
+            }
+                /* Hide event tags completely in print */
+                .tags-container,
+                .tag {
+                display: none !important;
+                visibility: hidden !important;
+                }
+
+            </style>
+        </head>
+        <body>
+            <div class="print-header">
+            <div class="header-left">
+                <img src="${logoUrl}" alt="School Logo" class="school-logo" />
+                <div class="header-text">
+                <div class="school-name">Naawan Central School</div>
+                <div class="report-title">Event List</div>
+                </div>
+            </div>
+            <div class="print-date">
+                ${new Date().toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+                })}
+            </div>
+            </div>
+            ${tableClone.outerHTML}
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+
+    // Wait for logo load before printing
+    const waitForImageLoad = (win, selector = '.school-logo', timeout = 5000) => {
+        return new Promise((resolve) => {
+        try {
+            const img = win.document.querySelector(selector);
+            if (!img) return resolve();
+
+            if (img.complete && img.naturalWidth !== 0) return resolve();
+
+            let done = false;
+            const finish = () => { if (!done) { done = true; resolve(); } };
+            img.addEventListener('load', finish);
+            img.addEventListener('error', finish);
+            setTimeout(finish, timeout);
+        } catch {
+            resolve();
+        }
+        });
+    };
+
+    await waitForImageLoad(printWindow, '.school-logo', 6000);
+
+    // Print and close
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+
+    // Restore rows
+    rowsPerPage.value = originalRows;
+    };
 
     // Add watch for isAllDay changes
     watch(() => newEvent.value.isAllDay, (newValue) => {
@@ -1739,6 +1900,8 @@
     handleMemoUpload,
     handleDefaultImageUpload,
     getTagColor,
+    rowsPerPage,
+    printTable,
     };
 
     },
@@ -1864,4 +2027,5 @@
   display: flex;
   align-items: center;
 }
+
 </style>
