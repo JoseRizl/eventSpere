@@ -80,7 +80,8 @@ export default defineComponent({
 
     const fetchData = async () => {
       try {
-        await router.visit('/category-list', {
+        const currentView = showTags.value ? 'tags' : 'categories';
+        await router.visit(route('category.list', { view: currentView }), {
           preserveState: true,
           onSuccess: (page) => {
             categories.value = page.props.categories;

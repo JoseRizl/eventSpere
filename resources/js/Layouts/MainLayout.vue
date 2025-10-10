@@ -154,6 +154,11 @@ const toggleSidebar = () => {
     }
 };
 
+const isSubmenuActive = (item) => {
+    if (!item.items) return false;
+    return item.items.some(subItem => route().current(subItem.routeName, subItem.routeParams));
+};
+
 const closeMobileSidebar = () => {
     isMobileSidebarOpen.value = false;
 };
@@ -316,7 +321,11 @@ onUnmounted(() => {
                         <div v-if="item.items">
                             <button @click="toggleDropdown(item.label)"
                                 class="flex items-center justify-between w-full p-3 rounded-lg transition-colors duration-200"
-                                :class="openDropdown === item.label ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'">
+                                :class="{
+                                    'bg-blue-500 text-white font-semibold shadow-md': isSubmenuActive(item),
+                                    'bg-blue-100 text-blue-700': !isSubmenuActive(item) && openDropdown === item.label,
+                                    'text-gray-600 hover:bg-gray-100': !isSubmenuActive(item) && openDropdown !== item.label
+                                }">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0">
                                         <i :class="item.icon" class="text-xl w-6 text-center"></i>

@@ -13,12 +13,14 @@
           :show-clear-button="false"
           @toggle-date-filter="toggleDateFilter"
         />
-        <Button icon="pi pi-print" class="p-button-secondary" @click="printTable" v-tooltip.top="'Print Table'"
-          aria-label="Print Table"
-        />
-        <button v-if="user?.role === 'Admin' || user?.role === 'Principal'" class="create-button" @click="openCreateModal">
-            Create<span class="hidden sm:inline"> Event</span>
-        </button>
+        <div class="flex items-center gap-2">
+          <Button icon="pi pi-print" class="p-button-secondary" @click="printTable" v-tooltip.top="'Print Table'"
+            aria-label="Print Table"
+          />
+          <button v-if="user?.role === 'Admin' || user?.role === 'Principal'" class="create-button" @click="openCreateModal">
+              Create<span class="hidden sm:inline"> Event</span>
+          </button>
+        </div>
       </div>
 
       <!-- Date Filter Calendar - Moved outside search-wrapper -->
