@@ -316,6 +316,24 @@ const updateBracketLines = () => {
         const containerRect = bracketContainer.getBoundingClientRect();
         svgEl.setAttribute('viewBox', `0 0 ${containerRect.width} ${containerRect.height}`);
 
+        const isWinnerLine = (match, part) => {
+            if (!match) return false;
+            if (overallWinnerMatchIds.has(match.id)) return true;
+
+            // For the winners bracket, also highlight the path of the upper bracket winner
+            if (part === 'winners' && upperBracketWinnerMatchIds.has(match.id)) {
+                return true;
+            }
+            // For the losers bracket, also highlight the path of the lower bracket winner
+            if (part === 'losers' && lowerBracketWinnerMatchIds.has(match.id)) {
+                return true;
+            }
+            // For the grand finals, the line from the upper bracket winner should be highlighted
+            if (part === 'grand_finals' && upperBracketWinnerMatchIds.has(match.id)) {
+                return true;
+            }
+            return false;
+        };
         for (let round = 0; round < matches.length - 1; round++) {
             matches[round].forEach((match, i) => {
                 const fromEl = document.getElementById(`${idPrefix}-${bracketIdx}-${round}-${i}`);
@@ -345,34 +363,22 @@ const updateBracketLines = () => {
                         newLines.push({
                             x1: fromPoint.x, y1: fromPoint.y,
                             x2: toPoint.x, y2: toPoint.y,
-                            isWinnerPath: isWinnerLine
+                            isWinnerPath: isWinnerLine(match, part)
                         });
                         return; // Continue to the next match
                     }
 
-                    let isWinnerLine = overallWinnerMatchIds.has(match.id);
-                    // For the winners bracket, also highlight the path of the upper bracket winner
-                    if (part === 'winners' && upperBracketWinnerMatchIds.has(match.id)) {
-                        isWinnerLine = true;
-                    }
-                    // For the losers bracket, also highlight the path of the lower bracket winner
-                    if (part === 'losers' && lowerBracketWinnerMatchIds.has(match.id)) {
-                        isWinnerLine = true;
-                    }
-                    // For the grand finals, the line from the upper bracket winner should be highlighted
-                    if (part === 'grand_finals' && upperBracketWinnerMatchIds.has(match.id)) {
-                        isWinnerLine = true;
-                    }
+                    const winnerPath = isWinnerLine(match, part);
 
                     newLines.push({
                         x1: fromPoint.x, y1: fromPoint.y,
                         x2: (fromPoint.x + toPoint.x) / 2, y2: fromPoint.y,
-                        isWinnerPath: isWinnerLine
+                        isWinnerPath: winnerPath
                     });
                     newLines.push({
                         x1: (fromPoint.x + toPoint.x) / 2, y1: fromPoint.y,
                         x2: (fromPoint.x + toPoint.x) / 2, y2: toPoint.y,
-                        isWinnerPath: isWinnerLine
+                        isWinnerPath: winnerPath
                     });
                     newLines.push({
                         x1: (fromPoint.x + toPoint.x) / 2, y1: toPoint.y,

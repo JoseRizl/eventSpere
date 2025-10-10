@@ -257,20 +257,28 @@ export function useBracketActions(state) {
 
       const bracket = brackets.value[bracketIdx];
       if (bracket.type === 'Single Elimination') {
-        const lastRound = bracket.matches[bracket.matches.length - 1];
-        const finalMatch = lastRound[0];
-        if (finalMatch.players[0].completed && finalMatch.players[1].completed) {
-          const winner = finalMatch.players[0].score >= finalMatch.players[1].score ? finalMatch.players[0] : finalMatch.players[1];
-          winnerMessage.value = `Winner: ${winner.name}`;
-          showWinnerDialog.value = true;
+        if (bracket.matches && bracket.matches.length > 0) {
+            const lastRound = bracket.matches[bracket.matches.length - 1];
+            if (lastRound && lastRound.length > 0) {
+                const finalMatch = lastRound[0];
+                if (finalMatch.players[0].completed && finalMatch.players[1].completed) {
+                    const winner = finalMatch.players[0].score >= finalMatch.players[1].score ? finalMatch.players[0] : finalMatch.players[1];
+                    winnerMessage.value = `Winner: ${winner.name}`;
+                    showWinnerDialog.value = true;
+                }
+            }
         }
       } else if (bracket.type === 'Double Elimination') {
-        const grandFinals = bracket.matches.grand_finals;
-        const lastMatch = grandFinals[grandFinals.length - 1];
-        if (lastMatch.players[0].completed && lastMatch.players[1].completed) {
-          const winner = lastMatch.players[0].score >= lastMatch.players[1].score ? lastMatch.players[0] : lastMatch.players[1];
-          winnerMessage.value = `Tournament Winner: ${winner.name}`;
-          showWinnerDialog.value = true;
+        const grandFinals = bracket.matches?.grand_finals;
+        if (!grandFinals || grandFinals.length === 0 || !grandFinals[0] || grandFinals[0].length === 0) return;
+
+        const lastMatch = grandFinals[grandFinals.length - 1][0];
+        if (!lastMatch || !Array.isArray(lastMatch.players) || lastMatch.players.length < 2) return;
+
+        if (lastMatch.players[0]?.completed && lastMatch.players[1]?.completed) {
+            const winner = (lastMatch.players[0].score ?? 0) >= (lastMatch.players[1].score ?? 0) ? lastMatch.players[0] : lastMatch.players[1];
+            winnerMessage.value = `Tournament Winner: ${winner.name}`;
+            showWinnerDialog.value = true;
         }
       }
     }
