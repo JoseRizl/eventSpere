@@ -22,11 +22,8 @@ class BracketController extends Controller
             // initialize normalized shape if file missing
             return [
                 'brackets' => [],
-                'players' => [],
                 'matches' => [],
                 'matchPlayers' => [],
-                'matchLinks' => [],
-                'standings' => []
             ];
         }
 
@@ -34,11 +31,8 @@ class BracketController extends Controller
 
         // Ensure all top-level keys for normalized data exist
         $data['brackets'] = $data['brackets'] ?? [];
-        $data['players'] = $data['players'] ?? [];
         $data['matches'] = $data['matches'] ?? [];
         $data['matchPlayers'] = $data['matchPlayers'] ?? [];
-        $data['matchLinks'] = $data['matchLinks'] ?? [];
-        $data['standings'] = $data['standings'] ?? [];
 
         return $data;
     }
@@ -59,151 +53,118 @@ class BracketController extends Controller
      * Returns array of match objects (unchanged).
      */
     private function flattenMatchesNode($matchesNode)
-{
-    $out = [];
+    {
+        $out = [];
 
-    if ($matchesNode === null) return $out;
-    if (!is_array($matchesNode)) return $out;
+        if ($matchesNode === null) return $out;
+        if (!is_array($matchesNode)) return $out;
 
-    // Numeric-indexed array? Could be array-of-rounds or flat array-of-matches.
-    $keys = array_keys($matchesNode);
-    $isNumericIndexed = ($keys === range(0, count($matchesNode) - 1));
+        // Are keys numeric (0..n-1)? -> could be array-of-rounds or flat array-of-matches.
+        $keys = array_keys($matchesNode);
+        $isNumericIndexed = ($keys === range(0, count($matchesNode) - 1));
 
-    if ($isNumericIndexed) {
-        // If first element is an array and looks like a match (has 'id' or 'players' keys), decide:
-        if (isset($matchesNode[0]) && is_array($matchesNode[0])) {
-            // Distinguish: if the *element* looks like a match (has 'id' or 'players' or 'match_number'), treat whole array as flat array-of-matches.
-            $first = $matchesNode[0];
-            $looksLikeMatch = is_array($first) && (isset($first['id']) || isset($first['players']) || isset($first['match_number']) || isset($first['round']));
-            if ($looksLikeMatch) {
-                // flat array of matches
-                foreach ($matchesNode as $m) {
-                    if (is_array($m)) $out[] = $m;
-                }
-            } else {
-                // array-of-rounds: flatten one level
-                foreach ($matchesNode as $roundMatches) {
-                    if (!is_array($roundMatches)) continue;
-                    foreach ($roundMatches as $m) {
-                        if (is_array($m)) $out[] = $m;
+        if ($isNumericIndexed) {
+            if (isset($matchesNode[0]) && is_array($matchesNode[0])) {
+                $first = $matchesNode[0];
+                // FIX: This logic was flawed for grand_finals which can be [[{match}]].
+                // The check for $firstElemIsRound was too aggressive and caused incorrect flattening.
+                // A "match" is an associative array, while a "round" is a numeric array of matches.
+                // We check if the first element of the first element is an associative array (a match).
+                // This correctly identifies array-of-rounds like [[{match}]] or [[{m1},{m2}],[{m3}]].
+                $firstElemOfFirstIsMatch = isset($first[0]) && is_array($first[0]) && Arr::isAssoc($first[0]);
+
+                // This check remains correct for flat arrays of matches like [{m1}, {m2}].
+                $firstElemLooksLikeMatch = !isset($first[0]) && (isset($first['id']) || isset($first['players']));
+
+                if ($firstElemLooksLikeMatch) {
+                    return $matchesNode; // It's already a flat array of matches.
+                } else {
+                    // array-of-rounds -> flatten one level
+                    foreach ($matchesNode as $roundMatches) {
+                        if (!is_array($roundMatches)) continue;
+                        foreach ($roundMatches as $m) {
+                            if (is_array($m)) $out[] = $m;
+                        }
                     }
                 }
+            } else if (isset($matchesNode[0])) {
+                // This handles a flat array of matches, e.g. [ {match1}, {match2} ]
+                return $matchesNode;
             }
-        } else {
-            // empty / unexpected - nothing to do
+            return $out; // Return the flattened rounds
+        }
+
+        // --- NEW: handle associative object with named sections like { winners: [...], losers: [...], grand_finals: [...] } ---
+        foreach ($matchesNode as $sectionKey => $sectionVal) {
+            if (!is_array($sectionVal)) continue;
+
+            // sectionVal could be:
+            // - flat array of matches
+            // - array-of-rounds (array of arrays)
+            // either way, recursively flatten the section
+            $sectionMatches = $this->flattenMatchesNode($sectionVal);
+
+            foreach ($sectionMatches as $m) {
+                if (is_array($m)) {
+                    // annotate origin section so later code can group/recognize it
+                    $m['bracket_type'] = $m['bracket_type'] ?? $sectionKey;
+                    $out[] = $m;
+                }
+            }
         }
 
         return $out;
     }
 
-    // Associative array (object-like) e.g. ['winners' => [...], 'losers' => [...], 'grand_finals' => ...]
-    foreach ($matchesNode as $sectionKey => $roundsOrMatches) {
-        if (!is_array($roundsOrMatches)) continue;
-
-        // If first element of section is an array
-        if (isset($roundsOrMatches[0]) && is_array($roundsOrMatches[0])) {
-            // Could be either array-of-rounds OR flat array-of-matches
-            $first = $roundsOrMatches[0];
-            $firstLooksLikeMatch = is_array($first) && (isset($first['id']) || isset($first['players']) || isset($first['match_number']) || isset($first['round']));
-            if ($firstLooksLikeMatch) {
-                // It's a flat array-of-matches for this section
-                foreach ($roundsOrMatches as $m) {
-                    if (is_array($m)) {
-                        // annotate bracket_type for provenance (optional)
-                        $m['bracket_type'] = $m['bracket_type'] ?? $sectionKey;
-                        $out[] = $m;
-                    }
-                }
-            } else {
-                // It's array-of-rounds: iterate each round and push matches
-                foreach ($roundsOrMatches as $roundMatches) {
-                    if (!is_array($roundMatches)) continue;
-                    foreach ($roundMatches as $m) {
-                        if (is_array($m)) {
-                            $m['bracket_type'] = $m['bracket_type'] ?? $sectionKey;
-                            $out[] = $m;
-                        }
-                    }
-                }
-            }
-        } else { // Flat array of matches
-            // This handles cases like grand_finals which might be `[match]` instead of `[[match]]`
-            $first = $roundsOrMatches[0] ?? null;
-            $firstLooksLikeMatch = is_array($first) && (isset($first['id']) || isset($first['players']) || isset($first['match_number']) || isset($first['round']));
-            if ($firstLooksLikeMatch) {
-                foreach ($roundsOrMatches as $m) {
-                    if (is_array($m)) {
-                        $m['bracket_type'] = $m['bracket_type'] ?? $sectionKey;
-                        $out[] = $m;
-                    }
-                }
-
-            }
-        }
-    }
-
-    return $out;
-}
-
     /**
      * Normalize and process incoming bracket data, separating it into tables.
      */
     private function processAndNormalizeBracketData(array &$jsonData, array $validatedData, $bracketId)
-    {
-        // 1. Add/update players (merge & dedupe by id)
-        $newPlayers = $validatedData['players'] ?? [];
-        if (!empty($newPlayers)) {
-            $merged = array_merge($jsonData['players'] ?? [], $newPlayers);
-            $unique = [];
-            foreach ($merged as $p) {
-                if (isset($p['id'])) $unique[$p['id']] = $p;
-            }
-            $jsonData['players'] = array_values($unique);
+{
+    // 2. Flatten matches from input (handles both array-of-rounds and double-elim object)
+    $incomingMatchesNode = $validatedData['matches'] ?? [];
+    $flatMatches = $this->flattenMatchesNode($incomingMatchesNode);
+
+    // 3. Remove old matches and matchPlayers for this bracket before adding new ones
+    $existingMatchIds = collect($jsonData['matches'])->where('bracket_id', $bracketId)->pluck('id');
+    $jsonData['matches'] = collect($jsonData['matches'])->reject(fn ($m) => ($m['bracket_id'] ?? null) == $bracketId)->values()->all();
+    $jsonData['matchPlayers'] = collect($jsonData['matchPlayers'])->reject(fn ($mp) => $existingMatchIds->contains($mp['match_id'] ?? null))->values()->all();
+
+    // 4. Add new matches and matchPlayers (build matches list and matchPlayers rows)
+    foreach ($flatMatches as $match) {
+        // copy match fields except players
+        $matchData = collect($match)->except('players')->all();
+        $matchData['bracket_id'] = $bracketId;
+        // ensure match id exists
+        if (!isset($matchData['id'])) {
+            $matchData['id'] = substr(md5(uniqid()), 0, 8);
         }
-
-        // 2. Flatten matches from input (handles both array-of-rounds and double-elim object)
-        $incomingMatchesNode = $validatedData['matches'] ?? [];
-        $flatMatches = $this->flattenMatchesNode($incomingMatchesNode);
-
-        // 3. Remove old matches and matchPlayers for this bracket before adding new ones
-        $existingMatchIds = collect($jsonData['matches'])->where('bracket_id', $bracketId)->pluck('id');
-        $jsonData['matches'] = collect($jsonData['matches'])->reject(fn ($m) => ($m['bracket_id'] ?? null) == $bracketId)->values()->all();
-        $jsonData['matchPlayers'] = collect($jsonData['matchPlayers'])->reject(fn ($mp) => $existingMatchIds->contains($mp['match_id'] ?? null))->values()->all();
-
-        // 4. Add new matches and matchPlayers
-        foreach ($flatMatches as $match) {
-            // copy match fields except players
-            $matchData = collect($match)->except('players')->all();
-            $matchData['bracket_id'] = $bracketId;
-            // ensure match id exists
-            if (!isset($matchData['id'])) {
-                $matchData['id'] = substr(md5(uniqid()), 0, 8);
+        // Normalize date format
+        if (isset($matchData['date'])) {
+            try {
+                $matchData['date'] = (new \DateTime($matchData['date']))->format('Y-m-d');
+            } catch (\Exception $e) {
+                // Keep original if parsing fails
             }
-            // Normalize date format
-            if (isset($matchData['date'])) {
-                try {
-                    $matchData['date'] = (new \DateTime($matchData['date']))->format('Y-m-d');
-                } catch (\Exception $e) {
-                    // Keep original if parsing fails
-                }
-            }
-            $jsonData['matches'][] = $matchData;
+        }
+        $jsonData['matches'][] = $matchData;
 
-            // players array: can be missing or be an array of player objects
-            if (!empty($match['players']) && is_array($match['players'])) {
-                foreach ($match['players'] as $slotIndex => $player) {
-                    $jsonData['matchPlayers'][] = [
-                        'match_id' => $matchData['id'],
-                        'player_id' => $player['id'] ?? null,
-                        'name' => $player['name'] ?? ($player['id'] ? null : 'TBD'),
-                        'slot' => $slotIndex + 1,
-                        'score' => isset($player['score']) ? (int)$player['score'] : 0,
-                        'completed' => !empty($player['completed']),
-                    ];
-                }
+        // players array: can be missing or be an array of player objects
+        if (!empty($match['players']) && is_array($match['players'])) {
+            foreach ($match['players'] as $slotIndex => $player) {
+                $jsonData['matchPlayers'][] = [
+                    'match_id' => $matchData['id'],
+                    'player_id' => $player['id'] ?? null,
+                    'name' => $player['name'] ?? ($player['id'] ? null : 'TBD'),
+                    'slot' => $slotIndex + 1,
+                    'score' => isset($player['score']) ? (int)$player['score'] : 0,
+                    'completed' => !empty($player['completed']),
+                ];
             }
         }
     }
+
+}
 
     /**
      * Display a listing of the resource (entire normalized database).
@@ -252,11 +213,8 @@ class BracketController extends Controller
 
         return response()->json([
             'brackets' => $filteredBrackets,
-            'players' => $players,
             'matches' => $matches,
             'matchPlayers' => $matchPlayers,
-            'matchLinks' => $jsonData['matchLinks'] ?? [],
-            'standings' => $jsonData['standings'] ?? [],
         ]);
     }
 

@@ -316,6 +316,8 @@ export function useBracketActions(state) {
       type: matchType.value,
       event_id: selectedEvent.value.id,
       matches: newBracket,
+      // The 'players' array is no longer needed here. The backend normalizes
+      // players from the 'matches' structure itself.
     };
 
     // Populate match-specific details from the event
@@ -442,18 +444,25 @@ export function useBracketActions(state) {
 
                 const groupByRound = (matches) => {
                     if (!matches || matches.length === 0) return [];
-                    const roundsObj = matches.reduce((acc, match) => {
-                        // Use match.round as the key to avoid sparse arrays
-                        (acc[match.round] = acc[match.round] || []).push(match);
+                    // FIX: Ensure rounds are correctly grouped and ordered, producing a dense array.
+                    // The round property is 1-based, so we subtract 1 for a 0-based array index.
+                    const roundsArr = matches.reduce((acc, match) => {
+                        const roundIndex = (match.round || 1) - 1;
+                        if (!acc[roundIndex]) {
+                            acc[roundIndex] = [];
+                        }
+                        acc[roundIndex].push(match);
                         return acc;
-                    }, {});
-                    // Convert the object of rounds into a dense array of rounds
-                    return Object.values(roundsObj).map(roundMatches => roundMatches.sort((a, b) => a.match_number - b.match_number));
+                    }, []);
+                    return roundsArr.map(roundMatches => roundMatches.sort((a, b) => a.match_number - b.match_number));
                 };
                 newBracket.matches = {
                     winners: groupByRound(winnersMatches),
                     losers: groupByRound(losersMatches),
-                    grand_finals: groupByRound(grandFinalsMatches),
+                    // FIX: Use groupByRound to ensure grand_finals is always structured as an
+                    // array of rounds, matching the structure from generateDoubleEliminationBracket.
+                    // This prevents the "Cannot read properties of undefined" error on refresh.
+                    grand_finals: groupByRound(grandFinalsMatches)
                 };
             } else {
                 newBracket.matches = bracketMatches.reduce((acc, match) => {
@@ -1265,29 +1274,21 @@ const updateLines = (bracketIdx) => {
       switch (bracketType) {
         case 'winners':
           match = bracket.matches.winners[roundIdx][matchIdx];
+          // Add defensive check to ensure the match exists before proceeding.
+          if (!match) return;
           break;
         case 'losers': // roundIdx is the direct index in the losers array
           match = bracket.matches.losers[roundIdx][matchIdx];
+          // Add defensive check to ensure the match exists before proceeding.
+          if (!match) return;
           break;
-        case 'grand_finals':
+          case 'grand_finals':
+          // FIX: Correctly access the nested grand_finals match.
+          // The structure is an array of rounds, similar to winners/losers.
           const grandFinals = bracket.matches.grand_finals;
-        if (!Array.isArray(grandFinals) || grandFinals.length === 0) {
-            console.error('Grand finals structure missing or malformed:', grandFinals);
-            return;
-        }
-
-        const grandRound = grandFinals[roundIdx] || grandFinals[0];
-        if (!Array.isArray(grandRound) || grandRound.length === 0) {
-            console.error('Grand finals round missing:', { roundIdx, grandFinals });
-            return;
-        }
-
-        match = grandRound[matchIdx] || grandRound[0];
-        if (!match) {
-            console.error('Grand finals match undefined:', { roundIdx, matchIdx, grandRound });
-            return;
-        }
-        break;
+          // Access is [roundIndex][matchIndex]
+          match = grandFinals?.[roundIdx]?.[matchIdx];
+          break;
       }
     } else if (bracket.type === 'Round Robin') {
       match = bracket.matches[roundIdx][matchIdx];
@@ -1339,15 +1340,17 @@ const updateLines = (bracketIdx) => {
             }
           }
         }
-        // Update in grand finals
-        for (let m = 0; m < bracket.matches.grand_finals.length; m++) {
-          if (bracket.matches.grand_finals[m].players[0].id === playerId) {
-            bracket.matches.grand_finals[m].players[0].name = newName;
-            bracket.matches.grand_finals[m].players[0].updated_at = new Date().toISOString();
-          }
-          if (bracket.matches.grand_finals[m].players[1].id === playerId) {
-            bracket.matches.grand_finals[m].players[1].name = newName;
-            bracket.matches.grand_finals[m].players[1].updated_at = new Date().toISOString();
+        // FIX: Correctly iterate through rounds and then matches for grand_finals
+        for (let r = 0; r < bracket.matches.grand_finals.length; r++) {
+          for (let m = 0; m < bracket.matches.grand_finals[r].length; m++) {
+            if (bracket.matches.grand_finals[r][m].players[0].id === playerId) {
+              bracket.matches.grand_finals[r][m].players[0].name = newName;
+              bracket.matches.grand_finals[r][m].players[0].updated_at = new Date().toISOString();
+            }
+            if (bracket.matches.grand_finals[r][m].players[1].id === playerId) {
+              bracket.matches.grand_finals[r][m].players[1].name = newName;
+              bracket.matches.grand_finals[r][m].players[1].updated_at = new Date().toISOString();
+            }
           }
         }
       } else if (bracket.type === 'Round Robin') {
@@ -1412,15 +1415,17 @@ const updateLines = (bracketIdx) => {
             }
           }
         }
-        // Update in grand finals
-        for (let m = 0; m < bracket.matches.grand_finals.length; m++) {
-          if (bracket.matches.grand_finals[m].players[0].id === playerId) {
-            bracket.matches.grand_finals[m].players[0].name = newName;
-            bracket.matches.grand_finals[m].players[0].updated_at = new Date().toISOString();
-          }
-          if (bracket.matches.grand_finals[m].players[1].id === playerId) {
-            bracket.matches.grand_finals[m].players[1].name = newName;
-            bracket.matches.grand_finals[m].players[1].updated_at = new Date().toISOString();
+        // FIX: Correctly iterate through rounds and then matches for grand_finals
+        for (let r = 0; r < bracket.matches.grand_finals.length; r++) {
+          for (let m = 0; m < bracket.matches.grand_finals[r].length; m++) {
+            if (bracket.matches.grand_finals[r][m].players[0].id === playerId) {
+              bracket.matches.grand_finals[r][m].players[0].name = newName;
+              bracket.matches.grand_finals[r][m].players[0].updated_at = new Date().toISOString();
+            }
+            if (bracket.matches.grand_finals[r][m].players[1].id === playerId) {
+              bracket.matches.grand_finals[r][m].players[1].name = newName;
+              bracket.matches.grand_finals[r][m].players[1].updated_at = new Date().toISOString();
+            }
           }
         }
       } else if (bracket.type === 'Round Robin') {
