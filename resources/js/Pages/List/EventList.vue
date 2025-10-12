@@ -90,7 +90,7 @@
         v-else
         :value="filteredEvents"
         id="events-table" class="p-datatable-striped" showGridlines
-        paginator :rows="10" :rowsPerPageOptions="[10, 20, 50]"
+        paginator :rows="10" :rowsPerPageOptions="[10, 20, 50, 100]" responsiveLayout="scroll"
         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} events">
         <Column field="title" header="Event Name" style="width:20%;" sortable>
@@ -725,7 +725,7 @@
       const isCreateTagModalVisible = ref(false);
       const defaultImage = computed(() =>
         page.props.settings_prop?.defaultEventImage ||
-        'https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg'
+        "\/images\/NCSlogo.png"
       );
       const searchQuery = ref("");
       const showDateFilter = ref(false);

@@ -209,12 +209,12 @@
       }
 
       .p-datatable th {
-        @apply bg-slate-50 text-slate-600 font-semibold text-base uppercase tracking-wider;
-        border-bottom: 2px solid #e5e7eb; /* gray-200 */
+        @apply bg-blue-900 text-slate-100 font-semibold text-base uppercase tracking-wider;
+        border-bottom: 1px solid #5568f7; /* purple-500 */
       }
 
       .p-datatable .p-sortable-column:focus-visible {
-        @apply shadow-none ring-2 ring-purple-500 ring-offset-0;
+        @apply shadow-none ring-2 ring-blue-800 ring-offset-0;
       }
 
       .p-datatable .p-column-header-content {
