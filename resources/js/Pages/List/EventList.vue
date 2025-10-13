@@ -76,14 +76,14 @@
       </div>
 
       <DataTable v-else-if="initialLoading" :value="Array(5).fill({})" class="p-datatable-striped">
-        <Column header="Event Name" style="width:20%;"><template #body><Skeleton /></template></Column>
-        <Column header="Description" style="width:15%;"><template #body><Skeleton /></template></Column>
-        <Column header="Venue" style="width:15%;"><template #body><Skeleton /></template></Column>
-        <Column header="Category" style="width:15%;"><template #body><Skeleton /></template></Column>
-        <Column header="Start Date & Time" style="width:20%;"><template #body><Skeleton /></template></Column>
-        <Column header="End Date & Time" style="width:20%;"><template #body><Skeleton /></template></Column>
-        <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Actions" style="width:10%;" body-class="text-center"><template #body><div class="flex justify-center gap-2"><Skeleton shape="circle" size="2rem" /><Skeleton shape="circle" size="2rem" /></div></template></Column>
-        <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Tasks" style="width:15%;" body-class="text-center"><template #body><div class="flex justify-center gap-2"><Skeleton shape="circle" size="2rem" /></div></template></Column>
+        <Column header="Event Name" style="width:20%;" :headerStyle="{ 'background-color': '#0077B3', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><Skeleton /></template></Column>
+        <Column header="Description" style="width:15%;" :headerStyle="{ 'background-color': '#0077B3', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><Skeleton /></template></Column>
+        <Column header="Venue" style="width:15%;" :headerStyle="{ 'background-color': '#0077B3', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><Skeleton /></template></Column>
+        <Column header="Category" style="width:15%;" :headerStyle="{ 'background-color': '#0077B3', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><Skeleton /></template></Column>
+        <Column header="Start Date & Time" style="width:20%;" :headerStyle="{ 'background-color': '#0077B3', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><Skeleton /></template></Column>
+        <Column header="End Date & Time" style="width:20%;" :headerStyle="{ 'background-color': '#0077B3', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><Skeleton /></template></Column>
+        <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Actions" style="width:10%;" body-class="text-center" :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><div class="flex justify-center gap-2"><Skeleton shape="circle" size="2rem" /><Skeleton shape="circle" size="2rem" /></div></template></Column>
+        <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Tasks" style="width:15%;" body-class="text-center" :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><div class="flex justify-center gap-2"><Skeleton shape="circle" size="2rem" /></div></template></Column>
       </DataTable>
 
       <DataTable
@@ -92,8 +92,8 @@
         id="events-table" class="p-datatable-striped" showGridlines
         paginator :rows="10" :rowsPerPageOptions="[10, 20, 50, 100]" responsiveLayout="scroll"
         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} events">
-        <Column field="title" header="Event Name" style="width:20%;" sortable>
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} events" :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
+        <Column field="title" header="Event Name" style="width:20%;" sortable :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
           <template #body="{ data }">
             <div class="flex items-center gap-2">
               <img v-if="data.image" :src="data.image" alt="Event Image" class="event-icon" />
@@ -120,13 +120,13 @@
           </template>
         </Column>
 
-        <Column field="description" header="Description" style="width:15%;" sortable>
+        <Column field="description" header="Description" style="width:15%;" sortable :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
           <template #body="{ data }">
             <div class="description" v-html="formatDescription(data.description)" @click="handleDescriptionClick"></div>
           </template>
         </Column>
 
-        <Column field="venue" header="Venue" style="width:15%;" sortable>
+        <Column field="venue" header="Venue" style="width:15%;" sortable :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
         <template #body="{ data }">
             <div class="datatable-content">
             {{ data.venue || "" }}
@@ -134,7 +134,7 @@
         </template>
         </Column>
 
-        <Column field="category_id" header="Category" style="width:15%;" sortable>
+        <Column field="category_id" header="Category" style="width:15%;" sortable :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
           <template #body="{ data }">
             <div class="datatable-content">
                 {{ categoryMap[data.category_id] || "" }}
@@ -142,7 +142,7 @@
           </template>
         </Column>
 
-        <Column field="startDateTime" header="Start Date & Time" style="width:20%;" sortable>
+        <Column field="startDateTime" header="Start Date & Time" style="width:20%;" sortable :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
           <template #body="{ data }">
             <div class="date-time">
               <span class="date">{{ formatDateTime(data.startDate, data.startTime).date }}</span>
@@ -151,7 +151,7 @@
           </template>
         </Column>
 
-        <Column field="endDateTime" header="End Date & Time" style="width:20%;" sortable>
+        <Column field="endDateTime" header="End Date & Time" style="width:20%;" sortable :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
           <template #body="{ data }">
             <div class="date-time">
               <span class="date">{{ formatDateTime(data.endDate, data.endTime).date }}</span>
@@ -160,7 +160,7 @@
           </template>
         </Column>
 
-        <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Actions" style="width:10%;" body-class="text-center print-hide" header-class="print-hide" >
+        <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Actions" style="width:10%;" body-class="text-center print-hide" header-class="print-hide" :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
           <template #body="{ data }">
             <div class="action-buttons">
               <Button icon="pi pi-pen-to-square" class="p-button-rounded p-button-text action-btn-info" @click="editEvent(data)" v-tooltip.top="'Edit Event'"/>
@@ -169,7 +169,7 @@
           </template>
         </Column>
 
-        <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Tasks" style="width:15%;" body-class="text-center print-hide" header-class="print-hide" >
+        <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Tasks" style="width:15%;" body-class="text-center print-hide" header-class="print-hide" :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
         <template #body="{ data }">
             <Button icon="pi pi-list" class="p-button-rounded p-button-text action-btn-warning" @click="tasksManager.openTaskModal(data, committees, employees)" v-tooltip.top="'Manage Tasks'"/>
         </template>

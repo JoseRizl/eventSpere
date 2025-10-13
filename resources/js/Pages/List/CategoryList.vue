@@ -339,10 +339,10 @@ export default defineComponent({
     </div>
 
     <DataTable v-if="initialLoading" :value="Array(5).fill({})" class="p-datatable-striped">
-        <Column :header="showTags ? 'Tag Name' : 'Category Name'" style="width:30%;"><template #body><Skeleton /></template></Column>
-        <Column v-if="!showTags" header="Description" style="width:40%;"><template #body><Skeleton /></template></Column>
-        <Column v-if="showTags" header="Color" style="width:20%;"><template #body><Skeleton /></template></Column>
-        <Column header="Actions" style="width:10%;" body-class="text-center"><template #body><div class="flex justify-center gap-2"><Skeleton shape="circle" size="2rem" /><Skeleton shape="circle" size="2rem" /></div></template></Column>
+        <Column :header="showTags ? 'Tag Name' : 'Category Name'" style="width:30%;" :headerStyle="{ 'background-color': '#0077B3', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><Skeleton /></template></Column>
+        <Column v-if="!showTags" header="Description" style="width:40%;" :headerStyle="{ 'background-color': '#0077B3', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><Skeleton /></template></Column>
+        <Column v-if="showTags" header="Color" style="width:20%;" :headerStyle="{ 'background-color': '#0077B3', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><Skeleton /></template></Column>
+        <Column header="Actions" style="width:10%;" body-class="text-center" :headerStyle="{ 'background-color': '#0077B3', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><div class="flex justify-center gap-2"><Skeleton shape="circle" size="2rem" /><Skeleton shape="circle" size="2rem" /></div></template></Column>
     </DataTable>
 
     <div v-else-if="filteredItems.length === 0" class="no-results-message">
@@ -368,8 +368,8 @@ export default defineComponent({
       class="p-datatable-striped" showGridlines
       paginator :rows="10" :rowsPerPageOptions="[10, 20, 50]"
       paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-      :currentPageReportTemplate="currentPageReportTemplate">
-      <Column :field="showTags ? 'name' : 'title'" :header="showTags ? 'Tag Name' : 'Category Name'" style="width:30%;" sortable>
+      :currentPageReportTemplate="currentPageReportTemplate" :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
+      <Column :field="showTags ? 'name' : 'title'" :header="showTags ? 'Tag Name' : 'Category Name'" style="width:30%;" sortable :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
         <template #body="{ data }">
           <div class="datatable-content">
             <div v-if="showTags">
@@ -386,7 +386,7 @@ export default defineComponent({
         </template>
       </Column>
 
-      <Column :field="showTags ? 'category_id' : 'description'" :header="showTags ? 'Category' : 'Description'" style="width:40%;" sortable>
+      <Column :field="showTags ? 'category_id' : 'description'" :header="showTags ? 'Category' : 'Description'" style="width:40%;" sortable :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
         <template #body="{ data }">
           <div class="datatable-content">
             <span v-if="showTags">{{ categoryMap[data.category_id] || 'Uncategorized' }}</span>
@@ -395,7 +395,7 @@ export default defineComponent({
         </template>
       </Column>
 
-      <Column header="Actions" style="width:10%;" body-class="text-center">
+      <Column header="Actions" style="width:10%;" body-class="text-center" :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
         <template #body="{ data }">
           <div class="action-buttons">
             <Button

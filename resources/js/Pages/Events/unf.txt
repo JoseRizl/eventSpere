@@ -143,14 +143,18 @@ const newMemorandumPreview = ref(null);
 const { activities: activitiesState, fetchActivities: fetchActivitiesApi, saveActivities } = useActivities();
 const tasksManager = useTasks();
 
-const handleTaskSaveSuccess = ({ message }) => {
-    const page = usePage();
-    tasksManager.isTaskModalVisible.value = false;
-    successMessage.value = message;
-    showSuccessDialog.value = true;
-    // Optimistically update the tasks in the view without a full reload
-    props.preloadedTasks.splice(0, props.preloadedTasks.length, ...(page.props.flash.tasks || []));
-};
+const handleTaskSaveSuccess = ({ message, tasks: newTasks }) => {
+        tasksManager.isTaskModalVisible.value = false; // Close the modal
+        successMessage.value = message; // Show success message
+        showSuccessDialog.value = true;
+        // The controller flashes the updated tasks. We need to update the local state.
+        if (newTasks) {
+            // Update the tasks list in the main event details view
+            eventDetails.value.tasks = newTasks;
+            // Also update the tasks in the composable to ensure consistency if the modal is reopened
+            tasksManager.taskAssignments.value = newTasks;
+        }
+    };
 
 const handleTaskSaveError = (message) => {
     errorMessage.value = message;
@@ -1115,41 +1119,6 @@ const getBracketIndex = (bracketId) => {
                     </div>
                     </div>
 
-
-                    <!-- Committee -->
-                    <div v-if="props.preloadedTasks && props.preloadedTasks.length > 0 || (user?.role === 'Admin' || user?.role === 'Principal')">
-                        <div class="flex justify-between items-center mb-2">
-                            <h2 class="font-semibold">Tasks & Committees:</h2>
-                            <Button
-                                v-if="user?.role === 'Admin' || user?.role === 'Principal'"
-                                icon="pi pi-list"
-                                class="p-button-rounded p-button-text action-btn-warning"
-                                @click="tasksManager.openTaskModal(
-                                    { ...props.event, tasks: props.preloadedTasks },
-                                    props.committees,
-                                    props.employees)"
-                                v-tooltip.top="'Manage Tasks'"
-                            />
-                        </div>
-                        <div class="space-y-3">
-                <div v-for="(taskItem, index) in props.preloadedTasks" :key="index" class="p-3 border rounded-lg bg-gray-50/50">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="font-semibold text-gray-800">{{ taskItem.task || 'No task specified' }}</p>
-                            <p class="text-xs text-gray-500">{{ taskItem.committee?.name || 'No committee' }}</p>
-                        </div>
-                    </div>
-                    <div class="mt-3 flex items-center gap-2 flex-wrap">
-                        <span v-if="!taskItem.employees || taskItem.employees.length === 0" class="text-gray-500 italic text-xs">No employees assigned</span>
-                        <div v-else v-for="employee in taskItem.employees" :key="employee.id" class="flex items-center gap-2 bg-white rounded-full px-2 py-1 border shadow-sm" v-tooltip.top="employee.name">
-                            <Avatar :label="employee.name ? employee.name.split(' ').map(n => n[0]).join('').toUpperCase() : '?'" shape="circle" size="small" />
-                            <span class="text-xs font-medium text-gray-800">{{ employee.name }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
                     <!-- Activities -->
                     <div v-if="editMode || (eventDetails.activities && eventDetails.activities.length > 0)">
                     <h2 class="font-semibold mb-1">Activities</h2>
@@ -1205,6 +1174,40 @@ const getBracketIndex = (bracketId) => {
                     >
                     Save Changes
                     </button>
+
+                    <!-- Committee -->
+                    <div v-if="props.preloadedTasks && props.preloadedTasks.length > 0 || (user?.role === 'Admin' || user?.role === 'Principal')">
+                        <div class="flex justify-between items-center mb-2">
+                            <h2 class="font-semibold">Tasks & Committees:</h2>
+                            <Button
+                                v-if="user?.role === 'Admin' || user?.role === 'Principal'"
+                                icon="pi pi-list"
+                                class="p-button-rounded p-button-text action-btn-warning"
+                                @click="tasksManager.openTaskModal(
+                                    { ...props.event, tasks: props.preloadedTasks },
+                                    props.committees,
+                                    props.employees)"
+                                v-tooltip.top="'Manage Tasks'"
+                            />
+                        </div>
+                        <div class="space-y-3">
+                <div v-for="(taskItem, index) in props.preloadedTasks" :key="index" class="p-3 border rounded-lg bg-gray-50/50">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-semibold text-gray-800">{{ taskItem.task || 'No task specified' }}</p>
+                            <p class="text-xs text-gray-500">{{ taskItem.committee?.name || 'No committee' }}</p>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex items-center gap-2 flex-wrap">
+                        <span v-if="!taskItem.employees || taskItem.employees.length === 0" class="text-gray-500 italic text-xs">No employees assigned</span>
+                        <div v-else v-for="employee in taskItem.employees" :key="employee.id" class="flex items-center gap-2 bg-white rounded-full px-2 py-1 border shadow-sm" v-tooltip.top="employee.name">
+                            <Avatar :label="employee.name ? employee.name.split(' ').map(n => n[0]).join('').toUpperCase() : '?'" shape="circle" size="small" />
+                            <span class="text-xs font-medium text-gray-800">{{ employee.name }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
                 </div>
                     </div>
 
