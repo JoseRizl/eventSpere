@@ -151,7 +151,7 @@ class EventController extends JsonController
         return Inertia::render('Events/EventDetails', [
             'event' => $event,
             'tags' => $data['tags'] ?? [],
-            'committees' => $data['committees'] ?? [],
+            'committees' => $allCommittees->values()->toArray(),
             'employees' => $data['employees'] ?? [],
             'categories' => $data['category'] ?? [],
             'relatedEvents' => $relatedEvents,

@@ -617,6 +617,7 @@
     name: "EventList",
     components: {
       TaskEditor,
+      SearchFilterBar,
     },
     inheritAttrs: false,
     setup() {
@@ -1057,10 +1058,11 @@
         initialLoading.value = false;
     });
 
-    const handleTaskSaveSuccess = (message) => {
-        tasksManager.isTaskModalVisible.value = false;
-        successMessage.value = message;
+    const handleTaskSaveSuccess = ({ message }) => {
+        tasksManager.isTaskModalVisible.value = false; // Close the modal
+        successMessage.value = message; // Show success message
         showSuccessDialog.value = true;
+
     };
 
     const handleTaskSaveError = (message) => {

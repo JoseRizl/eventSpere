@@ -1,17 +1,17 @@
 <template>
-    <Dialog v-model:visible="tasksManager.isTaskModalVisible.value" modal header="Assign Tasks" :style="{ width: '50vw' }">
+    <Dialog v-model:visible="props.tasksManager.isTaskModalVisible.value" modal header="Assign Tasks" :style="{ width: '50vw' }">
         <div class="p-fluid">
             <div class="p-field">
                 <label>Event</label>
-                <InputText v-if="tasksManager.selectedEventForTasks.value" v-model="tasksManager.selectedEventForTasks.value.title" disabled />
+                <InputText v-if="props.tasksManager.selectedEventForTasks.value" v-model="props.tasksManager.selectedEventForTasks.value.title" disabled />
             </div>
 
             <!-- Task Entries -->
-            <div v-for="(taskEntry, index) in tasksManager.taskAssignments.value" :key="index" class="p-field border-b pb-4 mb-4 last:border-b-0">
+            <div v-for="(taskEntry, index) in props.tasksManager.taskAssignments.value" :key="index" class="p-field border-b pb-4 mb-4 last:border-b-0">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="font-semibold text-lg">Task {{ index + 1 }}</h3>
                     <button
-                        @click="tasksManager.deleteTask(index)"
+                        @click="props.tasksManager.deleteTask(index)"
                         class="text-red-500 hover:text-red-700 text-sm flex items-center"
                         v-tooltip.top="'Clear Task'">
                         <i class="pi pi-times mr-1"></i> Clear
@@ -24,11 +24,11 @@
                     <label>Committee</label>
                     <Select
                         v-model="taskEntry.committee"
-                        :options="committees"
+                        :options="props.committees"
                         optionLabel="name"
                         placeholder="Select Committee"
                         filter
-                        @change="tasksManager.updateEmployeesForTask(index, employees)"
+                        @change="props.tasksManager.updateEmployeesForTask(index, props.employees)"
                     >
                         <template #option="slotProps">
                             <div>{{ slotProps.option.name }}</div>
@@ -45,7 +45,7 @@
                     <label>Employees</label>
                     <MultiSelect
                         v-model="taskEntry.employees"
-                        :options="tasksManager.filteredEmployees.value[index]"
+                        :options="props.tasksManager.filteredEmployees.value[index]"
                         optionLabel="name"
                         placeholder="Select Employees"
                         display="chip"
@@ -75,13 +75,13 @@
             </div>
 
             <!-- Add Task Button -->
-            <button @click="tasksManager.addTask()" class="text-blue-500 hover:text-blue-700 text-sm flex items-center mt-2">
+            <button @click="props.tasksManager.addTask()" class="text-blue-500 hover:text-blue-700 text-sm flex items-center mt-2">
                 <i class="pi pi-plus mr-1"></i> Add Task
             </button>
         </div>
 
         <template #footer>
-            <button class="modal-button-secondary" @click="tasksManager.isTaskModalVisible.value = false" :disabled="isSaving">Cancel</button>
+            <button class="modal-button-secondary" @click="props.tasksManager.isTaskModalVisible.value = false" :disabled="isSaving">Cancel</button>
             <button class="modal-button-primary" @click="handleSave" :disabled="isSaving">
                 <i v-if="isSaving" class="pi pi-spin pi-spinner mr-2"></i>
                 {{ isSaving ? 'Saving...' : 'Save Tasks' }}
@@ -102,19 +102,18 @@ const props = defineProps({
     employees: Array,
 });
 
-const tasksManager = props.tasksManager;
-const committees = props.committees;
-const employees = props.employees;
-
 const emit = defineEmits(['save-success', 'save-error']);
 const isSaving = ref(false);
 
 const handleSave = async () => {
   isSaving.value = true;
   try {
-    // use the local tasksManager reference instead of "props"
-    await tasksManager.saveTaskAssignments();
-    emit('save-success', 'Tasks updated successfully!');
+    const onSuccess = (page) => {
+      const newTasks = page.props.flash?.tasks || [];
+      emit('save-success', { message: 'Tasks updated successfully!', tasks: newTasks });
+    };
+
+    await props.tasksManager.saveTaskAssignments(onSuccess);
   } catch (err) {
     console.error('[handleSave] raw:', err);
     let message = 'Failed to save tasks.';
@@ -128,4 +127,3 @@ const handleSave = async () => {
   }
 };
 </script>
-

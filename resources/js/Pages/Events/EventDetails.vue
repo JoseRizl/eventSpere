@@ -13,6 +13,7 @@ import BracketCard from '@/Components/BracketCard.vue';
 import BracketView from '@/Components/BracketView.vue';
 import MatchEditorDialog from '@/Components/MatchEditorDialog.vue';
 import MatchesView from '@/Components/MatchesView.vue';
+import TaskEditor from '@/Components/TaskEditor.vue';
 import { getFullDateTime } from '@/utils/dateUtils.js';
 import { useActivities } from '@/composables/useActivities.js';
 import { useTasks } from '@/composables/useTasks.js';
@@ -21,8 +22,8 @@ import { useMemorandum } from '@/composables/useMemorandum.js';
 
 const props = defineProps({
   event: Object,
-  tags: Array,
   committees: Array,
+  tags: Array,
   employees: Array,
   categories: Array,
   relatedEvents: Array,
@@ -37,7 +38,6 @@ const props = defineProps({
 
 // Inertia props (now using defineProps)
 const user = computed(() => props.auth.user);
-const tasks = ref([]);
 const currentView = ref('details'); // 'details' or 'announcements'
 const bannerImageInput = ref(null);
 const tags = ref(props.tags || []);
@@ -55,10 +55,7 @@ const showMemoImageDialog = ref(false);
 const memoImageUrl = ref('');
 
 const employees = ref(props.employees || []);
-const filteredEmployees = ref([]);
 const relatedEvents = ref(props.relatedEvents || []);
-const showDeleteTaskConfirm = ref(false);
-const taskToDelete = ref(null);
 const showDeleteScheduleConfirm = ref(false);
 const originalEventDetails = ref(null);
 const searchQuery = ref('');
@@ -144,8 +141,19 @@ const { saveMemorandum, clearMemorandum } = useMemorandum();
 const newMemorandumFile = ref(null);
 const newMemorandumPreview = ref(null);
 const { activities: activitiesState, fetchActivities: fetchActivitiesApi, saveActivities } = useActivities();
-const { tasks: tasksState, fetchTasks: fetchTasksApi, saveTasks } = useTasks();
+const tasksManager = useTasks();
 
+const handleTaskSaveSuccess = ({ message }) => {
+        tasksManager.isTaskModalVisible.value = false; // Close the modal
+        successMessage.value = message; // Show success message
+        showSuccessDialog.value = true;
+
+    };
+
+const handleTaskSaveError = (message) => {
+    errorMessage.value = message;
+    showErrorDialog.value = true;
+};
 // Bracket logic
 const bracketState = useBracketState();
 const {
@@ -301,60 +309,7 @@ const eventDetails = ref({
       __uid: a.__uid || `${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 8)}`
     })),
     // event.tags is now an array of tag objects from backend, convert to IDs for editing
-    tags: (props.event.tags || []).map(tag => tag.id),
-    tasks: props.event.tasks?.map(task => {
-      // Handle committee
-      let committee = null;
-      if (task.committee) {
-        if (typeof task.committee === 'object') {
-          if (task.committee.name) {
-            committee = task.committee;
-          } else {
-            const foundCommittee = committees.value.find(c => c.id == task.committee.id);
-            committee = foundCommittee || { id: task.committee.id, name: 'Unknown Committee' };
-          }
-        } else {
-          const foundCommittee = committees.value.find(c => c.id == task.committee);
-          committee = foundCommittee || { id: task.committee, name: 'Unknown Committee' };
-        }
-      }
-
-      // Handle employees array
-      let employees = [];
-      if (task.employees) {
-        employees = task.employees.map(emp => {
-          if (typeof emp === 'object') {
-            if (emp.name) {
-              return emp;
-            }
-            const foundEmployee = employees.value.find(e => e.id == emp.id);
-            return foundEmployee || { id: emp.id, name: 'Unknown Employee' };
-          }
-          const foundEmployee = employees.value.find(e => e.id == emp);
-          return foundEmployee || { id: emp, name: 'Unknown Employee' };
-        });
-      } else if (task.employee) {
-        // Handle legacy single employee format
-        if (typeof task.employee === 'object') {
-          if (task.employee.name) {
-
-            employees = [task.employee];
-          } else {
-            const foundEmployee = employees.value.find(e => e.id == task.employee.id);
-            employees = [foundEmployee || { id: task.employee.id, name: 'Unknown Employee' }];
-          }
-        } else {
-          const foundEmployee = employees.value.find(e => e.id == task.employee);
-          employees = [foundEmployee || { id: task.employee, name: 'Unknown Employee' }];
-        }
-      }
-
-      return {
-        ...task,
-        committee,
-        employees
-      };
-    }) || []
+    tags: (props.event.tags || []).map(tag => tag.id)
 });
 
 const filteredTags = computed(() => {
@@ -455,9 +410,6 @@ onMounted(() => {
   }
 
   // Preload tasks/activities/announcements from props to avoid initial GETs
-  if (Array.isArray(props.preloadedTasks)) {
-    eventDetails.value.tasks = props.preloadedTasks;
-  }
   if (Array.isArray(props.preloadedActivities)) {
     eventDetails.value.activities = props.preloadedActivities.map((a, idx) => ({ ...a, __uid: `${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 8)}` }));
   }
@@ -466,30 +418,8 @@ onMounted(() => {
     eventAnnouncements.value = props.preloadedAnnouncements;
   }
 
-  // Ensure tasks have proper committee/employee references
+  //fetch brackets
   fetchBrackets(props.event.id);
-  // No initial GETs for tasks/activities/announcements; keep only mutations
-  if (eventDetails.value.tasks) {
-    filteredEmployees.value = eventDetails.value.tasks.map(task => {
-      // Find matching committee in committees list
-      if (task.committee?.id) {
-        task.committee = committees.value.find(c => c.id == task.committee.id) || task.committee;
-      }
-
-      // Find matching employee in employees list
-      if (task.employee?.id) {
-        task.employee = employees.value.find(e => e.id == task.employee.id) || task.employee;
-      }
-
-      // Return filtered employees for this task
-      return task.committee?.id
-        ? employees.value.filter(e => e.committeeId == task.committee.id)
-        : [];
-    });
-  } else {
-    eventDetails.value.tasks = [];
-    filteredEmployees.value = [];
-  }
 });
 
 watch(relatedBrackets, (newBrackets) => {
@@ -628,52 +558,6 @@ const formatAnnouncementTimestamp = (timestamp) => {
   return format(parseISO(timestamp), 'MMMM dd, yyyy HH:mm');
 };
 
-if (!eventDetails.value.tasks) {
-  eventDetails.value.tasks = [];
-}
-
-const updateFilteredEmployees = (index) => {
-  const task = eventDetails.value.tasks[index];
-  if (task.committee) {
-    task.committee = committees.value.find(c => c.id == task.committee.id) || task.committee;
-    filteredEmployees.value[index] = employees.value.filter(emp =>
-      emp.committeeId == task.committee.id
-    );
-  } else {
-    filteredEmployees.value[index] = [];
-  }
-  // Reset employees when committee changes
-  task.employees = [];
-};
-
-const removeEmployee = (taskIndex, employeeToRemove) => {
-  eventDetails.value.tasks[taskIndex].employees = eventDetails.value.tasks[taskIndex].employees.filter(
-    emp => emp.id !== employeeToRemove.id
-  );
-};
-
-// Methods
-const addCommitteeTask = () => {
-  eventDetails.value.tasks.push({
-    committee: null,
-    employees: [],
-    task: ''
-  });
-  filteredEmployees.value.push([]);
-};
-
-const promptDeleteTask = (index) => {
-  taskToDelete.value = index;
-  showDeleteTaskConfirm.value = true;
-};
-
-const confirmDeleteTask = () => {
-  eventDetails.value.tasks.splice(taskToDelete.value, 1);
-  filteredEmployees.value.splice(taskToDelete.value, 1);
-  showDeleteTaskConfirm.value = false;
-  taskToDelete.value = null;
-};
-
 const addActivity = () => {
   if (!Array.isArray(eventDetails.value.activities)) {
     eventDetails.value.activities = [];
@@ -741,15 +625,8 @@ const saveChanges = () => {
     startTime: eventDetails.value.startTime,
     endTime: eventDetails.value.endTime,
     tags: eventDetails.value.tags || [], // Only IDs
-  };
-
-  // Separate payload for tasks
-  const tasksPayload = {
-    tasks: eventDetails.value.tasks.map(task => ({
-      committee_id: task.committee ? task.committee.id : null,
-      employees: task.employees.map(emp => emp.id), // Send only the employee ID
-      description: task.task
-    })),
+    memorandum: eventDetails.value.memorandum,
+    activities: (eventDetails.value.activities || []).map(({ __uid, ...activity }) => activity),
   };
 
   // First, save the main event details
@@ -788,16 +665,6 @@ const saveChanges = () => {
         }
         const activitiesPayload = (eventDetails.value.activities || []).map(({ __uid, title, date, startTime, endTime, location }) => ({ title, date, startTime, endTime, location }));
         await saveActivities(eventDetails.value.id, activitiesPayload);
-
-
-        // Save tasks via composable
-        const tasksPayloadArray = eventDetails.value.tasks.map(task => ({
-          committee_id: task.committee ? task.committee.id : null,
-          employees: (task.employees || []).map(emp => emp.id),
-          description: task.task
-        }));
-        await saveTasks(eventDetails.value.id, tasksPayloadArray);
-
 
         showSuccessDialog.value = true;
         successMessage.value = 'The event was updated successfully.';
@@ -1246,103 +1113,6 @@ const getBracketIndex = (bracketId) => {
                     </div>
                     </div>
 
-
-                    <!-- Committee -->
-                    <div v-if="editMode || (eventDetails.tasks && eventDetails.tasks.length > 0)">
-                    <h2 class="font-semibold mb-2">Tasks & Committees:</h2>
-                    <div v-if="editMode">
-                    <div v-for="(taskItem, index) in eventDetails.tasks" :key="index" class="space-y-2 mb-4 p-3 border rounded">
-                        <!-- Committee Selection -->
-                        <div class="p-field">
-                        <label class="block text-sm font-medium mb-1">Committee</label>
-                        <Select
-                            v-model="taskItem.committee"
-                            :options="committees"
-                            optionLabel="name"
-                            placeholder="Select Committee"
-                            class="w-full"
-                            @change="updateFilteredEmployees(index)"
-                        >
-                            <template #option="slotProps">
-                            <div>{{ slotProps.option.name }}</div>
-                            </template>
-                            <template #value="slotProps">
-                            <div v-if="slotProps.value">{{ slotProps.value.name }}</div>
-                            <span v-else>{{ slotProps.placeholder }}</span>
-                            </template>
-                        </Select>
-                        </div>
-
-                <!-- Employee Selection (only shows if committee is selected) -->
-                <div v-if="taskItem.committee" class="p-field">
-                <label class="block text-sm font-medium mb-1">Employees</label>
-                <MultiSelect
-                    v-model="taskItem.employees"
-                    :options="filteredEmployees[index]"
-                    optionLabel="name"
-                    placeholder="Select Employees"
-                    display="chip"
-                    filter
-                >
-                    <template #chip="slotProps">
-                    <div class="flex items-center gap-2 px-2 py-1 rounded bg-blue-100 text-blue-800 text-xs">
-                        {{ slotProps.value.name }}
-                        <button
-                        type="button"
-                        class="text-blue-600 hover:text-blue-800"
-                        @click.stop="removeEmployee(index, slotProps.value)"
-                        v-tooltip.top="'Remove Employee'"
-                        >
-                        ✕
-                        </button>
-                    </div>
-                    </template>
-                </MultiSelect>
-                </div>
-
-                <!-- Task Description -->
-                <div class="p-field">
-                <label class="block text-sm font-medium mb-1">Task</label>
-                <input
-                    v-model="taskItem.task"
-                    type="text"
-                    placeholder="Enter task details"
-                    class="w-full border rounded p-2"
-                />
-                </div>
-
-                <!-- Remove Task Button -->
-                <button
-                @click="promptDeleteTask(index)"
-                class="text-red-500 hover:text-red-700 text-sm flex items-center mt-2"
-                >
-                <i class="pi pi-times mr-1"></i> Clear Task
-                </button>
-            </div>
-
-            <button @click="addCommitteeTask" class="text-blue-500 hover:text-blue-700 text-sm flex items-center mt-2">
-              <i class="pi pi-plus mr-1"></i> Add Committee Task
-            </button>
-            </div>
-            <div v-else class="space-y-3">
-                <div v-for="(taskItem, index) in eventDetails.tasks" :key="index" class="p-3 border rounded-lg bg-gray-50/50">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="font-semibold text-gray-800">{{ taskItem.task || 'No task specified' }}</p>
-                            <p class="text-xs text-gray-500">{{ taskItem.committee?.name || 'No committee' }}</p>
-                        </div>
-                    </div>
-                    <div class="mt-3 flex items-center gap-2 flex-wrap">
-                        <span v-if="!taskItem.employees || taskItem.employees.length === 0" class="text-gray-500 italic text-xs">No employees assigned</span>
-                        <div v-else v-for="employee in taskItem.employees" :key="employee.id" class="flex items-center gap-2 bg-white rounded-full px-2 py-1 border shadow-sm" v-tooltip.top="employee.name">
-                            <Avatar :label="employee.name ? employee.name.split(' ').map(n => n[0]).join('').toUpperCase() : '?'" shape="circle" size="small" />
-                            <span class="text-xs font-medium text-gray-800">{{ employee.name }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
                     <!-- Activities -->
                     <div v-if="editMode || (eventDetails.activities && eventDetails.activities.length > 0)">
                     <h2 class="font-semibold mb-1">Activities</h2>
@@ -1398,6 +1168,40 @@ const getBracketIndex = (bracketId) => {
                     >
                     Save Changes
                     </button>
+
+                    <!-- Committee -->
+                    <div v-if="props.preloadedTasks && props.preloadedTasks.length > 0 || (user?.role === 'Admin' || user?.role === 'Principal')">
+                        <div class="flex justify-between items-center mb-2">
+                            <h2 class="font-semibold">Tasks & Committees:</h2>
+                            <Button
+                                v-if="user?.role === 'Admin' || user?.role === 'Principal'"
+                                icon="pi pi-list"
+                                class="p-button-rounded p-button-text action-btn-warning"
+                                @click="tasksManager.openTaskModal(
+                                    { ...props.event, tasks: props.preloadedTasks },
+                                    props.committees,
+                                    props.employees)"
+                                v-tooltip.top="'Manage Tasks'"
+                            />
+                        </div>
+                        <div class="space-y-3">
+                <div v-for="(taskItem, index) in props.preloadedTasks" :key="index" class="p-3 border rounded-lg bg-gray-50/50">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-semibold text-gray-800">{{ taskItem.task || 'No task specified' }}</p>
+                            <p class="text-xs text-gray-500">{{ taskItem.committee?.name || 'No committee' }}</p>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex items-center gap-2 flex-wrap">
+                        <span v-if="!taskItem.employees || taskItem.employees.length === 0" class="text-gray-500 italic text-xs">No employees assigned</span>
+                        <div v-else v-for="employee in taskItem.employees" :key="employee.id" class="flex items-center gap-2 bg-white rounded-full px-2 py-1 border shadow-sm" v-tooltip.top="employee.name">
+                            <Avatar :label="employee.name ? employee.name.split(' ').map(n => n[0]).join('').toUpperCase() : '?'" shape="circle" size="small" />
+                            <span class="text-xs font-medium text-gray-800">{{ employee.name }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
                 </div>
                     </div>
 
@@ -1596,14 +1400,6 @@ const getBracketIndex = (bracketId) => {
         :message="successMessage"
       />
 
-      <!-- Delete Task Confirmation Dialog -->
-      <ConfirmationDialog
-        v-model:show="showDeleteTaskConfirm"
-        title="Clear Task?"
-        message="Are you sure you want to clear this task?"
-        @confirm="confirmDeleteTask"
-      />
-
       <!-- Delete Schedule Confirmation Dialog -->
       <ConfirmationDialog
         v-model:show="showDeleteScheduleConfirm"
@@ -1723,6 +1519,15 @@ const getBracketIndex = (bracketId) => {
     <Dialog v-model:visible="showImageDialog" modal :dismissableMask="true" header="Image" :style="{ width: '90vw', maxWidth: '1200px' }">
         <img :src="selectedImageUrl" alt="Announcement Image" class="w-full h-auto max-h-[80vh] object-contain" />
     </Dialog>
+
+    <!-- Task Editor Component -->
+    <TaskEditor
+        :tasks-manager="tasksManager"
+        :committees="committees"
+        :employees="employees"
+        @save-success="handleTaskSaveSuccess"
+        @save-error="handleTaskSaveError"
+    />
 </div>
 </template>
 

@@ -1,6 +1,5 @@
 <template>
     <div class="event-list-container">
-        <!-- ... other elements ... -->
         <LoadingSpinner :show="saving" />
         <input type="file" ref="defaultImageInput" @change="handleDefaultImageUpload" accept="image/*" class="hidden" />
         <h1 class="title">Event List</h1>
@@ -178,90 +177,13 @@
 
       </DataTable>
 
-      <Dialog v-model:visible="isTaskModalVisible" modal header="Assign Tasks" :style="{ width: '50vw' }">
-  <div class="p-fluid">
-    <div class="p-field">
-      <label>Event</label>
-      <InputText v-model="tasksManager.selectedEventForTasks.value.title" disabled />
-    </div>
-
-    <!-- Task Entries -->
-    <div v-for="(taskEntry, index) in tasksManager.taskAssignments.value" :key="index" class="p-field">
-      <h3>Task {{ index + 1 }}</h3>
-
-      <!-- Committee Selection -->
-      <div class="p-field">
-        <label>Committee</label>
-        <Select
-          v-model="taskEntry.committee"
-          :options="committees"
-          optionLabel="name"
-          placeholder="Select Committee"
-          filter
-          @change="tasksManager.updateEmployeesForTask(index, employees)"
-        >
-          <template #option="slotProps">
-            <div>{{ slotProps.option.name }}</div>
-          </template>
-          <template #value="slotProps">
-            <div v-if="slotProps.value">{{ slotProps.value.name }}</div>
-            <span v-else>{{ slotProps.placeholder }}</span>
-          </template>
-        </Select>
-      </div>
-
-      <!-- Employee Selection -->
-      <div v-if="taskEntry.committee" class="p-field">
-        <label>Employees</label>
-        <MultiSelect
-          v-model="taskEntry.employees"
-          :options="tasksManager.filteredEmployees.value[index]"
-          optionLabel="name"
-          placeholder="Select Employees"
-          display="chip"
-          filter
-        >
-          <template #chip="slotProps">
-            <div class="flex items-center gap-2 px-2 py-1 rounded bg-blue-100 text-blue-800 text-xs">
-              {{ slotProps.value.name }}
-              <button
-                type="button"
-                class="text-blue-600 hover:text-blue-800"
-                @click.stop="taskEntry.employees = taskEntry.employees.filter(e => e.id !== slotProps.value.id)"
-                v-tooltip.top="'Remove Employee'"
-              >
-                ✕
-              </button>
-            </div>
-          </template>
-        </MultiSelect>
-      </div>
-
-      <!-- Task Description -->
-      <div class="p-field">
-        <label>Task</label>
-        <Textarea v-model="taskEntry.task" rows="2" placeholder="Enter task details" />
-      </div>
-
-      <!-- Remove Task Button -->
-        <button
-            @click="tasksManager.deleteTask(index)"
-            class="text-red-500 hover:text-red-700 text-sm flex items-center mt-2">
-            <i class="pi pi-times mr-1"></i> Clear Task
-        </button>
-    </div>
-
-    <!-- Add Task Button -->
-    <button @click="tasksManager.addTask()" class="text-blue-500 hover:text-blue-700 text-sm flex items-center mt-2">
-        <i class="pi pi-plus mr-1"></i> Add Task
-    </button>
-  </div>
-
-  <template #footer>
-    <button class="modal-button-secondary" @click="tasksManager.isTaskModalVisible.value = false">Cancel</button>
-    <button class="modal-button-primary" @click="tasksManager.saveTaskAssignments().then(() => { successMessage = 'Tasks updated successfully!'; showSuccessDialog = true; })">Save Tasks</button>
-  </template>
-</Dialog>
+      <TaskEditor
+        :tasks-manager="tasksManager"
+        :committees="committees"
+        :employees="employees"
+        @save-success="handleTaskSaveSuccess"
+        @save-error="handleTaskSaveError"
+      />
 
     <!-- Create Event Modal-->
     <Dialog v-model:visible="isCreateModalVisible" modal header="Create Event" :style="{ width: '50vw' }">
@@ -659,16 +581,6 @@
       @confirm="confirmArchive"
     />
 
-    <!-- Delete Task Confirmation Dialog -->
-    <ConfirmationDialog
-      v-model:show="showDeleteTaskConfirm"
-      title="Clear Task?"
-      :message="taskToDelete ? `Are you sure you want to clear this task?` : ''"
-      confirmText="Yes, Clear"
-      confirmButtonClass="modal-button-danger"
-      @confirm="confirmDeleteTask"
-    />
-
     <!-- Save Changes Confirmation Dialog -->
     <ConfirmationDialog
       v-model:show="showSaveConfirm"
@@ -699,9 +611,14 @@
   import { useTasks } from '@/composables/useTasks.js';
   import { useMemorandum } from '@/composables/useMemorandum.js';
   import SearchFilterBar from '@/Components/SearchFilterBar.vue';
+  import TaskEditor from '@/Components/TaskEditor.vue';
 
   export default defineComponent({
     name: "EventList",
+    components: {
+      TaskEditor,
+      SearchFilterBar,
+    },
     inheritAttrs: false,
     setup() {
       const dateError = ref("");
@@ -1140,6 +1057,18 @@
         // We just need to switch off the loading indicator after mount.
         initialLoading.value = false;
     });
+
+    const handleTaskSaveSuccess = (message) => {
+        tasksManager.isTaskModalVisible.value = false;
+        successMessage.value = message;
+        showSuccessDialog.value = true;
+    };
+
+    const handleTaskSaveError = (message) => {
+        errorMessage.value = message;
+        showErrorDialog.value = true;
+    };
+
 
       // Format date and time display
       const formatDateTime = (date, time) => {
@@ -1758,6 +1687,9 @@
     getTagColor,
     rowsPerPage,
     printTable,
+    tasksManager,
+    handleTaskSaveSuccess,
+    handleTaskSaveError,
     };
 
     },

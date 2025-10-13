@@ -59,7 +59,7 @@ export function useTasks() {
 
   // Save logic
   // in useTasks.js
-const saveTaskAssignments = async () => {
+const saveTaskAssignments = async (onSuccessCallback) => {
   if (!selectedEventForTasks.value) {
     return Promise.reject({ message: 'No event selected', errors: { general: ['No event selected'] }});
   }
@@ -74,30 +74,19 @@ const saveTaskAssignments = async () => {
 
   console.debug('[saveTaskAssignments] payload', payload);
 
-  try {
-    const res = await router.put(route('tasks.updateForEvent', { id: selectedEventForTasks.value.id }), payload, {
-      preserveScroll: true,
-    });
-    return res;
-  } catch (err) {
-    // normalize error shape
-    let normalized = { message: 'Save failed', errors: {} };
-    if (err && err.response && err.response.data) {
-      const data = err.response.data;
-      normalized.message = data.message || normalized.message;
-      normalized.errors = data.errors || {};
-    } else if (err && err.errors) {
-      normalized = { message: err.message || normalized.message, errors: err.errors };
-    } else if (err instanceof Error) {
-      normalized.message = err.message;
-      normalized.errors = { general: [err.message] };
-    } else {
-      normalized.message = String(err);
-      normalized.errors = { general: [String(err)] };
-    }
-    console.error('[saveTaskAssignments] normalized error', normalized, err);
-    return Promise.reject(normalized);
-  }
+  const response = await router.put(route('tasks.updateForEvent', { id: selectedEventForTasks.value.id }), payload, {
+    preserveScroll: true,
+    onSuccess: (page) => {
+      if (onSuccessCallback) onSuccessCallback(page);
+    },
+  });
+
+  // Inertia's router.put doesn't return the page object directly in the promise resolution.
+  // The page updates automatically, and we can access the new props via usePage().
+  // However, since the controller flashes the tasks, they will be in the next page's props.
+  // The calling component handles the onSuccess logic, which has access to the updated page.
+  // For optimistic updates, we rely on the controller flashing back the data.
+  return response; // The promise resolves when the visit is complete.
 };
 
 

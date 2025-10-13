@@ -64,6 +64,7 @@ class TaskController extends JsonController
             ->values()
             ->toArray();
 
+        $newlyCreatedTasks = [];
         // Add the new\/updated tasks
         collect($validated['tasks'] ?? [])->each(function ($taskData) use ($eventId) {
             $newTaskId = $eventId . '-' . substr(md5(uniqid(rand(), true)), 0, 4);
@@ -79,9 +80,26 @@ class TaskController extends JsonController
             });
         });
 
+        // After saving, re-fetch and normalize the new tasks to send back to the frontend
+        $allEmployees = collect($this->jsonData['employees'] ?? []);
+        $allCommittees = collect($this->jsonData['committees'] ?? []);
+        $taskEmployeeMap = collect($this->jsonData['task_employee'] ?? [])->groupBy('task_id');
+
+        $newlyCreatedTasks = collect($this->jsonData['tasks'] ?? [])->where('event_id', $eventId)->map(function ($task) use ($allEmployees, $allCommittees, $taskEmployeeMap) {
+            $committee = $allCommittees->firstWhere('id', $task['committee_id']);
+            $employeeIds = $taskEmployeeMap->get($task['id'], collect())->pluck('employee_id');
+            $employees = $allEmployees->whereIn('id', $employeeIds)->values()->toArray();
+            return [
+                'id' => $task['id'],
+                'task' => $task['description'],
+                'committee' => $committee,
+                'employees' => $employees,
+            ];
+        });
+
         $this->writeJson($this->jsonData);
 
-        return redirect()->back()->with('success', 'Tasks updated successfully.');
+        return redirect()->back()->with(['success' => 'Tasks updated successfully.', 'tasks' => $newlyCreatedTasks]);
     }
 
     /**
