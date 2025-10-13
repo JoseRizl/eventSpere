@@ -51,20 +51,21 @@ class TaskController extends JsonController
             'tasks.*.description' => 'nullable|string|max:255',
         ]);
 
+        $taskIdsForEvent = collect($this->jsonData['tasks'] ?? [])->where('event_id', $eventId)->pluck('id')->all();
+
         // Remove existing tasks and employee assignments for this event
         $this->jsonData['tasks'] = collect($this->jsonData['tasks'] ?? [])
-            ->filter(fn($task) => $task['event_id'] !== $eventId)
+            ->filter(fn($task) => $task['event_id'] != $eventId)
             ->values()
             ->toArray();
 
-        $taskIdsForEvent = collect($this->jsonData['tasks'])->where('event_id', $eventId)->pluck('id')->all();
         $this->jsonData['task_employee'] = collect($this->jsonData['task_employee'] ?? [])
             ->filter(fn($assignment) => !in_array($assignment['task_id'], $taskIdsForEvent))
             ->values()
             ->toArray();
 
         // Add the new\/updated tasks
-        collect($validated['tasks'])->each(function ($taskData) use ($eventId) {
+        collect($validated['tasks'] ?? [])->each(function ($taskData) use ($eventId) {
             $newTaskId = $eventId . '-' . substr(md5(uniqid(rand(), true)), 0, 4);
             $this->jsonData['tasks'][] = [
                 'id' => $newTaskId,
@@ -80,11 +81,7 @@ class TaskController extends JsonController
 
         $this->writeJson($this->jsonData);
 
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true, 'message' => 'Tasks updated successfully.']);
-        }
-
-        return back()->with('success', 'Tasks updated successfully.');
+        return redirect()->back()->with('success', 'Tasks updated successfully.');
     }
 
     /**

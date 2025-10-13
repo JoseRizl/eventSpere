@@ -58,48 +58,32 @@ export function useTasks() {
   };
 
   // Save logic
-  // in useTasks.js
-const saveTaskAssignments = async () => {
-  if (!selectedEventForTasks.value) {
-    return Promise.reject({ message: 'No event selected', errors: { general: ['No event selected'] }});
-  }
+  const saveTaskAssignments = (onSuccessCallback) => {
+    if (!selectedEventForTasks.value) return Promise.reject('No event selected');
 
-  const payload = {
-    tasks: taskAssignments.value.map(task => ({
-      committee_id: task.committee ? task.committee.id : null,
-      employees: (task.employees || []).map(emp => (emp && emp.id) ? emp.id : emp),
-      description: task.task || ''
-    })),
-  };
+    const payload = {
+      tasks: taskAssignments.value.map(task => ({
+        committee_id: task.committee ? task.committee.id : null,
+        employees: (task.employees || []).map(emp => emp.id),
+        description: task.task || ''
+      })),
+    };
 
-  console.debug('[saveTaskAssignments] payload', payload);
-
-  try {
-    const res = await router.put(route('tasks.updateForEvent', { id: selectedEventForTasks.value.id }), payload, {
-      preserveScroll: true,
+    return new Promise((resolve, reject) => {
+      router.put(route('tasks.updateForEvent', { id: selectedEventForTasks.value.id }), payload, {
+        preserveScroll: true,
+        only: ['event', 'errors', 'flash'], // Explicitly request the updated event object
+        onSuccess: (page) => {
+          isTaskModalVisible.value = false;
+          if (typeof onSuccessCallback === 'function') {
+            onSuccessCallback(page);
+          }
+          resolve(page);
+        },
+        onError: (errors) => reject(errors)
+      });
     });
-    return res;
-  } catch (err) {
-    // normalize error shape
-    let normalized = { message: 'Save failed', errors: {} };
-    if (err && err.response && err.response.data) {
-      const data = err.response.data;
-      normalized.message = data.message || normalized.message;
-      normalized.errors = data.errors || {};
-    } else if (err && err.errors) {
-      normalized = { message: err.message || normalized.message, errors: err.errors };
-    } else if (err instanceof Error) {
-      normalized.message = err.message;
-      normalized.errors = { general: [err.message] };
-    } else {
-      normalized.message = String(err);
-      normalized.errors = { general: [String(err)] };
-    }
-    console.error('[saveTaskAssignments] normalized error', normalized, err);
-    return Promise.reject(normalized);
-  }
-};
-
+  };
 
   return { isTaskModalVisible, selectedEventForTasks, taskAssignments, filteredEmployees, openTaskModal, addTask, deleteTask, updateEmployeesForTask, saveTaskAssignments };
 }

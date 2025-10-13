@@ -53,7 +53,7 @@
         {
             "id": "313c",
             "title": "Graduation",
-            "description": "\ud83e\udd23s",
+            "description": "\ud83e\udd23",
             "venue": "bukid 1",
             "category_id": "1",
             "startDate": "May-08-2026",
@@ -349,336 +349,20 @@
     ],
     "tasks": [
         {
-            "id": "6174-abcd",
-            "description": "Tig sukli",
-            "event_id": "6174",
-            "committee_id": "1"
-        },
-        {
-            "id": "74cc-a342",
-            "description": "Gana pls hapit nako mo expire",
-            "event_id": "74cc",
-            "committee_id": "4"
-        },
-        {
-            "id": "313c-3f48",
-            "description": "Tig kaon",
+            "id": "313c-6f95",
+            "description": "gren1",
             "event_id": "313c",
-            "committee_id": "1"
+            "committee_id": "2"
         }
     ],
     "task_employee": [
         {
-            "task_id": "f423-jqij",
+            "task_id": "313c-e41e",
+            "employee_id": "13"
+        },
+        {
+            "task_id": "313c-6f95",
             "employee_id": "10"
-        },
-        {
-            "task_id": "24f0-IQBT",
-            "employee_id": "7"
-        },
-        {
-            "task_id": "6174-abcd",
-            "employee_id": "9"
-        },
-        {
-            "task_id": "6174-abcd",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "24f0-d9c4",
-            "employee_id": "3"
-        },
-        {
-            "task_id": "24f0-1b22",
-            "employee_id": "3"
-        },
-        {
-            "task_id": "24f0-ceca",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "74cc-a342",
-            "employee_id": "14"
-        },
-        {
-            "task_id": "f423-be1b",
-            "employee_id": "10"
-        },
-        {
-            "task_id": "f423-13bc",
-            "employee_id": "10"
-        },
-        {
-            "task_id": "313c-2686",
-            "employee_id": "1"
-        },
-        {
-            "task_id": "313c-2686",
-            "employee_id": "5"
-        },
-        {
-            "task_id": "24f0-83f0",
-            "employee_id": "3"
-        },
-        {
-            "task_id": "24f0-211c",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "24f0-4e45",
-            "employee_id": "3"
-        },
-        {
-            "task_id": "24f0-f1a5",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "24f0-0144",
-            "employee_id": "3"
-        },
-        {
-            "task_id": "24f0-118d",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "24f0-7a7f",
-            "employee_id": "3"
-        },
-        {
-            "task_id": "24f0-77bd",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "24f0-7470",
-            "employee_id": "3"
-        },
-        {
-            "task_id": "24f0-2352",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "24f0-e1e6",
-            "employee_id": "3"
-        },
-        {
-            "task_id": "24f0-7df3",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "24f0-bb8b",
-            "employee_id": "3"
-        },
-        {
-            "task_id": "24f0-bbc9",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "24f0-5f74",
-            "employee_id": "3"
-        },
-        {
-            "task_id": "24f0-93d8",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "24f0-31e6",
-            "employee_id": "3"
-        },
-        {
-            "task_id": "24f0-17b4",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "24f0-1908",
-            "employee_id": "3"
-        },
-        {
-            "task_id": "24f0-8002",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "24f0-6601",
-            "employee_id": "3"
-        },
-        {
-            "task_id": "24f0-e701",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "24f0-23a9",
-            "employee_id": "3"
-        },
-        {
-            "task_id": "24f0-a743",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "24f0-111c",
-            "employee_id": "3"
-        },
-        {
-            "task_id": "24f0-1fd3",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "24f0-97cb",
-            "employee_id": "3"
-        },
-        {
-            "task_id": "24f0-7307",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "24f0-4f5c",
-            "employee_id": "3"
-        },
-        {
-            "task_id": "24f0-b8d3",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "24f0-66ad",
-            "employee_id": "3"
-        },
-        {
-            "task_id": "24f0-064e",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "24f0-d77b",
-            "employee_id": "3"
-        },
-        {
-            "task_id": "24f0-139a",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "24f0-32d5",
-            "employee_id": "3"
-        },
-        {
-            "task_id": "24f0-9145",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "24f0-9514",
-            "employee_id": "11"
-        },
-        {
-            "task_id": "24f0-a28d",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "24f0-3f28",
-            "employee_id": "11"
-        },
-        {
-            "task_id": "24f0-b543",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "313c-85ec",
-            "employee_id": "5"
-        },
-        {
-            "task_id": "313c-6fee",
-            "employee_id": "5"
-        },
-        {
-            "task_id": "313c-8b3e",
-            "employee_id": "5"
-        },
-        {
-            "task_id": "313c-c29f",
-            "employee_id": "5"
-        },
-        {
-            "task_id": "313c-0d6e",
-            "employee_id": "5"
-        },
-        {
-            "task_id": "313c-6cf9",
-            "employee_id": "5"
-        },
-        {
-            "task_id": "24f0-c461",
-            "employee_id": "11"
-        },
-        {
-            "task_id": "24f0-700f",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "24f0-25af",
-            "employee_id": "11"
-        },
-        {
-            "task_id": "24f0-fb9b",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "24f0-fe0f",
-            "employee_id": "11"
-        },
-        {
-            "task_id": "24f0-1214",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "f423-fd97",
-            "employee_id": "10"
-        },
-        {
-            "task_id": "313c-ef23",
-            "employee_id": "5"
-        },
-        {
-            "task_id": "313c-71ae",
-            "employee_id": "5"
-        },
-        {
-            "task_id": "313c-1d1d",
-            "employee_id": "5"
-        },
-        {
-            "task_id": "313c-ed69",
-            "employee_id": "5"
-        },
-        {
-            "task_id": "24f0-f598",
-            "employee_id": "11"
-        },
-        {
-            "task_id": "24f0-b0b4",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "313c-8b55",
-            "employee_id": "5"
-        },
-        {
-            "task_id": "313c-6af6",
-            "employee_id": "5"
-        },
-        {
-            "task_id": "313c-6af6",
-            "employee_id": "1"
-        },
-        {
-            "task_id": "313c-6af6",
-            "employee_id": "13"
-        },
-        {
-            "task_id": "313c-3f48",
-            "employee_id": "1"
-        },
-        {
-            "task_id": "313c-3f48",
-            "employee_id": "5"
-        },
-        {
-            "task_id": "313c-3f48",
-            "employee_id": "13"
         }
     ],
     "event_announcements": [
@@ -892,17 +576,16 @@
             "location": "bh"
         },
         {
-            "id": "313c-762e",
+            "id": "313c-1fe7",
             "event_id": "313c",
-            "title": "Socials",
+            "title": "mangahoy",
             "date": "May-08-2026",
-            "startTime": "18:00",
-            "endTime": "22:50",
-            "location": "avr"
+            "startTime": "08:00",
+            "endTime": "08:30",
+            "location": "lasang 2"
         }
     ],
-    "settings": {
-    },
+    "settings": [],
     "brackets": [
         {
             "id": "29328093",
@@ -910,7 +593,7 @@
             "type": "Double Elimination",
             "event_id": "6ee4",
             "created_at": "2025-10-11T08:41:48.652498Z",
-            "updated_at": "2025-10-11T08:42:03.917406Z"
+            "updated_at": "2025-10-12T11:03:12.684712Z"
         },
         {
             "id": "186b9017",
@@ -1132,15 +815,16 @@
             "round": 1,
             "match_number": 2,
             "bracket_type": "winners",
-            "winner_id": null,
-            "loser_id": null,
-            "status": "pending",
+            "winner_id": "6l36bwbp2",
+            "loser_id": "eulrpcpm8",
+            "status": "completed",
             "created_at": "2025-10-11T08:41:48.375Z",
-            "updated_at": "2025-10-11T08:41:48.375Z",
+            "updated_at": "2025-10-12T11:03:12.113Z",
             "date": "2025-10-22",
             "time": "00:00",
             "venue": null,
-            "bracket_id": "29328093"
+            "bracket_id": "29328093",
+            "is_tie": false
         },
         {
             "id": "xd0oxy934",
@@ -1433,8 +1117,8 @@
             "player_id": "6l36bwbp2",
             "name": "Player 2",
             "slot": 1,
-            "score": 0,
-            "completed": false
+            "score": 1,
+            "completed": true
         },
         {
             "match_id": "x3znyg9zx",
@@ -1442,7 +1126,7 @@
             "name": "Player 3",
             "slot": 2,
             "score": 0,
-            "completed": false
+            "completed": true
         },
         {
             "match_id": "xd0oxy934",
@@ -1454,8 +1138,8 @@
         },
         {
             "match_id": "xd0oxy934",
-            "player_id": null,
-            "name": "TBD",
+            "player_id": "6l36bwbp2",
+            "name": "Player 2",
             "slot": 2,
             "score": 0,
             "completed": false
@@ -1470,8 +1154,8 @@
         },
         {
             "match_id": "ytafraxfl",
-            "player_id": null,
-            "name": "Loser of R1 M2",
+            "player_id": "eulrpcpm8",
+            "name": "Player 3",
             "slot": 2,
             "score": 0,
             "completed": false

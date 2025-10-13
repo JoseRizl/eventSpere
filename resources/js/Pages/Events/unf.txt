@@ -1,0 +1,1608 @@
+<script setup>
+import { ref, computed, onMounted, nextTick, watch } from 'vue';
+import { parse, format, parseISO, isValid, addDays, endOfDay, isWithinInterval } from 'date-fns';
+import { usePage, router, Link } from '@inertiajs/vue3';
+import axios from 'axios';
+import LoadingSpinner from '@/Components/LoadingSpinner.vue';
+import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
+import SuccessDialog from '@/Components/SuccessDialog.vue';
+import { useBracketState } from '@/composables/useBracketState.js';
+import { useBracketActions } from '@/composables/useBracketActions.js';
+import SearchFilterBar from '@/Components/SearchFilterBar.vue';
+import BracketCard from '@/Components/BracketCard.vue';
+import BracketView from '@/Components/BracketView.vue';
+import MatchEditorDialog from '@/Components/MatchEditorDialog.vue';
+import MatchesView from '@/Components/MatchesView.vue';
+import { getFullDateTime } from '@/utils/dateUtils.js';
+import { useActivities } from '@/composables/useActivities.js';
+import { useTasks } from '@/composables/useTasks.js';
+import { useAnnouncements } from '@/composables/useAnnouncements.js';
+import { useMemorandum } from '@/composables/useMemorandum.js';
+
+const props = defineProps({
+  event: Object,
+  tags: Array,
+  tasks_prop: Array,
+  committees: Array,
+  employees: Array,
+  categories: Array,
+  relatedEvents: Array,
+  errors: Object,
+  all_users: Array, // Assuming this comes from shared props
+  auth: Object, // Assuming this comes from shared props
+  preloadedActivities: Array,
+  preloadedMemorandum: Object,
+  preloadedTasks: Array,
+  preloadedAnnouncements: Array,
+});
+
+// Inertia props (now using defineProps)
+const user = computed(() => props.auth.user);
+const currentView = ref('details'); // 'details' or 'announcements'
+const bannerImageInput = ref(null);
+const tags = ref(props.tags || []);
+const saving = ref(false);
+const showSaveConfirmDialog = ref(false);
+const successMessage = ref('');
+const showSuccessDialog = ref(false);
+const errorMessage = ref(null);
+const showErrorDialog = ref(false);
+const errorDialogMessage = ref('');
+const categories = ref(props.categories || []);
+const committees = ref(props.committees || []);
+
+const showMemoImageDialog = ref(false);
+const memoImageUrl = ref('');
+
+const employees = ref(props.employees || []);
+const relatedEvents = ref(props.relatedEvents || []);
+const showDeleteTaskConfirm = ref(false);
+const taskToDelete = ref(null);
+const showDeleteScheduleConfirm = ref(false);
+const originalEventDetails = ref(null);
+const isTaskModalVisible = ref(false);
+const taskAssignments = ref([]);
+const searchQuery = ref('');
+const scheduleToDelete = ref(null);
+
+// Announcement search
+const announcementSearchQuery = ref('');
+const announcementStartDateFilter = ref(null);
+const announcementEndDateFilter = ref(null);
+const showAnnouncementDateFilter = ref(false);
+
+const filteredEventAnnouncements = computed(() => {
+  let announcements = eventAnnouncements.value;
+
+  // Filter by search query
+  const query = announcementSearchQuery.value.toLowerCase().trim();
+  if (query) {
+    announcements = announcements.filter(announcement => {
+      const messageMatch = announcement.message?.toLowerCase().includes(query);
+      return messageMatch;
+    });
+  }
+
+  // Filter by date range
+  if (announcementStartDateFilter.value || announcementEndDateFilter.value) {
+    announcements = announcements.filter(ann => {
+      const annDate = new Date(ann.timestamp);
+      if (isNaN(annDate.getTime())) return false;
+
+      const filterStart = announcementStartDateFilter.value ? new Date(announcementStartDateFilter.value) : null;
+      const filterEnd = announcementEndDateFilter.value ? endOfDay(new Date(announcementEndDateFilter.value)) : null;
+
+      if (filterStart && !filterEnd) return annDate >= filterStart;
+      if (!filterStart && filterEnd) return annDate <= filterEnd;
+      if (filterStart && filterEnd) return isWithinInterval(annDate, { start: filterStart, end: filterEnd });
+      return true;
+    });
+  }
+
+  return announcements;
+});
+
+const toggleAnnouncementDateFilter = () => {
+  showAnnouncementDateFilter.value = !showAnnouncementDateFilter.value;
+};
+
+const clearAnnouncementDateFilter = () => {
+  announcementStartDateFilter.value = null;
+  announcementEndDateFilter.value = null;
+};
+
+const clearAnnouncementFilters = () => {
+  announcementSearchQuery.value = '';
+  announcementStartDateFilter.value = null;
+  announcementEndDateFilter.value = null;
+  showAnnouncementDateFilter.value = false;
+};
+
+// Event-specific announcements
+const eventAnnouncements = ref([]);
+const allNewsProxy = ref(props.relatedEvents || []); // placeholder for composable signature
+const { setAnnouncements } = useAnnouncements({ searchQuery: announcementSearchQuery, startDateFilter: ref(null), endDateFilter: ref(null) }, allNewsProxy);
+const showAddAnnouncementModal = ref(false);
+const newAnnouncement = ref({
+  message: '',
+  image: null,
+  imagePreview: null
+});
+const showDeleteAnnouncementConfirm = ref(false);
+const announcementToDelete = ref(null);
+
+// For viewing announcement images
+const showImageDialog = ref(false);
+const selectedImageUrl = ref('');
+
+const openImageDialog = (imageUrl) => {
+  selectedImageUrl.value = imageUrl;
+  showImageDialog.value = true;
+};
+
+// Memorandum composable
+const { saveMemorandum, clearMemorandum } = useMemorandum();
+const newMemorandumFile = ref(null);
+const newMemorandumPreview = ref(null);
+const { saveActivities } = useActivities();
+const tasksManager = useTasks();
+
+// Bracket logic
+const bracketState = useBracketState();
+const {
+  brackets,
+  expandedBrackets,
+  showWinnerDialog,
+  showMatchEditorDialog,
+  selectedMatch,
+  selectedMatchData,
+  showMatchUpdateConfirmDialog,
+  showGenericErrorDialog,
+  genericErrorMessage,
+  roundRobinScoring,
+  bracketMatchFilters,
+  showScoringConfigDialog,
+  standingsRevision,
+} = bracketState;
+const { bracketViewModes } = bracketState;
+
+const {
+  fetchBrackets,
+  handleByeRounds,
+  updateLines,
+  isFinalRound,
+  getRoundRobinStandings,
+  isRoundRobinConcluded,
+  openMatchDialog,
+  closeMatchEditorDialog,
+  proceedWithMatchUpdate,
+  openScoringConfigDialog,
+  closeScoringConfigDialog,
+  saveScoringConfig,
+  toggleBracket,
+  setBracketViewMode,
+  getAllMatches,
+  setBracketMatchFilter,
+  openMatchEditorFromCard,
+  getBracketTypeClass,
+  getBracketStats,
+
+} = useBracketActions(bracketState);
+
+const relatedBrackets = computed(() => {
+  if (!brackets.value || !props.event) {
+    return [];
+  }
+  return brackets.value.filter(bracket => bracket.event_id === props.event.id);
+});
+
+const matchStatusFilterOptions = ref([
+    { label: 'All', value: 'all' },
+    { label: 'Pending', value: 'pending' },
+    { label: 'Completed', value: 'completed' }
+]);
+
+const selectedBracketForDialog = computed(() => {
+  if (selectedMatch.value) {
+    const bracket = brackets.value[selectedMatch.value.bracketIdx];
+    if (bracket) {
+        return bracket;
+    }
+  }
+});
+
+
+const isMatchDataInvalid = computed(() => {
+    if (!selectedMatchData.value || !selectedBracketForDialog.value) return true;
+
+    const { status, player1Score, player2Score, player1Name, player2Name } = selectedMatchData.value;
+    const bracketType = selectedBracketForDialog.value.type;
+
+    // Check for ties in elimination brackets
+    if (status === 'completed' && player1Score === player2Score && (bracketType === 'Single Elimination' || bracketType === 'Double Elimination')) {
+        return true;
+    }
+
+    // Check for empty player names
+    if (player1Name.trim() === '' || player2Name.trim() === '') {
+        return true;
+    }
+
+    return false;
+});
+
+const isMultiDayEvent = computed(() => {
+  if (selectedBracketForDialog.value?.event) {
+      return selectedBracketForDialog.value.event.startDate !== selectedBracketForDialog.value.event.endDate;
+  }
+  return false;
+});
+
+const eventMinDate = computed(() => {
+    if (selectedBracketForDialog.value?.event?.startDate) {
+        return parseISO(selectedBracketForDialog.value.event.startDate);
+    }
+    return null;
+});
+
+const eventMaxDate = computed(() => {
+    if (selectedBracketForDialog.value?.event?.endDate) {
+        return parseISO(selectedBracketForDialog.value.event.endDate);
+    }
+    return null;
+});
+
+const filteredRelatedBrackets = computed(() => {
+  if (!searchQuery.value) {
+    return relatedBrackets.value;
+  }
+  const query = searchQuery.value.toLowerCase().trim();
+  return relatedBrackets.value.filter(bracket => {
+    const bracketNameMatch = bracket.name?.toLowerCase().includes(query);
+    const bracketTypeMatch = bracket.type?.toLowerCase().includes(query);
+    return bracketNameMatch || bracketTypeMatch;
+  });
+});
+
+const getTagColor = (tag) => {
+    if (!tag || !tag.category_id) return '#808080'; // Default gray
+    const category = categories.value.find(c => c.id == tag.category_id);
+    return category?.color || '#808080';
+};
+
+// Create a map of tags for quick lookup
+const tagsMap = computed(() =>
+{
+  return tags.value.reduce((map, tag) => {
+    map[tag.id] = tag;
+    return map;
+  }, {});
+});
+
+const eventDetails = ref({
+    ...props.event,
+    venue: props.event.venue || '',
+    memorandum: props.preloadedMemorandum || props.event.memorandum || null,
+    category_id: props.event.category?.id || props.event.category_id,
+    activities: (props.event.activities || []).map((a, idx) => ({
+      ...a,
+      __uid: a.__uid || `${Date.now()}-${idx}`
+    })),
+    tags: (props.event.tags || []).map(tag => tag.id),
+    tasks: props.preloadedTasks || props.event.tasks || [],
+});
+
+const filteredTags = computed(() => {
+  if (!eventDetails.value.category_id) {
+    return [];
+  }
+  // Initialize memorandum if it's null
+  if (editMode.value && !eventDetails.value.memorandum) {
+      eventDetails.value.memorandum = null;
+  }
+  return tags.value.filter(tag => tag.category_id == eventDetails.value.category_id);
+});
+
+watch(() => eventDetails.value.category_id, (newCategoryId, oldCategoryId) => {
+    if (newCategoryId !== oldCategoryId && editMode.value) {
+        // When category changes, clear selected tags as they might not be valid for the new category.
+        eventDetails.value.tags = [];
+    }
+});
+
+const categoryMap = computed(() => {
+  return categories.value.reduce((map, category) => {
+    map[category.id] = category.title;
+    return map;
+  }, {});
+});
+
+const removeTag = (tagToRemove) => {
+  eventDetails.value.tags = eventDetails.value.tags.filter(tagId => tagId !== tagToRemove.id);
+};
+
+const formattedDescription = computed(() => {
+  const text = eventDetails.value.description;
+  if (!text) return '';
+
+  // 1. Escape the entire string to prevent XSS from user-inputted HTML.
+  const escapeHtml = (unsafe) => {
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  };
+  const escapedText = escapeHtml(text);
+
+  // 2. Find URLs in the escaped text and wrap them in <a> tags.
+  const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])|(\bwww\.[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])|(\b[A-Z0-9.-]+\.(com|org|net|gov|edu|io|co|us|ca|uk|de|fr|au|info|biz|me|tv|app|dev)\b([-A-Z0-9+&@#\/%?=~_|!:,.;]*))/gi;
+
+  return escapedText.replace(urlRegex, (url) => {
+    const unescapedUrlForHref = url.replace(/&amp;/g, '&');
+    let href = unescapedUrlForHref;
+    if (!href.match(/^(https?|ftp|file):\/\//i)) {
+      href = 'http://' + href;
+    }
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">${url}</a>`;
+  });
+});
+
+// Edit mode toggle
+const editMode = ref(false);
+const toggleEdit = () => {
+  if (editMode.value) {
+    // Cancelling edit mode: restore original data
+    if (originalEventDetails.value) {
+      eventDetails.value = JSON.parse(JSON.stringify(originalEventDetails.value));
+    }
+    errorMessage.value = null; // Clear any validation errors
+  } else {
+    // Entering edit mode: store a copy of the current data
+    originalEventDetails.value = JSON.parse(JSON.stringify(eventDetails.value));
+  }
+  editMode.value = !editMode.value;
+};
+
+const handleMemoUpload = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    eventDetails.value.memorandum = {
+      type: file.type.startsWith('image/') ? 'image' : 'file',
+      content: e.target.result,
+      filename: file.name,
+      isNew: true, // Flag to indicate it's a new upload
+    };
+  };
+  reader.readAsDataURL(file);
+};
+
+// Add this near your other initialization code
+onMounted(() => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const viewParam = urlParams.get('view');
+  if (viewParam === 'announcements') {
+    currentView.value = 'announcements';
+  }
+
+  // Preload tasks/activities/announcements from props to avoid initial GETs
+  if (Array.isArray(props.preloadedTasks)) {
+    eventDetails.value.tasks = props.preloadedTasks;
+  }
+  if (Array.isArray(props.preloadedActivities)) {
+    eventDetails.value.activities = props.preloadedActivities.map((a, idx) => ({ ...a, __uid: `${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 8)}` }));
+  }
+  if (Array.isArray(props.preloadedAnnouncements)) {
+    // Augment with employee names
+    eventAnnouncements.value = props.preloadedAnnouncements;
+  }
+});
+
+watch(relatedBrackets, (newBrackets) => {
+  newBrackets.forEach(bracket => {
+    const originalIndex = brackets.value.findIndex(b => b.id === bracket.id);
+    if (originalIndex !== -1) {
+      if (expandedBrackets.value[originalIndex] === undefined) {
+        expandedBrackets.value[originalIndex] = true; // Expand by default
+      }
+      handleByeRounds(originalIndex);
+      nextTick(() => {
+        updateLines(originalIndex);
+      });
+    }
+  });
+});
+
+const goBack = () => {
+    // A more robust way to go back.
+    // It checks if there's a previous page in the session history.
+    // If the user landed here directly, it provides a sensible fallback.
+    if (window.history.length > 2) {
+        window.history.back();
+    } else {
+        router.visit(route('home'));
+    }
+};
+
+// Initial announcements are preloaded via props; no GET here to achieve zero client GETs.
+
+const openAddAnnouncementModal = () => {
+  newAnnouncement.value = { message: '', image: null, imagePreview: null };
+  showAddAnnouncementModal.value = true;
+};
+
+const viewMemorandum = () => {
+    if (eventDetails.value.memorandum && eventDetails.value.memorandum.content) {
+    if (eventDetails.value.memorandum.type === 'image') {
+        memoImageUrl.value = eventDetails.value.memorandum.content;
+        showMemoImageDialog.value = true;
+    } else {
+        const link = document.createElement('a');
+        link.href = eventDetails.value.memorandum.content;
+        link.download = eventDetails.value.memorandum.filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+    }
+};
+
+const handleAnnouncementImageUpload = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    newAnnouncement.value.image = file;
+    newAnnouncement.value.imagePreview = URL.createObjectURL(file);
+  }
+};
+
+const toBase64 = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+});
+
+const handleBannerImageUpload = async (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    eventDetails.value.image = await toBase64(file);
+  }
+};
+
+const addAnnouncement = async () => {
+  if (!newAnnouncement.value.message.trim()) {
+    return;
+  }
+
+  saving.value = true;
+
+  let imageUrl = null;
+  if (newAnnouncement.value.image) {
+    imageUrl = await toBase64(newAnnouncement.value.image);
+  }
+
+  const payload = {
+    message: newAnnouncement.value.message,
+    timestamp: new Date().toISOString(),
+    image: imageUrl,
+    userId: user.value.id,
+  };
+
+  try {
+    const response = await axios.post(route('events.announcements.storeForEvent', { id: props.event.id }), payload);
+    const newAnn = response.data; // Backend now returns announcement with employee info
+    eventAnnouncements.value.unshift(newAnn);
+    showAddAnnouncementModal.value = false;
+    successMessage.value = 'Announcement posted successfully!';
+    showSuccessDialog.value = true;
+  } catch (error) {
+    console.error('Error posting announcement:', error);
+    errorMessage.value = 'Failed to post announcement.';
+    showErrorDialog.value = true;
+  } finally {
+    saving.value = false;
+  }
+};
+
+const promptDeleteAnnouncement = (announcement) => {
+  announcementToDelete.value = announcement;
+  showDeleteAnnouncementConfirm.value = true;
+};
+
+const confirmDeleteAnnouncement = async () => {
+  if (!announcementToDelete.value) return;
+  saving.value = true;
+  try {
+    await axios.delete(route('events.announcements.destroyForEvent', { id: props.event.id, announcementId: announcementToDelete.value.id }));
+    setAnnouncements(eventAnnouncements.value.filter(a => a.id !== announcementToDelete.value.id));
+    eventAnnouncements.value = eventAnnouncements.value.filter(a => a.id !== announcementToDelete.value.id);
+    successMessage.value = 'Announcement deleted.';
+    showSuccessDialog.value = true;
+  } catch (error) {
+    console.error('Error deleting announcement:', error);
+    errorMessage.value = 'Failed to delete announcement.';
+    showErrorDialog.value = true;
+  } finally {
+    saving.value = false;
+    showDeleteAnnouncementConfirm.value = false;
+    announcementToDelete.value = null;
+  }
+};
+
+const formatAnnouncementTimestamp = (timestamp) => {
+  if (!timestamp) return '';
+  return format(parseISO(timestamp), 'MMMM dd, yyyy HH:mm');
+};
+
+if (!eventDetails.value.tasks) {
+  eventDetails.value.tasks = [];
+}
+
+const addActivity = () => {
+  if (!Array.isArray(eventDetails.value.activities)) {
+    eventDetails.value.activities = [];
+  }
+  eventDetails.value.activities.push({
+    __uid: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    title: '',
+    date: eventDetails.value.startDate || '',
+    startTime: '',
+    endTime: '',
+    location: ''
+  });
+};
+
+const promptDeleteSchedule = (activity) => {
+  scheduleToDelete.value = activity;
+  showDeleteScheduleConfirm.value = true;
+};
+
+const confirmDeleteSchedule = () => {
+  if (Array.isArray(eventDetails.value.activities) && scheduleToDelete.value) {
+    const idx = eventDetails.value.activities.findIndex(a => (a.__uid && scheduleToDelete.value.__uid) ? a.__uid === scheduleToDelete.value.__uid : a === scheduleToDelete.value);
+    if (idx !== -1) {
+      eventDetails.value.activities.splice(idx, 1);
+    }
+  }
+  showDeleteScheduleConfirm.value = false;
+  scheduleToDelete.value = null;
+};
+
+const sortedActivities = computed(() => {
+  const activities = Array.isArray(eventDetails.value.activities) ? [...eventDetails.value.activities] : [];
+  return activities.sort((a, b) => {
+    const ad = formatDateForPicker(a.date) || new Date(0);
+    const bd = formatDateForPicker(b.date) || new Date(0);
+    if (ad.getTime() !== bd.getTime()) return ad - bd;
+    return (a.startTime || '').localeCompare(b.startTime || '');
+  });
+});
+
+const updateLocalEventDetails = (newEventData) => {
+    eventDetails.value = {
+        ...newEventData,
+        venue: newEventData.venue || '',
+        memorandum: newEventData.memorandum || null,
+        category_id: newEventData.category?.id || newEventData.category_id,
+        activities: (newEventData.activities || []).map((a, idx) => ({ ...a, __uid: `${Date.now()}-${idx}` })),
+        tags: (newEventData.tags || []).map(tag => (typeof tag === 'object' && tag !== null ? tag.id : tag)),
+        tasks: newEventData.tasks || [],
+    };
+};
+
+const saveChanges = () => {
+  saving.value = true;
+  errorMessage.value = null;
+  showErrorDialog.value = false;
+
+  const validationError = validateDatesAndTimes();
+  if (validationError) {
+    saving.value = false;
+    errorMessage.value = validationError;
+    showErrorDialog.value = true;
+    errorDialogMessage.value = errorMessage.value;
+    return;
+  }
+
+  const eventPayload = {
+      ...eventDetails.value,
+      startDate: eventDetails.value.startDate ? format(formatDateForPicker(eventDetails.value.startDate), 'MMM-dd-yyyy') : null,
+      endDate: eventDetails.value.endDate ? format(formatDateForPicker(eventDetails.value.endDate), 'MMM-dd-yyyy') : null,
+      tags: eventDetails.value.tags || [],
+      image: eventDetails.value.image,
+      memorandum: eventDetails.value.memorandum,
+      activities: (eventDetails.value.activities || []).map(({ __uid, ...activity }) => activity),
+      tasks: eventDetails.value.tasks || [],
+  };
+
+  // First, save the main event details
+  router.put(route('event.update', { id: eventDetails.value.id }), eventPayload, {
+    preserveScroll: true,
+    onError: (errors) => {
+      saving.value = false;
+      const firstErrorKey = Object.keys(errors)[0];
+      let message = 'Failed to save event details. Please check the form for errors.';
+      if (firstErrorKey) {
+          const errorValue = errors[firstErrorKey];
+          message = Array.isArray(errorValue) ? errorValue[0] : errorValue;
+      }
+      errorMessage.value = message;
+      errorDialogMessage.value = message;
+      showErrorDialog.value = true;
+    },
+    onSuccess: async (page) => {
+      try {
+        // Update local state with the new props from the server
+        updateLocalEventDetails(page.props.event);
+        // Save activities via composable
+        const originalMemo = originalEventDetails.value.memorandum;
+        const currentMemo = eventDetails.value.memorandum;
+
+        if (currentMemo && currentMemo.isNew) {
+            // New memorandum uploaded
+            await saveMemorandum(eventDetails.value.id, currentMemo);
+        } else if (!currentMemo && originalMemo) {
+            // Memorandum was removed
+            await clearMemorandum(eventDetails.value.id);
+        }
+        const activitiesPayload = (eventDetails.value.activities || []).map(({ __uid, title, date, startTime, endTime, location }) => ({ title, date, startTime, endTime, location }));
+        await saveActivities(eventDetails.value.id, activitiesPayload);
+
+        showSuccessDialog.value = true;
+        successMessage.value = 'The event was updated successfully.';
+        editMode.value = false;
+      } catch (err) {
+        const msg = err?.response?.data?.message || err?.message || 'Failed to save related data.';
+        errorMessage.value = `Event details saved, but failed to save activities/tasks: ${msg}`;
+        errorDialogMessage.value = errorMessage.value;
+        showErrorDialog.value = true;
+      } finally {
+        saving.value = false;
+      }
+    }
+  });
+};
+
+const formatDisplayTime = (timeString) => {
+  if (!timeString) return '';
+  const parsed = parse(timeString, 'HH:mm', new Date());
+  return format(parsed, 'hh:mm a'); // 04:00 PM
+};
+
+
+// Date-related functions
+
+const validateDatesAndTimes = () => {
+  try {
+    const startDate = formatDateForPicker(eventDetails.value.startDate);
+    const endDate = formatDateForPicker(eventDetails.value.endDate);
+
+    if (!startDate || !endDate || !isValid(startDate) || !isValid(endDate)) {
+      return "Invalid start or end date.";
+    }
+
+    if (endDate < startDate) {
+      return "End date cannot be earlier than start date.";
+    }
+
+    if (eventDetails.value.startTime && eventDetails.value.endTime) {
+      const startDateTime = getFullDateTime(startDate, eventDetails.value.startTime);
+      const endDateTime = getFullDateTime(endDate, eventDetails.value.endTime);
+      if (endDateTime <= startDateTime) {
+        return "End time must be after start time on the same day, or on a later day.";
+      }
+    }
+
+    // Validate activities using date-only comparisons to avoid timezone drift
+    if (Array.isArray(eventDetails.value.activities)) {
+      const normalize = (d) => {
+        const dt = formatDateForPicker(d);
+        return dt ? format(dt, 'yyyy-MM-dd') : null;
+      };
+      const startY = normalize(eventDetails.value.startDate);
+      const endY = normalize(eventDetails.value.endDate);
+
+      for (let i = 0; i < eventDetails.value.activities.length; i++) {
+        const act = eventDetails.value.activities[i];
+        if (!act) continue;
+        const actY = normalize(act.date);
+        if (!actY || !startY || !endY || actY < startY || actY > endY) {
+          return `Activity ${i + 1}: date (${formatDisplayDate(act.date)}) must be within the event range (${formatDisplayDate(eventDetails.value.startDate)} - ${formatDisplayDate(eventDetails.value.endDate)}).`;
+        }
+        if (act.startTime && act.endTime) {
+          const sdt = getFullDateTime(act.date, act.startTime);
+          const edt = getFullDateTime(act.date, act.endTime);
+          if (!sdt || !edt || edt <= sdt) {
+            return `Activity ${i + 1}: end time must be after start time.`;
+          }
+        }
+
+        // Enforce activity times within event window if event has times
+        const eventStartDT = (eventDetails.value.startDate && eventDetails.value.startTime)
+          ? getFullDateTime(eventDetails.value.startDate, eventDetails.value.startTime)
+          : null;
+        const eventEndDT = (eventDetails.value.endDate && eventDetails.value.endTime)
+          ? getFullDateTime(eventDetails.value.endDate, eventDetails.value.endTime)
+          : null;
+
+        if (eventStartDT && act.startTime) {
+          const actStartDT = getFullDateTime(act.date, act.startTime);
+          if (actStartDT < eventStartDT) {
+            return `Activity ${i + 1}: start time must be on/after event start (${formatDisplayDate(eventDetails.value.startDate)} ${formatDisplayTime(eventDetails.value.startTime)}).`;
+          }
+        }
+        if (eventEndDT && act.startTime) {
+          const actStartDT = getFullDateTime(act.date, act.startTime);
+          if (actStartDT > eventEndDT) {
+            return `Activity ${i + 1}: start time must be on/before event end (${formatDisplayDate(eventDetails.value.endDate)} ${formatDisplayTime(eventDetails.value.endTime)}).`;
+          }
+        }
+        if (eventEndDT && act.endTime) {
+          const actEndDT = getFullDateTime(act.date, act.endTime);
+          if (actEndDT > eventEndDT) {
+            return `Activity ${i + 1}: end time must be on/before event end (${formatDisplayDate(eventDetails.value.endDate)} ${formatDisplayTime(eventDetails.value.endTime)}).`;
+          }
+        }
+        if (eventStartDT && act.endTime) {
+          const actEndDT = getFullDateTime(act.date, act.endTime);
+          if (actEndDT < eventStartDT) {
+            return `Activity ${i + 1}: end time must be on/after event start (${formatDisplayDate(eventDetails.value.startDate)} ${formatDisplayTime(eventDetails.value.startTime)}).`;
+          }
+        }
+      }
+    }
+
+    return null; // No error
+  } catch {
+    return "An error occurred during date validation. Make sure end time/date is after start time/date.";
+  }
+};
+
+const formatDisplayDate = (dateString) => {
+  if (!dateString) return '';
+  try {
+    // Try parsing as ISO format first (yyyy-MM-dd)
+    let date = parseISO(dateString);
+    if (!isValid(date)) {
+      // If that fails, try parsing as MMM-dd-yyyy format
+      date = parse(dateString, 'MMM-dd-yyyy', new Date());
+    }
+    return isValid(date) ? format(date, 'MMM-dd-yyyy') : 'Invalid Date';
+  } catch {
+    return 'Invalid Date';
+  }
+};
+
+const formatDateForPicker = (dateInput) => {
+  if (!dateInput) return null;
+  try {
+    if (dateInput instanceof Date && isValid(dateInput)) {
+      return dateInput;
+    }
+    let date;
+    if (typeof dateInput === 'string') {
+      // Try parsing as ISO format first (yyyy-MM-dd)
+      date = parseISO(dateInput);
+      if (!isValid(date)) {
+        // If that fails, try parsing as MMM-dd-yyyy format
+        date = parse(dateInput, 'MMM-dd-yyyy', new Date());
+      }
+    } else {
+      date = new Date(dateInput);
+    }
+    return isValid(date) ? date : null;
+  } catch {
+    return null;
+  }
+};
+
+const startDateModel = computed({
+  get() {
+    const date = parse(eventDetails.value.startDate, 'MMM-dd-yyyy', new Date());
+    return isValid(date) ? date : null;
+  },
+  set(value) {
+    eventDetails.value.startDate = value ? format(value, 'MMM-dd-yyyy') : '';
+  }
+});
+
+const endDateModel = computed({
+  get() {
+    const date = parse(eventDetails.value.endDate, 'MMM-dd-yyyy', new Date());
+    return isValid(date) ? date : null;
+  },
+  set(value) {
+    eventDetails.value.endDate = value ? format(value, 'MMM-dd-yyyy') : '';
+  }
+});
+
+const formattedStartDate = computed(() => {
+  return startDateModel.value ? format(startDateModel.value, 'MMM-dd-yyyy') : '';
+});
+
+const formattedEndDate = computed(() => {
+  return endDateModel.value ? format(endDateModel.value, 'MMM-dd-yyyy') : '';
+});
+
+// Helpers for activity time input bounds
+const dateOnlyStr = (d) => {
+  const dt = formatDateForPicker(d);
+  return dt ? format(dt, 'yyyy-MM-dd') : null;
+};
+
+const handleSaveTasksClick = () => {
+  const onSuccess = (page) => {
+    // Safely read incoming tasks, falling back to an empty array
+    const incomingTasks = page?.props?.event?.tasks ?? [];
+
+    // Ensure eventDetails.value exists and is an object before mutation
+    if (!eventDetails.value || typeof eventDetails.value !== 'object') {
+      // This case is a safeguard; ideally, eventDetails.value should always be an object.
+      // We create a new object to prevent the 'cannot set properties of undefined' error.
+      eventDetails.value = { tasks: Array.isArray(incomingTasks) ? incomingTasks : [] };
+    } else {
+      // Safely assign the tasks to the existing object.
+      eventDetails.value.tasks = Array.isArray(incomingTasks) ? incomingTasks : [];
+    }
+
+    successMessage.value = 'Tasks updated successfully!';
+    showSuccessDialog.value = true;
+  };
+
+  tasksManager.saveTaskAssignments(onSuccess);
+};
+
+const getActivityStartMin = (act) => {
+  if (!eventDetails.value.startTime) return null;
+  return dateOnlyStr(act.date) === dateOnlyStr(eventDetails.value.startDate) ? eventDetails.value.startTime : null;
+};
+
+const getActivityStartMax = (act) => {
+  if (!eventDetails.value.endTime) return null;
+  return dateOnlyStr(act.date) === dateOnlyStr(eventDetails.value.endDate) ? eventDetails.value.endTime : null;
+};
+
+const getActivityEndMin = (act) => {
+  if (act.startTime) return act.startTime;
+  if (!eventDetails.value.startTime) return null;
+  return dateOnlyStr(act.date) === dateOnlyStr(eventDetails.value.startDate) ? eventDetails.value.startTime : null;
+};
+
+const getActivityEndMax = (act) => {
+  if (!eventDetails.value.endTime) return null;
+  return dateOnlyStr(act.date) === dateOnlyStr(eventDetails.value.endDate) ? eventDetails.value.endTime : null;
+};
+
+// Normalize related events tags
+const normalizedRelatedEvents = computed(() => {
+  return relatedEvents.value.map(event => ({
+    ...event,
+    tags: (event.tags || []).map(tag => {
+      if (typeof tag === 'object' && tag !== null) {
+        return tag;
+      }
+      return tagsMap.value[tag] || { id: tag, name: 'Unknown Tag', color: '#cccccc' };
+    })
+  }));
+});
+
+const getBracketIndex = (bracketId) => {
+    return brackets.value.findIndex(b => b.id === bracketId);
+};
+
+</script>
+
+<template>
+<div>
+    <div class="min-h-screen py-8 px-4 mx-auto">
+        <!-- Back Button for non-management -->
+        <div v-if="!user || !['Admin', 'Principal', 'TournamentManager'].includes(user.role)" class="mb-4 -ml-2">
+            <Button
+                icon="pi pi-arrow-left"
+                @click="goBack"
+                class="p-button-secondary p-button-text p-button-rounded"
+                v-tooltip.bottom="'Back to previous page'"
+                aria-label="Back to previous page"
+            />
+        </div>
+
+        <div class="mt-4">
+            <div class="flex flex-col md:flex-row gap-6">
+                <!-- Main content (left side) - takes remaining space -->
+                <div class="flex-1">
+                    <!-- Banner Image -->
+                    <div class="w-full bg-gray-800 rounded-lg shadow-md overflow-hidden relative mb-6">
+                        <template v-if="eventDetails?.image">
+                            <!-- Blurred Background -->
+                            <img
+                                :src="eventDetails.image"
+                                :alt="`${eventDetails.title} background`"
+                                class="absolute inset-0 w-full h-64 object-cover filter blur-lg scale-110"
+                            />
+                            <!-- Foreground Image -->
+                            <img
+                                :src="eventDetails.image"
+                                :alt="eventDetails.title"
+                                class="relative w-full h-64 object-contain"
+                            />
+                        </template>
+                        <div v-else class="w-full h-64 bg-gray-300 flex items-center justify-center">
+                            <span class="text-gray-500 text-lg">No Image Available</span>
+                        </div>
+                        <div v-if="editMode" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                            <input type="file" @change="handleBannerImageUpload" accept="image/*" class="hidden" ref="bannerImageInput" />
+                            <Button label="Change Image" icon="pi pi-upload" @click="$refs.bannerImageInput.click()" />
+                        </div>
+                    </div>
+
+                    <!-- View Toggle -->
+                    <div class="w-full mb-4">
+                        <div class="flex border-b">
+                            <button @click="currentView = 'details'" :class="['px-4 py-2 font-semibold transition-colors duration-200 focus:outline-none', currentView === 'details' ? 'border-b-2 border-[#0077B3] text-[#0077B3]' : 'text-gray-500 hover:text-[#0077B3]']">
+                                Event Details
+                            </button>
+                            <button @click="currentView = 'announcements'" :class="['px-4 py-2 font-semibold transition-colors duration-200 focus:outline-none', currentView === 'announcements' ? 'border-b-2 border-[#0077B3] text-[#0077B3]' : 'text-gray-500 hover:text-[#0077B3]']">
+                                Announcements
+                            </button>
+                        </div>
+                    </div>
+
+                    <div v-if="currentView === 'details'" class="space-y-6">
+                        <!-- Event Details -->
+                        <div v-if="eventDetails" class="bg-white shadow-md rounded-lg p-6 w-full flex flex-col space-y-4">
+                    <!-- Title -->
+                    <div class="flex justify-between items-center">
+                    <input
+                        v-if="editMode"
+                        v-model="eventDetails.title"
+                        class="text-xl font-bold border-b w-full"
+                        placeholder="Event Title"
+                    />
+                    <h1 v-else class="text-xl font-bold">{{ eventDetails.title }}</h1>
+
+                        <button
+                            v-if="(user?.role === 'Admin' || user?.role === 'Principal') && !eventDetails.archived"
+                            @click="toggleEdit"
+                            :class="editMode ? 'modal-button-danger' : 'create-button'"
+                            class="ml-4"
+                        >
+                            {{ editMode ? 'Cancel' : 'Edit Event' }}
+                        </button>
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                    <textarea
+                        v-if="editMode"
+                        v-model="eventDetails.description"
+                        class="w-full border rounded p-2"
+                        placeholder="Event Description"
+                    />
+                    <p v-else class="text-gray-800 whitespace-pre-line text-sm" v-html="formattedDescription"></p>
+                    </div>
+
+                    <!-- Details Section -->
+                    <div class="border-t border-gray-200 pt-4 mt-4">
+                        <div v-if="editMode" class="space-y-4">
+                            <!-- Edit Mode: Venue and Category -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-sm font-medium mb-1">Venue</label>
+                                    <InputText v-model="eventDetails.venue" class="w-full" placeholder="Enter event venue" />
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium mb-1">Category</label>
+                                    <Select v-model="eventDetails.category_id" :options="categories" optionLabel="title" optionValue="id" placeholder="Select a category" class="w-full" />
+                                </div>
+                            </div>
+
+                            <!-- Edit Mode: Tags -->
+                            <div>
+                                <label class="text-sm font-medium mb-1">Tags</label>
+                                <MultiSelect v-model="eventDetails.tags" :options="filteredTags" optionValue="id" optionLabel="name" display="chip" placeholder="Select tags" class="w-full" :show-toggle-all="false">
+                                    <template #chip="slotProps">
+                                        <div v-if="tagsMap[slotProps.value]" class="flex items-center gap-2 px-2 py-1 rounded text-white text-xs" :style="{ backgroundColor: tagsMap[slotProps.value].color }">
+                                            {{ tagsMap[slotProps.value].name }}
+                                            <button type="button" class="text-white hover:text-gray-200" @click.stop="removeTag(tagsMap[slotProps.value])" v-tooltip.top="'Remove Tag'">✕</button>
+                                        </div>
+                                        <div v-else class="flex items-center gap-2 px-2 py-1 rounded bg-gray-500 text-white text-xs">
+                                            {{ slotProps.value }}
+                                        </div>
+                                    </template>
+                                </MultiSelect>
+                            </div>
+
+                            <!-- Edit Mode: Dates and Times -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="flex flex-col"><label class="text-sm font-medium mb-1">Start Date</label><DatePicker v-model="startDateModel" dateFormat="M-dd-yy" showIcon class="w-full" /></div>
+                                <div class="flex flex-col"><label class="text-sm font-medium mb-1">Start Time</label><input type="time" v-model="eventDetails.startTime" class="border p-2 rounded" /></div>
+                                <div class="flex flex-col"><label class="text-sm font-medium mb-1">End Date</label><DatePicker v-model="endDateModel" dateFormat="M-dd-yy" showIcon class="w-full" /></div>
+                                <div class="flex flex-col"><label class="text-sm font-medium mb-1">End Time</label><input type="time" v-model="eventDetails.endTime" class="border p-2 rounded" /></div>
+                            </div>
+                        </div>
+                        <div v-else>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-4 text-sm text-gray-700">
+                                <!-- Date & Time -->
+                                <div class="flex items-start gap-3">
+                                    <i class="pi pi-calendar mt-1 text-gray-500 text-lg"></i>
+                                    <div>
+                                        <strong class="block text-gray-800 font-semibold">Date & Time</strong>
+                                        <span v-if="eventDetails.startDate === eventDetails.endDate">
+                                            {{ formatDisplayDate(eventDetails.startDate) }} from {{ formatDisplayTime(eventDetails.startTime) }} to {{ formatDisplayTime(eventDetails.endTime) }}
+                                        </span>
+                                        <span v-else>
+                                            From {{ formatDisplayDate(eventDetails.startDate) }} at {{ formatDisplayTime(eventDetails.startTime) }}<br>
+                                            to {{ formatDisplayDate(eventDetails.endDate) }} at {{ formatDisplayTime(eventDetails.endTime) }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Venue -->
+                                <div class="flex items-start gap-3">
+                                    <i class="pi pi-map-marker mt-1 text-gray-500 text-lg"></i>
+                                    <div>
+                                        <strong class="block text-gray-800 font-semibold">Venue</strong>
+                                        <span>{{ eventDetails.venue || 'Not specified' }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Category -->
+                                <div class="flex items-start gap-3">
+                                    <i class="pi pi-bookmark mt-1 text-gray-500 text-lg"></i>
+                                    <div>
+                                        <strong class="block text-gray-800 font-semibold">Category</strong>
+                                        <span>{{ categoryMap[eventDetails.category_id] || 'Uncategorized' }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Tags -->
+                                <div v-if="eventDetails.tags && eventDetails.tags.length > 0" class="flex items-start gap-3">
+                                    <i class="pi pi-tags mt-1 text-gray-500 text-lg"></i>
+                                    <div>
+                                        <strong class="block text-gray-800 font-semibold">Tags</strong>
+                                        <div class="flex gap-2 flex-wrap mt-1">
+                                            <span v-for="tagId in eventDetails.tags" :key="tagId" :style="{ backgroundColor: getTagColor(tagsMap[tagId]) || '#cccccc', color: '#fff' }" class="text-xs font-semibold py-1 px-2 rounded">
+                                                {{ tagsMap[tagId]?.name || 'Unknown' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Memorandum -->
+                    <div class="border-t border-gray-200 pt-4 mt-4">
+                    <!-- Show title only if memorandum exists OR in edit mode -->
+                    <h2 v-if="eventDetails.memorandum || editMode" class="font-semibold mb-2">Memorandum</h2>
+
+                    <!-- Edit Mode -->
+                    <div v-if="editMode" class="space-y-2">
+                        <!-- If memorandum exists -->
+                        <div v-if="eventDetails.memorandum" class="flex items-center gap-2 p-2 border rounded-md bg-gray-100">
+                        <i class="pi pi-file"></i>
+                        <span class="flex-1 cursor-pointer text-blue-600 hover:underline" @click="viewMemorandum">
+                            {{ eventDetails.memorandum.filename }}
+                        </span>
+                        <Button
+                            icon="pi pi-times"
+                            class="p-button-rounded p-button-danger p-button-text"
+                            @click="eventDetails.memorandum = null"
+                            v-tooltip.top="'Remove Memorandum'"
+                        />
+                        </div>
+
+                        <!-- If no memorandum uploaded -->
+                        <div v-else class="flex justify-center items-center border-2 border-dashed rounded-md p-4">
+                        <input type="file" ref="memoFileInput" @change="handleMemoUpload($event)" class="hidden" />
+                        <Button
+                            label="Upload Memorandum"
+                            icon="pi pi-upload"
+                            class="p-button-sm p-button-outlined"
+                            @click="$refs.memoFileInput.click()"
+                        />
+                        </div>
+                    </div>
+
+                    <!-- View Mode -->
+                    <div v-else>
+                        <div v-if="eventDetails.memorandum">
+                        <Button
+                            :label="`View ${eventDetails.memorandum.filename}`"
+                            icon="pi pi-eye"
+                            @click="viewMemorandum"
+                            class="p-button-secondary"
+                        />
+                        </div>
+                    </div>
+                    </div>
+
+
+                    <!-- Committee -->
+                    <div v-if="(eventDetails.tasks && eventDetails.tasks.length > 0) || editMode">
+                        <div class="flex justify-between items-center mb-2">
+                            <h2 class="font-semibold">Tasks & Committees:</h2>
+                            <button
+                                v-if="(user?.role === 'Admin' || user?.role === 'Principal') && editMode"
+                                @click="tasksManager.openTaskModal(eventDetails, committees, employees)"
+                                :class="[editMode ? 'create-button-sm' : '']"
+                            >
+                                {{ eventDetails.tasks && eventDetails.tasks.length > 0 ? 'Edit Tasks' : 'Add Tasks' }}
+                            </button>
+                        </div>
+                        <div v-if="eventDetails.tasks && eventDetails.tasks.length > 0" class="space-y-3">
+                            <div v-for="(taskItem, index) in eventDetails.tasks" :key="index" class="p-3 border rounded-lg bg-gray-50/50">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="font-semibold text-gray-800">{{ taskItem.task || 'No task specified' }}</p>
+                                        <p class="text-xs text-gray-500">{{ taskItem.committee?.name || 'No committee' }}</p>
+                                    </div>
+                                </div>
+                                <div class="mt-3 flex items-center gap-2 flex-wrap">
+                                    <span v-if="!taskItem.employees || taskItem.employees.length === 0" class="text-gray-500 italic text-xs">No employees assigned</span>
+                                    <div v-else v-for="employee in taskItem.employees" :key="employee.id" class="flex items-center gap-2 bg-white rounded-full px-2 py-1 border shadow-sm" v-tooltip.top="employee.name">
+                                        <Avatar :label="employee.name ? employee.name.split(' ').map(n => n[0]).join('').toUpperCase() : '?'" shape="circle" size="small" />
+                                        <span class="text-xs font-medium text-gray-800">{{ employee.name }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div v-if="errorMessage" class="text-red-500 text-sm mt-2">
+                    {{ errorMessage }}
+                    </div>
+
+                    <!-- Save Button -->
+                    <button
+                    v-if="editMode"
+                    @click="showSaveConfirmDialog = true"
+                    class="mt-4 self-end modal-button-primary"
+                    >
+                    Save Changes
+                    </button>
+                </div>
+                    </div>
+
+    <div v-if="currentView === 'announcements'">
+    <div class="w-full bg-white rounded-lg shadow-md p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="section-title m-0 text-left">Event Announcements</h2>
+        <button
+          v-if="user?.role === 'Admin' || user?.role === 'Principal'"
+          class="create-button flex items-center gap-2"
+          @click="openAddAnnouncementModal"
+        >
+            <i class="pi pi-plus"></i>
+            <span>Add<span class="hidden sm:inline"> Announcement</span></span>
+        </button>
+      </div>
+
+      <!-- Filters for Announcements -->
+      <div class="mb-4 flex flex-wrap items-center gap-2">
+        <SearchFilterBar
+          v-model:searchQuery="announcementSearchQuery"
+          placeholder="Search announcements..."
+          :show-date-filter="true"
+          :is-date-filter-active="showAnnouncementDateFilter"
+          :show-clear-button="!!(announcementSearchQuery || announcementStartDateFilter || announcementEndDateFilter)"
+          @toggle-date-filter="toggleAnnouncementDateFilter"
+          @clear-filters="clearAnnouncementFilters"
+        />
+      </div>
+
+      <!-- Date Filter Calendar -->
+      <div v-if="showAnnouncementDateFilter" class="date-filter-container mb-4 max-w-md">
+          <div class="flex flex-col sm:flex-row gap-2">
+            <div class="flex-1">
+              <label>From:</label>
+              <DatePicker
+                v-model="announcementStartDateFilter"
+                dateFormat="M-dd-yy"
+                :showIcon="true"
+                placeholder="Start date"
+                class="w-full"
+              />
+            </div>
+            <div class="date-input-group">
+              <label>To:</label>
+              <DatePicker
+                v-model="announcementEndDateFilter"
+                dateFormat="M-dd-yy"
+                :showIcon="true"
+                placeholder="End date"
+                class="w-full"
+              />
+            </div>
+          </div>
+          <Button v-if="announcementStartDateFilter || announcementEndDateFilter" icon="pi pi-times" class="p-button-text p-button-rounded clear-date-btn" @click="clearAnnouncementDateFilter" v-tooltip.top="'Clear date filter'" />
+      </div>
+
+      <div v-if="filteredEventAnnouncements.length > 0" class="space-y-6">
+        <div
+          v-for="announcement in filteredEventAnnouncements"
+          :key="announcement.id"
+          class="p-4 bg-gray-50 rounded-lg shadow-sm border border-gray-200 relative"
+        >
+          <!-- wrapper guarantees reliable positioning despite internal Button padding -->
+          <div v-if="user?.role === 'Admin' || user?.role === 'Principal'" class="absolute top-1 right-1 z-10">
+            <Button
+              icon="pi pi-trash"
+              class="p-button-rounded p-button-text action-btn-danger"
+              @click="promptDeleteAnnouncement(announcement)"
+              aria-label="Remove announcement"
+            />
+          </div>
+
+          <!-- User Avatar and Name -->
+          <div class="flex items-center mb-2">
+            <Avatar
+              image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png"
+              class="mr-2"
+              shape="circle"
+              size="small"
+            />
+            <span class="text-gray-600 text-sm font-semibold">{{ announcement.employee?.name || 'Admin' }}</span>
+          </div>
+
+          <p class="text-gray-800 text-base whitespace-pre-line">{{ announcement.message }}</p>
+
+          <img
+            v-if="announcement.image"
+            :src="announcement.image"
+            alt="Announcement image"
+            class="mt-4 rounded-lg max-w-full w-full md:max-w-md mx-auto h-auto cursor-pointer hover:opacity-90 transition-opacity"
+            @click="openImageDialog(announcement.image)"
+          />
+
+          <p class="text-xs text-gray-500 mt-2 text-right">
+            {{ formatAnnouncementTimestamp(announcement.timestamp) }}
+          </p>
+        </div>
+      </div>
+
+      <div v-else-if="announcementSearchQuery || announcementStartDateFilter || announcementEndDateFilter" class="text-center text-gray-500 py-8">
+        <p>No announcements found matching your search or filter.</p>
+      </div>
+      <div v-else class="text-center text-gray-500 py-8">
+        <p>No announcements for this event yet.</p>
+      </div>
+    </div>
+                    </div>
+                </div>
+
+                <!-- Related events sidebar (right side) -->
+                <div v-if="currentView === 'details' && normalizedRelatedEvents.length > 0" class="md:w-80 flex-shrink-0">
+                    <div class="bg-white shadow-md rounded-lg p-4 sticky top-4">
+                        <h3 class="font-bold text-lg mb-4">Related Events</h3>
+                        <div class="space-y-4">
+                            <div
+                                v-for="event in normalizedRelatedEvents"
+                                :key="event.id"
+                                class="cursor-pointer hover:bg-gray-50 rounded p-2 transition-colors"
+                                @click="router.visit(`/events/${event.id}`)"
+                            >
+                                <div class="flex gap-3">
+                                    <div class="w-24 h-16 flex-shrink-0">
+                                        <img :src="event.image || '/placeholder-event.jpg'" :alt="event.title" class="w-full h-full object-cover rounded" />
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="font-medium text-sm truncate">{{ event.title }}</h4>
+                                        <p class="text-xs text-gray-500 mt-1">{{ formatDisplayDate(event.startDate) }}</p>
+                                        <div class="flex flex-wrap gap-1 mt-1">
+                                            <span v-for="tag in event.tags?.slice(0, 2)" :key="tag.id" class="text-xs px-1.5 py-0.5 rounded" :style="{ backgroundColor: getTagColor(tag), color: '#fff' }">
+                                                {{ tag.name }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+      <!-- Brackets Section -->
+      <div v-if="relatedBrackets.length > 0" class="mx-auto mt-6">
+        <h2 class="section-title mb-0">Games</h2>
+        <div v-if="relatedBrackets.length > 1" class="my-4">
+            <SearchFilterBar
+                v-model:searchQuery="searchQuery"
+                placeholder="Search games..."
+                :show-date-filter="false"
+                :show-clear-button="!!searchQuery"
+                @clear-filters="searchQuery = ''" />
+        </div>
+        <div v-if="filteredRelatedBrackets.length === 0" class="no-brackets-message">
+            <div class="icon-and-title">
+                <i class="pi pi-search" style="font-size: 1.5rem; color: #007bff; margin-right: 10px;"></i>
+                <h2 class="no-brackets-title">No Games Found</h2>
+            </div>
+            <p class="no-brackets-text">No games match your search criteria. Try adjusting your search terms.</p>
+        </div>
+        <div v-else>
+            <BracketCard
+                v-for="bracket in filteredRelatedBrackets"
+                :key="bracket.id"
+                :bracket="bracket"
+                :bracketIndex="getBracketIndex(bracket.id)"
+                :user="user"
+                :isExpanded="expandedBrackets[getBracketIndex(bracket.id)]"
+                :viewMode="bracketViewModes[getBracketIndex(bracket.id)]"
+                :matchFilter="bracketMatchFilters[getBracketIndex(bracket.id)]"
+                :standingsRevision="standingsRevision"
+                :getBracketStats="getBracketStats"
+                :getBracketTypeClass="getBracketTypeClass"
+                :isFinalRound="isFinalRound"
+                :getRoundRobinStandings="getRoundRobinStandings"
+                :isArchived="eventDetails.archived"
+                :isRoundRobinConcluded="isRoundRobinConcluded"
+                :onOpenMatchDialog="user ? openMatchDialog : null"
+                :onOpenScoringConfigDialog="user ? openScoringConfigDialog : null"
+                :onOpenMatchEditorFromCard="user ? openMatchEditorFromCard : null"
+                @toggle-bracket="toggleBracket"
+                @set-view-mode="({ index, mode }) => setBracketViewMode(index, mode)"
+                @set-match-filter="({ index, filter }) => setBracketMatchFilter(index, filter)"
+                :showEventLink="false"
+                :showAdminControls="false"
+            />
+        </div>
+      </div>
+
+      <!-- Loading Dialog -->
+      <LoadingSpinner :show="saving" />
+
+      <!-- Success Message Dialog -->
+      <SuccessDialog
+        v-model:show="showSuccessDialog"
+        :message="successMessage"
+      />
+
+      <!-- Delete Schedule Confirmation Dialog -->
+      <ConfirmationDialog
+        v-model:show="showDeleteScheduleConfirm"
+        title="Clear Activity?"
+        message="Are you sure you want to clear this Activity?"
+        @confirm="confirmDeleteSchedule"
+      />
+
+      <!-- Save Changes Confirmation Dialog -->
+      <ConfirmationDialog
+        v-model:show="showSaveConfirmDialog"
+        title="Save Changes?"
+        message="Are you sure you want to save your changes?"
+        confirmText="Yes, Save"
+        @confirm="saveChanges"
+      />
+    </div>
+
+    <!-- Generic Error Dialog -->
+    <ConfirmationDialog
+        v-model:show="showGenericErrorDialog"
+        title="Error"
+        :message="genericErrorMessage"
+        confirmText="OK"
+        :show-cancel-button="false"
+        confirmButtonClass="bg-red-600 hover:bg-red-700"
+        @confirm="showGenericErrorDialog = false"
+    />
+
+    <!-- Add Announcement Modal -->
+    <Dialog v-model:visible="showAddAnnouncementModal" modal header="Add Announcement" :style="{ width: '50vw' }">
+        <div class="p-fluid">
+            <div class="p-field">
+                <label for="announcementMessage">Message</label>
+                <Textarea id="announcementMessage" v-model="newAnnouncement.message" rows="5" placeholder="Enter your announcement..." autoResize />
+            </div>
+            <div class="p-field mt-4">
+                <label for="announcementImage">Image (Optional)</label>
+                <input type="file" id="announcementImage" @change="handleAnnouncementImageUpload" accept="image/*" class="p-inputtext" />
+                <img v-if="newAnnouncement.imagePreview" :src="newAnnouncement.imagePreview" alt="Image preview" class="mt-4 rounded-lg max-w-xs h-auto" />
+            </div>
+        </div>
+        <template #footer>
+            <button class="modal-button-secondary" @click="showAddAnnouncementModal = false">Cancel</button>
+            <button class="modal-button-primary" @click="addAnnouncement" :disabled="saving">Post</button>
+        </template>
+    </Dialog>
+
+    <ConfirmationDialog
+        v-model:show="showDeleteAnnouncementConfirm"
+        title="Remove Announcement?"
+        message="Are you sure you want to remove this announcement?"
+        @confirm="confirmDeleteAnnouncement"
+    />
+
+    <!-- Scoring Configuration Dialog -->
+    <Dialog v-model:visible="showScoringConfigDialog" header="Configure Scoring System" modal :style="{ width: '400px' }">
+    <div class="scoring-config-dialog">
+        <div class="scoring-option">
+        <label>Win Points:</label>
+        <InputText
+            v-model="roundRobinScoring.win"
+            type="number"
+            step="0.5"
+            min="0"
+            placeholder="1"
+        />
+        </div>
+        <div class="scoring-option">
+        <label>Draw Points:</label>
+        <InputText
+            v-model="roundRobinScoring.draw"
+            type="number"
+            step="0.5"
+            min="0"
+            placeholder="0.5"
+        />
+        </div>
+        <div class="scoring-option">
+        <label>Loss Points:</label>
+        <InputText
+            v-model="roundRobinScoring.loss"
+            type="number"
+            step="0.5"
+            min="0"
+            placeholder="0"
+        />
+        </div>
+        <div class="dialog-actions">
+        <Button
+            label="Cancel"
+            @click="closeScoringConfigDialog"
+            class="modal-button-secondary"
+        />
+        <Button
+            label="Save"
+            @click="saveScoringConfig"
+            class="modal-button-primary"
+        />
+        </div>
+    </div>
+    </Dialog>
+
+    <!-- Shared Match Editor Dialog -->
+    <MatchEditorDialog
+        v-model:show="showMatchEditorDialog"
+        v-model:matchData="selectedMatchData"
+        :bracket="selectedBracketForDialog"
+        @confirm="proceedWithMatchUpdate"
+    />
+
+    <Dialog v-model:visible="showMemoImageDialog" modal :dismissableMask="true" :header="eventDetails.memorandum?.filename" :style="{ width: '90vw', maxWidth: '1200px' }">
+        <img :src="memoImageUrl" alt="Memorandum Image" class="w-full h-auto max-h-[80vh] object-contain" />
+    </Dialog>
+
+    <!-- Image Viewer Dialog -->
+    <Dialog v-model:visible="showImageDialog" modal :dismissableMask="true" header="Image" :style="{ width: '90vw', maxWidth: '1200px' }">
+        <img :src="selectedImageUrl" alt="Announcement Image" class="w-full h-auto max-h-[80vh] object-contain" />
+    </Dialog>
+
+    <!-- Task Editor Modal (re-using the composable) -->
+    <Dialog v-model:visible="tasksManager.isTaskModalVisible.value" modal header="Edit Tasks" :style="{ width: '50vw' }">
+        <div class="p-fluid">
+            <div v-for="(taskEntry, index) in tasksManager.taskAssignments.value" :key="index" class="p-field border-b pb-4 mb-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-semibold">Task {{ index + 1 }}</h3>
+                    <button @click="tasksManager.deleteTask(index)" class="text-red-500 hover:text-red-700 text-sm" v-tooltip.top="'Remove Task'"><i class="pi pi-times"></i></button>
+                </div>
+
+                <!-- Committee Selection -->
+                <div class="p-field">
+                    <label>Committee</label>
+                    <Select v-model="taskEntry.committee" :options="committees" optionLabel="name" placeholder="Select Committee" filter @change="tasksManager.updateEmployeesForTask(index, employees)" />
+                </div>
+
+                <!-- Employee Selection -->
+                <div v-if="taskEntry.committee" class="p-field">
+                    <label>Employees</label>
+                    <MultiSelect v-model="taskEntry.employees" :options="tasksManager.filteredEmployees.value[index]" optionLabel="name" placeholder="Select Employees" display="chip" filter>
+                        <template #chip="slotProps">
+                            <div class="flex items-center gap-2 px-2 py-1 rounded bg-blue-100 text-blue-800 text-xs">
+                                {{ slotProps.value.name }}
+                                <button type="button" class="text-blue-600 hover:text-blue-800" @click.stop="taskEntry.employees = taskEntry.employees.filter(e => e.id !== slotProps.value.id)" v-tooltip.top="'Remove Employee'">✕</button>
+                            </div>
+                        </template>
+                    </MultiSelect>
+                </div>
+
+                <!-- Task Description -->
+                <div class="p-field">
+                    <label>Task</label>
+                    <Textarea v-model="taskEntry.task" rows="2" placeholder="Enter task details" />
+                </div>
+            </div>
+
+            <button @click="tasksManager.addTask()" class="text-blue-500 hover:text-blue-700 text-sm flex items-center mt-2">
+                <i class="pi pi-plus mr-1"></i> Add Task
+            </button>
+        </div>
+        <template #footer>
+            <button class="modal-button-primary" @click="handleSaveTasksClick">Save Tasks</button>
+        </template>
+    </Dialog>
+</div>
+</template>
+
+<style scoped>
+.bracket-content-wrapper {
+    margin-top: 1rem;
+}
+
+
+.bracket-toggle-button {
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+.bracket-toggle-button :deep(.pi) {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #4B5563; /* gray-600 */
+    transition: color 0.2s;
+}
+
+.bracket-toggle-button:hover :deep(.pi) {
+    color: #1F2937; /* gray-800 */
+}
+
+.date-filter-btn {
+  min-width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.date-filter-container {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.date-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+
+.date-input-group label {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.date-filter-calendar {
+  width: 100%;
+}
+
+.clear-date-btn {
+  align-self: flex-end;
+  color: #dc3545;
+}
+
+.clear-date-btn:hover {
+  background-color: rgba(220, 53, 69, 0.1);
+}
+
+@media (min-width: 640px) {
+    .search-wrapper {
+        max-width: 400px;
+    }
+}
+
+@media (max-width: 420px) {
+    .search-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+</style>
