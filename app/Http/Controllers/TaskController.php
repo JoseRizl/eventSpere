@@ -45,10 +45,10 @@ class TaskController extends JsonController
 
         $validated = $request->validate([
             'tasks' => 'nullable|array',
-            'tasks.*.committee_id' => ['nullable', Rule::in($validCommitteeIds)],
-            'tasks.*.employees' => 'nullable|array',
-            'tasks.*.employees.*' => ['nullable', Rule::in($validEmployeeIds)],
-            'tasks.*.description' => 'nullable|string|max:255',
+            'tasks.*.committee_id' => ['nullable', 'integer', Rule::in($validCommitteeIds)],
+            'tasks.*.employees' => 'required|array|min:1',
+            'tasks.*.employees.*' => ['required', 'integer', Rule::in($validEmployeeIds)],
+            'tasks.*.description' => 'required|string|max:255',
         ]);
 
         $taskIdsForEvent = collect($this->jsonData['tasks'] ?? [])->where('event_id', $eventId)->pluck('id')->all();

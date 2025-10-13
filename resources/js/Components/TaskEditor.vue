@@ -10,12 +10,6 @@
             <div v-for="(taskEntry, index) in props.tasksManager.taskAssignments.value" :key="index" class="p-field border-b pb-4 mb-4 last:border-b-0">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="font-semibold text-lg">Task {{ index + 1 }}</h3>
-                    <button
-                        @click="promptDeleteTask(index)"
-                        class="text-red-500 hover:text-red-700 text-sm flex items-center"
-                        v-tooltip.top="'Clear Task'">
-                        <i class="pi pi-times mr-1"></i> Clear
-                    </button>
                 </div>
 
 
@@ -28,7 +22,6 @@
                         optionLabel="name"
                         placeholder="Select Committee"
                         filter
-                        @change="props.tasksManager.updateEmployeesForTask(index, props.employees)"
                     >
                         <template #option="slotProps">
                             <div>{{ slotProps.option.name }}</div>
@@ -41,11 +34,11 @@
                 </div>
 
                 <!-- Employee Selection -->
-                <div v-if="taskEntry.committee" class="p-field">
+                <div class="p-field">
                     <label>Employees</label>
                     <MultiSelect
                         v-model="taskEntry.employees"
-                        :options="props.tasksManager.filteredEmployees.value[index]"
+                        :options="props.employees"
                         optionLabel="name"
                         placeholder="Select Employees"
                         display="chip"
@@ -71,13 +64,26 @@
                 <div class="p-field">
                     <label>Task</label>
                     <Textarea v-model="taskEntry.task" rows="2" placeholder="Enter task details" />
+                    <div class="mt-5">
+                        <button @click="promptDeleteTask(index)" class="text-red-500 hover:text-red-700 text-sm flex items-center">
+                            <i class="pi pi-times mr-1"></i>
+                            Clear Task
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- Add Task Button -->
-            <button @click="props.tasksManager.addTask()" class="text-blue-500 hover:text-blue-700 text-sm flex items-center mt-2">
-                <i class="pi pi-plus mr-1"></i> Add Task
-            </button>
+            <div class="flex justify-between items-center mt-2">
+                <button @click="props.tasksManager.addTask()" class="text-blue-500 hover:text-blue-700 text-sm flex items-center">
+                    <i class="pi pi-plus mr-1"></i> Add Task
+                </button>
+                <!-- <button
+                    v-if="props.tasksManager.taskAssignments.value.length > 0"
+                    @click="promptClearAllTasks" class="text-red-500 hover:text-red-700 text-sm flex items-center">
+                    <i class="pi pi-trash mr-1"></i> Clear All Tasks
+                </button> -->
+            </div>
         </div>
 
         <template #footer>
@@ -107,6 +113,15 @@
         confirmButtonClass="modal-button-danger"
         @confirm="confirmDeleteTask"
     />
+
+    <!-- Clear All Confirmation -->
+    <ConfirmationDialog
+        v-model:show="showClearAllConfirm"
+        title="Clear All Tasks?"
+        message="Are you sure you want to clear all tasks? This action cannot be undone."
+        confirmText="Yes, Clear All"
+        @confirm="confirmClearAllTasks"
+    />
 </template>
 
 <script setup>
@@ -126,6 +141,7 @@ const emit = defineEmits(['save-success', 'save-error']);
 const isSaving = ref(false);
 const showSaveConfirm = ref(false);
 const showDeleteConfirm = ref(false);
+const showClearAllConfirm = ref(false);
 const taskToDeleteIndex = ref(null);
 
 const promptSave = () => {
@@ -144,9 +160,27 @@ const confirmDeleteTask = () => {
     }
 };
 
+const promptClearAllTasks = () => {
+    showClearAllConfirm.value = true;
+};
+
+const confirmClearAllTasks = () => {
+    props.tasksManager.clearAllTasks();
+};
+
 const handleSave = async () => {
   isSaving.value = true;
   try {
+    // Frontend validation
+    for (const task of props.tasksManager.taskAssignments.value) {
+      if (!task.task || task.task.trim() === '') {
+        throw new Error('All tasks must have a description.');
+      }
+      if (!task.employees || task.employees.length === 0) {
+        throw new Error('All tasks must have at least one employee assigned.');
+      }
+    }
+
     const onSuccess = (page) => {
       const newTasks = page.props.flash?.tasks || [];
       emit('save-success', { message: 'Tasks updated successfully!', tasks: newTasks });

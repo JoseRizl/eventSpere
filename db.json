@@ -278,87 +278,73 @@
     "employees": [
         {
             "id": "1",
-            "name": "Glene",
-            "committeeId": 1
+            "name": "Glene"
         },
         {
             "id": "2",
-            "name": "Miko",
-            "committeeId": 2
+            "name": "Miko"
         },
         {
             "id": "3",
-            "name": "Uvuvwevwevwe Onyetenyevwe Ubwemubwem Ossas",
-            "committeeId": 3
+            "name": "Uvuvwevwevwe Onyetenyevwe Ubwemubwem Ossas"
         },
         {
             "id": "4",
-            "name": "",
-            "committeeId": 4
+            "name": "Jose Pr"
         },
         {
             "id": "5",
-            "name": "Kim Jong Un",
-            "committeeId": 1
+            "name": "Kim Jong Un"
         },
         {
             "id": "6",
-            "name": "Melvin",
-            "committeeId": 2
+            "name": "Melvin"
         },
         {
             "id": "7",
-            "name": "Lee Ar",
-            "committeeId": 3
+            "name": "Lee Ar"
         },
         {
             "id": "8",
-            "name": "Jungkook",
-            "committeeId": 4
-        },
-        {
-            "id": "2",
-            "name": "Miko",
-            "committeeId": 4
+            "name": "Jungkook"
         },
         {
             "id": "10",
-            "name": "Edsel",
-            "committeeId": 2
+            "name": "Edsel"
         },
         {
             "id": "11",
-            "name": "Sonny Jihns",
-            "committeeId": 3
+            "name": "Sonny Jihns"
         },
         {
             "id": "12",
-            "name": "No Kum-sok",
-            "committeeId": 4
+            "name": "No Kum-sok"
         },
         {
             "id": "13",
-            "name": "Xi Jinping",
-            "committeeId": 1
+            "name": "Xi Jinping"
         },
         {
             "id": "14",
-            "name": "Bato",
-            "committeeId": 4
+            "name": "Bato"
         }
     ],
     "tasks": [
         {
-            "id": "313c-c8e4",
-            "description": "Pan",
-            "event_id": "313c",
-            "committee_id": "3"
+            "id": "72f9-63af",
+            "description": "123",
+            "event_id": "72f9",
+            "committee_id": "1"
         }
     ],
     "task_employee": [
         {
-            "task_id": "313c-c8e4",
-            "employee_id": "7"
+            "task_id": "72f9-63af",
+            "employee_id": "1"
+        },
+        {
+            "task_id": "72f9-63af",
+            "employee_id": "2"
         }
     ],
     "event_announcements": [

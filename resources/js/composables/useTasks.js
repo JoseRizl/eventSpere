@@ -6,7 +6,6 @@ export function useTasks() {
   const isTaskModalVisible = ref(false);
   const selectedEventForTasks = ref(null);
   const taskAssignments = ref([]);
-  const filteredEmployees = ref([]);
 
   // Method to open the modal and prepare data
   const openTaskModal = (event, allCommittees, allEmployees) => {
@@ -29,32 +28,20 @@ export function useTasks() {
       employees: (task.employees || []).map(emp => employeesMap[emp.id] || emp)
     }));
 
-    // Pre-populate filtered employees for each task
-    filteredEmployees.value = taskAssignments.value.map(task =>
-      task.committee ? allEmployees.filter(emp => Number(emp.committeeId) === Number(task.committee.id)) : []
-    );
-
     isTaskModalVisible.value = true;
   };
 
   // Modal Actions
   const addTask = () => {
     taskAssignments.value.push({ committee: null, employees: [], task: '' });
-    filteredEmployees.value.push([]);
   };
 
   const deleteTask = (index) => {
     taskAssignments.value.splice(index, 1);
-    filteredEmployees.value.splice(index, 1);
   };
 
-  const updateEmployeesForTask = (index, allEmployees) => {
-    const selectedCommittee = taskAssignments.value[index].committee;
-    filteredEmployees.value[index] = selectedCommittee
-      ? allEmployees.filter(emp => Number(emp.committeeId) === Number(selectedCommittee?.id))
-      : [];
-    // Reset employees when committee changes
-    taskAssignments.value[index].employees = [];
+  const clearAllTasks = () => {
+    taskAssignments.value = [];
   };
 
   // Save logic
@@ -90,5 +77,5 @@ const saveTaskAssignments = async (onSuccessCallback) => {
 };
 
 
-  return { isTaskModalVisible, selectedEventForTasks, taskAssignments, filteredEmployees, openTaskModal, addTask, deleteTask, updateEmployeesForTask, saveTaskAssignments };
+  return { isTaskModalVisible, selectedEventForTasks, taskAssignments, openTaskModal, addTask, deleteTask, clearAllTasks, saveTaskAssignments };
 }
