@@ -22,7 +22,7 @@ defineProps({
   },
   confirmButtonClass: {
     type: String,
-    default: 'modal-button-confirm' // Default to green for confirm actions
+    default: 'modal-button-primary' // Default to blue for confirm actions
   },
   cancelButtonClass: {
     type: String,
@@ -62,7 +62,7 @@ const handleCancel = () => {
         </button>
         <button
           @click="handleConfirm"
-          :class="['modal-button-primary', confirmButtonClass]"
+          :class="confirmButtonClass"
         >
           {{ confirmText }}
         </button>

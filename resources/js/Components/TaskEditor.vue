@@ -11,7 +11,7 @@
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="font-semibold text-lg">Task {{ index + 1 }}</h3>
                     <button
-                        @click="props.tasksManager.deleteTask(index)"
+                        @click="promptDeleteTask(index)"
                         class="text-red-500 hover:text-red-700 text-sm flex items-center"
                         v-tooltip.top="'Clear Task'">
                         <i class="pi pi-times mr-1"></i> Clear
@@ -82,16 +82,36 @@
 
         <template #footer>
             <button class="modal-button-secondary" @click="props.tasksManager.isTaskModalVisible.value = false" :disabled="isSaving">Cancel</button>
-            <button class="modal-button-primary" @click="handleSave" :disabled="isSaving">
+            <button class="modal-button-primary" @click="promptSave" :disabled="isSaving">
                 <i v-if="isSaving" class="pi pi-spin pi-spinner mr-2"></i>
                 {{ isSaving ? 'Saving...' : 'Save Tasks' }}
             </button>
         </template>
     </Dialog>
+
+    <!-- Save Confirmation -->
+    <ConfirmationDialog
+        v-model:show="showSaveConfirm"
+        title="Save Task Assignments?"
+        message="Are you sure you want to save these changes? This will overwrite any existing tasks for this event."
+        confirmText="Yes, Save"
+        @confirm="handleSave"
+    />
+
+    <!-- Delete Confirmation -->
+    <ConfirmationDialog
+        v-model:show="showDeleteConfirm"
+        title="Clear Task?"
+        message="Are you sure you want to clear this task? This will remove it from the list."
+        confirmText="Yes, Clear"
+        confirmButtonClass="modal-button-danger"
+        @confirm="confirmDeleteTask"
+    />
 </template>
 
 <script setup>
 import { ref } from 'vue';
+import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 
 const props = defineProps({
     tasksManager: {
@@ -104,6 +124,25 @@ const props = defineProps({
 
 const emit = defineEmits(['save-success', 'save-error']);
 const isSaving = ref(false);
+const showSaveConfirm = ref(false);
+const showDeleteConfirm = ref(false);
+const taskToDeleteIndex = ref(null);
+
+const promptSave = () => {
+    showSaveConfirm.value = true;
+};
+
+const promptDeleteTask = (index) => {
+    taskToDeleteIndex.value = index;
+    showDeleteConfirm.value = true;
+};
+
+const confirmDeleteTask = () => {
+    if (taskToDeleteIndex.value !== null) {
+        props.tasksManager.deleteTask(taskToDeleteIndex.value);
+        taskToDeleteIndex.value = null;
+    }
+};
 
 const handleSave = async () => {
   isSaving.value = true;

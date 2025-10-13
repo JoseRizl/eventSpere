@@ -587,7 +587,6 @@
       title="Save Changes?"
       :message="selectedEvent ? `Are you sure you want to save changes to '${selectedEvent.title}'?` : ''"
       confirmText="Yes, Save"
-      confirmButtonClass="modal-button-confirm"
       @confirm="confirmSaveChanges"
     />
 
@@ -597,7 +596,6 @@
       title="Create Event?"
       message="Are you sure you want to create this event?"
       confirmText="Yes, Create"
-      confirmButtonClass="modal-button-confirm"
       @confirm="confirmCreateEvent"
     />
 
