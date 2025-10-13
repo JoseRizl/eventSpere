@@ -8,6 +8,7 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\BracketController;
 use App\Http\Controllers\ActivitiesController;
 use App\Http\Controllers\AnnouncementsController;
+use App\Http\Controllers\CommitteeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -51,6 +52,10 @@ Route::middleware('auth')->group(function () {
     // This route is now handled by the API route below
     Route::put('/events/{id}/tasks', [TaskController::class, 'updateForEvent'])->name('tasks.updateForEvent');
     Route::get('/events/{eventId}/tasks/{taskId}', [TaskController::class, 'show'])->name('tasks.show');
+
+    // Committee routes
+    Route::post('/committees', [CommitteeController::class, 'store'])->name('committees.store');
+    Route::delete('/committees/{id}', [CommitteeController::class, 'destroy'])->name('committees.destroy');
 
     // API routes
     Route::prefix('api')->name('api.')->group(function () {

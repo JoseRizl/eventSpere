@@ -15,22 +15,35 @@
 
                 <!-- Committee Selection -->
                 <div class="p-field">
-                    <label>Committee</label>
-                    <Select
-                        v-model="taskEntry.committee"
-                        :options="props.committees"
-                        optionLabel="name"
-                        placeholder="Select Committee"
-                        filter
-                    >
-                        <template #option="slotProps">
-                            <div>{{ slotProps.option.name }}</div>
-                        </template>
-                        <template #value="slotProps">
-                            <div v-if="slotProps.value">{{ slotProps.value.name }}</div>
-                            <span v-else>{{ slotProps.placeholder }}</span>
-                        </template>
-                    </Select>
+                    <label for="committee">Committee</label>
+                    <div class="flex items-center gap-2">
+                        <Select
+                            v-model="taskEntry.committee"
+                            :options="localCommittees"
+                            optionLabel="name"
+                            placeholder="Select Committee"
+                            filter
+                            class="w-full"
+                        >
+                            <template #option="slotProps">
+                                <div class="flex justify-between items-center w-full">
+                                    <span>{{ slotProps.option.name }}</span>
+                                    <i v-if="!isCommitteeInUse(slotProps.option.id)"
+                                        class="pi pi-times text-red-500 hover:text-red-700 cursor-pointer"
+                                        @click.stop="promptDeleteCommittee(slotProps.option)" v-tooltip.top="'Delete Committee'"></i>
+                                    <i v-else
+                                        class="pi pi-info-circle text-blue-500 hover:text-blue-700 cursor-pointer"
+                                        @click.stop="showUsageDetails(slotProps.option)"
+                                        v-tooltip.top="'Committee is in use. Click for details.'"></i>
+                                </div>
+                            </template>
+                            <template #value="slotProps">
+                                <div v-if="slotProps.value">{{ slotProps.value.name }}</div>
+                                <span v-else>{{ slotProps.placeholder }}</span>
+                            </template>
+                        </Select>
+                        <Button icon="pi pi-plus" class="p-button-secondary p-button-rounded" @click="openCreateCommitteeModal" v-tooltip.top="'Create New Committee'" />
+                    </div>
                 </div>
 
                 <!-- Employee Selection -->
@@ -38,7 +51,7 @@
                     <label>Employees</label>
                     <MultiSelect
                         v-model="taskEntry.employees"
-                        :options="props.employees"
+                        :options="localEmployees"
                         optionLabel="name"
                         placeholder="Select Employees"
                         display="chip"
@@ -87,7 +100,10 @@
         </div>
 
         <template #footer>
-            <button class="modal-button-secondary" @click="props.tasksManager.isTaskModalVisible.value = false" :disabled="isSaving">Cancel</button>
+            <div v-if="taskErrorMessage" class="text-red-500 text-sm mr-auto p-2 text-left">
+                {{ taskErrorMessage }}
+            </div>
+            <button class="modal-button-secondary" @click="closeModal" :disabled="isSaving">Cancel</button>
             <button class="modal-button-primary" @click="promptSave" :disabled="isSaving">
                 <i v-if="isSaving" class="pi pi-spin pi-spinner mr-2"></i>
                 {{ isSaving ? 'Saving...' : 'Save Tasks' }}
@@ -122,11 +138,58 @@
         confirmText="Yes, Clear All"
         @confirm="confirmClearAllTasks"
     />
+
+    <!-- Create Committee Modal -->
+    <Dialog v-model:visible="isCreateCommitteeModalVisible" modal header="Create New Committee" :style="{ width: '30vw' }">
+        <div class="p-field">
+            <label for="committeeName">Committee Name</label>
+            <InputText id="committeeName" v-model="newCommittee.name" placeholder="Enter committee name" />
+        </div>
+        <template #footer>
+            <button class="modal-button-secondary" @click="isCreateCommitteeModalVisible = false">Cancel</button>
+            <button class="modal-button-primary" @click="createCommittee" :disabled="isSaving">Create</button>
+        </template>
+    </Dialog>
+
+    <!-- Delete Committee Confirmation -->
+    <ConfirmationDialog
+        v-model:show="showDeleteCommitteeConfirm"
+        title="Delete Committee?"
+        :message="committeeToDelete ? `Are you sure you want to delete the committee '${committeeToDelete.name}'? This cannot be undone.` : ''"
+        confirmText="Yes, Delete"
+        confirmButtonClass="modal-button-danger"
+        @confirm="confirmDeleteCommittee"
+    />
+
+    <!-- Committee In Use Dialog -->
+    <Dialog v-model:visible="committeeUsageDialog.visible" modal header="Committee In Use" :style="{ width: '35vw' }">
+        <div class="p-fluid">
+            <p class="mb-4">
+                The committee <strong>'{{ committeeInUseDetails.name }}'</strong> cannot be deleted because it is currently in use by the following:
+            </p>
+
+            <div v-if="committeeInUseDetails.tasks?.length > 0" class="mb-4">
+                <h4 class="font-semibold mb-2">Tasks:</h4>
+                <ul class="list-disc pl-5 space-y-1 text-sm">
+                    <li v-for="(task, index) in committeeInUseDetails.tasks" :key="`task-${index}`">{{ task }}</li>
+                </ul>
+            </div>
+
+            <div v-if="committeeInUseDetails.employees?.length > 0">
+                <h4 class="font-semibold mb-2">Employees:</h4>
+                <ul class="list-disc pl-5 space-y-1 text-sm">
+                    <li v-for="(employee, index) in committeeInUseDetails.employees" :key="`employee-${index}`">{{ employee }}</li>
+                </ul>
+            </div>
+        </div>
+    </Dialog>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch, computed } from 'vue';
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
+import axios from 'axios';
+import { router } from '@inertiajs/vue3';
 
 const props = defineProps({
     tasksManager: {
@@ -137,15 +200,57 @@ const props = defineProps({
     employees: Array,
 });
 
-const emit = defineEmits(['save-success', 'save-error']);
+const emit = defineEmits(['save-success', 'save-error', 'committee-action-success']);
 const isSaving = ref(false);
 const showSaveConfirm = ref(false);
 const showDeleteConfirm = ref(false);
 const showClearAllConfirm = ref(false);
 const taskToDeleteIndex = ref(null);
+const taskErrorMessage = ref(null);
+const isCreateCommitteeModalVisible = ref(false);
+const newCommittee = ref({ name: '' });
+const showDeleteCommitteeConfirm = ref(false);
+const committeeToDelete = ref(null);
+const committeeUsageDialog = ref({ visible: false });
+const committeeInUseDetails = ref({
+    name: '',
+    tasks: [],
+    employees: []
+});
+
+// Local mutable copies of props
+const localCommittees = ref([]);
+const localEmployees = ref([]);
+
+watch(() => props.committees, (newVal) => {
+    localCommittees.value = [...(newVal || [])];
+}, { immediate: true, deep: true });
+
+watch(() => props.employees, (newVal) => {
+    localEmployees.value = [...(newVal || [])];
+}, { immediate: true, deep: true });
+
+const isCommitteeInUse = computed(() => {
+    return (committeeId) => {
+        const usedInTasks = props.tasksManager.taskAssignments.value.some(t => t.committee?.id === committeeId);
+        const usedByEmployees = localEmployees.value.some(e => e.committeeId === committeeId);
+        return usedInTasks || usedByEmployees;
+    };
+});
+
+watch(() => props.tasksManager.isTaskModalVisible.value, (newValue) => {
+    if (newValue) {
+        taskErrorMessage.value = null; // Clear error when modal opens
+    }
+});
+
+const closeModal = () => {
+    props.tasksManager.isTaskModalVisible.value = false;
+};
 
 const promptSave = () => {
     showSaveConfirm.value = true;
+    taskErrorMessage.value = null;
 };
 
 const promptDeleteTask = (index) => {
@@ -168,16 +273,83 @@ const confirmClearAllTasks = () => {
     props.tasksManager.clearAllTasks();
 };
 
+const openCreateCommitteeModal = () => {
+    newCommittee.value.name = '';
+    isCreateCommitteeModalVisible.value = true;
+};
+
+const createCommittee = async () => {
+    if (!newCommittee.value.name.trim()) {
+        emit('save-error', 'Committee name cannot be empty.');
+        return;
+    }
+    isSaving.value = true;
+    try {
+        const response = await axios.post(route('committees.store'), { name: newCommittee.value.name });
+        if (response.data.success) {
+            localCommittees.value.push(response.data.committee);
+            isCreateCommitteeModalVisible.value = false;
+            emit('committee-action-success', 'Committee created successfully!');
+        }
+    } catch (error) {
+        const message = error.response?.data?.message || 'Failed to create committee.';
+        taskErrorMessage.value = message;
+    } finally {
+        isSaving.value = false;
+    }
+};
+
+const promptDeleteCommittee = (committee) => {
+    if (isCommitteeInUse.value(committee.id)) {
+        showUsageDetails(committee);
+    } else {
+        committeeToDelete.value = committee;
+        showDeleteCommitteeConfirm.value = true;
+    }
+};
+
+const showUsageDetails = (committee) => {
+    committeeInUseDetails.value.name = committee.name;
+    committeeInUseDetails.value.tasks = props.tasksManager.taskAssignments.value
+        .filter(t => t.committee?.id === committee.id)
+        .map(t => t.task || `Task ${props.tasksManager.taskAssignments.value.indexOf(t) + 1}`);
+    committeeInUseDetails.value.employees = localEmployees.value
+        .filter(e => e.committeeId === committee.id)
+        .map(e => e.name);
+    committeeUsageDialog.value.visible = true;
+};
+
+const confirmDeleteCommittee = async () => {
+    if (!committeeToDelete.value) return;
+    isSaving.value = true;
+    try {
+        const response = await axios.delete(route('committees.destroy', { id: committeeToDelete.value.id }));
+        localCommittees.value = localCommittees.value.filter(c => c.id !== committeeToDelete.value.id);
+        emit('committee-action-success', 'Committee deleted successfully!');
+    } catch (error) {
+        if (error.response?.status === 422 && error.response?.data?.in_use) {
+            committeeInUseDetails.value = { ...error.response.data.details, name: committeeToDelete.value.name };
+            committeeUsageDialog.value.visible = true;
+        } else {
+            taskErrorMessage.value = error.response?.data?.message || 'Failed to delete committee.';
+        }
+    } finally {
+        isSaving.value = false;
+        showDeleteCommitteeConfirm.value = false;
+    }
+};
+
 const handleSave = async () => {
   isSaving.value = true;
+  taskErrorMessage.value = null;
   try {
     // Frontend validation
     for (const task of props.tasksManager.taskAssignments.value) {
       if (!task.task || task.task.trim() === '') {
-        throw new Error('All tasks must have a description.');
+        throw new Error('Please provide a description for all tasks.');
       }
       if (!task.employees || task.employees.length === 0) {
-        throw new Error('All tasks must have at least one employee assigned.');
+        throw new Error('Please assign at least one employee to all tasks.');
       }
     }
 
@@ -193,8 +365,8 @@ const handleSave = async () => {
     const errs = err?.errors || (err?.response?.data?.errors) || {};
     const errorMessages = Object.values(errs).flat().filter(Boolean);
     if (errorMessages.length) message = `Failed to save tasks: ${errorMessages.join(' ')}`;
-    else if (err?.message) message = `Failed to save tasks: ${err.message}`;
-    emit('save-error', message);
+    else if (err?.message) message = err.message;
+    taskErrorMessage.value = message;
   } finally {
     isSaving.value = false;
   }

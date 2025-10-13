@@ -150,6 +150,12 @@ const handleTaskSaveSuccess = ({ message }) => {
 
     };
 
+const handleCommitteeActionSuccess = (message) => {
+    // Only show success message, don't close the modal
+    successMessage.value = message;
+    showSuccessDialog.value = true;
+};
+
 const handleTaskSaveError = (message) => {
     errorMessage.value = message;
     showErrorDialog.value = true;
@@ -1527,6 +1533,7 @@ const getBracketIndex = (bracketId) => {
         :employees="employees"
         @save-success="handleTaskSaveSuccess"
         @save-error="handleTaskSaveError"
+        @committee-action-success="handleCommitteeActionSuccess"
     />
 </div>
 </template>

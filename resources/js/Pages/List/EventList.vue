@@ -183,6 +183,7 @@
         :employees="employees"
         @save-success="handleTaskSaveSuccess"
         @save-error="handleTaskSaveError"
+        @committee-action-success="handleCommitteeActionSuccess"
       />
 
     <!-- Create Event Modal-->
@@ -1068,6 +1069,11 @@
         showErrorDialog.value = true;
     };
 
+    const handleCommitteeActionSuccess = (message) => {
+        successMessage.value = message;
+        showSuccessDialog.value = true;
+    };
+
 
       // Format date and time display
       const formatDateTime = (date, time) => {
@@ -1689,6 +1695,7 @@
     tasksManager,
     handleTaskSaveSuccess,
     handleTaskSaveError,
+    handleCommitteeActionSuccess,
     };
 
     },
