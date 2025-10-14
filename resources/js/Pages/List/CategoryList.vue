@@ -14,7 +14,7 @@ export default defineComponent({
     const isEditModalVisible = ref(false);
     const isCreateModalVisible = ref(false);
     const selectedItem = ref(null);
-    const newItem = ref({ title: "", description: "", color: "#800080" });
+    const newItem = ref({ title: "", description: "" });
     const showTags = ref(false); // Default to categories, will be updated on mount
     const searchQuery = ref("");
     const initialLoading = ref(true);
@@ -179,7 +179,7 @@ export default defineComponent({
     // Open Create Modal
     const openCreateModal = () => {
       newItem.value = showTags.value
-        ? { name: "", color: "#800080", category_id: null }
+        ? { name: "", category_id: null }
         : { title: "", description: "" };
       isCreateModalVisible.value = true;
     };
@@ -202,9 +202,9 @@ export default defineComponent({
           onSuccess: () => {
             isCreateModalVisible.value = false;
             // Reset the form
-            newItem.value = showTags.value
-              ? { name: "", color: "#800080" }
-              : { title: "", description: "" };
+            newItem.value = showTags.value ?
+              { name: "", category_id: null } :
+              { title: "", description: "" };
             // Show success message
             successMessage.value = `${showTags.value ? 'Tag' : 'Category'} created successfully!`;
             showSuccessDialog.value = true;
@@ -372,16 +372,7 @@ export default defineComponent({
       <Column :field="showTags ? 'name' : 'title'" :header="showTags ? 'Tag Name' : 'Category Name'" style="width:30%;" sortable :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
         <template #body="{ data }">
           <div class="datatable-content">
-            <div v-if="showTags">
-              {{ data.name }}
-            </div>
-            <div v-else class="flex items-center gap-2">
-                <span
-                    class="inline-block w-4 h-4 rounded-full"
-                    :style="{ backgroundColor: data.color || '#808080' }"
-                ></span>
-                <span>{{ data.title }}</span>
-            </div>
+            {{ showTags ? data.name : data.title }}
           </div>
         </template>
       </Column>
@@ -433,15 +424,6 @@ export default defineComponent({
           />
         </div>
 
-        <div class="p-field" v-if="!showTags">
-          <label for="color">Color</label>
-          <ColorPicker
-            id="color"
-            v-model="selectedItem.color"
-            class="w-full"
-          />
-        </div>
-
         <div class="p-field" v-if="showTags">
           <label for="tagCategory">Category</label>
           <Select id="tagCategory" v-model="selectedItem.category_id" :options="categories" optionLabel="title" optionValue="id" placeholder="Select a category" class="w-full" />
@@ -474,15 +456,6 @@ export default defineComponent({
             id="newTitle"
             v-model="newItem[showTags ? 'name' : 'title']"
             :placeholder="`Enter ${showTags ? 'tag' : 'category'} name`"
-          />
-        </div>
-
-        <div class="p-field" v-if="!showTags">
-          <label for="newColor">Color</label>
-          <ColorPicker
-              id="newColor"
-              v-model="newItem.color"
-              class="w-full"
           />
         </div>
 

@@ -35,8 +35,7 @@ class CategoryController extends Controller
 
         $data = $request->validate([
             $isTag ? 'name' : 'title' => 'required|string|max:255',
-            'description' => $isTag ? 'nullable' : 'required|string',
-            'color' => $isTag ? 'prohibited' : ['required', 'string', 'regex:/^#?[a-fA-F0-9]{6}$/'],
+            'description' => 'nullable|string',
             'category_id' => $isTag ? ['required', \Illuminate\Validation\Rule::in($validCategoryIds)] : 'nullable'
         ]);
 
@@ -45,10 +44,6 @@ class CategoryController extends Controller
             'id' => uniqid(),
             ...$data
         ];
-
-        if (!$isTag && !str_starts_with($newItem['color'], '#')) {
-            $newItem['color'] = '#' . $newItem['color'];
-        }
 
         $this->jsonData[$collection][] = $newItem;
         File::put(base_path('db.json'), json_encode($this->jsonData, JSON_PRETTY_PRINT));
@@ -67,8 +62,7 @@ class CategoryController extends Controller
 
         $data = $request->validate([
             $isTag ? 'name' : 'title' => 'required|string|max:255',
-            'description' => $isTag ? 'nullable' : 'sometimes|string',
-            'color' => $isTag ? 'prohibited' : ['sometimes', 'string', 'regex:/^#?[a-fA-F0-9]{6}$/'],
+            'description' => 'nullable|string',
             'category_id' => $isTag ? ['sometimes', 'required', \Illuminate\Validation\Rule::in($validCategoryIds)] : 'nullable'
         ]);
 
@@ -77,9 +71,6 @@ class CategoryController extends Controller
 
         foreach ($this->jsonData[$collection] as &$item) {
             if ($item['id'] === $id) {
-                if (isset($data['color']) && !str_starts_with($data['color'], '#')) {
-                    $data['color'] = '#' . $data['color'];
-                }
                 $item = array_merge($item, $data);
                 $updated = true;
                 break;

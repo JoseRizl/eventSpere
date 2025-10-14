@@ -82,8 +82,8 @@
         <Column header="Category" style="width:15%;" :headerStyle="{ 'background-color': '#0077B3', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><Skeleton /></template></Column>
         <Column header="Start Date & Time" style="width:20%;" :headerStyle="{ 'background-color': '#0077B3', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><Skeleton /></template></Column>
         <Column header="End Date & Time" style="width:20%;" :headerStyle="{ 'background-color': '#0077B3', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><Skeleton /></template></Column>
-        <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Actions" style="width:10%;" body-class="text-center" :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><div class="flex justify-center gap-2"><Skeleton shape="circle" size="2rem" /><Skeleton shape="circle" size="2rem" /></div></template></Column>
-        <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Tasks" style="width:15%;" body-class="text-center" :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><div class="flex justify-center gap-2"><Skeleton shape="circle" size="2rem" /></div></template></Column>
+        <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Actions" style="width:10%;" body-class="text-center" :headerStyle="{ 'background-color': '#0077B3', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><div class="flex justify-center gap-2"><Skeleton shape="circle" size="2rem" /><Skeleton shape="circle" size="2rem" /></div></template></Column>
+        <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Tasks" style="width:15%;" body-class="text-center" :headerStyle="{ 'background-color': '#0077B3', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><div class="flex justify-center gap-2"><Skeleton shape="circle" size="2rem" /></div></template></Column>
       </DataTable>
 
       <DataTable
@@ -112,7 +112,7 @@
                 v-for="tag in getEventTags(data.tags)"
                 :key="tag.id"
                 class="tag"
-                :style="{ backgroundColor: getTagColor(tag) }"
+                style="background-color: #3B82F6;"
             >
                 {{ tag.name }}
             </span>
@@ -436,7 +436,7 @@
                 <template #chip="slotProps">
                     <div v-if="tagsMap[slotProps.value]"
                         class="flex items-center gap-2 px-2 py-1 rounded text-white text-xs"
-                        :style="{ backgroundColor: tagsMap[slotProps.value].color || '#800080' }"
+                        style="background-color: #3B82F6;"
                     >
                         {{ tagsMap[slotProps.value].name }}
                         <button type="button" class="text-white hover:text-gray-200" @click.stop="removeTag(tagsMap[slotProps.value])" v-tooltip.top="'Remove Tag'">✕</button>
@@ -1432,13 +1432,6 @@
       return events;
     });
 
-    const getTagColor = (tag) => {
-        if (!tag || !tag.category_id) return '#808080'; // Default gray
-        const category = categories.value.find(c => c.id == tag.category_id);
-        return category?.color || '#808080';
-    };
-
-
     const saving = ref(false);
     const showSuccessDialog = ref(false);
     const successMessage = ref('');
@@ -1689,7 +1682,6 @@
     employees,
     handleMemoUpload,
     handleDefaultImageUpload,
-    getTagColor,
     rowsPerPage,
     printTable,
     tasksManager,
