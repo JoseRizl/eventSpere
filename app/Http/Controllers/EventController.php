@@ -191,7 +191,7 @@ class EventController extends JsonController
             'venue' => 'nullable|string|max:255',
             'startDate' => ['nullable', 'string', function ($attribute, $value, $fail) {
                 if ($value && !preg_match('/^[A-Za-z]{3}-\d{2}-\d{4}$/', $value)) {
-                    $fail('The start date must be in MMM-DD-YYYY format.');
+                    $fail('The '.$attribute.' must be in MMM-DD-YYYY format (e.g. May-28-2025).');
                 }
             }],
             'endDate' => ['nullable', 'string', function ($attribute, $value, $fail) use ($request) {
@@ -206,13 +206,11 @@ class EventController extends JsonController
                     }
                 }
             }],
-            'startTime' => 'nullable|date_format:H:i',
-            'endTime' => 'nullable|date_format:H:i',
-            'isAllDay' => 'boolean',
             'isAllDay' => ['required', 'boolean'],
             'startTime' => ['required_if:isAllDay,false', 'nullable', 'date_format:H:i'],
             'endTime' => ['required_if:isAllDay,false', 'nullable', 'date_format:H:i', function ($attribute, $value, $fail) use ($request) {
-                if ($request->input('startDate') == $request->input('endDate') && strtotime($value) <= strtotime($request->input('startTime'))) {
+                $isAllDay = $request->input('isAllDay', false);
+                if (!$isAllDay && $request->input('startDate') == $request->input('endDate') && strtotime($value) <= strtotime($request->input('startTime'))) {
                     $fail('The end time must be after the start time for single-day events.');
                 }
             }],
@@ -391,25 +389,23 @@ class EventController extends JsonController
             ];
         }
 
-        // Handle memorandum update/creation/deletion from EventDetails
-        if (array_key_exists('memorandum', $request->all())) {
-            $memorandumData = $request->input('memorandum');
-            $this->jsonData['memorandums'] = $this->jsonData['memorandums'] ?? [];
-            $existingMemoIndex = collect($this->jsonData['memorandums'])->search(fn($memo) => $memo['event_id'] === $id);
+        // Handle memorandum update/creation/deletion.
+        // This logic is now self-contained and doesn't rely on a separate client-side DELETE call.
+        $memorandumData = $request->input('memorandum');
+        $this->jsonData['memorandums'] = $this->jsonData['memorandums'] ?? [];
+        $existingMemoIndex = collect($this->jsonData['memorandums'])->search(fn($memo) => $memo['event_id'] === $id);
 
-            if ($memorandumData) { // If new data is provided (create or update)
-                $newMemo = $memorandumData;
-                $newMemo['id'] = ($existingMemoIndex !== false) ? $this->jsonData['memorandums'][$existingMemoIndex]['id'] : (string) \Illuminate\Support\Str::uuid();
-                $newMemo['event_id'] = $id;
-
-                if ($existingMemoIndex !== false) {
-                    $this->jsonData['memorandums'][$existingMemoIndex] = $newMemo;
-                } else {
-                    $this->jsonData['memorandums'][] = $newMemo;
-                }
-            } elseif ($existingMemoIndex !== false) { // If no data is provided and one exists, delete it
-                array_splice($this->jsonData['memorandums'], $existingMemoIndex, 1);
+        if ($memorandumData && !empty($memorandumData['content'])) { // If new/updated data is provided
+            $newMemo = $memorandumData;
+            $newMemo['id'] = ($existingMemoIndex !== false) ? $this->jsonData['memorandums'][$existingMemoIndex]['id'] : (string) \Illuminate\Support\Str::uuid();
+            $newMemo['event_id'] = $id;
+            if ($existingMemoIndex !== false) {
+                $this->jsonData['memorandums'][$existingMemoIndex] = $newMemo;
+            } else {
+                $this->jsonData['memorandums'][] = $newMemo;
             }
+        } elseif ($existingMemoIndex !== false) { // If no data is provided (null) and one exists, delete it
+            array_splice($this->jsonData['memorandums'], $existingMemoIndex, 1);
         }
 
         try {
@@ -438,11 +434,16 @@ class EventController extends JsonController
             'category_id' => ['nullable', Rule::in($validCategoryIds)],
             'venue' => 'nullable|string|max:255',
             'startDate' => 'nullable|date_format:M-d-Y',
-            'endDate' => 'nullable|date_format:M-d-Y|after_or_equal:startDate',
+            'endDate' => ['nullable', 'date_format:M-d-Y', function ($attribute, $value, $fail) use ($request) {
+                if ($request->input('startDate') && $value && strtotime($value) < strtotime($request->input('startDate'))) {
+                    $fail('The end date must be on or after the start date.');
+                }
+            }],
             'isAllDay' => 'sometimes|boolean',
             'startTime' => ['sometimes', 'required_if:isAllDay,false', 'nullable', 'date_format:H:i'],
             'endTime' => ['sometimes', 'required_if:isAllDay,false', 'nullable', 'date_format:H:i', function ($attribute, $value, $fail) use ($request) {
-                if ($request->input('startDate') && $request->input('endDate') && $request->input('startDate') == $request->input('endDate') && $request->input('startTime') && $value) {
+                $isAllDay = $request->input('isAllDay', false);
+                if (!$isAllDay && $request->input('startDate') && $request->input('endDate') && $request->input('startDate') == $request->input('endDate') && $request->input('startTime') && $value) {
                     if (strtotime($value) <= strtotime($request->input('startTime'))) {
                         $fail('The end time must be after the start time for single-day events.');
                     }

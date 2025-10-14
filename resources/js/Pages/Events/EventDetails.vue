@@ -652,23 +652,6 @@ const saveChanges = () => {
     },
     onSuccess: async () => {
       try {
-        // Save activities via composable
-        // Check if memorandum has changed
-        const originalMemo = originalEventDetails.value.memorandum;
-        const currentMemo = eventDetails.value.memorandum;
-
-        if (currentMemo && currentMemo.isNew) {
-            // New memorandum uploaded
-            const memoPayload = {
-                type: currentMemo.type,
-                content: currentMemo.content,
-                filename: currentMemo.filename,
-            };
-            await saveMemorandum(eventDetails.value.id, memoPayload);
-        } else if (!currentMemo && originalMemo) {
-            // Memorandum was removed
-            await clearMemorandum(eventDetails.value.id);
-        }
         const activitiesPayload = (eventDetails.value.activities || []).map(({ __uid, title, date, startTime, endTime, location }) => ({ title, date, startTime, endTime, location }));
         await saveActivities(eventDetails.value.id, activitiesPayload);
 
