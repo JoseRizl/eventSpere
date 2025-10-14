@@ -358,13 +358,17 @@ const handleSave = async () => {
       emit('save-success', { message: 'Tasks updated successfully!', tasks: newTasks });
     };
 
-    await props.tasksManager.saveTaskAssignments(onSuccess);
+    await props.tasksManager.saveTaskAssignments(onSuccess); // This will now throw on validation error
   } catch (err) {
-    console.error('[handleSave] raw:', err);
     let message = 'Failed to save tasks.';
-    const errs = err?.errors || (err?.response?.data?.errors) || {};
-    const errorMessages = Object.values(errs).flat().filter(Boolean);
-    if (errorMessages.length) message = `Failed to save tasks: ${errorMessages.join(' ')}`;
+    if (err.response && err.response.data && err.response.data.errors) {
+        // Handle structured validation errors from Laravel
+        const errors = err.response.data.errors;
+        const firstErrorKey = Object.keys(errors)[0];
+        if (firstErrorKey && Array.isArray(errors[firstErrorKey])) {
+            message = errors[firstErrorKey][0];
+        }
+    }
     else if (err?.message) message = err.message;
     taskErrorMessage.value = message;
   } finally {

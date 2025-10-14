@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 class TaskController extends JsonController
 {
@@ -40,16 +41,27 @@ class TaskController extends JsonController
      */
     public function updateForEvent(Request $request, $eventId)
     {
-        $validCommitteeIds = array_column($this->jsonData['committees'] ?? [], 'id');
-        $validEmployeeIds = array_column($this->jsonData['employees'] ?? [], 'id');
-
-        $validated = $request->validate([
-            'tasks' => 'nullable|array',
-            'tasks.*.committee_id' => ['nullable', 'integer', Rule::in($validCommitteeIds)],
+        $validator = Validator::make($request->all(), [
+            'tasks' => ['nullable', 'array', function ($attribute, $value, $fail) use ($request, $eventId) {
+                $this->validateTaskAssignments($attribute, $value, $fail, $request, $eventId);
+            }],
+            'tasks.*.committee_id' => ['nullable', 'integer', Rule::in(array_column($this->jsonData['committees'] ?? [], 'id'))],
             'tasks.*.employees' => 'required|array|min:1',
-            'tasks.*.employees.*' => ['required', 'integer', Rule::in($validEmployeeIds)],
+            'tasks.*.employees.*' => ['required', 'integer', Rule::in(array_column($this->jsonData['employees'] ?? [], 'id'))],
             'tasks.*.description' => 'required|string|max:255',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'The given data was invalid.',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $validated = $validator->validated();
+
+        $validCommitteeIds = array_column($this->jsonData['committees'] ?? [], 'id');
+        $validEmployeeIds = array_column($this->jsonData['employees'] ?? [], 'id');
 
         $taskIdsForEvent = collect($this->jsonData['tasks'] ?? [])->where('event_id', $eventId)->pluck('id')->all();
 
@@ -99,7 +111,11 @@ class TaskController extends JsonController
 
         $this->writeJson($this->jsonData);
 
-        return redirect()->back()->with(['success' => 'Tasks updated successfully.', 'tasks' => $newlyCreatedTasks]);
+        // Return a JSON response instead of redirecting
+        return response()->json([
+            'success' => true,
+            'tasks' => $newlyCreatedTasks->values()->all(),
+        ]);
     }
 
     /**
@@ -122,7 +138,7 @@ class TaskController extends JsonController
 
         // --- Check for duplicates within the same event ---
         $employeeCounts = collect($value)->flatMap(function ($task) {
-            return collect($task['employees'] ?? [])->pluck('id');
+            return collect($task['employees'] ?? []);
         })->filter()->countBy();
 
         foreach ($employeeCounts as $employeeId => $count) {
@@ -137,29 +153,52 @@ class TaskController extends JsonController
         // --- Check for conflicts with other events ---
         if (!$eventStartDateStr || !$eventEndDateStr) return;
 
-        $eventStartDate = \DateTime::createFromFormat('M-d-Y', $eventStartDateStr);
-        $eventEndDate = \DateTime::createFromFormat('M-d-Y', $eventEndDateStr);
-
-        if (!$eventStartDate || !$eventEndDate) return;
-
         $currentEmployeeIds = $employeeCounts->keys();
         if ($currentEmployeeIds->isEmpty()) return;
 
-        $otherEvents = $allEvents->where('id', '!=', $eventId)->where('archived', '!=', true);
+        // Normalize tasks for all other events to ensure consistent structure for validation
+        $allTasks = collect($this->jsonData['tasks'] ?? []);
+        $allEmployees = collect($this->jsonData['employees'] ?? []);
+        $allCommittees = collect($this->jsonData['committees'] ?? []);
+        $taskEmployeeMap = collect($this->jsonData['task_employee'] ?? [])->groupBy('task_id');
+
+        $otherEvents = $allEvents->where('id', '!=', $eventId)->where('archived', '!=', true)
+            ->map(function ($event) use ($allTasks, $allEmployees, $allCommittees, $taskEmployeeMap) {
+                $event['tasks'] = $allTasks->where('event_id', $event['id'])->map(function ($task) use ($allEmployees, $taskEmployeeMap) {
+                    $employeeIds = $taskEmployeeMap->get($task['id'], collect())->pluck('employee_id');
+                    return [
+                        'employees' => $allEmployees->whereIn('id', $employeeIds)->values()->toArray(),
+                    ];
+                })->values()->toArray();
+                return $event;
+            });
 
         foreach ($currentEmployeeIds as $employeeId) {
             $employee = collect($this->jsonData['employees'])->firstWhere('id', $employeeId);
             $employeeName = $employee['name'] ?? 'Unknown Employee';
 
             foreach ($otherEvents as $otherEvent) {
+                // Now that tasks are normalized, this check will work correctly.
                 $isAssignedToOtherEvent = collect($otherEvent['tasks'] ?? [])->flatMap(fn ($t) => collect($t['employees'] ?? [])->pluck('id'))->contains($employeeId);
 
                 if ($isAssignedToOtherEvent && !empty($otherEvent['startDate']) && !empty($otherEvent['endDate'])) {
-                    $otherEventStartDate = \DateTime::createFromFormat('M-d-Y', $otherEvent['startDate']);
-                    $otherEventEndDate = \DateTime::createFromFormat('M-d-Y', $otherEvent['endDate']);
+                    $currentIsAllDay = $currentEvent['isAllDay'] ?? false;
+                    $otherIsAllDay = $otherEvent['isAllDay'] ?? false;
 
-                    if ($otherEventStartDate && $otherEventEndDate && $eventStartDate <= $otherEventEndDate && $eventEndDate >= $otherEventStartDate) {
-                        $fail("Employee \"{$employeeName}\" is already assigned to another event (\"{$otherEvent['title']}\") during this time period.");
+                    $format = ($currentIsAllDay || $otherIsAllDay) ? 'M-d-Y' : 'M-d-Y H:i';
+
+                    $currentStartTime = $currentIsAllDay ? '' : ' ' . ($currentEvent['startTime'] ?? '00:00');
+                    $currentEndTime = $currentIsAllDay ? '' : ' ' . ($currentEvent['endTime'] ?? '23:59');
+                    $otherStartTime = $otherIsAllDay ? '' : ' ' . ($otherEvent['startTime'] ?? '00:00');
+                    $otherEndTime = $otherIsAllDay ? '' : ' ' . ($otherEvent['endTime'] ?? '23:59');
+
+                    $eventStartDateTime = \DateTime::createFromFormat($format, $currentEvent['startDate'] . $currentStartTime);
+                    $eventEndDateTime = \DateTime::createFromFormat($format, $currentEvent['endDate'] . $currentEndTime);
+                    $otherEventStartDateTime = \DateTime::createFromFormat($format, $otherEvent['startDate'] . $otherStartTime);
+                    $otherEventEndDateTime = \DateTime::createFromFormat($format, $otherEvent['endDate'] . $otherEndTime);
+
+                    if ($eventStartDateTime && $eventEndDateTime && $otherEventStartDateTime && $otherEventEndDateTime && $eventStartDateTime < $otherEventEndDateTime && $eventEndDateTime > $otherEventStartDateTime) {
+                        $fail("Employee \"{$employeeName}\" is already assigned to \"{$otherEvent['title']}\" during this time period.");
                         return;
                     }
                 }

@@ -1,5 +1,6 @@
 import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
+import axios from 'axios';
 
 export function useTasks() {
   // State for the modal
@@ -46,35 +47,29 @@ export function useTasks() {
 
   // Save logic
   // in useTasks.js
-const saveTaskAssignments = async (onSuccessCallback) => {
-  if (!selectedEventForTasks.value) {
-    return Promise.reject({ message: 'No event selected', errors: { general: ['No event selected'] }});
-  }
+  const saveTaskAssignments = async (onSuccessCallback) => {
+    if (!selectedEventForTasks.value) {
+      throw new Error('No event selected');
+    }
 
-  const payload = {
-    tasks: taskAssignments.value.map(task => ({
-      committee_id: task.committee ? task.committee.id : null,
-      employees: (task.employees || []).map(emp => (emp && emp.id) ? emp.id : emp),
-      description: task.task || ''
-    })),
+    const payload = {
+      tasks: taskAssignments.value.map(task => ({
+        committee_id: task.committee ? task.committee.id : null,
+        employees: (task.employees || []).map(emp => (emp && emp.id) ? emp.id : emp),
+        description: task.task || ''
+      })),
+    };
+
+    try {
+      const response = await axios.put(route('tasks.updateForEvent', { id: selectedEventForTasks.value.id }), payload);
+      // Manually trigger an Inertia visit to refresh props after a successful axios call
+      router.reload({ onSuccess: onSuccessCallback });
+      return response.data;
+    } catch (error) {
+      // Re-throw the error to be caught by the component
+      throw error;
+    }
   };
-
-  console.debug('[saveTaskAssignments] payload', payload);
-
-  const response = await router.put(route('tasks.updateForEvent', { id: selectedEventForTasks.value.id }), payload, {
-    preserveScroll: true,
-    onSuccess: (page) => {
-      if (onSuccessCallback) onSuccessCallback(page);
-    },
-  });
-
-  // Inertia's router.put doesn't return the page object directly in the promise resolution.
-  // The page updates automatically, and we can access the new props via usePage().
-  // However, since the controller flashes the tasks, they will be in the next page's props.
-  // The calling component handles the onSuccess logic, which has access to the updated page.
-  // For optimistic updates, we rely on the controller flashing back the data.
-  return response; // The promise resolves when the visit is complete.
-};
 
 
   return { isTaskModalVisible, selectedEventForTasks, taskAssignments, openTaskModal, addTask, deleteTask, clearAllTasks, saveTaskAssignments };

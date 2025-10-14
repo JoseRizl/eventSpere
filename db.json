@@ -359,50 +359,42 @@
     ],
     "tasks": [
         {
-            "id": "72f9-63af",
-            "description": "123",
-            "event_id": "72f9",
-            "committee_id": "1"
+            "id": "968d-04d8",
+            "description": "asdsad",
+            "event_id": "968d",
+            "committee_id": 1
         },
         {
-            "id": "313c-efba",
+            "id": "6ee4-8e42",
             "description": "ml",
-            "event_id": "313c",
-            "committee_id": 1
+            "event_id": "6ee4",
+            "committee_id": 4
         }
     ],
     "task_employee": [
         {
-            "task_id": "72f9-63af",
+            "task_id": "968d-04d8",
             "employee_id": "1"
         },
         {
-            "task_id": "72f9-63af",
+            "task_id": "968d-04d8",
             "employee_id": "2"
         },
         {
-            "task_id": "313c-efba",
-            "employee_id": "1"
-        },
-        {
-            "task_id": "313c-efba",
-            "employee_id": "2"
-        },
-        {
-            "task_id": "313c-efba",
+            "task_id": "968d-04d8",
             "employee_id": "3"
         },
         {
-            "task_id": "313c-efba",
+            "task_id": "968d-04d8",
+            "employee_id": "4"
+        },
+        {
+            "task_id": "968d-04d8",
             "employee_id": "6"
         },
         {
-            "task_id": "313c-efba",
-            "employee_id": "7"
-        },
-        {
-            "task_id": "313c-efba",
-            "employee_id": "10"
+            "task_id": "6ee4-8e42",
+            "employee_id": "5"
         }
     ],
     "event_announcements": [
