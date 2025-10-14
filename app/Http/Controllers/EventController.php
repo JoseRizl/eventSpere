@@ -597,26 +597,56 @@ class EventController extends JsonController
             $json = File::get(base_path('db.json'));
             $data = json_decode($json, true);
 
-            // Filter out the event to be deleted
-            $data['events'] = collect($data['events'])
-                ->filter(function($event) use ($id) {
-                    return $event['id'] != $id;
-                })
-                ->values()
-                ->toArray();
+            // --- Start of cascading delete logic ---
 
-            // Also filter out any brackets associated with the deleted event
-            if (isset($data['brackets'])) {
-                $data['brackets'] = collect($data['brackets'])
-                    ->filter(function($bracket) use ($id) {
-                        return ($bracket['event_id'] ?? null) != $id;
-                    })
-                    ->values()
-                    ->toArray();
+            // 1. Get IDs of related items before deleting them
+            $bracketIdsToDelete = collect($data['brackets'] ?? [])->where('event_id', $id)->pluck('id')->all();
+            $matchIdsToDelete = collect($data['matches'] ?? [])->whereIn('bracket_id', $bracketIdsToDelete)->pluck('id')->all();
+            $taskIdsToDelete = collect($data['tasks'] ?? [])->where('event_id', $id)->pluck('id')->all();
+
+            // 2. Filter out all related data
+            $collectionsToDeleteFrom = [
+                'events' => 'id',
+                'brackets' => 'event_id',
+                'activities' => 'event_id',
+                'announcements' => 'event_id',
+                'memorandums' => 'event_id',
+                'event_tags' => 'event_id',
+                'tasks' => 'event_id',
+            ];
+
+            foreach ($collectionsToDeleteFrom as $collection => $key) {
+                if (isset($data[$collection])) {
+                    $data[$collection] = collect($data[$collection])
+                        ->filter(fn($item) => ($item[$key] ?? null) != $id)
+                        ->values()
+                        ->toArray();
+                }
+            }
+
+            // 3. Delete matches and match players related to the event's brackets
+            if (!empty($bracketIdsToDelete)) {
+                if (isset($data['matches'])) {
+                    $data['matches'] = collect($data['matches'])
+                        ->filter(fn($match) => !in_array($match['bracket_id'], $bracketIdsToDelete))
+                        ->values()->toArray();
+                }
+                if (isset($data['matchPlayers']) && !empty($matchIdsToDelete)) {
+                    $data['matchPlayers'] = collect($data['matchPlayers'])
+                        ->filter(fn($player) => !in_array($player['match_id'], $matchIdsToDelete))
+                        ->values()->toArray();
+                }
+            }
+
+            // 4. Delete task-employee assignments
+            if (!empty($taskIdsToDelete) && isset($data['task_employee'])) {
+                $data['task_employee'] = collect($data['task_employee'])
+                    ->filter(fn($assignment) => !in_array($assignment['task_id'], $taskIdsToDelete))
+                    ->values()->toArray();
             }
 
             $this->writeJson($data);
-            return back()->with('success', 'Event and its associated brackets were permanently deleted.');
+            return back()->with('success', 'Event and all its related data were permanently deleted.');
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to delete event');
         }
