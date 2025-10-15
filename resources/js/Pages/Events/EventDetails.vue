@@ -14,10 +14,10 @@ import BracketView from '@/Components/BracketView.vue';
 import MatchEditorDialog from '@/Components/MatchEditorDialog.vue';
 import MatchesView from '@/Components/MatchesView.vue';
 import TaskEditor from '@/Components/TaskEditor.vue';
-import { getFullDateTime } from '@/utils/dateUtils.js';
 import { useActivities } from '@/composables/useActivities.js';
 import { useTasks } from '@/composables/useTasks.js';
 import { useAnnouncements } from '@/composables/useAnnouncements.js';
+import { useEventValidation } from '@/composables/useEventValidation.js';
 import { useMemorandum } from '@/composables/useMemorandum.js';
 
 const props = defineProps({
@@ -140,6 +140,9 @@ const openImageDialog = (imageUrl) => {
 const { saveMemorandum, clearMemorandum } = useMemorandum();
 const newMemorandumFile = ref(null);
 const newMemorandumPreview = ref(null);
+
+const { validateEvent, formatDateForPicker, formatDisplayDate } = useEventValidation();
+
 const { activities: activitiesState, fetchActivities: fetchActivitiesApi, saveActivities } = useActivities();
 const tasksManager = useTasks();
 
@@ -495,9 +498,10 @@ const handleBannerImageUpload = async (event) => {
 
 const addAnnouncement = async () => {
   if (!newAnnouncement.value.message.trim()) {
+    errorDialogMessage.value = "The announcement message cannot be empty.";
+    showErrorDialog.value = true;
     return;
   }
-
   saving.value = true;
 
   let imageUrl = null;
@@ -520,8 +524,11 @@ const addAnnouncement = async () => {
     successMessage.value = 'Announcement posted successfully!';
     showSuccessDialog.value = true;
   } catch (error) {
-    console.error('Error posting announcement:', error);
-    errorMessage.value = 'Failed to post announcement.';
+    let message = 'Failed to post announcement.';
+    if (error.response && error.response.data && error.response.data.message) {
+        message = error.response.data.message;
+    }
+    errorDialogMessage.value = message;
     showErrorDialog.value = true;
   } finally {
     saving.value = false;
@@ -603,7 +610,7 @@ const saveChanges = () => {
   errorMessage.value = null;
   showErrorDialog.value = false;
 
-  const validationError = validateDatesAndTimes();
+  const validationError = validateEvent(eventDetails.value, { isSubmitting: true, originalEvent: originalEventDetails.value });
   if (validationError) {
     saving.value = false;
     errorMessage.value = validationError;
@@ -672,130 +679,6 @@ const formatDisplayTime = (timeString) => {
 
 
 // Date-related functions
-
-const validateDatesAndTimes = () => {
-  try {
-    const startDate = formatDateForPicker(eventDetails.value.startDate);
-    const endDate = formatDateForPicker(eventDetails.value.endDate);
-
-    if (!startDate || !endDate || !isValid(startDate) || !isValid(endDate)) {
-      return "Invalid start or end date.";
-    }
-
-    if (endDate < startDate) {
-      return "End date cannot be earlier than start date.";
-    }
-
-    if (eventDetails.value.startTime && eventDetails.value.endTime) {
-      const startDateTime = getFullDateTime(startDate, eventDetails.value.startTime);
-      const endDateTime = getFullDateTime(endDate, eventDetails.value.endTime);
-      if (endDateTime <= startDateTime) {
-        return "End time must be after start time on the same day, or on a later day.";
-      }
-    }
-
-    // Validate activities using date-only comparisons to avoid timezone drift
-    if (Array.isArray(eventDetails.value.activities)) {
-      const normalize = (d) => {
-        const dt = formatDateForPicker(d);
-        return dt ? format(dt, 'yyyy-MM-dd') : null;
-      };
-      const startY = normalize(eventDetails.value.startDate);
-      const endY = normalize(eventDetails.value.endDate);
-
-      for (let i = 0; i < eventDetails.value.activities.length; i++) {
-        const act = eventDetails.value.activities[i];
-        if (!act) continue;
-        const actY = normalize(act.date);
-        if (!actY || !startY || !endY || actY < startY || actY > endY) {
-          return `Activity ${i + 1}: date (${formatDisplayDate(act.date)}) must be within the event range (${formatDisplayDate(eventDetails.value.startDate)} - ${formatDisplayDate(eventDetails.value.endDate)}).`;
-        }
-        if (act.startTime && act.endTime) {
-          const sdt = getFullDateTime(act.date, act.startTime);
-          const edt = getFullDateTime(act.date, act.endTime);
-          if (!sdt || !edt || edt <= sdt) {
-            return `Activity ${i + 1}: end time must be after start time.`;
-          }
-        }
-
-        // Enforce activity times within event window if event has times
-        const eventStartDT = (eventDetails.value.startDate && eventDetails.value.startTime)
-          ? getFullDateTime(eventDetails.value.startDate, eventDetails.value.startTime)
-          : null;
-        const eventEndDT = (eventDetails.value.endDate && eventDetails.value.endTime)
-          ? getFullDateTime(eventDetails.value.endDate, eventDetails.value.endTime)
-          : null;
-
-        if (eventStartDT && act.startTime) {
-          const actStartDT = getFullDateTime(act.date, act.startTime);
-          if (actStartDT < eventStartDT) {
-            return `Activity ${i + 1}: start time must be on/after event start (${formatDisplayDate(eventDetails.value.startDate)} ${formatDisplayTime(eventDetails.value.startTime)}).`;
-          }
-        }
-        if (eventEndDT && act.startTime) {
-          const actStartDT = getFullDateTime(act.date, act.startTime);
-          if (actStartDT > eventEndDT) {
-            return `Activity ${i + 1}: start time must be on/before event end (${formatDisplayDate(eventDetails.value.endDate)} ${formatDisplayTime(eventDetails.value.endTime)}).`;
-          }
-        }
-        if (eventEndDT && act.endTime) {
-          const actEndDT = getFullDateTime(act.date, act.endTime);
-          if (actEndDT > eventEndDT) {
-            return `Activity ${i + 1}: end time must be on/before event end (${formatDisplayDate(eventDetails.value.endDate)} ${formatDisplayTime(eventDetails.value.endTime)}).`;
-          }
-        }
-        if (eventStartDT && act.endTime) {
-          const actEndDT = getFullDateTime(act.date, act.endTime);
-          if (actEndDT < eventStartDT) {
-            return `Activity ${i + 1}: end time must be on/after event start (${formatDisplayDate(eventDetails.value.startDate)} ${formatDisplayTime(eventDetails.value.startTime)}).`;
-          }
-        }
-      }
-    }
-
-    return null; // No error
-  } catch {
-    return "An error occurred during date validation. Make sure end time/date is after start time/date.";
-  }
-};
-
-const formatDisplayDate = (dateString) => {
-  if (!dateString) return '';
-  try {
-    // Try parsing as ISO format first (yyyy-MM-dd)
-    let date = parseISO(dateString);
-    if (!isValid(date)) {
-      // If that fails, try parsing as MMM-dd-yyyy format
-      date = parse(dateString, 'MMM-dd-yyyy', new Date());
-    }
-    return isValid(date) ? format(date, 'MMM-dd-yyyy') : 'Invalid Date';
-  } catch {
-    return 'Invalid Date';
-  }
-};
-
-const formatDateForPicker = (dateInput) => {
-  if (!dateInput) return null;
-  try {
-    if (dateInput instanceof Date && isValid(dateInput)) {
-      return dateInput;
-    }
-    let date;
-    if (typeof dateInput === 'string') {
-      // Try parsing as ISO format first (yyyy-MM-dd)
-      date = parseISO(dateInput);
-      if (!isValid(date)) {
-        // If that fails, try parsing as MMM-dd-yyyy format
-        date = parse(dateInput, 'MMM-dd-yyyy', new Date());
-      }
-    } else {
-      date = new Date(dateInput);
-    }
-    return isValid(date) ? date : null;
-  } catch {
-    return null;
-  }
-};
 
 const startDateModel = computed({
   get() {
@@ -993,10 +876,22 @@ const getBracketIndex = (bracketId) => {
 
                             <!-- Edit Mode: Dates and Times -->
                             <div class="grid grid-cols-2 gap-4">
-                                <div class="flex flex-col"><label class="text-sm font-medium mb-1">Start Date</label><DatePicker v-model="startDateModel" dateFormat="M-dd-yy" showIcon class="w-full" /></div>
-                                <div class="flex flex-col"><label class="text-sm font-medium mb-1">Start Time</label><input type="time" v-model="eventDetails.startTime" class="border p-2 rounded" /></div>
-                                <div class="flex flex-col"><label class="text-sm font-medium mb-1">End Date</label><DatePicker v-model="endDateModel" dateFormat="M-dd-yy" showIcon class="w-full" /></div>
-                                <div class="flex flex-col"><label class="text-sm font-medium mb-1">End Time</label><input type="time" v-model="eventDetails.endTime" class="border p-2 rounded" /></div>
+                                <div class="flex flex-col">
+                                    <label class="text-sm font-medium mb-1">Start Date</label>
+                                    <DatePicker v-model="startDateModel" dateFormat="M-dd-yy" showIcon class="w-full" />
+                                </div>
+                                <div class="flex flex-col">
+                                    <label class="text-sm font-medium mb-1">Start Time</label>
+                                    <input type="time" v-model="eventDetails.startTime" class="border p-2 rounded" />
+                                </div>
+                                <div class="flex flex-col">
+                                    <label class="text-sm font-medium mb-1">End Date</label>
+                                    <DatePicker v-model="endDateModel" dateFormat="M-dd-yy" showIcon class="w-full" :minDate="startDateModel" />
+                                </div>
+                                <div class="flex flex-col">
+                                    <label class="text-sm font-medium mb-1">End Time</label>
+                                    <input type="time" v-model="eventDetails.endTime" class="border p-2 rounded" :min="dateOnlyStr(eventDetails.startDate) === dateOnlyStr(eventDetails.endDate) ? eventDetails.startTime : null" />
+                                </div>
                             </div>
                         </div>
                         <div v-else>
@@ -1254,6 +1149,7 @@ const getBracketIndex = (bracketId) => {
               icon="pi pi-trash"
               class="p-button-rounded p-button-text action-btn-danger"
               @click="promptDeleteAnnouncement(announcement)"
+              v-tooltip.top="'Remove Announcement'"
               aria-label="Remove announcement"
             />
           </div>
@@ -1402,15 +1298,16 @@ const getBracketIndex = (bracketId) => {
     </div>
 
     <!-- Generic Error Dialog -->
-    <ConfirmationDialog
-        v-model:show="showGenericErrorDialog"
-        title="Error"
-        :message="genericErrorMessage"
-        confirmText="OK"
-        :show-cancel-button="false"
-        confirmButtonClass="bg-red-600 hover:bg-red-700"
-        @confirm="showGenericErrorDialog = false"
-    />
+    <div v-if="showErrorDialog" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center" style="z-index: 9998;">
+      <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+        <h2 class="text-lg font-semibold text-red-700 mb-2">Error</h2>
+        <p class="text-sm text-gray-700 mb-4">{{ errorDialogMessage || errorMessage }}</p>
+        <div class="flex justify-end">
+          <button @click="showErrorDialog = false" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Close</button>
+        </div>
+      </div>
+    </div>
+
 
     <!-- Add Announcement Modal -->
     <Dialog v-model:visible="showAddAnnouncementModal" modal header="Add Announcement" :style="{ width: '50vw' }">

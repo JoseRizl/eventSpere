@@ -268,6 +268,7 @@
                   id="endDate"
                   v-model="newEvent.endDate"
                   dateFormat="MM-dd-yy"
+                  :minDate="newEvent.startDate ? new Date(newEvent.startDate) : null"
                   showIcon
                   class="w-full"
                 />
@@ -278,6 +279,7 @@
                   v-model="newEvent.endTime"
                   placeholder="HH:mm"
                   class="p-inputtext p-component w-36"
+                  :min="newEvent.startDate && newEvent.endDate && new Date(newEvent.startDate).toDateString() === new Date(newEvent.endDate).toDateString() ? newEvent.startTime : null"
                   @blur="newEvent.endTime = newEvent.endTime.padStart(5, '0')"
                 />
               </div>
@@ -473,7 +475,8 @@
             <div class="flex flex-col">
               <label for="endDate" class="mb-1 font-semibold">End</label>
               <div class="flex items-center gap-2">
-                <DatePicker id="endDate" v-model="selectedEvent.endDate" dateFormat="MM-dd-yy" showIcon class="w-full" />
+                <DatePicker id="endDate" v-model="selectedEvent.endDate" dateFormat="MM-dd-yy" showIcon class="w-full"
+                  :minDate="selectedEvent.startDate ? new Date(selectedEvent.startDate) : null" />
                 <input
                   v-if="!selectedEvent.isAllDay"
                   type="time"
@@ -481,10 +484,17 @@
                   v-model="selectedEvent.endTime"
                   placeholder="HH:mm"
                   class="p-inputtext p-component w-36"
+                  :min="selectedEvent.startDate && selectedEvent.endDate && new Date(selectedEvent.startDate).toDateString() === new Date(selectedEvent.endDate).toDateString() ? selectedEvent.startTime : null"
                   @blur="selectedEvent.endTime = selectedEvent.endTime.padStart(5, '0')"
                 />
               </div>
             </div>
+
+            <!-- Error Display -->
+          <div v-if="dateError" class="text-red-500 text-sm mt-2 flex items-center">
+            <i class="pi pi-exclamation-triangle mr-2"></i>
+            {{ dateError }}
+          </div>
 
             <!-- All Day Checkbox - Moved below date/time fields -->
             <div class="col-span-2 mt-2">
@@ -495,11 +505,7 @@
             </div>
           </div>
 
-          <!-- Error Display -->
-          <div v-if="dateError" class="text-red-500 text-sm mt-2 flex items-center">
-            <i class="pi pi-exclamation-triangle mr-2"></i>
-            {{ dateError }}
-          </div>
+
 
           <div class="p-field">
             <label for="description">Description</label>
@@ -610,6 +616,7 @@
   import { useTasks } from '@/composables/useTasks.js';
   import { useMemorandum } from '@/composables/useMemorandum.js';
   import SearchFilterBar from '@/Components/SearchFilterBar.vue';
+  import { useEventValidation } from '@/composables/useEventValidation.js';
   import TaskEditor from '@/Components/TaskEditor.vue';
 
   export default defineComponent({
@@ -650,6 +657,9 @@
 
       // Centralized Task Management
       const tasksManager = useTasks();
+
+      // Validation Composable
+      const { validateEvent } = useEventValidation();
 
       const newEvent = ref({
         title: "",
@@ -723,7 +733,10 @@
           isAllDay: false
         };
         isCreateModalVisible.value = true;
-        dateError.value = "";
+        // Clear previous errors and wait for the modal to open before re-enabling validation
+        nextTick(() => {
+            dateError.value = "";
+        });
       };
 
       const tagsMap = computed(() => {
@@ -744,6 +757,28 @@
             selectedEvent.value.tags = [];
         }
       });
+
+      // Reactive validation for newEvent
+      watch(newEvent, (newVal) => {
+        if (isCreateModalVisible.value) {
+            // Auto-update end date
+            if (newVal.startDate && (!newVal.endDate || new Date(newVal.endDate) < new Date(newVal.startDate)))
+            {
+                newEvent.value.endDate = new Date(newVal.startDate);
+            }
+        }
+      }, { deep: true });
+
+      // Reactive validation for selectedEvent
+      watch(selectedEvent, (newVal) => {
+        if (newVal) {
+            // Auto-update end date
+            if (newVal.startDate && (!newVal.endDate || new Date(newVal.endDate) < new Date(newVal.endDate))) {
+                selectedEvent.value.endDate = new Date(newVal.startDate);
+            }
+            dateError.value = validateEvent(newVal, { originalEvent: page.props.events_prop.find(e => e.id === newVal.id) });
+        }
+      }, { deep: true });
 
       const formatDescription = (description) => {
         if (!description) return '';
@@ -813,51 +848,17 @@
 
      const createEvent = () => {
         resetErrors();
-        let hasError = false;
+        const validationError = validateEvent(newEvent.value, { isSubmitting: true });
 
         if (!newEvent.value.title.trim()) {
             errorMessage.value = "Please enter a valid event title";
             showErrorDialog.value = true;
-            hasError = true;
+            return;
         }
 
-        if (!newEvent.value.startDate || !newEvent.value.endDate) {
-            dateError.value = "Both start and end dates are required.";
-            hasError = true;
-        } else {
-            const start = new Date(newEvent.value.startDate);
-            const end = new Date(newEvent.value.endDate);
-
-            if (end < start) {
-                dateError.value = "End date cannot be before start date.";
-                hasError = true;
-            }
-        }
-
-        if (!newEvent.value.isAllDay) {
-            if (!newEvent.value.startTime || !newEvent.value.endTime) {
-                dateError.value = (dateError.value ? dateError.value + ' ' : '') + "Start and end times are required for non-all-day events.";
-                hasError = true;
-            } else if (newEvent.value.startDate && newEvent.value.endDate && newEvent.value.startTime && newEvent.value.endTime) {
-                const startDateTime = new Date(`${format(new Date(newEvent.value.startDate), 'yyyy-MM-dd')}T${newEvent.value.startTime}`);
-                const endDateTime = new Date(`${format(new Date(newEvent.value.endDate), 'yyyy-MM-dd')}T${newEvent.value.endTime}`);
-                if (endDateTime <= startDateTime) {
-                    dateError.value = (dateError.value ? dateError.value + ' ' : '') + "End date/time must be after start date/time.";
-                    hasError = true;
-                }
-            }
-        }
-
-        if (hasError) {
-            // If we already showed a specific error, don't show the generic one.
-            if (!errorMessage.value) {
-                errorMessage.value = "Please correct the errors before creating the event.";
-                showErrorDialog.value = true;
-            }
-            if (end < start) {
-                dateError.value = "End date cannot be before start date";
-                return;
-            }
+        if (validationError) {
+            dateError.value = validationError;
+            return;
         }
 
         showCreateConfirm.value = true;
@@ -1135,43 +1136,19 @@
     const saveEditedEvent = () => {
       if (!selectedEvent.value) return;
       resetErrors();
-      let hasError = false;
+      const validationError = validateEvent(selectedEvent.value, { isSubmitting: true, originalEvent: page.props.events_prop.find(e => e.id === selectedEvent.value.id) });
 
       if (!selectedEvent.value.title.trim()) {
         errorMessage.value = 'Please enter a valid event title';
         showErrorDialog.value = true;
-        hasError = true;
+        return;
       }
 
-      if (!selectedEvent.value.startDate || !selectedEvent.value.endDate) { // No changes here, just for context
-        dateError.value = "Both start and end dates are required.";
-        hasError = true;
-      } else {
-        const start = new Date(selectedEvent.value.startDate);
-        const end = new Date(selectedEvent.value.endDate);
-
-        if (end < start) {
-          dateError.value = "End date cannot be before start date";
-          hasError = true;
-        }
-      }
-
-      if (!selectedEvent.value.isAllDay) {
-        if (!selectedEvent.value.startTime || !selectedEvent.value.endTime) {
-            dateError.value = (dateError.value ? dateError.value + ' ' : '') + "Start and end times are required for non-all-day events.";
-            hasError = true;
-        } else if (selectedEvent.value.startDate && selectedEvent.value.endDate && selectedEvent.value.startTime && selectedEvent.value.endTime) {
-            const startDateTime = new Date(`${format(new Date(selectedEvent.value.startDate), 'yyyy-MM-dd')}T${selectedEvent.value.startTime}`);
-            const endDateTime = new Date(`${format(new Date(selectedEvent.value.endDate), 'yyyy-MM-dd')}T${selectedEvent.value.endTime}`);
-            if (endDateTime <= startDateTime) {
-                dateError.value = (dateError.value ? dateError.value + ' ' : '') + "End date/time must be after start date/time.";
-                hasError = true;
-            }
-        }
-      }
-
-      if (hasError) {
-        return; // Stop execution if there are validation errors
+      if (validationError) {
+          dateError.value = validationError;
+          errorMessage.value = validationError;
+          showErrorDialog.value = true;
+          return;
       }
 
       showSaveConfirm.value = true;

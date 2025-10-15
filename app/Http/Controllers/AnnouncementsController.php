@@ -49,12 +49,24 @@ class AnnouncementsController extends Controller
             return back()->with('error', 'Event not found.');
         }
 
-        $validated = $request->validate([
-            'message' => 'required|string',
-            'image' => 'nullable|string',
-            'timestamp' => 'nullable|string',
-            'userId' => 'required',
-        ]);
+        try {
+            $validated = $request->validate([
+                'message' => ['required', 'string', function ($attribute, $value, $fail) {
+                    if (trim($value) === '') {
+                        $fail('The announcement message cannot be empty.');
+                    }
+                }],
+                'image' => 'nullable|string',
+                'timestamp' => 'nullable|string',
+                'userId' => 'required',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $errorMessage = $e->validator->errors()->first('message') ?? 'The given data was invalid.';
+            if ($request->wantsJson()) {
+                return response()->json(['message' => $errorMessage, 'errors' => $e->errors()], 422);
+            }
+            return back()->with('error', $errorMessage)->withInput();
+        }
 
         $new = [
             'id' => $eventId.'-'.substr(md5(uniqid(rand(), true)), 0, 4),

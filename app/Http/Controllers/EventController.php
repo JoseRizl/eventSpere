@@ -188,29 +188,17 @@ class EventController extends JsonController
             'description' => 'nullable|string',
             'image' => 'nullable|string',
             'category_id' => ['nullable', Rule::in($validCategoryIds)],
-            'venue' => 'nullable|string|max:255',
-            'startDate' => ['nullable', 'string', function ($attribute, $value, $fail) {
-                if ($value && !preg_match('/^[A-Za-z]{3}-\d{2}-\d{4}$/', $value)) {
-                    $fail('The '.$attribute.' must be in MMM-DD-YYYY format (e.g. May-28-2025).');
-                }
-            }],
-            'endDate' => ['nullable', 'string', function ($attribute, $value, $fail) use ($request) {
-                if ($value && !preg_match('/^[A-Za-z]{3}-\d{2}-\d{4}$/', $value)) {
-                    $fail('The end date must be in MMM-DD-YYYY format.');
-                }
-                if ($request->input('startDate') && $value) {
-                    $startDate = \DateTime::createFromFormat('M-d-Y', $request->input('startDate'));
-                    $endDate = \DateTime::createFromFormat('M-d-Y', $value);
-                    if ($endDate < $startDate) {
-                        $fail('The end date must be on or after the start date.');
-                    }
-                }
-            }],
+            'venue' => 'nullable|string|max:255', // Corrected position
+            'startDate' => 'required|date_format:M-d-Y|after_or_equal:today',
+            'endDate' => 'required|date_format:M-d-Y|after_or_equal:startDate',
             'isAllDay' => ['required', 'boolean'],
             'startTime' => ['required_if:isAllDay,false', 'nullable', 'date_format:H:i'],
             'endTime' => ['required_if:isAllDay,false', 'nullable', 'date_format:H:i', function ($attribute, $value, $fail) use ($request) {
-                $isAllDay = $request->input('isAllDay', false);
-                if (!$isAllDay && $request->input('startDate') == $request->input('endDate') && strtotime($value) <= strtotime($request->input('startTime'))) {
+                $isAllDay = $request->boolean('isAllDay');
+                $startTime = $request->input('startTime');
+                $startDate = $request->input('startDate');
+                $endDate = $request->input('endDate');
+                if (!$isAllDay && $startTime && $value && $startDate === $endDate && strtotime($value) <= strtotime($startTime)) {
                     $fail('The end time must be after the start time for single-day events.');
                 }
             }],
@@ -309,30 +297,29 @@ class EventController extends JsonController
             'description' => 'nullable|string',
             'image' => 'nullable|string',
             'category_id' => ['nullable', Rule::in($validCategoryIds)],
-            'venue' => 'nullable|string|max:255',
-            'startDate' => ['required', 'string', function ($attribute, $value, $fail) {
-                if (!preg_match('/^[A-Za-z]{3}-\d{2}-\d{4}$/', $value)) {
-                    $fail('The '.$attribute.' must be in MMM-DD-YYYY format (e.g. May-28-2025)');
+            'venue' => 'nullable|string|max:255', // Corrected position
+            'startDate' => ['required', 'date_format:M-d-Y', function ($attribute, $value, $fail) use ($id) {
+                $event = collect($this->jsonData['events'])->firstWhere('id', $id);
+                if (!$event) return; // Should not happen if validation runs after finding the event
+
+                $originalStartDate = \Carbon\Carbon::createFromFormat('M-d-Y', $event['startDate'])->startOfDay();
+                $newStartDate = \Carbon\Carbon::createFromFormat('M-d-Y', $value)->startOfDay();
+
+                if ($newStartDate->isPast() && !$originalStartDate->isPast()) {
+                    $fail('The start date for a future event cannot be moved to the past.');
                 }
             }],
-            'endDate' => ['required', 'string', function ($attribute, $value, $fail) use ($request) {
-                if (!preg_match('/^[A-Za-z]{3}-\d{2}-\d{4}$/', $value)) {
-                    $fail('The '.$attribute.' must be in MMM-DD-YYYY format (e.g. May-28-2025)');
-                }
-
-                // Convert to DateTime for comparison
-                $startDate = \DateTime::createFromFormat('M-d-Y', $request->input('startDate'));
-                $endDate = \DateTime::createFromFormat('M-d-Y', $value);
-
-                if ($endDate < $startDate) {
-                    $fail('The end date must be after or equal to the start date');
-                }
-            }],
+            'endDate' => 'required|date_format:M-d-Y|after_or_equal:startDate',
+            'isAllDay' => 'nullable|boolean',
             'startTime' => 'nullable|date_format:H:i',
             'endTime' => ['nullable', 'date_format:H:i', function ($attribute, $value, $fail) use ($request) {
+                $isAllDay = $request->boolean('isAllDay', false); // Assume false if not present
                 $startTime = $request->input('startTime');
-                if ($request->input('startDate') == $request->input('endDate') && strtotime($value) <= strtotime($startTime)) {
-                    $fail('The end time must be after the start time');
+                $startDate = $request->input('startDate');
+                $endDate = $request->input('endDate');
+
+                if (!$isAllDay && $startTime && $value && $startDate === $endDate && strtotime($value) <= strtotime($startTime)) {
+                    $fail('The end time must be after the start time for single-day events.');
                 }
             }],
             'tags' => ['nullable', 'array', function ($attribute, $value, $fail) use ($request, $validTagIds) {
@@ -433,20 +420,30 @@ class EventController extends JsonController
             'image' => 'nullable|string',
             'category_id' => ['nullable', Rule::in($validCategoryIds)],
             'venue' => 'nullable|string|max:255',
-            'startDate' => 'nullable|date_format:M-d-Y',
-            'endDate' => ['nullable', 'date_format:M-d-Y', function ($attribute, $value, $fail) use ($request) {
-                if ($request->input('startDate') && $value && strtotime($value) < strtotime($request->input('startDate'))) {
-                    $fail('The end date must be on or after the start date.');
+            'startDate' => ['sometimes', 'nullable', 'date_format:M-d-Y', function ($attribute, $value, $fail) use ($id) {
+                if (!$value) return;
+                $event = collect($this->jsonData['events'])->firstWhere('id', $id);
+                if (!$event) return;
+
+                $originalStartDate = \Carbon\Carbon::createFromFormat('M-d-Y', $event['startDate'])->startOfDay();
+                $newStartDate = \Carbon\Carbon::createFromFormat('M-d-Y', $value)->startOfDay();
+
+                if ($newStartDate->isPast() && !$originalStartDate->isPast()) {
+                    $fail('The start date for a future event cannot be moved to the past.');
                 }
             }],
+            'endDate' => 'sometimes|nullable|date_format:M-d-Y|after_or_equal:startDate',
             'isAllDay' => 'sometimes|boolean',
             'startTime' => ['sometimes', 'required_if:isAllDay,false', 'nullable', 'date_format:H:i'],
             'endTime' => ['sometimes', 'required_if:isAllDay,false', 'nullable', 'date_format:H:i', function ($attribute, $value, $fail) use ($request) {
-                $isAllDay = $request->input('isAllDay', false);
-                if (!$isAllDay && $request->input('startDate') && $request->input('endDate') && $request->input('startDate') == $request->input('endDate') && $request->input('startTime') && $value) {
-                    if (strtotime($value) <= strtotime($request->input('startTime'))) {
-                        $fail('The end time must be after the start time for single-day events.');
-                    }
+                // Use request's validated data if available, otherwise fallback to input
+                $isAllDay = $request->has('isAllDay') ? $request->boolean('isAllDay') : $request->input('isAllDay', false);
+                $startTime = $request->input('startTime');
+                $startDate = $request->input('startDate');
+                $endDate = $request->input('endDate');
+
+                if (!$isAllDay && $startTime && $value && $startDate === $endDate && strtotime($value) <= strtotime($startTime)) {
+                    $fail('The end time must be after the start time for single-day events.');
                 }
             }],
             'tags' => 'nullable|array',
