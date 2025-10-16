@@ -35,7 +35,9 @@ Route::middleware('auth')->group(function () {
 
     Route::put('/events/{id}/update', [EventController::class, 'update'])->name('event.update');
     Route::put('/events/{id}/activities', [ActivitiesController::class, 'updateForEvent'])->name('events.activities.updateForEvent');
+    Route::post('/announcements', [AnnouncementsController::class, 'store'])->name('announcements.store');
     Route::post('/events/{id}/announcements', [AnnouncementsController::class, 'storeForEvent'])->name('events.announcements.storeForEvent');
+    Route::put('/events/{id}/announcements/{announcementId}', [AnnouncementsController::class, 'updateForEvent'])->name('events.announcements.updateForEvent');
     Route::delete('/events/{id}/announcements/{announcementId}', [AnnouncementsController::class, 'destroyForEvent'])->name('events.announcements.destroyForEvent');
 
     // Category and Tag routes

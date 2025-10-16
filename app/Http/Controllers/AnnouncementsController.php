@@ -42,6 +42,43 @@ class AnnouncementsController extends Controller
         return response()->json($ann);
     }
 
+    public function store(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'message' => ['required', 'string', function ($attribute, $value, $fail) {
+                    if (trim($value) === '') {
+                        $fail('The announcement message cannot be empty.');
+                    }
+                }],
+                'image' => 'nullable|string',
+                'timestamp' => 'nullable|string',
+                'userId' => 'required',
+                'event_id' => 'nullable|string', // Event ID is now optional
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['message' => $e->validator->errors()->first(), 'errors' => $e->errors()], 422);
+        }
+
+        $new = [
+            'id' => ($validated['event_id'] ?? 'gen') . '-' . substr(md5(uniqid(rand(), true)), 0, 4),
+            'event_id' => $validated['event_id'] ?? null,
+            'message' => $validated['message'],
+            'image' => $validated['image'] ?? null,
+            'timestamp' => $validated['timestamp'] ?? now()->toISOString(),
+            'userId' => $validated['userId'],
+        ];
+
+        $this->jsonData['announcements'] = $this->jsonData['announcements'] ?? [];
+        array_unshift($this->jsonData['announcements'], $new);
+        $this->writeJson($this->jsonData);
+
+        $user = User::find($new['userId']);
+        $new['employee'] = $user ? ['name' => $user->name] : ['name' => 'Admin'];
+
+        return response()->json($new, 201);
+    }
+
     public function storeForEvent(Request $request, $eventId)
     {
         $event = collect($this->jsonData['events'] ?? [])->firstWhere('id', $eventId);
@@ -89,6 +126,49 @@ class AnnouncementsController extends Controller
             return response()->json($new, 201);
         }
         return back()->with('success', 'Announcement posted.');
+    }
+
+    public function updateForEvent(Request $request, $eventId, $announcementId)
+    {
+        try {
+            $validated = $request->validate([
+                'message' => ['required', 'string', function ($attribute, $value, $fail) {
+                    if (trim($value) === '') {
+                        $fail('The announcement message cannot be empty.');
+                    }
+                }],
+                'image' => 'nullable|string',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $errorMessage = $e->validator->errors()->first('message') ?? 'The given data was invalid.';
+            if ($request->wantsJson()) {
+                return response()->json(['message' => $errorMessage, 'errors' => $e->errors()], 422);
+            }
+            return back()->with('error', $errorMessage)->withInput();
+        }
+
+        $announcements = collect($this->jsonData['announcements'] ?? []);
+        $announcementIndex = $announcements->search(fn($ann) => $ann['id'] === $announcementId && ($ann['event_id'] ?? null) == $eventId);
+
+        if ($announcementIndex === false) {
+            return response()->json(['message' => 'Announcement not found.'], 404);
+        }
+
+        $updatedAnnouncement = $announcements[$announcementIndex];
+        $updatedAnnouncement['message'] = $validated['message'];
+        if ($request->has('image')) {
+            $updatedAnnouncement['image'] = $validated['image'];
+        }
+        // Optionally, you could add an 'updated_at' field instead of changing the timestamp
+        // $updatedAnnouncement['updated_at'] = now()->toISOString();
+
+        $this->jsonData['announcements'][$announcementIndex] = $updatedAnnouncement;
+        $this->writeJson($this->jsonData);
+
+        $user = User::find($updatedAnnouncement['userId']);
+        $updatedAnnouncement['employee'] = $user ? ['name' => $user->name] : ['name' => 'Admin'];
+
+        return response()->json($updatedAnnouncement, 200);
     }
 
     public function destroyForEvent(Request $request, $eventId, $announcementId)

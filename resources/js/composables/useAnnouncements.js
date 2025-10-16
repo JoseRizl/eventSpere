@@ -90,17 +90,31 @@ export function useAnnouncements({ searchQuery, startDateFilter, endDateFilter }
         eventAnnouncements.value = Array.isArray(anns) ? anns : [];
     };
 
-    const deleteAnnouncement = async (announcementId, eventIdOverride = null) => {
-        // Resolve event id from parameter or current list
-        let eventId = eventIdOverride;
-        if (!eventId) {
-            const ann = eventAnnouncements.value.find(a => a.id === announcementId);
-            eventId = ann?.event?.id;
+    const addAnnouncement = (newAnnouncement) => {
+        const employeesMap = allUsers.value.reduce((map, emp) => { map[emp.id] = emp; return map; }, {});
+        const events = Array.isArray(allNews.value) ? allNews.value : [];
+        const augmentedAnn = {
+            ...newAnnouncement,
+            event: events.find(e => e.id === newAnnouncement.event_id) || null,
+            employee: employeesMap[newAnnouncement.userId] || { name: 'Admin' },
+            formattedTimestamp: format(new Date(newAnnouncement.timestamp), "MMMM dd, yyyy HH:mm"),
+        };
+        eventAnnouncements.value.unshift(augmentedAnn);
+    };
+
+    const updateAnnouncement = (updatedAnnouncement) => {
+        const index = eventAnnouncements.value.findIndex(a => a.id === updatedAnnouncement.id);
+        if (index !== -1) {
+            // To keep reactivity, we need to merge properties into the existing object
+            // or replace it entirely. Replacing is simpler if the object structure is consistent.
+            eventAnnouncements.value.splice(index, 1, { ...eventAnnouncements.value[index], ...updatedAnnouncement });
         }
-        if (!eventId) return;
-        await axios.delete(route('events.announcements.destroyForEvent', { id: eventId, announcementId }));
+    };
+
+    const deleteAnnouncementById = (announcementId) => {
         eventAnnouncements.value = eventAnnouncements.value.filter(a => a.id !== announcementId);
     };
 
-    return { eventAnnouncements, fetchAnnouncements, filteredAnnouncements, deleteAnnouncement, setAnnouncements };
+
+    return { eventAnnouncements, fetchAnnouncements, filteredAnnouncements, setAnnouncements, addAnnouncement, updateAnnouncement, deleteAnnouncementById };
 }

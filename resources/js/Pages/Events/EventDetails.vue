@@ -13,6 +13,7 @@ import BracketCard from '@/Components/BracketCard.vue';
 import BracketView from '@/Components/BracketView.vue';
 import MatchEditorDialog from '@/Components/MatchEditorDialog.vue';
 import MatchesView from '@/Components/MatchesView.vue';
+import AnnouncementsBoard from '@/Components/AnnouncementsBoard.vue';
 import TaskEditor from '@/Components/TaskEditor.vue';
 import { useActivities } from '@/composables/useActivities.js';
 import { useTasks } from '@/composables/useTasks.js';
@@ -62,70 +63,12 @@ const searchQuery = ref('');
 const scheduleToDelete = ref(null);
 
 // Announcement search
-const announcementSearchQuery = ref('');
-const announcementStartDateFilter = ref(null);
-const announcementEndDateFilter = ref(null);
-const showAnnouncementDateFilter = ref(false);
-
-const filteredEventAnnouncements = computed(() => {
-  let announcements = eventAnnouncements.value;
-
-  // Filter by search query
-  const query = announcementSearchQuery.value.toLowerCase().trim();
-  if (query) {
-    announcements = announcements.filter(announcement => {
-      const messageMatch = announcement.message?.toLowerCase().includes(query);
-      return messageMatch;
-    });
-  }
-
-  // Filter by date range
-  if (announcementStartDateFilter.value || announcementEndDateFilter.value) {
-    announcements = announcements.filter(ann => {
-      const annDate = new Date(ann.timestamp);
-      if (isNaN(annDate.getTime())) return false;
-
-      const filterStart = announcementStartDateFilter.value ? new Date(announcementStartDateFilter.value) : null;
-      const filterEnd = announcementEndDateFilter.value ? endOfDay(new Date(announcementEndDateFilter.value)) : null;
-
-      if (filterStart && !filterEnd) return annDate >= filterStart;
-      if (!filterStart && filterEnd) return annDate <= filterEnd;
-      if (filterStart && filterEnd) return isWithinInterval(annDate, { start: filterStart, end: filterEnd });
-      return true;
-    });
-  }
-
-  return announcements;
-});
-
-const toggleAnnouncementDateFilter = () => {
-  showAnnouncementDateFilter.value = !showAnnouncementDateFilter.value;
-};
-
-const clearAnnouncementDateFilter = () => {
-  announcementStartDateFilter.value = null;
-  announcementEndDateFilter.value = null;
-};
-
-const clearAnnouncementFilters = () => {
-  announcementSearchQuery.value = '';
-  announcementStartDateFilter.value = null;
-  announcementEndDateFilter.value = null;
-  showAnnouncementDateFilter.value = false;
-};
+const announcementSearchQuery = ref(''); // Keep for the composable
 
 // Event-specific announcements
 const eventAnnouncements = ref([]);
 const allNewsProxy = ref(props.relatedEvents || []); // placeholder for composable signature
-const { setAnnouncements } = useAnnouncements({ searchQuery: announcementSearchQuery, startDateFilter: ref(null), endDateFilter: ref(null) }, allNewsProxy);
-const showAddAnnouncementModal = ref(false);
-const newAnnouncement = ref({
-  message: '',
-  image: null,
-  imagePreview: null
-});
-const showDeleteAnnouncementConfirm = ref(false);
-const announcementToDelete = ref(null);
+const { addAnnouncement, updateAnnouncement, deleteAnnouncementById } = useAnnouncements({ searchQuery: announcementSearchQuery, startDateFilter: ref(null), endDateFilter: ref(null) }, allNewsProxy);
 
 // For viewing announcement images
 const showImageDialog = ref(false);
@@ -453,11 +396,6 @@ const goBack = () => {
 
 // Initial announcements are preloaded via props; no GET here to achieve zero client GETs.
 
-const openAddAnnouncementModal = () => {
-  newAnnouncement.value = { message: '', image: null, imagePreview: null };
-  showAddAnnouncementModal.value = true;
-};
-
 const viewMemorandum = () => {
     if (eventDetails.value.memorandum && eventDetails.value.memorandum.content) {
     if (eventDetails.value.memorandum.type === 'image') {
@@ -474,95 +412,11 @@ const viewMemorandum = () => {
     }
 };
 
-const handleAnnouncementImageUpload = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    newAnnouncement.value.image = file;
-    newAnnouncement.value.imagePreview = URL.createObjectURL(file);
-  }
-};
-
-const toBase64 = file => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
-});
-
 const handleBannerImageUpload = async (event) => {
   const file = event.target.files[0];
   if (file) {
     eventDetails.value.image = await toBase64(file);
   }
-};
-
-const addAnnouncement = async () => {
-  if (!newAnnouncement.value.message.trim()) {
-    errorDialogMessage.value = "The announcement message cannot be empty.";
-    showErrorDialog.value = true;
-    return;
-  }
-  saving.value = true;
-
-  let imageUrl = null;
-  if (newAnnouncement.value.image) {
-    imageUrl = await toBase64(newAnnouncement.value.image);
-  }
-
-  const payload = {
-    message: newAnnouncement.value.message,
-    timestamp: new Date().toISOString(),
-    image: imageUrl,
-    userId: user.value.id,
-  };
-
-  try {
-    const response = await axios.post(route('events.announcements.storeForEvent', { id: props.event.id }), payload);
-    const newAnn = response.data; // Backend now returns announcement with employee info
-    eventAnnouncements.value.unshift(newAnn);
-    showAddAnnouncementModal.value = false;
-    successMessage.value = 'Announcement posted successfully!';
-    showSuccessDialog.value = true;
-  } catch (error) {
-    let message = 'Failed to post announcement.';
-    if (error.response && error.response.data && error.response.data.message) {
-        message = error.response.data.message;
-    }
-    errorDialogMessage.value = message;
-    showErrorDialog.value = true;
-  } finally {
-    saving.value = false;
-  }
-};
-
-const promptDeleteAnnouncement = (announcement) => {
-  announcementToDelete.value = announcement;
-  showDeleteAnnouncementConfirm.value = true;
-};
-
-const confirmDeleteAnnouncement = async () => {
-  if (!announcementToDelete.value) return;
-  saving.value = true;
-  try {
-    await axios.delete(route('events.announcements.destroyForEvent', { id: props.event.id, announcementId: announcementToDelete.value.id }));
-    setAnnouncements(eventAnnouncements.value.filter(a => a.id !== announcementToDelete.value.id));
-    eventAnnouncements.value = eventAnnouncements.value.filter(a => a.id !== announcementToDelete.value.id);
-    successMessage.value = 'Announcement deleted.';
-    showSuccessDialog.value = true;
-  } catch (error) {
-    console.error('Error deleting announcement:', error);
-    errorMessage.value = 'Failed to delete announcement.';
-    showErrorDialog.value = true;
-  } finally {
-    saving.value = false;
-    showDeleteAnnouncementConfirm.value = false;
-    announcementToDelete.value = null;
-  }
-};
-
-const formatAnnouncementTimestamp = (timestamp) => {
-  if (!timestamp) return '';
-  return format(parseISO(timestamp), 'MMMM dd, yyyy HH:mm');
 };
 
 const addActivity = () => {
@@ -1085,108 +939,14 @@ const getBracketIndex = (bracketId) => {
 
     <div v-if="currentView === 'announcements'">
     <div class="w-full bg-white rounded-lg shadow-md p-6">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="section-title m-0 text-left">Event Announcements</h2>
-        <button
-          v-if="user?.role === 'Admin' || user?.role === 'Principal'"
-          class="create-button flex items-center gap-2"
-          @click="openAddAnnouncementModal"
-        >
-            <i class="pi pi-plus"></i>
-            <span>Add<span class="hidden sm:inline"> Announcement</span></span>
-        </button>
-      </div>
-
-      <!-- Filters for Announcements -->
-      <div class="mb-4 flex flex-wrap items-center gap-2">
-        <SearchFilterBar
-          v-model:searchQuery="announcementSearchQuery"
-          placeholder="Search announcements..."
-          :show-date-filter="true"
-          :is-date-filter-active="showAnnouncementDateFilter"
-          :show-clear-button="!!(announcementSearchQuery || announcementStartDateFilter || announcementEndDateFilter)"
-          @toggle-date-filter="toggleAnnouncementDateFilter"
-          @clear-filters="clearAnnouncementFilters"
+        <AnnouncementsBoard
+            :announcements="eventAnnouncements"
+            context="event"
+            :event-id="props.event.id"
+            @announcement-added="addAnnouncement"
+            @announcement-updated="updateAnnouncement"
+            @announcement-deleted="deleteAnnouncementById"
         />
-      </div>
-
-      <!-- Date Filter Calendar -->
-      <div v-if="showAnnouncementDateFilter" class="date-filter-container mb-4 max-w-md">
-          <div class="flex flex-col sm:flex-row gap-2">
-            <div class="flex-1">
-              <label>From:</label>
-              <DatePicker
-                v-model="announcementStartDateFilter"
-                dateFormat="M-dd-yy"
-                :showIcon="true"
-                placeholder="Start date"
-                class="w-full"
-              />
-            </div>
-            <div class="date-input-group">
-              <label>To:</label>
-              <DatePicker
-                v-model="announcementEndDateFilter"
-                dateFormat="M-dd-yy"
-                :showIcon="true"
-                placeholder="End date"
-                class="w-full"
-              />
-            </div>
-          </div>
-          <Button v-if="announcementStartDateFilter || announcementEndDateFilter" icon="pi pi-times" class="p-button-text p-button-rounded clear-date-btn" @click="clearAnnouncementDateFilter" v-tooltip.top="'Clear date filter'" />
-      </div>
-
-      <div v-if="filteredEventAnnouncements.length > 0" class="space-y-6">
-        <div
-          v-for="announcement in filteredEventAnnouncements"
-          :key="announcement.id"
-          class="p-4 bg-gray-50 rounded-lg shadow-sm border border-gray-200 relative"
-        >
-          <!-- wrapper guarantees reliable positioning despite internal Button padding -->
-          <div v-if="user?.role === 'Admin' || user?.role === 'Principal'" class="absolute top-1 right-1 z-10">
-            <Button
-              icon="pi pi-trash"
-              class="p-button-rounded p-button-text action-btn-danger"
-              @click="promptDeleteAnnouncement(announcement)"
-              v-tooltip.top="'Remove Announcement'"
-              aria-label="Remove announcement"
-            />
-          </div>
-
-          <!-- User Avatar and Name -->
-          <div class="flex items-center mb-2">
-            <Avatar
-              image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png"
-              class="mr-2"
-              shape="circle"
-              size="small"
-            />
-            <span class="text-gray-600 text-sm font-semibold">{{ announcement.employee?.name || 'Admin' }}</span>
-          </div>
-
-          <p class="text-gray-800 text-base whitespace-pre-line">{{ announcement.message }}</p>
-
-          <img
-            v-if="announcement.image"
-            :src="announcement.image"
-            alt="Announcement image"
-            class="mt-4 rounded-lg max-w-full w-full md:max-w-md mx-auto h-auto cursor-pointer hover:opacity-90 transition-opacity"
-            @click="openImageDialog(announcement.image)"
-          />
-
-          <p class="text-xs text-gray-500 mt-2 text-right">
-            {{ formatAnnouncementTimestamp(announcement.timestamp) }}
-          </p>
-        </div>
-      </div>
-
-      <div v-else-if="announcementSearchQuery || announcementStartDateFilter || announcementEndDateFilter" class="text-center text-gray-500 py-8">
-        <p>No announcements found matching your search or filter.</p>
-      </div>
-      <div v-else class="text-center text-gray-500 py-8">
-        <p>No announcements for this event yet.</p>
-      </div>
     </div>
                     </div>
                 </div>
@@ -1335,6 +1095,28 @@ const getBracketIndex = (bracketId) => {
         @confirm="confirmDeleteAnnouncement"
     />
 
+    <!-- Edit Announcement Modal -->
+    <Dialog v-model:visible="showEditAnnouncementModal" modal header="Edit Announcement" :style="{ width: '50vw' }">
+        <div class="p-fluid">
+            <div class="p-field">
+                <label for="editAnnouncementMessage">Message</label>
+                <Textarea id="editAnnouncementMessage" v-model="editAnnouncementData.message" rows="5" placeholder="Enter your announcement..." autoResize />
+            </div>
+            <div class="p-field mt-4">
+                <label for="editAnnouncementImage">Image (Optional)</label>
+                <div v-if="editAnnouncementData.imagePreview" class="mt-2 relative w-fit">
+                    <img :src="editAnnouncementData.imagePreview" alt="Image preview" class="rounded-lg max-w-xs h-auto" />
+                    <Button icon="pi pi-times" class="p-button-rounded p-button-danger p-button-text absolute top-1 right-1 bg-white/50" @click="removeEditAnnouncementImage" v-tooltip.top="'Remove Image'" />
+                </div>
+                <input type="file" id="editAnnouncementImage" @change="handleEditAnnouncementImageUpload" accept="image/*" class="p-inputtext mt-2" />
+            </div>
+        </div>
+        <template #footer>
+            <Button label="Cancel" @click="showEditAnnouncementModal = false" class="p-button-text" />
+            <Button label="Save Changes" @click="confirmUpdateAnnouncement" :loading="saving" />
+        </template>
+    </Dialog>
+
     <!-- Scoring Configuration Dialog -->
     <Dialog v-model:visible="showScoringConfigDialog" header="Configure Scoring System" modal :style="{ width: '400px' }">
     <div class="scoring-config-dialog">
@@ -1446,20 +1228,6 @@ const getBracketIndex = (bracketId) => {
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   gap: 10px;
-  align-items: flex-start;
-}
-
-.date-input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  flex: 1;
-}
-
-.date-input-group label {
-  font-size: 0.9rem;
-  color: #666;
-  font-weight: 500;
 }
 
 .date-filter-calendar {

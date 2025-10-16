@@ -1,10 +1,12 @@
 <script setup>
 import { ref, onMounted, computed, watch } from "vue";
+import { addMonths, isBefore } from 'date-fns';
 import { loadToggleState, saveToggleState } from '@/utils/localStorage.js';
 import { usePage, router } from "@inertiajs/vue3";
 import { useEvents } from '@/composables/useEvents.js';
 import { useAnnouncements } from '@/composables/useAnnouncements.js';
 import EventCalendar from '@/Components/EventCalendar.vue';
+import AnnouncementsBoard from '@/Components/AnnouncementsBoard.vue';
 import { useFilters } from '@/composables/useFilters.js';
 const showEventsThisMonth = ref(loadToggleState('showEventsThisMonth', true));
 const saving = ref(false);
@@ -15,19 +17,6 @@ const showUpcomingEvents = ref(loadToggleState('showUpcomingEvents', true));
 watch(showEventsThisMonth, (val) => saveToggleState('showEventsThisMonth', val));
 watch(showOngoingEvents, (val) => saveToggleState('showOngoingEvents', val));
 watch(showUpcomingEvents, (val) => saveToggleState('showUpcomingEvents', val));
-const showErrorDialog = ref(false);
-const errorMessage = ref('');
-const showDeleteAnnouncementConfirm = ref(false);
-const announcementToDelete = ref(null);
-
-// For viewing announcement images
-const showImageDialog = ref(false);
-const selectedImageUrl = ref('');
-
-const openImageDialog = (imageUrl) => {
-  selectedImageUrl.value = imageUrl;
-  showImageDialog.value = true;
-};
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
@@ -44,7 +33,7 @@ const {
 } = useEvents({ searchQuery, startDateFilter, endDateFilter });
 
 const {
-    eventAnnouncements, fetchAnnouncements, filteredAnnouncements, deleteAnnouncement
+    eventAnnouncements, fetchAnnouncements, filteredAnnouncements, addAnnouncement, updateAnnouncement, deleteAnnouncementById
 } = useAnnouncements({ searchQuery, startDateFilter, endDateFilter }, allNews);
 
 onMounted(async () => {
@@ -53,28 +42,13 @@ onMounted(async () => {
     fetchAnnouncements(); // fire-and-forget for faster initial render
 });
 
-const promptDeleteAnnouncement = (announcement) => {
-  announcementToDelete.value = announcement;
-  showDeleteAnnouncementConfirm.value = true;
-};
-
-const confirmDeleteAnnouncement = async () => {
-  if (!announcementToDelete.value) return;
-  saving.value = true;
-  try {
-    await deleteAnnouncement(announcementToDelete.value.id);
-    successMessage.value = 'Announcement deleted successfully.';
-    showSuccessDialog.value = true;
-  } catch (error) {
-    console.error('Error deleting announcement:', error);
-    errorMessage.value = 'Failed to delete announcement.';
-    showErrorDialog.value = true;
-  } finally {
-    saving.value = false;
-    showDeleteAnnouncementConfirm.value = false;
-    announcementToDelete.value = null;
-  }
-};
+const announcementEvents = computed(() => {
+  const threeMonthsFromNow = addMonths(new Date(), 3);
+  const upcomingFiltered = upcomingEvents.value.filter(event =>
+    isBefore(new Date(event.startDate), threeMonthsFromNow)
+  );
+  return [...ongoingEvents.value, ...upcomingFiltered];
+});
 
 </script>
 
@@ -342,91 +316,19 @@ const confirmDeleteAnnouncement = async () => {
 
     <!-- Announcement Board -->
     <div v-if="currentView === 'announcements'" class="w-full mt-8">
-      <h2 class="section-title mb-5 text-xl">Announcement Board</h2>
-      <div v-if="filteredAnnouncements.length" class="space-y-6">
-        <div
-          v-for="announcement in filteredAnnouncements"
-          :key="announcement.id"
-          :id="`announcement-${announcement.id}`"
-          @click="announcement.event && router.visit(route('event.details', { id: announcement.event.id, view: 'announcements' }))"
-          :class="['relative p-6 bg-white rounded-lg shadow-lg border-l-4 border-blue-500', announcement.event ? 'cursor-pointer hover:bg-gray-50 transition-colors' : '']"
-        >
-          <!-- User Avatar and Name -->
-          <div v-if="user?.role === 'Admin' || user?.role === 'Principal'" class="absolute top-2 right-2 z-10">
-            <Button
-                icon="pi pi-trash"
-                class="p-button-text p-button-danger p-button-rounded"
-                @click.stop="promptDeleteAnnouncement(announcement)"
-                v-tooltip.top="'Delete Announcement'"
-            />
-          </div>
-          <div class="flex items-center mb-3">
-            <Avatar
-              image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png"
-              class="mr-2"
-              shape="circle"
-              size="small"
-            />
-            <span class="text-gray-600 text-sm font-semibold">{{ announcement.employee?.name || 'Admin' }}</span>
-          </div>
-          <div v-if="announcement.event" class="mb-3">
-            <span class="text-sm text-gray-600">For event:</span>
-            <Link :href="route('event.details', { id: announcement.event.id, view: 'announcements' })" @click.stop class="font-semibold text-blue-700 hover:underline ml-1 text-base">
-              {{ announcement.event.title }}
-            </Link>
-          </div>
-          <p class="text-gray-800 text-lg leading-relaxed">{{ announcement.message }}</p>
-          <img
-            v-if="announcement.image"
-            :src="announcement.image"
-            alt="Announcement image"
-            class="mt-4 rounded-lg max-w-full w-full md:max-w-md mx-auto h-auto shadow-md cursor-pointer hover:opacity-90 transition-opacity"
-            @click.stop="openImageDialog(announcement.image)"
-          />
-          <p class="text-sm text-gray-500 mt-4 text-right">{{ announcement.formattedTimestamp }}</p>
-        </div>
-      </div>
-      <div v-else-if="searchQuery || startDateFilter || endDateFilter" class="flex flex-col items-center justify-center py-10 bg-gray-50 rounded-lg shadow-inner border border-dashed border-gray-300 text-center text-gray-500">
-        <span class="text-4xl mb-2">🧐</span>
-        <span class="font-semibold text-lg">No Announcements Found</span>
-        <span class="text-sm">Try adjusting your search or date filters.</span>
-      </div>
-      <div v-else class="flex flex-col items-center justify-center py-10 bg-gray-50 rounded-lg shadow-inner border border-dashed border-gray-300 text-center text-gray-500">
-        <span class="text-4xl mb-2">📢</span>
-        <span class="font-semibold text-lg">No announcements yet</span>
-        <span class="text-sm">Check back later for updates.</span>
-      </div>
+        <AnnouncementsBoard
+            :announcements="filteredAnnouncements"
+            context="home"
+            :events-for-picker="announcementEvents"
+            @announcement-added="addAnnouncement"
+            @announcement-updated="updateAnnouncement"
+            @announcement-deleted="deleteAnnouncementById"
+        />
     </div>
 
     </div>
     <!-- Dialogs -->
     <LoadingSpinner :show="saving" />
-    <SuccessDialog
-      v-model:show="showSuccessDialog"
-      :message="successMessage"
-    />
-    <div v-if="showErrorDialog" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center" style="z-index: 9998;">
-      <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-        <h2 class="text-lg font-semibold text-red-700 mb-2">Error</h2>
-        <p class="text-sm text-gray-700 mb-4">{{ errorMessage }}</p>
-        <div class="flex justify-end">
-          <button @click="showErrorDialog = false" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Close</button>
-        </div>
-      </div>
-    </div>
-    <ConfirmationDialog
-      v-model:show="showDeleteAnnouncementConfirm"
-      title="Delete Announcement?"
-      message="Are you sure you want to delete this announcement?"
-      confirmText="Yes, Delete"
-      confirmButtonClass="bg-red-600 hover:bg-red-700"
-      @confirm="confirmDeleteAnnouncement"
-    />
-
-    <!-- Image Viewer Dialog -->
-    <Dialog v-model:visible="showImageDialog" modal :dismissableMask="true" header="Image" :style="{ width: '90vw', maxWidth: '1200px' }">
-        <img :src="selectedImageUrl" alt="Announcement Image" class="w-full h-auto max-h-[80vh] object-contain" />
-    </Dialog>
   </div>
 </template>
 
