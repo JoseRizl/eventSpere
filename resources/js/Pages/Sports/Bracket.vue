@@ -1,8 +1,8 @@
 <script setup>
 import { onMounted, computed, ref } from 'vue';
 import { usePage } from '@inertiajs/vue3';
-import BracketCard from '@/Components/BracketCard.vue';
-import MatchEditorDialog from '@/Components/MatchEditorDialog.vue';
+import BracketCard from '@/Components/Brackets/BracketCard.vue';
+import MatchEditorDialog from '@/Components/Brackets/MatchEditorDialog.vue';
 import { useBracketState } from '@/composables/useBracketState.js';
 import { useBracketActions } from '@/composables/useBracketActions.js';
 

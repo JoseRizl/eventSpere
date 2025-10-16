@@ -1,6 +1,6 @@
 <script setup>
-import BracketView from '@/Components/BracketView.vue';
-import MatchesView from '@/Components/MatchesView.vue';
+import BracketView from '@/Components/Brackets/BracketView.vue';
+import MatchesView from '@/Components/Brackets/MatchesView.vue';
 import { formatDisplayDate } from '@/utils/dateUtils.js';
 
 const props = defineProps({
