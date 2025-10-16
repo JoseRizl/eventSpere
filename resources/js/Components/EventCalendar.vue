@@ -99,11 +99,8 @@ const calendarGrid = computed(() => {
 
   const days = eachDayOfInterval({ start: startDate, end: endDate });
 
-  return days.map(day => ({
-    date: day,
-    isCurrentMonth: isSameMonth(day, currentDate.value),
-    isToday: isToday(day),
-    events: eventsWithColor.value
+  return days.map(day => {
+    const allDayEvents = eventsWithColor.value
       .filter((event) => {
         const start = getFullDateTime(event.startDate, event.startTime);
         const end = getFullDateTime(event.endDate || event.startDate, event.endTime || '23:59');
@@ -115,8 +112,23 @@ const calendarGrid = computed(() => {
         const end = getFullDateTime(event.endDate || event.startDate, event.endTime || '23:59');
         return { ...event, isStart: isSameDay(day, start), isEnd: isSameDay(day, end) };
       })
-      .slice(0, 3), // Limit to 3 events per day for display
-  }));
+      .sort((a, b) => {
+        // Prioritize events starting on the current day
+        if (a.isStart && !b.isStart) return -1;
+        if (!a.isStart && b.isStart) return 1;
+        // Otherwise, sort by the original start date/time
+        return getFullDateTime(a.startDate, a.startTime) - getFullDateTime(b.startDate, b.startTime);
+      });
+
+    return {
+      date: day,
+      isCurrentMonth: isSameMonth(day, currentDate.value),
+      isToday: isToday(day),
+      events: allDayEvents,
+      displayEvents: allDayEvents.slice(0, 2), // Show max 2 bars
+      moreEventsCount: Math.max(0, allDayEvents.length - 2),
+    };
+  });
 });
 </script>
 
@@ -165,8 +177,8 @@ const calendarGrid = computed(() => {
         </div>
         <!-- Desktop view: event bars -->
         <div class="hidden sm:flex flex-col mt-1 space-y-1 overflow-hidden flex-grow">
-          <div
-            v-for="event in day.events"
+          <div v-if="day.displayEvents.length > 0"
+            v-for="event in day.displayEvents"
             :key="event.id"
             class="flex items-center h-5 text-white transition-colors"
             :class="[
@@ -180,6 +192,9 @@ const calendarGrid = computed(() => {
           >
             <img v-if="event.isStart && event.image" :src="event.image" class="w-3.5 h-3.5 rounded-full mr-1 object-cover flex-shrink-0" alt="Event Icon" />
             <span v-if="event.isStart" class="truncate font-semibold text-xs">{{ event.title }}</span>
+          </div>
+          <div v-if="day.moreEventsCount > 0" class="text-xs font-semibold text-blue-800 hover:text-blue-600 pl-1.5">
+            +{{ day.moreEventsCount }} more
           </div>
         </div>
       </div>
