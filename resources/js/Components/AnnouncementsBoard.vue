@@ -168,8 +168,15 @@ const confirmUpdate = async () => {
             message: editAnnouncementData.value.message,
             image: editAnnouncementData.value.image,
         };
-        const eventId = announcementToEdit.value.event?.id || announcementToEdit.value.event_id;
-        const response = await axios.put(route('events.announcements.updateForEvent', { id: eventId, announcementId: announcementToEdit.value.id }), payload);
+        const eventId = announcementToEdit.value.event?.id || announcementToEdit.value.event_id || null;
+        let response;
+
+        if (eventId) {
+            response = await axios.put(route('events.announcements.updateForEvent', { id: eventId, announcementId: announcementToEdit.value.id }), payload);
+        } else {
+            response = await axios.put(route('announcements.update', { announcementId: announcementToEdit.value.id }), payload);
+        }
+
         emit('announcement-updated', response.data);
         successMessage.value = 'Announcement updated successfully.';
         showSuccessDialog.value = true;
@@ -187,7 +194,11 @@ const confirmDelete = async () => {
     saving.value = true;
     try {
         const eventId = announcementToDelete.value.event?.id || announcementToDelete.value.event_id;
-        await axios.delete(route('events.announcements.destroyForEvent', { id: eventId, announcementId: announcementToDelete.value.id }));
+        if (eventId) {
+            await axios.delete(route('events.announcements.destroyForEvent', { id: eventId, announcementId: announcementToDelete.value.id }));
+        } else {
+            await axios.delete(route('announcements.destroy', { announcementId: announcementToDelete.value.id }));
+        }
         emit('announcement-deleted', announcementToDelete.value.id);
         successMessage.value = 'Announcement deleted successfully.';
         showSuccessDialog.value = true;
@@ -235,9 +246,14 @@ const formatTimestamp = (timestamp) => {
                     <Avatar image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png" class="mr-2" shape="circle" size="small" />
                     <span class="text-gray-600 text-sm font-semibold">{{ announcement.employee?.name || 'Admin' }}</span>
                 </div>
-                <div v-if="context === 'home' && announcement.event" class="mb-3">
-                    <span class="text-sm text-gray-600">For event:</span>
-                    <Link :href="route('event.details', { id: announcement.event.id, view: 'announcements' })" @click.stop class="font-semibold text-blue-700 hover:underline ml-1 text-base">{{ announcement.event.title }}</Link>
+                <div v-if="context === 'home'" class="mb-3">
+                    <template v-if="announcement.event">
+                        <span class="text-sm text-gray-600">For event:</span>
+                        <Link :href="route('event.details', { id: announcement.event.id, view: 'announcements' })" @click.stop class="font-semibold text-blue-700 hover:underline ml-1 text-base">{{ announcement.event.title }}</Link>
+                    </template>
+                    <template v-else>
+                        <span class="text-sm font-semibold text-gray-500">General Announcement</span>
+                    </template>
                 </div>
                 <p class="text-gray-800 text-base whitespace-pre-line">{{ announcement.message }}</p>
                 <img v-if="announcement.image" :src="announcement.image" alt="Announcement image" class="mt-4 rounded-lg max-w-full w-full md:max-w-md mx-auto h-auto shadow-md cursor-pointer hover:opacity-90 transition-opacity" @click.stop="openImageDialog(announcement.image)" />
@@ -252,7 +268,7 @@ const formatTimestamp = (timestamp) => {
         <!-- Dialogs and Modals -->
         <LoadingSpinner :show="saving" />
         <SuccessDialog v-model:show="showSuccessDialog" :message="successMessage" />
-        <ConfirmationDialog v-model:show="showErrorDialog" title="Error" :message="errorMessage" confirmText="Close" :showCancelButton="false" confirmButtonClass="bg-red-600 hover:bg-red-700" @confirm="showErrorDialog = false" />
+        <ConfirmationDialog v-model:show="showErrorDialog" title="Error" :message="errorMessage" confirmText="Close" :showCancelButton="false" @confirm="showErrorDialog = false" />
         <ConfirmationDialog v-model:show="showDeleteConfirm" title="Delete Announcement?" message="Are you sure you want to delete this announcement?" @confirm="confirmDelete" />
 
         <!-- Add Modal -->

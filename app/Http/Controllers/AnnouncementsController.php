@@ -22,6 +22,25 @@ class AnnouncementsController extends Controller
         File::put($this->dbPath, json_encode($data, JSON_PRETTY_PRINT));
     }
 
+    public function index()
+    {
+        $ann = collect($this->jsonData['announcements'] ?? [])
+            ->sortByDesc(function ($a) {
+                return strtotime($a['timestamp'] ?? '1970-01-01T00:00:00Z');
+            })->values();
+
+        $userIds = $ann->pluck('userId')->unique()->filter();
+        $users = User::whereIn('id', $userIds)->get()->keyBy('id');
+
+        $ann = $ann->map(function ($announcement) use ($users) {
+            $user = $users->get($announcement['userId']);
+            $announcement['employee'] = $user ? ['name' => $user->name] : ['name' => 'Admin'];
+            return $announcement;
+        })->toArray();
+
+        return response()->json($ann);
+    }
+
     public function indexForEvent($eventId)
     {
         $ann = collect($this->jsonData['announcements'] ?? [])
@@ -128,6 +147,47 @@ class AnnouncementsController extends Controller
         return back()->with('success', 'Announcement posted.');
     }
 
+    public function update(Request $request, $announcementId)
+    {
+        try {
+            $validated = $request->validate([
+                'message' => ['required', 'string', function ($attribute, $value, $fail) {
+                    if (trim($value) === '') {
+                        $fail('The announcement message cannot be empty.');
+                    }
+                }],
+                'image' => 'nullable|string',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $errorMessage = $e->validator->errors()->first('message') ?? 'The given data was invalid.';
+            if ($request->wantsJson()) {
+                return response()->json(['message' => $errorMessage, 'errors' => $e->errors()], 422);
+            }
+            return back()->with('error', $errorMessage)->withInput();
+        }
+
+        $announcements = collect($this->jsonData['announcements'] ?? []);
+        $announcementIndex = $announcements->search(fn($ann) => $ann['id'] === $announcementId);
+
+        if ($announcementIndex === false) {
+            return response()->json(['message' => 'Announcement not found.'], 404);
+        }
+
+        $updatedAnnouncement = $announcements[$announcementIndex];
+        $updatedAnnouncement['message'] = $validated['message'];
+        if ($request->has('image')) {
+            $updatedAnnouncement['image'] = $validated['image'];
+        }
+
+        $this->jsonData['announcements'][$announcementIndex] = $updatedAnnouncement;
+        $this->writeJson($this->jsonData);
+
+        $user = User::find($updatedAnnouncement['userId']);
+        $updatedAnnouncement['employee'] = $user ? ['name' => $user->name] : ['name' => 'Admin'];
+
+        return response()->json($updatedAnnouncement, 200);
+    }
+
     public function updateForEvent(Request $request, $eventId, $announcementId)
     {
         try {
@@ -169,6 +229,29 @@ class AnnouncementsController extends Controller
         $updatedAnnouncement['employee'] = $user ? ['name' => $user->name] : ['name' => 'Admin'];
 
         return response()->json($updatedAnnouncement, 200);
+    }
+
+    public function destroy(Request $request, $announcementId)
+    {
+        $announcements = collect($this->jsonData['announcements'] ?? []);
+        $originalCount = $announcements->count();
+
+        $filteredAnnouncements = $announcements->filter(fn($ann) => $ann['id'] !== $announcementId);
+
+        if ($filteredAnnouncements->count() === $originalCount) {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Announcement not found.'], 404);
+            }
+            return back()->with('error', 'Announcement not found.');
+        }
+
+        $this->jsonData['announcements'] = $filteredAnnouncements->values()->toArray();
+        $this->writeJson($this->jsonData);
+
+        if ($request->wantsJson()) {
+            return response()->json(['deleted' => true], 200);
+        }
+        return back()->with('success', 'Announcement removed.');
     }
 
     public function destroyForEvent(Request $request, $eventId, $announcementId)

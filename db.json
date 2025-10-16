@@ -388,14 +388,6 @@
     ],
     "announcements": [
         {
-            "id": "gen-13e7",
-            "event_id": null,
-            "message": "sak",
-            "image": null,
-            "timestamp": "2025-10-16T00:42:30.939742Z",
-            "userId": 1
-        },
-        {
             "id": "d51f-a171",
             "event_id": "d51f",
             "message": "\"Studying is a sign of self doubt\"\n\n\n\n                                              -Emilio S Aguinaldo",
@@ -406,7 +398,7 @@
         {
             "id": "9ab1-60b2",
             "event_id": "9ab1",
-            "message": "Naay announcemen",
+            "message": "Naay announcement s",
             "image": null,
             "timestamp": "2025-10-14T21:00:58.503Z",
             "userId": 1

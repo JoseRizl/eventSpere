@@ -36,6 +36,8 @@ Route::middleware('auth')->group(function () {
     Route::put('/events/{id}/update', [EventController::class, 'update'])->name('event.update');
     Route::put('/events/{id}/activities', [ActivitiesController::class, 'updateForEvent'])->name('events.activities.updateForEvent');
     Route::post('/announcements', [AnnouncementsController::class, 'store'])->name('announcements.store');
+    Route::put('/announcements/{announcementId}', [AnnouncementsController::class, 'update'])->name('announcements.update');
+    Route::delete('/announcements/{announcementId}', [AnnouncementsController::class, 'destroy'])->name('announcements.destroy');
     Route::post('/events/{id}/announcements', [AnnouncementsController::class, 'storeForEvent'])->name('events.announcements.storeForEvent');
     Route::put('/events/{id}/announcements/{announcementId}', [AnnouncementsController::class, 'updateForEvent'])->name('events.announcements.updateForEvent');
     Route::delete('/events/{id}/announcements/{announcementId}', [AnnouncementsController::class, 'destroyForEvent'])->name('events.announcements.destroyForEvent');
@@ -65,6 +67,7 @@ Route::middleware('auth')->group(function () {
         Route::apiResource('brackets', BracketController::class)->except(['show', 'create', 'edit']);
         Route::get('/events/{eventId}/tasks', [TaskController::class, 'indexForEvent'])->name('events.tasks.indexForEvent');
         Route::get('/events/{eventId}/activities', [ActivitiesController::class, 'indexForEvent'])->name('events.activities.indexForEvent');
+        Route::get('/announcements', [AnnouncementsController::class, 'index'])->name('announcements.index');
         Route::get('/events/{eventId}/announcements', [AnnouncementsController::class, 'indexForEvent'])->name('events.announcements.indexForEvent');
         Route::apiResource('tasks', TaskController::class)->except(['show', 'create', 'edit']);
 
