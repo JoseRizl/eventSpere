@@ -1,4 +1,4 @@
-import { parse, format, parseISO, isValid } from 'date-fns';
+import { parse, format, parseISO, isValid, endOfDay, startOfDay } from 'date-fns';
 import { getFullDateTime } from '@/utils/dateUtils.js';
 
 export function useEventValidation() {
@@ -79,20 +79,25 @@ export function useEventValidation() {
 
                     const actDate = formatDateForPicker(act.date);
 
-                    if (!actDate || (startDate && actDate < startDate) || (endDate && actDate > endDate)) {
+                    // Normalize all dates to the start of the day for a pure date comparison
+                    const normActDate = actDate ? startOfDay(actDate) : null;
+                    const normStartDate = startDate ? startOfDay(startDate) : null;
+                    const normEndDate = endDate ? startOfDay(endDate) : null;
+
+                    if (!normActDate || (normStartDate && normActDate < normStartDate) || (normEndDate && normActDate > normEndDate)) {
                         return `Activity ${i + 1}: date must be within the event's date range.`;
                     }
 
-                    const actStartDT = act.startTime ? getFullDateTime(actDate, act.startTime) : null;
-                    const actEndDT = act.endTime ? getFullDateTime(actDate, act.endTime) : null;
+                    const actStartDT = act.startTime ? parse(act.startTime, 'HH:mm', actDate) : null;
+                    const actEndDT = act.endTime ? parse(act.endTime, 'HH:mm', actDate) : null;
 
                     if (actStartDT && actEndDT && actEndDT <= actStartDT) {
-                        return `Activity ${i + 1}: end time must be after start time.`;
+                        return `Activity ${i + 1}: end time must be after start time.`; // This is now correctly validated
                     }
 
                     // For non-all-day events, check if activity times are within the event's time window.
-                    if (!isAllDay && eventStartDT && eventEndDT) {
-                        if (actStartDT && (actStartDT < eventStartDT || actStartDT > eventEndDT)) {
+                    if (!isAllDay && eventStartDT && eventEndDT && actStartDT) {
+                        if (actStartDT < eventStartDT || actStartDT > eventEndDT) {
                             return `Activity ${i + 1} start time is outside the event's window (${format(eventStartDT, 'p')} - ${format(eventEndDT, 'p')}).`;
                         }
                         if (actEndDT && (actEndDT < eventStartDT || actEndDT > eventEndDT)) {

@@ -283,10 +283,7 @@
             "isAllDay": false,
             "createdAt": "2025-09-02T00:27:54.893Z",
             "startDateTime": "2026-05-08T00:00",
-            "endDateTime": "2026-05-08T23:59",
-            "tags": [
-                "6"
-            ]
+            "endDateTime": "2026-05-08T23:59"
         }
     ],
     "tags": [
@@ -667,20 +664,20 @@
             "tag_id": "2"
         },
         {
-            "event_id": "313c",
-            "tag_id": "6"
-        },
-        {
             "event_id": "b51a",
             "tag_id": "68ce70245aae8"
+        },
+        {
+            "event_id": "d51f",
+            "tag_id": "68d67fc024129"
         },
         {
             "event_id": "2e3f",
             "tag_id": "68d67fc024129"
         },
         {
-            "event_id": "d51f",
-            "tag_id": "68d67fc024129"
+            "event_id": "313c",
+            "tag_id": "6"
         }
     ],
     "memorandums": [
@@ -704,7 +701,7 @@
             "location": "bukid 2"
         },
         {
-            "id": "313c-b25d",
+            "id": "313c-46d2",
             "event_id": "313c",
             "title": "mangahoy",
             "date": "May-08-2026",

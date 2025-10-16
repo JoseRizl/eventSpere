@@ -1074,13 +1074,6 @@ const getBracketIndex = (bracketId) => {
       </div>
     </div>
 
-    <ConfirmationDialog
-        v-model:show="showDeleteAnnouncementConfirm"
-        title="Remove Announcement?"
-        message="Are you sure you want to remove this announcement?"
-        @confirm="confirmDeleteAnnouncement"
-    />
-
     <!-- Scoring Configuration Dialog -->
     <Dialog v-model:visible="showScoringConfigDialog" header="Configure Scoring System" modal :style="{ width: '400px' }">
     <div class="scoring-config-dialog">

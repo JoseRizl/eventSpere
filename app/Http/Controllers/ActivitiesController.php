@@ -56,7 +56,7 @@ class ActivitiesController extends Controller
                     return;
                 }
                 $eventStart = \DateTime::createFromFormat('M-d-Y', $event['startDate'] ?? null);
-                $eventEnd = \DateTime::createFromFormat('M-d-Y', $event['endDate'] ?? null);
+                $eventEnd = $event['endDate'] ? \DateTime::createFromFormat('M-d-Y', $event['endDate'])->setTime(23, 59, 59) : null;
                 $actDate = \DateTime::createFromFormat('M-d-Y', $value);
                 if ($eventStart && $eventEnd && $actDate && ($actDate < $eventStart || $actDate > $eventEnd)) {
                     $fail('Each activity date must be within the event date range.');
