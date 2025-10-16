@@ -1,5 +1,5 @@
 <template>
-    <Dialog v-model:visible="props.tasksManager.isTaskModalVisible.value" modal header="Assign Tasks" :style="{ width: '50vw' }">
+    <Dialog v-model:visible="props.tasksManager.isTaskModalVisible.value" modal header="Manage Tasks" :style="{ width: '50vw' }">
         <div class="p-fluid">
             <div class="p-field">
                 <label>Event</label>

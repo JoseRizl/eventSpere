@@ -22,9 +22,12 @@ class Announcement extends Model
         'timestamp' => 'datetime',
     ];
 
+
+     //withDefault() ensures that therelationship is optional, allowing for general announcements.
+
     public function event(): BelongsTo
     {
-        return $this->belongsTo(Event::class);
+        return $this->belongsTo(Event::class)->withDefault();
     }
 
     public function user(): BelongsTo

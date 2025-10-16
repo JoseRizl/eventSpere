@@ -66,19 +66,17 @@ const scheduleToDelete = ref(null);
 const announcementSearchQuery = ref(''); // Keep for the composable
 
 // Event-specific announcements
-const eventAnnouncements = ref([]);
 const allNewsProxy = ref(props.relatedEvents || []); // placeholder for composable signature
-const { addAnnouncement, updateAnnouncement, deleteAnnouncementById } = useAnnouncements({ searchQuery: announcementSearchQuery, startDateFilter: ref(null), endDateFilter: ref(null) }, allNewsProxy);
+const {
+    eventAnnouncements,
+    addAnnouncement,
+    updateAnnouncement,
+    deleteAnnouncementById
+} = useAnnouncements({ searchQuery: announcementSearchQuery, startDateFilter: ref(null), endDateFilter: ref(null) }, allNewsProxy);
 
 // For viewing announcement images
 const showImageDialog = ref(false);
 const selectedImageUrl = ref('');
-
-const openImageDialog = (imageUrl) => {
-  selectedImageUrl.value = imageUrl;
-  showImageDialog.value = true;
-};
-
 // Memorandum composable
 const { saveMemorandum, clearMemorandum } = useMemorandum();
 const newMemorandumFile = ref(null);
@@ -360,8 +358,7 @@ onMounted(() => {
     eventDetails.value.activities = props.preloadedActivities.map((a, idx) => ({ ...a, __uid: `${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 8)}` }));
   }
   if (Array.isArray(props.preloadedAnnouncements)) {
-    // Augment with employee names
-    eventAnnouncements.value = props.preloadedAnnouncements;
+    eventAnnouncements.value = [...props.preloadedAnnouncements];
   }
 
   //fetch brackets
@@ -916,24 +913,28 @@ const getBracketIndex = (bracketId) => {
                                 v-tooltip.top="'Manage Tasks'"
                             />
                         </div>
-                        <div class="space-y-3">
-                <div v-for="(taskItem, index) in props.preloadedTasks" :key="index" class="p-3 border rounded-lg bg-gray-50/50">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="font-semibold text-gray-800">{{ taskItem.task || 'No task specified' }}</p>
-                            <p class="text-xs text-gray-500">{{ taskItem.committee?.name || 'No committee' }}</p>
+                        <div v-if="props.preloadedTasks && props.preloadedTasks.length > 0" class="space-y-3">
+                            <div v-for="(taskItem, index) in props.preloadedTasks" :key="index" class="p-3 border rounded-lg bg-gray-50/50">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="font-semibold text-gray-800">{{ taskItem.task || 'No task specified' }}</p>
+                                        <p class="text-xs text-gray-500">{{ taskItem.committee?.name || 'No committee' }}</p>
+                                    </div>
+                                </div>
+                                <div class="mt-3 flex items-center gap-2 flex-wrap">
+                                    <span v-if="!taskItem.employees || taskItem.employees.length === 0" class="text-gray-500 italic text-xs">No employees assigned</span>
+                                    <div v-else v-for="employee in taskItem.employees" :key="employee.id" class="flex items-center gap-2 bg-white rounded-full px-2 py-1 border shadow-sm" v-tooltip.top="employee.name">
+                                        <Avatar :label="employee.name ? employee.name.split(' ').map(n => n[0]).join('').toUpperCase() : '?'" shape="circle" size="small" />
+                                        <span class="text-xs font-medium text-gray-800">{{ employee.name }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else class="text-center text-gray-500 py-4 border-2 border-dashed rounded-lg">
+                            <p class="text-sm">No tasks or committees have been assigned to this event yet.</p>
+                            <p v-if="user?.role === 'Admin' || user?.role === 'Principal'" class="text-xs mt-1">Click the  <i class="pi pi-list"></i>  button to start assigning tasks.</p>
                         </div>
                     </div>
-                    <div class="mt-3 flex items-center gap-2 flex-wrap">
-                        <span v-if="!taskItem.employees || taskItem.employees.length === 0" class="text-gray-500 italic text-xs">No employees assigned</span>
-                        <div v-else v-for="employee in taskItem.employees" :key="employee.id" class="flex items-center gap-2 bg-white rounded-full px-2 py-1 border shadow-sm" v-tooltip.top="employee.name">
-                            <Avatar :label="employee.name ? employee.name.split(' ').map(n => n[0]).join('').toUpperCase() : '?'" shape="circle" size="small" />
-                            <span class="text-xs font-medium text-gray-800">{{ employee.name }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
                 </div>
                     </div>
 
@@ -1068,54 +1069,12 @@ const getBracketIndex = (bracketId) => {
       </div>
     </div>
 
-
-    <!-- Add Announcement Modal -->
-    <Dialog v-model:visible="showAddAnnouncementModal" modal header="Add Announcement" :style="{ width: '50vw' }">
-        <div class="p-fluid">
-            <div class="p-field">
-                <label for="announcementMessage">Message</label>
-                <Textarea id="announcementMessage" v-model="newAnnouncement.message" rows="5" placeholder="Enter your announcement..." autoResize />
-            </div>
-            <div class="p-field mt-4">
-                <label for="announcementImage">Image (Optional)</label>
-                <input type="file" id="announcementImage" @change="handleAnnouncementImageUpload" accept="image/*" class="p-inputtext" />
-                <img v-if="newAnnouncement.imagePreview" :src="newAnnouncement.imagePreview" alt="Image preview" class="mt-4 rounded-lg max-w-xs h-auto" />
-            </div>
-        </div>
-        <template #footer>
-            <button class="modal-button-secondary" @click="showAddAnnouncementModal = false">Cancel</button>
-            <button class="modal-button-primary" @click="addAnnouncement" :disabled="saving">Post</button>
-        </template>
-    </Dialog>
-
     <ConfirmationDialog
         v-model:show="showDeleteAnnouncementConfirm"
         title="Remove Announcement?"
         message="Are you sure you want to remove this announcement?"
         @confirm="confirmDeleteAnnouncement"
     />
-
-    <!-- Edit Announcement Modal -->
-    <Dialog v-model:visible="showEditAnnouncementModal" modal header="Edit Announcement" :style="{ width: '50vw' }">
-        <div class="p-fluid">
-            <div class="p-field">
-                <label for="editAnnouncementMessage">Message</label>
-                <Textarea id="editAnnouncementMessage" v-model="editAnnouncementData.message" rows="5" placeholder="Enter your announcement..." autoResize />
-            </div>
-            <div class="p-field mt-4">
-                <label for="editAnnouncementImage">Image (Optional)</label>
-                <div v-if="editAnnouncementData.imagePreview" class="mt-2 relative w-fit">
-                    <img :src="editAnnouncementData.imagePreview" alt="Image preview" class="rounded-lg max-w-xs h-auto" />
-                    <Button icon="pi pi-times" class="p-button-rounded p-button-danger p-button-text absolute top-1 right-1 bg-white/50" @click="removeEditAnnouncementImage" v-tooltip.top="'Remove Image'" />
-                </div>
-                <input type="file" id="editAnnouncementImage" @change="handleEditAnnouncementImageUpload" accept="image/*" class="p-inputtext mt-2" />
-            </div>
-        </div>
-        <template #footer>
-            <Button label="Cancel" @click="showEditAnnouncementModal = false" class="p-button-text" />
-            <Button label="Save Changes" @click="confirmUpdateAnnouncement" :loading="saving" />
-        </template>
-    </Dialog>
 
     <!-- Scoring Configuration Dialog -->
     <Dialog v-model:visible="showScoringConfigDialog" header="Configure Scoring System" modal :style="{ width: '400px' }">
