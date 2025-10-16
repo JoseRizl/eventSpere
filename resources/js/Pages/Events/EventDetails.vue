@@ -2,7 +2,6 @@
 import { ref, computed, onMounted, nextTick, watch } from 'vue';
 import { parse, format, parseISO, isValid, addDays, endOfDay, isWithinInterval } from 'date-fns';
 import { usePage, router, Link } from '@inertiajs/vue3';
-import axios from 'axios';
 import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 import SuccessDialog from '@/Components/SuccessDialog.vue';
@@ -10,16 +9,13 @@ import { useBracketState } from '@/composables/useBracketState.js';
 import { useBracketActions } from '@/composables/useBracketActions.js';
 import SearchFilterBar from '@/Components/SearchFilterBar.vue';
 import BracketCard from '@/Components/BracketCard.vue';
-import BracketView from '@/Components/BracketView.vue';
 import MatchEditorDialog from '@/Components/MatchEditorDialog.vue';
-import MatchesView from '@/Components/MatchesView.vue';
 import AnnouncementsBoard from '@/Components/AnnouncementsBoard.vue';
 import TaskEditor from '@/Components/TaskEditor.vue';
 import { useActivities } from '@/composables/useActivities.js';
 import { useTasks } from '@/composables/useTasks.js';
 import { useAnnouncements } from '@/composables/useAnnouncements.js';
 import { useEventValidation } from '@/composables/useEventValidation.js';
-import { useMemorandum } from '@/composables/useMemorandum.js';
 
 const props = defineProps({
   event: Object,
@@ -63,7 +59,26 @@ const searchQuery = ref('');
 const scheduleToDelete = ref(null);
 
 // Announcement search
-const announcementSearchQuery = ref(''); // Keep for the composable
+const announcementSearchQuery = ref('');
+const announcementStartDateFilter = ref(null);
+const announcementEndDateFilter = ref(null);
+const showAnnouncementDateFilter = ref(false);
+
+const toggleAnnouncementDateFilter = () => {
+  showAnnouncementDateFilter.value = !showAnnouncementDateFilter.value;
+};
+
+const clearAnnouncementDateFilter = () => {
+  announcementStartDateFilter.value = null;
+  announcementEndDateFilter.value = null;
+};
+
+const clearAnnouncementFilters = () => {
+  announcementSearchQuery.value = '';
+  announcementStartDateFilter.value = null;
+  announcementEndDateFilter.value = null;
+  showAnnouncementDateFilter.value = false;
+};
 
 // Event-specific announcements
 const allNewsProxy = ref(props.relatedEvents || []); // placeholder for composable signature
@@ -71,16 +86,15 @@ const {
     eventAnnouncements,
     addAnnouncement,
     updateAnnouncement,
-    deleteAnnouncementById
-} = useAnnouncements({ searchQuery: announcementSearchQuery, startDateFilter: ref(null), endDateFilter: ref(null) }, allNewsProxy);
+    deleteAnnouncementById,
+    // We don't use filteredAnnouncements from the composable here, as the board does its own filtering.
+    // But we pass the reactive filters to the composable so it can refetch if needed.
+} = useAnnouncements({ searchQuery: announcementSearchQuery, startDateFilter: announcementStartDateFilter, endDateFilter: announcementEndDateFilter }, allNewsProxy);
 
 // For viewing announcement images
 const showImageDialog = ref(false);
 const selectedImageUrl = ref('');
-// Memorandum composable
-const { saveMemorandum, clearMemorandum } = useMemorandum();
-const newMemorandumFile = ref(null);
-const newMemorandumPreview = ref(null);
+
 
 const { validateEvent, formatDateForPicker, formatDisplayDate } = useEventValidation();
 
@@ -109,13 +123,9 @@ const bracketState = useBracketState();
 const {
   brackets,
   expandedBrackets,
-  showWinnerDialog,
   showMatchEditorDialog,
   selectedMatch,
   selectedMatchData,
-  showMatchUpdateConfirmDialog,
-  showGenericErrorDialog,
-  genericErrorMessage,
   roundRobinScoring,
   bracketMatchFilters,
   showScoringConfigDialog,
@@ -144,14 +154,12 @@ const {
   getRoundRobinStandings,
   isRoundRobinConcluded,
   openMatchDialog,
-  closeMatchEditorDialog,
   proceedWithMatchUpdate,
   openScoringConfigDialog,
   closeScoringConfigDialog,
   saveScoringConfig,
   toggleBracket,
   setBracketViewMode,
-  getAllMatches,
   setBracketMatchFilter,
   openMatchEditorFromCard,
   getBracketTypeClass,
@@ -166,11 +174,6 @@ const relatedBrackets = computed(() => {
   return brackets.value.filter(bracket => bracket.event_id === props.event.id);
 });
 
-const matchStatusFilterOptions = ref([
-    { label: 'All', value: 'all' },
-    { label: 'Pending', value: 'pending' },
-    { label: 'Completed', value: 'completed' }
-]);
 
 const selectedBracketForDialog = computed(() => {
   if (selectedMatch.value) {
@@ -179,47 +182,6 @@ const selectedBracketForDialog = computed(() => {
         return bracket;
     }
   }
-});
-
-
-const isMatchDataInvalid = computed(() => {
-    if (!selectedMatchData.value || !selectedBracketForDialog.value) return true;
-
-    const { status, player1Score, player2Score, player1Name, player2Name } = selectedMatchData.value;
-    const bracketType = selectedBracketForDialog.value.type;
-
-    // Check for ties in elimination brackets
-    if (status === 'completed' && player1Score === player2Score && (bracketType === 'Single Elimination' || bracketType === 'Double Elimination')) {
-        return true;
-    }
-
-    // Check for empty player names
-    if (player1Name.trim() === '' || player2Name.trim() === '') {
-        return true;
-    }
-
-    return false;
-});
-
-const isMultiDayEvent = computed(() => {
-  if (selectedBracketForDialog.value?.event) {
-      return selectedBracketForDialog.value.event.startDate !== selectedBracketForDialog.value.event.endDate;
-  }
-  return false;
-});
-
-const eventMinDate = computed(() => {
-    if (selectedBracketForDialog.value?.event?.startDate) {
-        return parseISO(selectedBracketForDialog.value.event.startDate);
-    }
-    return null;
-});
-
-const eventMaxDate = computed(() => {
-    if (selectedBracketForDialog.value?.event?.endDate) {
-        return parseISO(selectedBracketForDialog.value.event.endDate);
-    }
-    return null;
 });
 
 const filteredRelatedBrackets = computed(() => {
@@ -940,8 +902,51 @@ const getBracketIndex = (bracketId) => {
 
     <div v-if="currentView === 'announcements'">
     <div class="w-full bg-white rounded-lg shadow-md p-6">
+        <!-- Filters for Announcements -->
+        <div class="mb-4 flex flex-wrap items-center gap-2">
+            <SearchFilterBar
+                v-model:searchQuery="announcementSearchQuery"
+                placeholder="Search announcements..."
+                :show-date-filter="true"
+                :is-date-filter-active="showAnnouncementDateFilter"
+                :show-clear-button="!!(announcementSearchQuery || announcementStartDateFilter || announcementEndDateFilter)"
+                @toggle-date-filter="toggleAnnouncementDateFilter"
+                @clear-filters="clearAnnouncementFilters"
+            />
+        </div>
+
+        <!-- Date Filter Calendar -->
+        <div v-if="showAnnouncementDateFilter" class="date-filter-container mb-4 max-w-md">
+            <div class="flex flex-col sm:flex-row gap-2">
+                <div class="flex-1">
+                    <label>From:</label>
+                    <DatePicker
+                        v-model="announcementStartDateFilter"
+                        dateFormat="M-dd-yy"
+                        :showIcon="true"
+                        placeholder="Start date"
+                        class="w-full"
+                    />
+                </div>
+                <div class="date-input-group">
+                    <label>To:</label>
+                    <DatePicker
+                        v-model="announcementEndDateFilter"
+                        dateFormat="M-dd-yy"
+                        :showIcon="true"
+                        placeholder="End date"
+                        class="w-full"
+                    />
+                </div>
+            </div>
+            <Button v-if="announcementStartDateFilter || announcementEndDateFilter" icon="pi pi-times" class="p-button-text p-button-rounded clear-date-btn" @click="clearAnnouncementDateFilter" v-tooltip.top="'Clear date filter'" />
+        </div>
+
         <AnnouncementsBoard
             :announcements="eventAnnouncements"
+            :search-query="announcementSearchQuery"
+            :start-date-filter="announcementStartDateFilter"
+            :end-date-filter="announcementEndDateFilter"
             context="event"
             :event-id="props.event.id"
             @announcement-added="addAnnouncement"
@@ -1188,6 +1193,21 @@ const getBracketIndex = (bracketId) => {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   gap: 10px;
 }
+.date-filter-container {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  gap: 10px;
+  align-items: flex-start;
+}
+.date-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+
 
 .date-filter-calendar {
   width: 100%;

@@ -21,6 +21,18 @@ const props = defineProps({
         type: String,
         default: null,
     },
+    searchQuery: {
+        type: String,
+        default: '',
+    },
+    startDateFilter: {
+        type: [Date, String],
+        default: null,
+    },
+    endDateFilter: {
+        type: [Date, String],
+        default: null,
+    },
     eventsForPicker: { // Only used in 'home' context
         type: Array,
         default: () => [],
@@ -39,27 +51,9 @@ const successMessage = ref('');
 const showErrorDialog = ref(false);
 const errorMessage = ref('');
 
-// Filtering
-const searchQuery = ref('');
-const startDateFilter = ref(null);
-const endDateFilter = ref(null);
-const showDateFilter = ref(false);
-
-const toggleDateFilter = () => showDateFilter.value = !showDateFilter.value;
-const clearDateFilter = () => {
-    startDateFilter.value = null;
-    endDateFilter.value = null;
-};
-const clearFilters = () => {
-    searchQuery.value = '';
-    startDateFilter.value = null;
-    endDateFilter.value = null;
-    showDateFilter.value = false;
-};
-
 const filteredAnnouncements = computed(() => {
     let items = props.announcements;
-    const query = searchQuery.value.toLowerCase().trim();
+    const query = props.searchQuery.toLowerCase().trim();
     if (query) {
         items = items.filter(ann => {
             const messageMatch = ann.message?.toLowerCase().includes(query);
@@ -67,7 +61,21 @@ const filteredAnnouncements = computed(() => {
             return messageMatch || eventTitleMatch;
         });
     }
-    // Date filtering logic can be added here if needed, similar to original components
+
+    if (props.startDateFilter || props.endDateFilter) {
+        items = items.filter(ann => {
+            const annDate = new Date(ann.timestamp);
+            if (isNaN(annDate.getTime())) return false;
+
+            const filterStart = props.startDateFilter ? new Date(props.startDateFilter) : null;
+            const filterEnd = props.endDateFilter ? new Date(props.endDateFilter) : null;
+
+            if (filterStart && !filterEnd) return annDate >= filterStart;
+            if (!filterStart && filterEnd) return annDate <= filterEnd;
+            if (filterStart && filterEnd) return isWithinInterval(annDate, { start: filterStart, end: filterEnd });
+            return true;
+        });
+    }
     return items;
 });
 
@@ -227,14 +235,6 @@ const formatTimestamp = (timestamp) => {
             </button>
         </div>
 
-        <!-- Filters -->
-        <div class="mb-4 flex flex-wrap items-center gap-2">
-            <SearchFilterBar v-model:searchQuery="searchQuery" placeholder="Search announcements..." :show-date-filter="true" :is-date-filter-active="showDateFilter" :show-clear-button="!!(searchQuery || startDateFilter || endDateFilter)" @toggle-date-filter="toggleDateFilter" @clear-filters="clearFilters" />
-        </div>
-        <div v-if="showDateFilter" class="date-filter-container mb-4 max-w-md">
-            <!-- Date filter implementation can be added here if needed -->
-        </div>
-
         <!-- Announcements List -->
         <div v-if="filteredAnnouncements.length > 0" class="space-y-6">
             <div v-for="announcement in filteredAnnouncements" :key="announcement.id" :id="`announcement-${announcement.id}`" @click="context === 'home' && announcement.event && router.visit(route('event.details', { id: announcement.event.id, view: 'announcements' }))" :class="['relative p-6 bg-gray-50 rounded-lg shadow-sm border-l-4 border-blue-500', context === 'home' && announcement.event ? 'cursor-pointer hover:bg-gray-100 transition-colors' : '']">
@@ -261,7 +261,7 @@ const formatTimestamp = (timestamp) => {
             </div>
         </div>
         <div v-else class="text-center text-gray-500 py-8">
-            <p v-if="searchQuery || startDateFilter || endDateFilter">No announcements found matching your filters.</p>
+            <p v-if="props.searchQuery || props.startDateFilter || props.endDateFilter">No announcements found matching your filters.</p>
             <p v-else>No announcements yet.</p>
         </div>
 

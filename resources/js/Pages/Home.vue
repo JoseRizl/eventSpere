@@ -33,7 +33,7 @@ const {
 } = useEvents({ searchQuery, startDateFilter, endDateFilter });
 
 const {
-    eventAnnouncements, fetchAnnouncements, filteredAnnouncements, addAnnouncement, updateAnnouncement, deleteAnnouncementById
+    eventAnnouncements, fetchAnnouncements, addAnnouncement, updateAnnouncement, deleteAnnouncementById
 } = useAnnouncements({ searchQuery, startDateFilter, endDateFilter }, allNews);
 
 onMounted(async () => {
@@ -317,7 +317,10 @@ const announcementEvents = computed(() => {
     <!-- Announcement Board -->
     <div v-if="currentView === 'announcements'" class="w-full mt-8">
         <AnnouncementsBoard
-            :announcements="filteredAnnouncements"
+            :announcements="eventAnnouncements"
+            :search-query="searchQuery"
+            :start-date-filter="startDateFilter"
+            :end-date-filter="endDateFilter"
             context="home"
             :events-for-picker="announcementEvents"
             @announcement-added="addAnnouncement"
