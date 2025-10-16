@@ -188,7 +188,7 @@ const proceedWithUpdate = () => {
             title="Confirm Match Update"
             message="Are you sure you want to update this match? This action may trigger bracket progression and cannot be easily undone."
             confirmText="Yes, Update Match"
-            confirmButtonClass="modal-button-confirm"
+            confirmButtonClass="modal-button-primary"
             @confirm="proceedWithUpdate"
             :style="{ zIndex: 1102 }"
         />

@@ -197,27 +197,6 @@ const isMatchDataInvalid = computed(() => {
     return false;
 });
 
-const isMultiDayEvent = computed(() => {
-  if (selectedBracket.value?.event) {
-      return selectedBracket.value.event.startDate !== selectedBracket.value.event.endDate;
-  }
-  return false;
-});
-
-const eventMinDate = computed(() => {
-    if (selectedBracket.value?.event?.startDate) {
-        return parseISO(selectedBracket.value.event.startDate);
-    }
-    return null;
-});
-
-const eventMaxDate = computed(() => {
-    if (selectedBracket.value?.event?.endDate) {
-        return parseISO(selectedBracket.value.event.endDate);
-    }
-    return null;
-});
-
 // Add onMounted hook to fetch brackets when component loads
 onMounted(async () => {
   initialLoading.value = true;
@@ -402,7 +381,8 @@ onMounted(async () => {
         title="Missing Fields"
         message="Please fill out all fields."
         confirmText="OK"
-        confirmButtonClass="bg-red-600 hover:bg-red-700"
+        confirmButtonClass="modal-button-danger"
+        :show-cancel-button="false"
         @confirm="showMissingFieldsDialog = false"
       />
 
