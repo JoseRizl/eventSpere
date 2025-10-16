@@ -1,6 +1,7 @@
 import { nextTick, watch } from 'vue';
 import axios from 'axios';
 import { router } from '@inertiajs/vue3';
+import { useToast } from '@/composables/useToast.js';
 import { format, parseISO, isValid, parse } from 'date-fns';
 
 const robustParseDate = (dateString) => {
@@ -122,6 +123,8 @@ export function useBracketActions(state) {
     bracketViewModes,
     bracketMatchFilters,
   } = state;
+
+  const { showSuccess } = useToast();
 
 
   const getSeedingOrder = (n) => {
@@ -323,7 +326,7 @@ export function useBracketActions(state) {
     // Populate match-specific details from the event
     const populateEventDetails = (match) => {
         match.date = selectedEvent.value.startDate;
-        match.time = selectedEvent.value.startTime;
+        match.time = null;
         match.venue = selectedEvent.value.venue;
     };
     Object.values(payload.matches).flat().flat().forEach(populateEventDetails);
@@ -563,8 +566,8 @@ export function useBracketActions(state) {
         status: 'pending',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        date: selectedEvent.value.startDate,
-        time: selectedEvent.value.startTime,
+        date: selectedEvent.value.startDate, // Date defaults to event start date
+        time: null, // Time is unset by default
         venue: selectedEvent.value.venue,
       };
       firstRound.push(match);
@@ -586,8 +589,8 @@ export function useBracketActions(state) {
         status: 'pending',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        date: selectedEvent.value.startDate,
-        time: selectedEvent.value.startTime,
+        date: selectedEvent.value.startDate, // Date defaults to event start date
+        time: null, // Time is unset by default
         venue: selectedEvent.value.venue,
       }));
       rounds.push(nextMatches);
@@ -646,8 +649,8 @@ export function useBracketActions(state) {
         status: 'pending',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        date: selectedEvent.value.startDate,
-        time: selectedEvent.value.startTime,
+        date: selectedEvent.value.startDate, // Date defaults to event start date
+        time: null, // Time is unset by default
         venue: selectedEvent.value.venue,
       });
     }
@@ -668,8 +671,8 @@ export function useBracketActions(state) {
         status: 'pending',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        date: selectedEvent.value.startDate,
-        time: selectedEvent.value.startTime,
+        date: selectedEvent.value.startDate, // Date defaults to event start date
+        time: null, // Time is unset by default
         venue: selectedEvent.value.venue,
       }));
       winnersRounds.push(nextRound);
@@ -702,8 +705,8 @@ export function useBracketActions(state) {
         winner_id: null, loser_id: null, status: 'pending',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        date: selectedEvent.value.startDate,
-        time: selectedEvent.value.startTime,
+        date: selectedEvent.value.startDate, // Date defaults to event start date
+        time: null, // Time is unset by default
         venue: selectedEvent.value.venue,
       }));
       losersRounds.push(round);
@@ -771,8 +774,8 @@ export function useBracketActions(state) {
             winner_id: null, loser_id: null, status: 'pending',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-            date: selectedEvent.value.startDate,
-            time: selectedEvent.value.startTime,
+            date: selectedEvent.value.startDate, // Date defaults to event start date
+            time: null, // Time is unset by default
             venue: selectedEvent.value.venue,
         }]
     ];
@@ -853,12 +856,11 @@ export function useBracketActions(state) {
 
   const generateRoundRobinBracket = () => {
   const numPlayers = parseInt(numberOfPlayers.value, 10);
+  const hasBye = numPlayers % 2 !== 0;
+  const adjustedNumPlayers = hasBye ? numPlayers + 1 : numPlayers;
 
-  // Ensure even number of participants by adding BYE when needed
-  const adjustedNumPlayers = numPlayers % 2 === 0 ? numPlayers : numPlayers + 1;
-
-  // Build players array and add BYE if necessary
-  const players = Array.from({ length: numPlayers }, (_, i) => ({
+  // Create player objects
+  const actualPlayers = Array.from({ length: numPlayers }, (_, i) => ({
     id: generateId(),
     name: `Player ${i + 1}`,
     score: 0,
@@ -867,75 +869,60 @@ export function useBracketActions(state) {
     updated_at: new Date().toISOString(),
   }));
 
-  if (adjustedNumPlayers > numPlayers) {
-    players.push({
+  let participants;
+  if (hasBye) {
+    const byePlayer = {
       id: generateId(),
       name: 'BYE',
       score: 0,
       completed: true,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-    });
+    };
+    // Place BYE at the start to be the fixed element, and all actual players will rotate.
+    participants = [byePlayer, ...actualPlayers];
+  } else {
+    participants = actualPlayers;
   }
 
-  // Circle method: fix the first player, rotate others
-  const order = players.slice();
+  // Circle method for scheduling
   const rounds = [];
   const numRounds = adjustedNumPlayers - 1;
   const halfSize = adjustedNumPlayers / 2;
 
   for (let round = 0; round < numRounds; round++) {
     const roundMatches = [];
-
     for (let i = 0; i < halfSize; i++) {
-      const a = order[i];
-      const b = order[adjustedNumPlayers - 1 - i];
+      const player1 = participants[i];
+      const player2 = participants[adjustedNumPlayers - 1 - i];
 
       const match = {
         id: generateId(),
         round: round + 1,
         match_number: i + 1,
         bracket_type: 'round_robin',
-        players: [{ ...a }, { ...b }],
+        players: [{ ...player1 }, { ...player2 }],
         winner_id: null,
         loser_id: null,
         status: 'pending',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        date: selectedEvent.value.startDate,
-        time: selectedEvent.value.startTime,
+        date: selectedEvent.value.startDate, // Date defaults to event start date
+        time: null, // Time is unset by default
         venue: selectedEvent.value.venue,
       };
 
       // Auto-complete BYE matches
-      if (a.name === 'BYE' || b.name === 'BYE') {
-        const winner = a.name === 'BYE' ? b : a;
+      if (player1.name === 'BYE' || player2.name === 'BYE') {
+        const winner = player1.name === 'BYE' ? player2 : player1;
         match.status = 'completed';
         match.winner_id = winner.id;
-        match.loser_id = (a.name === 'BYE' ? a : b).id;
+        match.loser_id = (player1.name === 'BYE' ? player1 : player2).id;
         winner.completed = true;
       }
 
       roundMatches.push(match);
     }
-
-    // --- NEW LOGIC: cycle Player 1’s match slot across rounds ---
-    if (roundMatches.length > 1) {
-        // Save original number of slots BEFORE removing P1's match
-        const originalSlots = roundMatches.length;
-
-        const p1Index = roundMatches.findIndex(m =>
-            m.players.some(p => p.name === 'Player 1')
-        );
-        if (p1Index !== -1) {
-            const [p1Match] = roundMatches.splice(p1Index, 1);
-
-            // Use originalSlots so we can place P1 into any of the original slots (including the last)
-            const newIndex = round % originalSlots;
-            roundMatches.splice(newIndex, 0, p1Match);
-        }
-    }
-
 
     // Reassign match numbers sequentially
     roundMatches.forEach((match, index) => {
@@ -944,11 +931,10 @@ export function useBracketActions(state) {
 
     rounds.push(roundMatches);
 
-    // Rotate players for next round (circle method)
-    const fixed = order[0];
-    const rest = order.slice(1);
-    rest.unshift(rest.pop()); // rotate right
-    order.splice(1, rest.length, ...rest);
+    // Rotate participants for the next round, keeping the first one fixed.
+    const first = participants[0];
+    const rest = participants.slice(1);
+    participants = [first, rest.pop(), ...rest.slice(0)];
   }
 
   return rounds;
@@ -1217,7 +1203,7 @@ const updateLines = (bracketIdx) => {
       player2Score: match.players[1].score,
       status: match.status,
       date: robustParseDate(matchDate),
-      time: match.time || brackets.value[bracketIdx].event.startTime,
+      time: match.time, // Use the match's time directly, which can be null
       venue: match.venue || brackets.value[bracketIdx].event.venue,
     };
     showMatchEditorDialog.value = true;
@@ -1701,6 +1687,7 @@ const updateLines = (bracketIdx) => {
         nextTick(() => updateLines(bracketIdx));
       }
       showMatchEditorDialog.value = false;
+      showSuccess('Match updated successfully!');
     } catch (error) {
       console.error('Error updating Round Robin match:', error);
     }

@@ -188,6 +188,19 @@ const getPlayerStyling = (player, otherPlayer, match, part) => {
     return styling;
 };
 
+const getMatchResultIndicator = (player, match) => {
+    if (match.status !== 'completed' || !player || !player.id || player.name === 'BYE' || player.name === 'TBD') {
+        return '';
+    }
+    if (match.winner_id === player.id) {
+        return ' | W';
+    }
+    if (match.loser_id === player.id) {
+        return ' | L';
+    }
+    return '';
+};
+
 const getRoundRobinPlayerStyling = (player, otherPlayer, match) => {
     if (!player || player.name === 'BYE' || player.name === 'TBD' || !player.id) {
         return {
@@ -457,13 +470,13 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
                     <span
                     :class="getPlayerStyling(match.players[0], match.players[1], match, 'single')"
                     >
-                    {{ truncate(match.players[0].name, { length: 13 }) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
+                    {{ truncate(match.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
                     </span>
                     <hr />
                     <span
                     :class="getPlayerStyling(match.players[1], match.players[0], match, 'single')"
                     >
-                    {{ truncate(match.players[1].name, { length: 13 }) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
+                    {{ truncate(match.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
                     </span>
                 </div>
             </div>
@@ -489,13 +502,13 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
                 <span
                 :class="getRoundRobinPlayerStyling(match.players[0], match.players[1], match)"
                 >
-                {{ truncate(match.players[0].name, { length: 15 }) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
+                {{ truncate(match.players[0].name, { length: 15 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
                 </span>
                 <hr />
                 <span
                 :class="getRoundRobinPlayerStyling(match.players[1], match.players[0], match)"
                 >
-                {{ truncate(match.players[1].name, { length: 15 }) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
+                {{ truncate(match.players[1].name, { length: 15 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
                 </span>
             </div>
             </div>
@@ -581,13 +594,13 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
                     <span
                         :class="getPlayerStyling(match.players[0], match.players[1], match, 'winners')"
                     >
-                        {{ truncate(match.players[0].name, { length: 13 }) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
+                        {{ truncate(match.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
                     </span>
                     <hr />
                     <span
                         :class="getPlayerStyling(match.players[1], match.players[0], match, 'winners')"
                     >
-                        {{ truncate(match.players[1].name, { length: 13 }) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
+                        {{ truncate(match.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
                     </span>
                     </div>
                 </div>
@@ -629,13 +642,13 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
                     <span
                         :class="getPlayerStyling(match.players[0], match.players[1], match, 'losers')"
                     >
-                        {{ truncate(match.players[0].name, { length: 13 }) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
+                        {{ truncate(match.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
                     </span>
                     <hr />
                     <span
                         :class="getPlayerStyling(match.players[1], match.players[0], match, 'losers')"
                     >
-                        {{ truncate(match.players[1].name, { length: 13 }) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
+                        {{ truncate(match.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
                     </span>
                     </div>
                 </div>
@@ -673,13 +686,13 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
                     <span
                     :class="getPlayerStyling(match.players[0], match.players[1], match, 'grand_finals')"
                     >
-                    {{ truncate(match.players[0].name, { length: 13 }) }}{{ (match.players[0].name && match.players[0].name !== 'TBD' && match.players[0].name !== 'BYE') ? ' | ' + match.players[0].score : '' }}
+                    {{ truncate(match.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
                     </span>
                     <hr />
                     <span
                     :class="getPlayerStyling(match.players[1], match.players[0], match, 'grand_finals')"
                     >
-                    {{ truncate(match.players[1].name, { length: 13 }) }}{{ (match.players[1].name && match.players[1].name !== 'TBD' && match.players[1].name !== 'BYE') ? ' | ' + match.players[1].score : '' }}
+                    {{ truncate(match.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
                     </span>
                 </div>
                     </div>

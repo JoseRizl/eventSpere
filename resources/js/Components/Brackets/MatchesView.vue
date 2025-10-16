@@ -149,11 +149,11 @@ const getMatchIdentifier = (match) => {
                                 </div>
                             </div>
                             <div class="time-venue">
-                                <div class="info-item">
+                                <div v-if="match.time" class="info-item">
                                     <i class="pi pi-clock"></i>
-                                    <span>{{ formatDisplayTime(match.time || bracket.event.startTime) }}</span>
+                                    <span>{{ formatDisplayTime(match.time) }}</span>
                                 </div>
-                                <div class="info-item">
+                                <div v-if="match.venue || bracket.event.venue" class="info-item">
                                     <i class="pi pi-map-marker"></i>
                                     <span>{{ match.venue || bracket.event.venue }}</span>
                                 </div>
