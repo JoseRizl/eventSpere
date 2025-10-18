@@ -215,8 +215,12 @@ const eventDetails = ref({
       __uid: a.__uid || `${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 8)}`
     })),
     // event.tags is now an array of tag objects from backend, convert to IDs for editing
-    tags: (props.event.tags || []).map(tag => tag.id)
+    tags: (props.event.tags || []).map(tag => typeof tag === 'object' ? tag.id : tag)
 });
+
+console.log('EventDetails - Initial tags:', eventDetails.value.tags);
+console.log('EventDetails - Props event tags:', props.event.tags);
+console.log('EventDetails - Tags map:', tagsMap.value);
 
 const filteredTags = computed(() => {
   if (!eventDetails.value.category_id) {
@@ -287,6 +291,8 @@ const toggleEdit = () => {
   } else {
     // Entering edit mode: store a copy of the current data
     originalEventDetails.value = JSON.parse(JSON.stringify(eventDetails.value));
+    console.log('EventDetails - Entering edit mode, tags:', eventDetails.value.tags);
+    console.log('EventDetails - Filtered tags:', filteredTags.value);
   }
   editMode.value = !editMode.value;
 };
@@ -674,14 +680,34 @@ const getBracketIndex = (bracketId) => {
                             <!-- Edit Mode: Tags -->
                             <div>
                                 <label class="text-sm font-medium mb-1">Tags</label>
-                                <MultiSelect v-model="eventDetails.tags" :options="filteredTags" optionValue="id" optionLabel="name" display="chip" placeholder="Select tags" class="w-full" show-toggle-all="false">
-                                    <template #chip="slotProps">
-                                        <div v-if="tagsMap[slotProps.value]" class="flex items-center gap-2 px-2 py-1 rounded text-white text-xs" :style="{ backgroundColor: tagsMap[slotProps.value].color }">
-                                            {{ tagsMap[slotProps.value].name }}
-                                            <button type="button" class="text-white hover:text-gray-200" @click.stop="removeTag(tagsMap[slotProps.value])" v-tooltip.top="'Remove Tag'">✕</button>
+                                <MultiSelect 
+                                    v-model="eventDetails.tags" 
+                                    :options="filteredTags" 
+                                    optionValue="id" 
+                                    optionLabel="name" 
+                                    placeholder="Select tags" 
+                                    class="w-full" 
+                                    :showToggleAll="false"
+                                    display="chip"
+                                >
+                                    <template #chip="{ value }">
+                                        <div 
+                                            v-if="tagsMap[value]" 
+                                            class="flex items-center gap-2 px-2 py-1 rounded text-white text-xs" 
+                                            style="background-color: #3B82F6;"
+                                        >
+                                            {{ tagsMap[value].name }}
+                                            <button 
+                                                type="button" 
+                                                class="text-white hover:text-gray-200" 
+                                                @click.stop="removeTag(tagsMap[value])" 
+                                                v-tooltip.top="'Remove Tag'"
+                                            >
+                                                ✕
+                                            </button>
                                         </div>
                                         <div v-else class="flex items-center gap-2 px-2 py-1 rounded bg-gray-500 text-white text-xs">
-                                            {{ slotProps.value }}
+                                            {{ value }}
                                         </div>
                                     </template>
                                 </MultiSelect>

@@ -1163,14 +1163,16 @@
 
       // Open Edit Modal
       const editEvent = async (event) => {
-        const eventTagIds = event_tags.value
-          .filter(et => et.event_id === event.id)
-          .map(et => et.tag_id);
+        // Extract tag IDs from event.tags (which contains tag objects)
+        const eventTagIds = (event.tags || []).map(tag => typeof tag === 'object' ? tag.id : tag);
+
+        console.log('EventList - Event ID:', event.id);
+        console.log('EventList - Event tags:', event.tags);
+        console.log('EventList - Event tag IDs:', eventTagIds);
 
         Object.assign(selectedEvent.value, {
           ...event,
           venue: event.venue || "",
-          tags: eventTagIds,
           startDate: event.startDate ? new Date(event.startDate) : null,
           endDate: event.endDate ? new Date(event.endDate) : null,
           isAllDay: event.isAllDay ?? false,
@@ -1180,7 +1182,15 @@
           memorandum: event.memorandum || null,
         });
 
+        console.log('EventList - After Object.assign, tags:', selectedEvent.value.tags);
+
+        // Set tags after nextTick to allow the category_id watcher to complete
         await nextTick();
+        selectedEvent.value.tags = eventTagIds;
+        
+        console.log('EventList - After nextTick, tags:', selectedEvent.value.tags);
+        console.log('EventList - Filtered tags:', filteredSelectedEventTags.value);
+        
         isEditModalVisible.value = true;
       };
 

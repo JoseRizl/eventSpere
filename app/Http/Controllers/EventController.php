@@ -460,11 +460,11 @@ class EventController extends JsonController
                 // Check if the event currently has tags in the event_tags table
                 $hasExistingTags = collect($this->jsonData['event_tags'] ?? [])->where('event_id', $id)->isNotEmpty();
 
-                // Safety feature: do not overwrite existing tags with an empty array from the list view.
-                // This prevents accidental removal of all tags.
-                if (isset($validated['tags']) && empty($validated['tags']) && $hasExistingTags) {
-                    unset($validated['tags']);
-                }
+                // // Safety feature: do not overwrite existing tags with an empty array from the list view.
+                // // This prevents accidental removal of all tags.
+                // if (isset($validated['tags']) && empty($validated['tags']) && $hasExistingTags) {
+                //     unset($validated['tags']);
+                // }
 
                 $memorandumData = $validated['memorandum'] ?? null;
                 unset($validated['memorandum']);
