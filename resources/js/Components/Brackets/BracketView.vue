@@ -80,6 +80,87 @@ const isRoundOngoing = (bracketPart, roundIdx) => {
     return ongoingIndex !== null && ongoingIndex === roundIdx;
 };
 
+// Check if Single Elimination has consolation match (3rd place)
+const hasConsolationMatch = computed(() => {
+    if (props.bracket.type !== 'Single Elimination' || !props.bracket.matches) return false;
+    const finalRound = props.bracket.matches[props.bracket.matches.length - 1];
+    if (!finalRound) return false;
+    return finalRound.some(m => m.bracket_type === 'consolation');
+});
+
+// Check if Single Elimination should use split bracket layout (12+ players always)
+const shouldSplitBracket = computed(() => {
+    if (props.bracket.type !== 'Single Elimination' || !props.bracket.matches) return false;
+    
+    // Count total players in first round (excluding BYEs)
+    const firstRound = props.bracket.matches[0];
+    if (!firstRound) return false;
+    
+    const playerCount = firstRound.reduce((count, match) => {
+        const p1 = match.players[0]?.name !== 'BYE' && match.players[0]?.name !== 'TBD' ? 1 : 0;
+        const p2 = match.players[1]?.name !== 'BYE' && match.players[1]?.name !== 'TBD' ? 1 : 0;
+        return count + p1 + p2;
+    }, 0);
+    
+    // Use split layout for 12+ players (regardless of consolation match)
+    return playerCount >= 12;
+});
+
+// Split bracket into A and B sides with proper semifinal tracking
+const splitBracketData = computed(() => {
+    if (!shouldSplitBracket.value) return null;
+    
+    const matches = props.bracket.matches;
+    const totalRounds = matches.length;
+    
+    // For a proper split: each half progresses independently until semifinals
+    // Semifinals = second-to-last round (2 matches)
+    // Finals = last round (1 match)
+    
+    const semifinalRoundIdx = totalRounds - 2;
+    const finalRoundIdx = totalRounds - 1;
+    
+    // Split all rounds INCLUDING semifinals
+    const bracketA = [];
+    const bracketB = [];
+    
+    for (let roundIdx = 0; roundIdx <= semifinalRoundIdx; roundIdx++) {
+        const round = matches[roundIdx];
+        
+        if (roundIdx === semifinalRoundIdx) {
+            // Semifinals: first match to A, second match to B
+            if (round[0]) bracketA.push([round[0]]);
+            if (round[1]) bracketB.push([round[1]]);
+        } else {
+            // Earlier rounds: split by position
+            const midPoint = Math.ceil(round.length / 2);
+            
+            // Top half goes to Bracket A
+            bracketA.push(round.slice(0, midPoint));
+            // Bottom half goes to Bracket B
+            bracketB.push(round.slice(midPoint));
+        }
+    }
+    
+    // Finals and Consolation (both in the final round)
+    const finalRound = matches[finalRoundIdx] || [];
+    const finals = finalRound.find(m => m.bracket_type !== 'consolation') || finalRound[0];
+    const consolation = finalRound.find(m => m.bracket_type === 'consolation');
+    
+    // Get semifinal matches
+    const semifinals = matches[semifinalRoundIdx] || [];
+    
+    return { 
+        bracketA, 
+        bracketB, 
+        semifinals: { a: semifinals[0], b: semifinals[1] },
+        finals: finals,
+        consolation: consolation,
+        semifinalRoundIdx,
+        finalRoundIdx
+    };
+});
+
 const bracketAnalysis = computed(() => {
     const bracket = props.bracket;
     const analysis = {
@@ -544,7 +625,72 @@ const updateBracketLines = () => {
     // Use an async function to handle positioning and line drawing in order
     const runUpdates = async () => {
         if (bracket.type === 'Single Elimination') {
-            dynamicLines.value.single = drawLinesFor(bracket.matches, '.connection-lines', 'match', 'single');
+            // Check if using split bracket layout (with consolation)
+            if (shouldSplitBracket.value) {
+                // Use unified SVG for split bracket
+                const unifiedSvg = bracketContentRef.value?.querySelector('.unified-connection-lines');
+                if (!unifiedSvg) {
+                    console.warn('Unified SVG not found for split bracket');
+                    return;
+                }
+                
+                const svgRect = unifiedSvg.getBoundingClientRect();
+                dynamicLines.value.single = [];
+                
+                // Draw lines for all rounds in the bracket
+                for (let roundIdx = 0; roundIdx < bracket.matches.length - 1; roundIdx++) {
+                    const currentRound = bracket.matches[roundIdx];
+                    const nextRound = bracket.matches[roundIdx + 1];
+                    
+                    currentRound.forEach((match, matchIdx) => {
+                        // Determine next match index
+                        let nextMatchIdx;
+                        
+                        if (roundIdx === bracket.matches.length - 2) {
+                            // Semifinals to finals/consolation
+                            const consolationMatch = nextRound.find(m => m.bracket_type === 'consolation');
+                            if (consolationMatch) {
+                                // Has consolation - first SF goes to finals, both go to consolation for losers
+                                const finalsMatchIdx = nextRound.findIndex(m => m.bracket_type !== 'consolation');
+                                nextMatchIdx = finalsMatchIdx >= 0 ? finalsMatchIdx : 0;
+                            } else {
+                                nextMatchIdx = 0; // Both semifinals go to finals
+                            }
+                        } else {
+                            // Normal progression
+                            nextMatchIdx = Math.floor(matchIdx / 2);
+                        }
+                        
+                        const fromEl = bracketContentRef.value?.querySelector(`#match-${props.bracketIndex}-${roundIdx}-${matchIdx}`);
+                        const toEl = bracketContentRef.value?.querySelector(`#match-${props.bracketIndex}-${roundIdx + 1}-${nextMatchIdx}`);
+                        
+                        if (!fromEl || !toEl) return;
+                        
+                        const fromRect = fromEl.getBoundingClientRect();
+                        const toRect = toEl.getBoundingClientRect();
+                        
+                        const fromCenterY = fromRect.top - svgRect.top + fromRect.height / 2;
+                        const toCenterY = toRect.top - svgRect.top + toRect.height / 2;
+                        const fromRightX = fromRect.right - svgRect.left;
+                        const toLeftX = toRect.left - svgRect.left;
+                        
+                        // 3-segment elbow line
+                        const midX = (fromRightX + toLeftX) / 2;
+                        
+                        dynamicLines.value.single.push(
+                            { x1: fromRightX, y1: fromCenterY, x2: midX, y2: fromCenterY },
+                            { x1: midX, y1: fromCenterY, x2: midX, y2: toCenterY },
+                            { x1: midX, y1: toCenterY, x2: toLeftX, y2: toCenterY }
+                        );
+                    });
+                }
+            } else {
+                // Standard single elimination - filter out consolation matches from line drawing
+                const matchesWithoutConsolation = bracket.matches.map(round => 
+                    round.filter(m => m.bracket_type !== 'consolation')
+                );
+                dynamicLines.value.single = drawLinesFor(matchesWithoutConsolation, '.connection-lines', 'match', 'single');
+            }
         } else if (bracket.type === 'Double Elimination') {
             // For unified layout, use single SVG for all lines
             const unifiedSvg = bracketContentRef.value?.querySelector('.unified-connection-lines');
@@ -722,13 +868,43 @@ const updateBracketLines = () => {
     runUpdates();
 };
 
+// Align consolation match with finals match
+const alignConsolationWithFinals = () => {
+    if (props.bracket.type !== 'Single Elimination' || !hasConsolationMatch.value || shouldSplitBracket.value) {
+        return;
+    }
+    
+    nextTick(() => {
+        const finalsMatch = bracketContentRef.value?.querySelector('.finals-match-standard');
+        const consolationMatch = bracketContentRef.value?.querySelector('.consolation-match-standard');
+        
+        if (finalsMatch && consolationMatch) {
+            const finalsRect = finalsMatch.getBoundingClientRect();
+            const consolationRect = consolationMatch.getBoundingClientRect();
+            const containerRect = bracketContentRef.value.getBoundingClientRect();
+            
+            // Calculate the offset needed to align consolation with finals
+            const finalsTop = finalsRect.top - containerRect.top;
+            const consolationTop = consolationRect.top - containerRect.top;
+            const offset = finalsTop - consolationTop;
+            
+            // Apply the offset
+            consolationMatch.style.marginTop = `${offset}px`;
+        }
+    });
+};
+
 onMounted(() => {
     if (props.bracket.type !== 'Round Robin' && bracketContentRef.value) {
-        resizeObserver = new ResizeObserver(() => nextTick(updateBracketLines));
+        resizeObserver = new ResizeObserver(() => {
+            nextTick(updateBracketLines);
+            alignConsolationWithFinals();
+        });
         resizeObserver.observe(bracketContentRef.value);
         // Add delay to ensure DOM is fully rendered
         setTimeout(() => {
             nextTick(updateBracketLines);
+            alignConsolationWithFinals();
         }, 100);
     }
 });
@@ -737,11 +913,158 @@ onUnmounted(() => {
     if (resizeObserver) resizeObserver.disconnect();
 });
 
-watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
+watch(() => props.bracket, () => {
+    nextTick(updateBracketLines);
+    alignConsolationWithFinals();
+}, { deep: true });
 </script>
 
 <template>
-    <div v-if="bracket.type === 'Single Elimination'" class="bracket-scroll-container">
+    <!-- Single Elimination - Split Bracket Layout (with consolation) -->
+    <div v-if="bracket.type === 'Single Elimination' && shouldSplitBracket" class="bracket-scroll-container">
+        <div class="split-bracket-container-horizontal" ref="bracketContentRef">
+            <svg class="connection-lines unified-connection-lines">
+                <line
+                    v-for="(line, i) in dynamicLines.single"
+                    :key="`split-line-${i}`"
+                    :x1="line.x1"
+                    :y1="line.y1"
+                    :x2="line.x2"
+                    :y2="line.y2"
+                    stroke="#0077B3"
+                    stroke-width="2"
+                />
+            </svg>
+            
+            <div class="split-bracket-header">
+                <h3>Single Elimination Tournament</h3>
+            </div>
+            
+            <!-- Horizontal Layout: A flows right, B flows left, meet at finals -->
+            <div class="horizontal-split-layout">
+                <!-- Left Side: Bracket A (flows left to right) -->
+                <div class="bracket-side bracket-a-side">
+                    <div class="section-label">BRACKET A</div>
+                    <div class="bracket single-elimination bracket-flow-right">
+                        <div v-for="(round, roundIdx) in splitBracketData.bracketA" :key="`a-${roundIdx}`"
+                            :class="['round', `round-${roundIdx + 1}`]">
+                            <h4>{{ roundIdx === splitBracketData.bracketA.length - 1 ? 'SF' : `R${roundIdx + 1}` }}</h4>
+                            <div
+                                v-for="(match, matchIdx) in round"
+                                :key="`a-${roundIdx}-${matchIdx}`"
+                                :id="`match-${bracketIndex}-${roundIdx}-${matchIdx}`"
+                                :data-match-id="match.id"
+                                :style="getMatchStyle(roundIdx)"
+                                :class="['match', (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
+                                @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'single')"
+                            >
+                                <div class="player-box">
+                                    <span :class="getPlayerStyling(match.players[0], match.players[1], match, 'single')">
+                                        {{ truncate(match.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
+                                    </span>
+                                    <hr />
+                                    <span :class="getPlayerStyling(match.players[1], match.players[0], match, 'single')">
+                                        {{ truncate(match.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Center: Finals and Consolation -->
+                <div class="bracket-center-column">
+                    <!-- Finals -->
+                    <div class="finals-container">
+                        <div class="section-label">FINALS</div>
+                        <div class="bracket finals-bracket" v-if="splitBracketData.finals">
+                            <div class="round finals-round">
+                                <div
+                                    :id="`match-${bracketIndex}-${splitBracketData.finalRoundIdx}-0`"
+                                    :data-match-id="splitBracketData.finals.id"
+                                    :class="['match', 'finals-match', (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
+                                    @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, splitBracketData.finalRoundIdx, 0, splitBracketData.finals, 'single')"
+                                >
+                                    <div class="player-box">
+                                        <span :class="getPlayerStyling(splitBracketData.finals.players[0], splitBracketData.finals.players[1], splitBracketData.finals, 'single')">
+                                            {{ truncate(splitBracketData.finals.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(splitBracketData.finals.players[0], splitBracketData.finals) }}
+                                        </span>
+                                        <hr />
+                                        <span :class="getPlayerStyling(splitBracketData.finals.players[1], splitBracketData.finals.players[0], splitBracketData.finals, 'single')">
+                                            {{ truncate(splitBracketData.finals.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(splitBracketData.finals.players[1], splitBracketData.finals) }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="placement-labels">
+                                    <div class="placement-label champion">Champion</div>
+                                    <!-- <div class="placement-label second">Second</div> -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Consolation (3rd Place) -->
+                    <div class="consolation-container" v-if="splitBracketData.consolation">
+                        <div class="section-label">3RD PLACE</div>
+                        <div class="bracket consolation-bracket">
+                            <div class="round consolation-round">
+                                <div
+                                    :id="`match-${bracketIndex}-${splitBracketData.finalRoundIdx}-${bracket.matches[splitBracketData.finalRoundIdx].indexOf(splitBracketData.consolation)}`"
+                                    :data-match-id="splitBracketData.consolation.id"
+                                    :class="['match', 'consolation-match', (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
+                                    @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, splitBracketData.finalRoundIdx, bracket.matches[splitBracketData.finalRoundIdx].indexOf(splitBracketData.consolation), splitBracketData.consolation, 'single')"
+                                >
+                                    <div class="player-box">
+                                        <span :class="getPlayerStyling(splitBracketData.consolation.players[0], splitBracketData.consolation.players[1], splitBracketData.consolation, 'single')">
+                                            {{ truncate(splitBracketData.consolation.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(splitBracketData.consolation.players[0], splitBracketData.consolation) }}
+                                        </span>
+                                        <hr />
+                                        <span :class="getPlayerStyling(splitBracketData.consolation.players[1], splitBracketData.consolation.players[0], splitBracketData.consolation, 'single')">
+                                            {{ truncate(splitBracketData.consolation.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(splitBracketData.consolation.players[1], splitBracketData.consolation) }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="placement-label third">Third</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Side: Bracket B (flows right to left) -->
+                <div class="bracket-side bracket-b-side">
+                    <div class="section-label">BRACKET B</div>
+                    <div class="bracket single-elimination bracket-flow-left">
+                        <div v-for="(round, roundIdx) in splitBracketData.bracketB" :key="`b-${roundIdx}`"
+                            :class="['round', `round-${roundIdx + 1}`]">
+                            <h4>{{ roundIdx === splitBracketData.bracketB.length - 1 ? 'SF' : `R${roundIdx + 1}` }}</h4>
+                            <div
+                                v-for="(match, matchIdx) in round"
+                                :key="`b-${roundIdx}-${matchIdx}`"
+                                :id="`match-${bracketIndex}-${roundIdx}-${Math.ceil(bracket.matches[roundIdx].length / 2) + matchIdx}`"
+                                :data-match-id="match.id"
+                                :style="getMatchStyle(roundIdx)"
+                                :class="['match', (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
+                                @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, Math.ceil(bracket.matches[roundIdx].length / 2) + matchIdx, match, 'single')"
+                            >
+                                <div class="player-box">
+                                    <span :class="getPlayerStyling(match.players[0], match.players[1], match, 'single')">
+                                        {{ truncate(match.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
+                                    </span>
+                                    <hr />
+                                    <span :class="getPlayerStyling(match.players[1], match.players[0], match, 'single')">
+                                        {{ truncate(match.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Single Elimination - Standard Layout (without consolation or with consolation for <12 players) -->
+    <div v-else-if="bracket.type === 'Single Elimination'" class="bracket-scroll-container">
         <div class="bracket single-elimination" ref="bracketContentRef">
             <svg class="connection-lines">
             <line
@@ -758,18 +1081,18 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
 
             <div v-for="(round, roundIdx) in bracket.matches" :key="roundIdx"
             :class="['round', `round-${roundIdx + 1}`, { 'round-ongoing': isRoundOngoing('single', roundIdx) }]">
-            <h3>
+            <h3 :class="{ 'final-round-header': props.isFinalRound(bracketIndex, roundIdx) }">
                 {{ props.isFinalRound(bracketIndex, roundIdx) ? 'Final Round' : `Round ${roundIdx + 1}` }}
             </h3>
 
             <!-- Matches Display -->
             <div
-                v-for="(match, matchIdx) in round"
+                v-for="(match, matchIdx) in round.filter(m => m.bracket_type !== 'consolation')"
                 :key="matchIdx"
                 :id="`match-${bracketIndex}-${roundIdx}-${matchIdx}`"
                 :data-match-id="match.id"
                 :style="getMatchStyle(roundIdx)"
-                :class="['match', (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
+                :class="['match', { 'finals-match-standard': props.isFinalRound(bracketIndex, roundIdx) }, (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
                 @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'single')"
             >
                 <div class="player-box">
@@ -786,6 +1109,29 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
                     </span>
                 </div>
             </div>
+            </div>
+            
+            <!-- Consolation Match (3rd Place) - shown to the right of finals -->
+            <div v-if="hasConsolationMatch" class="round round-consolation">
+                <h3>3rd Place</h3>
+                <div
+                    v-for="(match, matchIdx) in bracket.matches[bracket.matches.length - 1].filter(m => m.bracket_type === 'consolation')"
+                    :key="`consolation-${matchIdx}`"
+                    :id="`match-${bracketIndex}-${bracket.matches.length - 1}-${bracket.matches[bracket.matches.length - 1].indexOf(match)}`"
+                    :data-match-id="match.id"
+                    :class="['match', 'consolation-match-standard', (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
+                    @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, bracket.matches.length - 1, bracket.matches[bracket.matches.length - 1].indexOf(match), match, 'single')"
+                >
+                    <div class="player-box">
+                        <span :class="getPlayerStyling(match.players[0], match.players[1], match, 'single')">
+                            {{ truncate(match.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
+                        </span>
+                        <hr />
+                        <span :class="getPlayerStyling(match.players[1], match.players[0], match, 'single')">
+                            {{ truncate(match.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
+                        </span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -11,6 +11,7 @@ const bracketName = ref("");
 const numberOfPlayers = ref();
 const matchType = ref("");
 const selectedEvent = ref(null);
+const includeThirdPlace = ref(false);
 
 // Data collections
 const events = ref([]);
@@ -26,6 +27,7 @@ export function useBracketState() {
     numberOfPlayers,
     matchType,
     selectedEvent,
+    includeThirdPlace,
     
     // Data collections
     events,

@@ -2235,3 +2235,262 @@
     padding: 0.75rem;
   }
 }
+
+/* ========================================
+   HORIZONTAL SPLIT BRACKET LAYOUT
+   (Single Elimination with Consolation)
+   ======================================== */
+
+.split-bracket-container-horizontal {
+  position: relative;
+  width: 100%;
+  padding: 2rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.split-bracket-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.split-bracket-header h3 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.horizontal-split-layout {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 3rem;
+  position: relative;
+}
+
+/* Bracket Sides */
+.bracket-side {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.bracket-a-side .section-label {
+  text-align: left;
+  color: #007bff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.bracket-b-side .section-label {
+  text-align: right;
+  color: #28a745;
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Flow directions */
+.bracket-flow-right {
+  display: flex;
+  flex-direction: row;
+  gap: 40px;
+}
+
+.bracket-flow-left {
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 40px;
+}
+
+.bracket-flow-right .round,
+.bracket-flow-left .round {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.bracket-flow-right .round h4,
+.bracket-flow-left .round h4 {
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #6c757d;
+  margin: 0 0 10px 0;
+  padding: 4px 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+}
+
+/* Center Column */
+.bracket-center-column {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3rem;
+  min-width: 200px;
+}
+
+.finals-container,
+.consolation-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.finals-container .section-label {
+  color: #ffc107;
+  font-weight: 700;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+}
+
+.consolation-container .section-label {
+  color: #cd7f32;
+  font-weight: 700;
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.finals-match {
+  border: 3px solid #ffc107 !important;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+  width: 180px;
+}
+
+.consolation-match {
+  border: 3px solid #cd7f32 !important;
+  box-shadow: 0 4px 12px rgba(205, 127, 50, 0.3);
+  width: 180px;
+}
+
+.placement-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.placement-label {
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.placement-label.champion {
+  background: #ffc107;
+  color: #000;
+}
+
+.placement-label.second {
+  background: #c0c0c0;
+  color: #000;
+}
+
+.placement-label.third {
+  background: #cd7f32;
+  color: #fff;
+}
+
+/* SVG for connection lines */
+.split-bracket-container-horizontal .unified-connection-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.split-bracket-container-horizontal .bracket,
+.split-bracket-container-horizontal .match {
+  position: relative;
+  z-index: 2;
+}
+
+/* Responsive */
+@media (max-width: 1400px) {
+  .horizontal-split-layout {
+    gap: 2rem;
+  }
+  
+  .bracket-flow-right,
+  .bracket-flow-left {
+    gap: 30px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .horizontal-split-layout {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .bracket-side {
+    width: 100%;
+  }
+  
+  .bracket-center-column {
+    order: 2;
+  }
+  
+  .bracket-a-side {
+    order: 1;
+  }
+  
+  .bracket-b-side {
+    order: 3;
+  }
+}
+
+/* ========================================
+   CONSOLATION MATCH IN STANDARD LAYOUT
+   ======================================== */
+
+.round-consolation {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  align-items: start;
+}
+
+.round-consolation h3 {
+  color: #cd7f32;
+  font-weight: 600;
+  font-size: 1.1rem;
+  background: #fff3e0;
+  padding: 8px;
+  border-radius: 4px;
+  margin: 0 0 15px 0;
+  text-align: center;
+  width: 100%;
+  grid-row: 1;
+}
+
+.consolation-match-standard {
+  border: 3px solid #cd7f32 !important;
+  box-shadow: 0 4px 12px rgba(205, 127, 50, 0.3);
+  background: #fff8f0 !important;
+  grid-row: 2;
+  align-self: center;
+}
+
+/* Finals styling in standard layout */
+.finals-match-standard {
+  border: 3px solid #ffc107 !important;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+  background: #fffbf0 !important;
+}
+
+.final-round-header {
+  color: #ffc107 !important;
+  background: #fff9e6 !important;
+  font-weight: 700;
+}
