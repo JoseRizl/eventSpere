@@ -1934,3 +1934,304 @@
     font-size: 0.65rem;
   }
 }
+
+/* Double Elimination Unified Layout */
+.double-elimination-unified {
+  position: relative;
+  width: 100%;
+  padding: 2rem;
+  background-color: #f8f9fa;
+}
+
+.unified-bracket-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.unified-bracket-header h3 {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.unified-bracket-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* Unified connection lines overlay */
+.unified-connection-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+  overflow: visible;
+}
+
+.unified-connection-lines line {
+  stroke: #333;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.three-column-bracket-container {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  grid-template-rows: auto auto;
+  gap: 2rem;
+  position: relative;
+  z-index: 2;
+  padding: 1rem;
+  align-items: start;
+}
+
+/* Left Column: Losers Bracket */
+.left-column.losers-section {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+/* Center Column: Initial Rounds */
+.center-column.initial-section {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+/* Right Column: Winners Bracket */
+.right-column.winners-section {
+  grid-column: 3;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Bottom Row: Finals (spans all columns) */
+.finals-bottom-row {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+  margin-top: 2rem;
+}
+
+.section-label {
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.winners-label {
+  background-color: #d4edda;
+  color: #155724;
+  border: 2px solid #28a745;
+}
+
+.losers-label {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 2px solid #dc3545;
+}
+
+.finals-label {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 2px solid #ffc107;
+}
+
+.initial-label {
+  background-color: #e3f2fd;
+  color: #1565c0;
+  border: 2px solid #2196f3;
+}
+
+/* Bracket Flows */
+.losers-left-flow {
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 40px;
+  align-items: flex-start;
+  position: relative;
+}
+
+.initial-center-flow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.winners-right-flow {
+  display: flex;
+  flex-direction: row;
+  gap: 40px;
+  align-items: flex-start;
+  position: relative;
+}
+
+.finals-center-flow {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.finals-round {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+.finals-match {
+  border: 3px solid #ffc107 !important;
+  box-shadow: 0 4px 16px rgba(255, 193, 7, 0.4) !important;
+  background: linear-gradient(135deg, #ffffff 0%, #fffef7 100%) !important;
+}
+
+.finals-match:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(255, 193, 7, 0.6) !important;
+}
+
+/* Round Labels */
+.round-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6c757d;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Adjust round spacing for three-column layout */
+.losers-section .round,
+.initial-section .round,
+.winners-section .round,
+.finals-bottom-row .round {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 180px;
+}
+
+/* Ensure matches are above connection lines */
+.losers-section .match,
+.initial-section .match,
+.winners-section .match,
+.finals-bottom-row .match {
+  position: relative;
+  z-index: 3;
+}
+
+/* Responsive adjustments for three-column layout */
+@media (max-width: 1200px) {
+  .three-column-bracket-container {
+    gap: 1.5rem;
+  }
+
+  .losers-left-flow,
+  .winners-right-flow {
+    gap: 30px;
+  }
+
+  .losers-section .round,
+  .initial-section .round,
+  .winners-section .round,
+  .finals-bottom-row .round {
+    min-width: 150px;
+  }
+}
+
+@media (max-width: 768px) {
+  .double-elimination-unified {
+    padding: 1rem;
+  }
+
+  .unified-bracket-header h3 {
+    font-size: 1.25rem;
+  }
+
+  .three-column-bracket-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto;
+    gap: 1.5rem;
+  }
+
+  .left-column.losers-section {
+    grid-column: 1;
+    grid-row: 1;
+    align-items: center;
+  }
+
+  .center-column.initial-section {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .right-column.winners-section {
+    grid-column: 1;
+    grid-row: 3;
+    align-items: center;
+  }
+
+  .finals-bottom-row {
+    grid-column: 1;
+    grid-row: 4;
+    padding: 1rem;
+    margin-top: 0;
+  }
+
+  .losers-left-flow,
+  .winners-right-flow {
+    gap: 20px;
+    overflow-x: auto;
+  }
+
+  .section-label {
+    font-size: 0.75rem;
+    padding: 0.4rem 1rem;
+  }
+
+  .losers-section .round,
+  .initial-section .round,
+  .winners-section .round,
+  .finals-bottom-row .round {
+    min-width: 120px;
+    gap: 15px;
+  }
+
+  .round-label {
+    font-size: 0.65rem;
+  }
+
+  .center-column.initial-section {
+    padding: 0.75rem;
+  }
+}
