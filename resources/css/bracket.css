@@ -1711,3 +1711,226 @@
     text-align: left; /* Align player names to the left */
   }
 }
+
+/* Round Robin Grid System Styles */
+.round-robin-grid-container {
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.round-robin-grid-container h3 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.round-robin-grid-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.round-robin-grid-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  min-width: 600px;
+}
+
+.round-robin-grid-table th,
+.round-robin-grid-table td {
+  border: 2px solid #dee2e6;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 0.9rem;
+}
+
+/* Corner cell (top-left) */
+.grid-corner-cell {
+  background-color: #f8f9fa;
+  width: 120px;
+  min-width: 120px;
+  padding: 0.75rem;
+}
+
+/* Header cells (top row) */
+.grid-header-cell {
+  background-color: #e9ecef;
+  padding: 0.75rem 0.5rem;
+  font-weight: 600;
+  color: #495057;
+  min-width: 100px;
+  width: 100px;
+}
+
+.grid-header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.grid-header-content .team-number {
+  font-size: 0.75rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.grid-header-content .team-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #212529;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Row headers (left column) */
+.grid-row-header {
+  background-color: #e9ecef;
+  padding: 0.75rem;
+  font-weight: 600;
+  color: #495057;
+  text-align: left;
+  width: 120px;
+  min-width: 120px;
+}
+
+.grid-row-header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.grid-row-header-content .team-number {
+  font-size: 0.75rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.grid-row-header-content .team-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #212529;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Grid cells */
+.grid-cell-content {
+  padding: 0.75rem 0.5rem;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 2rem;
+}
+
+/* Diagonal cells (same team vs same team) */
+.grid-cell-diagonal {
+  background-color: #212529;
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+/* Empty cells */
+.grid-cell-empty {
+  background-color: #f8f9fa;
+}
+
+/* Match cells */
+.grid-cell-match {
+  transition: all 0.2s ease;
+}
+
+.grid-cell-match.cursor-pointer:hover {
+  background-color: #e7f3ff;
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+  cursor: pointer;
+}
+
+/* Win cells */
+.grid-cell-win {
+  background-color: #d4edda;
+  color: #155724;
+  font-weight: 600;
+}
+
+.grid-cell-win:hover {
+  background-color: #c3e6cb !important;
+}
+
+/* Loss cells */
+.grid-cell-loss {
+  background-color: #f8d7da;
+  color: #721c24;
+  font-weight: 600;
+}
+
+.grid-cell-loss:hover {
+  background-color: #f5c6cb !important;
+}
+
+/* Tie cells */
+.grid-cell-tie {
+  background-color: #fff3cd;
+  color: #856404;
+  font-weight: 600;
+}
+
+.grid-cell-tie:hover {
+  background-color: #ffeeba !important;
+}
+
+/* Pending cells */
+.grid-cell-pending {
+  background-color: #e2e3e5;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.grid-cell-pending:hover {
+  background-color: #d6d8db !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .round-robin-grid-container {
+    padding: 1rem;
+  }
+
+  .grid-corner-cell,
+  .grid-row-header {
+    width: 80px;
+    min-width: 80px;
+    font-size: 0.75rem;
+  }
+
+  .grid-header-cell {
+    min-width: 70px;
+    width: 70px;
+    font-size: 0.75rem;
+  }
+
+  .grid-cell-content {
+    padding: 0.5rem 0.25rem;
+    min-height: 40px;
+    font-size: 1.5rem;
+  }
+
+  .grid-header-content .team-name,
+  .grid-row-header-content .team-name {
+    font-size: 0.7rem;
+  }
+
+  .grid-header-content .team-number,
+  .grid-row-header-content .team-number {
+    font-size: 0.65rem;
+  }
+}

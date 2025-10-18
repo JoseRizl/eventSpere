@@ -220,6 +220,114 @@ const getRoundRobinPlayerStyling = (player, otherPlayer, match) => {
     };
 };
 
+// Round Robin Grid System
+const roundRobinPlayers = computed(() => {
+    if (props.bracket.type !== 'Round Robin' || !props.bracket.matches) return [];
+    
+    const playerMap = new Map();
+    const allMatches = props.bracket.matches.flat();
+    
+    allMatches.forEach(match => {
+        match.players.forEach(player => {
+            if (player.name !== 'BYE' && player.name !== 'TBD' && !playerMap.has(player.id)) {
+                playerMap.set(player.id, {
+                    id: player.id,
+                    name: player.name
+                });
+            }
+        });
+    });
+    
+    return Array.from(playerMap.values());
+});
+
+const roundRobinGrid = computed(() => {
+    if (props.bracket.type !== 'Round Robin' || !props.bracket.matches) return [];
+    
+    const players = roundRobinPlayers.value;
+    const allMatches = props.bracket.matches.flat();
+    
+    // Create a grid matrix
+    const grid = players.map(rowPlayer => {
+        return players.map(colPlayer => {
+            // Diagonal cells (same player)
+            if (rowPlayer.id === colPlayer.id) {
+                return { type: 'diagonal', player: rowPlayer };
+            }
+            
+            // Find match between these two players
+            const match = allMatches.find(m => {
+                const p1 = m.players[0];
+                const p2 = m.players[1];
+                return (p1.id === rowPlayer.id && p2.id === colPlayer.id) ||
+                       (p1.id === colPlayer.id && p2.id === rowPlayer.id);
+            });
+            
+            if (match) {
+                // Determine if rowPlayer won, lost, or tied
+                const rowPlayerInMatch = match.players.find(p => p.id === rowPlayer.id);
+                const colPlayerInMatch = match.players.find(p => p.id === colPlayer.id);
+                
+                return {
+                    type: 'match',
+                    match: match,
+                    rowPlayer: rowPlayerInMatch,
+                    colPlayer: colPlayerInMatch,
+                    result: match.status === 'completed' 
+                        ? (match.is_tie ? 'tie' : (match.winner_id === rowPlayer.id ? 'win' : 'loss'))
+                        : 'pending'
+                };
+            }
+            
+            return { type: 'empty' };
+        });
+    });
+    
+    return grid;
+});
+
+const getGridCellClass = (cell) => {
+    if (cell.type === 'diagonal') return 'grid-cell-diagonal';
+    if (cell.type === 'empty') return 'grid-cell-empty';
+    if (cell.type === 'match') {
+        const classes = ['grid-cell-match'];
+        if (cell.match.status === 'completed') {
+            if (cell.result === 'win') classes.push('grid-cell-win');
+            else if (cell.result === 'loss') classes.push('grid-cell-loss');
+            else if (cell.result === 'tie') classes.push('grid-cell-tie');
+        } else {
+            classes.push('grid-cell-pending');
+        }
+        return classes.join(' ');
+    }
+    return '';
+};
+
+const getGridCellContent = (cell) => {
+    if (cell.type === 'diagonal') return '—';
+    if (cell.type === 'empty') return '';
+    if (cell.type === 'match') {
+        if (cell.match.status === 'completed') {
+            if (cell.result === 'win') return '✓';
+            if (cell.result === 'loss') return '✕';
+            if (cell.result === 'tie') return '=';
+        }
+        return '—';
+    }
+    return '';
+};
+
+const findMatchIndices = (match) => {
+    if (!props.bracket.matches) return null;
+    for (let roundIdx = 0; roundIdx < props.bracket.matches.length; roundIdx++) {
+        const matchIdx = props.bracket.matches[roundIdx].findIndex(m => m.id === match.id);
+        if (matchIdx !== -1) {
+            return { roundIdx, matchIdx };
+        }
+    }
+    return null;
+};
+
 const getLineStroke = (line) => {
     return line.isWinnerPath ? '#007bff' : 'black'; // Blue for winner, black for default
 };
@@ -484,76 +592,97 @@ watch(() => props.bracket, () => nextTick(updateBracketLines), { deep: true });
         </div>
     </div>
 
-    <!-- Round Robin Display -->
+    <!-- Round Robin Display - Grid System -->
     <div v-else-if="bracket.type === 'Round Robin'" class="round-robin-bracket">
-        <div class="bracket">
-        <div v-for="(round, roundIdx) in bracket.matches" :key="`round-${roundIdx}`"
-            :class="['round', `round-${roundIdx + 1}`, { 'round-ongoing': isRoundOngoing('round_robin', roundIdx) }]">
-            <h3>Round {{ roundIdx + 1 }}</h3>
-
-            <div
-            v-for="(match, matchIdx) in round"
-            :key="`round-${roundIdx}-${matchIdx}`"
-            :id="`round-match-${roundIdx}-${matchIdx}`"
-            :class="['match', (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
-            @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'round_robin')"
-            >
-            <div class="player-box">
-                <span
-                :class="getRoundRobinPlayerStyling(match.players[0], match.players[1], match)"
-                >
-                {{ truncate(match.players[0].name, { length: 15 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
-                </span>
-                <hr />
-                <span
-                :class="getRoundRobinPlayerStyling(match.players[1], match.players[0], match)"
-                >
-                {{ truncate(match.players[1].name, { length: 15 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
-                </span>
+        <div class="round-robin-grid-container">
+            <h3 class="text-xl font-bold mb-4">Round Robin Tournament</h3>
+            
+            <!-- Grid Table -->
+            <div class="round-robin-grid-wrapper">
+                <table class="round-robin-grid-table">
+                    <thead>
+                        <tr>
+                            <th class="grid-corner-cell"></th>
+                            <th 
+                                v-for="(player, idx) in roundRobinPlayers" 
+                                :key="`header-${player.id}`"
+                                class="grid-header-cell"
+                            >
+                                <div class="grid-header-content">
+                                    <span class="team-number">Team {{ idx + 1 }}</span>
+                                    <span class="team-name">{{ truncate(player.name, { length: 12 }) }}</span>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(row, rowIdx) in roundRobinGrid" :key="`row-${roundRobinPlayers[rowIdx].id}`">
+                            <th class="grid-row-header">
+                                <div class="grid-row-header-content">
+                                    <span class="team-number">Team {{ rowIdx + 1 }}</span>
+                                    <span class="team-name">{{ truncate(roundRobinPlayers[rowIdx].name, { length: 12 }) }}</span>
+                                </div>
+                            </th>
+                            <td 
+                                v-for="(cell, colIdx) in row" 
+                                :key="`cell-${rowIdx}-${colIdx}`"
+                                :class="[getGridCellClass(cell), (user && (user.role === 'Admin' || user.role === 'TournamentManager') && cell.type === 'match') ? 'cursor-pointer' : '']"
+                                @click="cell.type === 'match' && props.openMatchDialog && (() => {
+                                    const indices = findMatchIndices(cell.match);
+                                    if (indices) {
+                                        props.openMatchDialog(bracketIndex, indices.roundIdx, indices.matchIdx, cell.match, 'round_robin');
+                                    }
+                                })()"
+                            >
+                                <div class="grid-cell-content">
+                                    {{ getGridCellContent(cell) }}
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            </div>
-        </div>
         </div>
 
         <!-- Round Robin Standings -->
         <div class="standings-section">
-        <div class="standings-header-row">
-            <h3 class="text-lg font-semibold">Standings</h3>
-        </div>
-        <div class="standings-table">
-            <div class="standings-header">
-                <span class="rank">Rank</span>
-                <span class="player">Player</span>
-                <span class="wins">Wins</span>
-                <span class="draws">Draws</span>
-                <span class="losses">Losses</span>
-                <span class="points flex items-center">
-                    Points
-                    <button v-if="user?.role === 'Admin' || user?.role === 'TournamentManager'"
-                        @click="props.openScoringConfigDialog(bracketIndex)"
-                        class="scoring-config-btn ml-2"
-                        title="Configure scoring system">
-                        <i class="pi pi-cog"></i>
-                    </button>
-                </span>
+            <div class="standings-header-row">
+                <h3 class="text-lg font-semibold">Standings</h3>
             </div>
-            <div
-            v-for="(player, index) in (props.standingsRevision, props.getRoundRobinStandings(bracketIndex))"
-            :key="player.id"
-            class="standings-row"
-            :class="{ 'winner': index === 0 && props.isRoundRobinConcluded(bracketIndex) }"
-            >
-            <span class="rank" data-label="Rank">{{ index + 1 }}</span>
-            <span class="player" data-label="Player">
-                {{ truncate(player.name, { length: 15 }) }}
-                <i v-if="index === 0 && props.isRoundRobinConcluded(bracketIndex)" class="pi pi-crown winner-crown"></i>
-            </span>
-            <span class="wins" data-label="Wins">{{ player.wins }}</span>
-            <span class="draws" data-label="Draws">{{ player.draws }}</span>
-            <span class="losses" data-label="Losses">{{ player.losses }}</span>
-            <span class="points" data-label="Points">{{ player.points }}</span>
+            <div class="standings-table">
+                <div class="standings-header">
+                    <span class="rank">Rank</span>
+                    <span class="player">Player</span>
+                    <span class="wins">Wins</span>
+                    <span class="draws">Draws</span>
+                    <span class="losses">Losses</span>
+                    <span class="points flex items-center">
+                        Points
+                        <button v-if="user?.role === 'Admin' || user?.role === 'TournamentManager'"
+                            @click="props.openScoringConfigDialog(bracketIndex)"
+                            class="scoring-config-btn ml-2"
+                            title="Configure scoring system">
+                            <i class="pi pi-cog"></i>
+                        </button>
+                    </span>
+                </div>
+                <div
+                    v-for="(player, index) in (props.standingsRevision, props.getRoundRobinStandings(bracketIndex))"
+                    :key="player.id"
+                    class="standings-row"
+                    :class="{ 'winner': index === 0 && props.isRoundRobinConcluded(bracketIndex) }"
+                >
+                    <span class="rank" data-label="Rank">{{ index + 1 }}</span>
+                    <span class="player" data-label="Player">
+                        {{ truncate(player.name, { length: 15 }) }}
+                        <i v-if="index === 0 && props.isRoundRobinConcluded(bracketIndex)" class="pi pi-crown winner-crown"></i>
+                    </span>
+                    <span class="wins" data-label="Wins">{{ player.wins }}</span>
+                    <span class="draws" data-label="Draws">{{ player.draws }}</span>
+                    <span class="losses" data-label="Losses">{{ player.losses }}</span>
+                    <span class="points" data-label="Points">{{ player.points }}</span>
+                </div>
             </div>
-        </div>
         </div>
     </div>
 
