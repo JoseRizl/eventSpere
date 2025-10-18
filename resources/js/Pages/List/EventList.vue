@@ -460,7 +460,7 @@
               <div class="flex items-center gap-2">
                 <DatePicker id="startDate" v-model="selectedEvent.startDate" dateFormat="MM-dd-yy" showIcon class="w-full" />
                 <input
-                  v-if="!selectedEvent.isAllDay"
+                  v-show="!selectedEvent.isAllDay"
                   type="time"
                   id="startTime"
                   v-model="selectedEvent.startTime"
@@ -478,7 +478,7 @@
                 <DatePicker id="endDate" v-model="selectedEvent.endDate" dateFormat="MM-dd-yy" showIcon class="w-full"
                   :minDate="selectedEvent.startDate ? new Date(selectedEvent.startDate) : null" />
                 <input
-                  v-if="!selectedEvent.isAllDay"
+                  v-show="!selectedEvent.isAllDay"
                   type="time"
                   id="endTime"
                   v-model="selectedEvent.endTime"
@@ -637,7 +637,21 @@
       const categories = computed(() => page.props.categories_prop || []);
       const initialLoading = ref(true);
       const isEditModalVisible = ref(false);
-      const selectedEvent = ref(null);
+    const selectedEvent = ref({
+      id: "",
+      title: "",
+      description: "",
+      venue: "",
+      category_id: null,
+      tags: [],
+      startDate: null,
+      endDate: null,
+      isAllDay: false,
+      startTime: "",
+      endTime: "",
+      image: null,
+      memorandum: null,
+    });
       const tags = ref(page.props.tags_prop || []);
       const committees = computed(() => page.props.committees_prop || []);
       const employees = computed(() => page.props.employees_prop || []);
@@ -1106,32 +1120,45 @@
       );
 
       // Open Edit Modal
-    const editEvent = (event) => {
-        // Defensive: If tags are not loaded yet, wait and retry
-        if (!tags.value || tags.value.length === 0) {
-            // Wait for tags to be loaded, then retry
-            const unwatch = watch(tags, (newTags) => {
-                if (newTags && newTags.length > 0) {
-                    unwatch();
-                    editEvent(event); // Retry with tags loaded
-                }
-            });
-            return;
-        }
+      const editEvent = async (event) => {
+        Object.assign(selectedEvent.value, {
+          ...event,
+          venue: event.venue || "",
+          tags: (event.tags || []).map(t => typeof t === 'object' && t !== null ? t.id : t),
+          startDate: event.startDate ? new Date(event.startDate) : null,
+          endDate: event.endDate ? new Date(event.endDate) : null,
+          isAllDay: event.isAllDay ?? false,
+          startTime: event.startTime ?? (event.isAllDay ? "00:00" : ""),
+          endTime: event.endTime ?? (event.isAllDay ? "23:59" : ""),
+          image: event.image || defaultImage.value,
+          memorandum: event.memorandum || null,
+        });
 
-        selectedEvent.value = {
-            ...event,
-            venue: event.venue || "",
-            tags: (event.tags || []).map(tag =>
-                typeof tag === 'object' && tag !== null ? tag.id : tag
-            ),
-            startDate: event.startDate ? new Date(event.startDate) : null,
-            endDate: event.endDate ? new Date(event.endDate) : null,
-            image: event.image || defaultImage.value,
-            memorandum: event.memorandum || null,
-        };
+        await nextTick();
         isEditModalVisible.value = true;
-    };
+      };
+
+    // Watch for the edit modal closing and reset the selected event
+    watch(isEditModalVisible, (newValue) => {
+      if (!newValue) {
+        // Reset to default state to prevent stale data on next open
+        Object.assign(selectedEvent.value, {
+            id: "",
+            title: "",
+            description: "",
+            venue: "",
+            category_id: null,
+            tags: [],
+            startDate: null,
+            endDate: null,
+            isAllDay: false,
+            startTime: "",
+            endTime: "",
+            image: null,
+            memorandum: null,
+        });
+      }
+    });
 
     const saveEditedEvent = () => {
       if (!selectedEvent.value) return;
