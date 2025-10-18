@@ -231,7 +231,32 @@
                   display="chip"
                   :showToggleAll="false"
                   class="w-full"
-                />
+                >
+                    <!-- Selected Chip Template -->
+                    <template #chip="{ value }">
+                        <div
+                        v-if="tagsMap[value]"
+                        class="flex items-center gap-2 px-2 py-1 rounded text-white text-xs"
+                        style="background-color: #3B82F6;"
+                        >
+                        {{ tagsMap[value].name }}
+                        <button
+                            type="button"
+                            class="text-white hover:text-gray-200"
+                            @click.stop="removeNewTag(tagsMap[value])"
+                            v-tooltip.top="'Remove Tag'"
+                        >
+                            ✕
+                        </button>
+                        </div>
+                        <div
+                        v-else
+                        class="flex items-center gap-2 px-2 py-1 rounded bg-gray-500 text-white text-xs"
+                        >
+                        {{ value }}
+                        </div>
+                    </template>
+                </MultiSelect>
                 <Button icon="pi pi-plus" class="p-button-secondary p-button-rounded" @click="openTagModal('create')" v-tooltip.top="'Create New Tag'" />
             </div>
           </div>
@@ -410,47 +435,62 @@
           </div>
 
           <!-- Tags Selection (Conditional) -->
-          <div class="p-field" v-if="selectedEvent.category_id">
-            <label for="edit-tags">Tags</label>
-            <div class="flex items-center gap-2">
-                <MultiSelect
-                id="edit-tags"
-                v-model="selectedEvent.tags"
-                :options="filteredSelectedEventTags"
-                optionValue="id"
-                optionLabel="name"
-                placeholder="Select tags"
-                display="chip"
-                :showToggleAll="false"
-                class="w-full"
+        <div class="p-field" v-if="selectedEvent.category_id">
+        <label for="edit-tags">Tags</label>
+        <div class="flex items-center gap-2">
+            <MultiSelect
+            id="edit-tags"
+            v-model="selectedEvent.tags"
+            :options="filteredSelectedEventTags"
+            optionValue="id"
+            optionLabel="name"
+            placeholder="Select tags"
+            display="chip"
+            :showToggleAll="false"
+            class="w-full"
+            >
+            <!-- Option Template -->
+            <template #option="{ option }">
+                <div class="flex items-center gap-2">
+                <span>{{ option.name }}</span>
+                </div>
+            </template>
+
+            <!-- Selected Chip Template -->
+            <template #chip="{ value }">
+                <div
+                v-if="tagsMap[value]"
+                class="flex items-center gap-2 px-2 py-1 rounded text-white text-xs"
+                style="background-color: #3B82F6;"
                 >
-                <!-- Option Template -->
-                <template #option="slotProps">
-                    <div class="flex items-center gap-2">
-                    <div
-                        class="w-3 h-3 rounded-full"
-                        :style="{ backgroundColor: slotProps.option.color || '#800080' }"
-                    ></div>
-                    <span>{{ slotProps.option.name }}</span>
-                    </div>
-                </template>
-                <!-- Selected Chip Template -->
-                <template #chip="slotProps">
-                    <div v-if="tagsMap[slotProps.value]"
-                        class="flex items-center gap-2 px-2 py-1 rounded text-white text-xs"
-                        style="background-color: #3B82F6;"
-                    >
-                        {{ tagsMap[slotProps.value].name }}
-                        <button type="button" class="text-white hover:text-gray-200" @click.stop="removeTag(tagsMap[slotProps.value])" v-tooltip.top="'Remove Tag'">✕</button>
-                    </div>
-                    <div v-else class="flex items-center gap-2 px-2 py-1 rounded bg-gray-500 text-white text-xs">
-                    {{ slotProps.value }}
-                    </div>
-                </template>
-                </MultiSelect>
-                <Button icon="pi pi-plus" class="p-button-secondary p-button-rounded" @click="openTagModal('edit')" v-tooltip.top="'Create New Tag'" />
-            </div>
-          </div>
+                {{ tagsMap[value].name }}
+                <button
+                    type="button"
+                    class="text-white hover:text-gray-200"
+                    @click.stop="removeTag(tagsMap[value])"
+                    v-tooltip.top="'Remove Tag'"
+                >
+                    ✕
+                </button>
+                </div>
+                <div
+                v-else
+                class="flex items-center gap-2 px-2 py-1 rounded bg-gray-500 text-white text-xs"
+                >
+                {{ value }}
+                </div>
+            </template>
+            </MultiSelect>
+
+            <Button
+            icon="pi pi-plus"
+            class="p-button-secondary p-button-rounded"
+            @click="openTagModal('edit')"
+            v-tooltip.top="'Create New Tag'"
+            />
+        </div>
+        </div>
+
 
           <!-- Edit Event Modal -->
           <div class="p-field grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -637,6 +677,7 @@
       const categories = computed(() => page.props.categories_prop || []);
       const initialLoading = ref(true);
       const isEditModalVisible = ref(false);
+      const event_tags = computed(() => page.props.event_tags_prop || []);
     const selectedEvent = ref({
       id: "",
       title: "",
@@ -861,24 +902,25 @@
      };
 
      const createEvent = () => {
-        resetErrors();
-        const validationError = validateEvent(newEvent.value, { isSubmitting: true });
-
         if (!newEvent.value.title.trim()) {
             errorMessage.value = "Please enter a valid event title";
             showErrorDialog.value = true;
             return;
         }
-
-        if (validationError) {
-            dateError.value = validationError;
-            return;
-        }
-
         showCreateConfirm.value = true;
     };
 
     const confirmCreateEvent = async () => {
+        resetErrors();
+        const validationError = validateEvent(newEvent.value, { isSubmitting: true });
+        if (validationError) {
+            dateError.value = validationError;
+            errorMessage.value = validationError;
+            showErrorDialog.value = true;
+            showCreateConfirm.value = false; // Close confirmation dialog
+            return;
+        }
+
         let finalImage = newEvent.value.image;
         if (newEvent.value.image.startsWith('blob:')) {
             const response = await fetch(newEvent.value.image);
@@ -1121,10 +1163,14 @@
 
       // Open Edit Modal
       const editEvent = async (event) => {
+        const eventTagIds = event_tags.value
+          .filter(et => et.event_id === event.id)
+          .map(et => et.tag_id);
+
         Object.assign(selectedEvent.value, {
           ...event,
           venue: event.venue || "",
-          tags: (event.tags || []).map(t => typeof t === 'object' && t !== null ? t.id : t),
+          tags: eventTagIds,
           startDate: event.startDate ? new Date(event.startDate) : null,
           endDate: event.endDate ? new Date(event.endDate) : null,
           isAllDay: event.isAllDay ?? false,
@@ -1281,6 +1327,10 @@
 
     const removeTag = (tagToRemove) => {
       selectedEvent.value.tags = selectedEvent.value.tags.filter(tagId => tagId !== tagToRemove.id);
+    };
+
+    const removeNewTag = (tagToRemove) => {
+      newEvent.value.tags = newEvent.value.tags.filter(tagId => tagId !== tagToRemove.id);
     };
 
     const handleDescriptionClick = (event) => {
@@ -1677,11 +1727,13 @@
     confirmSaveChanges,
     user,
     showCreateConfirm,
+    event_tags,
     confirmCreateEvent,
     formatDescription,
     filteredNewEventTags,
     tagsMap,
     filteredSelectedEventTags,
+    removeNewTag,
     handleDescriptionClick,
     employees,
     handleMemoUpload,

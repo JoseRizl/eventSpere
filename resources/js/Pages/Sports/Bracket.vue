@@ -211,7 +211,7 @@ onMounted(async () => {
 
 <template>
     <div class="bracket-container">
-        <h1 class="title">Brackets</h1>
+        <h1 class="title">Brackets List</h1>
         <div class="toolbar-container mb-5">
             <div class="search-container">
                 <SearchFilterBar
