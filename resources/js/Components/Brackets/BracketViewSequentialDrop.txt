@@ -601,69 +601,24 @@ const updateBracketLines = () => {
                 });
             }
             
-            // Initial rounds to LR1 (losers from R1) - COMPRESSED pairing with smart line routing
-            // Only non-BYE matches produce losers, and they pair up: [0&1]->LR0, [2&3]->LR1, etc.
-            // Track which R1 matches feed into each LR1 match to determine line style
-            const lr1Connections = new Map(); // LR1 matchIdx -> array of R1 matchIdx
-            let nonByeCounter = 0;
-            
+            // Initial rounds to LR1 (losers from R1) - 2 parents to 1 child, same as R1 to WR2
             bracket.matches.winners[0].forEach((match, i) => {
-                const hasLoser = match.players[0]?.name !== 'BYE' && match.players[1]?.name !== 'BYE';
-                if (!hasLoser) return;
-                
-                const loserMatchIdx = Math.floor(nonByeCounter / 2);
-                if (!lr1Connections.has(loserMatchIdx)) {
-                    lr1Connections.set(loserMatchIdx, []);
-                }
-                lr1Connections.get(loserMatchIdx).push(i);
-                nonByeCounter++;
-            });
-            
-            // Now draw lines based on whether R1 matches are adjacent
-            bracket.matches.winners[0].forEach((match, i) => {
-                const hasLoser = match.players[0]?.name !== 'BYE' && match.players[1]?.name !== 'BYE';
-                if (!hasLoser) return;
-                
-                const loserMatchIdx = Math.floor(lr1Connections.get(0) ? 
-                    [...lr1Connections.entries()].find(([_, indices]) => indices.includes(i))?.[0] : 
-                    Math.floor(bracket.matches.winners[0].filter((m, idx) => 
-                        idx <= i && m.players[0]?.name !== 'BYE' && m.players[1]?.name !== 'BYE'
-                    ).length / 2));
-                
-                const loserMatch = bracket.matches.losers[0]?.[loserMatchIdx];
-                if (!loserMatch || (loserMatch.players[0]?.name === 'BYE' && loserMatch.players[1]?.name === 'BYE')) {
-                    return;
-                }
-                
+                const loserMatchIdx = Math.floor(i / 2);
                 const fromEl = bracketContentRef.value?.querySelector(`#winners-match-${props.bracketIndex}-0-${i}`);
                 const toEl = bracketContentRef.value?.querySelector(`#losers-match-${props.bracketIndex}-0-${loserMatchIdx}`);
                 if (!fromEl || !toEl) return;
-                
                 const fromRect = fromEl.getBoundingClientRect();
                 const toRect = toEl.getBoundingClientRect();
                 const fromCenterY = fromRect.top - svgRect.top + fromRect.height / 2;
                 const toCenterY = toRect.top - svgRect.top + toRect.height / 2;
                 const fromLeftX = fromRect.left - svgRect.left;
                 const toRightX = toRect.right - svgRect.left;
-                
-                // Check if the two R1 matches feeding this LR1 match are adjacent
-                const r1Indices = lr1Connections.get(loserMatchIdx) || [];
-                const areAdjacent = r1Indices.length === 2 && Math.abs(r1Indices[0] - r1Indices[1]) === 1;
-                
-                if (areAdjacent) {
-                    // Use normal 3-segment elbow lines for adjacent matches (M1 vs M2)
-                    const midX = (fromLeftX + toRightX) / 2;
-                    dynamicLines.value.losers.push(
-                        { x1: fromLeftX, y1: fromCenterY, x2: midX, y2: fromCenterY },
-                        { x1: midX, y1: fromCenterY, x2: midX, y2: toCenterY },
-                        { x1: midX, y1: toCenterY, x2: toRightX, y2: toCenterY }
-                    );
-                } else {
-                    // Use diagonal line for non-adjacent matches (compressed due to BYEs)
-                    dynamicLines.value.losers.push(
-                        { x1: fromLeftX, y1: fromCenterY, x2: toRightX, y2: toCenterY }
-                    );
-                }
+                const midX = (fromLeftX + toRightX) / 2;
+                dynamicLines.value.losers.push(
+                    { x1: fromLeftX, y1: fromCenterY, x2: midX, y2: fromCenterY },
+                    { x1: midX, y1: fromCenterY, x2: midX, y2: toCenterY },
+                    { x1: midX, y1: toCenterY, x2: toRightX, y2: toCenterY }
+                );
             });
             
             // Finals lines with elbow routing

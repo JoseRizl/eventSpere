@@ -52,11 +52,11 @@ export function useBracketUIState() {
   const standingsRevision = ref(0);
   const tempScoringConfig = ref(null);
 
-  // Bracket type options
+  // Bracket type options (simple string array for PrimeVue Select)
   const bracketTypeOptions = ref([
-    { label: 'Single Elimination', value: 'Single Elimination' },
-    { label: 'Double Elimination', value: 'Double Elimination' },
-    { label: 'Round Robin', value: 'Round Robin' }
+    'Single Elimination',
+    'Double Elimination',
+    'Round Robin'
   ]);
 
   // Helper computed properties

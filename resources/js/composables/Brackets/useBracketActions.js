@@ -331,11 +331,23 @@ export function useBracketActions(dataState) {
 
     // Populate match-specific details from the event
     const populateEventDetails = (match) => {
-        match.date = selectedEvent.value.startDate;
-        match.time = null;
-        match.venue = selectedEvent.value.venue;
+        if (match && typeof match === 'object') {
+            match.date = selectedEvent.value?.startDate || null;
+            match.time = null;
+            match.venue = selectedEvent.value?.venue || null;
+        }
     };
-    Object.values(payload.matches).flat().flat().forEach(populateEventDetails);
+    
+    // Handle different bracket structures
+    if (payload.matches) {
+        if (Array.isArray(payload.matches)) {
+            // Single Elimination or Round Robin: matches is array of rounds
+            payload.matches.flat().forEach(populateEventDetails);
+        } else if (typeof payload.matches === 'object') {
+            // Double Elimination: matches is object with winners, losers, grand_finals
+            Object.values(payload.matches).flat().flat().forEach(populateEventDetails);
+        }
+    }
 
     try {
       // Use Laravel API to store the new bracket
@@ -987,62 +999,109 @@ const updateLines = (bracketIdx) => {
           });
         }
       } else if (bracket.type === 'Double Elimination') {
-        // Winners Bracket Lines
-        const winnersContainer = bracketContentEl.querySelector('.winners .connection-lines');
-        if (winnersContainer) {
-          const winnersRect = winnersContainer.getBoundingClientRect();
-          for (let round = 0; round < bracket.matches.winners.length - 1; round++) {
-            const current = bracket.matches.winners[round];
-            current.forEach((match, i) => {
-              const fromEl = document.getElementById(`winners-match-${bracketIdx}-${round}-${i}`);
-              const toEl = document.getElementById(`winners-match-${bracketIdx}-${round + 1}-${Math.floor(i / 2)}`);
-              if (!fromEl || !toEl) return;
-              const fromRect = fromEl.getBoundingClientRect();
-              const toRect = toEl.getBoundingClientRect();
-              const fromCenterY = fromRect.top - winnersRect.top + fromRect.height / 2;
-              const toCenterY = toRect.top - winnersRect.top + toRect.height / 2;
-              const fromRightX = fromRect.right - winnersRect.left;
-              const toLeftX = toRect.left - winnersRect.left;
-              const midX = (fromRightX + toLeftX) / 2;
-              bracket.lines.winners.push(
-                { x1: fromRightX, y1: fromCenterY, x2: midX, y2: fromCenterY },
-                { x1: midX, y1: fromCenterY, x2: midX, y2: toCenterY },
-                { x1: midX, y1: toCenterY, x2: toLeftX, y2: toCenterY },
-              );
-            });
-          }
+        // Use unified SVG container for all connection lines
+        const unifiedSvg = bracketContentEl.querySelector('.unified-connection-lines');
+        if (!unifiedSvg) {
+          console.warn('Could not find unified-connection-lines SVG');
+          return;
+        }
+        const svgRect = unifiedSvg.getBoundingClientRect();
+
+        // Winners Bracket Lines (including initial lineup R1)
+        for (let round = 0; round < bracket.matches.winners.length - 1; round++) {
+          const current = bracket.matches.winners[round];
+          current.forEach((match, i) => {
+            const fromEl = document.getElementById(`winners-match-${bracketIdx}-${round}-${i}`);
+            const toEl = document.getElementById(`winners-match-${bracketIdx}-${round + 1}-${Math.floor(i / 2)}`);
+            if (!fromEl || !toEl) return;
+            const fromRect = fromEl.getBoundingClientRect();
+            const toRect = toEl.getBoundingClientRect();
+            const fromCenterY = fromRect.top - svgRect.top + fromRect.height / 2;
+            const toCenterY = toRect.top - svgRect.top + toRect.height / 2;
+            const fromRightX = fromRect.right - svgRect.left;
+            const toLeftX = toRect.left - svgRect.left;
+            const midX = (fromRightX + toLeftX) / 2;
+            bracket.lines.winners.push(
+              { x1: fromRightX, y1: fromCenterY, x2: midX, y2: fromCenterY },
+              { x1: midX, y1: fromCenterY, x2: midX, y2: toCenterY },
+              { x1: midX, y1: toCenterY, x2: toLeftX, y2: toCenterY },
+            );
+          });
         }
 
         // Losers Bracket Lines
-        const losersContainer = bracketContentEl.querySelector('.losers .connection-lines');
-        if (losersContainer) {
-          const losersRect = losersContainer.getBoundingClientRect();
-          for (let round = 0; round < bracket.matches.losers.length - 1; round++) {
-            const current = bracket.matches.losers[round];
-            current.forEach((match, i) => {
-              const fromEl = document.getElementById(`losers-match-${bracketIdx}-${round}-${i}`);
-              let nextMatchIdx;
-              // The structure of the losers bracket alternates.
-              if (round % 2 === 0) { // Advancing from a round like LR1 to LR2, or LR3 to LR4.
-                nextMatchIdx = i;
-              } else { // Advancing from a round like LR2 to LR3, or LR4 to LR5.
-                nextMatchIdx = Math.floor(i / 2);
-              }
-              const toEl = document.getElementById(`losers-match-${bracketIdx}-${round + 1}-${nextMatchIdx}`);
-              if (!fromEl || !toEl) return;
-              const fromRect = fromEl.getBoundingClientRect();
-              const toRect = toEl.getBoundingClientRect();
-              const fromCenterY = fromRect.top - losersRect.top + fromRect.height / 2;
-              const toCenterY = toRect.top - losersRect.top + toRect.height / 2;
-              const fromRightX = fromRect.right - losersRect.left;
-              const toLeftX = toRect.left - losersRect.left;
-              const midX = (fromRightX + toLeftX) / 2;
-              bracket.lines.losers.push(
-                { x1: fromRightX, y1: fromCenterY, x2: midX, y2: fromCenterY },
-                { x1: midX, y1: fromCenterY, x2: midX, y2: toCenterY },
-                { x1: midX, y1: toCenterY, x2: toLeftX, y2: toCenterY },
-              );
-            });
+        for (let round = 0; round < bracket.matches.losers.length - 1; round++) {
+          const current = bracket.matches.losers[round];
+          current.forEach((match, i) => {
+            const fromEl = document.getElementById(`losers-match-${bracketIdx}-${round}-${i}`);
+            let nextMatchIdx;
+            // The structure of the losers bracket alternates.
+            if (round % 2 === 0) { // Advancing from a round like LR1 to LR2, or LR3 to LR4.
+              nextMatchIdx = i;
+            } else { // Advancing from a round like LR2 to LR3, or LR4 to LR5.
+              nextMatchIdx = Math.floor(i / 2);
+            }
+            const toEl = document.getElementById(`losers-match-${bracketIdx}-${round + 1}-${nextMatchIdx}`);
+            if (!fromEl || !toEl) return;
+            const fromRect = fromEl.getBoundingClientRect();
+            const toRect = toEl.getBoundingClientRect();
+            const fromCenterY = fromRect.top - svgRect.top + fromRect.height / 2;
+            const toCenterY = toRect.top - svgRect.top + toRect.height / 2;
+            
+            // For center-out layout: losers flow left, so connections are reversed
+            const fromLeftX = fromRect.left - svgRect.left;
+            const toRightX = toRect.right - svgRect.left;
+            const midX = (fromLeftX + toRightX) / 2;
+            
+            bracket.lines.losers.push(
+              { x1: fromLeftX, y1: fromCenterY, x2: midX, y2: fromCenterY },
+              { x1: midX, y1: fromCenterY, x2: midX, y2: toCenterY },
+              { x1: midX, y1: toCenterY, x2: toRightX, y2: toCenterY },
+            );
+          });
+        }
+
+        // Grand Finals Lines (connect last winner and last loser to finals)
+        const lastWinnerRound = bracket.matches.winners.length - 1;
+        const lastLoserRound = bracket.matches.losers.length - 1;
+        
+        // Winner to Finals
+        if (bracket.matches.winners[lastWinnerRound] && bracket.matches.winners[lastWinnerRound][0]) {
+          const winnerEl = document.getElementById(`winners-match-${bracketIdx}-${lastWinnerRound}-0`);
+          const finalsEl = document.getElementById(`grand-finals-match-${bracketIdx}-0`);
+          if (winnerEl && finalsEl) {
+            const winnerRect = winnerEl.getBoundingClientRect();
+            const finalsRect = finalsEl.getBoundingClientRect();
+            const fromCenterY = winnerRect.top - svgRect.top + winnerRect.height / 2;
+            const toCenterY = finalsRect.top - svgRect.top + finalsRect.height / 2;
+            const fromRightX = winnerRect.right - svgRect.left;
+            const toLeftX = finalsRect.left - svgRect.left;
+            const midX = (fromRightX + toLeftX) / 2;
+            bracket.lines.finals.push(
+              { x1: fromRightX, y1: fromCenterY, x2: midX, y2: fromCenterY },
+              { x1: midX, y1: fromCenterY, x2: midX, y2: toCenterY },
+              { x1: midX, y1: toCenterY, x2: toLeftX, y2: toCenterY },
+            );
+          }
+        }
+
+        // Loser to Finals
+        if (bracket.matches.losers[lastLoserRound] && bracket.matches.losers[lastLoserRound][0]) {
+          const loserEl = document.getElementById(`losers-match-${bracketIdx}-${lastLoserRound}-0`);
+          const finalsEl = document.getElementById(`grand-finals-match-${bracketIdx}-0`);
+          if (loserEl && finalsEl) {
+            const loserRect = loserEl.getBoundingClientRect();
+            const finalsRect = finalsEl.getBoundingClientRect();
+            const fromCenterY = loserRect.top - svgRect.top + loserRect.height / 2;
+            const toCenterY = finalsRect.top - svgRect.top + finalsRect.height / 2;
+            const fromLeftX = loserRect.left - svgRect.left;
+            const toLeftX = finalsRect.left - svgRect.left;
+            const midX = (fromLeftX + toLeftX) / 2;
+            bracket.lines.finals.push(
+              { x1: fromLeftX, y1: fromCenterY, x2: midX, y2: fromCenterY },
+              { x1: midX, y1: fromCenterY, x2: midX, y2: toCenterY },
+              { x1: midX, y1: toCenterY, x2: toLeftX, y2: toCenterY },
+            );
           }
         }
 
