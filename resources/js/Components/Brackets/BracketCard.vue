@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue';
 import BracketView from '@/Components/Brackets/BracketView.vue';
 import MatchesView from '@/Components/Brackets/MatchesView.vue';
 import { formatDisplayDate } from '@/utils/dateUtils.js';
@@ -26,6 +27,7 @@ const props = defineProps({
     isArchived: Boolean,
     onOpenScoringConfigDialog: Function,
     onOpenMatchEditorFromCard: Function,
+    onToggleConsolationMatch: Function,
     // Configuration
     showEventLink: {
         type: Boolean,
@@ -46,6 +48,12 @@ const matchStatusFilterOptions = [
     { label: 'Pending', value: 'pending' },
     { label: 'Completed', value: 'completed' }
 ];
+
+const hasConsolationMatch = computed(() => {
+    if (!props.bracket.matches || props.bracket.type !== 'Single Elimination') return false;
+    const finalRound = props.bracket.matches[props.bracket.matches.length - 1];
+    return finalRound?.some(m => m.bracket_type === 'consolation') || false;
+});
 
 const handleToggleBracket = () => emit('toggle-bracket', props.bracketIndex);
 const handleRemoveBracket = () => emit('remove-bracket', props.bracketIndex);
@@ -68,6 +76,14 @@ const handleSetMatchFilter = (filter) => emit('set-match-filter', { index: props
                     </div>
                     <div class="bracket-controls">
                         <Button :icon="isExpanded ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" @click="handleToggleBracket" class="p-button-rounded p-button-text" v-tooltip.top="isExpanded ? 'Hide Bracket' : 'Show Bracket'" />
+                        <Button 
+                            v-if="showAdminControls && user?.role === 'Admin' && !isArchived && bracket.type === 'Single Elimination' && bracket.matches?.length >= 2" 
+                            :icon="hasConsolationMatch ? 'pi pi-minus-circle' : 'pi pi-plus-circle'" 
+                            @click="onToggleConsolationMatch(bracketIndex)" 
+                            class="p-button-rounded p-button-text" 
+                            :class="hasConsolationMatch ? 'p-button-warning' : 'p-button-success'"
+                            v-tooltip.top="hasConsolationMatch ? 'Remove 3rd Place Match' : 'Add 3rd Place Match'" 
+                        />
                         <Button v-if="showAdminControls && user?.role === 'Admin' && !isArchived" icon="pi pi-trash" @click="handleRemoveBracket" class="p-button-rounded p-button-text p-button-danger" v-tooltip.top="'Delete Bracket'" />
 
                     </div>

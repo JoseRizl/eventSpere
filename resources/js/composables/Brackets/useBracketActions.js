@@ -3,6 +3,7 @@ import axios from 'axios';
 import { router } from '@inertiajs/vue3';
 import { useToast } from '@/composables/useToast.js';
 import { useBracketUIState } from '@/composables/Brackets/useBracketUIState.js';
+import { useBracketState } from '@/composables/Brackets/useBracketState.js';
 import { format, parseISO, isValid, parse } from 'date-fns';
 
 const robustParseDate = (dateString) => {
@@ -598,6 +599,7 @@ export function useBracketActions(dataState) {
           { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
         ],
         winner_id: null,
+        loser_id: null,
         status: 'pending',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -609,6 +611,33 @@ export function useBracketActions(dataState) {
       prevMatches = nextMatches;
       roundNumber++;
     }
+    
+    // Add consolation match if requested (3rd place match)
+    // Requires at least semifinals (2 matches in second-to-last round)
+    const { includeThirdPlace } = useBracketState();
+    if (includeThirdPlace.value && rounds.length >= 2) {
+      const consolationMatch = {
+        id: generateId(),
+        round: roundNumber,
+        match_number: 1,
+        bracket_type: 'consolation', // Special marker for consolation match
+        players: [
+          { id: null, name: 'Loser of SF1', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+          { id: null, name: 'Loser of SF2', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+        ],
+        winner_id: null,
+        loser_id: null,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        date: selectedEvent.value.startDate,
+        time: null,
+        venue: selectedEvent.value.venue,
+      };
+      // Add consolation match as a parallel match to finals (same round as finals)
+      rounds[rounds.length - 1].push(consolationMatch);
+    }
+    
     return rounds;
   };
 
@@ -1561,12 +1590,41 @@ const updateLines = (bracketIdx) => {
       if (bracket.type === 'Single Elimination') {
         if (roundIdx < bracket.matches.length - 1) {
           const nextRoundIdx = roundIdx + 1;
-          const nextMatchIdx = Math.floor(matchIdx / 2);
-          const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
-          setPlayerWithLog(bracket, 'single', nextRoundIdx, nextMatchIdx, nextPlayerPos, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
+          const currentRound = bracket.matches[roundIdx];
+          const nextRound = bracket.matches[nextRoundIdx];
+          
+          // Check if this is a semifinal match (second-to-last round with 2 matches)
+          const isSemifinal = roundIdx === bracket.matches.length - 2 && currentRound.length === 2;
+          
+          // Find consolation match in the final round (if it exists)
+          const consolationMatch = nextRound.find(m => m.bracket_type === 'consolation');
+          
+          if (isSemifinal && consolationMatch) {
+            // Semifinal: Winner goes to finals, loser goes to consolation
+            const finalsMatch = nextRound.find(m => m.bracket_type !== 'consolation');
+            if (finalsMatch) {
+              const finalsMatchIdx = nextRound.indexOf(finalsMatch);
+              const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
+              setPlayerWithLog(bracket, 'single', nextRoundIdx, finalsMatchIdx, nextPlayerPos, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
+              
+              // Send loser to consolation match
+              const consolationMatchIdx = nextRound.indexOf(consolationMatch);
+              const consolationPlayerPos = matchIdx % 2 === 0 ? 0 : 1; // SF1 loser to pos 0, SF2 loser to pos 1
+              setPlayerWithLog(bracket, 'single', nextRoundIdx, consolationMatchIdx, consolationPlayerPos, { ...loser, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
+            }
+          } else {
+            // Normal progression
+            const nextMatchIdx = Math.floor(matchIdx / 2);
+            const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
+            setPlayerWithLog(bracket, 'single', nextRoundIdx, nextMatchIdx, nextPlayerPos, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
+          }
         } else {
-          // Final match completed
-          winnerMessage.value = `Winner: ${winner.name}`;
+          // Final match completed (could be finals or consolation)
+          if (match.bracket_type === 'consolation') {
+            winnerMessage.value = `Third Place: ${winner.name}`;
+          } else {
+            winnerMessage.value = `Winner: ${winner.name}`;
+          }
           showWinnerDialog.value = true;
         }
       } else if (bracket.type === 'Double Elimination') {
@@ -1769,6 +1827,109 @@ const updateLines = (bracketIdx) => {
     showScoringConfigDialog.value = true;
   };
 
+  const toggleConsolationMatch = async (bracketIdx) => {
+    const bracket = brackets.value[bracketIdx];
+    if (!bracket || bracket.type !== 'Single Elimination') return;
+    
+    const matches = bracket.matches;
+    if (!matches || matches.length < 2) return; // Need at least semifinals
+    
+    const finalRound = matches[matches.length - 1];
+    const consolationMatch = finalRound.find(m => m.bracket_type === 'consolation');
+    
+    if (consolationMatch) {
+      // Confirm removal
+      const confirmed = await new Promise((resolve) => {
+        if (window.confirm('Remove 3rd place match? This will not affect the bracket structure.')) {
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      });
+      
+      if (!confirmed) return;
+      
+      // Remove consolation match
+      const consolationIdx = finalRound.indexOf(consolationMatch);
+      finalRound.splice(consolationIdx, 1);
+      showSuccess('3rd place match removed');
+    } else {
+      // Confirm addition
+      const confirmed = await new Promise((resolve) => {
+        if (window.confirm('Add 3rd place match? Semifinal losers will compete for 3rd place.')) {
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      });
+      
+      if (!confirmed) return;
+      
+      // Get semifinal round (second to last round)
+      const semifinalRound = matches[matches.length - 2];
+      
+      // Find semifinal losers with full player data
+      let sf1LoserPlayer = { id: null, name: 'Loser of SF1', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+      let sf2LoserPlayer = { id: null, name: 'Loser of SF2', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+      
+      if (semifinalRound && semifinalRound.length >= 2) {
+        // SF1 (first semifinal)
+        const sf1 = semifinalRound[0];
+        if (sf1 && sf1.status === 'completed' && sf1.loser_id) {
+          const loser = sf1.players.find(p => p.id === sf1.loser_id);
+          if (loser) {
+            sf1LoserPlayer = {
+              id: loser.id,
+              name: loser.name,
+              score: 0,
+              completed: false,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            };
+          }
+        }
+        
+        // SF2 (second semifinal)
+        const sf2 = semifinalRound[1];
+        if (sf2 && sf2.status === 'completed' && sf2.loser_id) {
+          const loser = sf2.players.find(p => p.id === sf2.loser_id);
+          if (loser) {
+            sf2LoserPlayer = {
+              id: loser.id,
+              name: loser.name,
+              score: 0,
+              completed: false,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            };
+          }
+        }
+      }
+      
+      // Add consolation match with actual losers if available
+      const newConsolationMatch = {
+        id: generateId(),
+        round: matches.length,
+        match_number: finalRound.length + 1,
+        bracket_type: 'consolation',
+        players: [sf1LoserPlayer, sf2LoserPlayer],
+        winner_id: null,
+        loser_id: null,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        date: bracket.matches[0][0].date,
+        time: null,
+        venue: bracket.matches[0][0].venue,
+      };
+      finalRound.push(newConsolationMatch);
+      showSuccess('3rd place match added with semifinal losers');
+    }
+    
+    await saveBrackets(bracket);
+    nextTick(() => updateLines(bracketIdx));
+  };
+
   const closeScoringConfigDialog = () => {
     roundRobinScoring.value = tempScoringConfig.value; // Restore on cancel
     showScoringConfigDialog.value = false;
@@ -1821,6 +1982,7 @@ const updateLines = (bracketIdx) => {
     openMatchEditorFromCard,
     getBracketStats,
     getBracketTypeClass,
+    toggleConsolationMatch,
     
     // Expose UI state for components that need it
     ...uiState,

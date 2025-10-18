@@ -60,6 +60,7 @@ const {
   numberOfPlayers,
   matchType,
   selectedEvent,
+  includeThirdPlace,
   events,
   brackets,
 } = bracketState;
@@ -82,6 +83,7 @@ const {
   openMatchDialog,
   closeMatchEditorDialog,
   proceedWithMatchUpdate,
+  toggleConsolationMatch,
   openScoringConfigDialog,
   closeScoringConfigDialog,
   saveScoringConfig,
@@ -323,6 +325,7 @@ onMounted(async () => {
             :onOpenMatchDialog="openMatchDialog"
             :onOpenScoringConfigDialog="openScoringConfigDialog"
             :onOpenMatchEditorFromCard="openMatchEditorFromCard"
+            :onToggleConsolationMatch="toggleConsolationMatch"
             @toggle-bracket="toggleBracket"
             @remove-bracket="removeBracket"
             @set-view-mode="({ index, mode }) => setBracketViewMode(index, mode)"
@@ -362,6 +365,13 @@ onMounted(async () => {
               :options="bracketTypeOptions"
               placeholder="Select bracket type"
             />
+          </div>
+
+          <div class="p-field" v-if="matchType === 'Single Elimination'">
+            <div class="flex items-center gap-2">
+              <Checkbox v-model="includeThirdPlace" inputId="thirdPlace" :binary="true" />
+              <label for="thirdPlace" class="cursor-pointer">Include 3rd Place Match</label>
+            </div>
           </div>
 
           <div class="button-container">
