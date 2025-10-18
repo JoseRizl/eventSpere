@@ -5,8 +5,8 @@ import { usePage, router, Link } from '@inertiajs/vue3';
 import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 import SuccessDialog from '@/Components/SuccessDialog.vue';
-import { useBracketState } from '@/composables/useBracketState.js';
-import { useBracketActions } from '@/composables/useBracketActions.js';
+import { useBracketState } from '@/composables/Brackets/useBracketState.js';
+import { useBracketActions } from '@/composables/Brackets/useBracketActions.js';
 import SearchFilterBar from '@/Components/SearchFilterBar.vue';
 import BracketCard from '@/Components/Brackets/BracketCard.vue';
 import MatchEditorDialog from '@/Components/Brackets/MatchEditorDialog.vue';
@@ -118,20 +118,11 @@ const handleTaskSaveError = (message) => {
     errorMessage.value = message;
     showErrorDialog.value = true;
 };
-// Bracket logic
+// Bracket logic - Data state only
 const bracketState = useBracketState();
 const {
   brackets,
-  expandedBrackets,
-  showMatchEditorDialog,
-  selectedMatch,
-  selectedMatchData,
-  roundRobinScoring,
-  bracketMatchFilters,
-  showScoringConfigDialog,
-  standingsRevision,
 } = bracketState;
-const { bracketViewModes } = bracketState;
 
 const fetchActivities = async (eventId) => {
   try {
@@ -147,6 +138,7 @@ const fetchActivities = async (eventId) => {
 };
 
 const {
+  // Actions
   fetchBrackets,
   handleByeRounds,
   updateLines,
@@ -164,7 +156,17 @@ const {
   openMatchEditorFromCard,
   getBracketTypeClass,
   getBracketStats,
-
+  
+  // UI State (automatically included from useBracketActions)
+  expandedBrackets,
+  showMatchEditorDialog,
+  selectedMatch,
+  selectedMatchData,
+  roundRobinScoring,
+  bracketMatchFilters,
+  bracketViewModes,
+  showScoringConfigDialog,
+  standingsRevision,
 } = useBracketActions(bracketState);
 
 const relatedBrackets = computed(() => {

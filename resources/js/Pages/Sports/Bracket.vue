@@ -3,8 +3,8 @@ import { onMounted, computed, ref } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import BracketCard from '@/Components/Brackets/BracketCard.vue';
 import MatchEditorDialog from '@/Components/Brackets/MatchEditorDialog.vue';
-import { useBracketState } from '@/composables/useBracketState.js';
-import { useBracketActions } from '@/composables/useBracketActions.js';
+import { useBracketState } from '@/composables/Brackets/useBracketState.js';
+import { useBracketActions } from '@/composables/Brackets/useBracketActions.js';
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
@@ -52,7 +52,9 @@ const clearFilters = () => {
 };
 
 const initialLoading = ref(true);
-const state = useBracketState();
+
+// Data state only
+const bracketState = useBracketState();
 const {
   bracketName,
   numberOfPlayers,
@@ -60,27 +62,11 @@ const {
   selectedEvent,
   events,
   brackets,
-  showDialog,
-  expandedBrackets,
-  showConfirmDialog,
-  showMissingFieldsDialog,
-  showDeleteConfirmDialog,
-  bracketTypeOptions,
-  showSuccessDialog,
-  successMessage,
-  showMatchEditorDialog,
-  bracketViewModes,
-  bracketMatchFilters,
-  selectedMatch,
-  selectedMatchData,
-  showGenericErrorDialog,
-  genericErrorMessage,
-  roundRobinScoring,
-  showScoringConfigDialog,
-  standingsRevision,
-} = state;
+} = bracketState;
 
+// Actions + UI state (UI state is now included in useBracketActions)
 const {
+  // Actions
   openDialog,
   toggleBracket,
   createBracket,
@@ -103,8 +89,29 @@ const {
   getAllMatches,
   openMatchEditorFromCard,
   setBracketMatchFilter,
-  getBracketStats, getBracketTypeClass
-} = useBracketActions(state);
+  getBracketStats,
+  getBracketTypeClass,
+  
+  // UI State (automatically included from useBracketActions)
+  showDialog,
+  expandedBrackets,
+  showConfirmDialog,
+  showMissingFieldsDialog,
+  showDeleteConfirmDialog,
+  bracketTypeOptions,
+  showSuccessDialog,
+  successMessage,
+  showMatchEditorDialog,
+  bracketViewModes,
+  bracketMatchFilters,
+  selectedMatch,
+  selectedMatchData,
+  showGenericErrorDialog,
+  genericErrorMessage,
+  roundRobinScoring,
+  showScoringConfigDialog,
+  standingsRevision,
+} = useBracketActions(bracketState);
 
 const confirmMatchUpdate = () => {
     // This now just triggers the confirmation inside MatchEditorDialog

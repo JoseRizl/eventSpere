@@ -102,13 +102,13 @@ const sideBarItems = computed(() => {
       routeName: 'home',
     },
     {
-      label: 'Events List',
+      label: 'Event List',
       icon: 'pi pi-calendar-clock',
       routeName: 'events.index',
       roles: ['Admin', 'Principal', 'TournamentManager'],
     },
     {
-      label: 'Brackets List',
+      label: 'Bracket List',
       icon: 'pi pi-ticket',
       routeName: 'bracket',
       roles: ['Admin', 'TournamentManager'],
