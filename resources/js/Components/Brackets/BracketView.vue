@@ -415,6 +415,26 @@ const getLineStroke = (line) => {
 const getLineStrokeWidth = (line) => {
     return line.isWinnerPath ? 3 : 2; // Thicker for winner
 };
+
+// Get 3rd place (loser of lower bracket final)
+const getThirdPlaceWinner = () => {
+    if (!props.bracket.matches.losers || props.bracket.matches.losers.length === 0) {
+        return 'TBD';
+    }
+    
+    const losersFinal = props.bracket.matches.losers[props.bracket.matches.losers.length - 1];
+    if (!losersFinal || losersFinal.length === 0) {
+        return 'TBD';
+    }
+    
+    const finalMatch = losersFinal[0];
+    if (finalMatch.status === 'completed' && finalMatch.loser_id) {
+        const loser = finalMatch.players.find(p => p.id === finalMatch.loser_id);
+        return loser ? loser.name : 'TBD';
+    }
+    
+    return 'TBD';
+};
 const screenToSVG = (svg, x, y) => {
     if (!svg) return { x: 0, y: 0 };
     const p = svg.createSVGPoint();
@@ -747,34 +767,41 @@ const updateBracketLines = () => {
                 });
             }
             
-            // Initial rounds to LR1 (losers from R1) - COMPRESSED pairing with smart line routing
-            // Only non-BYE matches produce losers, and they pair up: [0&1]->LR0, [2&3]->LR1, etc.
-            // Track which R1 matches feed into each LR1 match to determine line style
+            // Initial rounds to LR1 (losers from R1) - CROSS PAIRING (1 vs 3, 2 vs 4 pattern)
+            // Cross pairing: Pair 1st with 3rd, 2nd with 4th, etc.
+            // Track which R1 matches feed into each LR1 match for cross pairing
             const lr1Connections = new Map(); // LR1 matchIdx -> array of R1 matchIdx
-            let nonByeCounter = 0;
             
+            const nonByeMatches = bracket.matches.winners[0].filter(match => 
+                match.players[0]?.name !== 'BYE' && match.players[1]?.name !== 'BYE'
+            );
+            
+            const numNonByeMatches = nonByeMatches.length;
+            const halfPoint = Math.floor(numNonByeMatches / 2);
+            
+            // Build cross pairing connections: pair i with i+halfPoint
+            for (let i = 0; i < halfPoint; i++) {
+                const firstMatchIdx = bracket.matches.winners[0].indexOf(nonByeMatches[i]);
+                const secondMatchIdx = bracket.matches.winners[0].indexOf(nonByeMatches[i + halfPoint]);
+                
+                lr1Connections.set(i, [firstMatchIdx, secondMatchIdx]);
+            }
+            
+            // Draw lines for cross pairing
             bracket.matches.winners[0].forEach((match, i) => {
                 const hasLoser = match.players[0]?.name !== 'BYE' && match.players[1]?.name !== 'BYE';
                 if (!hasLoser) return;
                 
-                const loserMatchIdx = Math.floor(nonByeCounter / 2);
-                if (!lr1Connections.has(loserMatchIdx)) {
-                    lr1Connections.set(loserMatchIdx, []);
+                // Find which LR1 match this R1 match feeds into
+                let loserMatchIdx = -1;
+                for (const [lrIdx, r1Indices] of lr1Connections.entries()) {
+                    if (r1Indices.includes(i)) {
+                        loserMatchIdx = lrIdx;
+                        break;
+                    }
                 }
-                lr1Connections.get(loserMatchIdx).push(i);
-                nonByeCounter++;
-            });
-            
-            // Now draw lines based on whether R1 matches are adjacent
-            bracket.matches.winners[0].forEach((match, i) => {
-                const hasLoser = match.players[0]?.name !== 'BYE' && match.players[1]?.name !== 'BYE';
-                if (!hasLoser) return;
                 
-                const loserMatchIdx = Math.floor(lr1Connections.get(0) ? 
-                    [...lr1Connections.entries()].find(([_, indices]) => indices.includes(i))?.[0] : 
-                    Math.floor(bracket.matches.winners[0].filter((m, idx) => 
-                        idx <= i && m.players[0]?.name !== 'BYE' && m.players[1]?.name !== 'BYE'
-                    ).length / 2));
+                if (loserMatchIdx === -1) return;
                 
                 const loserMatch = bracket.matches.losers[0]?.[loserMatchIdx];
                 if (!loserMatch || (loserMatch.players[0]?.name === 'BYE' && loserMatch.players[1]?.name === 'BYE')) {
@@ -792,12 +819,12 @@ const updateBracketLines = () => {
                 const fromLeftX = fromRect.left - svgRect.left;
                 const toRightX = toRect.right - svgRect.left;
                 
-                // Check if the two R1 matches feeding this LR1 match are adjacent
+                // Get the R1 indices for this LR1 match
                 const r1Indices = lr1Connections.get(loserMatchIdx) || [];
                 const areAdjacent = r1Indices.length === 2 && Math.abs(r1Indices[0] - r1Indices[1]) === 1;
                 
                 if (areAdjacent) {
-                    // Use normal 3-segment elbow lines for adjacent matches (M1 vs M2)
+                    // Use normal 3-segment elbow lines for adjacent matches (rare in cross pairing)
                     const midX = (fromLeftX + toRightX) / 2;
                     dynamicLines.value.losers.push(
                         { x1: fromLeftX, y1: fromCenterY, x2: midX, y2: fromCenterY },
@@ -805,7 +832,7 @@ const updateBracketLines = () => {
                         { x1: midX, y1: toCenterY, x2: toRightX, y2: toCenterY }
                     );
                 } else {
-                    // Use diagonal line for non-adjacent matches (compressed due to BYEs)
+                    // Use diagonal line for cross-paired matches (most common)
                     dynamicLines.value.losers.push(
                         { x1: fromLeftX, y1: fromCenterY, x2: toRightX, y2: toCenterY }
                     );
@@ -1305,6 +1332,12 @@ watch(() => props.bracket, () => {
                                         </span>
                                     </div>
                                 </div>
+                                <!-- 3rd Place Indicator (under losers bracket final) -->
+                                <div v-if="roundIdx === bracket.matches.losers.length - 1" class="third-place-indicator">
+                                    <div class="placement-label third">
+                                        3rd Place: {{ getThirdPlaceWinner() }}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1343,7 +1376,7 @@ watch(() => props.bracket, () => {
                     <!-- Right Column: Winners Bracket (flows right from center) -->
                     <div class="right-column winners-section">
                         <div class="section-label winners-label">
-                            <span>← UPPER BRACKET</span>
+                            <span>UPPER BRACKET →</span>
                         </div>
                         <div class="bracket winners-right-flow">
                             <div v-for="(round, roundIdx) in bracket.matches.winners.slice(1)" :key="`winners-${roundIdx + 1}`"
@@ -1377,6 +1410,7 @@ watch(() => props.bracket, () => {
                     <div class="finals-bottom-row">
                         <div class="section-label finals-label">
                             <span>GRAND FINALS</span>
+                            <span class="twice-to-beat-notice">⚠️ Upper Bracket Winner is Twice to Beat</span>
                         </div>
                         <div class="bracket finals-center-flow">
                             <div class="round finals-round">
