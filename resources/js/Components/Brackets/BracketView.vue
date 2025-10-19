@@ -94,17 +94,17 @@ const hasConsolationMatch = computed(() => {
 // Check if Single Elimination should use split bracket layout (12+ players always)
 const shouldSplitBracket = computed(() => {
     if (props.bracket.type !== 'Single Elimination' || !props.bracket.matches) return false;
-    
+
     // Count total players in first round (excluding BYEs)
     const firstRound = props.bracket.matches[0];
     if (!firstRound) return false;
-    
+
     const playerCount = firstRound.reduce((count, match) => {
         const p1 = match.players[0]?.name !== 'BYE' && match.players[0]?.name !== 'TBD' ? 1 : 0;
         const p2 = match.players[1]?.name !== 'BYE' && match.players[1]?.name !== 'TBD' ? 1 : 0;
         return count + p1 + p2;
     }, 0);
-    
+
     // Use split layout for 12+ players (regardless of consolation match)
     return playerCount >= 12;
 });
@@ -112,24 +112,24 @@ const shouldSplitBracket = computed(() => {
 // Split bracket into A and B sides with proper semifinal tracking
 const splitBracketData = computed(() => {
     if (!shouldSplitBracket.value) return null;
-    
+
     const matches = props.bracket.matches;
     const totalRounds = matches.length;
-    
+
     // For a proper split: each half progresses independently until semifinals
     // Semifinals = second-to-last round (2 matches)
     // Finals = last round (1 match)
-    
+
     const semifinalRoundIdx = totalRounds - 2;
     const finalRoundIdx = totalRounds - 1;
-    
+
     // Split all rounds INCLUDING semifinals
     const bracketA = [];
     const bracketB = [];
-    
+
     for (let roundIdx = 0; roundIdx <= semifinalRoundIdx; roundIdx++) {
         const round = matches[roundIdx];
-        
+
         if (roundIdx === semifinalRoundIdx) {
             // Semifinals: first match to A, second match to B
             if (round[0]) bracketA.push([round[0]]);
@@ -137,25 +137,25 @@ const splitBracketData = computed(() => {
         } else {
             // Earlier rounds: split by position
             const midPoint = Math.ceil(round.length / 2);
-            
+
             // Top half goes to Bracket A
             bracketA.push(round.slice(0, midPoint));
             // Bottom half goes to Bracket B
             bracketB.push(round.slice(midPoint));
         }
     }
-    
+
     // Finals and Consolation (both in the final round)
     const finalRound = matches[finalRoundIdx] || [];
     const finals = finalRound.find(m => m.bracket_type !== 'consolation') || finalRound[0];
     const consolation = finalRound.find(m => m.bracket_type === 'consolation');
-    
+
     // Get semifinal matches
     const semifinals = matches[semifinalRoundIdx] || [];
-    
-    return { 
-        bracketA, 
-        bracketB, 
+
+    return {
+        bracketA,
+        bracketB,
         semifinals: { a: semifinals[0], b: semifinals[1] },
         finals: finals,
         consolation: consolation,
@@ -307,10 +307,10 @@ const getRoundRobinPlayerStyling = (player, otherPlayer, match) => {
 // Round Robin Grid System
 const roundRobinPlayers = computed(() => {
     if (props.bracket.type !== 'Round Robin' || !props.bracket.matches) return [];
-    
+
     const playerMap = new Map();
     const allMatches = props.bracket.matches.flat();
-    
+
     allMatches.forEach(match => {
         match.players.forEach(player => {
             if (player.name !== 'BYE' && player.name !== 'TBD' && !playerMap.has(player.id)) {
@@ -321,16 +321,16 @@ const roundRobinPlayers = computed(() => {
             }
         });
     });
-    
+
     return Array.from(playerMap.values());
 });
 
 const roundRobinGrid = computed(() => {
     if (props.bracket.type !== 'Round Robin' || !props.bracket.matches) return [];
-    
+
     const players = roundRobinPlayers.value;
     const allMatches = props.bracket.matches.flat();
-    
+
     // Create a grid matrix
     const grid = players.map(rowPlayer => {
         return players.map(colPlayer => {
@@ -338,7 +338,7 @@ const roundRobinGrid = computed(() => {
             if (rowPlayer.id === colPlayer.id) {
                 return { type: 'diagonal', player: rowPlayer };
             }
-            
+
             // Find match between these two players
             const match = allMatches.find(m => {
                 const p1 = m.players[0];
@@ -346,27 +346,27 @@ const roundRobinGrid = computed(() => {
                 return (p1.id === rowPlayer.id && p2.id === colPlayer.id) ||
                        (p1.id === colPlayer.id && p2.id === rowPlayer.id);
             });
-            
+
             if (match) {
                 // Determine if rowPlayer won, lost, or tied
                 const rowPlayerInMatch = match.players.find(p => p.id === rowPlayer.id);
                 const colPlayerInMatch = match.players.find(p => p.id === colPlayer.id);
-                
+
                 return {
                     type: 'match',
                     match: match,
                     rowPlayer: rowPlayerInMatch,
                     colPlayer: colPlayerInMatch,
-                    result: match.status === 'completed' 
+                    result: match.status === 'completed'
                         ? (match.is_tie ? 'tie' : (match.winner_id === rowPlayer.id ? 'win' : 'loss'))
                         : 'pending'
                 };
             }
-            
+
             return { type: 'empty' };
         });
     });
-    
+
     return grid;
 });
 
@@ -424,18 +424,18 @@ const getThirdPlaceWinner = () => {
     if (!props.bracket.matches.losers || props.bracket.matches.losers.length === 0) {
         return 'TBD';
     }
-    
+
     const losersFinal = props.bracket.matches.losers[props.bracket.matches.losers.length - 1];
     if (!losersFinal || losersFinal.length === 0) {
         return 'TBD';
     }
-    
+
     const finalMatch = losersFinal[0];
     if (finalMatch.status === 'completed' && finalMatch.loser_id) {
         const loser = finalMatch.players.find(p => p.id === finalMatch.loser_id);
         return loser ? loser.name : 'TBD';
     }
-    
+
     return 'TBD';
 };
 
@@ -443,7 +443,7 @@ const getThirdPlaceWinner = () => {
 const hasTiedRank1Players = computed(() => {
     if (!props.bracket.matches || props.bracket.type !== 'Round Robin') return false;
     if (!props.isRoundRobinConcluded || !props.isRoundRobinConcluded(props.bracketIndex)) return false;
-    
+
     const allStats = roundRobinPlayers.value.map(player => {
         let wins = 0, losses = 0, draws = 0;
         props.bracket.matches.forEach(round => {
@@ -464,12 +464,12 @@ const hasTiedRank1Players = computed(() => {
         const winRatio = total > 0 ? wins / total : 0;
         return { id: player.id, wins, winRatio };
     });
-    
+
     allStats.sort((a, b) => {
         if (b.winRatio !== a.winRatio) return b.winRatio - a.winRatio;
         return b.wins - a.wins;
     });
-    
+
     // Check if there are multiple players with same stats as rank 1
     if (allStats.length < 2) return false;
     const first = allStats[0];
@@ -482,17 +482,17 @@ const getPlayerStats = (playerId) => {
     if (!props.bracket.matches || props.bracket.type !== 'Round Robin') {
         return { wins: 0, losses: 0, draws: 0, rank: '-' };
     }
-    
+
     let wins = 0, losses = 0, draws = 0;
-    
+
     // Count wins, losses, draws
     props.bracket.matches.forEach(round => {
         round.forEach(match => {
             if (match.status !== 'completed') return;
-            
+
             const player = match.players.find(p => p.id === playerId);
             if (!player) return;
-            
+
             if (match.is_tie) {
                 draws++;
             } else if (match.winner_id === playerId) {
@@ -502,11 +502,11 @@ const getPlayerStats = (playerId) => {
             }
         });
     });
-    
+
     // Calculate win ratio for ranking
     const totalGames = wins + losses + draws;
     const winRatio = totalGames > 0 ? wins / totalGames : 0;
-    
+
     // Get all players' stats for ranking
     const allStats = roundRobinPlayers.value.map(player => {
         let pWins = 0, pLosses = 0, pDraws = 0;
@@ -528,22 +528,22 @@ const getPlayerStats = (playerId) => {
         const pWinRatio = pTotal > 0 ? pWins / pTotal : 0;
         return { id: player.id, wins: pWins, winRatio: pWinRatio };
     });
-    
+
     // Sort by win ratio (descending), then by wins (descending), then by quotient if available
     allStats.sort((a, b) => {
         if (b.winRatio !== a.winRatio) return b.winRatio - a.winRatio;
         if (b.wins !== a.wins) return b.wins - a.wins;
-        
+
         // Use tiebreaker quotient if available
         if (props.bracket.tiebreaker_data) {
             const aQuotient = props.bracket.tiebreaker_data[a.id]?.quotient || 0;
             const bQuotient = props.bracket.tiebreaker_data[b.id]?.quotient || 0;
             if (bQuotient !== aQuotient) return bQuotient - aQuotient;
         }
-        
+
         return a.losses - b.losses; // Fewer losses is better
     });
-    
+
     // Find rank with tie handling
     let rank = 1;
     let currentRank = 1;
@@ -551,14 +551,14 @@ const getPlayerStats = (playerId) => {
         if (i > 0) {
             const prev = allStats[i - 1];
             const curr = allStats[i];
-            
+
             // Get quotients for comparison
             const prevQuotient = props.bracket.tiebreaker_data?.[prev.id]?.quotient || 0;
             const currQuotient = props.bracket.tiebreaker_data?.[curr.id]?.quotient || 0;
-            
+
             // If stats are different, increment rank
-            if (prev.winRatio !== curr.winRatio || 
-                prev.wins !== curr.wins || 
+            if (prev.winRatio !== curr.winRatio ||
+                prev.wins !== curr.wins ||
                 prevQuotient !== currQuotient) {
                 currentRank = i + 1;
             }
@@ -569,7 +569,7 @@ const getPlayerStats = (playerId) => {
             break;
         }
     }
-    
+
     return { wins, losses, draws, rank: rank > 0 ? rank : '-' };
 };
 const screenToSVG = (svg, x, y) => {
@@ -600,12 +600,12 @@ const getLoserMatchStyle = (roundIdx) => {
     // Losers bracket alternates between two patterns:
     // - Even rounds (LR1, LR3, LR5...): Receive losers from winners bracket, spacing increases
     // - Odd rounds (LR2, LR4, LR6...): Receive from previous losers round (1 parent), maintain alignment
-    
+
     // LR1 (roundIdx 0): Receives from R1, uses WR2 spacing
     // LR2 (roundIdx 1): Receives from LR1 (1 parent), same vertical position as LR1
     // LR3 (roundIdx 2): Receives from WR2, uses WR3 spacing
     // LR4 (roundIdx 3): Receives from LR3 (1 parent), same vertical position as LR3
-    
+
     if (roundIdx % 2 === 0) {
         // Even rounds: LR1, LR3, LR5... - these receive from winners bracket
         // LR1 (roundIdx 0) → WR2 spacing (roundIdx 1)
@@ -630,17 +630,17 @@ const getLoserRoundStyle = (roundIdx) => {
     // LR4 (roundIdx 3) = stays with LR3
     // LR5 (roundIdx 4) = shift right to align with WR3
     // Pattern: shift happens at even roundIdx >= 2
-    
+
     if (roundIdx < 2) {
         // LR1 and LR2 stay at initial position (no margin)
         return {};
     }
-    
+
     // For LR3+, calculate position based on which winners round they align with
     // LR3-4 align with WR2 (position 1), LR5-6 align with WR3 (position 2), etc.
     const position = Math.floor(roundIdx / 2);
     const roundWidth = 220; // Width of one round column (180px + 40px gap)
-    
+
     return {
         marginLeft: `${position * roundWidth}px`
     };
@@ -790,19 +790,19 @@ const updateBracketLines = () => {
                     console.warn('Unified SVG not found for split bracket');
                     return;
                 }
-                
+
                 const svgRect = unifiedSvg.getBoundingClientRect();
                 dynamicLines.value.single = [];
-                
+
                 // Draw lines for all rounds in the bracket
                 for (let roundIdx = 0; roundIdx < bracket.matches.length - 1; roundIdx++) {
                     const currentRound = bracket.matches[roundIdx];
                     const nextRound = bracket.matches[roundIdx + 1];
-                    
+
                     currentRound.forEach((match, matchIdx) => {
                         // Determine next match index
                         let nextMatchIdx;
-                        
+
                         if (roundIdx === bracket.matches.length - 2) {
                             // Semifinals to finals/consolation
                             const consolationMatch = nextRound.find(m => m.bracket_type === 'consolation');
@@ -817,23 +817,23 @@ const updateBracketLines = () => {
                             // Normal progression
                             nextMatchIdx = Math.floor(matchIdx / 2);
                         }
-                        
+
                         const fromEl = bracketContentRef.value?.querySelector(`#match-${props.bracketIndex}-${roundIdx}-${matchIdx}`);
                         const toEl = bracketContentRef.value?.querySelector(`#match-${props.bracketIndex}-${roundIdx + 1}-${nextMatchIdx}`);
-                        
+
                         if (!fromEl || !toEl) return;
-                        
+
                         const fromRect = fromEl.getBoundingClientRect();
                         const toRect = toEl.getBoundingClientRect();
-                        
+
                         const fromCenterY = fromRect.top - svgRect.top + fromRect.height / 2;
                         const toCenterY = toRect.top - svgRect.top + toRect.height / 2;
                         const fromRightX = fromRect.right - svgRect.left;
                         const toLeftX = toRect.left - svgRect.left;
-                        
+
                         // 3-segment elbow line
                         const midX = (fromRightX + toLeftX) / 2;
-                        
+
                         dynamicLines.value.single.push(
                             { x1: fromRightX, y1: fromCenterY, x2: midX, y2: fromCenterY },
                             { x1: midX, y1: fromCenterY, x2: midX, y2: toCenterY },
@@ -843,7 +843,7 @@ const updateBracketLines = () => {
                 }
             } else {
                 // Standard single elimination - filter out consolation matches from line drawing
-                const matchesWithoutConsolation = bracket.matches.map(round => 
+                const matchesWithoutConsolation = bracket.matches.map(round =>
                     round.filter(m => m.bracket_type !== 'consolation')
                 );
                 dynamicLines.value.single = drawLinesFor(matchesWithoutConsolation, '.connection-lines', 'match', 'single');
@@ -856,9 +856,9 @@ const updateBracketLines = () => {
                 return;
             }
             console.log('Drawing lines for Double Elimination bracket');
-            
+
             const svgRect = unifiedSvg.getBoundingClientRect();
-            
+
             // Winners lines
             dynamicLines.value.winners = [];
             for (let round = 0; round < bracket.matches.winners.length - 1; round++) {
@@ -880,7 +880,7 @@ const updateBracketLines = () => {
                     );
                 });
             }
-            
+
             // Losers lines (flow left)
             dynamicLines.value.losers = [];
             for (let round = 0; round < bracket.matches.losers.length - 1; round++) {
@@ -903,32 +903,32 @@ const updateBracketLines = () => {
                     );
                 });
             }
-            
+
             // Initial rounds to LR1 (losers from R1) - CROSS PAIRING (1 vs 3, 2 vs 4 pattern)
             // Cross pairing: Pair 1st with 3rd, 2nd with 4th, etc.
             // Track which R1 matches feed into each LR1 match for cross pairing
             const lr1Connections = new Map(); // LR1 matchIdx -> array of R1 matchIdx
-            
-            const nonByeMatches = bracket.matches.winners[0].filter(match => 
+
+            const nonByeMatches = bracket.matches.winners[0].filter(match =>
                 match.players[0]?.name !== 'BYE' && match.players[1]?.name !== 'BYE'
             );
-            
+
             const numNonByeMatches = nonByeMatches.length;
             const halfPoint = Math.floor(numNonByeMatches / 2);
-            
+
             // Build cross pairing connections: pair i with i+halfPoint
             for (let i = 0; i < halfPoint; i++) {
                 const firstMatchIdx = bracket.matches.winners[0].indexOf(nonByeMatches[i]);
                 const secondMatchIdx = bracket.matches.winners[0].indexOf(nonByeMatches[i + halfPoint]);
-                
+
                 lr1Connections.set(i, [firstMatchIdx, secondMatchIdx]);
             }
-            
+
             // Draw lines for cross pairing
             bracket.matches.winners[0].forEach((match, i) => {
                 const hasLoser = match.players[0]?.name !== 'BYE' && match.players[1]?.name !== 'BYE';
                 if (!hasLoser) return;
-                
+
                 // Find which LR1 match this R1 match feeds into
                 let loserMatchIdx = -1;
                 for (const [lrIdx, r1Indices] of lr1Connections.entries()) {
@@ -937,29 +937,29 @@ const updateBracketLines = () => {
                         break;
                     }
                 }
-                
+
                 if (loserMatchIdx === -1) return;
-                
+
                 const loserMatch = bracket.matches.losers[0]?.[loserMatchIdx];
                 if (!loserMatch || (loserMatch.players[0]?.name === 'BYE' && loserMatch.players[1]?.name === 'BYE')) {
                     return;
                 }
-                
+
                 const fromEl = bracketContentRef.value?.querySelector(`#winners-match-${props.bracketIndex}-0-${i}`);
                 const toEl = bracketContentRef.value?.querySelector(`#losers-match-${props.bracketIndex}-0-${loserMatchIdx}`);
                 if (!fromEl || !toEl) return;
-                
+
                 const fromRect = fromEl.getBoundingClientRect();
                 const toRect = toEl.getBoundingClientRect();
                 const fromCenterY = fromRect.top - svgRect.top + fromRect.height / 2;
                 const toCenterY = toRect.top - svgRect.top + toRect.height / 2;
                 const fromLeftX = fromRect.left - svgRect.left;
                 const toRightX = toRect.right - svgRect.left;
-                
+
                 // Get the R1 indices for this LR1 match
                 const r1Indices = lr1Connections.get(loserMatchIdx) || [];
                 const areAdjacent = r1Indices.length === 2 && Math.abs(r1Indices[0] - r1Indices[1]) === 1;
-                
+
                 if (areAdjacent) {
                     // Use normal 3-segment elbow lines for adjacent matches (rare in cross pairing)
                     const midX = (fromLeftX + toRightX) / 2;
@@ -975,12 +975,12 @@ const updateBracketLines = () => {
                     );
                 }
             });
-            
+
             // Finals lines with elbow routing
             dynamicLines.value.finals = [];
             const lastWinnerRound = bracket.matches.winners.length - 1;
             const lastLoserRound = bracket.matches.losers.length - 1;
-            
+
             // Winner to Finals (go right 30px, then down to finals level, then straight to finals)
             const winnerEl = bracketContentRef.value?.querySelector(`#winners-match-${props.bracketIndex}-${lastWinnerRound}-0`);
             const finalsEl = bracketContentRef.value?.querySelector(`#grand-finals-match-${props.bracketIndex}-0`);
@@ -991,17 +991,17 @@ const updateBracketLines = () => {
                 const toCenterY = finalsRect.top - svgRect.top + finalsRect.height / 2;
                 const fromRightX = winnerRect.right - svgRect.left;
                 const toRightX = finalsRect.right - svgRect.left;
-                
+
                 // Simple 3-segment path: right 30px, down to finals level, straight to finals
                 const elbowX = fromRightX + 30;
-                
+
                 dynamicLines.value.finals.push(
                     { x1: fromRightX, y1: fromCenterY, x2: elbowX, y2: fromCenterY }, // horizontal right 30px
                     { x1: elbowX, y1: fromCenterY, x2: elbowX, y2: toCenterY }, // vertical down to finals level
                     { x1: elbowX, y1: toCenterY, x2: toRightX, y2: toCenterY } // horizontal straight to finals
                 );
             }
-            
+
             // Loser to Finals (go left 30px, then down to finals level, then straight to finals)
             const loserEl = bracketContentRef.value?.querySelector(`#losers-match-${props.bracketIndex}-${lastLoserRound}-0`);
             if (loserEl && finalsEl) {
@@ -1011,17 +1011,17 @@ const updateBracketLines = () => {
                 const toCenterY = finalsRect.top - svgRect.top + finalsRect.height / 2;
                 const fromLeftX = loserRect.left - svgRect.left;
                 const toLeftX = finalsRect.left - svgRect.left;
-                
+
                 // Simple 3-segment path: left 30px, down to finals level, straight to finals
                 const elbowX = fromLeftX - 30;
-                
+
                 dynamicLines.value.finals.push(
                     { x1: fromLeftX, y1: fromCenterY, x2: elbowX, y2: fromCenterY }, // horizontal left 30px
                     { x1: elbowX, y1: fromCenterY, x2: elbowX, y2: toCenterY }, // vertical down to finals level
                     { x1: elbowX, y1: toCenterY, x2: toLeftX, y2: toCenterY } // horizontal straight to finals
                 );
             }
-            
+
             console.log('Lines calculated:', {
                 winners: dynamicLines.value.winners.length,
                 losers: dynamicLines.value.losers.length,
@@ -1037,21 +1037,21 @@ const alignConsolationWithFinals = () => {
     if (props.bracket.type !== 'Single Elimination' || !hasConsolationMatch.value || shouldSplitBracket.value) {
         return;
     }
-    
+
     nextTick(() => {
         const finalsMatch = bracketContentRef.value?.querySelector('.finals-match-standard');
         const consolationMatch = bracketContentRef.value?.querySelector('.consolation-match-standard');
-        
+
         if (finalsMatch && consolationMatch) {
             const finalsRect = finalsMatch.getBoundingClientRect();
             const consolationRect = consolationMatch.getBoundingClientRect();
             const containerRect = bracketContentRef.value.getBoundingClientRect();
-            
+
             // Calculate the offset needed to align consolation with finals
             const finalsTop = finalsRect.top - containerRect.top;
             const consolationTop = consolationRect.top - containerRect.top;
             const offset = finalsTop - consolationTop;
-            
+
             // Apply the offset
             consolationMatch.style.marginTop = `${offset}px`;
         }
@@ -1099,11 +1099,11 @@ watch(() => props.bracket, () => {
                     stroke-width="2"
                 />
             </svg>
-            
+
             <div class="split-bracket-header">
                 <h3>Single Elimination Tournament</h3>
             </div>
-            
+
             <!-- Horizontal Layout: A flows right, B flows left, meet at finals -->
             <div class="horizontal-split-layout">
                 <!-- Left Side: Bracket A (flows left to right) -->
@@ -1135,7 +1135,7 @@ watch(() => props.bracket, () => {
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Center: Finals and Consolation -->
                 <div class="bracket-center-column">
                     <!-- Finals -->
@@ -1166,7 +1166,7 @@ watch(() => props.bracket, () => {
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Consolation (3rd Place) -->
                     <div class="consolation-container" v-if="splitBracketData.consolation">
                         <div class="section-label">3RD PLACE</div>
@@ -1193,7 +1193,7 @@ watch(() => props.bracket, () => {
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Right Side: Bracket B (flows right to left) -->
                 <div class="bracket-side bracket-b-side">
                     <div class="section-label">BRACKET B</div>
@@ -1274,7 +1274,7 @@ watch(() => props.bracket, () => {
                 </div>
             </div>
             </div>
-            
+
             <!-- Consolation Match (3rd Place) - shown to the right of finals -->
             <div v-if="hasConsolationMatch" class="round round-consolation">
                 <h3>3rd Place</h3>
@@ -1304,7 +1304,7 @@ watch(() => props.bracket, () => {
     <div v-else-if="bracket.type === 'Round Robin'" class="round-robin-bracket">
         <div class="round-robin-grid-container">
             <h3 class="text-xl font-bold mb-4">Round Robin Tournament</h3>
-            
+
             <!-- Tiebreaker Notice -->
             <div v-if="hasTiedRank1Players && !dismissedTiebreakerNotices.has(bracket.id) && (user && (user.role === 'Admin' || user.role === 'TournamentManager'))" class="tiebreaker-notice">
                 <div class="tiebreaker-notice-content">
@@ -1318,15 +1318,15 @@ watch(() => props.bracket, () => {
                     </button>
                 </div>
             </div>
-            
+
             <!-- Grid Table -->
             <div class="round-robin-grid-wrapper">
                 <table class="round-robin-grid-table">
                     <thead>
                         <tr>
                             <th class="grid-corner-cell"></th>
-                            <th 
-                                v-for="(player, idx) in roundRobinPlayers" 
+                            <th
+                                v-for="(player, idx) in roundRobinPlayers"
                                 :key="`header-${player.id}`"
                                 class="grid-header-cell"
                             >
@@ -1350,8 +1350,8 @@ watch(() => props.bracket, () => {
                                     <span class="team-name">{{ truncate(roundRobinPlayers[rowIdx].name, { length: 12 }) }}</span>
                                 </div>
                             </th>
-                            <td 
-                                v-for="(cell, colIdx) in row" 
+                            <td
+                                v-for="(cell, colIdx) in row"
                                 :key="`cell-${rowIdx}-${colIdx}`"
                                 :class="[getGridCellClass(cell), (user && (user.role === 'Admin' || user.role === 'TournamentManager') && cell.type === 'match') ? 'cursor-pointer' : '']"
                                 @click="cell.type === 'match' && props.openMatchDialog && (() => {
@@ -1386,7 +1386,7 @@ watch(() => props.bracket, () => {
             <div class="unified-bracket-header">
                 <h3>Double Elimination Tournament</h3>
             </div>
-            
+
             <div class="unified-bracket-wrapper">
                 <svg class="unified-connection-lines">
                     <!-- Winners bracket lines -->
@@ -1431,7 +1431,7 @@ watch(() => props.bracket, () => {
                             <span>← LOWER BRACKET</span>
                         </div>
                         <div class="bracket losers-left-flow">
-                            <div v-for="(round, roundIdx) in bracket.matches.losers" 
+                            <div v-for="(round, roundIdx) in bracket.matches.losers"
                                 :key="`losers-${roundIdx}`"
                                 :class="['round', `losers-round-${roundIdx + 1}`, { 'round-ongoing': isRoundOngoing('losers', roundIdx) }]">
                                 <h4 class="round-label">LR{{ roundIdx + 1 }}</h4>
