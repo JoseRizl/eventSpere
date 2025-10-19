@@ -439,10 +439,13 @@ const getThirdPlaceWinner = () => {
     return 'TBD';
 };
 
-// Check if there are tied players at rank 1
 const hasTiedRank1Players = computed(() => {
     if (!props.bracket.matches || props.bracket.type !== 'Round Robin') return false;
     if (!props.isRoundRobinConcluded || !props.isRoundRobinConcluded(props.bracketIndex)) return false;
+    if (props.bracket.tiebreaker_data && Object.keys(props.bracket.tiebreaker_data).length > 0) {
+        // If tiebreakers are set, no need to show the notice
+        return false;
+    }
 
     const allStats = roundRobinPlayers.value.map(player => {
         let wins = 0, losses = 0, draws = 0;
@@ -1021,12 +1024,6 @@ const updateBracketLines = () => {
                     { x1: elbowX, y1: toCenterY, x2: toLeftX, y2: toCenterY } // horizontal straight to finals
                 );
             }
-
-            console.log('Lines calculated:', {
-                winners: dynamicLines.value.winners.length,
-                losers: dynamicLines.value.losers.length,
-                finals: dynamicLines.value.finals.length
-            });
         }
     };
     runUpdates();
@@ -1370,8 +1367,13 @@ watch(() => props.bracket, () => {
                             <td class="grid-stats-cell">{{ getPlayerStats(roundRobinPlayers[rowIdx].id).losses }}</td>
                             <td v-if="bracket.allow_draws" class="grid-stats-cell">{{ getPlayerStats(roundRobinPlayers[rowIdx].id).draws }}</td>
                             <td class="grid-stats-cell rank-cell" :class="{ 'rank-first': getPlayerStats(roundRobinPlayers[rowIdx].id).rank === 1 }">
+                                <span class="rank-value">
                                 {{ getPlayerStats(roundRobinPlayers[rowIdx].id).rank }}
-                                <i v-if="getPlayerStats(roundRobinPlayers[rowIdx].id).rank === 1 && props.isRoundRobinConcluded(bracketIndex)" class="pi pi-crown winner-crown"></i>
+                                <span 
+                                    v-if="getPlayerStats(roundRobinPlayers[rowIdx].id).rank === 1 && props.isRoundRobinConcluded(bracketIndex)" 
+                                    class="trophy-icon"
+                                >🏆</span>
+                                </span>
                             </td>
                         </tr>
                     </tbody>
