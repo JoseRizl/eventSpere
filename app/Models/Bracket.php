@@ -17,10 +17,12 @@ class Bracket extends Model
         'id',
         'name',
         'type',
-        'event_id'
+        'event_id',
+        'tiebreaker_data'
     ];
 
     protected $casts = [
+        'tiebreaker_data' => 'array'
     ];
 
     // Relationships

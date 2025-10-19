@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('type'); // e.g., 'Single Elimination', 'Round Robin'
             $table->json('scoring')->nullable(); // For Round Robin points
+            $table->json('tiebreaker_data')->nullable(); // For storing tiebreaker data
             $table->timestamps();
         });
     }

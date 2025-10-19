@@ -1519,11 +1519,18 @@
     text-align: center;
   }
 
-  .winner-crown {
-    color: #f59e0b; /* amber-500 */
-    font-size: 1.1rem;
-    line-height: 1;
-  }
+.rank-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.trophy-icon {
+  font-size: 1.2em;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
 
   /* Scoring Configuration Dialog */
   .scoring-config-dialog {

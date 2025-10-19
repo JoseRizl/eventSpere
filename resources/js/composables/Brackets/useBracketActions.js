@@ -1286,17 +1286,31 @@ const updateLines = (bracketIdx) => {
 
   const saveBrackets = async (bracketData) => {
     try {
-      // Create a shallow copy and remove the 'event' object before sending.
-      const payload = { ...bracketData };
-      delete payload.event;
+        // Create a shallow copy and remove the 'event' object before sending.
+        const payload = { ...bracketData };
+        delete payload.event;
 
-      // Use Laravel API to update the bracket
-      await axios.put(route('api.brackets.update', { bracket: payload.id }), payload);
+        // Ensure tiebreaker_data is an array
+        if (!payload.tiebreaker_data) {
+            payload.tiebreaker_data = []; // Set to empty array if null/undefined
+        }
+
+        console.log('Saving bracket with payload:', JSON.parse(JSON.stringify(payload)));
+
+        // Use Laravel API to update the bracket
+        const response = await axios.put(route('api.brackets.update', { bracket: payload.id }), payload);
+        console.log('Save successful:', response.data);
+        return response.data;
     } catch (e) {
-      // TODO: Add user-facing error handling
-      console.error('Error saving bracket:', e);
+        console.error('Error saving bracket:', e);
+        if (e.response) {
+            console.error('Error response data:', e.response.data);
+            console.error('Error status:', e.response.status);
+            console.error('Error headers:', e.response.headers);
+        }
+        throw e;
     }
-  };
+};
 
   const getRoundRobinStandings = (bracketIdx) => {
     const bracket = brackets.value[bracketIdx];
