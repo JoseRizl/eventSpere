@@ -1295,6 +1295,11 @@ const updateLines = (bracketIdx) => {
             payload.tiebreaker_data = []; // Set to empty array if null/undefined
         }
 
+        // Ensure allow_draws is a boolean
+        if (payload.allow_draws !== undefined) {
+            payload.allow_draws = Boolean(payload.allow_draws);
+        }
+
         console.log('Saving bracket with payload:', JSON.parse(JSON.stringify(payload)));
 
         // Use Laravel API to update the bracket
