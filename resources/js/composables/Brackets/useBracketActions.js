@@ -258,8 +258,77 @@ export function useBracketActions(dataState) {
       return;
     }
 
-    // Auto-progression for BYE rounds in Single and Double Elimination is disabled.
-    // BYE matches will be handled in the MatchEditorDialog to prevent unexpected state changes.
+    // Auto-advance BYE matches in elimination brackets
+    if (bracket.type === 'Single Elimination') {
+      bracket.matches.forEach((round, roundIdx) => {
+        round.forEach((match, matchIdx) => {
+          const player1 = match.players[0];
+          const player2 = match.players[1];
+          
+          // Check if this is a BYE match that hasn't been completed
+          if (match.status !== 'completed' && (player1?.name === 'BYE' || player2?.name === 'BYE')) {
+            const winner = player1?.name === 'BYE' ? player2 : player1;
+            const loser = player1?.name === 'BYE' ? player1 : player2;
+            
+            // Auto-complete the match
+            match.status = 'completed';
+            match.winner_id = winner.id;
+            match.loser_id = loser.id;
+            winner.completed = true;
+            loser.score = 0;
+            
+            // Advance winner to next round
+            if (roundIdx < bracket.matches.length - 1) {
+              const nextRoundMatchIdx = Math.floor(matchIdx / 2);
+              const nextMatch = bracket.matches[roundIdx + 1][nextRoundMatchIdx];
+              const nextPlayerSlot = matchIdx % 2;
+              
+              if (nextMatch) {
+                nextMatch.players[nextPlayerSlot] = {
+                  ...winner,
+                  score: 0,
+                  completed: false
+                };
+              }
+            }
+          }
+        });
+      });
+    } else if (bracket.type === 'Double Elimination') {
+      // Handle BYE matches in winners bracket
+      bracket.matches.winners.forEach((round, roundIdx) => {
+        round.forEach((match, matchIdx) => {
+          const player1 = match.players[0];
+          const player2 = match.players[1];
+          
+          if (match.status !== 'completed' && (player1?.name === 'BYE' || player2?.name === 'BYE')) {
+            const winner = player1?.name === 'BYE' ? player2 : player1;
+            const loser = player1?.name === 'BYE' ? player1 : player2;
+            
+            match.status = 'completed';
+            match.winner_id = winner.id;
+            match.loser_id = loser.id;
+            winner.completed = true;
+            loser.score = 0;
+            
+            // Advance winner to next winners round
+            if (roundIdx < bracket.matches.winners.length - 1) {
+              const nextRoundMatchIdx = Math.floor(matchIdx / 2);
+              const nextMatch = bracket.matches.winners[roundIdx + 1][nextRoundMatchIdx];
+              const nextPlayerSlot = matchIdx % 2;
+              
+              if (nextMatch) {
+                nextMatch.players[nextPlayerSlot] = {
+                  ...winner,
+                  score: 0,
+                  completed: false
+                };
+              }
+            }
+          }
+        });
+      });
+    }
   };
 
   const toggleBracket = (bracketIdx) => {
