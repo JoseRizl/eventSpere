@@ -762,27 +762,46 @@ export function useBracketActions(dataState) {
         const winnersRound = winnersRounds[wrRoundIdx];
 
         if (wrRoundIdx === 0) {
-            // Handle WR1 -> LR1 with compression to skip BYE-only matches
-            let nonByeCounter = 0;
-            winnersRound.forEach((wrMatch) => {
-                const hasLoser = wrMatch.players[0]?.name !== 'BYE' && wrMatch.players[1]?.name !== 'BYE';
-                if (!hasLoser) return; // This WR1 match will never produce a loser
-
+            // Handle WR1 -> LR1 with CROSS PAIRING (1 vs 3, 2 vs 4 pattern)
+            // Cross pairing: Pair 1st with 3rd, 2nd with 4th, etc.
+            // Example for 8 players (4 WR1 matches):
+            // LR1-M1: Loser of M1 vs Loser of M3
+            // LR1-M2: Loser of M2 vs Loser of M4
+            
+            const nonByeMatches = winnersRound.filter(wrMatch => 
+                wrMatch.players[0]?.name !== 'BYE' && wrMatch.players[1]?.name !== 'BYE'
+            );
+            
+            const numNonByeMatches = nonByeMatches.length;
+            const halfPoint = Math.floor(numNonByeMatches / 2);
+            
+            // Create cross pairing: pair i with i+halfPoint
+            for (let i = 0; i < halfPoint; i++) {
+                const firstMatch = nonByeMatches[i];
+                const secondMatch = nonByeMatches[i + halfPoint];
+                
                 const lrRoundIdx = 0; // LR1
-                const lrMatchIdx = Math.floor(nonByeCounter / 2); // pair losers 0&1, 2&3, ...
-                const lrPlayerPos = nonByeCounter % 2; // 0 then 1 for each pair
-                nonByeCounter++;
-
-                const loserPlaceholder = {
-                    id: null,
-                    name: `Loser of R1 M${wrMatch.match_number}`,
-                    score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
-                };
-
+                const lrMatchIdx = i;
+                
                 if (losersRounds[lrRoundIdx] && losersRounds[lrRoundIdx][lrMatchIdx]) {
-                    losersRounds[lrRoundIdx][lrMatchIdx].players[lrPlayerPos] = loserPlaceholder;
+                    losersRounds[lrRoundIdx][lrMatchIdx].players[0] = {
+                        id: null,
+                        name: `Loser of R1 M${firstMatch.match_number}`,
+                        score: 0,
+                        completed: false,
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString(),
+                    };
+                    losersRounds[lrRoundIdx][lrMatchIdx].players[1] = {
+                        id: null,
+                        name: `Loser of R1 M${secondMatch.match_number}`,
+                        score: 0,
+                        completed: false,
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString(),
+                    };
                 }
-            });
+            }
         } else {
             // WR2+ -> LR(2r-1), same match index, loser goes to slot 1 (faces winner coming from previous LR round)
             const lrRoundIdx = (wrRoundIdx * 2) - 1;
@@ -1649,7 +1668,7 @@ const updateLines = (bracketIdx) => {
             : { ...loser, score: 0, completed: false, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() };
 
           // This logic was incorrect for the final round. The loser of the final winners match goes to the final losers match.
-          if (roundIdx === 0) { // Losers from Winners Round 1
+          if (roundIdx === 0) { // Losers from Winners Round 1 - CROSS PAIRING
             // Find the index of this match among those that produce a loser.
             // This is necessary because BYE matches in WR1 don't produce losers,
             // which skews the original matchIdx.
@@ -1658,8 +1677,24 @@ const updateLines = (bracketIdx) => {
 
             if (loserIndex !== -1) {
               const losersRoundIdx = 0;
-              const losersMatchIdx = Math.floor(loserIndex / 2);
-              const losersPlayerPos = loserIndex % 2;
+              const numNonByeMatches = matchesWithLosers.length;
+              const halfPoint = Math.floor(numNonByeMatches / 2);
+              
+              // Cross pairing: pair i with i+halfPoint
+              // If loserIndex < halfPoint, it pairs with loserIndex+halfPoint
+              // If loserIndex >= halfPoint, it pairs with loserIndex-halfPoint
+              let losersMatchIdx, losersPlayerPos;
+              
+              if (loserIndex < halfPoint) {
+                // First half: goes to match i, position 0
+                losersMatchIdx = loserIndex;
+                losersPlayerPos = 0;
+              } else {
+                // Second half: goes to match (i-halfPoint), position 1
+                losersMatchIdx = loserIndex - halfPoint;
+                losersPlayerPos = 1;
+              }
+              
               setPlayerWithLog(bracket, 'losers', losersRoundIdx, losersMatchIdx, losersPlayerPos, newLoserPayload, performedActions);
             }
           } else { // Losers from subsequent Winners Rounds

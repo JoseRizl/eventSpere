@@ -2397,6 +2397,28 @@
 .placement-label.third {
   background: #cd7f32;
   color: #fff;
+  padding: 8px 16px;
+  font-size: 0.95rem;
+}
+
+/* Twice to Beat Notice */
+.twice-to-beat-notice {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #633d05;
+  background: rgba(255, 152, 0, 0.1);
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+/* 3rd Place Indicator */
+.third-place-indicator {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 /* SVG for connection lines */
