@@ -229,6 +229,8 @@ class BracketController extends Controller
             'event_id' => 'required',
             'matches' => 'required',
             'players' => 'sometimes|array',
+            'allow_draws' => 'sometimes|boolean',
+            'tiebreaker_data' => 'sometimes|array',
         ]);
 
         $jsonData = $this->readJson();
@@ -239,6 +241,8 @@ class BracketController extends Controller
             'name' => $validated['name'],
             'type' => $validated['type'],
             'event_id' => $validated['event_id'],
+            'allow_draws' => $validated['allow_draws'] ?? null,
+            'tiebreaker_data' => $validated['tiebreaker_data'] ?? null,
             'created_at' => now()->toISOString(),
             'updated_at' => now()->toISOString(),
         ];
@@ -269,10 +273,12 @@ class BracketController extends Controller
             'event_id' => 'sometimes',
             'matches' => 'sometimes',
             'players' => 'sometimes|array',
+            'allow_draws' => 'sometimes|boolean',
+            'tiebreaker_data' => 'sometimes|array',
         ]);
 
         // Update bracket details
-        $jsonData['brackets'][$bracketIndex] = array_merge($jsonData['brackets'][$bracketIndex], Arr::only($validated, ['name','type','event_id']));
+        $jsonData['brackets'][$bracketIndex] = array_merge($jsonData['brackets'][$bracketIndex], Arr::only($validated, ['name','type','event_id','allow_draws','tiebreaker_data']));
         $jsonData['brackets'][$bracketIndex]['updated_at'] = now()->toISOString();
 
         // The `matches` node is optional on update. If it's present, re-process.

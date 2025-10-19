@@ -22,7 +22,10 @@ const props = defineProps({
     openMatchDialog: { type: Function, default: null },
     getRoundRobinStandings: { type: Function },
     isRoundRobinConcluded: { type: Function },
-    openScoringConfigDialog: { type: Function, default: null }
+    openScoringConfigDialog: { type: Function, default: null },
+    openTiebreakerDialog: { type: Function, default: null },
+    dismissTiebreakerNotice: { type: Function, default: null },
+    dismissedTiebreakerNotices: { type: Set, default: () => new Set() }
 });
 
 const bracketContentRef = ref(null);
@@ -434,6 +437,140 @@ const getThirdPlaceWinner = () => {
     }
     
     return 'TBD';
+};
+
+// Check if there are tied players at rank 1
+const hasTiedRank1Players = computed(() => {
+    if (!props.bracket.matches || props.bracket.type !== 'Round Robin') return false;
+    if (!props.isRoundRobinConcluded || !props.isRoundRobinConcluded(props.bracketIndex)) return false;
+    
+    const allStats = roundRobinPlayers.value.map(player => {
+        let wins = 0, losses = 0, draws = 0;
+        props.bracket.matches.forEach(round => {
+            round.forEach(match => {
+                if (match.status !== 'completed') return;
+                const p = match.players.find(pl => pl.id === player.id);
+                if (!p) return;
+                if (match.is_tie) {
+                    draws++;
+                } else if (match.winner_id === player.id) {
+                    wins++;
+                } else if (match.loser_id === player.id) {
+                    losses++;
+                }
+            });
+        });
+        const total = wins + losses + draws;
+        const winRatio = total > 0 ? wins / total : 0;
+        return { id: player.id, wins, winRatio };
+    });
+    
+    allStats.sort((a, b) => {
+        if (b.winRatio !== a.winRatio) return b.winRatio - a.winRatio;
+        return b.wins - a.wins;
+    });
+    
+    // Check if there are multiple players with same stats as rank 1
+    if (allStats.length < 2) return false;
+    const first = allStats[0];
+    const second = allStats[1];
+    return first.winRatio === second.winRatio && first.wins === second.wins;
+});
+
+// Get player stats for Round Robin (W, L, D, Rank)
+const getPlayerStats = (playerId) => {
+    if (!props.bracket.matches || props.bracket.type !== 'Round Robin') {
+        return { wins: 0, losses: 0, draws: 0, rank: '-' };
+    }
+    
+    let wins = 0, losses = 0, draws = 0;
+    
+    // Count wins, losses, draws
+    props.bracket.matches.forEach(round => {
+        round.forEach(match => {
+            if (match.status !== 'completed') return;
+            
+            const player = match.players.find(p => p.id === playerId);
+            if (!player) return;
+            
+            if (match.is_tie) {
+                draws++;
+            } else if (match.winner_id === playerId) {
+                wins++;
+            } else if (match.loser_id === playerId) {
+                losses++;
+            }
+        });
+    });
+    
+    // Calculate win ratio for ranking
+    const totalGames = wins + losses + draws;
+    const winRatio = totalGames > 0 ? wins / totalGames : 0;
+    
+    // Get all players' stats for ranking
+    const allStats = roundRobinPlayers.value.map(player => {
+        let pWins = 0, pLosses = 0, pDraws = 0;
+        props.bracket.matches.forEach(round => {
+            round.forEach(match => {
+                if (match.status !== 'completed') return;
+                const p = match.players.find(pl => pl.id === player.id);
+                if (!p) return;
+                if (match.is_tie) {
+                    pDraws++;
+                } else if (match.winner_id === player.id) {
+                    pWins++;
+                } else if (match.loser_id === player.id) {
+                    pLosses++;
+                }
+            });
+        });
+        const pTotal = pWins + pLosses + pDraws;
+        const pWinRatio = pTotal > 0 ? pWins / pTotal : 0;
+        return { id: player.id, wins: pWins, winRatio: pWinRatio };
+    });
+    
+    // Sort by win ratio (descending), then by wins (descending), then by quotient if available
+    allStats.sort((a, b) => {
+        if (b.winRatio !== a.winRatio) return b.winRatio - a.winRatio;
+        if (b.wins !== a.wins) return b.wins - a.wins;
+        
+        // Use tiebreaker quotient if available
+        if (props.bracket.tiebreaker_data) {
+            const aQuotient = props.bracket.tiebreaker_data[a.id]?.quotient || 0;
+            const bQuotient = props.bracket.tiebreaker_data[b.id]?.quotient || 0;
+            if (bQuotient !== aQuotient) return bQuotient - aQuotient;
+        }
+        
+        return a.losses - b.losses; // Fewer losses is better
+    });
+    
+    // Find rank with tie handling
+    let rank = 1;
+    let currentRank = 1;
+    for (let i = 0; i < allStats.length; i++) {
+        if (i > 0) {
+            const prev = allStats[i - 1];
+            const curr = allStats[i];
+            
+            // Get quotients for comparison
+            const prevQuotient = props.bracket.tiebreaker_data?.[prev.id]?.quotient || 0;
+            const currQuotient = props.bracket.tiebreaker_data?.[curr.id]?.quotient || 0;
+            
+            // If stats are different, increment rank
+            if (prev.winRatio !== curr.winRatio || 
+                prev.wins !== curr.wins || 
+                prevQuotient !== currQuotient) {
+                currentRank = i + 1;
+            }
+            // Otherwise, keep the same rank (tied)
+        }
+        if (allStats[i].id === playerId) {
+            rank = currentRank;
+            break;
+        }
+    }
+    
+    return { wins, losses, draws, rank: rank > 0 ? rank : '-' };
 };
 const screenToSVG = (svg, x, y) => {
     if (!svg) return { x: 0, y: 0 };
@@ -1168,6 +1305,20 @@ watch(() => props.bracket, () => {
         <div class="round-robin-grid-container">
             <h3 class="text-xl font-bold mb-4">Round Robin Tournament</h3>
             
+            <!-- Tiebreaker Notice -->
+            <div v-if="hasTiedRank1Players && !dismissedTiebreakerNotices.has(bracket.id) && (user && (user.role === 'Admin' || user.role === 'TournamentManager'))" class="tiebreaker-notice">
+                <div class="tiebreaker-notice-content">
+                    <i class="pi pi-exclamation-circle"></i>
+                    <span>Multiple players are tied for 1st place. Set tiebreakers to determine final rankings.</span>
+                    <button @click="openTiebreakerDialog && openTiebreakerDialog(bracketIndex)" class="tiebreaker-button">
+                        <i class="pi pi-cog"></i> Set Tiebreakers
+                    </button>
+                    <button @click="dismissTiebreakerNotice && dismissTiebreakerNotice(bracket.id)" class="dismiss-button">
+                        <i class="pi pi-times"></i>
+                    </button>
+                </div>
+            </div>
+            
             <!-- Grid Table -->
             <div class="round-robin-grid-wrapper">
                 <table class="round-robin-grid-table">
@@ -1184,6 +1335,11 @@ watch(() => props.bracket, () => {
                                     <span class="team-name">{{ truncate(player.name, { length: 12 }) }}</span>
                                 </div>
                             </th>
+                            <!-- Stats columns -->
+                            <th class="grid-stats-header">W</th>
+                            <th class="grid-stats-header">L</th>
+                            <th v-if="bracket.allow_draws" class="grid-stats-header">D</th>
+                            <th class="grid-stats-header">Rank</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1209,50 +1365,17 @@ watch(() => props.bracket, () => {
                                     {{ getGridCellContent(cell) }}
                                 </div>
                             </td>
+                            <!-- Stats cells -->
+                            <td class="grid-stats-cell">{{ getPlayerStats(roundRobinPlayers[rowIdx].id).wins }}</td>
+                            <td class="grid-stats-cell">{{ getPlayerStats(roundRobinPlayers[rowIdx].id).losses }}</td>
+                            <td v-if="bracket.allow_draws" class="grid-stats-cell">{{ getPlayerStats(roundRobinPlayers[rowIdx].id).draws }}</td>
+                            <td class="grid-stats-cell rank-cell" :class="{ 'rank-first': getPlayerStats(roundRobinPlayers[rowIdx].id).rank === 1 }">
+                                {{ getPlayerStats(roundRobinPlayers[rowIdx].id).rank }}
+                                <i v-if="getPlayerStats(roundRobinPlayers[rowIdx].id).rank === 1 && props.isRoundRobinConcluded(bracketIndex)" class="pi pi-crown winner-crown"></i>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
-            </div>
-        </div>
-
-        <!-- Round Robin Standings -->
-        <div class="standings-section">
-            <div class="standings-header-row">
-                <h3 class="text-lg font-semibold">Standings</h3>
-            </div>
-            <div class="standings-table">
-                <div class="standings-header">
-                    <span class="rank">Rank</span>
-                    <span class="player">Player</span>
-                    <span class="wins">Wins</span>
-                    <span class="draws">Draws</span>
-                    <span class="losses">Losses</span>
-                    <span class="points flex items-center">
-                        Points
-                        <button v-if="user?.role === 'Admin' || user?.role === 'TournamentManager'"
-                            @click="props.openScoringConfigDialog(bracketIndex)"
-                            class="scoring-config-btn ml-2"
-                            title="Configure scoring system">
-                            <i class="pi pi-cog"></i>
-                        </button>
-                    </span>
-                </div>
-                <div
-                    v-for="(player, index) in (props.standingsRevision, props.getRoundRobinStandings(bracketIndex))"
-                    :key="player.id"
-                    class="standings-row"
-                    :class="{ 'winner': index === 0 && props.isRoundRobinConcluded(bracketIndex) }"
-                >
-                    <span class="rank" data-label="Rank">{{ index + 1 }}</span>
-                    <span class="player" data-label="Player">
-                        {{ truncate(player.name, { length: 15 }) }}
-                        <i v-if="index === 0 && props.isRoundRobinConcluded(bracketIndex)" class="pi pi-crown winner-crown"></i>
-                    </span>
-                    <span class="wins" data-label="Wins">{{ player.wins }}</span>
-                    <span class="draws" data-label="Draws">{{ player.draws }}</span>
-                    <span class="losses" data-label="Losses">{{ player.losses }}</span>
-                    <span class="points" data-label="Points">{{ player.points }}</span>
-                </div>
             </div>
         </div>
     </div>
