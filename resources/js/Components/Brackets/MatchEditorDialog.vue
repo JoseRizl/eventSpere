@@ -70,6 +70,27 @@ const isMatchDataInvalid = computed(() => {
     return false;
 });
 
+const isDrawNotAllowed = computed(() => {
+    if (!localMatchData.value || !props.bracket) return false;
+    
+    const { status, player1Score, player2Score } = localMatchData.value;
+    const bracketType = props.bracket.type;
+    
+    // Check if it's a draw and draws are not allowed
+    if (status === 'completed' && player1Score === player2Score) {
+        // Elimination brackets never allow draws
+        if (bracketType === 'Single Elimination' || bracketType === 'Double Elimination') {
+            return true;
+        }
+        // Round Robin only allows draws if allow_draws is true
+        if (bracketType === 'Round Robin' && !props.bracket.allow_draws) {
+            return true;
+        }
+    }
+    
+    return false;
+});
+
 const isMultiDayEvent = computed(() => {
   if (props.bracket?.event) {
       return props.bracket.event.startDate !== props.bracket.event.endDate;
@@ -171,15 +192,15 @@ const proceedWithUpdate = () => {
                 </div>
             </div>
 
-            <div v-if="localMatchData.status === 'completed' && localMatchData.player1Score === localMatchData.player2Score" :class="['tie-indicator', bracket?.type !== 'Round Robin' ? 'tie-warning-bg' : '']">
+            <div v-if="localMatchData.status === 'completed' && localMatchData.player1Score === localMatchData.player2Score" :class="['tie-indicator', (bracket?.type !== 'Round Robin' || (bracket?.type === 'Round Robin' && !bracket?.allow_draws)) ? 'tie-warning-bg' : '']">
                 <i class="pi pi-exclamation-triangle"></i>
-                <span v-if="bracket?.type === 'Round Robin'">This match is a tie!</span>
-                <span v-else class="tie-warning">Ties are not allowed in elimination brackets. Please adjust scores to determine a winner.</span>
+                <span v-if="bracket?.type === 'Round Robin' && bracket?.allow_draws">This match is a tie!</span>
+                <span v-else class="tie-warning">Draws are not allowed in this tournament. Please adjust scores to determine a winner.</span>
             </div>
 
             <div class="dialog-actions">
                 <button @click="closeModal" class="modal-button-secondary">Cancel</button>
-                <button @click="confirmUpdate" class="modal-button-primary" :disabled="isMatchDataInvalid">Update Match</button>
+                <button @click="confirmUpdate" class="modal-button-primary" :disabled="isMatchDataInvalid || isDrawNotAllowed">Update Match</button>
             </div>
         </div>
 

@@ -16,6 +16,9 @@ export function useBracketUIState() {
   const showMatchUpdateConfirmDialog = ref(false);
   const showGenericErrorDialog = ref(false);
   const showScoringConfigDialog = ref(false);
+  const showToggleDrawsDialog = ref(false);
+  const showTiebreakerDialog = ref(false);
+  const dismissedTiebreakerNotices = ref(new Set());
 
   // Messages
   const winnerMessage = ref('');
@@ -70,7 +73,9 @@ export function useBracketUIState() {
            showMatchEditorDialog.value ||
            showMatchUpdateConfirmDialog.value ||
            showGenericErrorDialog.value ||
-           showScoringConfigDialog.value;
+           showScoringConfigDialog.value ||
+           showToggleDrawsDialog.value ||
+           showTiebreakerDialog.value;
   });
 
   // Dialog control methods
@@ -85,6 +90,8 @@ export function useBracketUIState() {
     showMatchUpdateConfirmDialog.value = false;
     showGenericErrorDialog.value = false;
     showScoringConfigDialog.value = false;
+    showToggleDrawsDialog.value = false;
+    showTiebreakerDialog.value = false;
   };
 
   const resetMessages = () => {
@@ -137,6 +144,9 @@ export function useBracketUIState() {
     showMatchUpdateConfirmDialog,
     showGenericErrorDialog,
     showScoringConfigDialog,
+    showToggleDrawsDialog,
+    showTiebreakerDialog,
+    dismissedTiebreakerNotices,
 
     // Messages
     winnerMessage,

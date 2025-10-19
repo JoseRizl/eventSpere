@@ -28,6 +28,10 @@ const props = defineProps({
     onOpenScoringConfigDialog: Function,
     onOpenMatchEditorFromCard: Function,
     onToggleConsolationMatch: Function,
+    onToggleAllowDraws: Function,
+    onOpenTiebreakerDialog: Function,
+    onDismissTiebreakerNotice: Function,
+    dismissedTiebreakerNotices: Set,
     // Configuration
     showEventLink: {
         type: Boolean,
@@ -83,6 +87,14 @@ const handleSetMatchFilter = (filter) => emit('set-match-filter', { index: props
                             class="p-button-rounded p-button-text" 
                             :class="hasConsolationMatch ? 'p-button-warning' : 'p-button-success'"
                             v-tooltip.top="hasConsolationMatch ? 'Remove 3rd Place Match' : 'Add 3rd Place Match'" 
+                        />
+                        <Button 
+                            v-if="showAdminControls && user?.role === 'Admin' && !isArchived && bracket.type === 'Round Robin'" 
+                            :icon="bracket.allow_draws ? 'pi pi-check-circle' : 'pi pi-times-circle'" 
+                            @click="onToggleAllowDraws(bracketIndex)" 
+                            class="p-button-rounded p-button-text" 
+                            :class="bracket.allow_draws ? 'p-button-success' : 'p-button-secondary'"
+                            v-tooltip.top="bracket.allow_draws ? 'Draws Enabled' : 'Draws Disabled (Click to Enable)'" 
                         />
                         <Button v-if="showAdminControls && user?.role === 'Admin' && !isArchived" icon="pi pi-trash" @click="handleRemoveBracket" class="p-button-rounded p-button-text p-button-danger" v-tooltip.top="'Delete Bracket'" />
 
@@ -145,6 +157,9 @@ const handleSetMatchFilter = (filter) => emit('set-match-filter', { index: props
                     :getRoundRobinStandings="getRoundRobinStandings"
                     :isRoundRobinConcluded="isRoundRobinConcluded"
                     :openScoringConfigDialog="isArchived || !user ? null : onOpenScoringConfigDialog"
+                    :openTiebreakerDialog="isArchived || !user ? null : onOpenTiebreakerDialog"
+                    :dismissTiebreakerNotice="isArchived || !user ? null : onDismissTiebreakerNotice"
+                    :dismissedTiebreakerNotices="dismissedTiebreakerNotices"
                 />
                 <MatchesView
                     v-if="viewMode === 'matches'"

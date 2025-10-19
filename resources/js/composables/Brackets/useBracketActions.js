@@ -92,6 +92,8 @@ export function useBracketActions(dataState) {
     numberOfPlayers,
     matchType,
     selectedEvent,
+    includeThirdPlace,
+    allowDraws,
     events,
     brackets,
   } = dataState;
@@ -125,6 +127,9 @@ export function useBracketActions(dataState) {
     roundRobinScoring,
     standingsRevision,
     showScoringConfigDialog,
+    showToggleDrawsDialog,
+    showTiebreakerDialog,
+    dismissedTiebreakerNotices,
     tempScoringConfig,
     bracketTypeOptions,
     bracketViewModes,
@@ -328,7 +333,11 @@ export function useBracketActions(dataState) {
       matches: newBracket,
       // The 'players' array is no longer needed here. The backend normalizes
       // players from the 'matches' structure itself.
+      // Add allow_draws for Round Robin (default true, can be toggled later)
+      allow_draws: matchType.value === 'Round Robin' ? true : undefined,
     };
+    
+    console.log('Creating bracket with payload:', payload);
 
     // Populate match-specific details from the event
     const populateEventDetails = (match) => {
@@ -353,17 +362,17 @@ export function useBracketActions(dataState) {
     try {
       // Use Laravel API to store the new bracket
       const response = await axios.post(route('api.brackets.store'), payload);
-      // Backend returns bracket record (id, name, type, event_id, etc).
-      // Build a composed bracket for immediate UI display using the client-side payload.matches
-      const savedRaw = response.data;
+      
+      // Fetch event details for the newly created bracket
+      const eventDetails = await fetchEventDetails(payload.event_id);
+      
+      // Create savedBracket from response and payload
       const savedBracket = {
-        ...savedRaw,
-        event: selectedEvent.value,
-        // payload.matches can be either:
-        // - array of rounds [ [m,m], [m] ] for single/round-robin
-        // - object { winners: [...], losers: [...], grand_finals: [...] } for double-elim
-        // We'll deep clone to avoid accidental refs
-        matches: JSON.parse(JSON.stringify(payload.matches))
+        ...response.data,
+        matches: payload.matches,
+        allow_draws: payload.allow_draws,
+        tiebreaker_data: payload.tiebreaker_data || null,
+        event: eventDetails || { title: 'Event not found' },
       };
 
       // Ensure for Single/RoundRobin: matches is an array-of-rounds
@@ -487,12 +496,17 @@ export function useBracketActions(dataState) {
                     grand_finals: groupByRound(grandFinalsMatches)
                 };
             } else {
-                newBracket.matches = bracketMatches.reduce((acc, match) => {
+                // Group matches by round, ensuring no empty rounds
+                const roundsMap = bracketMatches.reduce((acc, match) => {
                     const round = match.round - 1;
                     if (!acc[round]) acc[round] = [];
                     acc[round].push(match);
                     return acc;
                 }, []);
+                // Filter out undefined/empty rounds and sort matches within each round
+                newBracket.matches = roundsMap
+                    .filter(round => round && round.length > 0)
+                    .map(round => round.sort((a, b) => a.match_number - b.match_number));
             }
             return newBracket;
           })
@@ -513,6 +527,7 @@ export function useBracketActions(dataState) {
     numberOfPlayers.value = null;
     matchType.value = "";
     selectedEvent.value = null;
+    includeThirdPlace.value = false;
 
     try {
       // Use Laravel API route for events
@@ -918,6 +933,9 @@ export function useBracketActions(dataState) {
   const numPlayers = parseInt(numberOfPlayers.value, 10);
   const hasBye = numPlayers % 2 !== 0;
   const adjustedNumPlayers = hasBye ? numPlayers + 1 : numPlayers;
+  
+  // Allow draws is true by default (can be toggled later)
+  const allowDraws = true;
 
   // Create player objects
   const actualPlayers = Array.from({ length: numPlayers }, (_, i) => ({
@@ -1571,6 +1589,12 @@ const updateLines = (bracketIdx) => {
       if (bracket.type === 'Round Robin') {
         // Check for tie in Round Robin
         if (match.players[0].score === match.players[1].score) {
+          // Check if draws are allowed (validation should happen in UI, but double-check here)
+          if (!bracket.allow_draws) {
+            // This should be prevented by the UI, but if it somehow gets here, don't save
+            console.error('Attempted to save a draw when draws are not allowed');
+            return;
+          }
           match.is_tie = true;
           match.winner_id = null;
           match.loser_id = null;
@@ -1965,6 +1989,63 @@ const updateLines = (bracketIdx) => {
     nextTick(() => updateLines(bracketIdx));
   };
 
+  const toggleAllowDraws = (bracketIdx) => {
+    pendingBracketIdx.value = bracketIdx;
+    showToggleDrawsDialog.value = true;
+  };
+  
+  const confirmToggleDraws = async () => {
+    const bracketIdx = pendingBracketIdx.value;
+    const bracket = brackets.value[bracketIdx];
+    if (!bracket || bracket.type !== 'Round Robin') return;
+    
+    bracket.allow_draws = !bracket.allow_draws;
+    
+    await saveBrackets(bracket);
+    showSuccess(`Draws ${bracket.allow_draws ? 'enabled' : 'disabled'}`);
+    showToggleDrawsDialog.value = false;
+    pendingBracketIdx.value = null;
+  };
+  
+  const cancelToggleDraws = () => {
+    showToggleDrawsDialog.value = false;
+    pendingBracketIdx.value = null;
+  };
+
+  // Tiebreaker management
+  const openTiebreakerDialog = (bracketIdx) => {
+    pendingBracketIdx.value = bracketIdx;
+    showTiebreakerDialog.value = true;
+    // Trigger update of tied players data in the parent component
+  };
+
+  const closeTiebreakerDialog = () => {
+    showTiebreakerDialog.value = false;
+    pendingBracketIdx.value = null;
+  };
+
+  const saveTiebreakers = async (bracketIdx, tiebreakerData) => {
+    const bracket = brackets.value[bracketIdx];
+    if (!bracket) return;
+
+    // Store tiebreaker data in bracket metadata (not in matches)
+    bracket.tiebreaker_data = tiebreakerData;
+    
+    await saveBrackets(bracket);
+    
+    // Force standings update for Round Robin
+    if (bracket.type === 'Round Robin') {
+      standingsRevision.value++;
+    }
+    
+    showSuccess('Tiebreakers saved successfully');
+    closeTiebreakerDialog();
+  };
+
+  const dismissTiebreakerNotice = (bracketId) => {
+    dismissedTiebreakerNotices.value.add(bracketId);
+  };
+
   const closeScoringConfigDialog = () => {
     roundRobinScoring.value = tempScoringConfig.value; // Restore on cancel
     showScoringConfigDialog.value = false;
@@ -2018,6 +2099,13 @@ const updateLines = (bracketIdx) => {
     getBracketStats,
     getBracketTypeClass,
     toggleConsolationMatch,
+    toggleAllowDraws,
+    confirmToggleDraws,
+    cancelToggleDraws,
+    openTiebreakerDialog,
+    closeTiebreakerDialog,
+    saveTiebreakers,
+    dismissTiebreakerNotice,
     
     // Expose UI state for components that need it
     ...uiState,

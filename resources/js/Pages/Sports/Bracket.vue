@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, computed, ref } from 'vue';
+import { onMounted, computed, ref, watch } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import BracketCard from '@/Components/Brackets/BracketCard.vue';
 import MatchEditorDialog from '@/Components/Brackets/MatchEditorDialog.vue';
@@ -84,6 +84,13 @@ const {
   closeMatchEditorDialog,
   proceedWithMatchUpdate,
   toggleConsolationMatch,
+  toggleAllowDraws,
+  confirmToggleDraws,
+  cancelToggleDraws,
+  openTiebreakerDialog,
+  closeTiebreakerDialog,
+  saveTiebreakers,
+  dismissTiebreakerNotice,
   openScoringConfigDialog,
   closeScoringConfigDialog,
   saveScoringConfig,
@@ -97,6 +104,7 @@ const {
   // UI State (automatically included from useBracketActions)
   showDialog,
   expandedBrackets,
+  pendingBracketIdx,
   showConfirmDialog,
   showMissingFieldsDialog,
   showDeleteConfirmDialog,
@@ -112,6 +120,9 @@ const {
   genericErrorMessage,
   roundRobinScoring,
   showScoringConfigDialog,
+  showToggleDrawsDialog,
+  showTiebreakerDialog,
+  dismissedTiebreakerNotices,
   standingsRevision,
 } = useBracketActions(bracketState);
 
@@ -120,6 +131,120 @@ const confirmMatchUpdate = () => {
     // The logic is handled there and it emits 'confirm' which is handled by proceedWithMatchUpdate
     // This function is passed as a prop to MatchEditorDialog
 };
+
+// Tiebreaker helpers
+const tiedPlayersData = ref([]);
+
+const getTiedPlayers = (bracketIdx) => {
+    const bracket = brackets.value[bracketIdx];
+    if (!bracket || bracket.type !== 'Round Robin') return [];
+    
+    if (!bracket.matches || !Array.isArray(bracket.matches)) return [];
+    
+    // Calculate stats for all players
+    const playerStatsMap = new Map();
+    
+    bracket.matches.forEach(round => {
+        if (!Array.isArray(round)) return;
+        round.forEach(match => {
+            if (!match.players || !Array.isArray(match.players)) return;
+            if (match.status !== 'completed') return;
+            
+            match.players.forEach(p => {
+                if (!playerStatsMap.has(p.id)) {
+                    playerStatsMap.set(p.id, {
+                        id: p.id,
+                        name: p.name,
+                        wins: 0,
+                        losses: 0,
+                        draws: 0,
+                        scored: null,
+                        allowed: null
+                    });
+                }
+                
+                const stats = playerStatsMap.get(p.id);
+                
+                if (match.is_tie) {
+                    stats.draws++;
+                } else if (match.winner_id === p.id) {
+                    stats.wins++;
+                } else if (match.loser_id === p.id) {
+                    stats.losses++;
+                }
+            });
+        });
+    });
+    
+    // Convert to array and calculate win ratios
+    const allPlayers = Array.from(playerStatsMap.values());
+    allPlayers.forEach(p => {
+        const total = p.wins + p.losses + p.draws;
+        p.winRatio = total > 0 ? p.wins / total : 0;
+    });
+    
+    // Sort by win ratio, then by wins
+    allPlayers.sort((a, b) => {
+        if (b.winRatio !== a.winRatio) return b.winRatio - a.winRatio;
+        return b.wins - a.wins;
+    });
+    
+    // Get only players tied for 1st place
+    if (allPlayers.length === 0) return [];
+    
+    const firstPlace = allPlayers[0];
+    const tiedPlayers = allPlayers.filter(p => 
+        p.winRatio === firstPlace.winRatio && p.wins === firstPlace.wins
+    );
+    
+    // Load existing tiebreaker data if available
+    if (bracket.tiebreaker_data) {
+        tiedPlayers.forEach(p => {
+            if (bracket.tiebreaker_data[p.id]) {
+                p.scored = bracket.tiebreaker_data[p.id].scored || null;
+                p.allowed = bracket.tiebreaker_data[p.id].allowed || null;
+            }
+        });
+    }
+    
+    return tiedPlayers;
+};
+
+const calculateQuotient = (scored, allowed) => {
+    if (scored === null || scored === undefined || scored === '' || 
+        allowed === null || allowed === undefined || allowed === '' || 
+        allowed === 0) {
+        return '-';
+    }
+    const quotient = parseFloat(scored) / parseFloat(allowed);
+    return isNaN(quotient) ? '-' : quotient.toFixed(2);
+};
+
+const handleSaveTiebreakers = () => {
+    const bracketIdx = pendingBracketIdx.value;
+    
+    const tiebreakerData = {};
+    tiedPlayersData.value.forEach(p => {
+        const scored = p.scored || 0;
+        const allowed = p.allowed || 0;
+        const quotient = (scored && allowed && allowed !== 0) ? (scored / allowed) : 0;
+        
+        tiebreakerData[p.id] = {
+            scored: scored,
+            allowed: allowed,
+            quotient: quotient
+        };
+    });
+    
+    saveTiebreakers(bracketIdx, tiebreakerData);
+};
+
+// Watch for dialog opening and populate tied players data
+watch(showTiebreakerDialog, (newVal) => {
+    if (newVal && pendingBracketIdx.value !== null) {
+        tiedPlayersData.value = getTiedPlayers(pendingBracketIdx.value);
+    }
+});
 
 const matchStatusFilterOptions = ref([
     { label: 'All', value: 'all' },
@@ -326,6 +451,10 @@ onMounted(async () => {
             :onOpenScoringConfigDialog="openScoringConfigDialog"
             :onOpenMatchEditorFromCard="openMatchEditorFromCard"
             :onToggleConsolationMatch="toggleConsolationMatch"
+            :onToggleAllowDraws="toggleAllowDraws"
+            :onOpenTiebreakerDialog="openTiebreakerDialog"
+            :onDismissTiebreakerNotice="dismissTiebreakerNotice"
+            :dismissedTiebreakerNotices="dismissedTiebreakerNotices"
             @toggle-bracket="toggleBracket"
             @remove-bracket="removeBracket"
             @set-view-mode="({ index, mode }) => setBracketViewMode(index, mode)"
@@ -431,6 +560,48 @@ onMounted(async () => {
         confirmButtonClass="bg-red-600 hover:bg-red-700"
         @confirm="showGenericErrorDialog = false"
       />
+
+      <!-- Toggle Draws Confirmation Dialog -->
+      <ConfirmationDialog
+        v-model:show="showToggleDrawsDialog"
+        title="Toggle Draws"
+        :message="brackets[pendingBracketIdx]?.allow_draws ? 'Disable draws for this Round Robin tournament?' : 'Enable draws for this Round Robin tournament?'"
+        :confirmText="brackets[pendingBracketIdx]?.allow_draws ? 'Disable Draws' : 'Enable Draws'"
+        cancelText="Cancel"
+        @confirm="confirmToggleDraws"
+        @cancel="cancelToggleDraws"
+      />
+
+      <!-- Tiebreaker Dialog -->
+      <Dialog v-model:visible="showTiebreakerDialog" header="Set Tiebreakers" modal :style="{ width: '500px' }">
+        <div class="tiebreaker-dialog">
+          <p class="mb-4 text-sm text-gray-600">Enter points scored and allowed for each tied player to calculate quotient rankings.</p>
+          <div v-if="pendingBracketIdx !== null && brackets[pendingBracketIdx]" class="tiebreaker-inputs">
+            <div v-for="(player, index) in tiedPlayersData" :key="player.id" class="tiebreaker-row">
+              <label class="player-label">{{ player.name }}</label>
+              <div class="input-group">
+                <InputText 
+                  v-model.number="player.scored" 
+                  type="number" 
+                  placeholder="Points Scored"
+                  class="tiebreaker-input"
+                />
+                <InputText 
+                  v-model.number="player.allowed" 
+                  type="number" 
+                  placeholder="Points Allowed"
+                  class="tiebreaker-input"
+                />
+                <span class="quotient-display">Quotient: {{ calculateQuotient(player.scored, player.allowed) }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="dialog-actions mt-4">
+            <button @click="closeTiebreakerDialog" class="modal-button-secondary">Cancel</button>
+            <button @click="handleSaveTiebreakers" class="modal-button-primary">Save Tiebreakers</button>
+          </div>
+        </div>
+      </Dialog>
 
       <!-- Scoring Configuration Dialog -->
       <Dialog v-model:visible="showScoringConfigDialog" header="Configure Scoring System" modal :style="{ width: '400px' }">
@@ -579,5 +750,52 @@ onMounted(async () => {
     }
 }
 
+/* Tiebreaker Dialog Styles */
+.tiebreaker-dialog {
+    padding: 1rem 0;
+}
+
+.tiebreaker-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.tiebreaker-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    background: #f8f9fa;
+}
+
+.player-label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.95rem;
+}
+
+.input-group {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.tiebreaker-input {
+    flex: 1;
+    min-width: 120px;
+}
+
+.quotient-display {
+    font-weight: 600;
+    color: #007bff;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
 
 </style>
