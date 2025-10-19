@@ -184,7 +184,12 @@ class EventController extends JsonController
         $validTagIds = collect($this->jsonData['tags'] ?? [])->pluck('id')->toArray();
 
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
+            'title' => ['required', 'string', 'max:255', function ($attribute, $value, $fail) {
+                $existingEvents = collect($this->jsonData['events']);
+                if ($existingEvents->where('title', $value)->isNotEmpty()) {
+                    $fail('The event title already exists.');
+                }
+            }],
             'description' => 'nullable|string',
             'image' => 'nullable|string',
             'category_id' => ['nullable', Rule::in($validCategoryIds)],
@@ -293,7 +298,12 @@ class EventController extends JsonController
 
         // Custom validation rules
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
+            'title' => ['required', 'string', 'max:255', function ($attribute, $value, $fail) use ($id) {
+                $existingEvents = collect($this->jsonData['events']);
+                if ($existingEvents->where('id', '!=', $id)->where('title', $value)->isNotEmpty()) {
+                    $fail('The event title already exists.');
+                }
+            }],
             'description' => 'nullable|string',
             'image' => 'nullable|string',
             'category_id' => ['nullable', Rule::in($validCategoryIds)],
@@ -415,7 +425,11 @@ class EventController extends JsonController
         $validTagIds = array_column($this->jsonData['tags'] ?? [], 'id');
 
         $validated = $request->validate([
-            'title' => 'sometimes|required|string|max:255',
+            'title' => ['sometimes', 'required', 'string', 'max:255', function ($attribute, $value, $fail) use ($id) {
+                if (collect($this->jsonData['events'])->where('id', '!=', $id)->where('title', $value)->isNotEmpty()) {
+                    $fail('The event title already exists.');
+                }
+            }],
             'description' => 'nullable|string',
             'image' => 'nullable|string',
             'category_id' => ['nullable', Rule::in($validCategoryIds)],
