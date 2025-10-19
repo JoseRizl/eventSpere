@@ -264,25 +264,25 @@ export function useBracketActions(dataState) {
         round.forEach((match, matchIdx) => {
           const player1 = match.players[0];
           const player2 = match.players[1];
-          
+
           // Check if this is a BYE match that hasn't been completed
           if (match.status !== 'completed' && (player1?.name === 'BYE' || player2?.name === 'BYE')) {
             const winner = player1?.name === 'BYE' ? player2 : player1;
             const loser = player1?.name === 'BYE' ? player1 : player2;
-            
+
             // Auto-complete the match
             match.status = 'completed';
             match.winner_id = winner.id;
             match.loser_id = loser.id;
             winner.completed = true;
             loser.score = 0;
-            
+
             // Advance winner to next round
             if (roundIdx < bracket.matches.length - 1) {
               const nextRoundMatchIdx = Math.floor(matchIdx / 2);
               const nextMatch = bracket.matches[roundIdx + 1][nextRoundMatchIdx];
               const nextPlayerSlot = matchIdx % 2;
-              
+
               if (nextMatch) {
                 nextMatch.players[nextPlayerSlot] = {
                   ...winner,
@@ -300,23 +300,23 @@ export function useBracketActions(dataState) {
         round.forEach((match, matchIdx) => {
           const player1 = match.players[0];
           const player2 = match.players[1];
-          
+
           if (match.status !== 'completed' && (player1?.name === 'BYE' || player2?.name === 'BYE')) {
             const winner = player1?.name === 'BYE' ? player2 : player1;
             const loser = player1?.name === 'BYE' ? player1 : player2;
-            
+
             match.status = 'completed';
             match.winner_id = winner.id;
             match.loser_id = loser.id;
             winner.completed = true;
             loser.score = 0;
-            
+
             // Advance winner to next winners round
             if (roundIdx < bracket.matches.winners.length - 1) {
               const nextRoundMatchIdx = Math.floor(matchIdx / 2);
               const nextMatch = bracket.matches.winners[roundIdx + 1][nextRoundMatchIdx];
               const nextPlayerSlot = matchIdx % 2;
-              
+
               if (nextMatch) {
                 nextMatch.players[nextPlayerSlot] = {
                   ...winner,
@@ -405,7 +405,7 @@ export function useBracketActions(dataState) {
       // Add allow_draws for Round Robin (default true, can be toggled later)
       allow_draws: matchType.value === 'Round Robin' ? true : undefined,
     };
-    
+
     console.log('Creating bracket with payload:', payload);
 
     // Populate match-specific details from the event
@@ -416,7 +416,7 @@ export function useBracketActions(dataState) {
             match.venue = selectedEvent.value?.venue || null;
         }
     };
-    
+
     // Handle different bracket structures
     if (payload.matches) {
         if (Array.isArray(payload.matches)) {
@@ -431,10 +431,10 @@ export function useBracketActions(dataState) {
     try {
       // Use Laravel API to store the new bracket
       const response = await axios.post(route('api.brackets.store'), payload);
-      
+
       // Fetch event details for the newly created bracket
       const eventDetails = await fetchEventDetails(payload.event_id);
-      
+
       // Create savedBracket from response and payload
       const savedBracket = {
         ...response.data,
@@ -695,7 +695,7 @@ export function useBracketActions(dataState) {
       prevMatches = nextMatches;
       roundNumber++;
     }
-    
+
     // Add consolation match if requested (3rd place match)
     // Requires at least semifinals (2 matches in second-to-last round)
     const { includeThirdPlace } = useBracketState();
@@ -721,7 +721,7 @@ export function useBracketActions(dataState) {
       // Add consolation match as a parallel match to finals (same round as finals)
       rounds[rounds.length - 1].push(consolationMatch);
     }
-    
+
     return rounds;
   };
 
@@ -851,22 +851,22 @@ export function useBracketActions(dataState) {
             // Example for 8 players (4 WR1 matches):
             // LR1-M1: Loser of M1 vs Loser of M3
             // LR1-M2: Loser of M2 vs Loser of M4
-            
-            const nonByeMatches = winnersRound.filter(wrMatch => 
+
+            const nonByeMatches = winnersRound.filter(wrMatch =>
                 wrMatch.players[0]?.name !== 'BYE' && wrMatch.players[1]?.name !== 'BYE'
             );
-            
+
             const numNonByeMatches = nonByeMatches.length;
             const halfPoint = Math.floor(numNonByeMatches / 2);
-            
+
             // Create cross pairing: pair i with i+halfPoint
             for (let i = 0; i < halfPoint; i++) {
                 const firstMatch = nonByeMatches[i];
                 const secondMatch = nonByeMatches[i + halfPoint];
-                
+
                 const lrRoundIdx = 0; // LR1
                 const lrMatchIdx = i;
-                
+
                 if (losersRounds[lrRoundIdx] && losersRounds[lrRoundIdx][lrMatchIdx]) {
                     losersRounds[lrRoundIdx][lrMatchIdx].players[0] = {
                         id: null,
@@ -1002,7 +1002,7 @@ export function useBracketActions(dataState) {
   const numPlayers = parseInt(numberOfPlayers.value, 10);
   const hasBye = numPlayers % 2 !== 0;
   const adjustedNumPlayers = hasBye ? numPlayers + 1 : numPlayers;
-  
+
   // Allow draws is true by default (can be toggled later)
   const allowDraws = true;
 
@@ -1182,12 +1182,12 @@ const updateLines = (bracketIdx) => {
             const toRect = toEl.getBoundingClientRect();
             const fromCenterY = fromRect.top - svgRect.top + fromRect.height / 2;
             const toCenterY = toRect.top - svgRect.top + toRect.height / 2;
-            
+
             // For center-out layout: losers flow left, so connections are reversed
             const fromLeftX = fromRect.left - svgRect.left;
             const toRightX = toRect.right - svgRect.left;
             const midX = (fromLeftX + toRightX) / 2;
-            
+
             bracket.lines.losers.push(
               { x1: fromLeftX, y1: fromCenterY, x2: midX, y2: fromCenterY },
               { x1: midX, y1: fromCenterY, x2: midX, y2: toCenterY },
@@ -1199,7 +1199,7 @@ const updateLines = (bracketIdx) => {
         // Grand Finals Lines (connect last winner and last loser to finals)
         const lastWinnerRound = bracket.matches.winners.length - 1;
         const lastLoserRound = bracket.matches.losers.length - 1;
-        
+
         // Winner to Finals
         if (bracket.matches.winners[lastWinnerRound] && bracket.matches.winners[lastWinnerRound][0]) {
           const winnerEl = document.getElementById(`winners-match-${bracketIdx}-${lastWinnerRound}-0`);
@@ -1704,13 +1704,13 @@ const updateLines = (bracketIdx) => {
           const nextRoundIdx = roundIdx + 1;
           const currentRound = bracket.matches[roundIdx];
           const nextRound = bracket.matches[nextRoundIdx];
-          
+
           // Check if this is a semifinal match (second-to-last round with 2 matches)
           const isSemifinal = roundIdx === bracket.matches.length - 2 && currentRound.length === 2;
-          
+
           // Find consolation match in the final round (if it exists)
           const consolationMatch = nextRound.find(m => m.bracket_type === 'consolation');
-          
+
           if (isSemifinal && consolationMatch) {
             // Semifinal: Winner goes to finals, loser goes to consolation
             const finalsMatch = nextRound.find(m => m.bracket_type !== 'consolation');
@@ -1718,7 +1718,7 @@ const updateLines = (bracketIdx) => {
               const finalsMatchIdx = nextRound.indexOf(finalsMatch);
               const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
               setPlayerWithLog(bracket, 'single', nextRoundIdx, finalsMatchIdx, nextPlayerPos, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
-              
+
               // Send loser to consolation match
               const consolationMatchIdx = nextRound.indexOf(consolationMatch);
               const consolationPlayerPos = matchIdx % 2 === 0 ? 0 : 1; // SF1 loser to pos 0, SF2 loser to pos 1
@@ -1772,12 +1772,12 @@ const updateLines = (bracketIdx) => {
               const losersRoundIdx = 0;
               const numNonByeMatches = matchesWithLosers.length;
               const halfPoint = Math.floor(numNonByeMatches / 2);
-              
+
               // Cross pairing: pair i with i+halfPoint
               // If loserIndex < halfPoint, it pairs with loserIndex+halfPoint
               // If loserIndex >= halfPoint, it pairs with loserIndex-halfPoint
               let losersMatchIdx, losersPlayerPos;
-              
+
               if (loserIndex < halfPoint) {
                 // First half: goes to match i, position 0
                 losersMatchIdx = loserIndex;
@@ -1787,7 +1787,7 @@ const updateLines = (bracketIdx) => {
                 losersMatchIdx = loserIndex - halfPoint;
                 losersPlayerPos = 1;
               }
-              
+
               setPlayerWithLog(bracket, 'losers', losersRoundIdx, losersMatchIdx, losersPlayerPos, newLoserPayload, performedActions);
             }
           } else { // Losers from subsequent Winners Rounds
@@ -1958,13 +1958,13 @@ const updateLines = (bracketIdx) => {
   const toggleConsolationMatch = async (bracketIdx) => {
     const bracket = brackets.value[bracketIdx];
     if (!bracket || bracket.type !== 'Single Elimination') return;
-    
+
     const matches = bracket.matches;
     if (!matches || matches.length < 2) return; // Need at least semifinals
-    
+
     const finalRound = matches[matches.length - 1];
     const consolationMatch = finalRound.find(m => m.bracket_type === 'consolation');
-    
+
     if (consolationMatch) {
       // Confirm removal
       const confirmed = await new Promise((resolve) => {
@@ -1974,9 +1974,9 @@ const updateLines = (bracketIdx) => {
           resolve(false);
         }
       });
-      
+
       if (!confirmed) return;
-      
+
       // Remove consolation match
       const consolationIdx = finalRound.indexOf(consolationMatch);
       finalRound.splice(consolationIdx, 1);
@@ -1990,16 +1990,16 @@ const updateLines = (bracketIdx) => {
           resolve(false);
         }
       });
-      
+
       if (!confirmed) return;
-      
+
       // Get semifinal round (second to last round)
       const semifinalRound = matches[matches.length - 2];
-      
+
       // Find semifinal losers with full player data
       let sf1LoserPlayer = { id: null, name: 'Loser of SF1', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
       let sf2LoserPlayer = { id: null, name: 'Loser of SF2', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
-      
+
       if (semifinalRound && semifinalRound.length >= 2) {
         // SF1 (first semifinal)
         const sf1 = semifinalRound[0];
@@ -2016,7 +2016,7 @@ const updateLines = (bracketIdx) => {
             };
           }
         }
-        
+
         // SF2 (second semifinal)
         const sf2 = semifinalRound[1];
         if (sf2 && sf2.status === 'completed' && sf2.loser_id) {
@@ -2033,7 +2033,7 @@ const updateLines = (bracketIdx) => {
           }
         }
       }
-      
+
       // Add consolation match with actual losers if available
       const newConsolationMatch = {
         id: generateId(),
@@ -2053,7 +2053,7 @@ const updateLines = (bracketIdx) => {
       finalRound.push(newConsolationMatch);
       showSuccess('3rd place match added with semifinal losers');
     }
-    
+
     await saveBrackets(bracket);
     nextTick(() => updateLines(bracketIdx));
   };
@@ -2062,20 +2062,20 @@ const updateLines = (bracketIdx) => {
     pendingBracketIdx.value = bracketIdx;
     showToggleDrawsDialog.value = true;
   };
-  
+
   const confirmToggleDraws = async () => {
     const bracketIdx = pendingBracketIdx.value;
     const bracket = brackets.value[bracketIdx];
     if (!bracket || bracket.type !== 'Round Robin') return;
-    
+
     bracket.allow_draws = !bracket.allow_draws;
-    
+
     await saveBrackets(bracket);
     showSuccess(`Draws ${bracket.allow_draws ? 'enabled' : 'disabled'}`);
     showToggleDrawsDialog.value = false;
     pendingBracketIdx.value = null;
   };
-  
+
   const cancelToggleDraws = () => {
     showToggleDrawsDialog.value = false;
     pendingBracketIdx.value = null;
@@ -2099,14 +2099,14 @@ const updateLines = (bracketIdx) => {
 
     // Store tiebreaker data in bracket metadata (not in matches)
     bracket.tiebreaker_data = tiebreakerData;
-    
+
     await saveBrackets(bracket);
-    
+
     // Force standings update for Round Robin
     if (bracket.type === 'Round Robin') {
       standingsRevision.value++;
     }
-    
+
     showSuccess('Tiebreakers saved successfully');
     closeTiebreakerDialog();
   };
@@ -2175,7 +2175,7 @@ const updateLines = (bracketIdx) => {
     closeTiebreakerDialog,
     saveTiebreakers,
     dismissTiebreakerNotice,
-    
+
     // Expose UI state for components that need it
     ...uiState,
   };

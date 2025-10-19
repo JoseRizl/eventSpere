@@ -100,7 +100,7 @@ const {
   setBracketMatchFilter,
   getBracketStats,
   getBracketTypeClass,
-  
+
   // UI State (automatically included from useBracketActions)
   showDialog,
   expandedBrackets,
@@ -138,18 +138,18 @@ const tiedPlayersData = ref([]);
 const getTiedPlayers = (bracketIdx) => {
     const bracket = brackets.value[bracketIdx];
     if (!bracket || bracket.type !== 'Round Robin') return [];
-    
+
     if (!bracket.matches || !Array.isArray(bracket.matches)) return [];
-    
+
     // Calculate stats for all players
     const playerStatsMap = new Map();
-    
+
     bracket.matches.forEach(round => {
         if (!Array.isArray(round)) return;
         round.forEach(match => {
             if (!match.players || !Array.isArray(match.players)) return;
             if (match.status !== 'completed') return;
-            
+
             match.players.forEach(p => {
                 if (!playerStatsMap.has(p.id)) {
                     playerStatsMap.set(p.id, {
@@ -162,9 +162,9 @@ const getTiedPlayers = (bracketIdx) => {
                         allowed: null
                     });
                 }
-                
+
                 const stats = playerStatsMap.get(p.id);
-                
+
                 if (match.is_tie) {
                     stats.draws++;
                 } else if (match.winner_id === p.id) {
@@ -175,28 +175,28 @@ const getTiedPlayers = (bracketIdx) => {
             });
         });
     });
-    
+
     // Convert to array and calculate win ratios
     const allPlayers = Array.from(playerStatsMap.values());
     allPlayers.forEach(p => {
         const total = p.wins + p.losses + p.draws;
         p.winRatio = total > 0 ? p.wins / total : 0;
     });
-    
+
     // Sort by win ratio, then by wins
     allPlayers.sort((a, b) => {
         if (b.winRatio !== a.winRatio) return b.winRatio - a.winRatio;
         return b.wins - a.wins;
     });
-    
+
     // Get only players tied for 1st place
     if (allPlayers.length === 0) return [];
-    
+
     const firstPlace = allPlayers[0];
-    const tiedPlayers = allPlayers.filter(p => 
+    const tiedPlayers = allPlayers.filter(p =>
         p.winRatio === firstPlace.winRatio && p.wins === firstPlace.wins
     );
-    
+
     // Load existing tiebreaker data if available
     if (bracket.tiebreaker_data) {
         tiedPlayers.forEach(p => {
@@ -206,13 +206,13 @@ const getTiedPlayers = (bracketIdx) => {
             }
         });
     }
-    
+
     return tiedPlayers;
 };
 
 const calculateQuotient = (scored, allowed) => {
-    if (scored === null || scored === undefined || scored === '' || 
-        allowed === null || allowed === undefined || allowed === '' || 
+    if (scored === null || scored === undefined || scored === '' ||
+        allowed === null || allowed === undefined || allowed === '' ||
         allowed === 0) {
         return '-';
     }
@@ -222,20 +222,20 @@ const calculateQuotient = (scored, allowed) => {
 
 const handleSaveTiebreakers = () => {
     const bracketIdx = pendingBracketIdx.value;
-    
+
     const tiebreakerData = {};
     tiedPlayersData.value.forEach(p => {
         const scored = p.scored || 0;
         const allowed = p.allowed || 0;
         const quotient = (scored && allowed && allowed !== 0) ? (scored / allowed) : 0;
-        
+
         tiebreakerData[p.id] = {
             scored: scored,
             allowed: allowed,
             quotient: quotient
         };
     });
-    
+
     saveTiebreakers(bracketIdx, tiebreakerData);
 };
 
@@ -580,15 +580,15 @@ onMounted(async () => {
             <div v-for="(player, index) in tiedPlayersData" :key="player.id" class="tiebreaker-row">
               <label class="player-label">{{ player.name }}</label>
               <div class="input-group">
-                <InputText 
-                  v-model.number="player.scored" 
-                  type="number" 
+                <InputText
+                  v-model.number="player.scored"
+                  type="number"
                   placeholder="Points Scored"
                   class="tiebreaker-input"
                 />
-                <InputText 
-                  v-model.number="player.allowed" 
-                  type="number" 
+                <InputText
+                  v-model.number="player.allowed"
+                  type="number"
                   placeholder="Points Allowed"
                   class="tiebreaker-input"
                 />

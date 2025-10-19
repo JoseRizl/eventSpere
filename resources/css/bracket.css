@@ -2539,7 +2539,7 @@
   .horizontal-split-layout {
     gap: 2rem;
   }
-  
+
   .bracket-flow-right,
   .bracket-flow-left {
     gap: 30px;
@@ -2551,19 +2551,19 @@
     flex-direction: column;
     align-items: center;
   }
-  
+
   .bracket-side {
     width: 100%;
   }
-  
+
   .bracket-center-column {
     order: 2;
   }
-  
+
   .bracket-a-side {
     order: 1;
   }
-  
+
   .bracket-b-side {
     order: 3;
   }
