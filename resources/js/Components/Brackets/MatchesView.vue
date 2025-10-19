@@ -140,12 +140,20 @@ const getMatchIdentifier = (match) => {
                             <div class="players-scores">
                                 <div class="player">
                                     <span class="player-name">{{ truncate(match.players[0].name, { length: 12 }) }}</span>
-                                    <span class="player-score">{{ match.players[0].score }}</span>
+                                    <span v-if="match.status === 'completed'" 
+                                          :class="['player-result', match.winner_id === match.players[0].id ? 'result-win' : 'result-loss']">
+                                        {{ match.winner_id === match.players[0].id ? 'W' : 'L' }}
+                                    </span>
+                                    <span v-else class="player-score">-</span>
                                 </div>
                                 <div class="vs-separator">vs</div>
                                 <div class="player">
                                     <span class="player-name">{{ truncate(match.players[1].name, { length: 12 }) }}</span>
-                                    <span class="player-score">{{ match.players[1].score }}</span>
+                                    <span v-if="match.status === 'completed'" 
+                                          :class="['player-result', match.winner_id === match.players[1].id ? 'result-win' : 'result-loss']">
+                                        {{ match.winner_id === match.players[1].id ? 'W' : 'L' }}
+                                    </span>
+                                    <span v-else class="player-score">-</span>
                                 </div>
                             </div>
                             <div class="time-venue">
@@ -221,5 +229,22 @@ const getMatchIdentifier = (match) => {
     text-align: center;
     color: #718096;
     padding: 2rem;
+}
+
+.player-result {
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.result-win {
+    color: #22c55e;
+    background-color: #f0fdf4;
+}
+
+.result-loss {
+    color: #ef4444;
+    background-color: #fef2f2;
 }
 </style>
