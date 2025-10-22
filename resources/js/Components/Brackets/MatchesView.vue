@@ -129,42 +129,58 @@ const getMatchIdentifier = (match) => {
                         :class="['match-card-item', (user && (user.role === 'Admin' || user.role === 'SportsManager')) ? 'editable' : '']"
                         @click="props.openMatchEditorFromCard && props.openMatchEditorFromCard(bracketIndex, match)"
                     >
-                        <div class="match-card-header">
-                            <div>
-                                <div class="match-location">{{ getMatchIdentifier(match) }}</div>
-                                <span class="match-date">{{ formatDisplayDate(match.date || bracket.event.startDate) }}</span>
+                        <div class="card-content">
+                            <div class="match-card-header">
+                                <div>
+                                    <div class="match-location">{{ getMatchIdentifier(match) }}</div>
+                                    <span class="match-date">{{ formatDisplayDate(match.date || bracket.event.startDate) }}</span>
+                                </div>
+                                <span :class="['match-status', `status-${match.status}`]">{{ match.status }}</span>
                             </div>
-                            <span :class="['match-status', `status-${match.status}`]">{{ match.status }}</span>
+                            <div class="match-content">
+                                <div class="players-and-info">
+                                    <div class="players-scores">
+                                        <div class="player">
+                                            <span class="player-name">{{ truncate(match.players[0].name, { length: 12 }) }}</span>
+                                            <span v-if="match.status === 'completed'"
+                                                :class="['player-result', 
+                                                        match.winner_id === null ? 'result-draw' : 
+                                                        (match.winner_id === match.players[0].id ? 'result-win' : 'result-loss')]">
+                                                {{ match.winner_id === null ? 'D' : 
+                                                (match.winner_id === match.players[0].id ? 'W' : 'L') }}
+                                            </span>
+                                            <span v-else class="player-score">-</span>
+                                        </div>
+                                        <div class="vs-separator">vs</div>
+                                        <div class="player">
+                                            <span class="player-name">{{ truncate(match.players[1].name, { length: 12 }) }}</span>
+                                            <span v-if="match.status === 'completed'"
+                                                :class="['player-result', 
+                                                        match.winner_id === null ? 'result-draw' : 
+                                                        (match.winner_id === match.players[1].id ? 'result-win' : 'result-loss')]">
+                                                {{ match.winner_id === null ? 'D' : 
+                                                (match.winner_id === match.players[1].id ? 'W' : 'L') }}
+                                            </span>
+                                            <span v-else class="player-score">-</span>
+                                        </div>
+                                    </div>
+                                    <div class="time-venue">
+                                        <div v-if="match.time" class="info-item">
+                                            <i class="pi pi-clock"></i>
+                                            <span>{{ formatDisplayTime(match.time) }}</span>
+                                        </div>
+                                        <div v-if="match.venue || bracket.event.venue" class="info-item">
+                                            <i class="pi pi-map-marker"></i>
+                                            <span>{{ match.venue || bracket.event.venue }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="match-card-body">
-                            <div class="players-scores">
-                                <div class="player">
-                                    <span class="player-name">{{ truncate(match.players[0].name, { length: 12 }) }}</span>
-                                    <span v-if="match.status === 'completed'" 
-                                          :class="['player-result', match.winner_id === match.players[0].id ? 'result-win' : 'result-loss']">
-                                        {{ match.winner_id === match.players[0].id ? 'W' : 'L' }}
-                                    </span>
-                                    <span v-else class="player-score">-</span>
-                                </div>
-                                <div class="vs-separator">vs</div>
-                                <div class="player">
-                                    <span class="player-name">{{ truncate(match.players[1].name, { length: 12 }) }}</span>
-                                    <span v-if="match.status === 'completed'" 
-                                          :class="['player-result', match.winner_id === match.players[1].id ? 'result-win' : 'result-loss']">
-                                        {{ match.winner_id === match.players[1].id ? 'W' : 'L' }}
-                                    </span>
-                                    <span v-else class="player-score">-</span>
-                                </div>
-                            </div>
-                            <div class="time-venue">
-                                <div v-if="match.time" class="info-item">
-                                    <i class="pi pi-clock"></i>
-                                    <span>{{ formatDisplayTime(match.time) }}</span>
-                                </div>
-                                <div v-if="match.venue || bracket.event.venue" class="info-item">
-                                    <i class="pi pi-map-marker"></i>
-                                    <span>{{ match.venue || bracket.event.venue }}</span>
-                                </div>
+                        <div v-if="match.status === 'completed'" class="final-score-bar">
+                            <div class="final-score-content">
+                                <span>Final Score</span>
+                                <span class="score-display">{{ match.players[0].score || '0' }} - {{ match.players[1].score || '0' }}</span>
                             </div>
                         </div>
                     </div>
@@ -206,23 +222,99 @@ const getMatchIdentifier = (match) => {
     gap: 1rem;
 }
 
+.match-card-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+}
+
+.match-card-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.card-content {
+    flex: 1;
+    padding: 0;
+}
+
 .match-card-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid #e2e8f0;
-    margin-bottom: 0.5rem;
+    align-items: center;
+    padding: 0.6rem 1rem;
+    background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
 }
 
-.match-location {
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: #2d3748;
+.match-card-header:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #4f46e5, #7c3aed, #a855f7);
 }
-.match-date {
-    font-size: 0.8rem;
-    color: #718096;
+
+.match-content {
+    padding: .5rem;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+}
+
+.players-and-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.players-scores {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.time-venue {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 120px;
+}
+
+.player {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0.9rem;
+    border-radius: 6px;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    margin-bottom: 0.25rem;
+}
+
+.player:hover {
+    background: #f8fafc;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    border-color: #cbd5e1;
+}
+
+.vs-separator {
+    margin: 0.25rem 0;
 }
 
 .no-matches-found {
@@ -232,19 +324,117 @@ const getMatchIdentifier = (match) => {
 }
 
 .player-result {
-    font-weight: 700;
-    font-size: 1rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
+    margin-left: auto;
 }
 
 .result-win {
-    color: #22c55e;
-    background-color: #f0fdf4;
+    color: #3b82f6 !important; /* Blue for win */
+    background-color: #eff6ff !important; /* Light blue background */
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    box-shadow: 0 1px 2px rgba(59, 130, 246, 0.1);
+}
+
+.result-loss {
+    color: #6b7280 !important; /* Gray for loss */
+    background-color: #f9fafb !important; /* Light gray background */
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    box-shadow: 0 1px 2px rgba(107, 114, 128, 0.1);
+}
+
+.final-score-bar {
+    background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.final-score-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    font-size: 0.9rem;
+}
+
+.score-display {
+    font-weight: 700;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    backdrop-filter: blur(4px);
+}
+
+.match-date {
+    font-size: 0.85rem;
+    color: #ffffff;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.player-name {
+    font-weight: 500;
+    color: #1e293b;
+    background: transparent;
+    padding: 0;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #4b5563;
+    background: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+}
+
+.result-draw {
+    color: #f59e0b; /* Amber color for draws */
+    background-color: #fffbeb;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    box-shadow: 0 1px 2px rgba(245, 158, 11, 0.1);
+}
+
+/* Keep your existing result-win and result-loss styles */
+.result-win {
+    color: #10b981;
+    background-color: #ecfdf5;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.8rem;
 }
 
 .result-loss {
     color: #ef4444;
     background-color: #fef2f2;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+/* Add these styles to your CSS */
+.player-score {
+    margin-left: auto; /* Align to the right, same as .player-result */
+    color: #9ca3af; /* Light gray color */
+    font-weight: 600;
+    padding: 0.25rem 0; /* Match vertical padding of results */
+    min-width: 1.5rem; /* Match width of W/L/D for consistent spacing */
+    text-align: center; /* Center the dash */
 }
 </style>
