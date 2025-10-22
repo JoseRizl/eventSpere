@@ -966,14 +966,43 @@ export function useBracketActions(dataState) {
     status = { text: 'Upcoming', class: 'status-upcoming' };
   }
 
+  // Count unique participants from the first round only (initial matches)
+  // This avoids counting the same player multiple times and excludes consolation match players
   const players = new Set();
-  allMatches.forEach(match => {
-    match.players.forEach(player => {
-      if (player && player.name && player.name !== 'TBD' && player.name !== 'BYE') {
-        players.add(player.id);
-      }
+  
+  if (bracket.type === 'Single Elimination') {
+    // Get first round matches only, excluding consolation matches
+    const firstRound = bracket.matches[0] || [];
+    firstRound.forEach(match => {
+      match.players.forEach(player => {
+        if (player && player.id && player.name && 
+            player.name !== 'TBD' && player.name !== 'BYE') {
+          players.add(player.id);
+        }
+      });
     });
-  });
+  } else if (bracket.type === 'Double Elimination') {
+    // Get first round of winners bracket only
+    const firstRound = bracket.matches.winners[0] || [];
+    firstRound.forEach(match => {
+      match.players.forEach(player => {
+        if (player && player.id && player.name && 
+            player.name !== 'TBD' && player.name !== 'BYE') {
+          players.add(player.id);
+        }
+      });
+    });
+  } else if (bracket.type === 'Round Robin') {
+    // For Round Robin, count all unique players across all matches
+    allMatches.forEach(match => {
+      match.players.forEach(player => {
+        if (player && player.id && player.name && 
+            player.name !== 'TBD' && player.name !== 'BYE') {
+          players.add(player.id);
+        }
+      });
+    });
+  }
 
   // compute rounds
   let rounds = 0;
@@ -983,11 +1012,7 @@ export function useBracketActions(dataState) {
     rounds = bracket.matches.winners.length + bracket.matches.losers.length;
   }
 
-  // easy fix: subtract 1 for double elimination kay perme sobra ug isa ang participants count sa double elim
-  let participants = players.size;
-  if (bracket.type === 'Double Elimination') {
-    participants = Math.max(0, participants - 1);
-  }
+  const participants = players.size;
 
   return {
     status,
