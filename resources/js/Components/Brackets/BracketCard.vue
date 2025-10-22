@@ -116,10 +116,10 @@ const handleSetMatchFilter = (filter) => emit('set-match-filter', { index: props
                 </Link>
 
                 <div class="bracket-stats">
-                    <!-- <div class="stat-item">
+                    <div class="stat-item">
                         <i class="pi pi-users"></i>
                         <span>{{ getBracketStats(bracket).participants }} Participants</span>
-                    </div> -->
+                    </div>
                     <div class="stat-item">
                         <i class="pi pi-sitemap"></i>
                         <span>{{ getBracketStats(bracket).rounds }} Rounds</span>
