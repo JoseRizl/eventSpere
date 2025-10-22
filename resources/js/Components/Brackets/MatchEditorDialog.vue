@@ -140,7 +140,7 @@ const proceedWithUpdate = () => {
                     <InputText v-model="localMatchData.player1Name" placeholder="Enter player name" :disabled="localMatchData?.player1Name === 'BYE'" />
                 </div>
                 <div class="score-section">
-                    <label>Player 1 Score:</label>
+                    <label>Score:</label>
                     <div class="score-controls">
                         <Button @click="localMatchData.player1Score--" :disabled="localMatchData.player1Score <= 0 || localMatchData.status === 'completed'" icon="pi pi-minus" class="p-button-sm" severity="danger" v-tooltip="{ value: 'Scores cannot be changed for a completed match.', disabled: localMatchData.status !== 'completed' }" />
                         <span class="score-display">{{ localMatchData.player1Score }}</span>
@@ -157,7 +157,7 @@ const proceedWithUpdate = () => {
                     <InputText v-model="localMatchData.player2Name" placeholder="Enter player name" :disabled="localMatchData?.player2Name === 'BYE'" />
                 </div>
                 <div class="score-section">
-                    <label>Player 2 Score:</label>
+                    <label>Score:</label>
                     <div class="score-controls">
                         <Button @click="localMatchData.player2Score--" :disabled="localMatchData.player2Score <= 0 || localMatchData.status === 'completed'" icon="pi pi-minus" class="p-button-sm" severity="danger" v-tooltip="{ value: 'Scores cannot be changed for a completed match.', disabled: localMatchData.status !== 'completed' }" />
                         <span class="score-display">{{ localMatchData.player2Score }}</span>

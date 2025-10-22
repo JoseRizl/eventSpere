@@ -310,19 +310,26 @@ const roundRobinPlayers = computed(() => {
 
     const playerMap = new Map();
     const allMatches = props.bracket.matches.flat();
+    const players = [];
 
+    // First pass: collect all players and extract their numbers
     allMatches.forEach(match => {
         match.players.forEach(player => {
             if (player.name !== 'BYE' && player.name !== 'TBD' && !playerMap.has(player.id)) {
+                // Extract number from player name (e.g., "Player 1" -> 1)
+                const playerNumber = parseInt(player.name.replace(/\D/g, '')) || 0;
                 playerMap.set(player.id, {
                     id: player.id,
-                    name: player.name
+                    name: player.name,
+                    number: playerNumber
                 });
+                players.push(playerMap.get(player.id));
             }
         });
     });
 
-    return Array.from(playerMap.values());
+    // Sort players by their extracted number
+    return players.sort((a, b) => a.number - b.number);
 });
 
 const roundRobinGrid = computed(() => {
