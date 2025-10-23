@@ -705,23 +705,38 @@ export function useBracketActions(dataState) {
     let prevMatches = firstRound;
     let roundNumber = 2;
     while (prevMatches.length > 1) {
-      const nextMatches = Array.from({ length: Math.ceil(prevMatches.length / 2) }, (_, i) => ({
-        id: generateId(),
-        round: roundNumber,
-        match_number: i + 1,
-        players: [
-          { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-          { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-        ],
-        winner_id: null,
-        loser_id: null,
-        status: 'pending',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        date: selectedEvent.value.startDate, // Date defaults to event start date
-        time: null, // Time is unset by default
-        venue: selectedEvent.value.venue,
-      }));
+      const nextMatches = Array.from({ length: Math.ceil(prevMatches.length / 2) }, (_, i) => {
+        // Calculate game numbers for source matches
+        const match1Idx = i * 2;
+        const match2Idx = i * 2 + 1;
+        const match1GameNum = prevMatches[match1Idx]?.match_number || (match1Idx + 1);
+        const match2GameNum = prevMatches[match2Idx]?.match_number || (match2Idx + 1);
+        
+        // Calculate cumulative game numbers
+        let gamesBeforeRound = 0;
+        for (let r = 1; r < roundNumber; r++) {
+          const roundMatches = rounds.find(round => round[0]?.round === r);
+          if (roundMatches) gamesBeforeRound += roundMatches.length;
+        }
+        
+        return {
+          id: generateId(),
+          round: roundNumber,
+          match_number: i + 1,
+          players: [
+            { id: null, name: `G${gamesBeforeRound + match1GameNum} Winner`, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+            { id: null, name: `G${gamesBeforeRound + match2GameNum} Winner`, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+          ],
+          winner_id: null,
+          loser_id: null,
+          status: 'pending',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          date: selectedEvent.value.startDate,
+          time: null,
+          venue: selectedEvent.value.venue,
+        };
+      });  
       rounds.push(nextMatches);
       prevMatches = nextMatches;
       roundNumber++;
@@ -813,24 +828,48 @@ export function useBracketActions(dataState) {
     winnersRounds.push(currentRound);
 
     while (currentRound.length > 1) {
-      const nextRound = Array.from({ length: Math.ceil(currentRound.length / 2) }, (_, i) => ({
-        id: generateId(),
-        round: winnersRounds.length + 1,
-        match_number: i + 1,
-        bracket_type: 'winners',
-        players: [
-          { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-          { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-        ],
-        winner_id: null,
-        loser_id: null,
-        status: 'pending',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        date: selectedEvent.value.startDate, // Date defaults to event start date
-        time: null, // Time is unset by default
-        venue: selectedEvent.value.venue,
-      }));
+      const nextRound = Array.from({ length: Math.ceil(currentRound.length / 2) }, (_, i) => {
+        // Calculate source game numbers
+        const match1Idx = i * 2;
+        const match2Idx = i * 2 + 1;
+        
+        // For R1 (first round), use match numbers directly (1, 2, 3, 4)
+        // For later rounds, calculate cumulative game numbers
+        let match1GameNum, match2GameNum;
+        
+        if (winnersRounds.length === 1) {
+          // R1 → WR2: Use R1 match numbers directly
+          match1GameNum = currentRound[match1Idx]?.match_number || (match1Idx + 1);
+          match2GameNum = currentRound[match2Idx]?.match_number || (match2Idx + 1);
+        } else {
+          // WR2+ → WR3+: Calculate cumulative
+          let gamesBeforePrevRound = 0;
+          for (let r = 0; r < winnersRounds.length; r++) {
+            gamesBeforePrevRound += winnersRounds[r].length;
+          }
+          match1GameNum = gamesBeforePrevRound + (match1Idx + 1);
+          match2GameNum = gamesBeforePrevRound + (match2Idx + 1);
+        }
+        
+        return {
+          id: generateId(),
+          round: winnersRounds.length + 1,
+          match_number: i + 1,
+          bracket_type: 'winners',
+          players: [
+            { id: null, name: `G${match1GameNum} Winner`, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+            { id: null, name: `G${match2GameNum} Winner`, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+          ],
+          winner_id: null,
+          loser_id: null,
+          status: 'pending',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          date: selectedEvent.value.startDate,
+          time: null,
+          venue: selectedEvent.value.venue,
+        };
+      });  
       winnersRounds.push(nextRound);
       currentRound = nextRound;
     }
@@ -877,55 +916,71 @@ export function useBracketActions(dataState) {
         const winnersRound = winnersRounds[wrRoundIdx];
 
         if (wrRoundIdx === 0) {
-            // Handle WR1 -> LR1 with CROSS PAIRING (1 vs 3, 2 vs 4 pattern)
-            // Cross pairing: Pair 1st with 3rd, 2nd with 4th, etc.
-            // Example for 8 players (4 WR1 matches):
-            // LR1-M1: Loser of M1 vs Loser of M3
-            // LR1-M2: Loser of M2 vs Loser of M4
-
-            const nonByeMatches = winnersRound.filter(wrMatch =>
-                wrMatch.players[0]?.name !== 'BYE' && wrMatch.players[1]?.name !== 'BYE'
-            );
-
-            const numNonByeMatches = nonByeMatches.length;
-            const halfPoint = Math.floor(numNonByeMatches / 2);
-
-            // Create cross pairing: pair i with i+halfPoint
-            for (let i = 0; i < halfPoint; i++) {
-                const firstMatch = nonByeMatches[i];
-                const secondMatch = nonByeMatches[i + halfPoint];
-
-                const lrRoundIdx = 0; // LR1
-                const lrMatchIdx = i;
-
+            // Handle WR1 -> LR1 with ODD-EVEN PAIRING
+            // Even matches (0,2,4,6...) go to LR1 Match 0,1,2,3... position 0
+            // Odd matches (1,3,5,7...) go to LR1 Match 0,1,2,3... position 1
+            // This creates crossing: 0 vs 2, 1 vs 3, 4 vs 6, 5 vs 7
+            
+            const lrRoundIdx = 0; // LR1
+            
+            winnersRound.forEach((wrMatch, wrMatchIdx) => {
+                // Odd-even pairing logic
+                const isEven = wrMatchIdx % 2 === 0;
+                const lrMatchIdx = Math.floor(wrMatchIdx / 2);
+                const lrPlayerPos = isEven ? 0 : 1;
+                
                 if (losersRounds[lrRoundIdx] && losersRounds[lrRoundIdx][lrMatchIdx]) {
-                    losersRounds[lrRoundIdx][lrMatchIdx].players[0] = {
+                    // If R1 match has a BYE, put BYE in LR1
+                    const hasBye = wrMatch.players[0]?.name === 'BYE' || wrMatch.players[1]?.name === 'BYE';
+                    
+                    losersRounds[lrRoundIdx][lrMatchIdx].players[lrPlayerPos] = {
                         id: null,
-                        name: `Loser of R1 M${firstMatch.match_number}`,
-                        score: 0,
-                        completed: false,
-                        created_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString(),
-                    };
-                    losersRounds[lrRoundIdx][lrMatchIdx].players[1] = {
-                        id: null,
-                        name: `Loser of R1 M${secondMatch.match_number}`,
+                        name: hasBye ? 'BYE' : `LG${wrMatch.match_number} Loser`,
                         score: 0,
                         completed: false,
                         created_at: new Date().toISOString(),
                         updated_at: new Date().toISOString(),
                     };
                 }
-            }
+            });
         } else {
-            // WR2+ -> LR(2r-1), same match index, loser goes to slot 1 (faces winner coming from previous LR round)
+            // WR2+ -> LR(2r-1), ALTERNATING STRAIGHT/CROSSED PATTERN
             const lrRoundIdx = (wrRoundIdx * 2) - 1;
+            const numMatches = winnersRound.length;
+            
+            // Calculate cumulative game number (total matches before this round)
+            let gamesBeforeThisRound = 0;
+            for (let r = 0; r < wrRoundIdx; r++) {
+                gamesBeforeThisRound += winnersRounds[r].length;
+            }
+            
             winnersRound.forEach((wrMatch, wrMatchIdx) => {
-                const lrMatchIdx = wrMatchIdx;
+                // SPLIT-CROSS PATTERN: Pairs cross within themselves
+                // For 4 matches: 0→1, 1→0, 2→3, 3→2
+                // For 2 matches: 0→1, 1→0
+                let lrMatchIdx;
+                if (numMatches === 1) {
+                    lrMatchIdx = 0;
+                } else {
+                    // Cross within pairs
+                    const pairIdx = Math.floor(wrMatchIdx / 2);
+                    const posInPair = wrMatchIdx % 2;
+                    const pairStart = pairIdx * 2;
+                    
+                    if (posInPair === 0) {
+                        lrMatchIdx = pairStart + 1;
+                    } else {
+                        lrMatchIdx = pairStart;
+                    }
+                }
                 const lrPlayerPos = 1;
+                
+                // Calculate actual game number (cumulative)
+                const actualGameNumber = gamesBeforeThisRound + wrMatchIdx + 1;
+                
                 const loserPlaceholder = {
                     id: null,
-                    name: `Loser of R${wrRoundIdx + 1} M${wrMatch.match_number}`,
+                    name: `LG${actualGameNumber} Loser`,
                     score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
                 };
                 if (losersRounds[lrRoundIdx] && losersRounds[lrRoundIdx][lrMatchIdx]) {
@@ -936,6 +991,10 @@ export function useBracketActions(dataState) {
     }
 
     // --- Grand Finals ---
+    // Calculate game numbers for finals
+    const lastWinnersGameNum = winnersRounds.reduce((sum, round) => sum + round.length, 0);
+    const lastLosersGameNum = lastWinnersGameNum + losersRounds.reduce((sum, round) => sum + round.length, 0);
+    
     const grandFinals = [ // grandFinals is an array of rounds
         [{
             id: generateId(),
@@ -943,8 +1002,8 @@ export function useBracketActions(dataState) {
             match_number: 1,
             bracket_type: 'grand_finals',
             players: [
-            { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-            { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+            { id: null, name: `G${lastWinnersGameNum} Winner`, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+            { id: null, name: `LG${lastLosersGameNum} Winner`, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
             ],
             winner_id: null, loser_id: null, status: 'pending',
             created_at: new Date().toISOString(),
@@ -954,6 +1013,10 @@ export function useBracketActions(dataState) {
             venue: selectedEvent.value.venue,
         }]
     ];
+
+    // Step 3: Keep TBD for losers bracket position 0 (no winner indicators shown)
+    // Winner indicators are only shown in Grand Finals
+    // Position 0 in losers bracket will remain as TBD until match is completed
 
     return { winners: winnersRounds, losers: losersRounds, grand_finals: grandFinals };
   };
@@ -1836,7 +1899,7 @@ const updateLines = (bracketIdx) => {
             : { ...loser, score: 0, completed: false, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() };
 
           // This logic was incorrect for the final round. The loser of the final winners match goes to the final losers match.
-          if (roundIdx === 0) { // Losers from Winners Round 1 - CROSS PAIRING
+          if (roundIdx === 0) { // Losers from Winners Round 1 - ODD-EVEN PAIRING
             // Find the index of this match among those that produce a loser.
             // This is necessary because BYE matches in WR1 don't produce losers,
             // which skews the original matchIdx.
@@ -1845,21 +1908,22 @@ const updateLines = (bracketIdx) => {
 
             if (loserIndex !== -1) {
               const losersRoundIdx = 0;
-              const numNonByeMatches = matchesWithLosers.length;
-              const halfPoint = Math.floor(numNonByeMatches / 2);
-
-              // Cross pairing: pair i with i+halfPoint
-              // If loserIndex < halfPoint, it pairs with loserIndex+halfPoint
-              // If loserIndex >= halfPoint, it pairs with loserIndex-halfPoint
+              
+              // Odd-even pairing: Match i pairs with Match i+2
+              // Match 0 (1st) pairs with Match 2 (3rd) -> LR1 Match 0
+              // Match 1 (2nd) pairs with Match 3 (4th) -> LR1 Match 1
+              // Match 4 (5th) pairs with Match 6 (7th) -> LR1 Match 2
+              // Match 5 (6th) pairs with Match 7 (8th) -> LR1 Match 3
+              
               let losersMatchIdx, losersPlayerPos;
-
-              if (loserIndex < halfPoint) {
-                // First half: goes to match i, position 0
-                losersMatchIdx = loserIndex;
+              
+              if (loserIndex % 2 === 0) {
+                // Even index (0, 2, 4, 6...): goes to position 0
+                losersMatchIdx = Math.floor(loserIndex / 2);
                 losersPlayerPos = 0;
               } else {
-                // Second half: goes to match (i-halfPoint), position 1
-                losersMatchIdx = loserIndex - halfPoint;
+                // Odd index (1, 3, 5, 7...): goes to position 1
+                losersMatchIdx = Math.floor((loserIndex - 1) / 2);
                 losersPlayerPos = 1;
               }
 
@@ -1871,8 +1935,26 @@ const updateLines = (bracketIdx) => {
                         const finalLosersRoundIdx = bracket.matches.losers.length - 1;
                         setPlayerWithLog(bracket, 'losers', finalLosersRoundIdx, 0, 1, newLoserPayload, performedActions);
                         } else {
+                        // SPLIT-CROSS PATTERN: Pairs cross within themselves
                         const losersRoundIdx = (roundIdx * 2) - 1;
-                        const losersMatchIdx = matchIdx;
+                        const numMatchesInRound = bracket.matches.winners[roundIdx].length;
+                        
+                        let losersMatchIdx;
+                        if (numMatchesInRound === 1) {
+                            losersMatchIdx = 0;
+                        } else {
+                            // Cross within pairs
+                            const pairIdx = Math.floor(matchIdx / 2);
+                            const posInPair = matchIdx % 2;
+                            const pairStart = pairIdx * 2;
+                            
+                            if (posInPair === 0) {
+                                losersMatchIdx = pairStart + 1;
+                            } else {
+                                losersMatchIdx = pairStart;
+                            }
+                        }
+                        
                         const losersPlayerPos = 1; // They play the winner of the previous losers round
                         setPlayerWithLog(bracket, 'losers', losersRoundIdx, losersMatchIdx, losersPlayerPos, newLoserPayload, performedActions);
                     }
