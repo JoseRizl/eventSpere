@@ -95,13 +95,8 @@ const groupedMatches = computed(() => {
         }
 
         if (filteredMatches.length > 0) {
-            const statusOrder = { 'ongoing': 1, 'pending': 2, 'completed': 3 };
-            filteredMatches.sort((a, b) => {
-                const statusA = statusOrder[a.status] || 99;
-                const statusB = statusOrder[b.status] || 99;
-                if (statusA !== statusB) return statusA - statusB;
-                return a.match_number - b.match_number;
-            });
+            // Sort matches by match_number only (natural order)
+            filteredMatches.sort((a, b) => a.match_number - b.match_number);
             result.push({ title, matches: filteredMatches });
         }
     });

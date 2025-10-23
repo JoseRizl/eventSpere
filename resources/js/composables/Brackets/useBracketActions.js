@@ -532,7 +532,7 @@ export function useBracketActions(dataState) {
 
                 // Populate match details from the event if they are missing
                 if (!match.date) match.date = newBracket.event.startDate;
-                if (!match.time) match.time = newBracket.event.startTime;
+                // Time is intentionally left as null and not inherited from event
                 if (!match.venue) match.venue = newBracket.event.venue;
             });
 
@@ -565,17 +565,48 @@ export function useBracketActions(dataState) {
                     grand_finals: groupByRound(grandFinalsMatches)
                 };
             } else {
-                // Group matches by round, ensuring no empty rounds
-                const roundsMap = bracketMatches.reduce((acc, match) => {
-                    const round = match.round - 1;
-                    if (!acc[round]) acc[round] = [];
-                    acc[round].push(match);
-                    return acc;
-                }, []);
-                // Filter out undefined/empty rounds and sort matches within each round
-                newBracket.matches = roundsMap
-                    .filter(round => round && round.length > 0)
-                    .map(round => round.sort((a, b) => a.match_number - b.match_number));
+                // Check if this is a split bracket (has bracket_type 'A' and 'B')
+                const hasSplitBrackets = bracketMatches.some(m => m.bracket_type === 'A' || m.bracket_type === 'B');
+                
+                if (hasSplitBrackets) {
+                    // Split bracket: separate matches by bracket_type
+                    const bracketAMatches = bracketMatches.filter(m => m.bracket_type === 'A');
+                    const bracketBMatches = bracketMatches.filter(m => m.bracket_type === 'B');
+                    const finalsMatches = bracketMatches.filter(m => m.bracket_type === 'finals');
+                    const thirdPlaceMatches = bracketMatches.filter(m => m.bracket_type === 'third_place');
+                    
+                    const groupByRound = (matches) => {
+                        if (!matches || matches.length === 0) return [];
+                        const roundsMap = matches.reduce((acc, match) => {
+                            const round = match.round - 1;
+                            if (!acc[round]) acc[round] = [];
+                            acc[round].push(match);
+                            return acc;
+                        }, []);
+                        return roundsMap
+                            .filter(round => round && round.length > 0)
+                            .map(round => round.sort((a, b) => a.match_number - b.match_number));
+                    };
+                    
+                    newBracket.matches = {
+                        A: groupByRound(bracketAMatches),
+                        B: groupByRound(bracketBMatches),
+                        finals: groupByRound(finalsMatches),
+                        third_place: groupByRound(thirdPlaceMatches)
+                    };
+                } else {
+                    // Regular single elimination: group matches by round
+                    const roundsMap = bracketMatches.reduce((acc, match) => {
+                        const round = match.round - 1;
+                        if (!acc[round]) acc[round] = [];
+                        acc[round].push(match);
+                        return acc;
+                    }, []);
+                    // Filter out undefined/empty rounds and sort matches within each round
+                    newBracket.matches = roundsMap
+                        .filter(round => round && round.length > 0)
+                        .map(round => round.sort((a, b) => a.match_number - b.match_number));
+                }
             }
             return newBracket;
           })

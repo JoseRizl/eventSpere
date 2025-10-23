@@ -1392,7 +1392,19 @@ watch(() => props.bracket, () => {
     <!-- Round Robin Display - Grid System -->
     <div v-else-if="bracket.type === 'Round Robin'" class="round-robin-bracket">
         <div class="round-robin-grid-container">
-            <h3 class="text-xl font-bold mb-4">Round Robin Tournament</h3>
+            <div class="round-robin-header">
+                <h3 class="text-xl font-bold mb-4">Round Robin Tournament</h3>
+                <!-- Persistent Tiebreaker Button -->
+                <button 
+                    v-if="isRoundRobinConcluded && isRoundRobinConcluded(bracketIndex) && (user && (user.role === 'Admin' || user.role === 'TournamentManager'))" 
+                    @click="openTiebreakerDialog && openTiebreakerDialog(bracketIndex)" 
+                    class="tiebreaker-settings-button"
+                    :title="bracket.tiebreaker_data && Object.keys(bracket.tiebreaker_data).length > 0 ? 'Edit Tiebreakers' : 'Set Tiebreakers'"
+                >
+                    <i class="pi pi-cog"></i>
+                    <span>{{ bracket.tiebreaker_data && Object.keys(bracket.tiebreaker_data).length > 0 ? 'Edit Tiebreakers' : 'Set Tiebreakers' }}</span>
+                </button>
+            </div>
 
             <!-- Tiebreaker Notice -->
             <div v-if="hasTiedRank1Players && !dismissedTiebreakerNotices.has(bracket.id) && (user && (user.role === 'Admin' || user.role === 'TournamentManager'))" class="tiebreaker-notice">
@@ -1757,5 +1769,50 @@ watch(() => props.bracket, () => {
 
 .unified-bracket-header h3 {
     text-align: center;
+}
+
+/* Round Robin Header with Tiebreaker Button */
+.round-robin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    gap: 1rem;
+}
+
+.round-robin-header h3 {
+    margin: 0;
+}
+
+.tiebreaker-settings-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #0077B3 0%, #005a8c 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0, 119, 179, 0.3);
+    white-space: nowrap;
+}
+
+.tiebreaker-settings-button:hover {
+    background: linear-gradient(135deg, #005a8c 0%, #004466 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 119, 179, 0.4);
+}
+
+.tiebreaker-settings-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 119, 179, 0.3);
+}
+
+.tiebreaker-settings-button i {
+    font-size: 1rem;
 }
 </style>
