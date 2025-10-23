@@ -56,7 +56,9 @@
 .round {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 10px;
+  min-width: 280px;
 }
 
 .round > h3 {
@@ -796,6 +798,211 @@
 .player-box .bye-text.winner-name,
 .player-box .bye-text.loser-name {
   color: #6c757d !important;
+}
+
+/* Split Cell Bracket Layout - Two player cells converging with label */
+.match-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  position: relative;
+  margin-bottom: 15px;
+  width: fit-content;
+}
+
+/* Losers bracket flows left, so reverse the order */
+.losers-left-flow .match-group {
+  flex-direction: row-reverse;
+}
+
+.player-cells {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.player-cell {
+  background: #fafaff;
+  border: 2px solid #0077B3;
+  padding: 6px 10px;
+  border-radius: 6px;
+  min-width: 100px;
+  max-width: 120px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 0.85rem;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.player-cell:hover {
+  transform: translateX(-2px);
+  box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.player-cell.winner-name {
+  background: #e3f2fd;
+  border-color: #007bff;
+  color: #007bff !important;
+  font-weight: 600;
+}
+
+.player-cell.loser-name {
+  background: #f5f5f5;
+  border-color: #999;
+  color: #666 !important;
+}
+
+/* Connector lines with label at convergence point */
+.match-connector {
+  position: relative;
+  width: 40px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.match-connector svg {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.match-connector line {
+  stroke: #0077B3;
+  stroke-width: 2;
+}
+
+/* Match label at convergence point - shows game number */
+.match-label {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  border: 2px solid #0077B3;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0077B3;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Losers bracket label on left side */
+.losers-left-flow .match-label {
+  right: auto;
+  left: 0;
+}
+
+.match-label.winner-label {
+  border-color: #007bff;
+  color: #007bff;
+}
+
+.match-label.loser-label {
+  border-color: #dc3545;
+  color: #dc3545;
+  background: #fff5f5;
+  font-size: 0.85rem;
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.2);
+}
+
+/* Line label (W-x, L-x) - shows on the connecting line */
+.line-label {
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #666;
+  z-index: 9;
+  border: 1px solid #ddd;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+}
+
+/* Losers bracket line label on left side */
+.losers-left-flow .line-label {
+  right: auto;
+  left: -8px;
+}
+
+.line-label.winner-line {
+  color: #007bff;
+  border-color: #007bff;
+}
+
+.line-label.loser-line {
+  color: #dc3545;
+  border-color: #dc3545;
+}
+
+/* Dotted lines from upper bracket to lower bracket */
+.dropout-line { 
+  stroke: #000000;
+  stroke-width: 3;
+  stroke-dasharray: 8, 4;
+  fill: none;
+  opacity: 0.5;
+}
+
+/* SVG layer ordering */
+.dropout-lines-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.unified-connection-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.unified-connection-lines g,
+.dropout-lines-layer g {
+  pointer-events: none;
+}
+
+/* Ensure match groups are above lines */
+.match-group {
+  position: relative;
+  z-index: 10;
+}
+
+/* Ensure player cells are above dropout lines */
+.player-cell {
+  position: relative;
+  z-index: 15;
 }
 
 /* Highlight matches with issues */
@@ -2050,9 +2257,9 @@
   flex-direction: column;
   align-items: center;
   padding: 1rem;
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 /* Right Column: Winners Bracket */
@@ -2121,6 +2328,11 @@
   position: relative;
 }
 
+.losers-left-flow .round {
+  display: flex;
+  flex-direction: column;
+}
+
 .initial-center-flow {
   display: flex;
   flex-direction: column;
@@ -2172,6 +2384,10 @@
   margin-bottom: 0.5rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  background: none;
+  border: none;
+  padding: 0;
+  box-shadow: none;
 }
 
 /* Adjust round spacing for three-column layout */
