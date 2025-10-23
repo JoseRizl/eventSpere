@@ -33,6 +33,51 @@ let resizeObserver = null;
 
 const dynamicLines = ref({ single: [], winners: [], losers: [], finals: [] });
 
+// Zoom functionality for elimination brackets
+const zoomLevel = ref(1);
+const minZoom = 0.5;
+const maxZoom = 1.5;
+const zoomStep = 0.1;
+
+const zoomIn = () => {
+    if (zoomLevel.value < maxZoom) {
+        zoomLevel.value = Math.min(maxZoom, zoomLevel.value + zoomStep);
+        // Recalculate lines after zoom with a small delay to ensure zoom is applied
+        setTimeout(() => {
+            nextTick(() => {
+                updateBracketLines();
+                alignConsolationWithFinals();
+            });
+        }, 50);
+    }
+};
+
+const zoomOut = () => {
+    if (zoomLevel.value > minZoom) {
+        zoomLevel.value = Math.max(minZoom, zoomLevel.value - zoomStep);
+        // Recalculate lines after zoom with a small delay to ensure zoom is applied
+        setTimeout(() => {
+            nextTick(() => {
+                updateBracketLines();
+                alignConsolationWithFinals();
+            });
+        }, 50);
+    }
+};
+
+const resetZoom = () => {
+    zoomLevel.value = 1;
+    // Recalculate lines after zoom with a small delay to ensure zoom is applied
+    setTimeout(() => {
+        nextTick(() => {
+            updateBracketLines();
+            alignConsolationWithFinals();
+        });
+    }, 50);
+};
+
+const zoomPercentage = computed(() => Math.round(zoomLevel.value * 100));
+
 const ongoingRoundIdentifiers = computed(() => {
     const bracket = props.bracket;
     const identifiers = {
@@ -836,10 +881,12 @@ const updateBracketLines = () => {
                         const fromRect = fromEl.getBoundingClientRect();
                         const toRect = toEl.getBoundingClientRect();
 
-                        const fromCenterY = fromRect.top - svgRect.top + fromRect.height / 2;
-                        const toCenterY = toRect.top - svgRect.top + toRect.height / 2;
-                        const fromRightX = fromRect.right - svgRect.left;
-                        const toLeftX = toRect.left - svgRect.left;
+                        // Adjust for zoom level
+                        const zoom = zoomLevel.value;
+                        const fromCenterY = (fromRect.top - svgRect.top + fromRect.height / 2) / zoom;
+                        const toCenterY = (toRect.top - svgRect.top + toRect.height / 2) / zoom;
+                        const fromRightX = (fromRect.right - svgRect.left) / zoom;
+                        const toLeftX = (toRect.left - svgRect.left) / zoom;
 
                         // 3-segment elbow line
                         const midX = (fromRightX + toLeftX) / 2;
@@ -878,10 +925,12 @@ const updateBracketLines = () => {
                     if (!fromEl || !toEl) return;
                     const fromRect = fromEl.getBoundingClientRect();
                     const toRect = toEl.getBoundingClientRect();
-                    const fromCenterY = fromRect.top - svgRect.top + fromRect.height / 2;
-                    const toCenterY = toRect.top - svgRect.top + toRect.height / 2;
-                    const fromRightX = fromRect.right - svgRect.left;
-                    const toLeftX = toRect.left - svgRect.left;
+                    // Adjust for zoom level
+                    const zoom = zoomLevel.value;
+                    const fromCenterY = (fromRect.top - svgRect.top + fromRect.height / 2) / zoom;
+                    const toCenterY = (toRect.top - svgRect.top + toRect.height / 2) / zoom;
+                    const fromRightX = (fromRect.right - svgRect.left) / zoom;
+                    const toLeftX = (toRect.left - svgRect.left) / zoom;
                     const midX = (fromRightX + toLeftX) / 2;
                     dynamicLines.value.winners.push(
                         { x1: fromRightX, y1: fromCenterY, x2: midX, y2: fromCenterY },
@@ -901,10 +950,12 @@ const updateBracketLines = () => {
                     if (!fromEl || !toEl) return;
                     const fromRect = fromEl.getBoundingClientRect();
                     const toRect = toEl.getBoundingClientRect();
-                    const fromCenterY = fromRect.top - svgRect.top + fromRect.height / 2;
-                    const toCenterY = toRect.top - svgRect.top + toRect.height / 2;
-                    const fromLeftX = fromRect.left - svgRect.left;
-                    const toRightX = toRect.right - svgRect.left;
+                    // Adjust for zoom level
+                    const zoom = zoomLevel.value;
+                    const fromCenterY = (fromRect.top - svgRect.top + fromRect.height / 2) / zoom;
+                    const toCenterY = (toRect.top - svgRect.top + toRect.height / 2) / zoom;
+                    const fromLeftX = (fromRect.left - svgRect.left) / zoom;
+                    const toRightX = (toRect.right - svgRect.left) / zoom;
                     const midX = (fromLeftX + toRightX) / 2;
                     dynamicLines.value.losers.push(
                         { x1: fromLeftX, y1: fromCenterY, x2: midX, y2: fromCenterY },
@@ -961,10 +1012,12 @@ const updateBracketLines = () => {
 
                 const fromRect = fromEl.getBoundingClientRect();
                 const toRect = toEl.getBoundingClientRect();
-                const fromCenterY = fromRect.top - svgRect.top + fromRect.height / 2;
-                const toCenterY = toRect.top - svgRect.top + toRect.height / 2;
-                const fromLeftX = fromRect.left - svgRect.left;
-                const toRightX = toRect.right - svgRect.left;
+                // Adjust for zoom level
+                const zoom = zoomLevel.value;
+                const fromCenterY = (fromRect.top - svgRect.top + fromRect.height / 2) / zoom;
+                const toCenterY = (toRect.top - svgRect.top + toRect.height / 2) / zoom;
+                const fromLeftX = (fromRect.left - svgRect.left) / zoom;
+                const toRightX = (toRect.right - svgRect.left) / zoom;
 
                 // Get the R1 indices for this LR1 match
                 const r1Indices = lr1Connections.get(loserMatchIdx) || [];
@@ -997,10 +1050,12 @@ const updateBracketLines = () => {
             if (winnerEl && finalsEl) {
                 const winnerRect = winnerEl.getBoundingClientRect();
                 const finalsRect = finalsEl.getBoundingClientRect();
-                const fromCenterY = winnerRect.top - svgRect.top + winnerRect.height / 2;
-                const toCenterY = finalsRect.top - svgRect.top + finalsRect.height / 2;
-                const fromRightX = winnerRect.right - svgRect.left;
-                const toRightX = finalsRect.right - svgRect.left;
+                // Adjust for zoom level
+                const zoom = zoomLevel.value;
+                const fromCenterY = (winnerRect.top - svgRect.top + winnerRect.height / 2) / zoom;
+                const toCenterY = (finalsRect.top - svgRect.top + finalsRect.height / 2) / zoom;
+                const fromRightX = (winnerRect.right - svgRect.left) / zoom;
+                const toRightX = (finalsRect.right - svgRect.left) / zoom;
 
                 // Simple 3-segment path: right 30px, down to finals level, straight to finals
                 const elbowX = fromRightX + 30;
@@ -1017,10 +1072,12 @@ const updateBracketLines = () => {
             if (loserEl && finalsEl) {
                 const loserRect = loserEl.getBoundingClientRect();
                 const finalsRect = finalsEl.getBoundingClientRect();
-                const fromCenterY = loserRect.top - svgRect.top + loserRect.height / 2;
-                const toCenterY = finalsRect.top - svgRect.top + finalsRect.height / 2;
-                const fromLeftX = loserRect.left - svgRect.left;
-                const toLeftX = finalsRect.left - svgRect.left;
+                // Adjust for zoom level
+                const zoom = zoomLevel.value;
+                const fromCenterY = (loserRect.top - svgRect.top + loserRect.height / 2) / zoom;
+                const toCenterY = (finalsRect.top - svgRect.top + finalsRect.height / 2) / zoom;
+                const fromLeftX = (loserRect.left - svgRect.left) / zoom;
+                const toLeftX = (finalsRect.left - svgRect.left) / zoom;
 
                 // Simple 3-segment path: left 30px, down to finals level, straight to finals
                 const elbowX = fromLeftX - 30;
@@ -1090,8 +1147,21 @@ watch(() => props.bracket, () => {
 <template>
     <!-- Single Elimination - Split Bracket Layout (with consolation) -->
     <div v-if="bracket.type === 'Single Elimination' && shouldSplitBracket" class="bracket-scroll-container">
-        <div class="split-bracket-container-horizontal" ref="bracketContentRef">
-            <svg class="connection-lines unified-connection-lines">
+        <!-- Zoom Controls -->
+        <div class="zoom-controls">
+            <button @click="zoomOut" :disabled="zoomLevel <= minZoom" class="zoom-btn" title="Zoom Out">
+                <i class="pi pi-minus"></i>
+            </button>
+            <button @click="resetZoom" class="zoom-btn zoom-reset" title="Reset Zoom">
+                {{ zoomPercentage }}%
+            </button>
+            <button @click="zoomIn" :disabled="zoomLevel >= maxZoom" class="zoom-btn" title="Zoom In">
+                <i class="pi pi-plus"></i>
+            </button>
+        </div>
+        <div class="bracket-zoom-wrapper" :style="{ zoom: zoomLevel }">
+            <div class="split-bracket-container-horizontal" ref="bracketContentRef">
+                <svg class="connection-lines unified-connection-lines">
                 <line
                     v-for="(line, i) in dynamicLines.single"
                     :key="`split-line-${i}`"
@@ -1229,12 +1299,26 @@ watch(() => props.bracket, () => {
                 </div>
             </div>
         </div>
+        </div>
     </div>
 
     <!-- Single Elimination - Standard Layout (without consolation or with consolation for <12 players) -->
     <div v-else-if="bracket.type === 'Single Elimination'" class="bracket-scroll-container">
-        <div class="bracket single-elimination" ref="bracketContentRef">
-            <svg class="connection-lines">
+        <!-- Zoom Controls -->
+        <div class="zoom-controls">
+            <button @click="zoomOut" :disabled="zoomLevel <= minZoom" class="zoom-btn" title="Zoom Out">
+                <i class="pi pi-minus"></i>
+            </button>
+            <button @click="resetZoom" class="zoom-btn zoom-reset" title="Reset Zoom">
+                {{ zoomPercentage }}%
+            </button>
+            <button @click="zoomIn" :disabled="zoomLevel >= maxZoom" class="zoom-btn" title="Zoom In">
+                <i class="pi pi-plus"></i>
+            </button>
+        </div>
+        <div class="bracket-zoom-wrapper" :style="{ zoom: zoomLevel }">
+            <div class="bracket single-elimination" ref="bracketContentRef">
+                <svg class="connection-lines">
             <line
                 v-for="(line, i) in dynamicLines.single"
                 :key="`dynamic-line-${i}`"
@@ -1301,6 +1385,7 @@ watch(() => props.bracket, () => {
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     </div>
 
@@ -1391,13 +1476,26 @@ watch(() => props.bracket, () => {
 
     <!-- Double Elimination Display - Center-Out Layout -->
     <div v-else-if="bracket.type === 'Double Elimination'" class="bracket-scroll-container">
-        <div class="double-elimination-unified" ref="bracketContentRef">
-            <div class="unified-bracket-header">
-                <h3>Double Elimination Tournament</h3>
-            </div>
+        <!-- Zoom Controls -->
+        <div class="zoom-controls">
+            <button @click="zoomOut" :disabled="zoomLevel <= minZoom" class="zoom-btn" title="Zoom Out">
+                <i class="pi pi-minus"></i>
+            </button>
+            <button @click="resetZoom" class="zoom-btn zoom-reset" title="Reset Zoom">
+                {{ zoomPercentage }}%
+            </button>
+            <button @click="zoomIn" :disabled="zoomLevel >= maxZoom" class="zoom-btn" title="Zoom In">
+                <i class="pi pi-plus"></i>
+            </button>
+        </div>
+        <div class="bracket-zoom-wrapper" :style="{ zoom: zoomLevel }">
+            <div class="double-elimination-unified" ref="bracketContentRef">
+                <div class="unified-bracket-header">
+                    <h3>Double Elimination Tournament</h3>
+                </div>
 
-            <div class="unified-bracket-wrapper">
-                <svg class="unified-connection-lines">
+                <div class="unified-bracket-wrapper">
+                    <svg class="unified-connection-lines">
                     <!-- Winners bracket lines -->
                     <g v-for="(line, i) in dynamicLines.winners" :key="`dynamic-winners-${i}`">
                         <line
@@ -1570,5 +1668,94 @@ watch(() => props.bracket, () => {
                 </div>
             </div>
         </div>
+        </div>
     </div>
 </template>
+
+<style scoped>
+/* Zoom Controls */
+.zoom-controls {
+    position: sticky;
+    top: 80px;
+    right: 20px;
+    z-index: 100;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-bottom: 15px;
+    padding: 0 10px;
+    background: transparent;
+}
+
+.zoom-btn {
+    background: white;
+    border: 2px solid #0077B3;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0077B3;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.zoom-btn:hover:not(:disabled) {
+    background: #0077B3;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 119, 179, 0.2);
+}
+
+.zoom-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.zoom-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.zoom-btn i {
+    font-size: 14px;
+}
+
+.zoom-reset {
+    min-width: 60px;
+    font-weight: 700;
+}
+
+/* Bracket scroll container adjustments for zoom */
+.bracket-scroll-container {
+    position: relative;
+    overflow: auto;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Ensure proper layout with CSS zoom */
+.split-bracket-container-horizontal,
+.bracket.single-elimination,
+.double-elimination-unified {
+    min-height: 100%;
+}
+
+/* Center title */
+.unified-bracket-header {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.unified-bracket-header h3 {
+    text-align: center;
+}
+</style>
