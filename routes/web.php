@@ -15,8 +15,13 @@ use Inertia\Inertia;
 Route::inertia('/', 'Home')->name('home');
 Route::get('/events/{id}', [EventController::class, 'show'])->name('event.details');
 
-// Public API route for fetching brackets for a specific event
-Route::get('/api/events/{event}/brackets', [BracketController::class, 'indexForEvent'])->name('api.events.brackets');
+// Public API routes (accessible without authentication)
+Route::prefix('api')->name('api.')->group(function () {
+    Route::get('/events/{event}/brackets', [BracketController::class, 'indexForEvent'])->name('events.brackets');
+    Route::get('/brackets', [BracketController::class, 'index'])->name('brackets.index');
+    Route::get('/events/{eventId}/announcements', [AnnouncementsController::class, 'indexForEvent'])->name('events.announcements.indexForEvent');
+    Route::get('/announcements', [AnnouncementsController::class, 'index'])->name('announcements.index');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [EventController::class, 'dashboard'])->name('dashboard');
@@ -61,14 +66,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/committees', [CommitteeController::class, 'store'])->name('committees.store');
     Route::delete('/committees/{id}', [CommitteeController::class, 'destroy'])->name('committees.destroy');
 
-    // API routes
+    // API routes (protected - require authentication)
     Route::prefix('api')->name('api.')->group(function () {
         Route::get('/events', [EventController::class, 'index'])->name('events.index'); // For fetching all events as JSON
-        Route::apiResource('brackets', BracketController::class)->except(['show', 'create', 'edit']);
+        Route::apiResource('brackets', BracketController::class)->except(['show', 'create', 'edit', 'index']);
+        Route::put('/brackets/{id}/update-player-names', [BracketController::class, 'updatePlayerNames'])->name('brackets.updatePlayerNames');
         Route::get('/events/{eventId}/tasks', [TaskController::class, 'indexForEvent'])->name('events.tasks.indexForEvent');
         Route::get('/events/{eventId}/activities', [ActivitiesController::class, 'indexForEvent'])->name('events.activities.indexForEvent');
-        Route::get('/announcements', [AnnouncementsController::class, 'index'])->name('announcements.index');
-        Route::get('/events/{eventId}/announcements', [AnnouncementsController::class, 'indexForEvent'])->name('events.announcements.indexForEvent');
         Route::apiResource('tasks', TaskController::class)->except(['show', 'create', 'edit']);
 
         // Memorandum API routes, note the parameter name change to 'event'

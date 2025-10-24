@@ -308,4 +308,67 @@ class BracketController extends Controller
 
         return response()->json(null, 204);
     }
+
+    /**
+     * Update player names in a bracket
+     */
+    public function updatePlayerNames(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'updates' => 'required|array',
+            'updates.*.oldName' => 'required|string',
+            'updates.*.newName' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $jsonData = $this->readJson();
+        $updates = $request->input('updates');
+
+        // Find the bracket
+        $bracketIndex = collect($jsonData['brackets'])->search(fn($b) => ($b['id'] ?? null) == $id);
+        
+        if ($bracketIndex === false) {
+            return response()->json(['error' => 'Bracket not found'], 404);
+        }
+
+        $bracket = $jsonData['brackets'][$bracketIndex];
+
+        // Update player names in the bracket's matches structure
+        $this->updatePlayerNamesInMatches($bracket['matches'], $updates);
+
+        // Save back
+        $jsonData['brackets'][$bracketIndex] = $bracket;
+        $this->writeJson($jsonData);
+
+        return response()->json(['message' => 'Player names updated successfully', 'bracket' => $bracket]);
+    }
+
+    /**
+     * Recursively update player names in matches
+     */
+    private function updatePlayerNamesInMatches(&$matches, $updates)
+    {
+        if (is_array($matches)) {
+            foreach ($matches as &$item) {
+                if (isset($item['players']) && is_array($item['players'])) {
+                    // This is a match with players
+                    foreach ($item['players'] as &$player) {
+                        if (isset($player['name'])) {
+                            foreach ($updates as $update) {
+                                if ($player['name'] === $update['oldName']) {
+                                    $player['name'] = $update['newName'];
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // Recurse into nested structure (rounds, etc.)
+                    $this->updatePlayerNamesInMatches($item, $updates);
+                }
+            }
+        }
+    }
 }
