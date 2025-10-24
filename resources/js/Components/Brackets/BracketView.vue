@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { truncate } from '@/utils/stringUtils.js';
+import { useToast } from '@/composables/useToast.js';
 
 const props = defineProps({
     bracket: {
@@ -32,6 +33,125 @@ const bracketContentRef = ref(null);
 let resizeObserver = null;
 
 const dynamicLines = ref({ single: [], winners: [], losers: [], finals: [], dropouts: [] });
+
+const { showSuccess, showError } = useToast();
+
+// Player name editing
+const showPlayerEditModal = ref(false);
+const editablePlayers = ref([]);
+
+// Player colors - assign random colors to each unique player
+const playerColors = ref({});
+
+// Generate deterministic color based on player name (consistent across sessions)
+const generatePlayerColor = (playerName) => {
+    if (!playerName || playerName === 'TBD' || playerName === 'BYE' || playerName.includes('Winner') || playerName.includes('Loser')) {
+        return null;
+    }
+    
+    if (!playerColors.value[playerName]) {
+        const colors = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+            '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52B788',
+            '#E63946', '#457B9D', '#F77F00', '#06FFA5', '#B5179E'
+        ];
+        
+        // Use simple hash of player name for consistent color assignment
+        let hash = 0;
+        for (let i = 0; i < playerName.length; i++) {
+            hash = playerName.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const colorIndex = Math.abs(hash) % colors.length;
+        playerColors.value[playerName] = colors[colorIndex];
+    }
+    
+    return playerColors.value[playerName];
+};
+
+const openPlayerEditModal = () => {
+    // Collect all unique players from the bracket
+    const players = new Set();
+    
+    const addPlayersFromMatches = (matches) => {
+        matches.forEach(match => {
+            if (match.players) {
+                match.players.forEach(player => {
+                    if (player && player.name && player.name !== 'TBD' && player.name !== 'BYE' && 
+                        !player.name.includes('Winner') && !player.name.includes('Loser')) {
+                        players.add(player.name);
+                    }
+                });
+            }
+        });
+    };
+    
+    if (props.bracket.type === 'Double Elimination') {
+        props.bracket.matches.winners.forEach(round => addPlayersFromMatches(round));
+        props.bracket.matches.losers.forEach(round => addPlayersFromMatches(round));
+        if (props.bracket.matches.grand_finals) {
+            addPlayersFromMatches(props.bracket.matches.grand_finals[0]);
+        }
+    } else if (Array.isArray(props.bracket.matches)) {
+        props.bracket.matches.forEach(round => addPlayersFromMatches(round));
+    }
+    
+    editablePlayers.value = Array.from(players).map(name => ({
+        oldName: name,
+        newName: name
+    }));
+    
+    showPlayerEditModal.value = true;
+};
+
+const savePlayerNames = async () => {
+    // Collect updates
+    const updates = editablePlayers.value
+        .filter(p => p.oldName !== p.newName && p.newName.trim() !== '')
+        .map(p => ({ oldName: p.oldName, newName: p.newName.trim() }));
+    
+    if (updates.length > 0) {
+        try {
+            // Save to backend - use axios like other bracket operations
+            await axios.put(route('api.brackets.updatePlayerNames', props.bracket.id), { updates });
+            
+            // Update player names in the bracket locally
+            const updatePlayerInMatches = (matches) => {
+                matches.forEach(match => {
+                    if (match.players) {
+                        match.players.forEach(player => {
+                            const update = updates.find(u => u.oldName === player.name);
+                            if (update) {
+                                player.name = update.newName;
+                                // Transfer color to new name
+                                if (playerColors.value[update.oldName]) {
+                                    playerColors.value[update.newName] = playerColors.value[update.oldName];
+                                }
+                            }
+                        });
+                    }
+                });
+            };
+            
+            // Update in all bracket types
+            if (props.bracket.type === 'Double Elimination') {
+                props.bracket.matches.winners.forEach(round => updatePlayerInMatches(round));
+                props.bracket.matches.losers.forEach(round => updatePlayerInMatches(round));
+                if (props.bracket.matches.grand_finals) {
+                    updatePlayerInMatches(props.bracket.matches.grand_finals[0]);
+                }
+            } else if (Array.isArray(props.bracket.matches)) {
+                props.bracket.matches.forEach(round => updatePlayerInMatches(round));
+            }
+            
+            showSuccess('Player names updated successfully!');
+        } catch (error) {
+            console.error('Error updating player names:', error);
+            showError('Failed to update player names. Please try again.');
+        }
+    }
+    
+    showPlayerEditModal.value = false;
+};
 
 // Zoom functionality for elimination brackets
 const zoomLevel = ref(1);
@@ -950,7 +1070,7 @@ const updateBracketLines = () => {
                 console.warn('Unified SVG not found');
                 return;
             }
-            console.log('Drawing lines for Double Elimination bracket');
+            //console.log('Drawing lines for Double Elimination bracket');
 
             const svgRect = unifiedSvg.getBoundingClientRect();
 
@@ -1063,8 +1183,8 @@ const updateBracketLines = () => {
             }
 
             // Draw lines for all R1 matches to LR1 (always displayed, cell to cell)
-            console.log('R1 to LR1 connections map:', lr1Connections);
-            console.log('Total R1 matches:', bracket.matches.winners[0].length);
+            // console.log('R1 to LR1 connections map:', lr1Connections);
+            // console.log('Total R1 matches:', bracket.matches.winners[0].length);
             
             bracket.matches.winners[0].forEach((match, i) => {
                 // Find which LR1 match this R1 match feeds into
@@ -1080,7 +1200,7 @@ const updateBracketLines = () => {
                     }
                 }
 
-                console.log(`R1 Match ${i}: loserMatchIdx=${loserMatchIdx}, playerPosition=${playerPosition}`);
+                // console.log(`R1 Match ${i}: loserMatchIdx=${loserMatchIdx}, playerPosition=${playerPosition}`);
 
                 if (loserMatchIdx === -1) {
                     console.warn(`R1 Match ${i} has no LR1 connection`);
@@ -1111,7 +1231,7 @@ const updateBracketLines = () => {
                 const fromLeftX = (fromRect.left - svgRect.left) / zoom;
                 const toRightX = (toRect.right - svgRect.left) / zoom;
 
-                console.log(`Drawing R1-${i} to LR1-${loserMatchIdx}: (${fromLeftX}, ${fromCenterY}) -> (${toRightX}, ${toCenterY})`);
+                //console.log(`Drawing R1-${i} to LR1-${loserMatchIdx}: (${fromLeftX}, ${fromCenterY}) -> (${toRightX}, ${toCenterY})`);
 
                 // Always use diagonal line from R1 cell to LR1 cell
                 dynamicLines.value.losers.push(
@@ -1292,9 +1412,17 @@ watch(() => props.bracket, () => {
     nextTick(updateBracketLines);
     alignConsolationWithFinals();
 }, { deep: true });
+
+// Expose functions and data so parent can access them
+defineExpose({
+    openPlayerEditModal,
+    playerColors,
+    generatePlayerColor
+});
 </script>
 
 <template>
+    <div class="bracket-view-wrapper">
     <!-- Single Elimination - Split Bracket Layout (with consolation) -->
     <div v-if="bracket.type === 'Single Elimination' && shouldSplitBracket" class="bracket-scroll-container">
         <!-- Zoom Controls -->
@@ -1487,48 +1615,24 @@ watch(() => props.bracket, () => {
                 {{ props.isFinalRound(bracketIndex, roundIdx) ? 'Final Round' : `Round ${roundIdx + 1}` }}
             </h3>
 
-            <!-- Matches Display - Split Cell Layout -->
+            <!-- Matches Display - Traditional Box Layout -->
             <div
                 v-for="(match, matchIdx) in round.filter(m => m.bracket_type !== 'consolation')"
                 :key="matchIdx"
                 :id="`match-${bracketIndex}-${roundIdx}-${matchIdx}`"
                 :data-match-id="match.id"
                 :style="getMatchStyle(roundIdx)"
-                class="match-group"
+                :class="['match', (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
+                @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'single')"
             >
-                <!-- Player Cells -->
-                <div class="player-cells">
-                    <div
-                        :id="`match-${bracketIndex}-${roundIdx}-${matchIdx}-p0`"
-                        :class="['player-cell', getPlayerStyling(match.players[0], match.players[1], match, 'single')]"
-                        @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'single')"
-                    >
+                <div class="player-box">
+                    <span :class="getPlayerStyling(match.players[0], match.players[1], match, 'single')">
                         {{ truncate(match.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
-                    </div>
-                    <div
-                        :id="`match-${bracketIndex}-${roundIdx}-${matchIdx}-p1`"
-                        :class="['player-cell', getPlayerStyling(match.players[1], match.players[0], match, 'single')]"
-                        @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'single')"
-                    >
+                    </span>
+                    <hr />
+                    <span :class="getPlayerStyling(match.players[1], match.players[0], match, 'single')">
                         {{ truncate(match.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
-                    </div>
-                </div>
-
-                <!-- Connector Lines with Label -->
-                <div class="match-connector">
-                    <svg viewBox="0 0 40 80" preserveAspectRatio="none">
-                        <line x1="0" y1="20" x2="20" y2="40" />
-                        <line x1="0" y1="60" x2="20" y2="40" />
-                        <line x1="20" y1="40" x2="40" y2="40" />
-                    </svg>
-                    <!-- Game Number in Circle -->
-                    <div class="match-label">
-                        G{{ matchIdx + 1 }}
-                    </div>
-                    <!-- W-x Label on Line -->
-                    <div class="line-label winner-line">
-                        W-{{ matchIdx + 1 }}
-                    </div>
+                    </span>
                 </div>
             </div>
             </div>
@@ -1737,7 +1841,7 @@ watch(() => props.bracket, () => {
                             <div v-for="(round, roundIdx) in bracket.matches.losers"
                                 :key="`losers-${roundIdx}`"
                                 :class="['round', `losers-round-${roundIdx + 1}`, { 'round-ongoing': isRoundOngoing('losers', roundIdx) }]">
-                                <h4 class="round-label">LR{{ roundIdx + 1 }}</h4>
+                                <h4 class="round-label">R{{ roundIdx + 1 }}</h4>
 
                                 <div
                                     v-for="(match, matchIdx) in round"
@@ -1754,6 +1858,7 @@ watch(() => props.bracket, () => {
                                             :class="['player-cell', getPlayerStyling(match.players[0], match.players[1], match, 'losers')]"
                                             @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'losers')"
                                         >
+                                            <span v-if="generatePlayerColor(match.players[0].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[0].name) }"></span>
                                             {{ truncate(match.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
                                         </div>
                                         <div
@@ -1761,6 +1866,7 @@ watch(() => props.bracket, () => {
                                             :class="['player-cell', getPlayerStyling(match.players[1], match.players[0], match, 'losers')]"
                                             @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'losers')"
                                         >
+                                            <span v-if="generatePlayerColor(match.players[1].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[1].name) }"></span>
                                             {{ truncate(match.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
                                         </div>
                                     </div>
@@ -1776,9 +1882,9 @@ watch(() => props.bracket, () => {
                                         <div class="match-label loser-label">
                                             G{{ getLoserMatchNumber(roundIdx, matchIdx) }}
                                         </div>
-                                        <!-- L-x Label on Line -->
+                                        <!-- LG-x Label on Line -->
                                         <div class="line-label loser-line">
-                                            L-{{ getLoserMatchNumber(roundIdx, matchIdx) }}
+                                            LG{{ getLoserMatchNumber(roundIdx, matchIdx) }}
                                         </div>
                                     </div>
                                 </div>
@@ -1815,6 +1921,7 @@ watch(() => props.bracket, () => {
                                             :class="['player-cell', getPlayerStyling(match.players[0], match.players[1], match, 'winners')]"
                                             @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, 0, matchIdx, match, 'winners')"
                                         >
+                                            <span v-if="generatePlayerColor(match.players[0].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[0].name) }"></span>
                                             {{ truncate(match.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
                                         </div>
                                         <div
@@ -1822,6 +1929,7 @@ watch(() => props.bracket, () => {
                                             :class="['player-cell', getPlayerStyling(match.players[1], match.players[0], match, 'winners')]"
                                             @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, 0, matchIdx, match, 'winners')"
                                         >
+                                            <span v-if="generatePlayerColor(match.players[1].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[1].name) }"></span>
                                             {{ truncate(match.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
                                         </div>
                                     </div>
@@ -1872,6 +1980,7 @@ watch(() => props.bracket, () => {
                                             :class="['player-cell', getPlayerStyling(match.players[0], match.players[1], match, 'winners')]"
                                             @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx + 1, matchIdx, match, 'winners')"
                                         >
+                                            <span v-if="generatePlayerColor(match.players[0].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[0].name) }"></span>
                                             {{ truncate(match.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
                                         </div>
                                         <div
@@ -1879,6 +1988,7 @@ watch(() => props.bracket, () => {
                                             :class="['player-cell', getPlayerStyling(match.players[1], match.players[0], match, 'winners')]"
                                             @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx + 1, matchIdx, match, 'winners')"
                                         >
+                                            <span v-if="generatePlayerColor(match.players[1].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[1].name) }"></span>
                                             {{ truncate(match.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
                                         </div>
                                     </div>
@@ -1908,7 +2018,16 @@ watch(() => props.bracket, () => {
                     <div class="finals-bottom-row">
                         <div class="section-label finals-label">
                             <span>GRAND FINALS</span>
-                            <span class="twice-to-beat-notice">⚠️ Upper Bracket Winner is Twice to Beat</span>
+                            <div class="finals-rules-notice">
+                                <div class="rule-item">
+                                    <span class="rule-icon">🏆</span>
+                                    <span>Upper Bracket Winner wins → <strong>Champion</strong></span>
+                                </div>
+                                <div class="rule-item">
+                                    <span class="rule-icon">🔄</span>
+                                    <span>Lower Bracket Winner wins → <strong>Replay Match</strong></span>
+                                </div>
+                            </div>
                         </div>
                         <div class="bracket finals-center-flow">
                             <div class="round finals-round">
@@ -1924,12 +2043,14 @@ watch(() => props.bracket, () => {
                                                 :class="['player-cell', getPlayerStyling(match.players[0], match.players[1], match, 'grand_finals')]"
                                                 @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'grand_finals')"
                                             >
+                                                <span v-if="generatePlayerColor(match.players[0].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[0].name) }"></span>
                                                 {{ truncate(match.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
                                             </div>
                                             <div
                                                 :class="['player-cell', getPlayerStyling(match.players[1], match.players[0], match, 'grand_finals')]"
                                                 @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'grand_finals')"
                                             >
+                                                <span v-if="generatePlayerColor(match.players[1].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[1].name) }"></span>
                                                 {{ truncate(match.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
                                             </div>
                                         </div>
@@ -1956,9 +2077,48 @@ watch(() => props.bracket, () => {
         </div>
         </div>
     </div>
+
+    <!-- Player Name Edit Modal -->
+    <div v-if="showPlayerEditModal" class="modal-overlay" @click.self="showPlayerEditModal = false">
+        <div class="player-edit-modal">
+            <div class="modal-header">
+                <h3>Edit Player Names</h3>
+                <button @click="showPlayerEditModal = false" class="close-btn">
+                    <i class="pi pi-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div v-for="(player, index) in editablePlayers" :key="index" class="player-edit-row">
+                    <input 
+                        type="color" 
+                        v-model="playerColors[player.oldName]"
+                        class="player-color-picker"
+                        :title="`Change color for ${player.oldName}`"
+                    />
+                    <input 
+                        v-model="player.newName" 
+                        type="text" 
+                        class="player-name-input"
+                        :placeholder="player.oldName"
+                    />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button @click="showPlayerEditModal = false" class="btn-cancel">Cancel</button>
+                <button @click="savePlayerNames" class="btn-save">Save Changes</button>
+            </div>
+        </div>
+    </div>
+    </div>
 </template>
 
 <style scoped>
+/* Wrapper for single root element */
+.bracket-view-wrapper {
+    width: 100%;
+    height: 100%;
+}
+
 /* Zoom Controls */
 .zoom-controls {
     position: sticky;
@@ -2033,16 +2193,19 @@ watch(() => props.bracket, () => {
     min-height: 100%;
 }
 
-/* Center title */
+/* Header with button */
 .unified-bracket-header {
     display: flex;
     justify-content: center;
+    align-items: center;
     width: 100%;
     margin-bottom: 20px;
+    padding: 0 20px;
+    gap: 16px;
 }
 
 .unified-bracket-header h3 {
-    text-align: center;
+    margin: 0;
 }
 
 /* Round Robin Header with Tiebreaker Button */
@@ -2088,5 +2251,157 @@ watch(() => props.bracket, () => {
 
 .tiebreaker-settings-button i {
     font-size: 1rem;
+}
+
+/* Edit Players Button */
+.unified-bracket-header .edit-players-btn {
+    flex-shrink: 0;
+}
+
+.unified-bracket-header .edit-players-btn * {
+    pointer-events: none !important;
+    user-select: none !important;
+}
+
+/* Player Name Edit Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.player-edit-modal {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 20px;
+    color: #333;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #666;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.close-btn:hover {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.player-edit-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.player-color-picker {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.player-color-picker:hover {
+    border-color: #0077B3;
+}
+
+.player-name-input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.player-name-input:focus {
+    outline: none;
+    border-color: #0077B3;
+}
+
+.modal-footer {
+    padding: 20px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn-cancel, .btn-save {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cancel {
+    background: #f0f0f0;
+    color: #666;
+}
+
+.btn-cancel:hover {
+    background: #e0e0e0;
+}
+
+.btn-save {
+    background: #0077B3;
+    color: white;
+}
+
+.btn-save:hover {
+    background: #005a87;
+}
+
+/* Player Color Chip */
+.player-color-chip {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
 }
 </style>

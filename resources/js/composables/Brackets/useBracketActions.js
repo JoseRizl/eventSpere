@@ -705,38 +705,23 @@ export function useBracketActions(dataState) {
     let prevMatches = firstRound;
     let roundNumber = 2;
     while (prevMatches.length > 1) {
-      const nextMatches = Array.from({ length: Math.ceil(prevMatches.length / 2) }, (_, i) => {
-        // Calculate game numbers for source matches
-        const match1Idx = i * 2;
-        const match2Idx = i * 2 + 1;
-        const match1GameNum = prevMatches[match1Idx]?.match_number || (match1Idx + 1);
-        const match2GameNum = prevMatches[match2Idx]?.match_number || (match2Idx + 1);
-        
-        // Calculate cumulative game numbers
-        let gamesBeforeRound = 0;
-        for (let r = 1; r < roundNumber; r++) {
-          const roundMatches = rounds.find(round => round[0]?.round === r);
-          if (roundMatches) gamesBeforeRound += roundMatches.length;
-        }
-        
-        return {
-          id: generateId(),
-          round: roundNumber,
-          match_number: i + 1,
-          players: [
-            { id: null, name: `G${gamesBeforeRound + match1GameNum} Winner`, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-            { id: null, name: `G${gamesBeforeRound + match2GameNum} Winner`, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-          ],
-          winner_id: null,
-          loser_id: null,
-          status: 'pending',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          date: selectedEvent.value.startDate,
-          time: null,
-          venue: selectedEvent.value.venue,
-        };
-      });  
+      const nextMatches = Array.from({ length: Math.ceil(prevMatches.length / 2) }, (_, i) => ({
+        id: generateId(),
+        round: roundNumber,
+        match_number: i + 1,
+        players: [
+          { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+          { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+        ],
+        winner_id: null,
+        loser_id: null,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        date: selectedEvent.value.startDate,
+        time: null,
+        venue: selectedEvent.value.venue,
+      }));  
       rounds.push(nextMatches);
       prevMatches = nextMatches;
       roundNumber++;
@@ -935,7 +920,7 @@ export function useBracketActions(dataState) {
                     
                     losersRounds[lrRoundIdx][lrMatchIdx].players[lrPlayerPos] = {
                         id: null,
-                        name: hasBye ? 'BYE' : `LG${wrMatch.match_number} Loser`,
+                        name: hasBye ? 'BYE' : `G${wrMatch.match_number} Loser`,
                         score: 0,
                         completed: false,
                         created_at: new Date().toISOString(),
@@ -980,7 +965,7 @@ export function useBracketActions(dataState) {
                 
                 const loserPlaceholder = {
                     id: null,
-                    name: `LG${actualGameNumber} Loser`,
+                    name: `G${actualGameNumber} Loser`,
                     score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
                 };
                 if (losersRounds[lrRoundIdx] && losersRounds[lrRoundIdx][lrMatchIdx]) {
