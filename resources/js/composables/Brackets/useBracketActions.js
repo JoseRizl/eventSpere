@@ -1,4 +1,4 @@
-import { nextTick, watch } from 'vue';
+import { nextTick, watch, ref } from 'vue';
 import axios from 'axios';
 import { router } from '@inertiajs/vue3';
 import { useToast } from '@/composables/useToast.js';
@@ -137,6 +137,11 @@ export function useBracketActions(dataState) {
   } = uiState;
 
   const { showSuccess } = useToast();
+
+  // --- Loading States ---
+  const isCreatingBracket = ref(false);
+  const isDeletingBracket = ref(false);
+  const isUpdatingMatch = ref(false);
 
 
   const getSeedingOrder = (n) => {
@@ -385,6 +390,8 @@ export function useBracketActions(dataState) {
       return;
     }
 
+    isCreatingBracket.value = true;
+
     let newBracket;
     if (matchType.value === 'Single Elimination') {
       newBracket = generateBracket();
@@ -490,6 +497,8 @@ export function useBracketActions(dataState) {
       showSuccessDialog.value = true;
     } catch (error) {
       console.error('Error creating bracket:', error);
+    } finally {
+      isCreatingBracket.value = false;
     }
   };
 
@@ -528,7 +537,7 @@ export function useBracketActions(dataState) {
                 match.players = allMatchPlayers
                     .filter(mp => mp.match_id === match.id)
                     .sort((a, b) => a.slot - b.slot)
-                    .map(mp => ({ id: mp.player_id, name: mp.name, score: mp.score, completed: mp.completed }));
+                    .map(mp => ({ id: mp.player_id, name: mp.name, score: mp.score, completed: mp.completed, color: mp.color ?? null }));
 
                 // Populate match details from the event if they are missing
                 if (!match.date) match.date = newBracket.event.startDate;
@@ -733,7 +742,9 @@ export function useBracketActions(dataState) {
     if (includeThirdPlace.value && rounds.length >= 2) {
       const consolationMatch = {
         id: generateId(),
-        round: roundNumber,
+        // FIX: The consolation match should be in the same round as the finals.
+        // roundNumber was already incremented, so we use `rounds.length` which is the correct final round number.
+        round: rounds.length,
         match_number: 1,
         bracket_type: 'consolation', // Special marker for consolation match
         players: [
@@ -1378,8 +1389,11 @@ const updateLines = (bracketIdx) => {
         showSuccessDialog.value = true;
       } catch (e) {
         console.error('Error deleting bracket:', e);
+      } finally {
+        isDeletingBracket.value = false;
       }
     }
+
     showDeleteConfirmDialog.value = false;
   };
 
@@ -1559,6 +1573,8 @@ const updateLines = (bracketIdx) => {
   const updateMatch = async () => {
     if (!selectedMatch.value) return;
 
+    isUpdatingMatch.value = true;
+
     const { bracketIdx, roundIdx, matchIdx, bracketType } = selectedMatch.value;
     const bracket = brackets.value[bracketIdx];
 
@@ -1567,6 +1583,7 @@ const updateLines = (bracketIdx) => {
     if (validationError) {
       genericErrorMessage.value = validationError;
       showGenericErrorDialog.value = true;
+      isUpdatingMatch.value = false;
       return;
     }
 
@@ -1766,6 +1783,7 @@ const updateLines = (bracketIdx) => {
       if ((bracket.type === 'Single Elimination' || bracket.type === 'Double Elimination') &&
           match.players[0].score === match.players[1].score) {
         // Cannot complete elimination bracket matches with ties
+        isUpdatingMatch.value = false;
         alert('Ties are not allowed in elimination brackets. Please adjust the scores to determine a winner.');
         return;
       }
@@ -1784,6 +1802,7 @@ const updateLines = (bracketIdx) => {
           // Check if draws are allowed (validation should happen in UI, but double-check here)
           if (!bracket.allow_draws) {
             // This should be prevented by the UI, but if it somehow gets here, don't save
+            isUpdatingMatch.value = false;
             console.error('Attempted to save a draw when draws are not allowed');
             return;
           }
@@ -2077,6 +2096,8 @@ const updateLines = (bracketIdx) => {
       showSuccess('Match updated successfully!');
     } catch (error) {
       console.error('Error updating Round Robin match:', error);
+    } finally {
+      isUpdatingMatch.value = false;
     }
   };
 
@@ -2319,6 +2340,11 @@ const updateLines = (bracketIdx) => {
     dismissTiebreakerNotice,
 
     // Expose UI state for components that need it
+    // Loading states
+    isCreatingBracket,
+    isDeletingBracket,
+    isUpdatingMatch,
+
     ...uiState,
   };
 }

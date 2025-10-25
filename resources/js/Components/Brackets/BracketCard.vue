@@ -41,6 +41,11 @@ const props = defineProps({
     showAdminControls: {
         type: Boolean,
         default: true
+    },
+    // Loading states from composable
+    isDeletingBracket: {
+        type: Boolean,
+        default: false
     }
 });
 
@@ -71,20 +76,22 @@ const showPlayerEditModal = ref(false);
 const editablePlayers = ref([]);
 const bracketViewRef = ref(null);
 const playerColors = ref({});
+const isSavingPlayers = ref(false);
 
 const openPlayerEditModal = () => {
-    // Get colors from BracketView
-    if (bracketViewRef.value) {
-        playerColors.value = bracketViewRef.value.playerColors;
+    if (props.bracket.type === 'Double Elimination') {
+        playerColors.value = bracketViewRef.value?.playerColors || {};
+    } else {
+        playerColors.value = {};
     }
-    
+
     const players = new Set();
-    
+
     const addPlayersFromMatches = (matches) => {
         matches.forEach(match => {
             if (match.players) {
                 match.players.forEach(player => {
-                    if (player && player.name && player.name !== 'TBD' && player.name !== 'BYE' && 
+                    if (player && player.name && player.name !== 'TBD' && player.name !== 'BYE' &&
                         !player.name.includes('Winner') && !player.name.includes('Loser')) {
                         players.add(player.name);
                     }
@@ -92,7 +99,7 @@ const openPlayerEditModal = () => {
             }
         });
     };
-    
+
     if (props.bracket.type === 'Double Elimination') {
         props.bracket.matches.winners.forEach(round => addPlayersFromMatches(round));
         props.bracket.matches.losers.forEach(round => addPlayersFromMatches(round));
@@ -102,25 +109,30 @@ const openPlayerEditModal = () => {
     } else if (Array.isArray(props.bracket.matches)) {
         props.bracket.matches.forEach(round => addPlayersFromMatches(round));
     }
-    
+
     editablePlayers.value = Array.from(players).map(name => ({
         oldName: name,
         newName: name
     }));
-    
+
     showPlayerEditModal.value = true;
 };
 
 const savePlayerNames = async () => {
+    isSavingPlayers.value = true;
+
     const updates = editablePlayers.value
+        .filter(p => p.oldName !== p.newName && p.newName.trim() !== '');
+
+    const nameUpdates = editablePlayers.value
         .filter(p => p.oldName !== p.newName && p.newName.trim() !== '')
         .map(p => ({ oldName: p.oldName, newName: p.newName.trim() }));
-    
+
     if (updates.length > 0) {
         try {
             await axios.put(route('api.brackets.updatePlayerNames', props.bracket.id), { updates });
-            
-            const updatePlayerInMatches = (matches) => {
+
+            const updatePlayerInMatches = (matches, updates) => {
                 matches.forEach(match => {
                     if (match.players) {
                         match.players.forEach(player => {
@@ -129,30 +141,49 @@ const savePlayerNames = async () => {
                                 player.name = update.newName;
                                 if (playerColors.value[update.oldName]) {
                                     playerColors.value[update.newName] = playerColors.value[update.oldName];
+                                    // Also update the child component's colors
+                                    if (bracketViewRef.value?.playerColors) {
+                                        bracketViewRef.value.playerColors[update.newName] = playerColors.value[update.oldName];
+                                    }
                                 }
                             }
                         });
                     }
                 });
             };
-            
+
             if (props.bracket.type === 'Double Elimination') {
-                props.bracket.matches.winners.forEach(round => updatePlayerInMatches(round));
-                props.bracket.matches.losers.forEach(round => updatePlayerInMatches(round));
+                props.bracket.matches.winners.forEach(round => updatePlayerInMatches(round, updates));
+                props.bracket.matches.losers.forEach(round => updatePlayerInMatches(round, updates));
                 if (props.bracket.matches.grand_finals) {
-                    updatePlayerInMatches(props.bracket.matches.grand_finals[0]);
+                    updatePlayerInMatches(props.bracket.matches.grand_finals[0], updates);
                 }
             } else if (Array.isArray(props.bracket.matches)) {
-                props.bracket.matches.forEach(round => updatePlayerInMatches(round));
+                props.bracket.matches.forEach(round => updatePlayerInMatches(round, updates));
             }
-            
+
             showSuccess('Player names updated successfully!');
         } catch (error) {
             console.error('Error updating player names:', error);
             showError('Failed to update player names. Please try again.');
         }
     }
-    
+
+    // Only save colors for Double Elimination brackets
+    if (props.bracket.type === 'Double Elimination') {
+        const colorUpdates = editablePlayers.value
+            .filter(p => bracketViewRef.value?.playerColors[p.oldName] !== playerColors.value[p.oldName]);
+
+        try {
+            await axios.put(route('api.brackets.updatePlayerColors', props.bracket.id), { colors: playerColors.value });
+            if (colorUpdates.length > 0) showSuccess('Player colors updated successfully!');
+        } catch (error) {
+            console.error('Error updating player colors:', error);
+            showError('Failed to update player colors. Please try again.');
+        }
+    }
+
+    isSavingPlayers.value = false;
     showPlayerEditModal.value = false;
 };
 
@@ -172,28 +203,28 @@ const savePlayerNames = async () => {
                     </div>
                     <div class="bracket-controls">
                         <Button :icon="isExpanded ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" @click="handleToggleBracket" class="p-button-rounded p-button-text" v-tooltip.top="isExpanded ? 'Hide Bracket' : 'Show Bracket'" />
-                        <Button 
-                            v-if="showAdminControls && user?.role === 'Admin' && !isArchived" 
-                            icon="pi pi-pen-to-square" 
-                            @click="openPlayerEditModal" 
-                            class="p-button-rounded p-button-text action-btn-info" 
-                            v-tooltip.top="'Edit Player Names'" 
+                        <Button
+                            v-if="showAdminControls && user?.role === 'Admin' && !isArchived"
+                            icon="pi pi-pen-to-square"
+                            @click="openPlayerEditModal"
+                            class="p-button-rounded p-button-text action-btn-info"
+                            v-tooltip.top="'Edit Player Names'"
                         />
-                        <Button 
-                            v-if="showAdminControls && user?.role === 'Admin' && !isArchived && bracket.type === 'Single Elimination' && bracket.matches?.length >= 2" 
-                            :icon="hasConsolationMatch ? 'pi pi-minus-circle' : 'pi pi-plus-circle'" 
-                            @click="onToggleConsolationMatch(bracketIndex)" 
-                            class="p-button-rounded p-button-text" 
+                        <Button
+                            v-if="showAdminControls && user?.role === 'Admin' && !isArchived && bracket.type === 'Single Elimination' && bracket.matches?.length >= 2"
+                            :icon="hasConsolationMatch ? 'pi pi-minus-circle' : 'pi pi-plus-circle'"
+                            @click="onToggleConsolationMatch(bracketIndex)"
+                            class="p-button-rounded p-button-text"
                             :class="hasConsolationMatch ? 'p-button-warning' : 'p-button-success'"
-                            v-tooltip.top="hasConsolationMatch ? 'Remove 3rd Place Match' : 'Add 3rd Place Match'" 
+                            v-tooltip.top="hasConsolationMatch ? 'Remove 3rd Place Match' : 'Add 3rd Place Match'"
                         />
-                        <Button 
-                            v-if="showAdminControls && user?.role === 'Admin' && !isArchived && bracket.type === 'Round Robin'" 
-                            :icon="bracket.allow_draws ? 'pi pi-check-circle' : 'pi pi-times-circle'" 
-                            @click="onToggleAllowDraws(bracketIndex)" 
-                            class="p-button-rounded p-button-text" 
+                        <Button
+                            v-if="showAdminControls && user?.role === 'Admin' && !isArchived && bracket.type === 'Round Robin'"
+                            :icon="bracket.allow_draws ? 'pi pi-check-circle' : 'pi pi-times-circle'"
+                            @click="onToggleAllowDraws(bracketIndex)"
+                            class="p-button-rounded p-button-text"
                             :class="bracket.allow_draws ? 'p-button-success' : 'p-button-secondary'"
-                            v-tooltip.top="bracket.allow_draws ? 'Draws Enabled' : 'Draws Disabled (Click to Enable)'" 
+                            v-tooltip.top="bracket.allow_draws ? 'Draws Enabled' : 'Draws Disabled (Click to Enable)'"
                         />
                         <Button v-if="showAdminControls && user?.role === 'Admin' && !isArchived" icon="pi pi-trash" @click="handleRemoveBracket" class="p-button-rounded p-button-text p-button-danger" v-tooltip.top="'Delete Bracket'" />
 
@@ -285,15 +316,16 @@ const savePlayerNames = async () => {
             </div>
             <div class="modal-body">
                 <div v-for="(player, index) in editablePlayers" :key="index" class="player-edit-row">
-                    <input 
-                        type="color" 
+                    <input
+                        v-if="bracket.type === 'Double Elimination'"
+                        type="color"
                         v-model="playerColors[player.oldName]"
                         class="player-color-picker"
                         :title="`Change color for ${player.oldName}`"
                     />
-                    <input 
-                        v-model="player.newName" 
-                        type="text" 
+                    <input
+                        v-model="player.newName"
+                        type="text"
                         class="player-name-input"
                         :placeholder="player.oldName"
                     />
@@ -301,7 +333,7 @@ const savePlayerNames = async () => {
             </div>
             <div class="modal-footer">
                 <button @click="showPlayerEditModal = false" class="btn-cancel">Cancel</button>
-                <button @click="savePlayerNames" class="btn-save">Save Changes</button>
+                <Button @click="savePlayerNames" class="btn-save" :loading="isSavingPlayers" label="Save Changes" />
             </div>
         </div>
     </div>
