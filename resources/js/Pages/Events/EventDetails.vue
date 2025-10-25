@@ -462,12 +462,12 @@ const saveChanges = () => {
     preserveScroll: true,
     onError: (errors) => {
       saving.value = false;
-      const firstErrorKey = Object.keys(errors)[0];
-      let message = 'Failed to save event details. Please check the form for errors.';
-      if (firstErrorKey) {
-          const errorValue = errors[firstErrorKey];
-          message = Array.isArray(errorValue) ? errorValue[0] : errorValue;
+      // Use the first error message available, prioritizing 'title' for this specific validation.
+      let message = errors.title || Object.values(errors)[0];
+      if (Array.isArray(message)) {
+        message = message[0];
       }
+      message = message || 'An unknown validation error occurred.';
       errorMessage.value = message;
       errorDialogMessage.value = message;
       showErrorDialog.value = true;
