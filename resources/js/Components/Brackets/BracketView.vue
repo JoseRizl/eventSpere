@@ -1467,10 +1467,8 @@ onMounted(populateInitialColors);
 
 <template>
     <div :class="['bracket-view-wrapper', bracket.type === 'Single Elimination' ? 'single-elim' : '']">
-    <!-- Single Elimination - Split Bracket Layout (with consolation) -->
-    <div v-if="bracket.type === 'Single Elimination' && shouldSplitBracket" class="bracket-scroll-container">
-        <!-- Zoom Controls -->
-        <div class="zoom-controls">
+        <!-- Zoom Controls - Placed outside the scroll container for fixed positioning -->
+        <div v-if="bracket.type === 'Single Elimination' || bracket.type === 'Double Elimination'" class="zoom-controls">
             <button @click="zoomOut" :disabled="zoomLevel <= minZoom" class="zoom-btn" title="Zoom Out">
                 <i class="pi pi-minus"></i>
             </button>
@@ -1481,6 +1479,9 @@ onMounted(populateInitialColors);
                 <i class="pi pi-plus"></i>
             </button>
         </div>
+
+    <!-- Single Elimination - Split Bracket Layout (with consolation) -->
+    <div v-if="bracket.type === 'Single Elimination' && shouldSplitBracket" class="bracket-scroll-container">
         <div class="bracket-zoom-wrapper" :style="{ zoom: zoomLevel }">
             <div class="split-bracket-container-horizontal" ref="bracketContentRef">
                 <svg class="connection-lines unified-connection-lines">
@@ -1626,18 +1627,6 @@ onMounted(populateInitialColors);
 
     <!-- Single Elimination - Standard Layout (without consolation or with consolation for <12 players) -->
     <div v-else-if="bracket.type === 'Single Elimination'" class="bracket-scroll-container">
-        <!-- Zoom Controls -->
-        <div class="zoom-controls">
-            <button @click="zoomOut" :disabled="zoomLevel <= minZoom" class="zoom-btn" title="Zoom Out">
-                <i class="pi pi-minus"></i>
-            </button>
-            <button @click="resetZoom" class="zoom-btn zoom-reset" title="Reset Zoom">
-                {{ zoomPercentage }}%
-            </button>
-            <button @click="zoomIn" :disabled="zoomLevel >= maxZoom" class="zoom-btn" title="Zoom In">
-                <i class="pi pi-plus"></i>
-            </button>
-        </div>
         <div class="bracket-zoom-wrapper" :style="{ zoom: zoomLevel }">
             <div class="bracket single-elimination" ref="bracketContentRef">
                 <svg class="connection-lines">
@@ -1807,18 +1796,6 @@ onMounted(populateInitialColors);
 
     <!-- Double Elimination Display - Center-Out Layout -->
     <div v-else-if="bracket.type === 'Double Elimination'" class="bracket-scroll-container">
-        <!-- Zoom Controls -->
-        <div class="zoom-controls">
-            <button @click="zoomOut" :disabled="zoomLevel <= minZoom" class="zoom-btn" title="Zoom Out">
-                <i class="pi pi-minus"></i>
-            </button>
-            <button @click="resetZoom" class="zoom-btn zoom-reset" title="Reset Zoom">
-                {{ zoomPercentage }}%
-            </button>
-            <button @click="zoomIn" :disabled="zoomLevel >= maxZoom" class="zoom-btn" title="Zoom In">
-                <i class="pi pi-plus"></i>
-            </button>
-        </div>
         <div class="bracket-zoom-wrapper" :style="{ zoom: zoomLevel }">
             <div class="double-elimination-unified" ref="bracketContentRef">
                 <div class="unified-bracket-header">
@@ -2161,19 +2138,19 @@ onMounted(populateInitialColors);
 /* Wrapper for single root element */
 .bracket-view-wrapper {
     width: 100%;
-    height: 100%;
+    height: 100%; /* Ensure it takes full height of its parent */
+    position: relative; /* Establish a positioning context for absolute children */
 }
 
 /* Zoom Controls */
 .zoom-controls {
-    position: sticky;
-    top: 80px;
-    right: 20px;
+    position: absolute; /* Changed from fixed to absolute */
+    top: 10px;
+    right: 10px;
     z-index: 100;
     display: flex;
     gap: 8px;
     justify-content: flex-end;
-    margin-bottom: 15px;
     padding: 0 10px;
     background: transparent;
 }
