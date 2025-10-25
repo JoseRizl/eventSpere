@@ -388,6 +388,15 @@ export function useBracketActions(dataState) {
       return;
     }
 
+    // --- VALIDATION: Check for unique bracket name within the event ---
+    const eventBrackets = brackets.value.filter(b => b.event_id === selectedEvent.value.id);
+    if (eventBrackets.some(b => b.name.trim().toLowerCase() === bracketName.value.trim().toLowerCase())) {
+        genericErrorMessage.value = `A bracket with the name "${bracketName.value}" already exists for this event. Please choose a different name.`;
+        showGenericErrorDialog.value = true;
+        return;
+    }
+    // --- END VALIDATION ---
+
     isCreatingBracket.value = true;
 
     let newBracket;
@@ -1584,6 +1593,45 @@ const updateLines = (bracketIdx) => {
       isUpdatingMatch.value = false;
       return;
     }
+
+    // --- VALIDATION: Check for duplicate player names when editing within a match ---
+    const newName1 = selectedMatchData.value.player1Name.trim();
+    const newName2 = selectedMatchData.value.player2Name.trim();
+
+    // Get the original match to find the original names
+    let originalMatch;
+    if (bracket.type === 'Single Elimination' || bracket.type === 'Round Robin') {
+        originalMatch = bracket.matches[roundIdx]?.[matchIdx];
+    } else if (bracket.type === 'Double Elimination') {
+        originalMatch = bracket.matches?.[bracketType]?.[roundIdx]?.[matchIdx];
+    }
+
+    if (originalMatch) {
+        const originalName1 = originalMatch.players[0]?.name;
+        const originalName2 = originalMatch.players[1]?.name;
+
+        // Collect all other player names in the bracket
+        const allMatches = getAllMatches(bracket);
+        const otherPlayerNames = new Set();
+        allMatches.forEach(m => {
+            m.players.forEach(p => {
+                // Add name if it's not one of the original names being edited
+                if (p.name && p.name !== originalName1 && p.name !== originalName2) {
+                    otherPlayerNames.add(p.name.trim().toLowerCase());
+                }
+            });
+        });
+
+        // Check for conflicts
+        if ((newName1 && otherPlayerNames.has(newName1.toLowerCase())) || (newName2 && otherPlayerNames.has(newName2.toLowerCase()))) {
+            genericErrorMessage.value = 'A player with that name already exists in this bracket. Please choose a unique name.';
+            showGenericErrorDialog.value = true;
+            isUpdatingMatch.value = false;
+            return;
+        }
+    }
+    // --- END VALIDATION ---
+
 
     let match;
     if (bracket.type === 'Single Elimination') {

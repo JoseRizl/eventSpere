@@ -159,10 +159,11 @@ const savePlayerNames = async () => {
 };
 
 // Zoom functionality for elimination brackets
-const zoomLevel = ref(1);
-const minZoom = 0.5;
-const maxZoom = 1.5;
-const zoomStep = 0.1;
+const baseZoom = 0.7; // New default zoom level
+const zoomLevel = ref(baseZoom);
+const minZoom = 0.5 * baseZoom; // Scaled min zoom (was 0.5)
+const maxZoom = 1.5 * baseZoom; // Scaled max zoom (was 1.5)
+const zoomStep = 0.1 * baseZoom;  // Scaled zoom step (was 0.1)
 
 const zoomIn = () => {
     if (zoomLevel.value < maxZoom) {
@@ -191,7 +192,7 @@ const zoomOut = () => {
 };
 
 const resetZoom = () => {
-    zoomLevel.value = 1;
+    zoomLevel.value = baseZoom;
     // Recalculate lines after zoom with a small delay to ensure zoom is applied
     setTimeout(() => {
         nextTick(() => {
@@ -201,7 +202,7 @@ const resetZoom = () => {
     }, 50);
 };
 
-const zoomPercentage = computed(() => Math.round(zoomLevel.value * 100));
+const zoomPercentage = computed(() => Math.round((zoomLevel.value / baseZoom) * 100));
 
 const ongoingRoundIdentifiers = computed(() => {
     const bracket = props.bracket;

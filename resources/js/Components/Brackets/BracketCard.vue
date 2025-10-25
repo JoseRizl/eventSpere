@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
+import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 import BracketView from '@/Components/Brackets/BracketView.vue';
 import MatchesView from '@/Components/Brackets/MatchesView.vue';
 import { formatDisplayDate } from '@/utils/dateUtils.js';
@@ -77,6 +78,7 @@ const editablePlayers = ref([]);
 const bracketViewRef = ref(null);
 const playerColors = ref({});
 const isSavingPlayers = ref(false);
+const showDuplicatePlayerError = ref(false);
 
 const openPlayerEditModal = () => {
     if (props.bracket.type === 'Double Elimination') {
@@ -119,6 +121,18 @@ const openPlayerEditModal = () => {
 };
 
 const savePlayerNames = async () => {
+    const newNames = editablePlayers.value.map(p => p.newName.trim().toLowerCase());
+    const hasDuplicates = newNames.length !== new Set(newNames).size;
+
+    if (hasDuplicates) {
+        showDuplicatePlayerError.value = true;
+        return;
+    }
+
+    await proceedWithSave();
+};
+
+const proceedWithSave = async () => {
     isSavingPlayers.value = true;
 
     const updates = editablePlayers.value
@@ -333,10 +347,21 @@ const savePlayerNames = async () => {
             </div>
             <div class="modal-footer">
                 <button @click="showPlayerEditModal = false" class="btn-cancel">Cancel</button>
-                <Button @click="savePlayerNames" class="btn-save" :loading="isSavingPlayers" :disabled="isSavingPlayers" label="Save Changes" />
+                <button @click="savePlayerNames" class="btn-save" :loading="isSavingPlayers" :disabled="isSavingPlayers">Save Changes</button>
             </div>
         </div>
     </div>
+
+    <!-- Duplicate Player Name Error Dialog -->
+    <ConfirmationDialog
+        v-model:show="showDuplicatePlayerError"
+        title="Duplicate Player Names"
+        message="Duplicate player names are not allowed. Please ensure all player names are unique."
+        confirmText="OK"
+        :showCancelButton="false"
+        confirmButtonClass="modal-button-danger"
+        @confirm="showDuplicatePlayerError = false"
+    />
 </template>
 
 <style scoped>
@@ -351,7 +376,7 @@ const savePlayerNames = async () => {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 9999;
+    z-index: 9997; /* Lower than ConfirmationDialog's 9998 to appear underneath */
 }
 
 .player-edit-modal {

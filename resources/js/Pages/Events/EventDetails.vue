@@ -1078,6 +1078,7 @@ const getBracketIndex = (bracketId) => {
         v-model:show="showDeleteScheduleConfirm"
         title="Clear Activity?"
         message="Are you sure you want to clear this Activity?"
+        confirmButtonClass="modal-button-danger"
         @confirm="confirmDeleteSchedule"
       />
 
@@ -1095,9 +1096,9 @@ const getBracketIndex = (bracketId) => {
     <div v-if="showErrorDialog" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center" style="z-index: 9998;">
       <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
         <h2 class="text-lg font-semibold text-red-700 mb-2">Error</h2>
-        <p class="text-sm text-gray-700 mb-4">{{ errorDialogMessage || errorMessage }}</p>
+        <p class="text-sm text-gray-700 mb-4">{{ errorDialogMessage || errorMessage || 'An unexpected error occurred.' }}</p>
         <div class="flex justify-end">
-          <button @click="showErrorDialog = false" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Close</button>
+          <button @click="showErrorDialog = false" class="modal-button-danger">Close</button>
         </div>
       </div>
     </div>
