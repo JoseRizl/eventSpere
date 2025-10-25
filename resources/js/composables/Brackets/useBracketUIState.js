@@ -20,6 +20,11 @@ export function useBracketUIState() {
   const showTiebreakerDialog = ref(false);
   const dismissedTiebreakerNotices = ref(new Set());
 
+  // Loading states
+  const isCreatingBracket = ref(false);
+  const isDeletingBracket = ref(false);
+  const isUpdatingMatch = ref(false);
+
   // Messages
   const winnerMessage = ref('');
   const successMessage = ref('');
@@ -146,6 +151,11 @@ export function useBracketUIState() {
     showScoringConfigDialog,
     showToggleDrawsDialog,
     showTiebreakerDialog,
+    // Loading states
+    isCreatingBracket,
+    isDeletingBracket,
+    isUpdatingMatch,
+
     dismissedTiebreakerNotices,
 
     // Messages

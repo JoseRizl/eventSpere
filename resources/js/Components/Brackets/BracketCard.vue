@@ -333,7 +333,7 @@ const savePlayerNames = async () => {
             </div>
             <div class="modal-footer">
                 <button @click="showPlayerEditModal = false" class="btn-cancel">Cancel</button>
-                <Button @click="savePlayerNames" class="btn-save" :loading="isSavingPlayers" label="Save Changes" />
+                <Button @click="savePlayerNames" class="btn-save" :loading="isSavingPlayers" :disabled="isSavingPlayers" label="Save Changes" />
             </div>
         </div>
     </div>

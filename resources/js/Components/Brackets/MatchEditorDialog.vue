@@ -13,6 +13,10 @@ const props = defineProps({
         type: Boolean,
         required: true,
     },
+    loading: {
+        type: Boolean,
+        default: false,
+    },
     matchData: {
         type: Object,
         default: null,
@@ -72,10 +76,10 @@ const isMatchDataInvalid = computed(() => {
 
 const isDrawNotAllowed = computed(() => {
     if (!localMatchData.value || !props.bracket) return false;
-    
+
     const { status, player1Score, player2Score } = localMatchData.value;
     const bracketType = props.bracket.type;
-    
+
     // Check if it's a draw and draws are not allowed
     if (status === 'completed' && player1Score === player2Score) {
         // Elimination brackets never allow draws
@@ -87,7 +91,7 @@ const isDrawNotAllowed = computed(() => {
             return true;
         }
     }
-    
+
     return false;
 });
 
@@ -200,7 +204,7 @@ const proceedWithUpdate = () => {
 
             <div class="dialog-actions">
                 <button @click="closeModal" class="modal-button-secondary">Cancel</button>
-                <button @click="confirmUpdate" class="modal-button-primary" :disabled="isMatchDataInvalid || isDrawNotAllowed">Update Match</button>
+                <Button @click="confirmUpdate" class="modal-button-primary" :disabled="isMatchDataInvalid || isDrawNotAllowed || loading" :loading="loading" label="Update Match" />
             </div>
         </div>
 

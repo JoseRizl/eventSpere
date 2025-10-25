@@ -30,11 +30,11 @@ export function useBracketState() {
     selectedEvent,
     includeThirdPlace,
     allowDraws,
-    
+
     // Data collections
     events,
     brackets,
-    
+
     // Computed
     currentGameNumber,
   };

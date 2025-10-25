@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, computed, ref, watch } from 'vue';
+import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import { usePage } from '@inertiajs/vue3';
 import BracketCard from '@/Components/Brackets/BracketCard.vue';
 import MatchEditorDialog from '@/Components/Brackets/MatchEditorDialog.vue';
@@ -124,6 +125,9 @@ const {
   showTiebreakerDialog,
   dismissedTiebreakerNotices,
   standingsRevision,
+  isCreatingBracket,
+  isDeletingBracket,
+  isUpdatingMatch,
 } = useBracketActions(bracketState);
 
 const confirmMatchUpdate = () => {
@@ -331,6 +335,12 @@ const isMatchDataInvalid = computed(() => {
     return false;
 });
 
+const isLoading = computed(() =>
+    isCreatingBracket.value ||
+    isDeletingBracket.value ||
+    isUpdatingMatch.value
+);
+
 // Add onMounted hook to fetch brackets when component loads
 onMounted(async () => {
   initialLoading.value = true;
@@ -345,6 +355,8 @@ onMounted(async () => {
 
 <template>
     <div class="bracket-container">
+        <LoadingSpinner :show="isLoading" message="Processing..." />
+
         <h1 class="title">Brackets List</h1>
         <div class="toolbar-container mb-5">
             <div class="search-container">
@@ -655,6 +667,7 @@ onMounted(async () => {
       <MatchEditorDialog
         v-model:show="showMatchEditorDialog"
         v-model:matchData="selectedMatchData"
+        :loading="isUpdatingMatch"
         :bracket="selectedBracket"
         @confirm="proceedWithMatchUpdate"
         @update:show="val => !val && closeMatchEditorDialog()"
