@@ -131,17 +131,15 @@ export function useBracketActions(dataState) {
     showTiebreakerDialog,
     dismissedTiebreakerNotices,
     tempScoringConfig,
+    isCreatingBracket,
+    isDeletingBracket,
+    isUpdatingMatch,
     bracketTypeOptions,
     bracketViewModes,
     bracketMatchFilters,
   } = uiState;
 
   const { showSuccess } = useToast();
-
-  // --- Loading States ---
-  const isCreatingBracket = ref(false);
-  const isDeletingBracket = ref(false);
-  const isUpdatingMatch = ref(false);
 
 
   const getSeedingOrder = (n) => {
@@ -2344,6 +2342,10 @@ const updateLines = (bracketIdx) => {
     isCreatingBracket,
     isDeletingBracket,
     isUpdatingMatch,
+
+    // Expose UI state for components that need it
+    // Loading states
+
 
     ...uiState,
   };
