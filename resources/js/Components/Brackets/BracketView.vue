@@ -48,14 +48,14 @@ const generatePlayerColor = (playerName) => {
     if (!playerName || playerName === 'TBD' || playerName === 'BYE' || playerName.includes('Winner') || playerName.includes('Loser')) {
         return null;
     }
-    
+
     if (!playerColors.value[playerName]) {
         const colors = [
             '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
             '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52B788',
             '#E63946', '#457B9D', '#F77F00', '#06FFA5', '#B5179E'
         ];
-        
+
         // Use simple hash of player name for consistent color assignment
         let hash = 0;
         for (let i = 0; i < playerName.length; i++) {
@@ -64,19 +64,19 @@ const generatePlayerColor = (playerName) => {
         const colorIndex = Math.abs(hash) % colors.length;
         playerColors.value[playerName] = colors[colorIndex];
     }
-    
+
     return playerColors.value[playerName];
 };
 
 const openPlayerEditModal = () => {
     // Collect all unique players from the bracket
     const players = new Set();
-    
+
     const addPlayersFromMatches = (matches) => {
         matches.forEach(match => {
             if (match.players) {
                 match.players.forEach(player => {
-                    if (player && player.name && player.name !== 'TBD' && player.name !== 'BYE' && 
+                    if (player && player.name && player.name !== 'TBD' && player.name !== 'BYE' &&
                         !player.name.includes('Winner') && !player.name.includes('Loser')) {
                         players.add(player.name);
                     }
@@ -84,7 +84,7 @@ const openPlayerEditModal = () => {
             }
         });
     };
-    
+
     if (props.bracket.type === 'Double Elimination') {
         props.bracket.matches.winners.forEach(round => addPlayersFromMatches(round));
         props.bracket.matches.losers.forEach(round => addPlayersFromMatches(round));
@@ -94,12 +94,12 @@ const openPlayerEditModal = () => {
     } else if (Array.isArray(props.bracket.matches)) {
         props.bracket.matches.forEach(round => addPlayersFromMatches(round));
     }
-    
+
     editablePlayers.value = Array.from(players).map(name => ({
         oldName: name,
         newName: name
     }));
-    
+
     showPlayerEditModal.value = true;
 };
 
@@ -108,12 +108,12 @@ const savePlayerNames = async () => {
     const updates = editablePlayers.value
         .filter(p => p.oldName !== p.newName && p.newName.trim() !== '')
         .map(p => ({ oldName: p.oldName, newName: p.newName.trim() }));
-    
+
     if (updates.length > 0) {
         try {
             // Save to backend - use axios like other bracket operations
             await axios.put(route('api.brackets.updatePlayerNames', props.bracket.id), { updates });
-            
+
             // Update player names in the bracket locally
             const updatePlayerInMatches = (matches) => {
                 matches.forEach(match => {
@@ -131,7 +131,7 @@ const savePlayerNames = async () => {
                     }
                 });
             };
-            
+
             // Update in all bracket types
             if (props.bracket.type === 'Double Elimination') {
                 props.bracket.matches.winners.forEach(round => updatePlayerInMatches(round));
@@ -142,14 +142,14 @@ const savePlayerNames = async () => {
             } else if (Array.isArray(props.bracket.matches)) {
                 props.bracket.matches.forEach(round => updatePlayerInMatches(round));
             }
-            
+
             showSuccess('Player names updated successfully!');
         } catch (error) {
             console.error('Error updating player names:', error);
             showError('Failed to update player names. Please try again.');
         }
     }
-    
+
     showPlayerEditModal.value = false;
 };
 
@@ -272,6 +272,19 @@ const shouldSplitBracket = computed(() => {
 
     // Use split layout for 12+ players (regardless of consolation match)
     return playerCount >= 12;
+});
+
+const playerCount = computed(() => {
+    if (props.bracket.type !== 'Single Elimination' || !props.bracket.matches) return 0;
+
+    const firstRound = props.bracket.matches[0];
+    if (!firstRound) return 0;
+
+    return firstRound.reduce((count, match) => {
+        const p1 = match.players[0]?.name !== 'BYE' && match.players[0]?.name !== 'TBD' ? 1 : 0;
+        const p2 = match.players[1]?.name !== 'BYE' && match.players[1]?.name !== 'TBD' ? 1 : 0;
+        return count + p1 + p2;
+    }, 0);
 });
 
 // Split bracket into A and B sides with proper semifinal tracking
@@ -595,17 +608,17 @@ const getLineStrokeWidth = (line) => {
 const getThirdPlaceWinner = () => {
     // Get 3rd place (loser of lower bracket final)
     if (!props.bracket.matches?.losers) return 'TBD';
-    
+
     const lastLoserRound = props.bracket.matches.losers[props.bracket.matches.losers.length - 1];
     if (!lastLoserRound || lastLoserRound.length === 0) return 'TBD';
-    
+
     const finalMatch = lastLoserRound[0];
     if (finalMatch.status !== 'completed') return 'TBD';
-    
+
     // The loser of the lower bracket final gets 3rd place
     const loserId = finalMatch.loser_id;
     if (!loserId) return 'TBD';
-    
+
     const loser = finalMatch.players.find(p => p.id === loserId);
     return loser ? loser.name : 'TBD';
 };
@@ -613,34 +626,34 @@ const getThirdPlaceWinner = () => {
 // Calculate cumulative loser match number across all rounds
 const getLoserMatchNumber = (roundIdx, matchIdx) => {
     if (!props.bracket.matches?.losers) return matchIdx + 1;
-    
+
     let cumulativeCount = 0;
-    
+
     // Add all matches from previous rounds
     for (let i = 0; i < roundIdx; i++) {
         cumulativeCount += props.bracket.matches.losers[i].length;
     }
-    
+
     // Add current match index
     cumulativeCount += matchIdx + 1;
-    
+
     return cumulativeCount;
 };
 
 // Calculate cumulative winner match number across all rounds
 const getWinnerMatchNumber = (roundIdx, matchIdx) => {
     if (!props.bracket.matches?.winners) return matchIdx + 1;
-    
+
     let cumulativeCount = 0;
-    
+
     // Add all matches from previous rounds
     for (let i = 0; i < roundIdx; i++) {
         cumulativeCount += props.bracket.matches.winners[i].length;
     }
-    
+
     // Add current match index
     cumulativeCount += matchIdx + 1;
-    
+
     return cumulativeCount;
 };
 
@@ -796,11 +809,11 @@ const getMatchStyle = (roundIdx) => {
     // With the new split-cell layout (no result cell), we use simpler spacing
     const matchGroupHeight = 72; // Height of player cells (32px * 2 + 8px gap)
     const gap = 15;
-    
+
     if (roundIdx === 0) {
         return { marginTop: '0px', marginBottom: '0px' };
     }
-    
+
     // Calculate spacing to align with previous round matches
     const spacing = Math.pow(2, roundIdx - 1) * (matchGroupHeight + gap) - (matchGroupHeight / 2);
     return {
@@ -1080,27 +1093,27 @@ const updateBracketLines = () => {
                 bracket.matches.winners[round].forEach((match, i) => {
                     const nextMatchIdx = Math.floor(i / 2);
                     const nextPlayerIdx = i % 2; // 0 for top, 1 for bottom
-                    
+
                     // Connect from game indicator to next match's player cell
                     const fromEl = bracketContentRef.value?.querySelector(`#winners-match-${props.bracketIndex}-${round}-${i} .match-label`);
                     const toEl = bracketContentRef.value?.querySelector(`#winners-match-${props.bracketIndex}-${round + 1}-${nextMatchIdx}-p${nextPlayerIdx}`);
-                    
+
                     if (!fromEl || !toEl) return;
-                    
+
                     const fromRect = fromEl.getBoundingClientRect();
                     const toRect = toEl.getBoundingClientRect();
                     const zoom = zoomLevel.value;
-                    
+
                     const fromCenterY = (fromRect.top - svgRect.top + fromRect.height / 2) / zoom;
                     const toCenterY = (toRect.top - svgRect.top + toRect.height / 2) / zoom;
                     const fromRightX = (fromRect.right - svgRect.left) / zoom;
                     const toLeftX = (toRect.left - svgRect.left) / zoom;
                     const midX = (fromRightX + toLeftX) / 2;
-                    
+
                     // Check if this is the winner's path for styling
                     const winnerId = match.winner_id;
                     const isWinnerPath = winnerId && match.players[nextPlayerIdx].id === winnerId;
-                    
+
                     dynamicLines.value.winners.push(
                         { x1: fromRightX, y1: fromCenterY, x2: midX, y2: fromCenterY, isWinnerPath },
                         { x1: midX, y1: fromCenterY, x2: midX, y2: toCenterY, isWinnerPath },
@@ -1115,27 +1128,27 @@ const updateBracketLines = () => {
                 bracket.matches.losers[round].forEach((match, i) => {
                     let nextMatchIdx = (round % 2 === 0) ? i : Math.floor(i / 2);
                     const nextPlayerIdx = (round % 2 === 0) ? 0 : (i % 2);
-                    
+
                     // Connect from game indicator to next match's player cell
                     const fromEl = bracketContentRef.value?.querySelector(`#losers-match-${props.bracketIndex}-${round}-${i} .match-label`);
                     const toEl = bracketContentRef.value?.querySelector(`#losers-match-${props.bracketIndex}-${round + 1}-${nextMatchIdx}-p${nextPlayerIdx}`);
-                    
+
                     if (!fromEl || !toEl) return;
-                    
+
                     const fromRect = fromEl.getBoundingClientRect();
                     const toRect = toEl.getBoundingClientRect();
                     const zoom = zoomLevel.value;
-                    
+
                     const fromCenterY = (fromRect.top - svgRect.top + fromRect.height / 2) / zoom;
                     const toCenterY = (toRect.top - svgRect.top + toRect.height / 2) / zoom;
                     const fromLeftX = (fromRect.left - svgRect.left) / zoom;
                     const toRightX = (toRect.right - svgRect.left) / zoom;
                     const midX = (fromLeftX + toRightX) / 2;
-                    
+
                     // Check if this is the winner's path for styling
                     const winnerId = match.winner_id;
                     const isWinnerPath = winnerId && match.players[nextPlayerIdx].id === winnerId;
-                    
+
                     dynamicLines.value.losers.push(
                         { x1: fromLeftX, y1: fromCenterY, x2: midX, y2: fromCenterY, isWinnerPath },
                         { x1: midX, y1: fromCenterY, x2: midX, y2: toCenterY, isWinnerPath },
@@ -1155,11 +1168,11 @@ const updateBracketLines = () => {
             // Match 4 (5th) pairs with Match 6 (7th) -> LR1 Match 2
             // Match 5 (6th) pairs with Match 7 (8th) -> LR1 Match 3
             const totalR1Matches = bracket.matches.winners[0].length;
-            
+
             for (let i = 0; i < Math.floor(totalR1Matches / 2); i++) {
                 const firstIdx = i * 2;      // 0, 2, 4, 6...
                 const secondIdx = i * 2 + 2; // 2, 4, 6, 8...
-                
+
                 if (secondIdx < totalR1Matches) {
                     lr1Connections.set(i, [firstIdx, secondIdx]);
                 } else if (firstIdx < totalR1Matches) {
@@ -1167,14 +1180,14 @@ const updateBracketLines = () => {
                     lr1Connections.set(i, [firstIdx]);
                 }
             }
-            
+
             // Handle the "odd" matches (1, 3, 5, 7...)
             for (let i = 0; i < Math.floor(totalR1Matches / 2); i++) {
                 const firstIdx = i * 2 + 1;  // 1, 3, 5, 7...
                 const secondIdx = i * 2 + 3; // 3, 5, 7, 9...
-                
+
                 const lrMatchIdx = Math.floor(totalR1Matches / 4) + i;
-                
+
                 if (secondIdx < totalR1Matches) {
                     lr1Connections.set(lrMatchIdx, [firstIdx, secondIdx]);
                 } else if (firstIdx < totalR1Matches) {
@@ -1185,12 +1198,12 @@ const updateBracketLines = () => {
             // Draw lines for all R1 matches to LR1 (always displayed, cell to cell)
             // console.log('R1 to LR1 connections map:', lr1Connections);
             // console.log('Total R1 matches:', bracket.matches.winners[0].length);
-            
+
             bracket.matches.winners[0].forEach((match, i) => {
                 // Find which LR1 match this R1 match feeds into
                 let loserMatchIdx = -1;
                 let playerPosition = -1; // Which position in LR1 match (0 or 1)
-                
+
                 for (const [lrIdx, r1Indices] of lr1Connections.entries()) {
                     const posInArray = r1Indices.indexOf(i);
                     if (posInArray !== -1) {
@@ -1216,16 +1229,16 @@ const updateBracketLines = () => {
                 // Connect from R1 MATCH CENTER (between cells) to LR1 player cell
                 const fromEl = bracketContentRef.value?.querySelector(`#winners-match-${props.bracketIndex}-0-${i}`);
                 const toEl = bracketContentRef.value?.querySelector(`#losers-match-${props.bracketIndex}-0-${loserMatchIdx}-p${playerPosition}`);
-                
+
                 if (!fromEl) console.warn(`From element not found: #winners-match-${props.bracketIndex}-0-${i}`);
                 if (!toEl) console.warn(`To element not found: #losers-match-${props.bracketIndex}-0-${loserMatchIdx}-p${playerPosition}`);
-                
+
                 if (!fromEl || !toEl) return;
 
                 const fromRect = fromEl.getBoundingClientRect();
                 const toRect = toEl.getBoundingClientRect();
                 const zoom = zoomLevel.value;
-                
+
                 const fromCenterY = (fromRect.top - svgRect.top + fromRect.height / 2) / zoom;
                 const toCenterY = (toRect.top - svgRect.top + toRect.height / 2) / zoom;
                 const fromLeftX = (fromRect.left - svgRect.left) / zoom;
@@ -1294,15 +1307,15 @@ const updateBracketLines = () => {
             // Connect from game indicator to their destination cell in lower bracket (always displayed)
             // SPLIT-CROSS PATTERN: Matches are paired and crossed within pairs
             dynamicLines.value.dropouts = [];
-            
+
             // Map winners rounds to losers rounds based on the image pattern
             // WR2 losers → LR2 (position 1), WR3 losers → LR4 (position 1), WR4 losers → LR6 (position 1), etc.
             for (let winRound = 1; winRound < bracket.matches.winners.length; winRound++) {
                 const loserRound = winRound * 2 - 1; // WR2→LR2, WR3→LR4, WR4→LR6
-                
+
                 if (loserRound < bracket.matches.losers.length) {
                     const numWinMatches = bracket.matches.winners[winRound].length;
-                    
+
                     bracket.matches.winners[winRound].forEach((winMatch, winIdx) => {
                         // SPLIT-CROSS PATTERN: Pairs cross within themselves
                         // For 4 matches: pairs (0,1) and (2,3) each cross
@@ -1317,7 +1330,7 @@ const updateBracketLines = () => {
                             const pairIdx = Math.floor(winIdx / 2);
                             const posInPair = winIdx % 2;
                             const pairStart = pairIdx * 2;
-                            
+
                             if (posInPair === 0) {
                                 // First in pair goes to second position
                                 loserIdx = pairStart + 1;
@@ -1326,27 +1339,27 @@ const updateBracketLines = () => {
                                 loserIdx = pairStart;
                             }
                         }
-                        
+
                         if (loserIdx < bracket.matches.losers[loserRound].length) {
                             // Connect from game indicator to destination cell (always displayed)
                             const fromEl = bracketContentRef.value?.querySelector(`#winners-match-${props.bracketIndex}-${winRound}-${winIdx} .match-label`);
                             const toEl = bracketContentRef.value?.querySelector(`#losers-match-${props.bracketIndex}-${loserRound}-${loserIdx}-p1`);
-                            
+
                             if (fromEl && toEl) {
                                 const fromRect = fromEl.getBoundingClientRect();
                                 const toRect = toEl.getBoundingClientRect();
                                 const zoom = zoomLevel.value;
-                                
+
                                 const fromX = (fromRect.left - svgRect.left) / zoom;
                                 const fromY = (fromRect.top - svgRect.top + fromRect.height / 2) / zoom;
                                 const toX = (toRect.right - svgRect.left) / zoom;
                                 const toY = (toRect.top - svgRect.top + toRect.height / 2) / zoom;
-                                
+
                                 // Simple routing like reference image
                                 // Go left a bit, then diagonal to destination
                                 const horizontalOffset = 40;
                                 const midX = fromX - horizontalOffset;
-                                
+
                                 dynamicLines.value.dropouts.push(
                                     // Horizontal segment from source
                                     { x1: fromX, y1: fromY, x2: midX, y2: fromY, isDotted: true },
@@ -1422,7 +1435,7 @@ defineExpose({
 </script>
 
 <template>
-    <div class="bracket-view-wrapper">
+    <div :class="['bracket-view-wrapper', bracket.type === 'Single Elimination' ? 'single-elim' : '']">
     <!-- Single Elimination - Split Bracket Layout (with consolation) -->
     <div v-if="bracket.type === 'Single Elimination' && shouldSplitBracket" class="bracket-scroll-container">
         <!-- Zoom Controls -->
@@ -1645,6 +1658,7 @@ defineExpose({
                     :key="`consolation-${matchIdx}`"
                     :id="`match-${bracketIndex}-${bracket.matches.length - 1}-${bracket.matches[bracket.matches.length - 1].indexOf(match)}`"
                     :data-match-id="match.id"
+                    :style="{ marginTop: playerCount > 8 && playerCount < 12 ? '50px' : '10px' }"
                     :class="['match', 'consolation-match-standard', (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
                     @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, bracket.matches.length - 1, bracket.matches[bracket.matches.length - 1].indexOf(match), match, 'single')"
                 >
@@ -1669,9 +1683,9 @@ defineExpose({
             <div class="round-robin-header">
                 <h3 class="text-xl font-bold mb-4">Round Robin Tournament</h3>
                 <!-- Persistent Tiebreaker Button -->
-                <button 
-                    v-if="isRoundRobinConcluded && isRoundRobinConcluded(bracketIndex) && (user && (user.role === 'Admin' || user.role === 'TournamentManager'))" 
-                    @click="openTiebreakerDialog && openTiebreakerDialog(bracketIndex)" 
+                <button
+                    v-if="isRoundRobinConcluded && isRoundRobinConcluded(bracketIndex) && (user && (user.role === 'Admin' || user.role === 'TournamentManager'))"
+                    @click="openTiebreakerDialog && openTiebreakerDialog(bracketIndex)"
                     class="tiebreaker-settings-button"
                     :title="bracket.tiebreaker_data && Object.keys(bracket.tiebreaker_data).length > 0 ? 'Edit Tiebreakers' : 'Set Tiebreakers'"
                 >
@@ -1747,8 +1761,8 @@ defineExpose({
                             <td class="grid-stats-cell rank-cell" :class="{ 'rank-first': getPlayerStats(roundRobinPlayers[rowIdx].id).rank === 1 }">
                                 <span class="rank-value">
                                 {{ getPlayerStats(roundRobinPlayers[rowIdx].id).rank }}
-                                <span 
-                                    v-if="getPlayerStats(roundRobinPlayers[rowIdx].id).rank === 1 && props.isRoundRobinConcluded(bracketIndex)" 
+                                <span
+                                    v-if="getPlayerStats(roundRobinPlayers[rowIdx].id).rank === 1 && props.isRoundRobinConcluded(bracketIndex)"
                                     class="trophy-icon"
                                 >🏆</span>
                                 </span>
@@ -1793,7 +1807,7 @@ defineExpose({
                             />
                         </g>
                     </svg>
-                    
+
                     <!-- Main connection lines (above dropout lines) -->
                     <svg class="unified-connection-lines">
                     <!-- Winners bracket lines -->
@@ -2089,15 +2103,15 @@ defineExpose({
             </div>
             <div class="modal-body">
                 <div v-for="(player, index) in editablePlayers" :key="index" class="player-edit-row">
-                    <input 
-                        type="color" 
+                    <input
+                        type="color"
                         v-model="playerColors[player.oldName]"
                         class="player-color-picker"
                         :title="`Change color for ${player.oldName}`"
                     />
-                    <input 
-                        v-model="player.newName" 
-                        type="text" 
+                    <input
+                        v-model="player.newName"
+                        type="text"
                         class="player-name-input"
                         :placeholder="player.oldName"
                     />

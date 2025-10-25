@@ -567,14 +567,14 @@ export function useBracketActions(dataState) {
             } else {
                 // Check if this is a split bracket (has bracket_type 'A' and 'B')
                 const hasSplitBrackets = bracketMatches.some(m => m.bracket_type === 'A' || m.bracket_type === 'B');
-                
+
                 if (hasSplitBrackets) {
                     // Split bracket: separate matches by bracket_type
                     const bracketAMatches = bracketMatches.filter(m => m.bracket_type === 'A');
                     const bracketBMatches = bracketMatches.filter(m => m.bracket_type === 'B');
                     const finalsMatches = bracketMatches.filter(m => m.bracket_type === 'finals');
                     const thirdPlaceMatches = bracketMatches.filter(m => m.bracket_type === 'third_place');
-                    
+
                     const groupByRound = (matches) => {
                         if (!matches || matches.length === 0) return [];
                         const roundsMap = matches.reduce((acc, match) => {
@@ -587,7 +587,7 @@ export function useBracketActions(dataState) {
                             .filter(round => round && round.length > 0)
                             .map(round => round.sort((a, b) => a.match_number - b.match_number));
                     };
-                    
+
                     newBracket.matches = {
                         A: groupByRound(bracketAMatches),
                         B: groupByRound(bracketBMatches),
@@ -721,7 +721,7 @@ export function useBracketActions(dataState) {
         date: selectedEvent.value.startDate,
         time: null,
         venue: selectedEvent.value.venue,
-      }));  
+      }));
       rounds.push(nextMatches);
       prevMatches = nextMatches;
       roundNumber++;
@@ -817,11 +817,11 @@ export function useBracketActions(dataState) {
         // Calculate source game numbers
         const match1Idx = i * 2;
         const match2Idx = i * 2 + 1;
-        
+
         // For R1 (first round), use match numbers directly (1, 2, 3, 4)
         // For later rounds, calculate cumulative game numbers
         let match1GameNum, match2GameNum;
-        
+
         if (winnersRounds.length === 1) {
           // R1 → WR2: Use R1 match numbers directly
           match1GameNum = currentRound[match1Idx]?.match_number || (match1Idx + 1);
@@ -835,7 +835,7 @@ export function useBracketActions(dataState) {
           match1GameNum = gamesBeforePrevRound + (match1Idx + 1);
           match2GameNum = gamesBeforePrevRound + (match2Idx + 1);
         }
-        
+
         return {
           id: generateId(),
           round: winnersRounds.length + 1,
@@ -854,7 +854,7 @@ export function useBracketActions(dataState) {
           time: null,
           venue: selectedEvent.value.venue,
         };
-      });  
+      });
       winnersRounds.push(nextRound);
       currentRound = nextRound;
     }
@@ -905,19 +905,19 @@ export function useBracketActions(dataState) {
             // Even matches (0,2,4,6...) go to LR1 Match 0,1,2,3... position 0
             // Odd matches (1,3,5,7...) go to LR1 Match 0,1,2,3... position 1
             // This creates crossing: 0 vs 2, 1 vs 3, 4 vs 6, 5 vs 7
-            
+
             const lrRoundIdx = 0; // LR1
-            
+
             winnersRound.forEach((wrMatch, wrMatchIdx) => {
                 // Odd-even pairing logic
                 const isEven = wrMatchIdx % 2 === 0;
                 const lrMatchIdx = Math.floor(wrMatchIdx / 2);
                 const lrPlayerPos = isEven ? 0 : 1;
-                
+
                 if (losersRounds[lrRoundIdx] && losersRounds[lrRoundIdx][lrMatchIdx]) {
                     // If R1 match has a BYE, put BYE in LR1
                     const hasBye = wrMatch.players[0]?.name === 'BYE' || wrMatch.players[1]?.name === 'BYE';
-                    
+
                     losersRounds[lrRoundIdx][lrMatchIdx].players[lrPlayerPos] = {
                         id: null,
                         name: hasBye ? 'BYE' : `G${wrMatch.match_number} Loser`,
@@ -932,13 +932,13 @@ export function useBracketActions(dataState) {
             // WR2+ -> LR(2r-1), ALTERNATING STRAIGHT/CROSSED PATTERN
             const lrRoundIdx = (wrRoundIdx * 2) - 1;
             const numMatches = winnersRound.length;
-            
+
             // Calculate cumulative game number (total matches before this round)
             let gamesBeforeThisRound = 0;
             for (let r = 0; r < wrRoundIdx; r++) {
                 gamesBeforeThisRound += winnersRounds[r].length;
             }
-            
+
             winnersRound.forEach((wrMatch, wrMatchIdx) => {
                 // SPLIT-CROSS PATTERN: Pairs cross within themselves
                 // For 4 matches: 0→1, 1→0, 2→3, 3→2
@@ -951,7 +951,7 @@ export function useBracketActions(dataState) {
                     const pairIdx = Math.floor(wrMatchIdx / 2);
                     const posInPair = wrMatchIdx % 2;
                     const pairStart = pairIdx * 2;
-                    
+
                     if (posInPair === 0) {
                         lrMatchIdx = pairStart + 1;
                     } else {
@@ -959,10 +959,10 @@ export function useBracketActions(dataState) {
                     }
                 }
                 const lrPlayerPos = 1;
-                
+
                 // Calculate actual game number (cumulative)
                 const actualGameNumber = gamesBeforeThisRound + wrMatchIdx + 1;
-                
+
                 const loserPlaceholder = {
                     id: null,
                     name: `G${actualGameNumber} Loser`,
@@ -979,7 +979,7 @@ export function useBracketActions(dataState) {
     // Calculate game numbers for finals
     const lastWinnersGameNum = winnersRounds.reduce((sum, round) => sum + round.length, 0);
     const lastLosersGameNum = lastWinnersGameNum + losersRounds.reduce((sum, round) => sum + round.length, 0);
-    
+
     const grandFinals = [ // grandFinals is an array of rounds
         [{
             id: generateId(),
@@ -1048,13 +1048,13 @@ export function useBracketActions(dataState) {
   // Count unique participants from the first round only (initial matches)
   // This avoids counting the same player multiple times and excludes consolation match players
   const players = new Set();
-  
+
   if (bracket.type === 'Single Elimination') {
     // Get first round matches only, excluding consolation matches
     const firstRound = bracket.matches[0] || [];
     firstRound.forEach(match => {
       match.players.forEach(player => {
-        if (player && player.id && player.name && 
+        if (player && player.id && player.name &&
             player.name !== 'TBD' && player.name !== 'BYE') {
           players.add(player.id);
         }
@@ -1065,7 +1065,7 @@ export function useBracketActions(dataState) {
     const firstRound = bracket.matches.winners[0] || [];
     firstRound.forEach(match => {
       match.players.forEach(player => {
-        if (player && player.id && player.name && 
+        if (player && player.id && player.name &&
             player.name !== 'TBD' && player.name !== 'BYE') {
           players.add(player.id);
         }
@@ -1075,7 +1075,7 @@ export function useBracketActions(dataState) {
     // For Round Robin, count all unique players across all matches
     allMatches.forEach(match => {
       match.players.forEach(player => {
-        if (player && player.id && player.name && 
+        if (player && player.id && player.name &&
             player.name !== 'TBD' && player.name !== 'BYE') {
           players.add(player.id);
         }
@@ -1893,15 +1893,15 @@ const updateLines = (bracketIdx) => {
 
             if (loserIndex !== -1) {
               const losersRoundIdx = 0;
-              
+
               // Odd-even pairing: Match i pairs with Match i+2
               // Match 0 (1st) pairs with Match 2 (3rd) -> LR1 Match 0
               // Match 1 (2nd) pairs with Match 3 (4th) -> LR1 Match 1
               // Match 4 (5th) pairs with Match 6 (7th) -> LR1 Match 2
               // Match 5 (6th) pairs with Match 7 (8th) -> LR1 Match 3
-              
+
               let losersMatchIdx, losersPlayerPos;
-              
+
               if (loserIndex % 2 === 0) {
                 // Even index (0, 2, 4, 6...): goes to position 0
                 losersMatchIdx = Math.floor(loserIndex / 2);
@@ -1923,7 +1923,7 @@ const updateLines = (bracketIdx) => {
                         // SPLIT-CROSS PATTERN: Pairs cross within themselves
                         const losersRoundIdx = (roundIdx * 2) - 1;
                         const numMatchesInRound = bracket.matches.winners[roundIdx].length;
-                        
+
                         let losersMatchIdx;
                         if (numMatchesInRound === 1) {
                             losersMatchIdx = 0;
@@ -1932,14 +1932,14 @@ const updateLines = (bracketIdx) => {
                             const pairIdx = Math.floor(matchIdx / 2);
                             const posInPair = matchIdx % 2;
                             const pairStart = pairIdx * 2;
-                            
+
                             if (posInPair === 0) {
                                 losersMatchIdx = pairStart + 1;
                             } else {
                                 losersMatchIdx = pairStart;
                             }
                         }
-                        
+
                         const losersPlayerPos = 1; // They play the winner of the previous losers round
                         setPlayerWithLog(bracket, 'losers', losersRoundIdx, losersMatchIdx, losersPlayerPos, newLoserPayload, performedActions);
                     }

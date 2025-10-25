@@ -606,6 +606,24 @@
 }
 
 /* No Brackets Message */
+.no-bracket-center-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.finals-container .section-label,
+.consolation-container .section-label {
+  margin-bottom: 4px;
+  margin-top: 0;
+}
+
 .no-brackets-message {
   display: flex;
   flex-direction: column;
@@ -959,7 +977,7 @@
 }
 
 /* Dotted lines from upper bracket to lower bracket */
-.dropout-line { 
+.dropout-line {
   stroke: #000000;
   stroke-width: 3;
   stroke-dasharray: 8, 4;
@@ -1739,8 +1757,8 @@
   align-items: center;
 }
 
-  /* Scoring Configuration Dialog */
-  .scoring-config-dialog {
+/* Scoring Configuration Dialog */
+.scoring-config-dialog {
     padding: 10px 0;
   }
 
@@ -2384,12 +2402,19 @@
   position: relative;
 }
 
-.finals-round {
+.single-elim .finals-round,
+.single-elim .consolation-round {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
-  gap: 20px;
+  gap: 8px;
+  min-height: auto;
+}
+
+.single-elim .finals-round .placement-labels,
+.single-elim .consolation-round .placement-label {
+  margin-top: 0;
 }
 
 .finals-match {
@@ -2619,8 +2644,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3rem;
+  gap: 0.5rem;
   min-width: 200px;
+  padding: 0.5rem 0;
 }
 
 .finals-container,
@@ -2628,21 +2654,43 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  margin: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.finals-bracket .finals-round,
+.consolation-bracket .consolation-round {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-height: auto;
+}
+
+.finals-bracket .placement-labels,
+.consolation-bracket .placement-label {
+  margin-top: 0;
+  text-align: center;
+  width: 100%;
 }
 
 .finals-container .section-label {
   color: #ffc107;
   font-weight: 700;
-  font-size: 1.2rem;
+  font-size: 1rem;
   text-transform: uppercase;
+  margin: 0.25rem 0;
+  line-height: 1.2;
 }
 
 .consolation-container .section-label {
   color: #cd7f32;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
+  margin: 0.25rem 0;
+  line-height: 1.2;
 }
 
 .finals-match {
@@ -2705,7 +2753,7 @@
 /* 3rd Place Indicator */
 .third-place-indicator {
   display: flex;
-  justify-content: flex-start;
+  justify-content: flex-end;
   align-items: center;
 }
 
@@ -2863,3 +2911,198 @@
   background: #fff9e6 !important;
   font-weight: 700;
 }
+
+/* Scoped restore: single-elim alignment (based on the old working rules) */
+.single-elim .bracket {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.single-elim .round {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* CRITICAL: evenly distribute matches vertically */
+  gap: 20px;                       /* old file used ~20px for round gaps */
+  min-width: 280px;
+  /* ensure there's vertical room for space-between to work */
+  min-height: 360px;               /* tweak if needed for your layout */
+}
+
+.single-elim .round > h3 {
+  margin: 0 0 15px 0;
+}
+
+.single-elim .round > .match:first-of-type {
+  margin-top: 20px;
+}
+
+.single-elim .match {
+  width: 150px;
+  min-height: 60px;
+  position: relative;
+  z-index: 3;    /* keep matches above connector SVGs */
+  margin-bottom: 0;
+  /* keep appearance consistent with older styles (optional — uncomment if desired)
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  */
+}
+
+/* Make sure groups fill the column (no !important, follow old behavior) */
+.single-elim .match-group {
+  width: 100%;
+  align-items: stretch;
+}
+
+
+/* ensure connection-line overlays stay behind matches in single-elim */
+.single-elim .unified-connection-lines,
+.single-elim .dropout-lines-layer {
+  z-index: 1;
+}
+
+/* Force overrides (only if earlier rules keep winning): increase specificity */
+body .single-elim .bracket { gap: 20px; }
+body .single-elim .round  { min-width: 180px; justify-content: space-between; }
+
+/* === Single Elimination Scoped Layout === */
+.single-elim .round-consolation {
+  display: grid !important;
+  grid-template-rows: auto 1fr !important;
+  align-items: start !important;
+  position: relative;
+}
+
+.single-elim .consolation-match-standard {
+  grid-row: 2 !important;
+  align-self: center !important;
+
+}
+
+.single-elim .finals-container,
+.single-elim .consolation-container {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 1rem !important;
+}
+
+.single-elim .placement-labels {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.5rem !important;
+  margin-top: 0.5rem !important;
+}
+
+.single-elim .bracket-side-left .placement-plate,
+.single-elim .bracket-side-right .placement-plate {
+  position: relative;
+  margin-top: 1rem;
+  width: max-content;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.single-elim .finals-bottom-row,
+.single-elim .finals-center-flow,
+.single-elim .three-column-bracket-container {
+  display: block !important;
+  grid-column: auto !important;
+  grid-row: auto !important;
+}
+
+.single-elim .unified-connection-lines,
+.single-elim .dropout-lines-layer {
+  z-index: 1 !important;
+}
+
+/* Placement plates styling */
+.placement-plate {
+  background: #fff;
+  border-radius: 8px;
+  padding: 6px 10px;
+  border: 2px solid rgba(0,0,0,0.06);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  font-weight: 700;
+}
+
+.placement-plate .placement-label.champion {
+  background: #ffc107;
+  color: #000;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.placement-plate .placement-label.third {
+  background: #cd7f32;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+/* --- SINGLE ELIMINATION FIX: restore champion & 3rd place positions --- */
+
+.single-elim .round {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* evenly distribute matches vertically */
+  gap: 20px;
+  min-width: 280px;
+  min-height: 360px;
+}
+
+.single-elim .finals-round,
+.single-elim .consolation-round {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+  min-height: auto;
+}
+
+/* champion + 3rd place labels sit directly below the match */
+.single-elim .finals-round .placement-labels,
+.single-elim .consolation-round .placement-label {
+  margin-top: 0;
+}
+
+/* keep small vertical spacing for placement blocks */
+.single-elim .placement-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* 3rd-place (consolation) container grid restored */
+.single-elim .round-consolation {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  position: relative;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.single-elim .consolation-match-standard {
+  margin-top: 0;
+  align-self: flex-start;
+}
+
+/* align placement plates under each bracket side */
+.single-elim .bracket-side-left .placement-plate,
+.single-elim .bracket-side-right .placement-plate {
+  position: relative;
+  margin-top: 1rem;
+  width: max-content;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/*
+
+*/
