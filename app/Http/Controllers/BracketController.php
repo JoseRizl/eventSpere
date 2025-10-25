@@ -329,21 +329,62 @@ class BracketController extends Controller
 
         // Find the bracket
         $bracketIndex = collect($jsonData['brackets'])->search(fn($b) => ($b['id'] ?? null) == $id);
-        
+
         if ($bracketIndex === false) {
             return response()->json(['error' => 'Bracket not found'], 404);
         }
 
-        $bracket = $jsonData['brackets'][$bracketIndex];
+        // Get all match IDs for the specified bracket
+        $matchIdsForBracket = collect($jsonData['matches'])
+            ->where('bracket_id', $id)
+            ->pluck('id')
+            ->all();
 
-        // Update player names in the bracket's matches structure
-        $this->updatePlayerNamesInMatches($bracket['matches'], $updates);
+        // Update names in the normalized matchPlayers table
+        foreach ($jsonData['matchPlayers'] as &$matchPlayer) {
+            if (in_array($matchPlayer['match_id'], $matchIdsForBracket)) {
+                foreach ($updates as $update) {
+                    if ($matchPlayer['name'] === $update['oldName']) {
+                        $matchPlayer['name'] = $update['newName'];
+                    }
+                }
+            }
+        }
 
         // Save back
-        $jsonData['brackets'][$bracketIndex] = $bracket;
         $this->writeJson($jsonData);
 
-        return response()->json(['message' => 'Player names updated successfully', 'bracket' => $bracket]);
+        return response()->json(['message' => 'Player names updated successfully']);
+    }
+
+    public function updatePlayerColors(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'colors' => 'required|array',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $jsonData = $this->readJson();
+        $colors = $request->input('colors');
+
+        // Get all match IDs for the specified bracket
+        $matchIdsForBracket = collect($jsonData['matches'])
+            ->where('bracket_id', $id)
+            ->pluck('id')
+            ->all();
+
+        // Update colors in the normalized matchPlayers table
+        foreach ($jsonData['matchPlayers'] as &$matchPlayer) {
+            if (in_array($matchPlayer['match_id'], $matchIdsForBracket) && isset($colors[$matchPlayer['name']])) {
+                $matchPlayer['color'] = $colors[$matchPlayer['name']];
+            }
+        }
+
+        $this->writeJson($jsonData);
+        return response()->json(['message' => 'Player colors updated successfully']);
     }
 
     /**

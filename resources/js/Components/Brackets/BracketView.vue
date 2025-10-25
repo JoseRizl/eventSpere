@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { truncate } from '@/utils/stringUtils.js';
 import { useToast } from '@/composables/useToast.js';
 
@@ -46,6 +46,11 @@ const playerColors = ref({});
 // Generate deterministic color based on player name (consistent across sessions)
 const generatePlayerColor = (playerName) => {
     if (!playerName || playerName === 'TBD' || playerName === 'BYE' || playerName.includes('Winner') || playerName.includes('Loser')) {
+        return null;
+    }
+
+    // If a color is already set for this player, use it.
+    if (playerColors.value[playerName]) {
         return null;
     }
 
@@ -1422,16 +1427,42 @@ onUnmounted(() => {
 });
 
 watch(() => props.bracket, () => {
+    playerColors.value = {}; // Clear old colors before populating new ones
+    populateInitialColors();
     nextTick(updateBracketLines);
     alignConsolationWithFinals();
 }, { deep: true });
 
+const populateInitialColors = () => {
+    const processMatches = (matches) => {
+        if (!matches) return;
+        matches.flat().forEach(match => {
+            if (match && match.players) {
+                match.players.forEach(player => {
+                    if (player && player.name && player.color && !playerColors.value[player.name]) {
+                        playerColors.value[player.name] = player.color;
+                    }
+                });
+            }
+        });
+    };
+
+    if (props.bracket.type === 'Double Elimination') {
+        processMatches(props.bracket.matches.winners);
+        processMatches(props.bracket.matches.losers);
+        processMatches(props.bracket.matches.grand_finals);
+    } else {
+        processMatches(props.bracket.matches);
+    }
+};
 // Expose functions and data so parent can access them
 defineExpose({
     openPlayerEditModal,
     playerColors,
     generatePlayerColor
 });
+
+onMounted(populateInitialColors);
 </script>
 
 <template>

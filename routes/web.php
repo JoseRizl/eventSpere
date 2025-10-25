@@ -71,6 +71,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/events', [EventController::class, 'index'])->name('events.index'); // For fetching all events as JSON
         Route::apiResource('brackets', BracketController::class)->except(['show', 'create', 'edit', 'index']);
         Route::put('/brackets/{id}/update-player-names', [BracketController::class, 'updatePlayerNames'])->name('brackets.updatePlayerNames');
+        Route::put('/brackets/{id}/update-player-colors', [BracketController::class, 'updatePlayerColors'])->name('brackets.updatePlayerColors');
         Route::get('/events/{eventId}/tasks', [TaskController::class, 'indexForEvent'])->name('events.tasks.indexForEvent');
         Route::get('/events/{eventId}/activities', [ActivitiesController::class, 'indexForEvent'])->name('events.activities.indexForEvent');
         Route::apiResource('tasks', TaskController::class)->except(['show', 'create', 'edit']);
