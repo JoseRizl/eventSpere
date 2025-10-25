@@ -204,7 +204,7 @@ const proceedWithUpdate = () => {
 
             <div class="dialog-actions">
                 <button @click="closeModal" class="modal-button-secondary">Cancel</button>
-                <Button @click="confirmUpdate" class="modal-button-primary" :disabled="isMatchDataInvalid || isDrawNotAllowed || loading" :loading="loading" label="Update Match" />
+                <button @click="confirmUpdate" class="modal-button-primary" :disabled="isMatchDataInvalid || isDrawNotAllowed || loading" :loading="loading">Update Match</button>
             </div>
         </div>
 

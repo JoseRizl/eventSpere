@@ -569,7 +569,7 @@ onMounted(async () => {
         :message="genericErrorMessage"
         confirmText="OK"
         :show-cancel-button="false"
-        confirmButtonClass="bg-red-600 hover:bg-red-700"
+        confirmButtonClass="modal-button-danger"
         @confirm="showGenericErrorDialog = false"
       />
 
