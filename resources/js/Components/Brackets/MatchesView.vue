@@ -138,10 +138,10 @@ const getMatchIdentifier = (match) => {
                                         <div class="player">
                                             <span class="player-name">{{ truncate(match.players[0].name, { length: 12 }) }}</span>
                                             <span v-if="match.status === 'completed'"
-                                                :class="['player-result', 
-                                                        match.winner_id === null ? 'result-draw' : 
+                                                :class="['player-result',
+                                                        match.winner_id === null ? 'result-draw' :
                                                         (match.winner_id === match.players[0].id ? 'result-win' : 'result-loss')]">
-                                                {{ match.winner_id === null ? 'D' : 
+                                                {{ match.winner_id === null ? 'D' :
                                                 (match.winner_id === match.players[0].id ? 'W' : 'L') }}
                                             </span>
                                             <span v-else class="player-score">-</span>
@@ -150,10 +150,10 @@ const getMatchIdentifier = (match) => {
                                         <div class="player">
                                             <span class="player-name">{{ truncate(match.players[1].name, { length: 12 }) }}</span>
                                             <span v-if="match.status === 'completed'"
-                                                :class="['player-result', 
-                                                        match.winner_id === null ? 'result-draw' : 
+                                                :class="['player-result',
+                                                        match.winner_id === null ? 'result-draw' :
                                                         (match.winner_id === match.players[1].id ? 'result-win' : 'result-loss')]">
-                                                {{ match.winner_id === null ? 'D' : 
+                                                {{ match.winner_id === null ? 'D' :
                                                 (match.winner_id === match.players[1].id ? 'W' : 'L') }}
                                             </span>
                                             <span v-else class="player-score">-</span>
@@ -172,12 +172,12 @@ const getMatchIdentifier = (match) => {
                                 </div>
                             </div>
                         </div>
-                        <div v-if="match.status === 'completed'" class="final-score-bar">
+                        <!-- <div v-if="match.status === 'completed'" class="final-score-bar">
                             <div class="final-score-content">
                                 <span>Final Score</span>
                                 <span class="score-display">{{ match.players[0].score || '0' }} - {{ match.players[1].score || '0' }}</span>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>

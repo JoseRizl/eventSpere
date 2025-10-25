@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
+import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 import BracketView from '@/Components/Brackets/BracketView.vue';
 import MatchesView from '@/Components/Brackets/MatchesView.vue';
@@ -79,6 +80,7 @@ const bracketViewRef = ref(null);
 const playerColors = ref({});
 const isSavingPlayers = ref(false);
 const showDuplicatePlayerError = ref(false);
+const showSaveConfirm = ref(false);
 
 const openPlayerEditModal = () => {
     if (props.bracket.type === 'Double Elimination') {
@@ -129,12 +131,14 @@ const savePlayerNames = async () => {
         return;
     }
 
-    await proceedWithSave();
+    // Show confirmation dialog instead of saving directly
+    showSaveConfirm.value = true;
 };
 
 const proceedWithSave = async () => {
     isSavingPlayers.value = true;
 
+    // This is now called after confirmation
     const updates = editablePlayers.value
         .filter(p => p.oldName !== p.newName && p.newName.trim() !== '');
 
@@ -199,6 +203,7 @@ const proceedWithSave = async () => {
 
     isSavingPlayers.value = false;
     showPlayerEditModal.value = false;
+    showSaveConfirm.value = false; // Ensure confirm dialog is closed
 };
 
 </script>
@@ -347,7 +352,7 @@ const proceedWithSave = async () => {
             </div>
             <div class="modal-footer">
                 <button @click="showPlayerEditModal = false" class="btn-cancel">Cancel</button>
-                <button @click="savePlayerNames" class="btn-save" :loading="isSavingPlayers" :disabled="isSavingPlayers">Save Changes</button>
+                <button @click="savePlayerNames" class="create-button" :loading="isSavingPlayers" :disabled="isSavingPlayers" label="Save Changes">Save Changes</button>
             </div>
         </div>
     </div>
@@ -362,6 +367,17 @@ const proceedWithSave = async () => {
         confirmButtonClass="modal-button-danger"
         @confirm="showDuplicatePlayerError = false"
     />
+
+    <!-- Save Player Names Confirmation Dialog -->
+    <ConfirmationDialog
+        v-model:show="showSaveConfirm"
+        title="Save Player Names"
+        message="Are you sure you want to save these changes?"
+        confirmText="Yes, Save"
+        @confirm="proceedWithSave"
+    />
+
+    <LoadingSpinner :show="isSavingPlayers" message="Processing..."/>
 </template>
 
 <style scoped>
