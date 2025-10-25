@@ -750,16 +750,6 @@
     "settings": [],
     "brackets": [
         {
-            "id": "7222f2ee",
-            "name": "17",
-            "type": "Single Elimination",
-            "event_id": "9ab1",
-            "allow_draws": false,
-            "tiebreaker_data": [],
-            "created_at": "2025-10-25T15:08:46.759203Z",
-            "updated_at": "2025-10-25T15:29:28.591281Z"
-        },
-        {
             "id": "c1a7b8ac",
             "name": "8",
             "type": "Single Elimination",
@@ -784,10 +774,10 @@
             "name": "12",
             "type": "Single Elimination",
             "event_id": "6ee4",
-            "allow_draws": null,
+            "allow_draws": false,
             "tiebreaker_data": [],
             "created_at": "2025-10-25T13:50:29.720221Z",
-            "updated_at": "2025-10-25T13:50:33.964140Z"
+            "updated_at": "2025-10-25T16:18:08.423628Z"
         },
         {
             "id": "7c7e27b7",
@@ -1247,227 +1237,6 @@
             "bracket_id": "7c7e27b7"
         },
         {
-            "id": "elqlgr9wc",
-            "round": 1,
-            "match_number": 1,
-            "winner_id": "gy6umosza",
-            "status": "completed",
-            "created_at": "2025-10-25T13:50:29.086Z",
-            "updated_at": "2025-10-25T13:50:29.086Z",
-            "date": "2025-10-22",
-            "time": null,
-            "venue": "Court",
-            "loser_id": "zqpy4qpkf",
-            "bracket_id": "b62fdd55"
-        },
-        {
-            "id": "77utz0v6f",
-            "round": 1,
-            "match_number": 2,
-            "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-10-25T13:50:29.086Z",
-            "updated_at": "2025-10-25T13:50:29.086Z",
-            "date": "2025-10-22",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "b62fdd55"
-        },
-        {
-            "id": "mjjx27yze",
-            "round": 1,
-            "match_number": 3,
-            "winner_id": "4mw7bgee1",
-            "status": "completed",
-            "created_at": "2025-10-25T13:50:29.086Z",
-            "updated_at": "2025-10-25T13:50:29.086Z",
-            "date": "2025-10-22",
-            "time": null,
-            "venue": "Court",
-            "loser_id": "km95bup18",
-            "bracket_id": "b62fdd55"
-        },
-        {
-            "id": "amdzx1gwa",
-            "round": 1,
-            "match_number": 4,
-            "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-10-25T13:50:29.086Z",
-            "updated_at": "2025-10-25T13:50:29.086Z",
-            "date": "2025-10-22",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "b62fdd55"
-        },
-        {
-            "id": "9661jrvm3",
-            "round": 1,
-            "match_number": 5,
-            "winner_id": "ilfqltpij",
-            "status": "completed",
-            "created_at": "2025-10-25T13:50:29.086Z",
-            "updated_at": "2025-10-25T13:50:29.086Z",
-            "date": "2025-10-22",
-            "time": null,
-            "venue": "Court",
-            "loser_id": "hpaqdh8sv",
-            "bracket_id": "b62fdd55"
-        },
-        {
-            "id": "rxtym2gj1",
-            "round": 1,
-            "match_number": 6,
-            "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-10-25T13:50:29.086Z",
-            "updated_at": "2025-10-25T13:50:29.086Z",
-            "date": "2025-10-22",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "b62fdd55"
-        },
-        {
-            "id": "cvtsrfo0z",
-            "round": 1,
-            "match_number": 7,
-            "winner_id": "gi33asqrf",
-            "status": "completed",
-            "created_at": "2025-10-25T13:50:29.086Z",
-            "updated_at": "2025-10-25T13:50:29.086Z",
-            "date": "2025-10-22",
-            "time": null,
-            "venue": "Court",
-            "loser_id": "z57b5nttf",
-            "bracket_id": "b62fdd55"
-        },
-        {
-            "id": "xs7duhep5",
-            "round": 1,
-            "match_number": 8,
-            "winner_id": null,
-            "status": "pending",
-            "created_at": "2025-10-25T13:50:29.086Z",
-            "updated_at": "2025-10-25T13:50:29.086Z",
-            "date": "2025-10-22",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "b62fdd55"
-        },
-        {
-            "id": "h768mkw21",
-            "round": 2,
-            "match_number": 1,
-            "winner_id": null,
-            "loser_id": null,
-            "status": "pending",
-            "created_at": "2025-10-25T13:50:29.086Z",
-            "updated_at": "2025-10-25T13:50:29.086Z",
-            "date": "2025-10-22",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "b62fdd55"
-        },
-        {
-            "id": "gpzh4wzr9",
-            "round": 2,
-            "match_number": 2,
-            "winner_id": null,
-            "loser_id": null,
-            "status": "pending",
-            "created_at": "2025-10-25T13:50:29.086Z",
-            "updated_at": "2025-10-25T13:50:29.086Z",
-            "date": "2025-10-22",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "b62fdd55"
-        },
-        {
-            "id": "vmj6lz3i2",
-            "round": 2,
-            "match_number": 3,
-            "winner_id": null,
-            "loser_id": null,
-            "status": "pending",
-            "created_at": "2025-10-25T13:50:29.086Z",
-            "updated_at": "2025-10-25T13:50:29.086Z",
-            "date": "2025-10-22",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "b62fdd55"
-        },
-        {
-            "id": "n8xfloy5t",
-            "round": 2,
-            "match_number": 4,
-            "winner_id": null,
-            "loser_id": null,
-            "status": "pending",
-            "created_at": "2025-10-25T13:50:29.086Z",
-            "updated_at": "2025-10-25T13:50:29.086Z",
-            "date": "2025-10-22",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "b62fdd55"
-        },
-        {
-            "id": "pxmiaz3d3",
-            "round": 3,
-            "match_number": 1,
-            "winner_id": null,
-            "loser_id": null,
-            "status": "pending",
-            "created_at": "2025-10-25T13:50:29.086Z",
-            "updated_at": "2025-10-25T13:50:29.086Z",
-            "date": "2025-10-22",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "b62fdd55"
-        },
-        {
-            "id": "v5s43830g",
-            "round": 3,
-            "match_number": 2,
-            "winner_id": null,
-            "loser_id": null,
-            "status": "pending",
-            "created_at": "2025-10-25T13:50:29.086Z",
-            "updated_at": "2025-10-25T13:50:29.086Z",
-            "date": "2025-10-22",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "b62fdd55"
-        },
-        {
-            "id": "xcwwbeg9r",
-            "round": 4,
-            "match_number": 1,
-            "winner_id": null,
-            "loser_id": null,
-            "status": "pending",
-            "created_at": "2025-10-25T13:50:29.086Z",
-            "updated_at": "2025-10-25T13:50:29.086Z",
-            "date": "2025-10-22",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "b62fdd55"
-        },
-        {
-            "id": "c82l2n3dn",
-            "round": 4,
-            "match_number": 2,
-            "bracket_type": "consolation",
-            "winner_id": null,
-            "loser_id": null,
-            "status": "pending",
-            "created_at": "2025-10-25T13:50:33.308Z",
-            "updated_at": "2025-10-25T13:50:33.308Z",
-            "date": "2025-10-22",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "b62fdd55"
-        },
-        {
             "id": "gvslkdv16",
             "round": 1,
             "match_number": 1,
@@ -1808,452 +1577,225 @@
             "bracket_id": "c1a7b8ac"
         },
         {
-            "id": "583i6ri00",
+            "id": "elqlgr9wc",
             "round": 1,
             "match_number": 1,
-            "winner_id": "dy3b5nxt7",
+            "winner_id": "gy6umosza",
             "status": "completed",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
+            "created_at": "2025-10-25T13:50:29.086Z",
+            "updated_at": "2025-10-25T13:50:29.086Z",
+            "date": "2025-10-22",
             "time": null,
             "venue": "Court",
-            "bracket_id": "7222f2ee",
-            "loser_id": "3fbkpgcp3"
+            "loser_id": "zqpy4qpkf",
+            "bracket_id": "b62fdd55"
         },
         {
-            "id": "y3krqul8o",
+            "id": "77utz0v6f",
             "round": 1,
             "match_number": 2,
             "winner_id": null,
             "status": "pending",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
+            "created_at": "2025-10-25T13:50:29.086Z",
+            "updated_at": "2025-10-25T13:50:29.086Z",
+            "date": "2025-10-22",
             "time": null,
             "venue": "Court",
-            "bracket_id": "7222f2ee"
+            "bracket_id": "b62fdd55"
         },
         {
-            "id": "idzyxh4ow",
+            "id": "mjjx27yze",
             "round": 1,
             "match_number": 3,
-            "winner_id": "sjl89gvft",
+            "winner_id": "4mw7bgee1",
             "status": "completed",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
+            "created_at": "2025-10-25T13:50:29.086Z",
+            "updated_at": "2025-10-25T13:50:29.086Z",
+            "date": "2025-10-22",
             "time": null,
             "venue": "Court",
-            "bracket_id": "7222f2ee",
-            "loser_id": "lytiyrnji"
+            "loser_id": "km95bup18",
+            "bracket_id": "b62fdd55"
         },
         {
-            "id": "kr19xuqyf",
+            "id": "amdzx1gwa",
             "round": 1,
             "match_number": 4,
-            "winner_id": "ul4bssksw",
-            "status": "completed",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
+            "winner_id": null,
+            "status": "pending",
+            "created_at": "2025-10-25T13:50:29.086Z",
+            "updated_at": "2025-10-25T13:50:29.086Z",
+            "date": "2025-10-22",
             "time": null,
             "venue": "Court",
-            "bracket_id": "7222f2ee",
-            "loser_id": "yf1q3zjd9"
+            "bracket_id": "b62fdd55"
         },
         {
-            "id": "yj5ebqz3e",
+            "id": "9661jrvm3",
             "round": 1,
             "match_number": 5,
-            "winner_id": "9x5vt7v29",
+            "winner_id": "ilfqltpij",
             "status": "completed",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
+            "created_at": "2025-10-25T13:50:29.086Z",
+            "updated_at": "2025-10-25T13:50:29.086Z",
+            "date": "2025-10-22",
             "time": null,
             "venue": "Court",
-            "bracket_id": "7222f2ee",
-            "loser_id": "uapk6id69"
+            "loser_id": "hpaqdh8sv",
+            "bracket_id": "b62fdd55"
         },
         {
-            "id": "p5y40k7lf",
+            "id": "rxtym2gj1",
             "round": 1,
             "match_number": 6,
-            "winner_id": "1qh8bws1b",
-            "status": "completed",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
+            "winner_id": null,
+            "status": "pending",
+            "created_at": "2025-10-25T13:50:29.086Z",
+            "updated_at": "2025-10-25T13:50:29.086Z",
+            "date": "2025-10-22",
             "time": null,
             "venue": "Court",
-            "bracket_id": "7222f2ee",
-            "loser_id": "wphrxbgld"
+            "bracket_id": "b62fdd55"
         },
         {
-            "id": "ewfy64sws",
+            "id": "cvtsrfo0z",
             "round": 1,
             "match_number": 7,
-            "winner_id": "9r2w93ehx",
+            "winner_id": "gi33asqrf",
             "status": "completed",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
+            "created_at": "2025-10-25T13:50:29.086Z",
+            "updated_at": "2025-10-25T13:50:29.086Z",
+            "date": "2025-10-22",
             "time": null,
             "venue": "Court",
-            "bracket_id": "7222f2ee",
-            "loser_id": "m1fpej5qr"
+            "loser_id": "z57b5nttf",
+            "bracket_id": "b62fdd55"
         },
         {
-            "id": "7em4azgny",
+            "id": "xs7duhep5",
             "round": 1,
             "match_number": 8,
-            "winner_id": "jrk1t3tgh",
-            "status": "completed",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
+            "winner_id": null,
+            "status": "pending",
+            "created_at": "2025-10-25T13:50:29.086Z",
+            "updated_at": "2025-10-25T13:50:29.086Z",
+            "date": "2025-10-22",
             "time": null,
             "venue": "Court",
-            "bracket_id": "7222f2ee",
-            "loser_id": "xwbnlmpey"
+            "bracket_id": "b62fdd55"
         },
         {
-            "id": "zrtp6ej55",
-            "round": 1,
-            "match_number": 9,
-            "winner_id": "qx75cep35",
-            "status": "completed",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "7222f2ee",
-            "loser_id": "21i0mq6k8"
-        },
-        {
-            "id": "6od4brs5a",
-            "round": 1,
-            "match_number": 10,
-            "winner_id": "llfko4rl5",
-            "status": "completed",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "7222f2ee",
-            "loser_id": "c3kp1fn42"
-        },
-        {
-            "id": "511o138o2",
-            "round": 1,
-            "match_number": 11,
-            "winner_id": "d3xxk3ad0",
-            "status": "completed",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "7222f2ee",
-            "loser_id": "k5bxf2a0f"
-        },
-        {
-            "id": "i6vi5rw3m",
-            "round": 1,
-            "match_number": 12,
-            "winner_id": "k16swl0a5",
-            "status": "completed",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "7222f2ee",
-            "loser_id": "esf47po44"
-        },
-        {
-            "id": "yc5mlbxcj",
-            "round": 1,
-            "match_number": 13,
-            "winner_id": "buuy24lzg",
-            "status": "completed",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "7222f2ee",
-            "loser_id": "6hxkmiqyj"
-        },
-        {
-            "id": "lejrio9xg",
-            "round": 1,
-            "match_number": 14,
-            "winner_id": "yk5qbbc1c",
-            "status": "completed",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "7222f2ee",
-            "loser_id": "09cdunhub"
-        },
-        {
-            "id": "5iu0weoz0",
-            "round": 1,
-            "match_number": 15,
-            "winner_id": "kawjaqgwu",
-            "status": "completed",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "7222f2ee",
-            "loser_id": "01s0m44du"
-        },
-        {
-            "id": "82fffkjoo",
-            "round": 1,
-            "match_number": 16,
-            "winner_id": "iu3myovsx",
-            "status": "completed",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "7222f2ee",
-            "loser_id": "c44trsc7n"
-        },
-        {
-            "id": "itbrsfn2j",
+            "id": "h768mkw21",
             "round": 2,
             "match_number": 1,
             "winner_id": null,
             "loser_id": null,
             "status": "pending",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
+            "created_at": "2025-10-25T13:50:29.086Z",
+            "updated_at": "2025-10-25T13:50:29.086Z",
+            "date": "2025-10-22",
             "time": null,
             "venue": "Court",
-            "bracket_id": "7222f2ee"
+            "bracket_id": "b62fdd55"
         },
         {
-            "id": "nufs0pyyh",
+            "id": "gpzh4wzr9",
             "round": 2,
             "match_number": 2,
             "winner_id": null,
             "loser_id": null,
             "status": "pending",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
+            "created_at": "2025-10-25T13:50:29.086Z",
+            "updated_at": "2025-10-25T13:50:29.086Z",
+            "date": "2025-10-22",
             "time": null,
             "venue": "Court",
-            "bracket_id": "7222f2ee"
+            "bracket_id": "b62fdd55"
         },
         {
-            "id": "ud1ex8haq",
+            "id": "vmj6lz3i2",
             "round": 2,
             "match_number": 3,
             "winner_id": null,
             "loser_id": null,
             "status": "pending",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
+            "created_at": "2025-10-25T13:50:29.086Z",
+            "updated_at": "2025-10-25T13:50:29.086Z",
+            "date": "2025-10-22",
             "time": null,
             "venue": "Court",
-            "bracket_id": "7222f2ee"
+            "bracket_id": "b62fdd55"
         },
         {
-            "id": "x77h6lqi3",
+            "id": "n8xfloy5t",
             "round": 2,
             "match_number": 4,
             "winner_id": null,
             "loser_id": null,
             "status": "pending",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
+            "created_at": "2025-10-25T13:50:29.086Z",
+            "updated_at": "2025-10-25T13:50:29.086Z",
+            "date": "2025-10-22",
             "time": null,
             "venue": "Court",
-            "bracket_id": "7222f2ee"
+            "bracket_id": "b62fdd55"
         },
         {
-            "id": "ii2fycwfx",
-            "round": 2,
-            "match_number": 5,
-            "winner_id": null,
-            "loser_id": null,
-            "status": "pending",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "7222f2ee"
-        },
-        {
-            "id": "zw19x1mbx",
-            "round": 2,
-            "match_number": 6,
-            "winner_id": null,
-            "loser_id": null,
-            "status": "pending",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "7222f2ee"
-        },
-        {
-            "id": "whnefk86s",
-            "round": 2,
-            "match_number": 7,
-            "winner_id": null,
-            "loser_id": null,
-            "status": "pending",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "7222f2ee"
-        },
-        {
-            "id": "2ibhfgrct",
-            "round": 2,
-            "match_number": 8,
-            "winner_id": null,
-            "loser_id": null,
-            "status": "pending",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "7222f2ee"
-        },
-        {
-            "id": "e2te54wng",
+            "id": "pxmiaz3d3",
             "round": 3,
             "match_number": 1,
             "winner_id": null,
             "loser_id": null,
             "status": "pending",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
+            "created_at": "2025-10-25T13:50:29.086Z",
+            "updated_at": "2025-10-25T13:50:29.086Z",
+            "date": "2025-10-22",
             "time": null,
             "venue": "Court",
-            "bracket_id": "7222f2ee"
+            "bracket_id": "b62fdd55"
         },
         {
-            "id": "7nf88vi7u",
+            "id": "v5s43830g",
             "round": 3,
             "match_number": 2,
             "winner_id": null,
             "loser_id": null,
             "status": "pending",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
+            "created_at": "2025-10-25T13:50:29.086Z",
+            "updated_at": "2025-10-25T13:50:29.086Z",
+            "date": "2025-10-22",
             "time": null,
             "venue": "Court",
-            "bracket_id": "7222f2ee"
+            "bracket_id": "b62fdd55"
         },
         {
-            "id": "cn685c5qz",
-            "round": 3,
-            "match_number": 3,
-            "winner_id": null,
-            "loser_id": null,
-            "status": "pending",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "7222f2ee"
-        },
-        {
-            "id": "9drud9dbu",
-            "round": 3,
-            "match_number": 4,
-            "winner_id": null,
-            "loser_id": null,
-            "status": "pending",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "7222f2ee"
-        },
-        {
-            "id": "dvvodtkw2",
+            "id": "xcwwbeg9r",
             "round": 4,
             "match_number": 1,
             "winner_id": null,
             "loser_id": null,
             "status": "pending",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
+            "created_at": "2025-10-25T13:50:29.086Z",
+            "updated_at": "2025-10-25T13:50:29.086Z",
+            "date": "2025-10-22",
             "time": null,
             "venue": "Court",
-            "bracket_id": "7222f2ee"
+            "bracket_id": "b62fdd55"
         },
         {
-            "id": "0ic6flpxu",
+            "id": "c82l2n3dn",
             "round": 4,
             "match_number": 2,
-            "winner_id": null,
-            "loser_id": null,
-            "status": "pending",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "7222f2ee"
-        },
-        {
-            "id": "em1h4u55i",
-            "round": 5,
-            "match_number": 1,
-            "winner_id": null,
-            "loser_id": null,
-            "status": "pending",
-            "created_at": "2025-10-25T15:08:46.075Z",
-            "updated_at": "2025-10-25T15:08:46.075Z",
-            "date": "2025-10-29",
-            "time": null,
-            "venue": "Court",
-            "bracket_id": "7222f2ee"
-        },
-        {
-            "id": "jt8jdx0ua",
-            "round": 5,
-            "match_number": 1,
             "bracket_type": "consolation",
             "winner_id": null,
             "loser_id": null,
             "status": "pending",
-            "created_at": "2025-10-25T15:08:46.076Z",
-            "updated_at": "2025-10-25T15:08:46.076Z",
-            "date": "2025-10-29",
+            "created_at": "2025-10-25T13:50:33.308Z",
+            "updated_at": "2025-10-25T13:50:33.308Z",
+            "date": "2025-10-22",
             "time": null,
             "venue": "Court",
-            "bracket_id": "7222f2ee"
+            "bracket_id": "b62fdd55"
         }
     ],
     "matchPlayers": [
@@ -2730,262 +2272,6 @@
             "completed": false
         },
         {
-            "match_id": "elqlgr9wc",
-            "player_id": "gy6umosza",
-            "name": "Player 1",
-            "slot": 1,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "elqlgr9wc",
-            "player_id": "zqpy4qpkf",
-            "name": "BYE",
-            "slot": 2,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "77utz0v6f",
-            "player_id": "jke08rp4v",
-            "name": "Player 8",
-            "slot": 1,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "77utz0v6f",
-            "player_id": "wqjb5gpvt",
-            "name": "Player 9",
-            "slot": 2,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "mjjx27yze",
-            "player_id": "4mw7bgee1",
-            "name": "Player 4",
-            "slot": 1,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "mjjx27yze",
-            "player_id": "km95bup18",
-            "name": "BYE",
-            "slot": 2,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "amdzx1gwa",
-            "player_id": "9xw4r8mli",
-            "name": "Player 5",
-            "slot": 1,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "amdzx1gwa",
-            "player_id": "pjvcph9rc",
-            "name": "Player 12",
-            "slot": 2,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "9661jrvm3",
-            "player_id": "ilfqltpij",
-            "name": "Player 2",
-            "slot": 1,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "9661jrvm3",
-            "player_id": "hpaqdh8sv",
-            "name": "BYE",
-            "slot": 2,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "rxtym2gj1",
-            "player_id": "4qxt1cfcm",
-            "name": "Player 7",
-            "slot": 1,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "rxtym2gj1",
-            "player_id": "uzfh7e7nj",
-            "name": "Player 10",
-            "slot": 2,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "cvtsrfo0z",
-            "player_id": "gi33asqrf",
-            "name": "Player 3",
-            "slot": 1,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "cvtsrfo0z",
-            "player_id": "z57b5nttf",
-            "name": "BYE",
-            "slot": 2,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "xs7duhep5",
-            "player_id": "qooetl9h4",
-            "name": "Player 6",
-            "slot": 1,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "xs7duhep5",
-            "player_id": "vs1q95gkq",
-            "name": "Player 11",
-            "slot": 2,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "h768mkw21",
-            "player_id": "gy6umosza",
-            "name": "Player 1",
-            "slot": 1,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "h768mkw21",
-            "player_id": null,
-            "name": "TBD",
-            "slot": 2,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "gpzh4wzr9",
-            "player_id": "4mw7bgee1",
-            "name": "Player 4",
-            "slot": 1,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "gpzh4wzr9",
-            "player_id": null,
-            "name": "TBD",
-            "slot": 2,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "vmj6lz3i2",
-            "player_id": "ilfqltpij",
-            "name": "Player 2",
-            "slot": 1,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "vmj6lz3i2",
-            "player_id": null,
-            "name": "TBD",
-            "slot": 2,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "n8xfloy5t",
-            "player_id": "gi33asqrf",
-            "name": "Player 3",
-            "slot": 1,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "n8xfloy5t",
-            "player_id": null,
-            "name": "TBD",
-            "slot": 2,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "pxmiaz3d3",
-            "player_id": null,
-            "name": "TBD",
-            "slot": 1,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "pxmiaz3d3",
-            "player_id": null,
-            "name": "TBD",
-            "slot": 2,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "v5s43830g",
-            "player_id": null,
-            "name": "TBD",
-            "slot": 1,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "v5s43830g",
-            "player_id": null,
-            "name": "TBD",
-            "slot": 2,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "xcwwbeg9r",
-            "player_id": null,
-            "name": "TBD",
-            "slot": 1,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "xcwwbeg9r",
-            "player_id": null,
-            "name": "TBD",
-            "slot": 2,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "c82l2n3dn",
-            "player_id": null,
-            "name": "Loser of SF1",
-            "slot": 1,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "c82l2n3dn",
-            "player_id": null,
-            "name": "Loser of SF2",
-            "slot": 2,
-            "score": 0,
-            "completed": false
-        },
-        {
             "match_id": "gvslkdv16",
             "player_id": "ollkor959",
             "name": "Player 1",
@@ -3252,7 +2538,7 @@
         {
             "match_id": "wufqfczrn",
             "player_id": "wrldfrrn9",
-            "name": "33",
+            "name": "333",
             "slot": 2,
             "score": 0,
             "completed": true
@@ -3260,7 +2546,7 @@
         {
             "match_id": "fko2fiujj",
             "player_id": "dagwrpgt1",
-            "name": "PLayer 4",
+            "name": "PLayer 43",
             "slot": 1,
             "score": 1,
             "completed": true
@@ -3268,7 +2554,7 @@
         {
             "match_id": "fko2fiujj",
             "player_id": "9xe7we6h6",
-            "name": "Player 5",
+            "name": "Player 456",
             "slot": 2,
             "score": 0,
             "completed": true
@@ -3276,7 +2562,7 @@
         {
             "match_id": "3faojtyeb",
             "player_id": "scsvr44g5",
-            "name": "Player 2",
+            "name": "Player 22",
             "slot": 1,
             "score": 0,
             "completed": false
@@ -3316,7 +2602,7 @@
         {
             "match_id": "oeuy4yhgt",
             "player_id": "dagwrpgt1",
-            "name": "PLayer 4",
+            "name": "PLayer 43",
             "slot": 2,
             "score": 0,
             "completed": false
@@ -3370,399 +2656,143 @@
             "completed": false
         },
         {
-            "match_id": "583i6ri00",
-            "player_id": "dy3b5nxt7",
+            "match_id": "elqlgr9wc",
+            "player_id": "gy6umosza",
             "name": "Player 1",
             "slot": 1,
             "score": 0,
             "completed": true
         },
         {
-            "match_id": "583i6ri00",
-            "player_id": "3fbkpgcp3",
+            "match_id": "elqlgr9wc",
+            "player_id": "zqpy4qpkf",
             "name": "BYE",
             "slot": 2,
             "score": 0,
             "completed": true
         },
         {
-            "match_id": "y3krqul8o",
-            "player_id": "ann07gacp",
-            "name": "Player 1",
-            "slot": 1,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "y3krqul8o",
-            "player_id": "mlwezo8dl",
-            "name": "Player 17",
-            "slot": 2,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "idzyxh4ow",
-            "player_id": "sjl89gvft",
-            "name": "Player 8",
-            "slot": 1,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "idzyxh4ow",
-            "player_id": "lytiyrnji",
-            "name": "BYE",
-            "slot": 2,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "kr19xuqyf",
-            "player_id": "ul4bssksw",
-            "name": "Player 9",
-            "slot": 1,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "kr19xuqyf",
-            "player_id": "yf1q3zjd9",
-            "name": "BYE",
-            "slot": 2,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "yj5ebqz3e",
-            "player_id": "9x5vt7v29",
-            "name": "Player 4",
-            "slot": 1,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "yj5ebqz3e",
-            "player_id": "uapk6id69",
-            "name": "BYE",
-            "slot": 2,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "p5y40k7lf",
-            "player_id": "1qh8bws1b",
-            "name": "Player 13",
-            "slot": 1,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "p5y40k7lf",
-            "player_id": "wphrxbgld",
-            "name": "BYE",
-            "slot": 2,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "ewfy64sws",
-            "player_id": "9r2w93ehx",
-            "name": "Player 5",
-            "slot": 1,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "ewfy64sws",
-            "player_id": "m1fpej5qr",
-            "name": "BYE",
-            "slot": 2,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "7em4azgny",
-            "player_id": "jrk1t3tgh",
-            "name": "Player 12",
-            "slot": 1,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "7em4azgny",
-            "player_id": "xwbnlmpey",
-            "name": "BYE",
-            "slot": 2,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "zrtp6ej55",
-            "player_id": "qx75cep35",
-            "name": "Player 2",
-            "slot": 1,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "zrtp6ej55",
-            "player_id": "21i0mq6k8",
-            "name": "BYE",
-            "slot": 2,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "6od4brs5a",
-            "player_id": "llfko4rl5",
-            "name": "Player 15",
-            "slot": 1,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "6od4brs5a",
-            "player_id": "c3kp1fn42",
-            "name": "BYE",
-            "slot": 2,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "511o138o2",
-            "player_id": "d3xxk3ad0",
-            "name": "Player 7",
-            "slot": 1,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "511o138o2",
-            "player_id": "k5bxf2a0f",
-            "name": "BYE",
-            "slot": 2,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "i6vi5rw3m",
-            "player_id": "k16swl0a5",
-            "name": "Player 10",
-            "slot": 1,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "i6vi5rw3m",
-            "player_id": "esf47po44",
-            "name": "BYE",
-            "slot": 2,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "yc5mlbxcj",
-            "player_id": "buuy24lzg",
-            "name": "Player 3",
-            "slot": 1,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "yc5mlbxcj",
-            "player_id": "6hxkmiqyj",
-            "name": "BYE",
-            "slot": 2,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "lejrio9xg",
-            "player_id": "yk5qbbc1c",
-            "name": "Player 14",
-            "slot": 1,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "lejrio9xg",
-            "player_id": "09cdunhub",
-            "name": "BYE",
-            "slot": 2,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "5iu0weoz0",
-            "player_id": "kawjaqgwu",
-            "name": "Player 6",
-            "slot": 1,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "5iu0weoz0",
-            "player_id": "01s0m44du",
-            "name": "BYE",
-            "slot": 2,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "82fffkjoo",
-            "player_id": "iu3myovsx",
-            "name": "Player 11",
-            "slot": 1,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "82fffkjoo",
-            "player_id": "c44trsc7n",
-            "name": "BYE",
-            "slot": 2,
-            "score": 0,
-            "completed": true
-        },
-        {
-            "match_id": "itbrsfn2j",
-            "player_id": "dy3b5nxt7",
-            "name": "Player 1",
-            "slot": 1,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "itbrsfn2j",
-            "player_id": null,
-            "name": "TBD",
-            "slot": 2,
-            "score": 0,
-            "completed": false
-        },
-        {
-            "match_id": "nufs0pyyh",
-            "player_id": "sjl89gvft",
+            "match_id": "77utz0v6f",
+            "player_id": "jke08rp4v",
             "name": "Player 8",
             "slot": 1,
             "score": 0,
             "completed": false
         },
         {
-            "match_id": "nufs0pyyh",
-            "player_id": "ul4bssksw",
+            "match_id": "77utz0v6f",
+            "player_id": "wqjb5gpvt",
             "name": "Player 9",
             "slot": 2,
             "score": 0,
             "completed": false
         },
         {
-            "match_id": "ud1ex8haq",
-            "player_id": "9x5vt7v29",
+            "match_id": "mjjx27yze",
+            "player_id": "4mw7bgee1",
             "name": "Player 4",
             "slot": 1,
             "score": 0,
-            "completed": false
+            "completed": true
         },
         {
-            "match_id": "ud1ex8haq",
-            "player_id": "1qh8bws1b",
-            "name": "Player 13",
+            "match_id": "mjjx27yze",
+            "player_id": "km95bup18",
+            "name": "BYE",
             "slot": 2,
             "score": 0,
-            "completed": false
+            "completed": true
         },
         {
-            "match_id": "x77h6lqi3",
-            "player_id": "9r2w93ehx",
+            "match_id": "amdzx1gwa",
+            "player_id": "9xw4r8mli",
             "name": "Player 5",
             "slot": 1,
             "score": 0,
             "completed": false
         },
         {
-            "match_id": "x77h6lqi3",
-            "player_id": "jrk1t3tgh",
+            "match_id": "amdzx1gwa",
+            "player_id": "pjvcph9rc",
             "name": "Player 12",
             "slot": 2,
             "score": 0,
             "completed": false
         },
         {
-            "match_id": "ii2fycwfx",
-            "player_id": "qx75cep35",
+            "match_id": "9661jrvm3",
+            "player_id": "ilfqltpij",
             "name": "Player 2",
             "slot": 1,
             "score": 0,
-            "completed": false
+            "completed": true
         },
         {
-            "match_id": "ii2fycwfx",
-            "player_id": "llfko4rl5",
-            "name": "Player 15",
+            "match_id": "9661jrvm3",
+            "player_id": "hpaqdh8sv",
+            "name": "BYE",
             "slot": 2,
             "score": 0,
-            "completed": false
+            "completed": true
         },
         {
-            "match_id": "zw19x1mbx",
-            "player_id": "d3xxk3ad0",
+            "match_id": "rxtym2gj1",
+            "player_id": "4qxt1cfcm",
             "name": "Player 7",
             "slot": 1,
             "score": 0,
             "completed": false
         },
         {
-            "match_id": "zw19x1mbx",
-            "player_id": "k16swl0a5",
+            "match_id": "rxtym2gj1",
+            "player_id": "uzfh7e7nj",
             "name": "Player 10",
             "slot": 2,
             "score": 0,
             "completed": false
         },
         {
-            "match_id": "whnefk86s",
-            "player_id": "buuy24lzg",
+            "match_id": "cvtsrfo0z",
+            "player_id": "gi33asqrf",
             "name": "Player 3",
             "slot": 1,
             "score": 0,
-            "completed": false
+            "completed": true
         },
         {
-            "match_id": "whnefk86s",
-            "player_id": "yk5qbbc1c",
-            "name": "Player 14",
+            "match_id": "cvtsrfo0z",
+            "player_id": "z57b5nttf",
+            "name": "BYE",
             "slot": 2,
             "score": 0,
-            "completed": false
+            "completed": true
         },
         {
-            "match_id": "2ibhfgrct",
-            "player_id": "kawjaqgwu",
+            "match_id": "xs7duhep5",
+            "player_id": "qooetl9h4",
             "name": "Player 6",
             "slot": 1,
             "score": 0,
             "completed": false
         },
         {
-            "match_id": "2ibhfgrct",
-            "player_id": "iu3myovsx",
+            "match_id": "xs7duhep5",
+            "player_id": "vs1q95gkq",
             "name": "Player 11",
             "slot": 2,
             "score": 0,
             "completed": false
         },
         {
-            "match_id": "e2te54wng",
-            "player_id": null,
-            "name": "TBD",
+            "match_id": "h768mkw21",
+            "player_id": "gy6umosza",
+            "name": "Player 1",
             "slot": 1,
             "score": 0,
             "completed": false
         },
         {
-            "match_id": "e2te54wng",
+            "match_id": "h768mkw21",
             "player_id": null,
             "name": "TBD",
             "slot": 2,
@@ -3770,15 +2800,15 @@
             "completed": false
         },
         {
-            "match_id": "7nf88vi7u",
-            "player_id": null,
-            "name": "TBD",
+            "match_id": "gpzh4wzr9",
+            "player_id": "4mw7bgee1",
+            "name": "Player 4",
             "slot": 1,
             "score": 0,
             "completed": false
         },
         {
-            "match_id": "7nf88vi7u",
+            "match_id": "gpzh4wzr9",
             "player_id": null,
             "name": "TBD",
             "slot": 2,
@@ -3786,15 +2816,15 @@
             "completed": false
         },
         {
-            "match_id": "cn685c5qz",
-            "player_id": null,
-            "name": "TBD",
+            "match_id": "vmj6lz3i2",
+            "player_id": "ilfqltpij",
+            "name": "Player 2",
             "slot": 1,
             "score": 0,
             "completed": false
         },
         {
-            "match_id": "cn685c5qz",
+            "match_id": "vmj6lz3i2",
             "player_id": null,
             "name": "TBD",
             "slot": 2,
@@ -3802,15 +2832,15 @@
             "completed": false
         },
         {
-            "match_id": "9drud9dbu",
-            "player_id": null,
-            "name": "TBD",
+            "match_id": "n8xfloy5t",
+            "player_id": "gi33asqrf",
+            "name": "Player 3",
             "slot": 1,
             "score": 0,
             "completed": false
         },
         {
-            "match_id": "9drud9dbu",
+            "match_id": "n8xfloy5t",
             "player_id": null,
             "name": "TBD",
             "slot": 2,
@@ -3818,7 +2848,7 @@
             "completed": false
         },
         {
-            "match_id": "dvvodtkw2",
+            "match_id": "pxmiaz3d3",
             "player_id": null,
             "name": "TBD",
             "slot": 1,
@@ -3826,7 +2856,7 @@
             "completed": false
         },
         {
-            "match_id": "dvvodtkw2",
+            "match_id": "pxmiaz3d3",
             "player_id": null,
             "name": "TBD",
             "slot": 2,
@@ -3834,7 +2864,7 @@
             "completed": false
         },
         {
-            "match_id": "0ic6flpxu",
+            "match_id": "v5s43830g",
             "player_id": null,
             "name": "TBD",
             "slot": 1,
@@ -3842,7 +2872,7 @@
             "completed": false
         },
         {
-            "match_id": "0ic6flpxu",
+            "match_id": "v5s43830g",
             "player_id": null,
             "name": "TBD",
             "slot": 2,
@@ -3850,7 +2880,7 @@
             "completed": false
         },
         {
-            "match_id": "em1h4u55i",
+            "match_id": "xcwwbeg9r",
             "player_id": null,
             "name": "TBD",
             "slot": 1,
@@ -3858,7 +2888,7 @@
             "completed": false
         },
         {
-            "match_id": "em1h4u55i",
+            "match_id": "xcwwbeg9r",
             "player_id": null,
             "name": "TBD",
             "slot": 2,
@@ -3866,7 +2896,7 @@
             "completed": false
         },
         {
-            "match_id": "jt8jdx0ua",
+            "match_id": "c82l2n3dn",
             "player_id": null,
             "name": "Loser of SF1",
             "slot": 1,
@@ -3874,7 +2904,7 @@
             "completed": false
         },
         {
-            "match_id": "jt8jdx0ua",
+            "match_id": "c82l2n3dn",
             "player_id": null,
             "name": "Loser of SF2",
             "slot": 2,

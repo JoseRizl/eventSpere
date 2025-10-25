@@ -291,12 +291,12 @@
         @apply text-white px-4 py-1.5 border-0 rounded-md cursor-pointer text-base font-semibold transition-all duration-200;
 
         /* Normal state: Subtle gradient from your base color to a slightly darker shade */
-        @apply bg-gradient-to-b from-[#0077B3] to-[#006da1];
+        @apply bg-gradient-to-br from-[#2121c8] to-[#0872a3];
       }
 
       .create-button:hover {
         /* Hover state: Subtle gradient from your hover color to a slightly darker shade */
-        @apply bg-gradient-to-b from-[#A4CBE1] to-[#9AC0D9] text-gray-800;
+       @apply bg-[#065a82] text-white; /* Darker blue for hover */
       }
 
       .create-button:disabled {
@@ -306,25 +306,25 @@
 
       .modal-button-primary {
         /* Using the blue color scheme for standard primary actions */
-        @apply bg-[#0077B3] text-white px-4 py-2 rounded-md font-semibold transition-colors duration-200 text-base;
+        @apply bg-gradient-to-br from-[#2121c8] to-[#0872a3] text-white px-4 py-2 rounded-md font-semibold transition-colors duration-200 text-base;
       }
 
       .modal-button-primary:hover {
-        @apply bg-[#A4CBE1] text-gray-800;
+        @apply bg-gradient-to-br from-[#2020ba] to-[#073b53] text-white; /* Darker blue for hover */
       }
 
       .modal-button-confirm {
-        @apply bg-green-600 text-white px-4 py-2 rounded-md font-semibold transition-colors duration-200 text-base;
+        @apply bg-gradient-to-br from-[#38a169] to-[#2f855a] text-white px-4 py-2 rounded-md font-semibold transition-colors duration-200 text-base;
       }
       .modal-button-confirm:hover {
-        @apply bg-green-700;
+        @apply bg-gradient-to-br from-[#38a169] to-[#2f855a];
       }
 
       .modal-button-danger {
-        @apply bg-red-600 text-white px-4 py-2 rounded-md font-semibold transition-colors duration-200 text-base;
+        @apply bg-gradient-to-br from-[#d8514f] to-[#C62828] text-white px-4 py-2 rounded-md font-semibold transition-colors duration-200 text-base;
       }
       .modal-button-danger:hover {
-        @apply bg-red-700;
+        @apply bg-gradient-to-br from-[#b91815] to-[#7b0f0f];
       }
 
 
