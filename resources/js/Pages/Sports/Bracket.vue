@@ -88,6 +88,8 @@ const {
   toggleAllowDraws,
   confirmToggleDraws,
   cancelToggleDraws,
+  confirmToggleConsolation,
+  cancelToggleConsolation,
   openTiebreakerDialog,
   closeTiebreakerDialog,
   saveTiebreakers,
@@ -120,6 +122,7 @@ const {
   showGenericErrorDialog,
   genericErrorMessage,
   roundRobinScoring,
+  showToggleConsolationDialog,
   showScoringConfigDialog,
   showToggleDrawsDialog,
   showTiebreakerDialog,
@@ -582,6 +585,20 @@ onMounted(async () => {
         cancelText="Cancel"
         @confirm="confirmToggleDraws"
         @cancel="cancelToggleDraws"
+      />
+
+      <!-- Toggle Consolation Match Confirmation Dialog -->
+      <ConfirmationDialog
+        v-model:show="showToggleConsolationDialog"
+        title="Toggle 3rd Place Match"
+        :message="pendingBracketIdx !== null && brackets[pendingBracketIdx]?.matches.flat().some(m => m.bracket_type === 'consolation')
+            ? 'Are you sure you want to remove the 3rd place match?'
+            : 'Are you sure you want to add a 3rd place match?'"
+        :confirmText="pendingBracketIdx !== null && brackets[pendingBracketIdx]?.matches.flat().some(m => m.bracket_type === 'consolation') ? 'Yes, Remove' : 'Yes, Add'"
+        cancelText="Cancel"
+        :confirmButtonClass="pendingBracketIdx !== null && brackets[pendingBracketIdx]?.matches.flat().some(m => m.bracket_type === 'consolation') ? 'modal-button-danger' : 'modal-button-primary'"
+        @confirm="confirmToggleConsolation"
+        @cancel="cancelToggleConsolation"
       />
 
       <!-- Tiebreaker Dialog -->

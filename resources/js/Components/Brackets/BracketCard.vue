@@ -232,7 +232,7 @@ const proceedWithSave = async () => {
                         <Button
                             v-if="showAdminControls && user?.role === 'Admin' && !isArchived && bracket.type === 'Single Elimination' && bracket.matches?.length >= 2"
                             :icon="hasConsolationMatch ? 'pi pi-minus-circle' : 'pi pi-plus-circle'"
-                            @click="onToggleConsolationMatch(bracketIndex)"
+                            @click="() => onToggleConsolationMatch(bracketIndex)"
                             class="p-button-rounded p-button-text"
                             :class="hasConsolationMatch ? 'p-button-warning' : 'p-button-success'"
                             v-tooltip.top="hasConsolationMatch ? 'Remove 3rd Place Match' : 'Add 3rd Place Match'"

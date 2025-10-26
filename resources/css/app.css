@@ -291,12 +291,12 @@
         @apply text-white px-4 py-1.5 border-0 rounded-md cursor-pointer text-base font-semibold transition-all duration-200;
 
         /* Normal state: Subtle gradient from your base color to a slightly darker shade */
-        @apply bg-gradient-to-br from-[#2121c8] to-[#0872a3];
+        @apply bg-gradient-to-br from-[#0872a3] to-[#2121c8];
       }
 
       .create-button:hover {
         /* Hover state: Subtle gradient from your hover color to a slightly darker shade */
-       @apply bg-[#065a82] text-white; /* Darker blue for hover */
+       @apply bg-gradient-to-br from-[#2121c8] to-[#073b53] text-white; /* Darker blue for hover */
       }
 
       .create-button:disabled {
@@ -306,11 +306,11 @@
 
       .modal-button-primary {
         /* Using the blue color scheme for standard primary actions */
-        @apply bg-gradient-to-br from-[#2121c8] to-[#0872a3] text-white px-4 py-2 rounded-md font-semibold transition-colors duration-200 text-base;
+        @apply bg-gradient-to-br from-[#0872a3] to-[#2121c8] text-white px-4 py-2 rounded-md font-semibold transition-colors duration-200 text-base;
       }
 
       .modal-button-primary:hover {
-        @apply bg-gradient-to-br from-[#2020ba] to-[#073b53] text-white; /* Darker blue for hover */
+        @apply bg-gradient-to-br from-[#2121c8] to-[#073b53] text-white; /* Darker blue for hover */
       }
 
       .modal-button-confirm {
