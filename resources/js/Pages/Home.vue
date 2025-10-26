@@ -28,9 +28,15 @@ const {
 } = useFilters();
 
 const {
-    allNews, fetchEvents, filteredNews, ongoingEvents, eventsThisMonth,
-    upcomingEvents, carouselEvents, isNewEvent, getUpcomingTag, getUpcomingSeverity
+    allNews, fetchEvents, filteredNews, ongoingEvents, eventsThisMonth, upcomingEvents,
+    isNewEvent, getUpcomingTag, getUpcomingSeverity
 } = useEvents({ searchQuery, startDateFilter, endDateFilter });
+
+// Create a separate, unfiltered instance of useEvents just for the carousel.
+const { carouselEvents } = useEvents({
+    // We pass empty refs here so the carousel is not affected by the page's filters.
+    searchQuery: ref(''), startDateFilter: ref(null), endDateFilter: ref(null)
+});
 
 const {
     eventAnnouncements, fetchAnnouncements, addAnnouncement, updateAnnouncement, deleteAnnouncementById
