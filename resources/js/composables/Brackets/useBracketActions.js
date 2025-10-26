@@ -396,6 +396,13 @@ export function useBracketActions(dataState) {
         showGenericErrorDialog.value = true;
         return;
     }
+
+    // Client-side validation for participant limit
+    if (parseInt(numberOfPlayers.value, 10) > 32) {
+        genericErrorMessage.value = 'The number of participants cannot exceed 32.';
+        showGenericErrorDialog.value = true;
+        return;
+    }
     // --- END VALIDATION ---
 
     isCreatingBracket.value = true;

@@ -320,9 +320,11 @@ onUnmounted(() => {
                         <!-- Dropdown Menu Item -->
                         <div v-if="item.items">
                             <button @click="toggleDropdown(item.label)"
-                                class="flex items-center justify-between w-full p-3 rounded-lg transition-colors duration-200"
+                                v-tooltip.right="{ value: item.label, disabled: !isDesktopCollapsed }"
+                                class="flex items-center justify-between w-full p-3 rounded-lg transition-colors duration-200 relative"
                                 :class="{
-                                    'bg-blue-500 text-white font-semibold shadow-md': isSubmenuActive(item),
+                                    'bg-blue-500 text-white font-semibold shadow-md': isSubmenuActive(item) && !isDesktopCollapsed,
+                                    'bg-blue-100 text-blue-800': isSubmenuActive(item) && isDesktopCollapsed,
                                     'bg-blue-100 text-blue-700': !isSubmenuActive(item) && openDropdown === item.label,
                                     'text-gray-600 hover:bg-gray-100': !isSubmenuActive(item) && openDropdown !== item.label
                                 }">
@@ -333,8 +335,10 @@ onUnmounted(() => {
                                     <span v-show="!isDesktopCollapsed" class="ml-3 text-sm font-medium">{{ item.label }}</span>
                                 </div>
                                 <i v-show="!isDesktopCollapsed" :class="['pi', openDropdown === item.label ? 'pi-chevron-down' : 'pi-chevron-right', 'transition-transform duration-200 text-xs']"></i>
+                                <!-- Active indicator for collapsed state -->
+                                <div v-if="isSubmenuActive(item) && isDesktopCollapsed" class="absolute left-0 top-0 h-full w-1 bg-blue-600 rounded-r-full"></div>
                             </button>
-                            <div v-if="openDropdown === item.label && !isDesktopCollapsed" class="mt-1 pl-6 space-y-1 py-1">
+                            <div v-if="openDropdown === item.label && !isDesktopCollapsed" class="mt-1 pl-6 space-y-1 py-1 transition-all duration-300 ease-in-out">
                                 <Link v-for="subItem in item.items" :key="subItem.label" :href="route(subItem.routeName, subItem.routeParams)"
                                     class="flex items-center p-2 rounded-md transition-colors text-sm"
                                     :class="route().current(subItem.routeName, subItem.routeParams) ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-500 hover:bg-gray-100'">
@@ -345,12 +349,18 @@ onUnmounted(() => {
                         </div>
                         <!-- Regular Link Item -->
                         <Link v-else-if="item.routeName"
+                            v-tooltip.right="{ value: item.label, disabled: !isDesktopCollapsed }"
                             :href="route(item.routeName)"
-                            class="flex items-center p-3 rounded-lg transition-colors duration-200"
-                            :class="isActive(item.routeName) ? 'bg-blue-500 text-white font-semibold shadow-md' : 'text-gray-600 hover:bg-gray-100'">
+                            class="flex items-center p-3 rounded-lg transition-colors duration-200 relative"
+                            :class="{
+                                'bg-blue-500 text-white font-semibold shadow-md': isActive(item.routeName) && !isDesktopCollapsed,
+                                'bg-blue-100 text-blue-800': isActive(item.routeName) && isDesktopCollapsed,
+                                'text-gray-600 hover:bg-gray-100': !isActive(item.routeName)
+                            }">
                             <div class="flex-shrink-0">
                                 <i :class="item.icon" class="text-xl w-6 text-center"></i>
                             </div>
+                            <div v-if="isActive(item.routeName) && isDesktopCollapsed" class="absolute left-0 top-0 h-full w-1 bg-blue-600 rounded-r-full"></div>
                             <span v-show="!isDesktopCollapsed" class="ml-3 text-sm font-medium">{{ item.label }}</span>
                         </Link>
                     </div>

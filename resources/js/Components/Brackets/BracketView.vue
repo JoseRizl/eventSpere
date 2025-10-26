@@ -2102,7 +2102,7 @@ onMounted(populateInitialColors);
     position: absolute; /* Changed from fixed to absolute */
     top: 10px;
     right: 10px;
-    z-index: 100;
+    z-index: 40; /* Lowered from 100 to be below the main navbar (z-50) */
     display: flex;
     gap: 8px;
     justify-content: flex-end;

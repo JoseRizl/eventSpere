@@ -4,6 +4,7 @@ import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import { usePage } from '@inertiajs/vue3';
 import BracketCard from '@/Components/Brackets/BracketCard.vue';
 import MatchEditorDialog from '@/Components/Brackets/MatchEditorDialog.vue';
+import { useEventValidation } from '@/composables/useEventValidation.js';
 import { useBracketState } from '@/composables/Brackets/useBracketState.js';
 import { useBracketActions } from '@/composables/Brackets/useBracketActions.js';
 
@@ -132,6 +133,10 @@ const {
   isDeletingBracket,
   isUpdatingMatch,
 } = useBracketActions(bracketState);
+
+const {
+    validateEvent: validateBracket,
+} = useEventValidation();
 
 const confirmMatchUpdate = () => {
     // This now just triggers the confirmation inside MatchEditorDialog
@@ -481,12 +486,13 @@ onMounted(async () => {
       <Dialog v-model:visible="showDialog" header="Bracket Setup" modal :style="{ width: '400px' }">
         <div class="dialog-content">
           <div class="p-field">
-            <label for="bracketName">Bracket Name:</label>
-            <InputText v-model="bracketName" placeholder="Enter bracket name" />
+            <label for="bracketName">Bracket Name</label>
+            <InputText v-model="bracketName" placeholder="Enter bracket name" :invalid="!!genericErrorMessage && !bracketName" />
+            <small v-if="!!genericErrorMessage && !bracketName" class="p-error">Bracket name is required.</small>
           </div>
 
           <div class="p-field">
-            <label for="event">Select Event:</label>
+            <label for="event">Select Event</label>
             <Select
               v-model="selectedEvent"
               :options="events"
@@ -494,21 +500,26 @@ onMounted(async () => {
               placeholder="Select a sports event"
               filter
               class="w-full"
+              :invalid="!!genericErrorMessage && !selectedEvent"
             />
+            <small v-if="!!genericErrorMessage && !selectedEvent" class="p-error">Event is required.</small>
           </div>
 
           <div class="p-field">
-            <label for="numberOfPlayers">Number of Participants:</label>
-            <InputText v-model="numberOfPlayers" type="number" min="1" placeholder="Insert number of teams" />
+            <label for="numberOfPlayers">Number of Participants</label>
+            <InputText v-model="numberOfPlayers" type="number" min="1" max="32" placeholder="Insert number of teams" />
+            <small v-if="!!genericErrorMessage && !numberOfPlayers" class="p-error">Number of participants is required.</small>
           </div>
 
           <div class="p-field">
-            <label for="matchType">Bracket Type:</label>
+            <label for="matchType">Bracket Type</label>
             <Select
               v-model="matchType"
               :options="bracketTypeOptions"
               placeholder="Select bracket type"
+              :invalid="!!genericErrorMessage && !matchType"
             />
+            <small v-if="!!genericErrorMessage && !matchType" class="p-error">Bracket type is required.</small>
           </div>
 
           <div class="p-field" v-if="matchType === 'Single Elimination'">
