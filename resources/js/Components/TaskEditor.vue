@@ -55,7 +55,9 @@
                         optionLabel="name"
                         placeholder="Select Employees"
                         display="chip"
+                        class="w-full"
                         filter
+                        :showToggleAll="false"
                     >
                         <template #chip="slotProps">
                             <div class="flex items-center gap-2 px-2 py-1 rounded bg-blue-100 text-blue-800 text-xs">

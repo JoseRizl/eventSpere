@@ -379,12 +379,20 @@ const viewMemorandum = () => {
     }
 };
 
+const toBase64 = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+});
+
 const handleBannerImageUpload = async (event) => {
   const file = event.target.files[0];
   if (file) {
     eventDetails.value.image = await toBase64(file);
   }
 };
+
 
 const addActivity = () => {
   if (!Array.isArray(eventDetails.value.activities)) {

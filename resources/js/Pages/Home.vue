@@ -27,20 +27,28 @@ const {
     toggleDateFilter, clearDateFilter, clearFilters
 } = useFilters();
 
-const {
-    allNews, fetchEvents, filteredNews, ongoingEvents, eventsThisMonth, upcomingEvents,
-    isNewEvent, getUpcomingTag, getUpcomingSeverity
-} = useEvents({ searchQuery, startDateFilter, endDateFilter });
+// 1. Create a single, master ref for all event data.
+const allNews = ref([]);
 
-// Create a separate, unfiltered instance of useEvents just for the carousel.
+// 2. Create a "main" instance of useEvents for fetching and for the page's filtered content.
+// It uses the page's reactive filters.
+const {
+    fetchEvents, filteredNews, ongoingEvents, eventsThisMonth, upcomingEvents,
+    isNewEvent, getUpcomingTag, getUpcomingSeverity
+} = useEvents({ searchQuery, startDateFilter, endDateFilter, allNews });
+
+// 3. Create a separate, "unfiltered" instance for the carousel.
+// It shares the same `allNews` data but uses its own non-reactive filters.
 const { carouselEvents } = useEvents({
-    // We pass empty refs here so the carousel is not affected by the page's filters.
-    searchQuery: ref(''), startDateFilter: ref(null), endDateFilter: ref(null)
+    searchQuery: ref(''),
+    startDateFilter: ref(null),
+    endDateFilter: ref(null),
+    allNews
 });
 
 const {
     eventAnnouncements, fetchAnnouncements, addAnnouncement, updateAnnouncement, deleteAnnouncementById
-} = useAnnouncements({ searchQuery, startDateFilter, endDateFilter }, allNews);
+} = useAnnouncements({ searchQuery, startDateFilter, endDateFilter }, allNews); // Pass the master list here too.
 
 onMounted(async () => {
     await fetchEvents();
