@@ -27,7 +27,7 @@ const close = () => {
       <h2 class="text-lg font-semibold text-green-700 mb-2">{{ title }}</h2>
       <p class="text-sm text-gray-700 mb-4">{{ message }}</p>
       <div class="flex justify-end">
-        <button @click="close" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Close</button>
+        <button @click="close" class="modal-button-confirm">Close</button>
       </div>
     </div>
   </div>

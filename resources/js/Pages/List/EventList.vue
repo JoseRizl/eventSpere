@@ -164,7 +164,7 @@
           <template #body="{ data }">
             <div class="action-buttons">
               <Button icon="pi pi-pen-to-square" class="p-button-rounded p-button-text action-btn-info" @click="editEvent(data)" v-tooltip.top="'Edit Event'"/>
-              <Button icon="pi pi-folder" class="p-button-rounded p-button-text action-btn-danger" @click="archiveEvent(data)" v-tooltip.top="'Archive Event'"/>
+              <Button icon="pi pi-folder" class="p-button-rounded p-button-text action-btn-warning" @click="archiveEvent(data)" v-tooltip.top="'Archive Event'"/>
             </div>
           </template>
         </Column>
@@ -624,7 +624,7 @@
       title="Archive Event?"
       :message="eventToProcess ? `Are you sure you want to archive '${eventToProcess.title}'?` : ''"
       confirmText="Yes, Archive"
-      confirmButtonClass="modal-button-confirm bg-yellow-600 hover:bg-yellow-700"
+      confirmButtonClass="modal-button-primary"
       @confirm="confirmArchive"
     />
 
@@ -1187,10 +1187,10 @@
         // Set tags after nextTick to allow the category_id watcher to complete
         await nextTick();
         selectedEvent.value.tags = eventTagIds;
-        
+
         console.log('EventList - After nextTick, tags:', selectedEvent.value.tags);
         console.log('EventList - Filtered tags:', filteredSelectedEventTags.value);
-        
+
         isEditModalVisible.value = true;
       };
 
@@ -1298,14 +1298,16 @@
             errorMessage.value = firstErrorMessage;
             showErrorDialog.value = true;
           },
+          onFinish: () => {
+            saving.value = false;
+            showSaveConfirm.value = false;
+          },
           preserveScroll: true
         });
       } catch (error) {
         errorMessage.value = 'Failed to update the event.';
         showErrorDialog.value = true;
-      } finally {
         saving.value = false;
-        showSaveConfirm.value = false;
       }
     };
 

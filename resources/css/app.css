@@ -314,10 +314,10 @@
       }
 
       .modal-button-confirm {
-        @apply bg-gradient-to-br from-[#38a169] to-[#2f855a] text-white px-4 py-2 rounded-md font-semibold transition-colors duration-200 text-base;
+        @apply bg-gradient-to-br from-[#319d63] to-[#1b814e] text-white px-4 py-2 rounded-md font-semibold transition-colors duration-200 text-base;
       }
       .modal-button-confirm:hover {
-        @apply bg-gradient-to-br from-[#38a169] to-[#2f855a];
+        @apply bg-gradient-to-br from-[#0f6f3f] to-[#0b5530];
       }
 
       .modal-button-danger {
