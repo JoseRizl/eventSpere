@@ -363,12 +363,7 @@ class EventController extends JsonController
         // Update the event
         foreach ($this->jsonData['events'] as &$event) {
             if ($event['id'] == $id) {
-                $event = array_merge($event, $validated);
-                unset($event['tags']); // Tags are managed in event_tags table
-                // Also unset memorandum as it's handled separately
-                if (array_key_exists('memorandum', $validated)) {
-                    unset($event['memorandum']);
-                }
+                $event = array_merge($event, $validated, ['image' => $validated['image'] ?? $event['image']]);
                 break;
             }
         }
