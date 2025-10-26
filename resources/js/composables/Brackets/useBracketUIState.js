@@ -18,6 +18,7 @@ export function useBracketUIState() {
   const showScoringConfigDialog = ref(false);
   const showToggleDrawsDialog = ref(false);
   const showDuplicatePlayerWarningDialog = ref(false);
+  const showToggleConsolationDialog = ref(false);
   const showTiebreakerDialog = ref(false);
   const dismissedTiebreakerNotices = ref(new Set());
 
@@ -82,6 +83,7 @@ export function useBracketUIState() {
            showScoringConfigDialog.value ||
            showToggleDrawsDialog.value ||
            showDuplicatePlayerWarningDialog.value ||
+           showToggleConsolationDialog.value ||
            showTiebreakerDialog.value;
   });
 
@@ -99,6 +101,7 @@ export function useBracketUIState() {
     showScoringConfigDialog.value = false;
     showToggleDrawsDialog.value = false;
     showDuplicatePlayerWarningDialog.value = false;
+    showToggleConsolationDialog.value = false;
     showTiebreakerDialog.value = false;
   };
 
@@ -154,6 +157,7 @@ export function useBracketUIState() {
     showScoringConfigDialog,
     showToggleDrawsDialog,
     showDuplicatePlayerWarningDialog,
+    showToggleConsolationDialog,
     showTiebreakerDialog,
     // Loading states
     isCreatingBracket,

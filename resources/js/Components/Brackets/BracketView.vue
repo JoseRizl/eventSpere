@@ -51,7 +51,7 @@ const generatePlayerColor = (playerName) => {
 
     // If a color is already set for this player, use it.
     if (playerColors.value[playerName]) {
-        return null;
+        return playerColors.value[playerName];
     }
 
     if (!playerColors.value[playerName]) {
@@ -1163,65 +1163,19 @@ const updateBracketLines = () => {
                 });
             }
 
-            // Initial rounds to LR1 (losers from R1) - ODD-EVEN PAIRING (1 vs 3, 2 vs 4, 5 vs 7, 6 vs 8, etc.)
-            // Odd-even pairing: Match 1 vs Match 3, Match 2 vs Match 4, Match 5 vs Match 7, etc.
-            // Track which R1 matches feed into each LR1 match
-            const lr1Connections = new Map(); // LR1 matchIdx -> array of R1 matchIdx
-
-            // Build odd-even pairing for ALL R1 matches (including those with BYEs)
-            // Match 0 (1st) pairs with Match 2 (3rd) -> LR1 Match 0
-            // Match 1 (2nd) pairs with Match 3 (4th) -> LR1 Match 1
-            // Match 4 (5th) pairs with Match 6 (7th) -> LR1 Match 2
-            // Match 5 (6th) pairs with Match 7 (8th) -> LR1 Match 3
-            const totalR1Matches = bracket.matches.winners[0].length;
-
-            for (let i = 0; i < Math.floor(totalR1Matches / 2); i++) {
-                const firstIdx = i * 2;      // 0, 2, 4, 6...
-                const secondIdx = i * 2 + 2; // 2, 4, 6, 8...
-
-                if (secondIdx < totalR1Matches) {
-                    lr1Connections.set(i, [firstIdx, secondIdx]);
-                } else if (firstIdx < totalR1Matches) {
-                    // Handle odd number of matches - last match pairs with itself
-                    lr1Connections.set(i, [firstIdx]);
-                }
-            }
-
-            // Handle the "odd" matches (1, 3, 5, 7...)
-            for (let i = 0; i < Math.floor(totalR1Matches / 2); i++) {
-                const firstIdx = i * 2 + 1;  // 1, 3, 5, 7...
-                const secondIdx = i * 2 + 3; // 3, 5, 7, 9...
-
-                const lrMatchIdx = Math.floor(totalR1Matches / 4) + i;
-
-                if (secondIdx < totalR1Matches) {
-                    lr1Connections.set(lrMatchIdx, [firstIdx, secondIdx]);
-                } else if (firstIdx < totalR1Matches) {
-                    lr1Connections.set(lrMatchIdx, [firstIdx]);
-                }
-            }
-
             // Draw lines for all R1 matches to LR1 (always displayed, cell to cell)
-            // console.log('R1 to LR1 connections map:', lr1Connections);
-            // console.log('Total R1 matches:', bracket.matches.winners[0].length);
-
-            bracket.matches.winners[0].forEach((match, i) => {
+            const wr1Matches = bracket.matches.winners[0] || [];
+            wr1Matches.forEach((match, i) => {
                 // Find which LR1 match this R1 match feeds into
-                let loserMatchIdx = -1;
-                let playerPosition = -1; // Which position in LR1 match (0 or 1)
+                const numLoserMatches = bracket.matches.losers[0]?.length || 0;
 
-                for (const [lrIdx, r1Indices] of lr1Connections.entries()) {
-                    const posInArray = r1Indices.indexOf(i);
-                    if (posInArray !== -1) {
-                        loserMatchIdx = lrIdx;
-                        playerPosition = posInArray; // 0 for first match, 1 for second match
-                        break;
-                    }
-                }
+                // Formula for 1v3, 2v4, 5v7, 6v8 pairing
+                const loserMatchIdx = Math.floor(i / 4) * 2 + (i % 2);
+                const playerPosition = Math.floor((i % 4) / 2);
 
                 // console.log(`R1 Match ${i}: loserMatchIdx=${loserMatchIdx}, playerPosition=${playerPosition}`);
 
-                if (loserMatchIdx === -1) {
+                if (loserMatchIdx >= numLoserMatches) {
                     console.warn(`R1 Match ${i} has no LR1 connection`);
                     return;
                 }

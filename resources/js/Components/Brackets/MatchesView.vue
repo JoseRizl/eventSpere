@@ -244,7 +244,7 @@ const getMatchIdentifier = (match) => {
     justify-content: space-between;
     align-items: center;
     padding: 0.6rem 1rem;
-    background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+    background: linear-gradient(90deg, #0872a3 0%, #2121c8 100%);
     color: white;
     position: relative;
     overflow: hidden;
@@ -258,7 +258,7 @@ const getMatchIdentifier = (match) => {
     left: 0;
     right: 0;
     height: 2px;
-    background: linear-gradient(90deg, #4f46e5, #7c3aed, #a855f7);
+    background: linear-gradient(90deg, #0872a3, #2121c8, #6855f7);
 }
 
 .match-content {
