@@ -3,8 +3,10 @@ import axios from 'axios';
 import { format, isWithinInterval, isSameMonth, areIntervalsOverlapping, endOfDay, differenceInHours, differenceInDays } from "date-fns";
 import { getFullDateTime } from '@/utils/dateUtils.js';
 
-export function useEvents({ searchQuery, startDateFilter, endDateFilter }) {
-    const allNews = ref([]);
+export function useEvents({ searchQuery, startDateFilter, endDateFilter, allNews: externalNews }) {
+    // Use the externally provided ref if it exists, otherwise create a local one.
+    // This allows us to share the master list of events between composable instances.
+    const allNews = externalNews || ref([]);
 
     const fetchEvents = async () => {
         try {
