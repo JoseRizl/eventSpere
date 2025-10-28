@@ -360,10 +360,17 @@ class EventController extends JsonController
             'memorandum' => 'nullable|array', // Allow memorandum to be part of the update
         ]);
 
+        // Separate tags and memorandum from the event data to prevent it from being merged into the event object.
+        $tagIdsToUpdate = $validated['tags'] ?? null;
+        unset($validated['tags']);
+        $memorandumData = $validated['memorandum'] ?? null;
+        unset($validated['memorandum']);
+
         // Update the event
         foreach ($this->jsonData['events'] as &$event) {
             if ($event['id'] == $id) {
                 $event = array_merge($event, $validated, ['image' => $validated['image'] ?? $event['image']]);
+                // The 'tags' and 'memorandum' keys are now unset from $validated, so they won't be merged here.
                 break;
             }
         }
@@ -374,7 +381,7 @@ class EventController extends JsonController
             ->values()
             ->toArray();
 
-        foreach ($validated['tags'] ?? [] as $tagId) {
+        foreach ($tagIdsToUpdate ?? [] as $tagId) {
             $this->jsonData['event_tags'][] = [
                 'event_id' => $id,
                 'tag_id' => $tagId
@@ -383,7 +390,7 @@ class EventController extends JsonController
 
         // Handle memorandum update/creation/deletion.
         // This logic is now self-contained and doesn't rely on a separate client-side DELETE call.
-        $memorandumData = $request->input('memorandum');
+        // $memorandumData is already set from the validation step above.
         $this->jsonData['memorandums'] = $this->jsonData['memorandums'] ?? [];
         $existingMemoIndex = collect($this->jsonData['memorandums'])->search(fn($memo) => $memo['event_id'] === $id);
 
@@ -475,10 +482,14 @@ class EventController extends JsonController
                 //     unset($validated['tags']);
                 // }
 
+                // Separate tags and memorandum from the event data to prevent it from being merged into the event object.
+                $tagIdsToUpdate = $validated['tags'] ?? null;
+                unset($validated['tags']);
                 $memorandumData = $validated['memorandum'] ?? null;
                 unset($validated['memorandum']);
 
                 // Explicitly merge validated data to be more intentional about what is being updated.
+                // The 'tags' key is now unset from $validated, so it won't be merged here.
                 $event = array_merge($event, $validated);
                 $eventFound = true;
                 break;
@@ -494,14 +505,14 @@ class EventController extends JsonController
 
         // Only update tags if the 'tags' key was passed in the validated data.
         // The safety feature inside the loop would have unset 'tags' if it was an unsafe empty update.
-        if (array_key_exists('tags', $validated)) {
+        if ($tagIdsToUpdate !== null) {
             // Update event_tags pseudo-table
             $data['event_tags'] = collect($data['event_tags'] ?? [])
                 ->filter(fn($et) => $et['event_id'] !== $id)
                 ->values()
                 ->toArray();
 
-            foreach (($validated['tags'] ?? []) as $tagId) {
+            foreach ($tagIdsToUpdate as $tagId) {
                 $data['event_tags'][] = [
                     'event_id' => $id,
                     'tag_id' => $tagId
@@ -511,7 +522,7 @@ class EventController extends JsonController
 
         // Handle memorandum update/creation/deletion
         if (array_key_exists('memorandum', $request->all())) {
-            $memorandumData = $request->input('memorandum');
+            // $memorandumData is already set from the loop above
             $data['memorandums'] = $data['memorandums'] ?? [];
             $existingMemoIndex = collect($data['memorandums'])->search(fn($memo) => $memo['event_id'] === $id);
 
