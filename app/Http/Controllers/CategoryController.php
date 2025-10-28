@@ -19,11 +19,13 @@ class CategoryController extends Controller
     {
         $categories = $this->jsonData['category'] ?? [];
         $tags = $this->jsonData['tags'] ?? [];
+        $event_tags = $this->jsonData['event_tags'] ?? [];
         $events = $this->jsonData['events'] ?? [];
 
         return Inertia::render('List/CategoryList', [
             'categories' => $categories,
             'tags' => $tags,
+            'event_tags' => $event_tags,
             'events' => $events
         ]);
     }
