@@ -30,6 +30,17 @@ const props = defineProps({
     }
 });
 
+const getMatchDisplayStatus = (match) => {
+    if (match.status === 'completed') {
+        return 'completed';
+    }
+    const hasScores = match.players.some(p => p.score > 0);
+    if (hasScores) {
+        return 'ongoing';
+    }
+    return 'pending';
+};
+
 const getRoundTitle = (match) => {
     if (!match || typeof match.round === 'undefined') {
         return 'Unknown Round';
@@ -91,7 +102,7 @@ const groupedMatches = computed(() => {
     roundGroups.forEach((matches, title) => {
         let filteredMatches = matches;
         if (props.filter && props.filter !== 'all') {
-            filteredMatches = matches.filter(match => match.status === props.filter);
+            filteredMatches = matches.filter(match => getMatchDisplayStatus(match) === props.filter);
         }
 
         if (filteredMatches.length > 0) {
@@ -130,7 +141,7 @@ const getMatchIdentifier = (match) => {
                                     <div class="match-location">{{ getMatchIdentifier(match) }}</div>
                                     <span class="match-date">{{ formatDisplayDate(match.date || bracket.event.startDate) }}</span>
                                 </div>
-                                <span :class="['match-status', `status-${match.status}`]">{{ match.status }}</span>
+                                <span :class="['match-status', `status-${getMatchDisplayStatus(match)}`]">{{ getMatchDisplayStatus(match) }}</span>
                             </div>
                             <div class="match-content">
                                 <div class="players-and-info">
