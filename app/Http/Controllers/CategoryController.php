@@ -198,4 +198,65 @@ class CategoryController extends Controller
             return redirect()->back()->with('error', 'Failed to delete the item: ' . $e->getMessage());
         }
     }
+
+    public function archiveTag($id)
+    {
+        $tagIndex = collect($this->jsonData['tags'])->search(fn($tag) => $tag['id'] === $id);
+
+        if ($tagIndex === false) {
+            return redirect()->back()->with('error', 'Tag not found.');
+        }
+
+        $this->jsonData['tags'][$tagIndex]['archived'] = true;
+        $this->writeJson($this->jsonData);
+
+        return redirect()->back()->with('success', 'Tag archived successfully.');
+    }
+
+    public function restoreTag($id)
+    {
+        $tagIndex = collect($this->jsonData['tags'])->search(fn($tag) => $tag['id'] === $id);
+
+        if ($tagIndex === false) {
+            return redirect()->back()->with('error', 'Tag not found.');
+        }
+
+        // Ensure the 'archived' key exists before unsetting
+        if (isset($this->jsonData['tags'][$tagIndex]['archived'])) {
+            $this->jsonData['tags'][$tagIndex]['archived'] = false;
+        }
+
+        $this->writeJson($this->jsonData);
+
+        return redirect()->back()->with('success', 'Tag restored successfully.');
+    }
+
+    public function permanentDeleteTag($id)
+    {
+        $tagIndex = collect($this->jsonData['tags'])->search(fn($tag) => $tag['id'] === $id);
+
+        if ($tagIndex === false) {
+            return redirect()->back()->with('error', 'Tag not found.');
+        }
+
+        // Also remove from event_tags
+        $this->jsonData['event_tags'] = collect($this->jsonData['event_tags'] ?? [])
+            ->where('tag_id', '!=', $id)
+            ->values()
+            ->toArray();
+
+        // Remove the tag itself
+        array_splice($this->jsonData['tags'], $tagIndex, 1);
+
+        $this->writeJson($this->jsonData);
+
+        return redirect()->back()->with('success', 'Tag permanently deleted.');
+    }
+
+    private function writeJson(array $data): void
+    {
+        File::put(base_path('db.json'), json_encode($data, JSON_PRETTY_PRINT));
+        // Update the instance property after writing to the file
+        $this->jsonData = $data;
+    }
 }

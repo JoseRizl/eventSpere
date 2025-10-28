@@ -556,24 +556,40 @@ class EventController extends JsonController
         return redirect()->route('events.index')->with('success', 'Event archived successfully.');
     }
 
-    public function getArchivedEvents()
+    public function getArchivedEvents($type = 'events')
     {
         $json = File::get(base_path('db.json'));
         $data = json_decode($json, true);
-
-        $archivedEvents = collect($data['events'] ?? [])
-            ->where('archived', true)
-            ->sortByDesc(function ($event) {
-                return strtotime($event['startDate'] ?? '1970-01-01');
-            })
-            ->values()
-            ->toArray();
-
         $categories = $data['category'] ?? [];
+        $archivedItems = [];
+
+        if ($type === 'events') {
+            $archivedItems = collect($data['events'] ?? [])
+                ->where('archived', true)
+                ->sortByDesc(function ($event) {
+                    return strtotime($event['startDate'] ?? '1970-01-01');
+                })
+                ->values()
+                ->toArray();
+        } elseif ($type === 'tags') {
+            $categoryMap = collect($categories)->keyBy('id');
+            $archivedItems = collect($data['tags'] ?? [])
+                ->where('archived', true)
+                ->map(function ($tag) use ($categoryMap) {
+                    $tag['category'] = $categoryMap->get($tag['category_id']);
+                    return $tag;
+                })
+                ->sortBy('name')
+                ->values()
+                ->toArray();
+        }
 
         return Inertia::render('List/Archive', [
-            'archivedEvents' => $archivedEvents,
-            'categories' => $categories
+            'type' => $type,
+            'archivedItems' => $archivedItems,
+            'categories' => $categories,
+            // Pass other necessary props if any, e.g., tags for event filtering
+            'tags' => $data['tags'] ?? [],
         ]);
     }
 

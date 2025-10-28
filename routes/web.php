@@ -27,7 +27,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [EventController::class, 'dashboard'])->name('dashboard');
     // Route::get('/event-list', [EventController::class, 'index'])->name('event.list');
     Route::get('/category-list', [CategoryController::class, 'index'])->name('category.list');
-    Route::get('/archive', [EventController::class, 'getArchivedEvents'])->name('archive');
+    Route::get('/archive/{type?}', [EventController::class, 'getArchivedEvents'])->name('archive');
 
     Route::get('/events', [EventController::class, 'index'])->name('events.index');
     Route::put('/events/{id}/restore', [EventController::class, 'restore'])->name('events.restore');
@@ -51,6 +51,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/categories', [CategoryController::class, 'store'])->name('category.store');
     Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('category.update');
     Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('category.destroy');
+    Route::put('/tags/{id}/archive', [CategoryController::class, 'archiveTag'])->name('tags.archive');
+    Route::put('/tags/{id}/restore', [CategoryController::class, 'restoreTag'])->name('tags.restore');
+    Route::delete('/tags/{id}/permanent', [CategoryController::class, 'permanentDeleteTag'])->name('tags.permanent-delete');
 
     // Additional event routes for Vue actions
     Route::post('/events', [EventController::class, 'store'])->name('events.store');

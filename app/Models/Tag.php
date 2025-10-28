@@ -15,6 +15,7 @@ class Tag extends Model
         'name',
         'description',
         'category_id',
+        'archived'
     ];
 
     public function category(): BelongsTo

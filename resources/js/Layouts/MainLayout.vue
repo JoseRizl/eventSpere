@@ -134,10 +134,23 @@ const sideBarItems = computed(() => {
       ],
     },
     {
-      label: 'Archive',
-      icon: 'pi pi-folder',
-      routeName: 'archive',
-      roles: ['Admin', 'Principal'],
+        label: 'Archive',
+        icon: 'pi pi-folder',
+        roles: ['Admin', 'Principal'],
+        items: [
+            {
+                label: 'Events',
+                icon: 'pi pi-calendar',
+                routeName: 'archive',
+                routeParams: { type: 'events' },
+            },
+            {
+                label: 'Tags',
+                icon: 'pi pi-tags',
+                routeName: 'archive',
+                routeParams: { type: 'tags' },
+            },
+        ],
     },
   ];
   return allItems.filter(item => {
@@ -156,7 +169,7 @@ const toggleSidebar = () => {
 
 const isSubmenuActive = (item) => {
     if (!item.items) return false;
-    return item.items.some(subItem => route().current(subItem.routeName, subItem.routeParams));
+    return item.items.some(subItem => route().current(subItem.routeName, subItem.routeParams || {}));
 };
 
 const closeMobileSidebar = () => {
@@ -178,7 +191,7 @@ const toggleDropdown = (label) => {
 // Auto-open dropdown on page load/navigation
 watch(() => page.url, () => {
     const activeItem = sideBarItems.value.find(item =>
-        item.items && item.items.some(subItem => route().current(subItem.routeName, subItem.routeParams))
+        item.items && item.items.some(subItem => route().current(subItem.routeName, subItem.routeParams || {}))
     );
     if (activeItem) openDropdown.value = activeItem.label;
 }, { immediate: true });
