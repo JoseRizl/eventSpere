@@ -544,8 +544,11 @@ export default defineComponent({
       </div>
 
       <template #footer>
-        <button class="modal-button-secondary" @click="isEditModalVisible = false">Cancel</button>
-        <button class="modal-button-primary" @click="saveEditedItem">Save Changes</button>
+        <button class="modal-button-secondary sm:p-button-sm" @click="isEditModalVisible = false" :disabled="saving">Cancel</button>
+        <button class="modal-button-primary sm:p-button-sm" @click="saveEditedItem" :disabled="saving">
+          <i v-if="saving" class="pi pi-spin pi-spinner mr-2"></i>
+          {{ saving ? 'Saving...' : 'Save Changes' }}
+        </button>
       </template>
     </Dialog>
 
@@ -579,8 +582,11 @@ export default defineComponent({
       </div>
 
       <template #footer>
-        <button class="modal-button-secondary" @click="isCreateModalVisible = false">Cancel</button>
-        <button class="modal-button-primary" @click="createItem">{{ `Create ${showTags ? 'Tag' : 'Category'}` }}</button>
+        <button class="modal-button-secondary sm:p-button-sm" @click="isCreateModalVisible = false" :disabled="saving">Cancel</button>
+        <button class="modal-button-primary sm:p-button-sm" @click="createItem" :disabled="saving">
+          <i v-if="saving" class="pi pi-spin pi-spinner mr-2"></i>
+          {{ saving ? 'Creating...' : `Create ${showTags ? 'Tag' : 'Category'}` }}
+        </button>
       </template>
     </Dialog>
 
