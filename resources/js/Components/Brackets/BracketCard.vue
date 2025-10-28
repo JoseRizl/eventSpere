@@ -58,7 +58,8 @@ const emit = defineEmits([
 const matchStatusFilterOptions = [
     { label: 'All', value: 'all' },
     { label: 'Pending', value: 'pending' },
-    { label: 'Completed', value: 'completed' }
+    { label: 'Ongoing', value: 'ongoing' },
+    { label: 'Completed', value: 'completed' },
 ];
 
 const hasConsolationMatch = computed(() => {
