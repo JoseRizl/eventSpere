@@ -28,6 +28,8 @@ export default defineComponent({
     const errorDialogMessage = ref('');
     const showDeleteConfirm = ref(false);
     const itemToDelete = ref(null);
+    const showArchiveConfirm = ref(false);
+    const itemToArchive = ref(null);
     const showCreateConfirm = ref(false);
     const showEditConfirm = ref(false);
     const showUsageDialog = ref(false);
@@ -71,7 +73,9 @@ export default defineComponent({
 
     // Add computed property for filtered items
     const filteredItems = computed(() => {
-      const items = showTags.value ? tags.value : categories.value;
+      const items = showTags.value
+        ? tags.value.filter(tag => !tag.archived)
+        : categories.value;
       if (!searchQuery.value) return items;
 
       const query = searchQuery.value.toLowerCase().trim();
@@ -181,6 +185,7 @@ export default defineComponent({
             isEditModalVisible.value = false;
             successMessage.value = `${showTags.value ? 'Tag' : 'Category'} updated successfully!`;
             showSuccessDialog.value = true;
+            showSuccess(successMessage.value);
           },
           onError: (errors) => {
             errorMessage.value = errors.message || 'Failed to update item';
@@ -300,6 +305,44 @@ export default defineComponent({
       }
     };
 
+    // Archive Tag
+    const archiveItem = (item) => {
+      itemToArchive.value = item;
+      showArchiveConfirm.value = true;
+    };
+
+    const confirmArchive = async () => {
+      if (!itemToArchive.value) return;
+      saving.value = true;
+
+      try {
+        await router.put(route('tags.archive', { id: itemToArchive.value.id }), {}, {
+          onSuccess: (page) => {
+            // Manually update the tags list from props
+            tags.value = page.props.tags;
+            successMessage.value = 'Tag archived successfully!';
+            showSuccessDialog.value = true;
+            showSuccess('Tag archived successfully!');
+          },
+          onError: (errors) => {
+            const message = errors.message || 'Failed to archive the tag.';
+            showError(message);
+            errorMessage.value = message;
+            errorDialogMessage.value = JSON.stringify(errors, null, 2);
+            showErrorDialog.value = true;
+          },
+          onFinish: () => {
+            saving.value = false;
+            showArchiveConfirm.value = false;
+            itemToArchive.value = null;
+          }
+        });
+      } catch (error) {
+        showError('An unexpected error occurred while archiving the tag.');
+        saving.value = false;
+      }
+    };
+
     return {
       categories,
       tags,
@@ -330,6 +373,9 @@ export default defineComponent({
       showCreateConfirm,
       showEditConfirm,
       confirmDelete,
+      archiveItem,
+      confirmArchive,
+      showArchiveConfirm,
       currentPageReportTemplate,
       openUsageDialog,
       showUsageDialog,
@@ -348,7 +394,7 @@ export default defineComponent({
 
 <template>
   <div class="category-list-container">
-    <Toast />
+    <!-- <Toast /> -->
     <LoadingSpinner :show="saving" />
     <h1 class="title">{{ showTags ? 'Tags' : 'Category' }} List</h1>
 
@@ -448,17 +494,20 @@ export default defineComponent({
               @click="openEditModal(data)"
               v-tooltip.top="`Edit ${showTags ? 'Tag' : 'Category'}`"
             />
-            <Button v-if="!isItemInUse(data.id)"
-              icon="pi pi-trash"
-              class="p-button-rounded p-button-text action-btn-danger"
-              @click="deleteItem(data.id)"
-              v-tooltip.top="`Delete ${showTags ? 'Tag' : 'Category'}`"
-            />
+            <template v-if="!isItemInUse(data.id)">
+                <Button
+                    v-if="!showTags"
+                    icon="pi pi-trash"
+                    class="p-button-rounded p-button-text action-btn-danger"
+                    @click="deleteItem(data.id)"
+                    v-tooltip.top="`Delete Category`" />
+                <Button v-if="showTags" icon="pi pi-folder" class="p-button-rounded p-button-text action-btn-warning" @click="archiveItem(data)" v-tooltip.top="'Archive Tag'"/>
+            </template>
             <Button v-else
               icon="pi pi-info-circle"
               class="p-button-rounded p-button-text p-button-help"
               @click="openUsageDialog(data)"
-              v-tooltip.top="`${showTags ? 'Tag' : 'Category'} is in use. Click to see details.`"
+              v-tooltip.top="`${showTags ? 'Tag' : 'Category'} is in use and cannot be archived. Click to see details.`"
             />
           </div>
         </template>
@@ -602,6 +651,12 @@ export default defineComponent({
       :message="`Are you sure you want to delete this ${showTags ? 'tag' : 'category'}?`"
       confirmButtonClass="modal-button-danger"
       @confirm="confirmDelete"
+    />
+
+    <ConfirmationDialog v-model:show="showArchiveConfirm" title="Archive Tag?" :message="`Are you sure you want to archive this tag?`" confirmText="Yes, Archive" @confirm="confirmArchive"
+    />
+
+    <ConfirmationDialog v-model:show="showArchiveConfirm" title="Archive Tag?" :message="`Are you sure you want to archive this tag?`" confirmText="Yes, Archive" @confirm="confirmArchive"
     />
 
     <!-- Usage Details Dialog -->
