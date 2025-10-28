@@ -393,6 +393,10 @@
                 <InputText id="tagName" v-model="newTag.name" />
             </div>
             <div class="p-field">
+                <label for="tagDescription">Description (Optional)</label>
+                <Textarea id="tagDescription" v-model="newTag.description" rows="2" placeholder="Enter an optional description" autoResize />
+            </div>
+            <div class="p-field">
                 <label for="tagCategory">Category</label>
                 <Select id="tagCategory" v-model="newTag.category_id" :options="categories" optionLabel="title" optionValue="id" placeholder="Select a category" class="w-full" disabled />
             </div>
@@ -803,6 +807,7 @@
 
       const newTag = ref({
         name: "",
+        description: "",
         color: "#ff0000",
         category_id: null
       });
@@ -863,7 +868,7 @@
      const openTagModal = (context = 'create') => {
         tagCreationContext.value = context;
         const categoryId = context === 'edit' ? selectedEvent.value.category_id : newEvent.value.category_id;
-        newTag.value = { name: '', color: '#ff0000', category_id: categoryId };
+        newTag.value = { name: '', description: '', color: '#ff0000', category_id: categoryId };
         isCreateTagModalVisible.value = true;
      };
 
@@ -878,6 +883,7 @@
        try {
          const response = await axios.post(route('category.store'), {
            name: newTag.value.name,
+           description: newTag.value.description || null,
            category_id: newTag.value.category_id
          });
 

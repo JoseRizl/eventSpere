@@ -10,11 +10,12 @@ export default defineComponent({
     const { props } = usePage();
     const categories = ref(props.categories || []);
     const tags = ref(props.tags || []);
+    const event_tags = ref(props.event_tags || []);
     const events = ref(props.events || []);
     const isEditModalVisible = ref(false);
     const isCreateModalVisible = ref(false);
     const selectedItem = ref(null);
-    const newItem = ref({ title: "", description: "" });
+    const newItem = ref({ title: "", description: "", name: "", category_id: null });
     const showTags = ref(false); // Default to categories, will be updated on mount
     const searchQuery = ref("");
     const initialLoading = ref(true);
@@ -31,24 +32,41 @@ export default defineComponent({
     const showEditConfirm = ref(false);
     const showUsageDialog = ref(false);
     const usageDetails = ref({ events: [], tags: [] });
+    const isDetailsModalVisible = ref(false);
+    const selectedTagForDetails = ref(null);
     const currentItemName = ref('');
 
     const currentPageReportTemplate = computed(() => `Showing {first} to {last} of {totalRecords} ${showTags.value ? 'tags' : 'categories'}`);
 
     const normalizedEvents = computed(() => {
       return events.value.map(event => ({
-        ...event,
-        tags: Array.isArray(event.tags)
-          ? event.tags.map(tag => typeof tag === 'object' ? tag.id : tag)
-          : []
+        ...event
       }));
     });
+
+    const tagUsageCount = computed(() => event_tags.value.reduce((acc, item) => { acc[item.tag_id] = (acc[item.tag_id] || 0) + 1; return acc; }, {}));
+
 
     const categoryMap = computed(() => {
       return categories.value.reduce((map, category) => {
         map[category.id] = category.title;
         return map;
       }, {});
+    });
+
+    const categoryUsageCount = computed(() => {
+      const usageMap = {};
+      // Initialize counts for all categories
+      categories.value.forEach(category => {
+        usageMap[category.id] = 0;
+      });
+      // Count non-archived events for each category
+      normalizedEvents.value.forEach(event => {
+        if (event.category_id && !event.archived && usageMap.hasOwnProperty(event.category_id)) {
+          usageMap[event.category_id]++;
+        }
+      });
+      return usageMap;
     });
 
     // Add computed property for filtered items
@@ -133,6 +151,12 @@ export default defineComponent({
       showUsageDialog.value = true;
     };
 
+    const openDetailsModal = (tag) => {
+      selectedTagForDetails.value = tag;
+      usageDetails.value = getUsageDetails(tag.id);
+      isDetailsModalVisible.value = true;
+    };
+
     // Open Edit Modal
     const openEditModal = (item) => {
       selectedItem.value = { ...item };
@@ -179,8 +203,8 @@ export default defineComponent({
     // Open Create Modal
     const openCreateModal = () => {
       newItem.value = showTags.value
-        ? { name: "", category_id: null }
-        : { title: "", description: "" };
+        ? { name: "", description: "", category_id: null }
+        : { title: "", description: "", name: "", category_id: null };
       isCreateModalVisible.value = true;
     };
 
@@ -202,9 +226,9 @@ export default defineComponent({
           onSuccess: () => {
             isCreateModalVisible.value = false;
             // Reset the form
-            newItem.value = showTags.value ?
-              { name: "", category_id: null } :
-              { title: "", description: "" };
+            newItem.value = showTags.value
+              ? { name: "", description: "", category_id: null }
+              : { title: "", description: "", name: "", category_id: null };
             // Show success message
             successMessage.value = `${showTags.value ? 'Tag' : 'Category'} created successfully!`;
             showSuccessDialog.value = true;
@@ -311,6 +335,12 @@ export default defineComponent({
       showUsageDialog,
       usageDetails,
       categoryMap,
+      categoryUsageCount,
+      openDetailsModal,
+      isDetailsModalVisible,
+      selectedTagForDetails,
+      tagUsageCount,
+      currentItemName,
     };
   },
 });
@@ -377,11 +407,28 @@ export default defineComponent({
         </template>
       </Column>
 
-      <Column :field="showTags ? 'category_id' : 'description'" :header="showTags ? 'Category' : 'Description'" style="width:40%;" sortable :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
+      <Column v-if="showTags" field="category_id" header="Category" style="width:20%;" sortable :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
         <template #body="{ data }">
           <div class="datatable-content">
-            <span v-if="showTags">{{ categoryMap[data.category_id] || 'Uncategorized' }}</span>
-            <span v-else>{{ data.description || "No description available" }}</span>
+            <span>{{ categoryMap[data.category_id] || '' }}</span>
+          </div>
+        </template>
+      </Column>
+
+      <!-- <Column field="description" header="Description" style="width:30%;" sortable :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
+        <template #body="{ data }">
+          <div class="datatable-content">
+            <span>{{ data.description || "" }}</span>
+          </div>
+        </template>
+      </Column> -->
+
+      <Column v-if="!showTags" header="Events Using" style="width:10%;" sortable :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
+        <template #body="{ data }">
+          <div class="datatable-content text-center">
+            <span class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-indigo-100 bg-indigo-700 rounded-full">
+              {{ categoryUsageCount[data.id] || 0 }}
+            </span>
           </div>
         </template>
       </Column>
@@ -389,6 +436,12 @@ export default defineComponent({
       <Column header="Actions" style="width:10%;" body-class="text-center" :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
         <template #body="{ data }">
           <div class="action-buttons">
+            <Button
+              v-if="showTags"
+              icon="pi pi-eye"
+              class="p-button-rounded p-button-text action-btn-success"
+              @click="openDetailsModal(data)"
+              v-tooltip.top="`View Details`" />
             <Button
               icon="pi pi-pen-to-square"
               class="p-button-rounded p-button-text action-btn-info"
@@ -429,13 +482,13 @@ export default defineComponent({
           <Select id="tagCategory" v-model="selectedItem.category_id" :options="categories" optionLabel="title" optionValue="id" placeholder="Select a category" class="w-full" />
         </div>
 
-        <div class="p-field" v-if="!showTags">
+        <div class="p-field">
           <label for="description">Description</label>
           <Textarea
             id="description"
             v-model="selectedItem.description"
             rows="4"
-            :placeholder="`Enter ${showTags ? 'tag' : 'category'} description`"
+            :placeholder="`Enter description`"
             autoResize
           />
         </div>
@@ -464,14 +517,13 @@ export default defineComponent({
           <Select id="newTagCategory" v-model="newItem.category_id" :options="categories" optionLabel="title" optionValue="id" placeholder="Select a category" class="w-full" />
         </div>
 
-
-        <div class="p-field" v-if="!showTags">
+        <div class="p-field">
           <label for="newDescription">Description</label>
           <Textarea
             id="newDescription"
             v-model="newItem.description"
             rows="4"
-            :placeholder="`Enter ${showTags ? 'tag' : 'category'} description`"
+            :placeholder="`Enter description`"
             autoResize
           />
         </div>
@@ -481,6 +533,40 @@ export default defineComponent({
         <button class="modal-button-secondary" @click="isCreateModalVisible = false">Cancel</button>
         <button class="modal-button-primary" @click="createItem">{{ `Create ${showTags ? 'Tag' : 'Category'}` }}</button>
       </template>
+    </Dialog>
+
+    <!-- Tag Details Modal -->
+    <Dialog v-if="selectedTagForDetails" v-model:visible="isDetailsModalVisible" modal header="Tag Details" :style="{ width: '450px' }" :breakpoints="{ '960px': '75vw', '640px': '90vw' }">
+        <div class="p-6">
+            <div class="flex flex-col items-center text-center">
+                <div class="text-2xl font-bold text-gray-800 mb-2">{{ selectedTagForDetails.name }}</div>
+                <div class="text-sm text-gray-500 mb-4">{{ categoryMap[selectedTagForDetails.category_id] || 'Uncategorized' }}</div>
+            </div>
+
+            <div class="mt-6 border-t border-gray-200 pt-6">
+                <div class="grid grid-cols-1 gap-4">
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-500 mb-1">Description</h4>
+                        <p class="text-base text-gray-700">{{ selectedTagForDetails.description || 'No description provided.' }}</p>
+                    </div>
+
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-500 mb-1">Usage</h4>
+                        <div class="flex items-center gap-2 text-base text-gray-700">
+                            <i class="pi pi-calendar"></i>
+                            <span>Used in <strong>{{ tagUsageCount[selectedTagForDetails.id] || 0 }}</strong> event(s).</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <template #footer>
+            <Button
+                label="Close"
+                icon="pi pi-times"
+                @click="isDetailsModalVisible = false"
+                class="p-button-text" />
+        </template>
     </Dialog>
 
     <!-- Success Message Dialog -->
