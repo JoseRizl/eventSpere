@@ -417,7 +417,7 @@ export default defineComponent({
         </div>
       </div>
       <div class="flex gap-2">
-        <button class="create-button" @click="openCreateModal">Create</button>
+        <button class="create-button" @click="openCreateModal">{{ showTags ? 'Create Tag' : 'Create Category' }}</button>
       </div>
     </div>
 
@@ -525,7 +525,7 @@ export default defineComponent({
     <Dialog v-model:visible="isEditModalVisible" modal :header="`Edit ${showTags ? 'Tag' : 'Category'}`" :style="{ width: '50vw' }">
       <div class="p-fluid">
         <div class="p-field">
-          <label for="title">{{ showTags ? 'Tag' : 'Category' }} Name</label>
+          <label for="title">{{ showTags ? 'Tag' : 'Category' }} Name <span style="color: red;">*</span></label>
           <InputText
             id="title"
             v-model="selectedItem[showTags ? 'name' : 'title']"
@@ -534,12 +534,12 @@ export default defineComponent({
         </div>
 
         <div class="p-field" v-if="showTags">
-          <label for="tagCategory">Category</label>
+          <label for="tagCategory">Category <span style="color: red;">*</span></label>
           <Select id="tagCategory" v-model="selectedItem.category_id" :options="categories" optionLabel="title" optionValue="id" placeholder="Select a category" class="w-full" />
         </div>
 
         <div class="p-field">
-          <label for="description">Description</label>
+          <label for="description">Description <span style="color: #6c757d; font-weight: normal;">(Optional)</span></label>
           <Textarea
             id="description"
             v-model="selectedItem.description"
@@ -563,7 +563,7 @@ export default defineComponent({
     <Dialog v-model:visible="isCreateModalVisible" modal :header="`Create ${showTags ? 'Tag' : 'Category'}`" :style="{ width: '50vw' }">
       <div class="p-fluid">
         <div class="p-field">
-          <label for="newTitle">{{ showTags ? 'Tag' : 'Category' }} Name</label>
+          <label for="newTitle">{{ showTags ? 'Tag' : 'Category' }} Name <span style="color: red;">*</span></label>
           <InputText
             id="newTitle"
             v-model="newItem[showTags ? 'name' : 'title']"
@@ -572,12 +572,12 @@ export default defineComponent({
         </div>
 
         <div class="p-field" v-if="showTags">
-          <label for="newTagCategory">Category</label>
+          <label for="newTagCategory">Category <span style="color: red;">*</span></label>
           <Select id="newTagCategory" v-model="newItem.category_id" :options="categories" optionLabel="title" optionValue="id" placeholder="Select a category" class="w-full" />
         </div>
 
         <div class="p-field">
-          <label for="newDescription">Description</label>
+          <label for="newDescription">Description <span style="color: #6c757d; font-weight: normal;">(Optional)</span></label>
           <Textarea
             id="newDescription"
             v-model="newItem.description"

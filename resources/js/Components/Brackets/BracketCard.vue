@@ -212,7 +212,7 @@ const proceedWithSave = async () => {
 <template>
     <div class="bracket-section">
         <div class="bracket-wrapper">
-            <div class="bracket-header">
+            <div class="bracket-header compact-v2">
                 <div class="flex justify-between items-start">
                     <div class="flex items-center gap-4">
                         <h2>{{ bracket.name }}</h2>
@@ -252,10 +252,10 @@ const proceedWithSave = async () => {
                 </div>
 
                 <!-- Winner Banner -->
-                <div v-if="getBracketStats(bracket).status.text === 'Completed' && getBracketStats(bracket).winnerName" class="winner-banner">
+                <!-- <div v-if="getBracketStats(bracket).status.text === 'Completed' && getBracketStats(bracket).winnerName" class="winner-banner">
                     <i class="pi pi-trophy"></i>
                     <span>Winner: <strong>{{ getBracketStats(bracket).winnerName }}</strong></span>
-                </div>
+                </div> -->
 
                 <Link v-if="showEventLink && bracket.event" :href="route('event.details', { id: bracket.event_id })" class="event-link-container group">
                     <img :src="bracket.event.image || '/placeholder-event.jpg'" :alt="bracket.event.title" class="event-link-icon" />
@@ -382,6 +382,25 @@ const proceedWithSave = async () => {
 </template>
 
 <style scoped>
+.bracket-header.compact-v2 {
+    padding: 0.5rem 1rem; /* Further reduced vertical padding */
+}
+.bracket-header.compact-v2 h2 {
+    font-size: 1.1rem; /* Further reduced font size */
+    margin-bottom: 0.1rem;
+}
+.bracket-header.compact-v2 .winner-banner {
+    margin-top: 0.25rem;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8rem;
+}
+.bracket-header.compact-v2 .event-link-container {
+    margin-top: 0.25rem;
+}
+.bracket-header.compact-v2 .bracket-stats {
+    margin-top: 0.25rem;
+    gap: 0.75rem;
+}
 /* Player Name Edit Modal */
 .modal-overlay {
     position: fixed;
