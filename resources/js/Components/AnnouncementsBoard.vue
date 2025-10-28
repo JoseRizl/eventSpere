@@ -292,8 +292,8 @@ const formatTimestamp = (timestamp) => {
                 </div>
             </div>
             <template #footer>
-                <button @click="showAddModal = false" class="modal-button-secondary">Cancel</button>
-                <button @click="confirmAdd" :disabled="saving" class="modal-button-primary">
+                <button @click="showAddModal = false" class="modal-button-secondary sm:p-button-sm">Cancel</button>
+                <button @click="confirmAdd" :disabled="saving" class="modal-button-primary sm:p-button-sm">
                     <i v-if="saving" class="pi pi-spin pi-spinner mr-2"></i>Post Announcement
                 </button>
             </template>
@@ -316,8 +316,8 @@ const formatTimestamp = (timestamp) => {
                 </div>
             </div>
             <template #footer>
-                <button @click="showEditModal = false" class="modal-button-secondary">Cancel</button>
-                <button @click="confirmUpdate" :disabled="saving" class="modal-button-primary">
+                <button @click="showEditModal = false" class="modal-button-secondary sm:p-button-sm">Cancel</button>
+                <button @click="confirmUpdate" :disabled="saving" class="modal-button-primary sm:p-button-sm">
                     <i v-if="saving" class="pi pi-spin pi-spinner mr-2"></i>
                     Update Announcement
                 </button>

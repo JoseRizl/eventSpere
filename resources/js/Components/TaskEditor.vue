@@ -105,8 +105,8 @@
             <div v-if="taskErrorMessage" class="text-red-500 text-sm mr-auto p-2 text-left">
                 {{ taskErrorMessage }}
             </div>
-            <button class="modal-button-secondary" @click="closeModal" :disabled="isSaving">Cancel</button>
-            <button class="modal-button-primary" @click="promptSave" :disabled="isSaving">
+            <button class="modal-button-secondary sm:p-button-sm" @click="closeModal" :disabled="isSaving">Cancel</button>
+            <button class="modal-button-primary sm:p-button-sm" @click="promptSave" :disabled="isSaving">
                 <i v-if="isSaving" class="pi pi-spin pi-spinner mr-2"></i>
                 {{ isSaving ? 'Saving...' : 'Save Tasks' }}
             </button>

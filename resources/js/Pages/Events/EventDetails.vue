@@ -892,8 +892,10 @@ const getBracketIndex = (bracketId) => {
                     v-if="editMode"
                     @click="showSaveConfirmDialog = true"
                     class="mt-4 self-end modal-button-primary"
+                    :disabled="saving"
                     >
-                    Save Changes
+                    <i v-if="saving" class="pi pi-spin pi-spinner mr-2"></i>
+                    {{ saving ? 'Saving...' : 'Save Changes' }}
                     </button>
 
                     <!-- Committee -->

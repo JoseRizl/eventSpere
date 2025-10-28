@@ -187,7 +187,7 @@
       />
 
     <!-- Create Event Modal-->
-    <Dialog v-model:visible="isCreateModalVisible" modal header="Create Event" :style="{ width: '50vw' }">
+    <Dialog v-model:visible="isCreateModalVisible" modal header="Create Event" :style="{ width: '50vw' }" :breakpoints="{ '960px': '75vw', '640px': '90vw' }">
         <div class="p-fluid">
           <!-- Event Title -->
           <div class="p-field">
@@ -260,56 +260,56 @@
                 <Button icon="pi pi-plus" class="p-button-secondary p-button-rounded" @click="openTagModal('create')" v-tooltip.top="'Create New Tag'" />
             </div>
           </div>
-          <!-- Create Event Modal -->
-          <div class="p-field grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Start -->
+          <!-- Create Event Modal - Date/Time Section -->
+          <div class="p-field grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Start Date -->
             <div class="flex flex-col">
-              <label for="startDate" class="mb-1 font-semibold">Start</label>
-              <div class="flex items-center gap-2">
-                <DatePicker
-                  id="startDate"
-                  v-model="newEvent.startDate"
-                  dateFormat="MM-dd-yy"
-                  showIcon
-                  class="w-full"
-                />
-                <input
-                  v-if="!newEvent.isAllDay"
-                  type="time"
-                  id="startTime"
-                  v-model="newEvent.startTime"
-                  placeholder="HH:mm"
-                  class="p-inputtext p-component w-36"
-                  @blur="newEvent.startTime = newEvent.startTime.padStart(5, '0')"
-                />
-              </div>
+              <label for="startDate" class="mb-1 font-semibold">Start Date</label>
+              <DatePicker id="startDate" v-model="newEvent.startDate" dateFormat="MM-dd-yy" showIcon class="w-full" />
             </div>
 
-            <!-- End -->
+            <!-- End Date -->
             <div class="flex flex-col">
-              <label for="endDate" class="mb-1 font-semibold">End</label>
-              <div class="flex items-center gap-2">
-                <DatePicker
-                  id="endDate"
-                  v-model="newEvent.endDate"
-                  dateFormat="MM-dd-yy"
-                  :minDate="newEvent.startDate ? new Date(newEvent.startDate) : null"
-                  showIcon
-                  class="w-full"
-                />
-                <input
-                  v-if="!newEvent.isAllDay"
-                  type="time"
-                  id="endTime"
-                  v-model="newEvent.endTime"
-                  placeholder="HH:mm"
-                  class="p-inputtext p-component w-36"
-                  :min="newEvent.startDate && newEvent.endDate && new Date(newEvent.startDate).toDateString() === new Date(newEvent.endDate).toDateString() ? newEvent.startTime : null"
-                  @blur="newEvent.endTime = newEvent.endTime.padStart(5, '0')"
-                />
-              </div>
+              <label for="endDate" class="mb-1 font-semibold">End Date</label>
+              <DatePicker
+                id="endDate"
+                v-model="newEvent.endDate"
+                dateFormat="MM-dd-yy"
+                :minDate="newEvent.startDate ? new Date(newEvent.startDate) : null"
+                showIcon
+                class="w-full"
+              />
+            </div>
+          </div>
+          <div class="p-field grid grid-cols-1 sm:grid-cols-2 gap-4" v-if="!newEvent.isAllDay">
+            <!-- Start Time -->
+            <div class="flex flex-col">
+              <label for="startTime" class="mb-1 font-semibold">Start Time</label>
+              <input
+                type="time"
+                id="startTime"
+                v-model="newEvent.startTime"
+                placeholder="HH:mm"
+                class="p-inputtext p-component w-full"
+                @blur="newEvent.startTime = newEvent.startTime.padStart(5, '0')"
+              />
             </div>
 
+            <!-- End Time -->
+            <div class="flex flex-col">
+              <label for="endTime" class="mb-1 font-semibold">End Time</label>
+              <input
+                type="time"
+                id="endTime"
+                v-model="newEvent.endTime"
+                placeholder="HH:mm"
+                class="p-inputtext p-component w-full"
+                :min="newEvent.startDate && newEvent.endDate && new Date(newEvent.startDate).toDateString() === new Date(newEvent.endDate).toDateString() ? newEvent.startTime : null"
+                @blur="newEvent.endTime = newEvent.endTime.padStart(5, '0')"
+              />
+            </div>
+          </div>
+          <div class="p-field">
             <!-- All Day Checkbox - Moved below date/time fields -->
             <div class="col-span-2 mt-2">
               <div class="flex items-center gap-2 checkbox-container">
@@ -376,17 +376,20 @@
 
         <template #footer>
             <div class="flex justify-between w-full">
-                <Button v-if="user?.role === 'Admin' || user?.role === 'Principal'" icon="pi pi-image" class="p-button-secondary" @click="$refs.defaultImageInput.click()" v-tooltip.top="'Change Default Image'" />
-                <div class="flex gap-2">
-                    <button class="modal-button-secondary" @click="isCreateModalVisible = false">Cancel</button>
-                    <button class="modal-button-primary" @click="createEvent">Create Event</button>
+                <Button v-if="user?.role === 'Admin' || user?.role === 'Principal'" icon="pi pi-image" class="p-button-secondary sm:p-button-sm" @click="$refs.defaultImageInput.click()" v-tooltip.top="'Change Default Image'" />
+                <div class="flex gap-1 sm:gap-2">
+                    <button class="modal-button-secondary sm:p-button-sm" @click="isCreateModalVisible = false" :disabled="saving">Cancel</button>
+                    <button class="modal-button-primary sm:p-button-sm" @click="createEvent" :disabled="saving">
+                        <i v-if="saving" class="pi pi-spin pi-spinner mr-2"></i>
+                        {{ saving ? 'Creating...' : 'Create Event' }}
+                    </button>
                 </div>
             </div>
         </template>
       </Dialog>
 
       <!-- Create Tag Modal -->
-      <Dialog v-model:visible="isCreateTagModalVisible" modal header="Create New Tag" :style="{ width: '30vw' }">
+      <Dialog v-model:visible="isCreateTagModalVisible" modal header="Create New Tag" :style="{ width: '30vw' }" :breakpoints="{ '960px': '50vw', '640px': '90vw' }">
         <div class="p-fluid">
             <div class="p-field">
                 <label for="tagName">Tag Name</label>
@@ -398,13 +401,16 @@
             </div>
         </div>
         <template #footer>
-            <button class="modal-button-secondary" @click="isCreateTagModalVisible = false">Cancel</button>
-            <button class="modal-button-primary" @click="createTag" :disabled="saving">Create</button>
+            <button class="modal-button-secondary" @click="isCreateTagModalVisible = false" :disabled="saving">Cancel</button>
+            <button class="modal-button-primary" @click="createTag" :disabled="saving">
+                <i v-if="saving" class="pi pi-spin pi-spinner mr-2"></i>
+                {{ saving ? 'Creating...' : 'Create' }}
+            </button>
         </template>
       </Dialog>
 
       <!-- Edit Event Modal -->
-      <Dialog v-model:visible="isEditModalVisible" modal header="Edit Event" :style="{ width: '50vw' }">
+      <Dialog v-model:visible="isEditModalVisible" modal header="Edit Event" :style="{ width: '50vw' }" :breakpoints="{ '960px': '75vw', '640px': '90vw' }">
         <div class="p-fluid">
           <!-- Event Title -->
           <div class="p-field">
@@ -492,44 +498,50 @@
         </div>
 
 
-          <!-- Edit Event Modal -->
-          <div class="p-field grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Start Date & Time -->
+          <!-- Edit Event Modal - Date/Time Section -->
+          <div class="p-field grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Start Date -->
             <div class="flex flex-col">
-              <label for="startDate" class="mb-1 font-semibold">Start</label>
-              <div class="flex items-center gap-2">
-                <DatePicker id="startDate" v-model="selectedEvent.startDate" dateFormat="MM-dd-yy" showIcon class="w-full" />
-                <input
-                  v-show="!selectedEvent.isAllDay"
-                  type="time"
-                  id="startTime"
-                  v-model="selectedEvent.startTime"
-                  placeholder="HH:mm"
-                  class="p-inputtext p-component w-36"
-                  @blur="selectedEvent.startTime = selectedEvent.startTime.padStart(5, '0')"
-                />
-              </div>
+              <label for="editStartDate" class="mb-1 font-semibold">Start Date</label>
+              <DatePicker id="editStartDate" v-model="selectedEvent.startDate" dateFormat="MM-dd-yy" showIcon class="w-full" />
             </div>
 
-            <!-- End Date & Time -->
+            <!-- End Date -->
             <div class="flex flex-col">
-              <label for="endDate" class="mb-1 font-semibold">End</label>
-              <div class="flex items-center gap-2">
-                <DatePicker id="endDate" v-model="selectedEvent.endDate" dateFormat="MM-dd-yy" showIcon class="w-full"
-                  :minDate="selectedEvent.startDate ? new Date(selectedEvent.startDate) : null" />
-                <input
-                  v-show="!selectedEvent.isAllDay"
-                  type="time"
-                  id="endTime"
-                  v-model="selectedEvent.endTime"
-                  placeholder="HH:mm"
-                  class="p-inputtext p-component w-36"
-                  :min="selectedEvent.startDate && selectedEvent.endDate && new Date(selectedEvent.startDate).toDateString() === new Date(selectedEvent.endDate).toDateString() ? selectedEvent.startTime : null"
-                  @blur="selectedEvent.endTime = selectedEvent.endTime.padStart(5, '0')"
-                />
-              </div>
+              <label for="editEndDate" class="mb-1 font-semibold">End Date</label>
+              <DatePicker id="editEndDate" v-model="selectedEvent.endDate" dateFormat="MM-dd-yy" showIcon class="w-full"
+                :minDate="selectedEvent.startDate ? new Date(selectedEvent.startDate) : null" />
+            </div>
+          </div>
+          <div class="p-field grid grid-cols-1 sm:grid-cols-2 gap-4" v-if="!selectedEvent.isAllDay">
+            <!-- Start Time -->
+            <div class="flex flex-col">
+              <label for="editStartTime" class="mb-1 font-semibold">Start Time</label>
+              <input
+                type="time"
+                id="editStartTime"
+                v-model="selectedEvent.startTime"
+                placeholder="HH:mm"
+                class="p-inputtext p-component w-full"
+                @blur="selectedEvent.startTime = selectedEvent.startTime.padStart(5, '0')"
+              />
             </div>
 
+            <!-- End Time -->
+            <div class="flex flex-col">
+              <label for="editEndTime" class="mb-1 font-semibold">End Time</label>
+              <input
+                type="time"
+                id="editEndTime"
+                v-model="selectedEvent.endTime"
+                placeholder="HH:mm"
+                class="p-inputtext p-component w-full"
+                :min="selectedEvent.startDate && selectedEvent.endDate && new Date(selectedEvent.startDate).toDateString() === new Date(selectedEvent.endDate).toDateString() ? selectedEvent.startTime : null"
+                @blur="selectedEvent.endTime = selectedEvent.endTime.padStart(5, '0')"
+              />
+            </div>
+          </div>
+          <div class="p-field">
             <!-- Error Display -->
           <div v-if="dateError" class="text-red-500 text-sm mt-2 flex items-center">
             <i class="pi pi-exclamation-triangle mr-2"></i>
@@ -540,7 +552,7 @@
             <div class="col-span-2 mt-2">
               <div class="flex items-center gap-2 checkbox-container">
                 <Checkbox v-model="selectedEvent.isAllDay" :binary="true" />
-                <label for="allDay" class="checkbox-label">All Day Event</label>
+                <label for="editAllDay" class="checkbox-label">All Day Event</label>
               </div>
             </div>
           </div>
@@ -596,8 +608,11 @@
         </div>
 
         <template #footer>
-          <button class="modal-button-secondary" @click="isEditModalVisible = false">Cancel</button>
-          <button class="modal-button-primary" @click="saveEditedEvent">Save Changes</button>
+          <button class="modal-button-secondary sm:p-button-sm" @click="isEditModalVisible = false" :disabled="saving">Cancel</button>
+          <button class="modal-button-primary sm:p-button-sm" @click="saveEditedEvent" :disabled="saving">
+            <i v-if="saving" class="pi pi-spin pi-spinner mr-2"></i>
+            {{ saving ? 'Saving...' : 'Save Changes' }}
+          </button>
         </template>
       </Dialog>
     </div>

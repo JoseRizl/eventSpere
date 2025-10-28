@@ -189,9 +189,9 @@ const announcementEvents = computed(() => {
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               <div v-for="(event, index) in ongoingEvents" :key="'ongoing-' + index" class="group relative h-full">
                 <Link :href="route('event.details', { id: event.id })" preserve-scroll class="block h-full">
-                  <Card class="h-full flex flex-col justify-between compact-event-card">
+                  <Card class="h-full flex flex-col justify-between compact-event-card-sm">
                     <template #header>
-                      <div class="h-36 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
+                      <div class="h-28 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
                         <div class="absolute inset-0 bg-gradient-to-b from-gray-900/20 to-transparent z-10"></div>
                         <img v-if="event.image" :src="event.image" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" alt="Event image" loading="lazy"/>
                         <img v-else src="/resources/images/NCSlogo.png" class="w-24 h-24 object-contain opacity-50" alt="Event Placeholder" />
@@ -199,7 +199,7 @@ const announcementEvents = computed(() => {
                       </div>
                     </template>
                     <template #title>
-                      <h3 class="text-base font-medium overflow-hidden line-clamp-1 cursor-help" v-tooltip.top="event.title">{{ event.title }}</h3>
+                      <h3 class="text-sm font-medium overflow-hidden line-clamp-1 cursor-help" v-tooltip.top="event.title">{{ event.title }}</h3>
                     </template>
                     <template #subtitle>
                       <div class="flex items-center gap-2">
@@ -208,8 +208,8 @@ const announcementEvents = computed(() => {
                       </div>
                     </template>
                     <template #content>
-                      <div class="relative flex-1 overflow-hidden h-10 flex items-center">
-                        <p class="text-sm text-gray-600 line-clamp-2">{{ event.description }}</p>
+                      <div class="relative flex-1 overflow-hidden h-8 flex items-center">
+                        <p class="text-xs text-gray-600 line-clamp-2">{{ event.description }}</p>
                         <div class="absolute inset-0 bg-white/50 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
                             <Button label="View Details" icon="pi pi-info-circle" class="p-button-text p-button-sm no-hover" @click.stop="$inertia.visit(route('event.details', { id: event.id }))"/>
                         </div>
@@ -238,9 +238,9 @@ const announcementEvents = computed(() => {
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               <div v-for="(event, index) in eventsThisMonth" :key="'month-' + index" class="group relative h-full">
                 <Link :href="route('event.details', { id: event.id })" preserve-scroll class="block h-full">
-                  <Card class="h-full flex flex-col justify-between compact-event-card">
+                  <Card class="h-full flex flex-col justify-between compact-event-card-sm">
                     <template #header>
-                      <div class="h-36 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
+                      <div class="h-28 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
                         <div class="absolute inset-0 bg-gradient-to-b from-gray-900/20 to-transparent z-10"></div>
                         <img v-if="event.image" :src="event.image" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" alt="Event image" loading="lazy"/>
                         <img v-else src="/resources/images/NCSlogo.png" class="w-24 h-24 object-contain opacity-50" alt="Event Placeholder" />
@@ -248,7 +248,7 @@ const announcementEvents = computed(() => {
                       </div>
                     </template>
                     <template #title>
-                      <h3 class="text-base font-medium overflow-hidden line-clamp-1 cursor-help" v-tooltip.top="event.title">{{ event.title }}</h3>
+                      <h3 class="text-sm font-medium overflow-hidden line-clamp-1 cursor-help" v-tooltip.top="event.title">{{ event.title }}</h3>
                     </template>
                     <template #subtitle>
                       <div class="flex items-center gap-2">
@@ -257,8 +257,8 @@ const announcementEvents = computed(() => {
                       </div>
                     </template>
                     <template #content>
-                      <div class="relative flex-1 overflow-hidden h-10 flex items-center">
-                        <p class="text-sm text-gray-600 line-clamp-2">{{ event.description }}</p>
+                      <div class="relative flex-1 overflow-hidden h-8 flex items-center">
+                        <p class="text-xs text-gray-600 line-clamp-2">{{ event.description }}</p>
                         <div class="absolute inset-0 bg-white/50 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
                             <Button label="View Details" icon="pi pi-info-circle" class="p-button-text p-button-sm no-hover" @click.stop="$inertia.visit(route('event.details', { id: event.id }))"/>
                         </div>
@@ -287,9 +287,9 @@ const announcementEvents = computed(() => {
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               <div v-for="(event, index) in upcomingEvents" :key="'upcoming-' + index" class="group relative h-full">
                 <Link :href="route('event.details', { id: event.id })" preserve-scroll class="block h-full">
-                  <Card class="h-full flex flex-col justify-between compact-event-card">
+                  <Card class="h-full flex flex-col justify-between compact-event-card-sm">
                     <template #header>
-                      <div class="h-36 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
+                      <div class="h-28 bg-gray-300 rounded-t-lg flex items-center justify-center overflow-hidden relative">
                         <div class="absolute inset-0 bg-gradient-to-b from-gray-900/20 to-transparent z-10"></div>
                         <img v-if="event.image" :src="event.image" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" alt="Event image" loading="lazy"/>
                         <img v-else src="/resources/images/NCSlogo.png" class="w-24 h-24 object-contain opacity-50" alt="Event Placeholder" />
@@ -297,7 +297,7 @@ const announcementEvents = computed(() => {
                       </div>
                     </template>
                     <template #title>
-                      <h3 class="text-base font-medium overflow-hidden line-clamp-1 cursor-help" v-tooltip.top="event.title">{{ event.title }}</h3>
+                      <h3 class="text-sm font-medium overflow-hidden line-clamp-1 cursor-help" v-tooltip.top="event.title">{{ event.title }}</h3>
                     </template>
                     <template #subtitle>
                       <div class="flex items-center gap-2">
@@ -306,8 +306,8 @@ const announcementEvents = computed(() => {
                       </div>
                     </template>
                     <template #content>
-                      <div class="relative flex-1 overflow-hidden h-10 flex items-center">
-                        <p class="text-sm text-gray-600 line-clamp-2">{{ event.description }}</p>
+                      <div class="relative flex-1 overflow-hidden h-8 flex items-center">
+                        <p class="text-xs text-gray-600 line-clamp-2">{{ event.description }}</p>
                         <div class="absolute inset-0 bg-white/50 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
                             <Button label="View Details" icon="pi pi-info-circle" class="p-button-text p-button-sm no-hover" @click.stop="$inertia.visit(route('event.details', { id: event.id }))"/>
                         </div>
@@ -364,18 +364,18 @@ const announcementEvents = computed(() => {
   background-color: rgba(0, 0, 0, 0.04) !important;
 }
 
-:deep(.compact-event-card .p-card-body) {
+:deep(.compact-event-card-sm .p-card-body) {
     padding: 0.75rem 1rem;
     gap: 0.5rem;
 }
-:deep(.compact-event-card .p-card-subtitle) {
+:deep(.compact-event-card-sm .p-card-subtitle) {
     margin-bottom: 0.25rem;
 }
-:deep(.compact-event-card .p-card-content) {
+:deep(.compact-event-card-sm .p-card-content) {
     padding-top: 0.25rem;
     padding-bottom: 0.25rem;
 }
-:deep(.compact-event-card .p-card-footer) {
+:deep(.compact-event-card-sm .p-card-footer) {
     padding-top: 0;
 }
 
