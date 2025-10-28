@@ -191,20 +191,20 @@
         <div class="p-fluid">
           <!-- Event Title -->
           <div class="p-field">
-            <label for="title">Event Title</label>
+            <label for="title">Event Title <span style="color: red;">*</span></label>
             <InputText id="title" v-model="newEvent.title" placeholder="Enter event title" />
           </div>
 
           <div class="p-field grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Venue -->
             <div>
-              <label for="venue">Venue</label>
+              <label for="venue">Venue <span style="color: #6c757d; font-weight: normal;">(Optional)</span></label>
               <InputText id="venue" v-model="newEvent.venue" placeholder="Enter event venue (e.g., Main Hall, Stadium)" class="w-full" />
             </div>
 
             <!-- Event Category Dropdown -->
             <div>
-              <label for="category">Category</label>
+              <label for="category">Category <span style="color: #6c757d; font-weight: normal;">(Optional)</span></label>
               <Select
                 id="category"
                 v-model="newEvent.category_id"
@@ -219,7 +219,7 @@
 
           <!-- Tags Selection (Conditional) -->
           <div class="p-field" v-if="newEvent.category_id">
-            <label for="tags">Tags</label>
+            <label for="tags">Tags <span style="color: #6c757d; font-weight: normal;">(Optional)</span></label>
             <div class="flex items-center gap-2">
                 <MultiSelect
                   id="tags"
@@ -264,13 +264,13 @@
           <div class="p-field grid grid-cols-1 sm:grid-cols-2 gap-4">
             <!-- Start Date -->
             <div class="flex flex-col">
-              <label for="startDate" class="mb-1 font-semibold">Start Date</label>
+              <label for="startDate" class="mb-1 font-semibold">Start Date <span style="color: red;">*</span></label>
               <DatePicker id="startDate" v-model="newEvent.startDate" dateFormat="MM-dd-yy" showIcon class="w-full" />
             </div>
 
             <!-- End Date -->
             <div class="flex flex-col">
-              <label for="endDate" class="mb-1 font-semibold">End Date</label>
+              <label for="endDate" class="mb-1 font-semibold">End Date <span style="color: red;">*</span></label>
               <DatePicker
                 id="endDate"
                 v-model="newEvent.endDate"
@@ -284,7 +284,7 @@
           <div class="p-field grid grid-cols-1 sm:grid-cols-2 gap-4" v-if="!newEvent.isAllDay">
             <!-- Start Time -->
             <div class="flex flex-col">
-              <label for="startTime" class="mb-1 font-semibold">Start Time</label>
+              <label for="startTime" class="mb-1 font-semibold">Start Time <span style="color: red;">*</span></label>
               <input
                 type="time"
                 id="startTime"
@@ -297,7 +297,7 @@
 
             <!-- End Time -->
             <div class="flex flex-col">
-              <label for="endTime" class="mb-1 font-semibold">End Time</label>
+              <label for="endTime" class="mb-1 font-semibold">End Time <span style="color: red;">*</span></label>
               <input
                 type="time"
                 id="endTime"
@@ -327,13 +327,13 @@
 
           <!-- Event Description -->
           <div class="p-field">
-            <label for="description">Description</label>
+            <label for="description">Description <span style="color: #6c757d; font-weight: normal;">(Optional)</span></label>
             <Textarea id="description" v-model="newEvent.description" rows="4" placeholder="Enter event description" autoResize />
           </div>
 
           <!-- Memorandum File Upload -->
           <div class="p-field">
-            <label for="memorandum">Memorandum</label>
+            <label for="memorandum">Memorandum <span style="color: #6c757d; font-weight: normal;">(Optional)</span></label>
             <div v-if="newEvent.memorandum" class="flex items-center gap-2 p-2 border rounded-md bg-gray-100">
                 <i class="pi pi-file"></i>
                 <span class="flex-1">{{ newEvent.memorandum.filename }}</span>
@@ -351,7 +351,7 @@
         </div>
 
         <div class="p-field">
-          <label for="image">Event Image</label>
+          <label for="image">Event Image <span style="color: #6c757d; font-weight: normal;">(Optional)</span></label>
           <div v-if="newEvent.image" class="mt-2">
             <img :src="newEvent.image" alt="Preview" class="preview-image" />
           </div>
@@ -414,20 +414,20 @@
         <div class="p-fluid">
           <!-- Event Title -->
           <div class="p-field">
-            <label for="title">Event Title</label>
+            <label for="title">Event Title <span style="color: red;">*</span></label>
             <InputText id="title" v-model="selectedEvent.title" placeholder="Enter event title" />
           </div>
 
           <div class="p-field grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Venue -->
             <div>
-              <label for="venue">Venue</label>
+              <label for="venue">Venue <span style="color: #6c757d; font-weight: normal;">(Optional)</span></label>
               <InputText id="venue" v-model="selectedEvent.venue" placeholder="Enter event venue (e.g., Main Hall, Stadium)" class="w-full" />
             </div>
 
             <!-- Event Category Dropdown -->
             <div>
-              <label for="category">Category</label>
+              <label for="category">Category <span style="color: #6c757d; font-weight: normal;">(Optional)</span></label>
               <Select
                 id="category"
                 v-model="selectedEvent.category_id"
@@ -442,7 +442,7 @@
 
           <!-- Tags Selection (Conditional) -->
         <div class="p-field" v-if="selectedEvent.category_id">
-        <label for="edit-tags">Tags</label>
+        <label for="edit-tags">Tags <span style="color: #6c757d; font-weight: normal;">(Optional)</span></label>
         <div class="flex items-center gap-2">
             <MultiSelect
             id="edit-tags"
@@ -502,13 +502,13 @@
           <div class="p-field grid grid-cols-1 sm:grid-cols-2 gap-4">
             <!-- Start Date -->
             <div class="flex flex-col">
-              <label for="editStartDate" class="mb-1 font-semibold">Start Date</label>
+              <label for="editStartDate" class="mb-1 font-semibold">Start Date <span style="color: red;">*</span></label>
               <DatePicker id="editStartDate" v-model="selectedEvent.startDate" dateFormat="MM-dd-yy" showIcon class="w-full" />
             </div>
 
             <!-- End Date -->
             <div class="flex flex-col">
-              <label for="editEndDate" class="mb-1 font-semibold">End Date</label>
+              <label for="editEndDate" class="mb-1 font-semibold">End Date <span style="color: red;">*</span></label>
               <DatePicker id="editEndDate" v-model="selectedEvent.endDate" dateFormat="MM-dd-yy" showIcon class="w-full"
                 :minDate="selectedEvent.startDate ? new Date(selectedEvent.startDate) : null" />
             </div>
@@ -516,7 +516,7 @@
           <div class="p-field grid grid-cols-1 sm:grid-cols-2 gap-4" v-if="!selectedEvent.isAllDay">
             <!-- Start Time -->
             <div class="flex flex-col">
-              <label for="editStartTime" class="mb-1 font-semibold">Start Time</label>
+              <label for="editStartTime" class="mb-1 font-semibold">Start Time <span style="color: red;">*</span></label>
               <input
                 type="time"
                 id="editStartTime"
@@ -529,7 +529,7 @@
 
             <!-- End Time -->
             <div class="flex flex-col">
-              <label for="editEndTime" class="mb-1 font-semibold">End Time</label>
+              <label for="editEndTime" class="mb-1 font-semibold">End Time <span style="color: red;">*</span></label>
               <input
                 type="time"
                 id="editEndTime"
@@ -560,13 +560,13 @@
 
 
           <div class="p-field">
-            <label for="description">Description</label>
+            <label for="description">Description <span style="color: #6c757d; font-weight: normal;">(Optional)</span></label>
             <Textarea id="description" v-model="selectedEvent.description" rows="4" placeholder="Enter event description" autoResize />
           </div>
 
           <!-- Memorandum File Upload -->
           <div class="p-field">
-            <label for="edit-memorandum">Memorandum</label>
+            <label for="edit-memorandum">Memorandum <span style="color: #6c757d; font-weight: normal;">(Optional)</span></label>
             <div v-if="selectedEvent.memorandum" class="flex items-center gap-2 p-2 border rounded-md bg-gray-100">
                 <i class="pi pi-file"></i>
                 <span class="flex-1">{{ selectedEvent.memorandum.filename }}</span>
@@ -584,7 +584,7 @@
         </div>
 
         <div class="p-field">
-          <label for="image">Event Image</label>
+          <label for="image">Event Image <span style="color: #6c757d; font-weight: normal;">(Optional)</span></label>
           <div v-if="selectedEvent.image" class="mt-2">
             <img :src="selectedEvent.image" alt="Preview" class="preview-image" />
           </div>

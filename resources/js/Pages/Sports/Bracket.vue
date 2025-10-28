@@ -486,13 +486,13 @@ onMounted(async () => {
       <Dialog v-model:visible="showDialog" header="Bracket Setup" modal :style="{ width: '400px' }">
         <div class="dialog-content">
           <div class="p-field">
-            <label for="bracketName">Bracket Name</label>
+            <label for="bracketName">Bracket Name <span style="color: red;">*</span></label>
             <InputText v-model="bracketName" placeholder="Enter bracket name" :invalid="!!genericErrorMessage && !bracketName" />
             <small v-if="!!genericErrorMessage && !bracketName" class="p-error">Bracket name is required.</small>
           </div>
 
           <div class="p-field">
-            <label for="event">Select Event</label>
+            <label for="event">Select Event <span style="color: red;">*</span></label>
             <Select
               v-model="selectedEvent"
               :options="events"
@@ -506,13 +506,13 @@ onMounted(async () => {
           </div>
 
           <div class="p-field">
-            <label for="numberOfPlayers">Number of Participants</label>
+            <label for="numberOfPlayers">Number of Participants <span style="color: red;">*</span></label>
             <InputText v-model="numberOfPlayers" type="number" min="1" max="32" placeholder="Insert number of teams" />
             <small v-if="!!genericErrorMessage && !numberOfPlayers" class="p-error">Number of participants is required.</small>
           </div>
 
           <div class="p-field">
-            <label for="matchType">Bracket Type</label>
+            <label for="matchType">Bracket Type <span style="color: red;">*</span></label>
             <Select
               v-model="matchType"
               :options="bracketTypeOptions"
