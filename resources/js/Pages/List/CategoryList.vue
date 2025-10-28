@@ -227,7 +227,14 @@ export default defineComponent({
       showErrorDialog.value = false;
 
       try {
-        await router.post('/categories', newItem.value, {
+        const payload = showTags.value
+          ? {
+              name: newItem.value.name,
+              description: newItem.value.description,
+              category_id: newItem.value.category_id,
+            }
+          : { title: newItem.value.title, description: newItem.value.description };
+        await router.post('/categories', payload, {
           onSuccess: () => {
             isCreateModalVisible.value = false;
             // Reset the form
@@ -461,13 +468,13 @@ export default defineComponent({
         </template>
       </Column>
 
-      <!-- <Column field="description" header="Description" style="width:30%;" sortable :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
+      <Column v-if="!showTags" field="description" header="Description" style="width:30%;" sortable :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
         <template #body="{ data }">
           <div class="datatable-content">
             <span>{{ data.description || "" }}</span>
           </div>
         </template>
-      </Column> -->
+      </Column>
 
       <Column v-if="!showTags" header="Events Using" style="width:10%;" sortable :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
         <template #body="{ data }">
@@ -598,19 +605,26 @@ export default defineComponent({
                 <div class="text-sm text-gray-500 mb-4">{{ categoryMap[selectedTagForDetails.category_id] || 'Uncategorized' }}</div>
             </div>
 
-            <div class="mt-6 border-t border-gray-200 pt-6">
+            <div class="mt-4 border-t border-gray-200 pt-4">
                 <div class="grid grid-cols-1 gap-4">
                     <div>
                         <h4 class="text-sm font-medium text-gray-500 mb-1">Description</h4>
                         <p class="text-base text-gray-700">{{ selectedTagForDetails.description || 'No description provided.' }}</p>
                     </div>
 
-                    <div>
+                    <div v-if="usageDetails.events.length > 0">
+                        <h4 class="text-sm font-medium text-gray-500 mb-2">Used in {{ usageDetails.events.length }} Event(s):</h4>
+                        <ul class="list-disc pl-5 space-y-1 text-sm max-h-40 overflow-y-auto">
+                            <li v-for="event in usageDetails.events" :key="`event-detail-${event.id}`">
+                                <a :href="route('event.details', { id: event.id })" target="_blank" class="text-blue-600 hover:underline">
+                                    {{ event.title }}
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div v-else>
                         <h4 class="text-sm font-medium text-gray-500 mb-1">Usage</h4>
-                        <div class="flex items-center gap-2 text-base text-gray-700">
-                            <i class="pi pi-calendar"></i>
-                            <span>Used in <strong>{{ tagUsageCount[selectedTagForDetails.id] || 0 }}</strong> event(s).</span>
-                        </div>
+                        <p class="text-base text-gray-700">This tag is not currently used in any events.</p>
                     </div>
                 </div>
             </div>
