@@ -32,7 +32,7 @@ class CategoryController extends Controller
 
     public function store(Request $request)
     {
-        $isTag = $request->has('name');
+        $isTag = $request->has('name') && $request->has('category_id');
         $validCategoryIds = array_column($this->jsonData['category'] ?? [], 'id');
 
         $data = $request->validate([
@@ -47,7 +47,7 @@ class CategoryController extends Controller
             ...$data
         ];
 
-        $this->jsonData[$collection][] = $newItem;
+        array_unshift($this->jsonData[$collection], $newItem);
         File::put(base_path('db.json'), json_encode($this->jsonData, JSON_PRETTY_PRINT));
 
         if ($request->wantsJson()) {
