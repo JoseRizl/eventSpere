@@ -17,6 +17,7 @@ class EventController extends JsonController
     $settings = $data['settings'] ?? ['defaultEventImage' => 'https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg'];
     $tagsCollection = collect($data['tags'] ?? []);
     $eventTags = collect($data['event_tags'] ?? []);
+    $categoriesCollection = collect($data['category'] ?? [])->keyBy('id');
 
     // Pre-load task-related data for efficiency
     $allTasks = collect($data['tasks'] ?? []);
@@ -30,7 +31,7 @@ class EventController extends JsonController
         ->sortByDesc(function ($event) {
             return strtotime($event['startDate'] ?? '1970-01-01');
         })
-        ->map(function ($event) use ($tagsCollection, $eventTags, $allTasks, $allEmployees, $allCommittees, $taskEmployeeMap, $allMemorandums) {
+        ->map(function ($event) use ($tagsCollection, $eventTags, $categoriesCollection, $allTasks, $allEmployees, $allCommittees, $taskEmployeeMap, $allMemorandums) {
             // Get tag IDs for this event from event_tags pseudo-table
             $tagIds = $eventTags->where('event_id', $event['id'])->pluck('tag_id')->toArray();
             // Resolve tag objects
@@ -52,6 +53,9 @@ class EventController extends JsonController
 
             // Resolve memorandum for this event
             $event['memorandum'] = $allMemorandums->get($event['id']);
+
+            // Resolve category for this event
+            $event['category'] = $categoriesCollection->get($event['category_id']);
 
             return $event;
         })->values()->toArray();

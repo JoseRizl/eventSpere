@@ -224,14 +224,14 @@ const proceedWithSave = async () => {
                     <div class="bracket-controls">
                         <Button :icon="isExpanded ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" @click="handleToggleBracket" class="p-button-rounded p-button-text" v-tooltip.top="isExpanded ? 'Hide Bracket' : 'Show Bracket'" />
                         <Button
-                            v-if="showAdminControls && user?.role === 'Admin' && !isArchived"
+                            v-if="showAdminControls && (user?.role === 'Admin' || user.role == 'TournamentManager') && !isArchived"
                             icon="pi pi-pen-to-square"
                             @click="openPlayerEditModal"
                             class="p-button-rounded p-button-text action-btn-info"
                             v-tooltip.top="'Edit Player Names'"
                         />
                         <Button
-                            v-if="showAdminControls && user?.role === 'Admin' && !isArchived && bracket.type === 'Single Elimination' && bracket.matches?.length >= 2"
+                            v-if="showAdminControls && (user?.role === 'Admin' || user.role == 'TournamentManager') && !isArchived && bracket.type === 'Single Elimination' && bracket.matches?.length >= 2"
                             :icon="hasConsolationMatch ? 'pi pi-minus-circle' : 'pi pi-plus-circle'"
                             @click="() => onToggleConsolationMatch(bracketIndex)"
                             class="p-button-rounded p-button-text"
@@ -239,7 +239,7 @@ const proceedWithSave = async () => {
                             v-tooltip.top="hasConsolationMatch ? 'Remove 3rd Place Match' : 'Add 3rd Place Match'"
                         />
                         <Button
-                            v-if="showAdminControls && user?.role === 'Admin' && !isArchived && bracket.type === 'Round Robin'"
+                            v-if="showAdminControls && (user?.role === 'Admin' || user.role == 'TournamentManager') && !isArchived && bracket.type === 'Round Robin'"
                             :icon="bracket.allow_draws ? 'pi pi-check-circle' : 'pi pi-times-circle'"
                             @click="onToggleAllowDraws(bracketIndex)"
                             class="p-button-rounded p-button-text"

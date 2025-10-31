@@ -940,6 +940,12 @@ const getBracketIndex = (bracketId) => {
 
     <div v-if="currentView === 'announcements'">
     <div class="w-full bg-white rounded-lg shadow-md p-6">
+        <div class="mb-4">
+            <Link :href="route('home', { view: 'announcements' })" class="text-blue-600 hover:underline text-sm flex items-center gap-2">
+                <i class="pi pi-arrow-left"></i>
+                Back to Main Announcement Board
+            </Link>
+        </div>
         <!-- Filters for Announcements -->
         <div class="mb-4 flex flex-wrap items-center gap-2">
             <SearchFilterBar

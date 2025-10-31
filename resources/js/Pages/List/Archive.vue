@@ -124,8 +124,8 @@
       <Column header="Actions" style="width:10%;" body-class="text-center" :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
         <template #body="{ data }">
           <div class="action-buttons">
-            <Button icon="pi pi-undo" class="p-button-rounded p-button-text action-btn-success" @click="restoreEvent(data)" v-tooltip.top="'Restore Event'"/>
-            <Button icon="pi pi-trash" class="p-button-rounded p-button-text action-btn-danger" @click="deleteEventPermanently(data)" v-tooltip.top="'Delete Event'"/>
+            <Button icon="pi pi-undo" class="p-button-rounded p-button-text action-btn-success" @click="restoreItem(data)" v-tooltip.top="'Restore Event'"/>
+            <Button icon="pi pi-trash" class="p-button-rounded p-button-text action-btn-danger" @click="deleteItemPermanently(data)" v-tooltip.top="'Delete Event'"/>
           </div>
         </template>
       </Column>
@@ -142,9 +142,17 @@
       :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
 
       <!-- Tag Columns -->
-      <Column field="name" header="Tag Name" style="width:45%;" sortable :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"></Column>
+      <Column field="name" header="Tag Name" style="width:35%;" sortable :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
+        <template #body="{ data }">
+          <div class="datatable-content">{{ data.name }}</div>
+        </template>
+      </Column>
 
-      <Column field="category.title" header="Category" style="width:20%;" sortable :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"></Column>
+      <Column field="category.title" header="Category" style="width:30%;" sortable :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
+        <template #body="{ data }">
+          <div class="datatable-content">{{ data.category?.title || 'N/A' }}</div>
+        </template>
+      </Column>
 
       <Column header="Actions" style="width:10%;" body-class="text-center" :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
         <template #body="{ data }">

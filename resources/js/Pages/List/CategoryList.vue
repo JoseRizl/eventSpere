@@ -15,7 +15,7 @@ export default defineComponent({
     const isEditModalVisible = ref(false);
     const isCreateModalVisible = ref(false);
     const selectedItem = ref(null);
-    const newItem = ref({ title: "", description: "", name: "", category_id: null });
+    const newItem = ref({ title: "", description: "", name: "", category_id: null, allow_brackets: false });
     const showTags = ref(false); // Default to categories, will be updated on mount
     const searchQuery = ref("");
     const initialLoading = ref(true);
@@ -208,8 +208,8 @@ export default defineComponent({
     // Open Create Modal
     const openCreateModal = () => {
       newItem.value = showTags.value
-        ? { name: "", description: "", category_id: null }
-        : { title: "", description: "", name: "", category_id: null };
+        ? { name: "", description: "", category_id: null, allow_brackets: false }
+        : { title: "", description: "", name: "", category_id: null, allow_brackets: false };
       isCreateModalVisible.value = true;
     };
 
@@ -233,14 +233,14 @@ export default defineComponent({
               description: newItem.value.description,
               category_id: newItem.value.category_id,
             }
-          : { title: newItem.value.title, description: newItem.value.description };
+          : { title: newItem.value.title, description: newItem.value.description, allow_brackets: newItem.value.allow_brackets || false };
         await router.post('/categories', payload, {
           onSuccess: () => {
             isCreateModalVisible.value = false;
             // Reset the form
             newItem.value = showTags.value
-              ? { name: "", description: "", category_id: null }
-              : { title: "", description: "", name: "", category_id: null };
+              ? { name: "", description: "", category_id: null, allow_brackets: false }
+              : { title: "", description: "", name: "", category_id: null, allow_brackets: false };
             // Show success message
             successMessage.value = `${showTags.value ? 'Tag' : 'Category'} created successfully!`;
             showSuccessDialog.value = true;
@@ -533,6 +533,13 @@ export default defineComponent({
           />
         </div>
 
+        <div class="p-field" v-if="!showTags">
+          <div class="flex items-center gap-2">
+            <Checkbox v-model="selectedItem.allow_brackets" inputId="allowBracketsEdit" :binary="true" />
+            <label for="allowBracketsEdit" class="cursor-pointer">Allow Brackets</label>
+          </div>
+        </div>
+
         <div class="p-field" v-if="showTags">
           <label for="tagCategory">Category <span style="color: red;">*</span></label>
           <Select id="tagCategory" v-model="selectedItem.category_id" :options="categories" optionLabel="title" optionValue="id" placeholder="Select a category" class="w-full" />
@@ -569,6 +576,13 @@ export default defineComponent({
             v-model="newItem[showTags ? 'name' : 'title']"
             :placeholder="`Enter ${showTags ? 'tag' : 'category'} name`"
           />
+        </div>
+
+        <div class="p-field" v-if="!showTags">
+          <div class="flex items-center gap-2">
+            <Checkbox v-model="newItem.allow_brackets" inputId="allowBracketsCreate" :binary="true" />
+            <label for="allowBracketsCreate" class="cursor-pointer">Allow Brackets</label>
+          </div>
         </div>
 
         <div class="p-field" v-if="showTags">

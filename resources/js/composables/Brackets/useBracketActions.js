@@ -96,6 +96,7 @@ export function useBracketActions(dataState) {
     allowDraws,
     events,
     brackets,
+    categories,
   } = dataState;
 
   // Use the UI state composable
@@ -530,6 +531,7 @@ export function useBracketActions(dataState) {
       }
 
       if (response.data && response.data.brackets) {
+        categories.value = response.data.categories || [];
         const db = response.data;
         const allMatches = db.matches || [];
         const allMatchPlayers = db.matchPlayers || [];
@@ -656,10 +658,11 @@ export function useBracketActions(dataState) {
     try {
       // Use Laravel API route for events
       const response = await axios.get(route('api.events.index'));
-      events.value = response.data.filter(event => {
-        const categoryId = parseInt(event.category_id);
-        return categoryId === 3 && !event.archived; // Category 3 is 'Sports'
-      });
+      // Filter events where the category allows brackets and the event is not archived.
+      // The event object from the API now includes the category object.
+      events.value = response.data.filter(event =>
+        event.category?.allow_brackets && !event.archived
+      );
     } catch (error) {
       console.error('Error fetching events:', error);
     }

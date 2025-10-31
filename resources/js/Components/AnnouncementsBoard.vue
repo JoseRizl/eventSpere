@@ -279,7 +279,7 @@ const formatTimestamp = (timestamp) => {
                     <Select v-model="newAnnouncementData.event_id" :options="eventsForPicker" optionLabel="title" optionValue="id" placeholder="Select an event to link" filter showClear class="w-full" />
                 </div>
                 <div class="p-field">
-                    <label for="newMessage">Message</label>
+                    <label for="newMessage">Message <span style="color: red;">*</span></label>
                     <Textarea id="newMessage" v-model="newAnnouncementData.message" rows="5" placeholder="Enter your announcement..." autoResize />
                 </div>
                 <div class="p-field mt-4">
@@ -303,7 +303,7 @@ const formatTimestamp = (timestamp) => {
         <Dialog v-model:visible="showEditModal" modal header="Edit Announcement" :style="{ width: '50vw' }">
             <div class="p-fluid">
                 <div class="p-field">
-                    <label for="editMessage">Message</label>
+                    <label for="editMessage">Message <span style="color: red;">*</span></label>
                     <Textarea id="editMessage" v-model="editAnnouncementData.message" rows="5" placeholder="Enter your announcement..." autoResize />
                 </div>
                 <div class="p-field mt-4">

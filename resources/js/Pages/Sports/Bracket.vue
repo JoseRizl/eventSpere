@@ -18,6 +18,7 @@ const showFilters = ref(false);
 const filterByEvents = ref([]);
 const filterByTypes = ref([]);
 const filterByStatus = ref([]);
+const filterByCategories = ref([]);
 const sortBy = ref({ name: 'Creation Date (Newest)', code: 'created_desc' });
 
 const sortOptions = ref([
@@ -41,16 +42,24 @@ const uniqueEvents = computed(() => {
         .sort((a, b) => a.title.localeCompare(b.title));
 });
 
+const uniqueCategories = computed(() => {
+    return categories.value
+        .filter(c => c.allow_brackets)
+        .sort((a, b) => a.title.localeCompare(b.title))
+});
+
 const areFiltersActive = computed(() => {
     return filterByEvents.value.length > 0 ||
            filterByTypes.value.length > 0 ||
-           filterByStatus.value.length > 0;
+           filterByStatus.value.length > 0 ||
+           filterByCategories.value.length > 0;
 });
 
 const clearFilters = () => {
     filterByEvents.value = [];
     filterByTypes.value = [];
     filterByStatus.value = [];
+    filterByCategories.value = [];
 };
 
 const initialLoading = ref(true);
@@ -64,6 +73,7 @@ const {
   selectedEvent,
   includeThirdPlace,
   events,
+  categories,
   brackets,
 } = bracketState;
 
@@ -298,6 +308,10 @@ const filteredBrackets = computed(() => {
             return statuses.includes(status);
         });
     }
+    if (filterByCategories.value.length > 0) {
+        const categoryIds = filterByCategories.value.map(c => c.id);
+        results = results.filter(b => b.event?.category_id && categoryIds.includes(b.event.category_id));
+    }
 
     // 3. Sorting
     const sortCode = sortBy.value?.code || 'created_desc';
@@ -384,9 +398,10 @@ onMounted(async () => {
         </div>
         <div v-if="showFilters" class="filter-panel mb-5">
             <div class="filter-controls">
-                <MultiSelect v-model="filterByEvents" :options="uniqueEvents" optionLabel="title" placeholder="Filter by Event" display="chip" class="filter-select" />
-                <MultiSelect v-model="filterByTypes" :options="bracketTypeOptions.map(t => ({name: t, code: t}))" optionLabel="name" placeholder="Filter by Type" display="chip" class="filter-select" />
-                <MultiSelect v-model="filterByStatus" :options="['Upcoming', 'Ongoing', 'Completed'].map(s => ({name: s, code: s}))" optionLabel="name" placeholder="Filter by Status" display="chip" class="filter-select" />
+                <MultiSelect v-model="filterByEvents" :options="uniqueEvents" optionLabel="title" placeholder="Filter by Event" display="chip" class="filter-select" :showToggleAll="false" />
+                <MultiSelect v-model="filterByCategories" :options="uniqueCategories" optionLabel="title" placeholder="Filter by Category" display="chip" class="filter-select" :showToggleAll="false" />
+                <MultiSelect v-model="filterByTypes" :options="bracketTypeOptions.map(t => ({name: t, code: t}))" optionLabel="name" placeholder="Filter by Type" display="chip" class="filter-select" :showToggleAll="false" />
+                <MultiSelect v-model="filterByStatus" :options="['Upcoming', 'Ongoing', 'Completed'].map(s => ({name: s, code: s}))" optionLabel="name" placeholder="Filter by Status" display="chip" class="filter-select" :showToggleAll="false" />
             </div>
             <div class="sort-and-actions">
                 <Button v-if="areFiltersActive" label="Clear Filters" severity="danger" text @click="clearFilters" />
