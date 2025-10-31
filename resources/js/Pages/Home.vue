@@ -54,6 +54,12 @@ onMounted(async () => {
     await fetchEvents();
     // fetchAnnouncements depends on allNews from fetchEvents
     fetchAnnouncements(); // fire-and-forget for faster initial render
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const viewParam = urlParams.get('view');
+    if (viewParam === 'announcements') {
+        currentView.value = 'announcements';
+    }
 });
 
 const announcementEvents = computed(() => {

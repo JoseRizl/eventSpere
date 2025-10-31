@@ -38,7 +38,8 @@ class CategoryController extends Controller
         $data = $request->validate([
             $isTag ? 'name' : 'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'category_id' => $isTag ? ['required', \Illuminate\Validation\Rule::in($validCategoryIds)] : 'nullable'
+            'category_id' => $isTag ? ['required', \Illuminate\Validation\Rule::in($validCategoryIds)] : 'nullable',
+            'allow_brackets' => !$isTag ? 'sometimes|boolean' : 'nullable'
         ]);
 
         $collection = $isTag ? 'tags' : 'category';
@@ -65,7 +66,8 @@ class CategoryController extends Controller
         $data = $request->validate([
             $isTag ? 'name' : 'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'category_id' => $isTag ? ['sometimes', 'required', \Illuminate\Validation\Rule::in($validCategoryIds)] : 'nullable'
+            'category_id' => $isTag ? ['sometimes', 'required', \Illuminate\Validation\Rule::in($validCategoryIds)] : 'nullable',
+            'allow_brackets' => !$isTag ? 'sometimes|boolean' : 'nullable'
         ]);
 
         $collection = $isTag ? 'tags' : 'category';

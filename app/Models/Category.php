@@ -13,6 +13,7 @@ class Category extends Model
     protected $fillable = [
         'title',
         'description',
+        'allow_brackets',
     ];
 
     public function events(): HasMany

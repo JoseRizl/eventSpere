@@ -171,8 +171,20 @@ class BracketController extends Controller
      */
     public function index()
     {
-        // Return the normalized "tables" directly to the client
-        return response()->json($this->readJson());
+        $jsonData = $this->readJson();
+        $categories = collect($jsonData['category'] ?? [])->keyBy('id');
+        $events = collect($jsonData['events'] ?? [])->map(function ($event) use ($categories) {
+            $event['category'] = $categories->get($event['category_id']);
+            return $event;
+        });
+
+        return response()->json([
+            'brackets' => $jsonData['brackets'] ?? [],
+            'matches' => $jsonData['matches'] ?? [],
+            'matchPlayers' => $jsonData['matchPlayers'] ?? [],
+            'events' => $events->values()->all(), // Return modified events
+            'categories' => $jsonData['category'] ?? [],
+        ]);
     }
 
     /**

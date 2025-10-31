@@ -15,7 +15,7 @@
 
                 <!-- Committee Selection -->
                 <div class="p-field">
-                    <label for="committee">Committee</label>
+                    <label for="committee">Committee <span style="color: #6c757d; font-weight: normal;">(Optional)</span></label>
                     <div class="flex items-center gap-2">
                         <Select
                             v-model="taskEntry.committee"
@@ -48,7 +48,7 @@
 
                 <!-- Employee Selection -->
                 <div class="p-field">
-                    <label>Employees</label>
+                    <label>Employees <span style="color: red;">*</span></label>
                     <MultiSelect
                         v-model="taskEntry.employees"
                         :options="localEmployees"
@@ -77,7 +77,7 @@
 
                 <!-- Task Description -->
                 <div class="p-field">
-                    <label>Task</label>
+                    <label>Task <span style="color: red;">*</span></label>
                     <Textarea v-model="taskEntry.task" rows="2" placeholder="Enter task details" />
                     <div class="mt-5">
                         <button @click="promptDeleteTask(index)" class="text-red-500 hover:text-red-700 text-sm flex items-center">

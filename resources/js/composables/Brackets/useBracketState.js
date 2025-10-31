@@ -17,6 +17,7 @@ const allowDraws = ref(false);
 // Data collections
 const events = ref([]);
 const brackets = ref([]);
+const categories = ref([]);
 
 // Computed properties
 const currentGameNumber = computed(() => `Game ${1}`);
@@ -34,6 +35,7 @@ export function useBracketState() {
     // Data collections
     events,
     brackets,
+    categories,
 
     // Computed
     currentGameNumber,

@@ -935,6 +935,7 @@
             showCreateConfirm.value = false; // Close confirmation dialog
             return;
         }
+        saving.value = true;
 
         let finalImage = newEvent.value.image;
         if (newEvent.value.image.startsWith('blob:')) {
@@ -947,7 +948,6 @@
             });
         }
 
-        saving.value = true;
         showCreateConfirm.value = false;
 
         try {
@@ -1008,13 +1008,16 @@
                 errorMessage.value = firstErrorMessage;
                 showErrorDialog.value = true;
             },
+            onFinish: () => {
+                saving.value = false;
+                showCreateConfirm.value = false;
+            },
             preserveScroll: true
         });
     } catch (error) {
+        saving.value = false;
         errorMessage.value = 'Failed to create the event.';
         showErrorDialog.value = true;
-    } finally {
-        saving.value = false;
     }
       };
 
