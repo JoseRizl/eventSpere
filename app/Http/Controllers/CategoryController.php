@@ -36,7 +36,19 @@ class CategoryController extends Controller
         $validCategoryIds = array_column($this->jsonData['category'] ?? [], 'id');
 
         $data = $request->validate([
-            $isTag ? 'name' : 'title' => 'required|string|max:255',
+            $isTag ? 'name' : 'title' => [
+                'required',
+                'string',
+                'max:255',
+                function ($attribute, $value, $fail) use ($isTag) {
+                    $singular = $isTag ? 'tag' : 'category';
+                    $collection = $isTag ? 'tags' : 'category';
+                    $key = $isTag ? 'name' : 'title';
+                    if (collect($this->jsonData[$collection] ?? [])->where($key, $value)->isNotEmpty()) {
+                        $fail("A {$singular} with this name already exists.");
+                    }
+                }
+            ],
             'description' => 'nullable|string',
             'category_id' => $isTag ? ['required', \Illuminate\Validation\Rule::in($validCategoryIds)] : 'nullable',
             'allow_brackets' => !$isTag ? 'sometimes|boolean' : 'nullable'
@@ -64,7 +76,20 @@ class CategoryController extends Controller
         $validCategoryIds = array_column($this->jsonData['category'] ?? [], 'id');
 
         $data = $request->validate([
-            $isTag ? 'name' : 'title' => 'required|string|max:255',
+            $isTag ? 'name' : 'title' => [
+                'required',
+                'string',
+                'max:255',
+                function ($attribute, $value, $fail) use ($isTag, $id) {
+                    $singular = $isTag ? 'tag' : 'category';
+                    $collection = $isTag ? 'tags' : 'category';
+                    $key = $isTag ? 'name' : 'title';
+                    $existing = collect($this->jsonData[$collection] ?? [])
+                        ->where($key, $value)->where('id', '!=', $id)->isNotEmpty();
+                    if ($existing) {
+                        $fail("A {$singular} with this name already exists.");
+                    }
+                }],
             'description' => 'nullable|string',
             'category_id' => $isTag ? ['sometimes', 'required', \Illuminate\Validation\Rule::in($validCategoryIds)] : 'nullable',
             'allow_brackets' => !$isTag ? 'sometimes|boolean' : 'nullable'

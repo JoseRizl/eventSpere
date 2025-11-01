@@ -188,9 +188,13 @@ export default defineComponent({
             showSuccess(successMessage.value);
           },
           onError: (errors) => {
-            errorMessage.value = errors.message || 'Failed to update item';
+            // Extract the first validation error message
+            const firstErrorKey = Object.keys(errors)[0];
+            const firstErrorMessage = firstErrorKey ? (Array.isArray(errors[firstErrorKey]) ? errors[firstErrorKey][0] : errors[firstErrorKey]) : 'Failed to update the item.';
+
+            errorMessage.value = firstErrorMessage;
             showErrorDialog.value = true;
-            errorDialogMessage.value = JSON.stringify(errors, null, 2);
+            errorDialogMessage.value = firstErrorMessage;
           },
           onFinish: () => {
             saving.value = false;
@@ -248,9 +252,13 @@ export default defineComponent({
             fetchData();
           },
           onError: (errors) => {
-            errorMessage.value = errors.message || 'Failed to create item';
+            // Extract the first validation error message
+            const firstErrorKey = Object.keys(errors)[0];
+            const firstErrorMessage = firstErrorKey ? (Array.isArray(errors[firstErrorKey]) ? errors[firstErrorKey][0] : errors[firstErrorKey]) : 'Failed to create the item.';
+
+            errorMessage.value = firstErrorMessage;
             showErrorDialog.value = true;
-            errorDialogMessage.value = JSON.stringify(errors, null, 2);
+            errorDialogMessage.value = firstErrorMessage;
           },
           onFinish: () => {
             saving.value = false;
@@ -291,9 +299,13 @@ export default defineComponent({
             showSuccessDialog.value = true;
           },
           onError: (errors) => {
-            errorMessage.value = errors.message || 'Failed to delete item';
+            // Extract the first validation error message
+            const firstErrorKey = Object.keys(errors)[0];
+            const firstErrorMessage = firstErrorKey ? (Array.isArray(errors[firstErrorKey]) ? errors[firstErrorKey][0] : errors[firstErrorKey]) : 'Failed to delete the item.';
+
+            errorMessage.value = firstErrorMessage;
             showErrorDialog.value = true;
-            errorDialogMessage.value = JSON.stringify(errors, null, 2);
+            errorDialogMessage.value = firstErrorMessage;
           },
           onFinish: () => {
             saving.value = false;
