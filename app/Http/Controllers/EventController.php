@@ -9,6 +9,7 @@ use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\File;
 use App\Models\Category;
+use Illuminate\Support\Facades\Storage;
 class EventController extends JsonController
 {
     public function index()
@@ -182,6 +183,46 @@ class EventController extends JsonController
         ]);
     }
 
+    private function deleteImage($path)
+    {
+        if ($path && str_starts_with($path, '/storage/')) {
+            $filePath = str_replace('/storage/', '', $path);
+            if (Storage::disk('public')->exists($filePath)) {
+                Storage::disk('public')->delete($filePath);
+            }
+        }
+    }
+
+    private function saveImage($base64Image, $oldImagePath = null)
+    {
+        if (!$base64Image || !str_contains($base64Image, 'base64')) {
+            // Not a new base64 upload, so return it as is (might be an existing path or null)
+            return $base64Image;
+        }
+
+        // A new image is being uploaded, so delete the old one if it exists.
+        if ($oldImagePath) {
+            $this->deleteImage($oldImagePath);
+        }
+
+        // Extract image data and type
+        list($type, $data) = explode(';', $base64Image);
+        list(, $data)      = explode(',', $data);
+        $data = base64_decode($data);
+
+        // Determine file extension
+        $type = str_replace('data:image/', '', $type);
+        $extension = $type === 'jpeg' ? 'jpg' : $type;
+
+        // Create a unique path and filename
+        $path = 'images/events/' . date('Y/m');
+        $filename = uniqid() . '.' . $extension;
+
+        Storage::disk('public')->put($path . '/' . $filename, $data);
+
+        return Storage::url($path . '/' . $filename);
+    }
+
     public function store(Request $request)
     {
         $validCategoryIds = array_column($this->jsonData['category'] ?? [], 'id');
@@ -245,6 +286,9 @@ class EventController extends JsonController
         $newEvent['id'] = substr(md5(uniqid()), 0, 4);
         $newEvent['createdAt'] = now()->toISOString();
         $newEvent['type'] = 'event';
+
+        // Handle image upload
+        $newEvent['image'] = $this->saveImage($validated['image']); // No old image on create
 
         // Remove tags and memorandum from event object as they are handled separately
         unset($newEvent['tags']);
@@ -373,8 +417,12 @@ class EventController extends JsonController
         // Update the event
         foreach ($this->jsonData['events'] as &$event) {
             if ($event['id'] == $id) {
-                $event = array_merge($event, $validated, ['image' => $validated['image'] ?? $event['image']]);
+                // Handle image upload if a new image is provided
+                $validated['image'] = $this->saveImage($validated['image'], $event['image']);
+
+                // Explicitly merge validated data to be more intentional about what is being updated.
                 // The 'tags' and 'memorandum' keys are now unset from $validated, so they won't be merged here.
+                $event = array_merge($event, $validated);
                 break;
             }
         }
@@ -491,6 +539,9 @@ class EventController extends JsonController
                 unset($validated['tags']);
                 $memorandumData = $validated['memorandum'] ?? null;
                 unset($validated['memorandum']);
+
+                // Handle image upload if a new image is provided
+                $validated['image'] = $this->saveImage($validated['image'], $event['image']);
 
                 // Explicitly merge validated data to be more intentional about what is being updated.
                 // The 'tags' key is now unset from $validated, so it won't be merged here.
@@ -634,6 +685,9 @@ class EventController extends JsonController
             $json = File::get(base_path('db.json'));
             $data = json_decode($json, true);
 
+            // Find the event to get the image path before deleting the record
+            $eventToDelete = collect($data['events'] ?? [])->firstWhere('id', $id);
+
             // --- Start of cascading delete logic ---
 
             // 1. Get IDs of related items before deleting them
@@ -682,6 +736,11 @@ class EventController extends JsonController
                     ->values()->toArray();
             }
 
+            // 5. Delete the associated image file from storage
+            if ($eventToDelete && isset($eventToDelete['image'])) {
+                $this->deleteImage($eventToDelete['image']);
+            }
+
             $this->writeJson($data);
             return back()->with('success', 'Event and all its related data were permanently deleted.');
         } catch (\Exception $e) {
@@ -695,12 +754,14 @@ class EventController extends JsonController
             'image' => 'required|string',
         ]);
 
-        $newDefaultImage = $request->input('image');
         $data = $this->jsonData; // Use a local variable for clarity
 
         if (!isset($data['settings'])) {
             $data['settings'] = [];
         }
+
+        $oldDefaultImage = $data['settings']['defaultEventImage'] ?? null;
+        $newDefaultImage = $this->saveImage($request->input('image'), $oldDefaultImage);
 
         $data['settings']['defaultEventImage'] = $newDefaultImage;
 

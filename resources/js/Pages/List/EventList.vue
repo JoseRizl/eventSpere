@@ -1278,11 +1278,11 @@
             finalImage = defaultImage;
           }
         } else if (!selectedEvent.value.image) {
-          finalImage = defaultImage.value;
+          finalImage = defaultImage.value; // Use computed property's value
         }
         const payload = {
           ...selectedEvent.value,
-          image: finalImage,
+          image: finalImage || defaultImage.value,
           tags: selectedEvent.value.tags || [],
           startDate: selectedEvent.value.startDate
             ? format(new Date(selectedEvent.value.startDate), "MMM-dd-yyyy")
