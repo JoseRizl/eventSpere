@@ -1382,6 +1382,7 @@ const updateLines = (bracketIdx) => {
 
   const confirmDeleteBracket = async () => {
     if (deleteBracketIdx.value !== null) {
+      isDeletingBracket.value = true;
       try {
         const bracket = brackets.value[deleteBracketIdx.value];
         if (bracket.id) {

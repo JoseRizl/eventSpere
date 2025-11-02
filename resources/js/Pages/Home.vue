@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from "vue";
 import { addMonths, isBefore } from 'date-fns';
+import Skeleton from 'primevue/skeleton';
 import { loadToggleState, saveToggleState } from '@/utils/localStorage.js';
 import { usePage, router } from "@inertiajs/vue3";
 import { useEvents } from '@/composables/useEvents.js';
@@ -21,6 +22,8 @@ watch(showUpcomingEvents, (val) => saveToggleState('showUpcomingEvents', val));
 const page = usePage();
 const user = computed(() => page.props.auth.user);
 const allUsers = computed(() => page.props.all_users || []);
+
+const initialLoading = ref(true);
 const currentView = ref('events'); // 'events' or 'announcements'
 const {
     searchQuery, startDateFilter, endDateFilter, showDateFilter,
@@ -51,14 +54,19 @@ const {
 } = useAnnouncements({ searchQuery, startDateFilter, endDateFilter }, allNews); // Pass the master list here too.
 
 onMounted(async () => {
-    await fetchEvents();
-    // fetchAnnouncements depends on allNews from fetchEvents
-    fetchAnnouncements(); // fire-and-forget for faster initial render
+    initialLoading.value = true;
+    try {
+        await fetchEvents();
+        // fetchAnnouncements depends on allNews from fetchEvents
+        fetchAnnouncements(); // fire-and-forget for faster initial render
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const viewParam = urlParams.get('view');
-    if (viewParam === 'announcements') {
-        currentView.value = 'announcements';
+        const urlParams = new URLSearchParams(window.location.search);
+        const viewParam = urlParams.get('view');
+        if (viewParam === 'announcements') {
+            currentView.value = 'announcements';
+        }
+    } finally {
+        initialLoading.value = false;
     }
 });
 
@@ -78,7 +86,10 @@ const announcementEvents = computed(() => {
     <!-- <h1 class="text-2xl font-bold mt-4 text-center text-slate-800">News and Updates</h1> -->
 
     <!-- Carousel Banner -->
-    <div v-if="carouselEvents.length > 0" class="w-full relative group/carousel">
+    <div v-if="initialLoading" class="w-full relative">
+        <Skeleton height="400px" width="100%" />
+    </div>
+    <div v-else-if="carouselEvents.length > 0" class="w-full relative group/carousel">
         <Carousel :value="carouselEvents" :numVisible="1" :numScroll="1" circular :autoplayInterval="5000" :showIndicators="true" class="home-carousel">
             <template #item="slotProps">
                 <div class="relative w-full h-56 md:h-96 lg:h-[400px] bg-gray-700 overflow-hidden" @click.stop="router.visit(route('event.details', { id: slotProps.data.id }))">
@@ -172,7 +183,46 @@ const announcementEvents = computed(() => {
     </div>
 
     <!-- Conditional Content -->
-    <div v-if="currentView === 'events'" class="w-full">
+    <div v-if="initialLoading" class="w-full">
+        <!-- Skeleton for Events View -->
+        <div v-if="currentView === 'events'">
+            <div class="w-full mt-6 bg-white/60 p-4 rounded-xl border border-gray-200/80 shadow-sm">
+                <Skeleton width="12rem" height="2rem" class="mb-4" />
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div v-for="i in 4" :key="`sk-ongoing-${i}`">
+                        <Skeleton height="10rem" />
+                        <div class="flex justify-between mt-2">
+                            <Skeleton width="4rem" height="1.5rem" />
+                            <Skeleton width="6rem" height="1.5rem" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="w-full mt-6 bg-white/60 p-4 rounded-xl border border-gray-200/80 shadow-sm">
+                <Skeleton width="12rem" height="2rem" class="mb-4" />
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div v-for="i in 4" :key="`sk-month-${i}`">
+                        <Skeleton height="10rem" />
+                        <div class="flex justify-between mt-2">
+                            <Skeleton width="4rem" height="1.5rem" />
+                            <Skeleton width="6rem" height="1.5rem" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Skeleton for Announcements View -->
+        <div v-else class="w-full mt-8">
+            <div class="w-full bg-white rounded-lg shadow-md p-6">
+                <Skeleton width="15rem" height="2rem" class="mb-4" />
+                <div v-for="i in 3" :key="`sk-ann-${i}`" class="mb-4 border p-4 rounded-lg">
+                    <Skeleton width="10rem" height="1rem" class="mb-2" />
+                    <Skeleton height="3rem" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div v-else-if="currentView === 'events'" class="w-full">
       <div v-if="!filteredNews.length && (searchQuery || startDateFilter || endDateFilter)" class="w-full mt-8 flex flex-col items-center justify-center py-10 bg-gray-50 rounded-lg shadow-inner border border-dashed border-gray-300 text-center text-gray-500">
         <span class="text-4xl mb-2">🧐</span>
         <span class="font-semibold text-lg">No Events Found</span>
@@ -335,7 +385,7 @@ const announcementEvents = computed(() => {
     </div>
 
     <!-- Announcement Board -->
-    <div v-if="currentView === 'announcements'" class="w-full mt-8">
+    <div v-else-if="currentView === 'announcements'" class="w-full mt-8">
         <AnnouncementsBoard
             :announcements="eventAnnouncements"
             :search-query="searchQuery"

@@ -491,6 +491,7 @@ onMounted(async () => {
             :onDismissTiebreakerNotice="dismissTiebreakerNotice"
             :dismissedTiebreakerNotices="dismissedTiebreakerNotices"
             @toggle-bracket="toggleBracket"
+            :isDeletingBracket="isDeletingBracket"
             @remove-bracket="removeBracket"
             @set-view-mode="({ index, mode }) => setBracketViewMode(index, mode)"
             @set-match-filter="({ index, filter }) => setBracketMatchFilter(index, filter)"

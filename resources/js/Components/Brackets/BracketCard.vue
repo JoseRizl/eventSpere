@@ -246,7 +246,14 @@ const proceedWithSave = async () => {
                             :class="bracket.allow_draws ? 'p-button-success' : 'p-button-secondary'"
                             v-tooltip.top="bracket.allow_draws ? 'Draws Enabled' : 'Draws Disabled (Click to Enable)'"
                         />
-                        <Button v-if="showAdminControls && user?.role === 'Admin' && !isArchived" icon="pi pi-trash" @click="handleRemoveBracket" class="p-button-rounded p-button-text p-button-danger" v-tooltip.top="'Delete Bracket'" />
+                        <Button
+                            v-if="showAdminControls && user?.role === 'Admin' && !isArchived"
+                            :icon="isDeletingBracket ? 'pi pi-spin pi-spinner' : 'pi pi-trash'"
+                            @click="handleRemoveBracket"
+                            :disabled="isDeletingBracket"
+                            class="p-button-rounded p-button-text p-button-danger"
+                            v-tooltip.top="'Delete Bracket'"
+                        />
 
                     </div>
                 </div>
