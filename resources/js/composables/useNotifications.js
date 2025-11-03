@@ -43,8 +43,8 @@ export function useNotifications(popoverRef) {
     const pollForUpdates = async (isInitialLoad = false) => {
         try {
             const [eventsResponse, eventAnnouncementsResponse] = await Promise.all([
-                axios.get("http://localhost:3000/events"),
-                axios.get("http://localhost:3000/event_announcements")
+                axios.get("/events"),
+                axios.get("/announcements")
             ]);
 
             const allEvents = [...eventsResponse.data].filter((event) => !event.archived);
@@ -59,7 +59,11 @@ export function useNotifications(popoverRef) {
             }, {});
 
             const oneMonthAgo = subMonths(new Date(), 1);
-            const announcementNotifications = eventAnnouncementsResponse.data.map(ann => ({
+
+            // Ensure announcement data is always an array before mapping
+            const announcementsData = Array.isArray(eventAnnouncementsResponse.data) ? eventAnnouncementsResponse.data : [];
+
+            const announcementNotifications = announcementsData.map(ann => ({
                 id: `ann-${ann.id}`,
                 type: 'announcement',
                 timestamp: new Date(ann.timestamp),

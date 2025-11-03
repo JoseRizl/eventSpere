@@ -102,7 +102,17 @@ export function useEvents({ searchQuery, startDateFilter, endDateFilter, allNews
             if (start > now) return 2;
             return 3;
         };
-        return [...filteredNews.value].sort((a, b) => {
+
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+        const recentEvents = filteredNews.value.filter(event => {
+            const end = getFullDateTime(event.endDate || event.startDate, event.endTime || '23:59');
+            // Keep event if it's not ended, or if it ended within the last week
+            return getStatus(event) !== 3 || (end && end >= oneWeekAgo);
+        });
+
+        return [...recentEvents].sort((a, b) => {
             const statusA = getStatus(a);
             const statusB = getStatus(b);
             if (statusA !== statusB) return statusA - statusB;
