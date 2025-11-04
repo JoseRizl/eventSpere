@@ -12,7 +12,7 @@
             "startTime": "00:00",
             "endTime": "23:59",
             "archived": false,
-            "id": "a8c5",
+            "id": 1,
             "createdAt": "2025-11-02T10:12:23.575600Z",
             "type": "event"
         },
@@ -28,7 +28,7 @@
             "startTime": "15:00",
             "endTime": "18:00",
             "archived": false,
-            "id": "216d",
+            "id": 2423,
             "createdAt": "2025-10-29T13:13:46.508219Z",
             "type": "event"
         },
@@ -209,22 +209,6 @@
             "type": "event"
         },
         {
-            "title": "Halloween C",
-            "description": "ostume",
-            "image": "/storage/images/events/2025/11/6906bb2101516.webp",
-            "category_id": "5e80",
-            "venue": null,
-            "startDate": "Oct-31-2025",
-            "endDate": "Oct-31-2025",
-            "isAllDay": false,
-            "startTime": "17:00",
-            "endTime": "21:00",
-            "archived": false,
-            "id": "314e",
-            "createdAt": "2025-10-14T04:22:56.487095Z",
-            "type": "event"
-        },
-        {
             "title": "October",
             "description": null,
             "image": "/images/NCSlogo.png",
@@ -288,10 +272,7 @@
             "createdAt": "2025-09-20T10:41:41.453564Z",
             "type": "event",
             "startDateTime": "2025-10-29T00:00",
-            "endDateTime": "2025-10-31T23:59",
-            "tags": [
-                "2"
-            ]
+            "endDateTime": "2025-10-31T23:59"
         },
         {
             "id": "313c",
@@ -556,11 +537,18 @@
             "name": "Bato"
         }
     ],
-    "tasks": [],
     "task_employee": [
         {
-            "task_id": "6ee4-8e42",
+            "task_id": "0b89-1a4e",
             "employee_id": "5"
+        }
+    ],
+    "tasks": [
+        {
+            "id": "0b89-1a4e",
+            "description": "Santa",
+            "event_id": "0b89",
+            "committee_id": 6
         }
     ],
     "event_tags": [
@@ -693,14 +681,6 @@
             "isNew": true,
             "id": "e696bbdd-e6bc-474a-859a-a3e45230fd1a",
             "event_id": "0b89"
-        },
-        {
-            "type": "file",
-            "content": "/storage/memorandums/files/2025/11/6906ca4cd6b97_Ent101Activity2.docx",
-            "filename": "Ent 101 Activity (2).docx",
-            "isNew": true,
-            "id": "4be868cc-dd75-406e-b777-ce3f34faf030",
-            "event_id": "314e"
         }
     ],
     "activities": [

@@ -7,24 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class Task extends Model
+class Employee extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['description', 'event_id', 'committee_id'];
-
-    public function event(): BelongsTo
-    {
-        return $this->belongsTo(Event::class);
-    }
+    protected $fillable = ['name', 'committee_id'];
 
     public function committee(): BelongsTo
     {
         return $this->belongsTo(Committee::class);
     }
 
-    public function employees(): BelongsToMany
+    public function tasks(): BelongsToMany
     {
-        return $this->belongsToMany(Employee::class, 'task_employee')->using(TaskEmployee::class);
+        return $this->belongsToMany(Task::class, 'task_employee')->using(TaskEmployee::class);
     }
 }

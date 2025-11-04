@@ -10,6 +10,8 @@ class Memorandum extends Model
 {
     use HasFactory;
 
+    protected $table = 'memorandums';
+
     protected $fillable = [
         'event_id',
         'type',

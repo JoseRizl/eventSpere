@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('event_id')->unique()->constrained()->onDelete('cascade');
             $table->string('filename');
             $table->string('type'); // e.g., 'image', 'file'
-            $table->longText('content'); // base64 encoded content
+            $table->longText('content'); // path or base64 encoded content
             $table->timestamps();
         });
     }
