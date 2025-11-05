@@ -10,8 +10,12 @@ export function useEvents({ searchQuery, startDateFilter, endDateFilter, allNews
 
     const fetchEvents = async () => {
         try {
-            const response = await axios.get(route('api.events.index'));
-            allNews.value = [...response.data]
+            // Fetch from Laravel API route which returns JSON when Accept: application/json
+            const response = await axios.get(route('api.events.index'), {
+                headers: { 'Accept': 'application/json' }
+            });
+            const data = Array.isArray(response.data) ? response.data : (response.data?.events || []);
+            allNews.value = [...data]
                 .filter((news) => !news.archived)
                 .map((news) => ({
                     ...news,

@@ -667,7 +667,7 @@
   import { defineComponent, ref, onMounted, computed, watch, nextTick } from "vue";
   import { usePage, Link, router } from '@inertiajs/vue3';
   import axios from "axios";
-  import { parse, format, isWithinInterval } from 'date-fns';
+  import { parse, format, isWithinInterval, isValid as isValidDate } from 'date-fns';
   import { useTasks } from '@/composables/useTasks.js';
   import { useMemorandum } from '@/composables/useMemorandum.js';
   import SearchFilterBar from '@/Components/SearchFilterBar.vue';
@@ -729,7 +729,7 @@
       const tasksManager = useTasks();
 
       // Validation Composable
-      const { validateEvent } = useEventValidation();
+      const { validateEvent, formatDateForPicker } = useEventValidation();
 
       const newEvent = ref({
         title: "",
@@ -770,12 +770,16 @@
       });
 
       const combinedEvents = computed(() => {
-        const processItem = item => ({
-            ...item,
-            category_id: item.category?.id || item.category_id,
-            startDateTime: item.startDate ? `${format(new Date(item.startDate), 'yyyy-MM-dd')}T${item.startTime || '00:00'}` : null,
-            endDateTime: item.endDate ? `${format(new Date(item.endDate), 'yyyy-MM-dd')}T${item.endTime || '00:00'}` : null,
-        });
+        const processItem = item => {
+            const dStart = formatDateForPicker(item.startDate);
+            const dEnd = formatDateForPicker(item.endDate);
+            return {
+                ...item,
+                category_id: item.category?.id || item.category_id,
+                startDateTime: dStart ? `${format(dStart, 'yyyy-MM-dd')}T${item.startTime || '00:00'}` : null,
+                endDateTime: dEnd ? `${format(dEnd, 'yyyy-MM-dd')}T${item.endTime || '00:00'}` : null,
+            };
+        };
 
         const allEvents = (events.value || []).map(processItem);
 
@@ -935,6 +939,13 @@
             showCreateConfirm.value = false; // Close confirmation dialog
             return;
         }
+        // Enforce Date objects for DatePicker models prior to submit
+        if (newEvent.value.startDate && !(newEvent.value.startDate instanceof Date)) {
+            newEvent.value.startDate = formatDateForPicker(newEvent.value.startDate);
+        }
+        if (newEvent.value.endDate && !(newEvent.value.endDate instanceof Date)) {
+            newEvent.value.endDate = formatDateForPicker(newEvent.value.endDate);
+        }
         saving.value = true;
 
         let finalImage = newEvent.value.image;
@@ -955,14 +966,10 @@
             ...newEvent.value,
             image: finalImage || defaultImage.value,
             tags: newEvent.value.tags || [],
-            startDate: newEvent.value.startDate
-                ? format(new Date(newEvent.value.startDate), "MMM-dd-yyyy")
-                : null,
-            endDate: newEvent.value.endDate
-                ? format(new Date(newEvent.value.endDate), "MMM-dd-yyyy")
-                : null,
-            startTime: newEvent.value.startTime.padStart(5, "0"),
-            endTime: newEvent.value.endTime.padStart(5, "0"),
+            startDate: (() => { const d = formatDateForPicker(newEvent.value.startDate); return d ? format(d, 'MMM-dd-yyyy') : null; })(),
+            endDate: (() => { const d = formatDateForPicker(newEvent.value.endDate); return d ? format(d, 'MMM-dd-yyyy') : null; })(),
+            startTime: (newEvent.value.startTime || '').padStart(5, "0"),
+            endTime: (newEvent.value.endTime || '').padStart(5, "0"),
             archived: false,
             createdAt: new Date().toISOString(),
             memorandum: newEvent.value.memorandum,
@@ -1152,16 +1159,22 @@
 
       // Format date and time display
       const formatDateTime = (date, time) => {
-        const formattedDate = date ? format(new Date(date), 'MMM-dd-yyyy') : 'No date';
-        let formattedTime = '';
+        // Normalize date safely
+        const parsedDate = date ? formatDateForPicker(date) : null;
+        const formattedDate = !date ? 'No date' : (parsedDate ? format(parsedDate, 'MMM-dd-yyyy') : 'Invalid Date');
 
-        if (time === "00:00" && time === "23:59") {
-          formattedTime = 'All Day';
-        } else if (time) {
+        // Normalize time safely
+        let formattedTime = '';
+        if (time) {
           try {
             const paddedTime = time.padStart(5, '0');
-            const parsedTime = parse(paddedTime, 'HH:mm', new Date());
-            formattedTime = format(parsedTime, 'hh:mm a');
+            const base = parsedDate || new Date(0);
+            const parsedTime = parse(paddedTime, 'HH:mm', base);
+            if (!isValidDate(parsedTime)) {
+              formattedTime = paddedTime;
+            } else {
+              formattedTime = format(parsedTime, 'hh:mm a');
+            }
           } catch (e) {
             console.error('Error formatting time:', e);
             formattedTime = time.padStart(5, '0');
@@ -1191,8 +1204,8 @@
         Object.assign(selectedEvent.value, {
           ...event,
           venue: event.venue || "",
-          startDate: event.startDate ? new Date(event.startDate) : null,
-          endDate: event.endDate ? new Date(event.endDate) : null,
+          startDate: event.startDate ? formatDateForPicker(event.startDate) : null,
+          endDate: event.endDate ? formatDateForPicker(event.endDate) : null,
           isAllDay: event.isAllDay ?? false,
           startTime: event.startTime ?? (event.isAllDay ? "00:00" : ""),
           endTime: event.endTime ?? (event.isAllDay ? "23:59" : ""),
@@ -1259,6 +1272,13 @@
     const confirmSaveChanges = async () => {
       saving.value = true;
       try {
+        // Enforce Date objects for DatePicker models prior to submit
+        if (selectedEvent.value.startDate && !(selectedEvent.value.startDate instanceof Date)) {
+          selectedEvent.value.startDate = formatDateForPicker(selectedEvent.value.startDate);
+        }
+        if (selectedEvent.value.endDate && !(selectedEvent.value.endDate instanceof Date)) {
+          selectedEvent.value.endDate = formatDateForPicker(selectedEvent.value.endDate);
+        }
         // If the image is a new upload (blob URL), convert it to a base64 data URL
         let finalImage = selectedEvent.value.image;
         if (selectedEvent.value.image && selectedEvent.value.image.startsWith('blob:')) {
@@ -1284,12 +1304,8 @@
           ...selectedEvent.value,
           image: finalImage || defaultImage.value,
           tags: selectedEvent.value.tags || [],
-          startDate: selectedEvent.value.startDate
-            ? format(new Date(selectedEvent.value.startDate), "MMM-dd-yyyy")
-            : null,
-          endDate: selectedEvent.value.endDate
-            ? format(new Date(selectedEvent.value.endDate), "MMM-dd-yyyy")
-            : null,
+          startDate: (() => { const d = formatDateForPicker(selectedEvent.value.startDate); return d ? format(d, 'MMM-dd-yyyy') : null; })(),
+          endDate: (() => { const d = formatDateForPicker(selectedEvent.value.endDate); return d ? format(d, 'MMM-dd-yyyy') : null; })(),
           startTime: selectedEvent.value.startTime?.padStart(5, "0") || "00:00",
           endTime: selectedEvent.value.endTime?.padStart(5, "0") || "00:00",
           memorandum: selectedEvent.value.memorandum,

@@ -2,288 +2,196 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
+use App\Models\Event;
+use App\Models\Tag;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class CategoryController extends Controller
 {
-    protected $jsonData;
-
-    public function __construct()
+    public function index(Request $request)
     {
-        $this->jsonData = json_decode(File::get(base_path('db.json')), true);
-    }
+        $categories = Category::query()->get();
+        $tags = Tag::query()->get();
 
-    public function index()
-    {
-        $categories = $this->jsonData['category'] ?? [];
-        $tags = $this->jsonData['tags'] ?? [];
-        $event_tags = $this->jsonData['event_tags'] ?? [];
-        $events = $this->jsonData['events'] ?? [];
+        // Build events array with tag IDs for CategoryList.vue usage checks
+        $events = Event::with('tags')->get()->map(function ($e) {
+            return [
+                'id' => (string)$e->id,
+                'title' => $e->title,
+                'category_id' => $e->category_id,
+                'archived' => (bool)$e->archived,
+                // CategoryList.vue expects tags to be an array of tag IDs
+                'tags' => $e->tags->pluck('id')->values()->toArray(),
+            ];
+        })->values()->toArray();
+
+        // Build event_tags bridge array for tagUsageCount and details
+        $event_tags = [];
+        foreach ($events as $ev) {
+            foreach ($ev['tags'] as $tid) {
+                $event_tags[] = [
+                    'event_id' => (string)$ev['id'],
+                    'tag_id' => (string)$tid,
+                ];
+            }
+        }
 
         return Inertia::render('List/CategoryList', [
             'categories' => $categories,
             'tags' => $tags,
             'event_tags' => $event_tags,
-            'events' => $events
+            'events' => $events,
         ]);
     }
 
     public function store(Request $request)
     {
         $isTag = $request->has('name') && $request->has('category_id');
-        $validCategoryIds = array_column($this->jsonData['category'] ?? [], 'id');
 
-        $data = $request->validate([
-            $isTag ? 'name' : 'title' => [
-                'required',
-                'string',
-                'max:255',
-                function ($attribute, $value, $fail) use ($isTag) {
-                    $singular = $isTag ? 'tag' : 'category';
-                    $collection = $isTag ? 'tags' : 'category';
-                    $key = $isTag ? 'name' : 'title';
-                    if (collect($this->jsonData[$collection] ?? [])->where($key, $value)->isNotEmpty()) {
-                        $fail("A {$singular} with this name already exists.");
-                    }
-                }
-            ],
-            'description' => 'nullable|string',
-            'category_id' => $isTag ? ['required', \Illuminate\Validation\Rule::in($validCategoryIds)] : 'nullable',
-            'allow_brackets' => !$isTag ? 'sometimes|boolean' : 'nullable'
-        ]);
+        if ($isTag) {
+            $data = $request->validate([
+                'name' => ['required', 'string', 'max:255', 'unique:tags,name'],
+                'description' => 'nullable|string',
+                'category_id' => ['required', 'exists:categories,id'],
+            ]);
 
-        $collection = $isTag ? 'tags' : 'category';
-        $newItem = [
-            'id' => uniqid(),
-            ...$data
-        ];
+            $tag = new Tag();
+            $tag->name = $data['name'];
+            $tag->description = $data['description'] ?? null;
+            $tag->category_id = $data['category_id'];
+            $tag->archived = false;
+            $tag->save();
 
-        array_unshift($this->jsonData[$collection], $newItem);
-        File::put(base_path('db.json'), json_encode($this->jsonData, JSON_PRETTY_PRINT));
+            if ($request->wantsJson()) {
+                return response()->json(['success' => true, 'tag' => $tag]);
+            }
 
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true, 'tag' => $newItem]);
+            return redirect()->route('category.list')->with('success', 'Tag created successfully!');
         }
 
-        return redirect()->back()->with('success', $isTag ? 'Tag created successfully!' : 'Category created successfully!');
+        $data = $request->validate([
+            'title' => ['required', 'string', 'max:255', 'unique:categories,title'],
+            'description' => 'nullable|string',
+            'allow_brackets' => 'sometimes|boolean',
+        ]);
+
+        $category = new Category();
+        $category->title = $data['title'];
+        $category->description = $data['description'] ?? null;
+        $category->allow_brackets = (bool)($data['allow_brackets'] ?? false);
+        $category->save();
+
+        return redirect()->route('category.list')->with('success', 'Category created successfully!');
     }
 
     public function update(Request $request, $id)
     {
         $isTag = $request->has('name');
-        $validCategoryIds = array_column($this->jsonData['category'] ?? [], 'id');
 
+        if ($isTag) {
+            $tag = Tag::findOrFail($id);
+            $data = $request->validate([
+                'name' => ['required', 'string', 'max:255', 'unique:tags,name,' . $tag->id],
+                'description' => 'nullable|string',
+                'category_id' => ['sometimes', 'required', 'exists:categories,id'],
+            ]);
+
+            $tag->name = $data['name'];
+            if (array_key_exists('description', $data)) {
+                $tag->description = $data['description'];
+            }
+            if (array_key_exists('category_id', $data)) {
+                $tag->category_id = $data['category_id'];
+            }
+            $tag->save();
+
+            return redirect()->route('category.list')->with('success', 'Tag updated successfully!');
+        }
+
+        $category = Category::findOrFail($id);
         $data = $request->validate([
-            $isTag ? 'name' : 'title' => [
-                'required',
-                'string',
-                'max:255',
-                function ($attribute, $value, $fail) use ($isTag, $id) {
-                    $singular = $isTag ? 'tag' : 'category';
-                    $collection = $isTag ? 'tags' : 'category';
-                    $key = $isTag ? 'name' : 'title';
-                    $existing = collect($this->jsonData[$collection] ?? [])
-                        ->where($key, $value)->where('id', '!=', $id)->isNotEmpty();
-                    if ($existing) {
-                        $fail("A {$singular} with this name already exists.");
-                    }
-                }],
+            'title' => ['required', 'string', 'max:255', 'unique:categories,title,' . $category->id],
             'description' => 'nullable|string',
-            'category_id' => $isTag ? ['sometimes', 'required', \Illuminate\Validation\Rule::in($validCategoryIds)] : 'nullable',
-            'allow_brackets' => !$isTag ? 'sometimes|boolean' : 'nullable'
+            'allow_brackets' => 'sometimes|boolean',
         ]);
 
-        $collection = $isTag ? 'tags' : 'category';
-        $updated = false;
-
-        foreach ($this->jsonData[$collection] as &$item) {
-            if ($item['id'] === $id) {
-                $item = array_merge($item, $data);
-                $updated = true;
-                break;
-            }
+        $category->title = $data['title'];
+        if (array_key_exists('description', $data)) {
+            $category->description = $data['description'];
         }
-
-        if ($updated) {
-            File::put(base_path('db.json'), json_encode($this->jsonData, JSON_PRETTY_PRINT));
-            return redirect()->back()->with('success', $isTag ? 'Tag updated successfully!' : 'Category updated successfully!');
+        if (array_key_exists('allow_brackets', $data)) {
+            $category->allow_brackets = (bool)$data['allow_brackets'];
         }
+        $category->save();
 
-        return redirect()->back()->with('error', 'Item not found');
+        return redirect()->route('category.list')->with('success', 'Category updated successfully!');
     }
 
     public function destroy($id, Request $request)
     {
-        \Log::info('Delete request received', ['id' => $id, 'request' => $request->all()]);
-
         $isTag = $request->input('type') === 'tag';
-        $collection = $isTag ? 'tags' : 'category';
-        $dbPath = base_path('db.json');
 
-        \Log::info('Processing delete', ['isTag' => $isTag, 'collection' => $collection, 'request_data' => $request->all()]);
+        if ($isTag) {
+            $tag = Tag::findOrFail($id);
+            // Check if any event uses this tag
+            $inUse = Event::whereHas('tags', function ($q) use ($id) {
+                $q->where('tags.id', $id);
+            })->exists();
 
-        try {
-            // Get file lock
-            $lockFile = fopen($dbPath, 'r+');
-            if (!$lockFile) {
-                throw new \Exception('Could not open file for writing');
+            if ($inUse) {
+                return redirect()->route('category.list')->with('error', 'Item is in use and cannot be deleted');
             }
 
-            // Get exclusive lock
-            if (!flock($lockFile, LOCK_EX)) {
-                fclose($lockFile);
-                throw new \Exception('Could not acquire file lock');
-            }
+            // Detach from pivot and delete
+            DB::table('event_tags')->where('tag_id', $id)->delete();
+            $tag->delete();
 
-            // Read current data
-            $fileContent = fread($lockFile, filesize($dbPath));
-            $this->jsonData = json_decode($fileContent, true);
-
-            if (!isset($this->jsonData[$collection])) {
-                $this->jsonData[$collection] = [];
-            }
-
-            // Check if item is in use
-            $isInUse = false;
-            if ($isTag) {
-                $isInUse = collect($this->jsonData['events'] ?? [])->contains(function ($event) use ($id) {
-                    return collect($event['tags'] ?? [])->contains(function ($tag) use ($id) {
-                        return is_array($tag) ? $tag['id'] === $id : $tag === $id;
-                    });
-                });
-            } else {
-                $eventUsingCategory = collect($this->jsonData['events'] ?? [])->contains(function ($event) use ($id) {
-                    return $event['category_id'] === $id && !($event['archived'] ?? false);
-                });
-                $tagUsingCategory = collect($this->jsonData['tags'] ?? [])->contains('category_id', (string) $id);
-                $isInUse = $eventUsingCategory || $tagUsingCategory;
-            }
-
-            if ($isInUse) {
-                flock($lockFile, LOCK_UN);
-                fclose($lockFile);
-                return redirect()->back()->with('error', 'Item is in use and cannot be deleted');
-            }
-
-            // Find and remove the item
-            $itemToDelete = null;
-            foreach ($this->jsonData[$collection] as $key => $item) {
-                \Log::info('Checking item', ['key' => $key, 'item_id' => $item['id'], 'search_id' => $id]);
-                if ((string)$item['id'] === (string)$id) {
-                    $itemToDelete = $key;
-                    break;
-                }
-            }
-
-            if ($itemToDelete !== null) {
-                // Remove the item
-                unset($this->jsonData[$collection][$itemToDelete]);
-                // Reindex the array
-                $this->jsonData[$collection] = array_values($this->jsonData[$collection]);
-
-                // Write back to file
-                fseek($lockFile, 0);
-                ftruncate($lockFile, 0);
-                $jsonString = json_encode($this->jsonData, JSON_PRETTY_PRINT);
-                fwrite($lockFile, $jsonString);
-                fflush($lockFile);
-
-                // Release lock
-                flock($lockFile, LOCK_UN);
-                fclose($lockFile);
-
-                \Log::info('Item deleted successfully', [
-                    'id' => $id,
-                    'collection' => $collection,
-                    'remaining_items' => count($this->jsonData[$collection])
-                ]);
-
-                // Redirect back to the list page
-                return redirect()->route('category.list')->with('success', $isTag ? 'Tag deleted successfully!' : 'Category deleted successfully!');
-            }
-
-            // Release lock if item not found
-            flock($lockFile, LOCK_UN);
-            fclose($lockFile);
-
-            return redirect()->back()->with('error', 'Item not found');
-
-        } catch (\Exception $e) {
-            \Log::error('Error during deletion', [
-                'error' => $e->getMessage(),
-                'id' => $id,
-                'collection' => $collection
-            ]);
-
-            if (isset($lockFile) && is_resource($lockFile)) {
-                flock($lockFile, LOCK_UN);
-                fclose($lockFile);
-            }
-
-            return redirect()->back()->with('error', 'Failed to delete the item: ' . $e->getMessage());
+            return redirect()->route('category.list')->with('success', 'Tag deleted successfully!');
         }
+
+        $category = Category::findOrFail($id);
+        // Check usage: by non-archived events or by tags
+        $eventUsingCategory = Event::where('category_id', $id)
+            ->where(function ($q) { $q->whereNull('archived')->orWhere('archived', false); })
+            ->exists();
+        $tagUsingCategory = Tag::where('category_id', $id)->exists();
+
+        if ($eventUsingCategory || $tagUsingCategory) {
+            return redirect()->route('category.list')->with('error', 'Item is in use and cannot be deleted');
+        }
+
+        $category->delete();
+        return redirect()->route('category.list')->with('success', 'Category deleted successfully!');
     }
 
     public function archiveTag($id)
     {
-        $tagIndex = collect($this->jsonData['tags'])->search(fn($tag) => $tag['id'] === $id);
+        $tag = Tag::findOrFail($id);
+        $tag->archived = true;
+        $tag->save();
 
-        if ($tagIndex === false) {
-            return redirect()->back()->with('error', 'Tag not found.');
-        }
-
-        $this->jsonData['tags'][$tagIndex]['archived'] = true;
-        $this->writeJson($this->jsonData);
-
-        return redirect()->back()->with('success', 'Tag archived successfully.');
+        return redirect()->route('category.list')->with('success', 'Tag archived successfully.');
     }
 
     public function restoreTag($id)
     {
-        $tagIndex = collect($this->jsonData['tags'])->search(fn($tag) => $tag['id'] === $id);
+        $tag = Tag::findOrFail($id);
+        $tag->archived = false;
+        $tag->save();
 
-        if ($tagIndex === false) {
-            return redirect()->back()->with('error', 'Tag not found.');
-        }
-
-        // Ensure the 'archived' key exists before unsetting
-        if (isset($this->jsonData['tags'][$tagIndex]['archived'])) {
-            $this->jsonData['tags'][$tagIndex]['archived'] = false;
-        }
-
-        $this->writeJson($this->jsonData);
-
-        return redirect()->back()->with('success', 'Tag restored successfully.');
+        return redirect()->route('category.list')->with('success', 'Tag restored successfully.');
     }
 
     public function permanentDeleteTag($id)
     {
-        $tagIndex = collect($this->jsonData['tags'])->search(fn($tag) => $tag['id'] === $id);
+        $tag = Tag::findOrFail($id);
+        // Ensure no events reference
+        DB::table('event_tags')->where('tag_id', $id)->delete();
+        $tag->delete();
 
-        if ($tagIndex === false) {
-            return redirect()->back()->with('error', 'Tag not found.');
-        }
-
-        // Also remove from event_tags
-        $this->jsonData['event_tags'] = collect($this->jsonData['event_tags'] ?? [])
-            ->where('tag_id', '!=', $id)
-            ->values()
-            ->toArray();
-
-        // Remove the tag itself
-        array_splice($this->jsonData['tags'], $tagIndex, 1);
-
-        $this->writeJson($this->jsonData);
-
-        return redirect()->back()->with('success', 'Tag permanently deleted.');
-    }
-
-    private function writeJson(array $data): void
-    {
-        File::put(base_path('db.json'), json_encode($data, JSON_PRETTY_PRINT));
-        // Update the instance property after writing to the file
-        $this->jsonData = $data;
+        return redirect()->route('category.list')->with('success', 'Tag permanently deleted.');
     }
 }

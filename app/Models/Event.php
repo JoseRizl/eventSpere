@@ -40,8 +40,6 @@ class Event extends Model
     protected $casts = [
         'isAllDay' => 'boolean',
         'archived' => 'boolean',
-        'startDate' => 'date:M-d-Y',
-        'endDate' => 'date:M-d-Y',
     ];
 
     public function category(): BelongsTo

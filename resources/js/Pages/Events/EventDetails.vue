@@ -456,10 +456,10 @@ const saveChanges = () => {
     image: eventDetails.value.image, // This will be handled on the backend
     venue: eventDetails.value.venue,
     category_id: eventDetails.value.category_id,
-    startDate: eventDetails.value.startDate,
-    endDate: eventDetails.value.endDate,
-    startTime: eventDetails.value.startTime,
-    endTime: eventDetails.value.endTime,
+    startDate: (() => { const d = formatDateForPicker(eventDetails.value.startDate); return d ? format(d, 'MMM-dd-yyyy') : ''; })(),
+    endDate: (() => { const d = formatDateForPicker(eventDetails.value.endDate); return d ? format(d, 'MMM-dd-yyyy') : ''; })(),
+    startTime: (eventDetails.value.startTime || '').padStart(5, '0'),
+    endTime: (eventDetails.value.endTime || '').padStart(5, '0'),
     tags: eventDetails.value.tags || [], // Only IDs
     memorandum: eventDetails.value.memorandum,
     activities: (eventDetails.value.activities || []).map(({ __uid, ...activity }) => activity),
@@ -502,8 +502,15 @@ const saveChanges = () => {
 
 const formatDisplayTime = (timeString) => {
   if (!timeString) return '';
-  const parsed = parse(timeString, 'HH:mm', new Date());
-  return format(parsed, 'hh:mm a'); // 04:00 PM
+  try {
+    const base = formatDateForPicker(eventDetails.value.startDate) || new Date(0);
+    const padded = timeString.padStart(5, '0');
+    const parsed = parse(padded, 'HH:mm', base);
+    if (!isValid(parsed)) return padded;
+    return format(parsed, 'hh:mm a');
+  } catch (e) {
+    return (timeString || '').padStart(5, '0');
+  }
 };
 
 
