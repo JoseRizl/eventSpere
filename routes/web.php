@@ -15,12 +15,15 @@ use Inertia\Inertia;
 Route::inertia('/', 'Home')->name('home');
 Route::get('/events/{id}', [EventController::class, 'show'])->name('event.details');
 
+Route::inertia('/test', 'Test')->name('test');
+
 // Public API routes (accessible without authentication)
 Route::prefix('api')->name('api.')->group(function () {
     Route::get('/events/{event}/brackets', [BracketController::class, 'indexForEvent'])->name('events.brackets');
     Route::get('/brackets', [BracketController::class, 'index'])->name('brackets.index');
     Route::get('/events/{eventId}/announcements', [AnnouncementsController::class, 'indexForEvent'])->name('events.announcements.indexForEvent');
     Route::get('/announcements', [AnnouncementsController::class, 'index'])->name('announcements.index');
+    Route::get('/events', [EventController::class, 'index'])->name('events.index'); // For fetching all events as JSON for guests
 });
 
 Route::middleware('auth')->group(function () {
@@ -71,7 +74,6 @@ Route::middleware('auth')->group(function () {
 
     // API routes (protected - require authentication)
     Route::prefix('api')->name('api.')->group(function () {
-        Route::get('/events', [EventController::class, 'index'])->name('events.index'); // For fetching all events as JSON
         Route::apiResource('brackets', BracketController::class)->except(['show', 'create', 'edit', 'index']);
         Route::put('/brackets/{id}/update-player-names', [BracketController::class, 'updatePlayerNames'])->name('brackets.updatePlayerNames');
         Route::put('/brackets/{id}/update-player-colors', [BracketController::class, 'updatePlayerColors'])->name('brackets.updatePlayerColors');

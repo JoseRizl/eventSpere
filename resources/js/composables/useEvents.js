@@ -10,7 +10,7 @@ export function useEvents({ searchQuery, startDateFilter, endDateFilter, allNews
 
     const fetchEvents = async () => {
         try {
-            const response = await axios.get("http://localhost:3000/events");
+            const response = await axios.get(route('api.events.index'));
             allNews.value = [...response.data]
                 .filter((news) => !news.archived)
                 .map((news) => ({

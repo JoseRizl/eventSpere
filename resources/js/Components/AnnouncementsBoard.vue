@@ -115,10 +115,10 @@ const promptDelete = (announcement) => {
     showDeleteConfirm.value = true;
 };
 
-const handleImageUpload = (event, dataObject) => {
-    const file = event.target.files[0];
+const handleImageUpload = (event, dataObject) => { // event is now a FileUpload event
+    const file = event.files[0];
     if (file) {
-        const reader = new FileReader();
+        const reader = new FileReader(); // FileReader remains the same
         reader.onload = (e) => {
             dataObject.image = e.target.result;
             dataObject.imagePreview = e.target.result;
@@ -272,7 +272,7 @@ const formatTimestamp = (timestamp) => {
         <ConfirmationDialog v-model:show="showDeleteConfirm" title="Delete Announcement?" message="Are you sure you want to delete this announcement?" @confirm="confirmDelete" />
 
         <!-- Add Modal -->
-        <Dialog v-model:visible="showAddModal" modal header="Add Announcement" :style="{ width: '50vw' }">
+        <Dialog v-model:visible="showAddModal" modal header="Add Announcement" :style="{ width: 'min(600px, 90vw)' }">
             <div class="p-fluid">
                 <div v-if="context === 'home'" class="p-field mb-4">
                     <label for="newEventId">Event (Optional)</label>
@@ -288,19 +288,31 @@ const formatTimestamp = (timestamp) => {
                         <img :src="newAnnouncementData.imagePreview" alt="Image preview" class="rounded-lg max-w-xs h-auto" />
                         <Button icon="pi pi-times" class="p-button-rounded p-button-danger p-button-text absolute top-1 right-1 bg-white/50" @click="removeImage(newAnnouncementData)" v-tooltip.top="'Remove Image'" />
                     </div>
-                    <input type="file" id="newImage" @change="handleImageUpload($event, newAnnouncementData)" accept="image/*" class="p-inputtext mt-2" />
+                    <FileUpload
+                        v-else
+                        mode="basic"
+                        name="newImage"
+                        accept="image/*"
+                        :maxFileSize="1000000"
+                        @select="handleImageUpload($event, newAnnouncementData)"
+                        chooseLabel="Choose Image"
+                        class="mt-2"
+                    />
                 </div>
             </div>
             <template #footer>
-                <button @click="showAddModal = false" class="modal-button-secondary sm:p-button-sm">Cancel</button>
+                <div class="flex justify-end flex-wrap gap-2">
+                    <button @click="showCreateModal = false" class="modal-button-secondary sm:p-button-sm">Cancel</button>
                 <button @click="confirmAdd" :disabled="saving" class="modal-button-primary sm:p-button-sm">
-                    <i v-if="saving" class="pi pi-spin pi-spinner mr-2"></i>Post Announcement
+                    <i v-if="saving" class="pi pi-spin pi-spinner mr-2"></i>
+                    Post Announcement
                 </button>
+                </div>
             </template>
         </Dialog>
 
         <!-- Edit Modal -->
-        <Dialog v-model:visible="showEditModal" modal header="Edit Announcement" :style="{ width: '50vw' }">
+        <Dialog v-model:visible="showEditModal" modal header="Edit Announcement" :style="{ width: 'min(600px, 90vw)' }">
             <div class="p-fluid">
                 <div class="p-field">
                     <label for="editMessage">Message <span style="color: red;">*</span></label>
@@ -312,15 +324,26 @@ const formatTimestamp = (timestamp) => {
                         <img :src="editAnnouncementData.imagePreview" alt="Image preview" class="rounded-lg max-w-xs h-auto" />
                         <Button icon="pi pi-times" class="p-button-rounded p-button-danger p-button-text absolute top-1 right-1 bg-white/50" @click="removeImage(editAnnouncementData)" v-tooltip.top="'Remove Image'" />
                     </div>
-                    <input type="file" id="editImage" @change="handleImageUpload($event, editAnnouncementData)" accept="image/*" class="p-inputtext mt-2" />
+                    <FileUpload
+                        v-else
+                        mode="basic"
+                        name="editImage"
+                        accept="image/*"
+                        :maxFileSize="1000000"
+                        @select="handleImageUpload($event, editAnnouncementData)"
+                        chooseLabel="Choose Image"
+                        class="mt-2"
+                    />
                 </div>
             </div>
             <template #footer>
-                <button @click="showEditModal = false" class="modal-button-secondary sm:p-button-sm">Cancel</button>
+                <div class="flex justify-end flex-wrap gap-2">
+                    <button @click="showEditModal = false" class="modal-button-secondary sm:p-button-sm">Cancel</button>
                 <button @click="confirmUpdate" :disabled="saving" class="modal-button-primary sm:p-button-sm">
                     <i v-if="saving" class="pi pi-spin pi-spinner mr-2"></i>
-                    Update Announcement
+                    Save
                 </button>
+                </div>
             </template>
         </Dialog>
 

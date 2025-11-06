@@ -1912,6 +1912,16 @@
     .bracket {
         min-width: 768px; /* Adjust as needed for better viewing */
     }
+
+    /* Ensure split bracket layout is scrollable on mobile */
+    .split-bracket-container-horizontal {
+        min-width: 1400px; /* Adjust as needed */
+    }
+
+    /* Hide dotted dropout lines on mobile for a cleaner look */
+    .dropout-lines-layer {
+        display: none;
+    }
 }
 
 @media (max-width: 768px) {
@@ -2251,7 +2261,7 @@
   display: grid;
   grid-template-columns: auto auto auto;
   grid-template-rows: auto auto;
-  gap: 2rem;
+  gap: 0.5rem; /* Reduced from 2rem to make it more compact */
   position: relative;
   z-index: 2;
   padding: 1rem;
@@ -2491,12 +2501,13 @@
     font-size: 1.25rem;
   }
 
-  .three-column-bracket-container {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto auto;
-    gap: 1.5rem;
+  /* Ensure the double elimination bracket maintains its layout and becomes scrollable on mobile */
+  .double-elimination-unified {
+    min-width: 1200px; /* Adjust this value as needed to fit your bracket's content */
   }
 
+  /* The following rules cause stacking, which we want to avoid.
+     They are commented out to preserve the desktop grid layout.
   .left-column.losers-section {
     grid-column: 1;
     grid-row: 1;
@@ -2519,7 +2530,7 @@
     grid-row: 4;
     padding: 1rem;
     margin-top: 0;
-  }
+  } */
 
   .losers-left-flow,
   .winners-right-flow {
@@ -2833,7 +2844,7 @@
   z-index: 2;
 }
 
-/* Responsive */
+/* Responsive
 @media (max-width: 1400px) {
   .horizontal-split-layout {
     gap: 2rem;
@@ -2857,16 +2868,15 @@
 
   .bracket-center-column {
     order: 2;
-  }
+  } */
 
-  .bracket-a-side {
+  /* .bracket-a-side {
     order: 1;
   }
 
   .bracket-b-side {
     order: 3;
-  }
-}
+} */
 
 /* ========================================
    CONSOLATION MATCH IN STANDARD LAYOUT

@@ -499,7 +499,7 @@ onMounted(async () => {
       </div>
 
       <!-- Dialog for Bracket Setup -->
-      <Dialog v-model:visible="showDialog" header="Bracket Setup" modal :style="{ width: '400px' }">
+      <Dialog v-model:visible="showDialog" header="Bracket Setup" modal :style="{ width: 'min(400px, 90vw)' }">
         <div class="dialog-content">
           <div class="p-field">
             <label for="bracketName">Bracket Name <span style="color: red;">*</span></label>
@@ -629,7 +629,7 @@ onMounted(async () => {
       />
 
       <!-- Tiebreaker Dialog -->
-      <Dialog v-model:visible="showTiebreakerDialog" header="Set Tiebreakers" modal :style="{ width: '500px' }">
+      <Dialog v-model:visible="showTiebreakerDialog" header="Set Tiebreakers" modal :style="{ width: 'min(500px, 90vw)' }">
         <div class="tiebreaker-dialog">
           <p class="mb-4 text-sm text-gray-600">Enter points scored and allowed for each tied player to calculate quotient rankings.</p>
           <div v-if="pendingBracketIdx !== null && brackets[pendingBracketIdx]" class="tiebreaker-inputs">
@@ -652,7 +652,7 @@ onMounted(async () => {
               </div>
             </div>
           </div>
-          <div class="dialog-actions mt-4">
+          <div class="dialog-actions mt-4 flex justify-end flex-wrap gap-2">
             <button @click="closeTiebreakerDialog" class="modal-button-secondary">Cancel</button>
             <button @click="handleSaveTiebreakers" class="modal-button-primary">Save Tiebreakers</button>
           </div>
@@ -660,7 +660,7 @@ onMounted(async () => {
       </Dialog>
 
       <!-- Scoring Configuration Dialog -->
-      <Dialog v-model:visible="showScoringConfigDialog" header="Configure Scoring System" modal :style="{ width: '400px' }">
+      <Dialog v-model:visible="showScoringConfigDialog" header="Configure Scoring System" modal :style="{ width: 'min(400px, 90vw)' }">
         <div class="scoring-config-dialog">
           <div class="scoring-option">
             <label>Win Points:</label>

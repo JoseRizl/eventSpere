@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
+import html2canvas from 'html2canvas';
 import { truncate } from '@/utils/stringUtils.js';
 import { useToast } from '@/composables/useToast.js';
 
@@ -26,7 +27,9 @@ const props = defineProps({
     openScoringConfigDialog: { type: Function, default: null },
     openTiebreakerDialog: { type: Function, default: null },
     dismissTiebreakerNotice: { type: Function, default: null },
-    dismissedTiebreakerNotices: { type: Set, default: () => new Set() }
+    dismissedTiebreakerNotices: { type: Set, default: () => new Set() },
+    playerColors: { type: Object, default: () => ({}) },
+    generatePlayerColor: { type: Function, default: () => null }
 });
 
 const bracketContentRef = ref(null);
@@ -38,161 +41,38 @@ const { showSuccess, showError } = useToast();
 
 // Player name editing
 const showPlayerEditModal = ref(false);
-const editablePlayers = ref([]);
-
-// Player colors - assign random colors to each unique player
-const playerColors = ref({});
-
-// Generate deterministic color based on player name (consistent across sessions)
-const generatePlayerColor = (playerName) => {
-    if (!playerName || playerName === 'TBD' || playerName === 'BYE' || playerName.includes('Winner') || playerName.includes('Loser')) {
-        return null;
-    }
-
-    // If a color is already set for this player, use it.
-    if (playerColors.value[playerName]) {
-        return playerColors.value[playerName];
-    }
-
-    if (!playerColors.value[playerName]) {
-        const colors = [
-            '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
-            '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52B788',
-            '#E63946', '#457B9D', '#F77F00', '#06FFA5', '#B5179E'
-        ];
-
-        // Use simple hash of player name for consistent color assignment
-        let hash = 0;
-        for (let i = 0; i < playerName.length; i++) {
-            hash = playerName.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        const colorIndex = Math.abs(hash) % colors.length;
-        playerColors.value[playerName] = colors[colorIndex];
-    }
-
-    return playerColors.value[playerName];
-};
-
-const openPlayerEditModal = () => {
-    // Collect all unique players from the bracket
-    const players = new Set();
-
-    const addPlayersFromMatches = (matches) => {
-        matches.forEach(match => {
-            if (match.players) {
-                match.players.forEach(player => {
-                    if (player && player.name && player.name !== 'TBD' && player.name !== 'BYE' &&
-                        !player.name.includes('Winner') && !player.name.includes('Loser')) {
-                        players.add(player.name);
-                    }
-                });
-            }
-        });
-    };
-
-    if (props.bracket.type === 'Double Elimination') {
-        props.bracket.matches.winners.forEach(round => addPlayersFromMatches(round));
-        props.bracket.matches.losers.forEach(round => addPlayersFromMatches(round));
-        if (props.bracket.matches.grand_finals) {
-            addPlayersFromMatches(props.bracket.matches.grand_finals[0]);
-        }
-    } else if (Array.isArray(props.bracket.matches)) {
-        props.bracket.matches.forEach(round => addPlayersFromMatches(round));
-    }
-
-    editablePlayers.value = Array.from(players).map(name => ({
-        oldName: name,
-        newName: name
-    }));
-
-    showPlayerEditModal.value = true;
-};
-
-const savePlayerNames = async () => {
-    // Collect updates
-    const updates = editablePlayers.value
-        .filter(p => p.oldName !== p.newName && p.newName.trim() !== '')
-        .map(p => ({ oldName: p.oldName, newName: p.newName.trim() }));
-
-    if (updates.length > 0) {
-        try {
-            // Save to backend - use axios like other bracket operations
-            await axios.put(route('api.brackets.updatePlayerNames', props.bracket.id), { updates });
-
-            // Update player names in the bracket locally
-            const updatePlayerInMatches = (matches) => {
-                matches.forEach(match => {
-                    if (match.players) {
-                        match.players.forEach(player => {
-                            const update = updates.find(u => u.oldName === player.name);
-                            if (update) {
-                                player.name = update.newName;
-                                // Transfer color to new name
-                                if (playerColors.value[update.oldName]) {
-                                    playerColors.value[update.newName] = playerColors.value[update.oldName];
-                                }
-                            }
-                        });
-                    }
-                });
-            };
-
-            // Update in all bracket types
-            if (props.bracket.type === 'Double Elimination') {
-                props.bracket.matches.winners.forEach(round => updatePlayerInMatches(round));
-                props.bracket.matches.losers.forEach(round => updatePlayerInMatches(round));
-                if (props.bracket.matches.grand_finals) {
-                    updatePlayerInMatches(props.bracket.matches.grand_finals[0]);
-                }
-            } else if (Array.isArray(props.bracket.matches)) {
-                props.bracket.matches.forEach(round => updatePlayerInMatches(round));
-            }
-
-            showSuccess('Player names updated successfully!');
-        } catch (error) {
-            console.error('Error updating player names:', error);
-            showError('Failed to update player names. Please try again.');
-        }
-    }
-
-    showPlayerEditModal.value = false;
-};
 
 // Zoom functionality for elimination brackets
-const baseZoom = 0.7; // New default zoom level
-const zoomLevel = ref(baseZoom);
-const minZoom = 0.5 * baseZoom; // Scaled min zoom (was 0.5)
-const maxZoom = 1.5 * baseZoom; // Scaled max zoom (was 1.5)
-const zoomStep = 0.1 * baseZoom;  // Scaled zoom step (was 0.1)
+const defaultDesktopZoom = 0.7;
+const defaultMobileZoom = 0.35; // Smaller zoom to fit bracket on mobile
+const zoomLevel = ref(defaultDesktopZoom);
+const minZoom = computed(() => 0.5 * (window.innerWidth <= 768 ? defaultMobileZoom : defaultDesktopZoom));
+const maxZoom = computed(() => 1.5 * (window.innerWidth <= 768 ? defaultMobileZoom : defaultDesktopZoom));
+const zoomStep = computed(() => 0.1 * (window.innerWidth <= 768 ? defaultMobileZoom : defaultDesktopZoom));
 
 const zoomIn = () => {
-    if (zoomLevel.value < maxZoom) {
-        zoomLevel.value = Math.min(maxZoom, zoomLevel.value + zoomStep);
-        // Recalculate lines after zoom with a small delay to ensure zoom is applied
-        setTimeout(() => {
-            nextTick(() => {
-                updateBracketLines();
-                alignConsolationWithFinals();
-            });
-        }, 50);
+    if (zoomLevel.value < maxZoom.value) {
+        zoomLevel.value = Math.min(maxZoom.value, zoomLevel.value + zoomStep.value);
+        recalculateLinesAfterZoom();
     }
 };
 
 const zoomOut = () => {
-    if (zoomLevel.value > minZoom) {
-        zoomLevel.value = Math.max(minZoom, zoomLevel.value - zoomStep);
-        // Recalculate lines after zoom with a small delay to ensure zoom is applied
-        setTimeout(() => {
-            nextTick(() => {
-                updateBracketLines();
-                alignConsolationWithFinals();
-            });
-        }, 50);
+    if (zoomLevel.value > minZoom.value) {
+        zoomLevel.value = Math.max(minZoom.value, zoomLevel.value - zoomStep.value);
+        recalculateLinesAfterZoom();
     }
 };
 
+const recalculateLinesAfterZoom = () => {
+    setTimeout(() => {
+        nextTick(updateBracketLines);
+        nextTick(alignConsolationWithFinals);
+    }, 50);
+};
+
 const resetZoom = () => {
-    zoomLevel.value = baseZoom;
+    adjustZoomForScreenSize();
     // Recalculate lines after zoom with a small delay to ensure zoom is applied
     setTimeout(() => {
         nextTick(() => {
@@ -202,7 +82,52 @@ const resetZoom = () => {
     }, 50);
 };
 
-const zoomPercentage = computed(() => Math.round((zoomLevel.value / baseZoom) * 100));
+const adjustZoomForScreenSize = () => {
+    if (window.innerWidth <= 768) {
+        zoomLevel.value = defaultMobileZoom;
+    } else {
+        zoomLevel.value = defaultDesktopZoom;
+    }
+};
+
+const printBracket = () => {
+    if (!bracketContentRef.value) return;
+
+    // Temporarily reset zoom to get a high-quality capture
+    const originalZoom = zoomLevel.value;
+    zoomLevel.value = 1; // Use 1 for the capture to get a clear image
+
+    nextTick(() => {
+        html2canvas(bracketContentRef.value, {
+            scale: 2, // Increase scale for better resolution
+            useCORS: true,
+            onclone: (document) => {
+                // You can apply print-specific styles here if needed
+            }
+        }).then(canvas => {
+            const printWindow = window.open('', '_blank');
+            if (printWindow) {
+                printWindow.document.write('<html><head><title>Print Bracket</title>');
+                printWindow.document.write('<style>body { margin: 0; } img { width: 100%; }</style>');
+                printWindow.document.write('</head><body>');
+                printWindow.document.write('<img src="' + canvas.toDataURL() + '" />');
+                printWindow.document.write('</body></html>');
+                printWindow.document.close();
+                printWindow.focus();
+                setTimeout(() => {
+                    printWindow.print();
+                }, 500); // Delay to ensure image loads
+            }
+            // Restore original zoom level
+            zoomLevel.value = originalZoom;
+        });
+    });
+};
+
+const zoomPercentage = computed(() => {
+    const base = window.innerWidth <= 768 ? defaultMobileZoom : defaultDesktopZoom;
+    return Math.round((zoomLevel.value / base) * 100);
+});
 
 const ongoingRoundIdentifiers = computed(() => {
     const bracket = props.bracket;
@@ -1363,6 +1288,8 @@ const alignConsolationWithFinals = () => {
 };
 
 onMounted(() => {
+    adjustZoomForScreenSize();
+    window.addEventListener('resize', adjustZoomForScreenSize);
     if (props.bracket.type !== 'Round Robin' && bracketContentRef.value) {
         resizeObserver = new ResizeObserver(() => {
             nextTick(updateBracketLines);
@@ -1378,6 +1305,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+    window.removeEventListener('resize', adjustZoomForScreenSize);
     if (resizeObserver) resizeObserver.disconnect();
 });
 
@@ -1388,36 +1316,6 @@ watch(() => props.bracket, () => {
     alignConsolationWithFinals();
 }, { deep: true });
 
-const populateInitialColors = () => {
-    const processMatches = (matches) => {
-        if (!matches) return;
-        matches.flat().forEach(match => {
-            if (match && match.players) {
-                match.players.forEach(player => {
-                    if (player && player.name && player.color && !playerColors.value[player.name]) {
-                        playerColors.value[player.name] = player.color;
-                    }
-                });
-            }
-        });
-    };
-
-    if (props.bracket.type === 'Double Elimination') {
-        processMatches(props.bracket.matches.winners);
-        processMatches(props.bracket.matches.losers);
-        processMatches(props.bracket.matches.grand_finals);
-    } else {
-        processMatches(props.bracket.matches);
-    }
-};
-// Expose functions and data so parent can access them
-defineExpose({
-    openPlayerEditModal,
-    playerColors,
-    generatePlayerColor
-});
-
-onMounted(populateInitialColors);
 </script>
 
 <template>
@@ -1432,6 +1330,9 @@ onMounted(populateInitialColors);
             </button>
             <button @click="zoomIn" :disabled="zoomLevel >= maxZoom" class="zoom-btn" title="Zoom In">
                 <i class="pi pi-plus"></i>
+            </button>
+            <button @click="printBracket" class="zoom-btn" title="Print Bracket">
+                <i class="pi pi-print"></i>
             </button>
         </div>
 
@@ -1653,10 +1554,14 @@ onMounted(populateInitialColors);
     </div>
 
     <!-- Round Robin Display - Grid System -->
-    <div v-else-if="bracket.type === 'Round Robin'" class="round-robin-bracket">
-        <div class="round-robin-grid-container">
+    <div v-else-if="bracket.type === 'Round Robin'" class="round-robin-bracket" ref="bracketContentRef">
+        <div class="round-robin-grid-container" >
             <div class="round-robin-header">
                 <h3 class="text-xl font-bold mb-4">Round Robin Tournament</h3>
+                <div class="flex items-center gap-2">
+                    <button @click="printBracket" class="zoom-btn" title="Print Bracket">
+                        <i class="pi pi-print"></i>
+                    </button>
                 <!-- Persistent Tiebreaker Button -->
                 <button
                     v-if="isRoundRobinConcluded && isRoundRobinConcluded(bracketIndex) && (user && (user.role === 'Admin' || user.role === 'TournamentManager'))"
@@ -1668,6 +1573,7 @@ onMounted(populateInitialColors);
                     <span>{{ bracket.tiebreaker_data && Object.keys(bracket.tiebreaker_data).length > 0 ? 'Edit Tiebreakers' : 'Set Tiebreakers' }}</span>
                 </button>
             </div>
+        </div>
 
             <!-- Tiebreaker Notice -->
             <div v-if="hasTiedRank1Players && !dismissedTiebreakerNotices.has(bracket.id) && (user && (user.role === 'Admin' || user.role === 'TournamentManager'))" class="tiebreaker-notice">
@@ -1835,7 +1741,7 @@ onMounted(populateInitialColors);
                                             :class="['player-cell', getPlayerStyling(match.players[0], match.players[1], match, 'losers')]"
                                             @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'losers')"
                                         >
-                                            <span v-if="generatePlayerColor(match.players[0].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[0].name) }"></span>
+                                            <span v-if="props.generatePlayerColor(match.players[0].name)" class="player-color-chip" :style="{ backgroundColor: props.generatePlayerColor(match.players[0].name) }"></span>
                                             {{ truncate(match.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
                                         </div>
                                         <div
@@ -1843,7 +1749,7 @@ onMounted(populateInitialColors);
                                             :class="['player-cell', getPlayerStyling(match.players[1], match.players[0], match, 'losers')]"
                                             @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'losers')"
                                         >
-                                            <span v-if="generatePlayerColor(match.players[1].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[1].name) }"></span>
+                                            <span v-if="props.generatePlayerColor(match.players[1].name)" class="player-color-chip" :style="{ backgroundColor: props.generatePlayerColor(match.players[1].name) }"></span>
                                             {{ truncate(match.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
                                         </div>
                                     </div>
@@ -1866,9 +1772,14 @@ onMounted(populateInitialColors);
                                     </div>
                                 </div>
                                 <!-- 3rd Place Indicator (under losers bracket final) -->
-                                <div v-if="roundIdx === bracket.matches.losers.length - 1" class="third-place-indicator">
-                                    <div class="placement-label third">
-                                        3rd Place: {{ getThirdPlaceWinner() }}
+                                <div v-if="roundIdx === bracket.matches.losers.length - 1" class="bracket-info-section">
+                                    <div class="third-place-indicator">
+                                        <div class="placement-label third">
+                                            🥉 3rd Place: {{ getThirdPlaceWinner() || 'TBD' }}
+                                        </div>
+                                    </div>
+                                    <div class="third-place-note">
+                                        <span class="bracket-note">(Lower Bracket Final Loser)</span>
                                     </div>
                                 </div>
                             </div>
@@ -1898,7 +1809,7 @@ onMounted(populateInitialColors);
                                             :class="['player-cell', getPlayerStyling(match.players[0], match.players[1], match, 'winners')]"
                                             @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, 0, matchIdx, match, 'winners')"
                                         >
-                                            <span v-if="generatePlayerColor(match.players[0].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[0].name) }"></span>
+                                            <span v-if="props.generatePlayerColor(match.players[0].name)" class="player-color-chip" :style="{ backgroundColor: props.generatePlayerColor(match.players[0].name) }"></span>
                                             {{ truncate(match.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
                                         </div>
                                         <div
@@ -1906,7 +1817,7 @@ onMounted(populateInitialColors);
                                             :class="['player-cell', getPlayerStyling(match.players[1], match.players[0], match, 'winners')]"
                                             @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, 0, matchIdx, match, 'winners')"
                                         >
-                                            <span v-if="generatePlayerColor(match.players[1].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[1].name) }"></span>
+                                            <span v-if="props.generatePlayerColor(match.players[1].name)" class="player-color-chip" :style="{ backgroundColor: props.generatePlayerColor(match.players[1].name) }"></span>
                                             {{ truncate(match.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
                                         </div>
                                     </div>
@@ -1957,7 +1868,7 @@ onMounted(populateInitialColors);
                                             :class="['player-cell', getPlayerStyling(match.players[0], match.players[1], match, 'winners')]"
                                             @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx + 1, matchIdx, match, 'winners')"
                                         >
-                                            <span v-if="generatePlayerColor(match.players[0].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[0].name) }"></span>
+                                            <span v-if="props.generatePlayerColor(match.players[0].name)" class="player-color-chip" :style="{ backgroundColor: props.generatePlayerColor(match.players[0].name) }"></span>
                                             {{ truncate(match.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
                                         </div>
                                         <div
@@ -1965,7 +1876,7 @@ onMounted(populateInitialColors);
                                             :class="['player-cell', getPlayerStyling(match.players[1], match.players[0], match, 'winners')]"
                                             @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx + 1, matchIdx, match, 'winners')"
                                         >
-                                            <span v-if="generatePlayerColor(match.players[1].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[1].name) }"></span>
+                                            <span v-if="props.generatePlayerColor(match.players[1].name)" class="player-color-chip" :style="{ backgroundColor: props.generatePlayerColor(match.players[1].name) }"></span>
                                             {{ truncate(match.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
                                         </div>
                                     </div>
@@ -2020,14 +1931,14 @@ onMounted(populateInitialColors);
                                                 :class="['player-cell', getPlayerStyling(match.players[0], match.players[1], match, 'grand_finals')]"
                                                 @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'grand_finals')"
                                             >
-                                                <span v-if="generatePlayerColor(match.players[0].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[0].name) }"></span>
+                                                <span v-if="props.generatePlayerColor(match.players[0].name)" class="player-color-chip" :style="{ backgroundColor: props.generatePlayerColor(match.players[0].name) }"></span>
                                                 {{ truncate(match.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
                                             </div>
                                             <div
                                                 :class="['player-cell', getPlayerStyling(match.players[1], match.players[0], match, 'grand_finals')]"
                                                 @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'grand_finals')"
                                             >
-                                                <span v-if="generatePlayerColor(match.players[1].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[1].name) }"></span>
+                                                <span v-if="props.generatePlayerColor(match.players[1].name)" class="player-color-chip" :style="{ backgroundColor: props.generatePlayerColor(match.players[1].name) }"></span>
                                                 {{ truncate(match.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
                                             </div>
                                         </div>
@@ -2370,6 +2281,24 @@ onMounted(populateInitialColors);
     background: #005a87;
 }
 
+.third-place-note {
+    margin-top: 4px;
+    text-align: center;
+}
+
+.third-place-note .bracket-note {
+    display: inline-block;
+    font-size: 16px;
+    font-weight: 500;
+    color: #5d4037;
+    background-color: #f5f5f5;
+    padding: 4px 10px;
+    border-radius: 4px;
+    border-left: 3px solid #bdbdbd;
+    font-style: normal;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
 /* Player Color Chip */
 .player-color-chip {
     display: inline-block;
@@ -2380,5 +2309,14 @@ onMounted(populateInitialColors);
     vertical-align: middle;
     position: relative;
     top: -1px;
+}
+</style>
+
+<style>
+/* Non-scoped styles for global overrides if needed, or for media queries on component classes */
+@media (max-width: 768px) {
+    .zoom-controls {
+        display: none !important;
+    }
 }
 </style>

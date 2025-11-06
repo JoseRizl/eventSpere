@@ -73,9 +73,10 @@ onMounted(async () => {
 const announcementEvents = computed(() => {
   const threeMonthsFromNow = addMonths(new Date(), 3);
   const upcomingFiltered = upcomingEvents.value.filter(event =>
-    isBefore(new Date(event.startDate), threeMonthsFromNow)
+    isBefore(new Date(event.startDate), threeMonthsFromNow),
   );
-  return [...ongoingEvents.value, ...upcomingFiltered];
+  // Combine ongoing, this month's, and upcoming events for the picker
+  return [...ongoingEvents.value, ...eventsThisMonth.value, ...upcomingFiltered];
 });
 
 </script>

@@ -131,7 +131,7 @@ const proceedWithUpdate = () => {
 </script>
 
 <template>
-    <Dialog :visible="show" @update:visible="closeModal" header="Edit Match" modal :style="{ width: '500px' }">
+    <Dialog :visible="show" @update:visible="closeModal" header="Edit Match" modal :style="{ width: 'min(500px, 90vw)' }">
         <div v-if="localMatchData" class="round-robin-match-dialog">
             <div class="match-info">
                 <h3>Match Details</h3>
@@ -202,7 +202,7 @@ const proceedWithUpdate = () => {
                 <span v-else class="tie-warning">Draws are not allowed in this tournament. Please adjust scores to determine a winner.</span>
             </div>
 
-            <div class="dialog-actions">
+            <div class="dialog-actions flex justify-end flex-wrap gap-2">
                 <button @click="closeModal" class="modal-button-secondary">Cancel</button>
                 <button @click="confirmUpdate" class="modal-button-primary" :disabled="isMatchDataInvalid || isDrawNotAllowed || loading" :loading="loading">Update Match</button>
             </div>

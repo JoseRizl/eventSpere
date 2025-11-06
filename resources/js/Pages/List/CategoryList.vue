@@ -534,7 +534,7 @@ export default defineComponent({
     </DataTable>
 
     <!-- Edit Modal -->
-    <Dialog v-model:visible="isEditModalVisible" modal :header="`Edit ${showTags ? 'Tag' : 'Category'}`" :style="{ width: '50vw' }">
+    <Dialog v-model:visible="isEditModalVisible" modal :header="`Edit ${showTags ? 'Tag' : 'Category'}`" :style="{ width: 'min(500px, 90vw)' }">
       <div class="p-fluid">
         <div class="p-field">
           <label for="title">{{ showTags ? 'Tag' : 'Category' }} Name <span style="color: red;">*</span></label>
@@ -569,7 +569,7 @@ export default defineComponent({
         </div>
       </div>
 
-      <template #footer>
+	  <template #footer>
         <button class="modal-button-secondary sm:p-button-sm" @click="isEditModalVisible = false" :disabled="saving">Cancel</button>
         <button class="modal-button-primary sm:p-button-sm" @click="saveEditedItem" :disabled="saving">
           <i v-if="saving" class="pi pi-spin pi-spinner mr-2"></i>
@@ -579,7 +579,7 @@ export default defineComponent({
     </Dialog>
 
     <!-- Create Modal -->
-    <Dialog v-model:visible="isCreateModalVisible" modal :header="`Create ${showTags ? 'Tag' : 'Category'}`" :style="{ width: '50vw' }">
+    <Dialog v-model:visible="isCreateModalVisible" modal :header="`Create ${showTags ? 'Tag' : 'Category'}`" :style="{ width: 'min(500px, 90vw)' }">
       <div class="p-fluid">
         <div class="p-field">
           <label for="newTitle">{{ showTags ? 'Tag' : 'Category' }} Name <span style="color: red;">*</span></label>
@@ -614,7 +614,7 @@ export default defineComponent({
         </div>
       </div>
 
-      <template #footer>
+	  <template #footer>
         <button class="modal-button-secondary sm:p-button-sm" @click="isCreateModalVisible = false" :disabled="saving">Cancel</button>
         <button class="modal-button-primary sm:p-button-sm" @click="createItem" :disabled="saving">
           <i v-if="saving" class="pi pi-spin pi-spinner mr-2"></i>

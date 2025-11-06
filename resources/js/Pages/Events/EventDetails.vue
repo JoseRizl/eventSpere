@@ -803,8 +803,8 @@ const getBracketIndex = (bracketId) => {
                     <div v-if="editMode" class="space-y-2">
                         <!-- If memorandum exists -->
                         <div v-if="eventDetails.memorandum" class="flex items-center gap-2 p-2 border rounded-md bg-gray-100">
-                        <i class="pi pi-file"></i>
-                        <span class="flex-1 cursor-pointer text-blue-600 hover:underline" @click="viewMemorandum">
+                        <i class="pi pi-file flex-shrink-0"></i>
+                        <span class="flex-1 cursor-pointer text-blue-600 hover:underline truncate min-w-0" @click="viewMemorandum" v-tooltip.top="eventDetails.memorandum.filename">
                             {{ eventDetails.memorandum.filename }}
                         </span>
                         <Button
@@ -830,12 +830,14 @@ const getBracketIndex = (bracketId) => {
                     <!-- View Mode -->
                     <div v-else>
                         <div v-if="eventDetails.memorandum">
-                        <Button
-                            :label="`View ${eventDetails.memorandum.filename}`"
-                            icon="pi pi-eye"
-                            @click="viewMemorandum"
-                            class="p-button-secondary"
-                        />
+                            <Button @click="viewMemorandum" class="p-button-secondary w-full sm:w-auto">
+                                <div class="flex items-center gap-2 overflow-hidden">
+                                    <i class="pi pi-eye"></i>
+                                    <span class="truncate">
+                                        View {{ eventDetails.memorandum.filename }}
+                                    </span>
+                                </div>
+                            </Button>
                         </div>
                     </div>
                     </div>

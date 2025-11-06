@@ -23,4 +23,10 @@ export default defineConfig({
     optimizeDeps: {
         include: ['primevue/card'],
     },
+    server: {
+        host: true,
+        hmr: {
+            host: '10.145.76.4'
+        }
+    }
 });

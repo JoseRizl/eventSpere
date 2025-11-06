@@ -1,5 +1,5 @@
 <template>
-    <Dialog v-model:visible="props.tasksManager.isTaskModalVisible.value" modal header="Manage Tasks" :style="{ width: '50vw' }">
+    <Dialog v-model:visible="props.tasksManager.isTaskModalVisible.value" modal header="Manage Tasks" :style="{ width: 'min(700px, 90vw)' }">
         <div class="p-fluid">
             <div class="p-field">
                 <label>Event</label>
@@ -102,14 +102,18 @@
         </div>
 
         <template #footer>
-            <div v-if="taskErrorMessage" class="text-red-500 text-sm mr-auto p-2 text-left">
-                {{ taskErrorMessage }}
+            <div class="flex justify-between items-center flex-wrap gap-2">
+                <div v-if="taskErrorMessage" class="text-red-500 text-sm text-left">
+                    {{ taskErrorMessage }}
+                </div>
+                <div class="flex gap-2 ml-auto">
+                    <button class="modal-button-secondary sm:p-button-sm" @click="closeModal" :disabled="isSaving">Cancel</button>
+                    <button class="modal-button-primary sm:p-button-sm" @click="promptSave" :disabled="isSaving">
+                        <i v-if="isSaving" class="pi pi-spin pi-spinner mr-2"></i>
+                        {{ isSaving ? 'Saving...' : 'Save Tasks' }}
+                    </button>
+                </div>
             </div>
-            <button class="modal-button-secondary sm:p-button-sm" @click="closeModal" :disabled="isSaving">Cancel</button>
-            <button class="modal-button-primary sm:p-button-sm" @click="promptSave" :disabled="isSaving">
-                <i v-if="isSaving" class="pi pi-spin pi-spinner mr-2"></i>
-                {{ isSaving ? 'Saving...' : 'Save Tasks' }}
-            </button>
         </template>
     </Dialog>
 

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, onMounted } from 'vue';
 import LoadingSpinner from '@/Components/LoadingSpinner.vue';
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 import BracketView from '@/Components/Brackets/BracketView.vue';
@@ -83,12 +83,47 @@ const isSavingPlayers = ref(false);
 const showDuplicatePlayerError = ref(false);
 const showSaveConfirm = ref(false);
 
-const openPlayerEditModal = () => {
-    if (props.bracket.type === 'Double Elimination') {
-        playerColors.value = bracketViewRef.value?.playerColors || {};
-    } else {
-        playerColors.value = {};
+const generatePlayerColor = (playerName) => {
+    if (!playerName || playerName === 'TBD' || playerName === 'BYE' || playerName.includes('Winner') || playerName.includes('Loser')) {
+        return null;
     }
+    if (playerColors.value[playerName]) {
+        return playerColors.value[playerName];
+    }
+    const colors = [
+        '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+        '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52B788',
+        '#E63946', '#457B9D', '#F77F00', '#06FFA5', '#B5179E'
+    ];
+    let hash = 0;
+    for (let i = 0; i < playerName.length; i++) {
+        hash = playerName.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const colorIndex = Math.abs(hash) % colors.length;
+    playerColors.value[playerName] = colors[colorIndex];
+    return playerColors.value[playerName];
+};
+
+const populateInitialColors = () => {
+    const processMatches = (matches) => {
+        if (!matches) return;
+        matches.flat().forEach(match => {
+            if (match && match.players) {
+                match.players.forEach(player => {
+                    if (player && player.name && player.color && !playerColors.value[player.name]) {
+                        playerColors.value[player.name] = player.color;
+                    }
+                });
+            }
+        });
+    };
+    processMatches(props.bracket.matches?.winners);
+    processMatches(props.bracket.matches?.losers);
+    processMatches(props.bracket.matches?.grand_finals);
+};
+
+const openPlayerEditModal = () => {
+    populateInitialColors(); // Ensure colors are populated before opening
 
     const players = new Set();
 
@@ -207,6 +242,8 @@ const proceedWithSave = async () => {
     showSaveConfirm.value = false; // Ensure confirm dialog is closed
 };
 
+onMounted(populateInitialColors);
+
 </script>
 
 <template>
@@ -221,7 +258,7 @@ const proceedWithSave = async () => {
                             <span :class="['bracket-tag', getBracketStats(bracket).status.class]">{{ getBracketStats(bracket).status.text }}</span>
                         </div>
                     </div>
-                    <div class="bracket-controls">
+                <div class="bracket-controls flex-wrap justify-end gap-1">
                         <Button :icon="isExpanded ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" @click="handleToggleBracket" class="p-button-rounded p-button-text" v-tooltip.top="isExpanded ? 'Hide Bracket' : 'Show Bracket'" />
                         <Button
                             v-if="showAdminControls && (user?.role === 'Admin' || user.role == 'TournamentManager') && !isArchived"
@@ -299,6 +336,7 @@ const proceedWithSave = async () => {
                             optionLabel="label"
                             optionValue="value"
                             aria-labelledby="match-status-filter"
+                            class="responsive-select-button"
                         />
                     </div>
                 </div>
@@ -318,6 +356,8 @@ const proceedWithSave = async () => {
                     :openTiebreakerDialog="isArchived || !user ? null : onOpenTiebreakerDialog"
                     :dismissTiebreakerNotice="isArchived || !user ? null : onDismissTiebreakerNotice"
                     :dismissedTiebreakerNotices="dismissedTiebreakerNotices"
+                    :playerColors="playerColors"
+                    :generatePlayerColor="generatePlayerColor"
                 />
                 <MatchesView
                     v-if="viewMode === 'matches'"
@@ -333,7 +373,7 @@ const proceedWithSave = async () => {
     </div>
 
     <!-- Player Name Edit Modal -->
-    <div v-if="showPlayerEditModal" class="modal-overlay" @click.self="showPlayerEditModal = false">
+    <div v-if="showPlayerEditModal" class="modal-overlay">
         <div class="player-edit-modal">
             <div class="modal-header">
                 <h3>Edit Player Names</h3>
@@ -536,5 +576,25 @@ const proceedWithSave = async () => {
 
 .btn-save:hover {
     background: #005a87;
+}
+
+.bracket-controls {
+    display: flex;
+    align-items: center;
+}
+
+@media (max-width: 640px) { /* sm breakpoint */
+    :deep(.responsive-select-button) {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+    :deep(.responsive-select-button .p-button) {
+        width: 100%;
+        justify-content: center;
+        border-radius: 0 !important;
+    }
+    :deep(.responsive-select-button .p-button:first-child) { border-top-left-radius: 6px !important; border-top-right-radius: 6px !important; }
+    :deep(.responsive-select-button .p-button:last-child) { border-bottom-left-radius: 6px !important; border-bottom-right-radius: 6px !important; }
 }
 </style>
