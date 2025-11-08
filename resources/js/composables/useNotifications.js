@@ -43,8 +43,8 @@ export function useNotifications(popoverRef) {
     const pollForUpdates = async (isInitialLoad = false) => {
         try {
             const [eventsResponse, eventAnnouncementsResponse] = await Promise.all([
-                axios.get("/events"),
-                axios.get("/announcements")
+                axios.get(route('api.events.index')),
+                axios.get(route('api.announcements.index'))
             ]);
 
             const allEvents = [...eventsResponse.data].filter((event) => !event.archived);

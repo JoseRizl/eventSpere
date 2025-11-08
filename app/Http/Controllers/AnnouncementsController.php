@@ -4,37 +4,21 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\Support\Facades\File;
+use App\Models\Announcement;
+use App\Models\Event;
 use Illuminate\Support\Facades\Storage;
 
 class AnnouncementsController extends Controller
 {
-    private string $dbPath;
-    private array $jsonData;
-
-    public function __construct()
-    {
-        $this->dbPath = base_path('db.json');
-        $this->jsonData = json_decode(File::get($this->dbPath), true);
-    }
-
-    private function writeJson(array $data): void
-    {
-        File::put($this->dbPath, json_encode($data, JSON_PRETTY_PRINT));
-    }
-
     private function saveImage($base64Image, $oldImagePath = null)
     {
-        // If the new image is not a base64 string, it's either an existing path or null.
         if (!$base64Image || !str_contains($base64Image, 'base64')) {
-            // If the "new" image is null and there was an old one, delete the old one.
             if (is_null($base64Image) && $oldImagePath) {
                 $this->deleteImage($oldImagePath);
             }
-            return $base64Image; // Return the (potentially null) path.
+            return $base64Image;
         }
 
-        // A new base64 image is being uploaded, so delete the old one.
         if ($oldImagePath) {
             $this->deleteImage($oldImagePath);
         }
@@ -44,7 +28,7 @@ class AnnouncementsController extends Controller
         $data = base64_decode($data);
 
         $path = 'images/announcements/' . date('Y/m');
-        $filename = uniqid() . '.webp'; // Standardize on webp
+        $filename = uniqid() . '.webp';
 
         Storage::disk('public')->put($path . '/' . $filename, $data);
 
@@ -63,41 +47,45 @@ class AnnouncementsController extends Controller
 
     public function index()
     {
-        $ann = collect($this->jsonData['announcements'] ?? [])
-            ->sortByDesc(function ($a) {
-                return strtotime($a['timestamp'] ?? '1970-01-01T00:00:00Z');
-            })->values();
+        $ann = Announcement::with(['user:id,name', 'event:id,title'])
+            ->orderByDesc('timestamp')
+            ->get()
+            ->map(function ($a) {
+                return [
+                    'id' => (string) $a->id,
+                    'event_id' => $a->event_id,
+                    'message' => $a->message,
+                    'image' => $a->image,
+                    'timestamp' => optional($a->timestamp)->toIso8601String(),
+                    'userId' => $a->user_id,
+                    'employee' => ['name' => optional($a->user)->name ?? 'Admin'],
+                    'event' => $a->event_id ? ['id' => $a->event_id, 'title' => optional($a->event)->title] : null,
+                ];
+            });
 
-        $userIds = $ann->pluck('userId')->unique()->filter();
-        $users = User::whereIn('id', $userIds)->get()->keyBy('id');
-
-        $ann = $ann->map(function ($announcement) use ($users) {
-            $user = $users->get($announcement['userId']);
-            $announcement['employee'] = $user ? ['name' => $user->name] : ['name' => 'Admin'];
-            return $announcement;
-        })->toArray();
-
-        return response()->json($ann);
+        return response()->json($ann->values());
     }
 
     public function indexForEvent($eventId)
     {
-        $ann = collect($this->jsonData['announcements'] ?? [])
+        $ann = Announcement::with(['user:id,name', 'event:id,title'])
             ->where('event_id', $eventId)
-            ->sortByDesc(function ($a) {
-                return strtotime($a['timestamp'] ?? '1970-01-01T00:00:00Z');
-            })->values();
+            ->orderByDesc('timestamp')
+            ->get()
+            ->map(function ($a) {
+                return [
+                    'id' => (string) $a->id,
+                    'event_id' => $a->event_id,
+                    'message' => $a->message,
+                    'image' => $a->image,
+                    'timestamp' => optional($a->timestamp)->toIso8601String(),
+                    'userId' => $a->user_id,
+                    'employee' => ['name' => optional($a->user)->name ?? 'Admin'],
+                    'event' => $a->event_id ? ['id' => $a->event_id, 'title' => optional($a->event)->title] : null,
+                ];
+            });
 
-        $userIds = $ann->pluck('userId')->unique()->filter();
-        $users = User::whereIn('id', $userIds)->get()->keyBy('id');
-
-        $ann = $ann->map(function ($announcement) use ($users) {
-            $user = $users->get($announcement['userId']);
-            $announcement['employee'] = $user ? ['name' => $user->name] : ['name' => 'Admin'];
-            return $announcement;
-        })->toArray();
-
-        return response()->json($ann);
+        return response()->json($ann->values());
     }
 
     public function store(Request $request)
@@ -111,40 +99,46 @@ class AnnouncementsController extends Controller
                 }],
                 'image' => 'nullable|string',
                 'timestamp' => 'nullable|string',
-                'userId' => 'required',
-                'event_id' => 'nullable|string', // Event ID is now optional
+                'userId' => 'required|exists:users,id',
+                'event_id' => 'nullable|exists:events,id',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['message' => $e->validator->errors()->first(), 'errors' => $e->errors()], 422);
         }
 
-        // Handle image upload
         $imagePath = $this->saveImage($validated['image'] ?? null);
 
-        $new = [
-            'id' => ($validated['event_id'] ?? 'gen') . '-' . substr(md5(uniqid(rand(), true)), 0, 4),
+        $a = Announcement::create([
             'event_id' => $validated['event_id'] ?? null,
+            'user_id' => $validated['userId'],
             'message' => $validated['message'],
             'image' => $imagePath,
-            'timestamp' => $validated['timestamp'] ?? now()->toISOString(),
-            'userId' => $validated['userId'],
+            'timestamp' => isset($validated['timestamp']) ? now()->parse($validated['timestamp']) : now(),
+        ]);
+
+        $a->load(['user:id,name', 'event:id,title']);
+
+        $resp = [
+            'id' => (string) $a->id,
+            'event_id' => $a->event_id,
+            'message' => $a->message,
+            'image' => $a->image,
+            'timestamp' => optional($a->timestamp)->toIso8601String(),
+            'userId' => $a->user_id,
+            'employee' => ['name' => optional($a->user)->name ?? 'Admin'],
+            'event' => $a->event_id ? ['id' => $a->event_id, 'title' => optional($a->event)->title] : null,
         ];
 
-        $this->jsonData['announcements'] = $this->jsonData['announcements'] ?? [];
-        array_unshift($this->jsonData['announcements'], $new);
-        $this->writeJson($this->jsonData);
-
-        $user = User::find($new['userId']);
-        $new['employee'] = $user ? ['name' => $user->name] : ['name' => 'Admin'];
-
-        return response()->json($new, 201);
+        return response()->json($resp, 201);
     }
 
     public function storeForEvent(Request $request, $eventId)
     {
-        $event = collect($this->jsonData['events'] ?? [])->firstWhere('id', $eventId);
+        $event = Event::find($eventId);
         if (!$event) {
-            return back()->with('error', 'Event not found.');
+            return $request->wantsJson()
+                ? response()->json(['message' => 'Event not found.'], 404)
+                : back()->with('error', 'Event not found.');
         }
 
         try {
@@ -156,7 +150,7 @@ class AnnouncementsController extends Controller
                 }],
                 'image' => 'nullable|string',
                 'timestamp' => 'nullable|string',
-                'userId' => 'required',
+                'userId' => 'required|exists:users,id',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             $errorMessage = $e->validator->errors()->first('message') ?? 'The given data was invalid.';
@@ -166,28 +160,31 @@ class AnnouncementsController extends Controller
             return back()->with('error', $errorMessage)->withInput();
         }
 
-        // Handle image upload
         $imagePath = $this->saveImage($validated['image'] ?? null);
 
-        $new = [
-            'id' => $eventId.'-'.substr(md5(uniqid(rand(), true)), 0, 4),
-            'event_id' => $eventId,
+        $a = Announcement::create([
+            'event_id' => $event->id,
+            'user_id' => $validated['userId'],
             'message' => $validated['message'],
             'image' => $imagePath,
-            'timestamp' => $validated['timestamp'] ?? now()->toISOString(),
-            'userId' => $validated['userId'],
+            'timestamp' => isset($validated['timestamp']) ? now()->parse($validated['timestamp']) : now(),
+        ]);
+
+        $a->load(['user:id,name', 'event:id,title']);
+
+        $resp = [
+            'id' => (string) $a->id,
+            'event_id' => $a->event_id,
+            'message' => $a->message,
+            'image' => $a->image,
+            'timestamp' => optional($a->timestamp)->toIso8601String(),
+            'userId' => $a->user_id,
+            'employee' => ['name' => optional($a->user)->name ?? 'Admin'],
+            'event' => ['id' => $a->event_id, 'title' => optional($a->event)->title],
         ];
 
-        $this->jsonData['announcements'] = $this->jsonData['announcements'] ?? [];
-        array_unshift($this->jsonData['announcements'], $new);
-        $this->writeJson($this->jsonData);
-
-        // Attach employee name for the response
-        $user = User::find($new['userId']);
-        $new['employee'] = $user ? ['name' => $user->name] : ['name' => 'Admin'];
-
         if ($request->wantsJson()) {
-            return response()->json($new, 201);
+            return response()->json($resp, 201);
         }
         return back()->with('success', 'Announcement posted.');
     }
@@ -211,26 +208,28 @@ class AnnouncementsController extends Controller
             return back()->with('error', $errorMessage)->withInput();
         }
 
-        $announcements = collect($this->jsonData['announcements'] ?? []);
-        $announcementIndex = $announcements->search(fn($ann) => $ann['id'] === $announcementId);
-
-        if ($announcementIndex === false) {
+        $a = Announcement::find($announcementId);
+        if (!$a) {
             return response()->json(['message' => 'Announcement not found.'], 404);
         }
 
-        $updatedAnnouncement = $announcements[$announcementIndex];
-        $oldImage = $updatedAnnouncement['image'] ?? null;
+        $a->message = $validated['message'];
+        $a->image = $this->saveImage($validated['image'] ?? null, $a->image);
+        $a->save();
+        $a->load(['user:id,name', 'event:id,title']);
 
-        $updatedAnnouncement['message'] = $validated['message'];
-        $updatedAnnouncement['image'] = $this->saveImage($validated['image'] ?? null, $oldImage);
+        $resp = [
+            'id' => (string) $a->id,
+            'event_id' => $a->event_id,
+            'message' => $a->message,
+            'image' => $a->image,
+            'timestamp' => optional($a->timestamp)->toIso8601String(),
+            'userId' => $a->user_id,
+            'employee' => ['name' => optional($a->user)->name ?? 'Admin'],
+            'event' => $a->event_id ? ['id' => $a->event_id, 'title' => optional($a->event)->title] : null,
+        ];
 
-        $this->jsonData['announcements'][$announcementIndex] = $updatedAnnouncement;
-        $this->writeJson($this->jsonData);
-
-        $user = User::find($updatedAnnouncement['userId']);
-        $updatedAnnouncement['employee'] = $user ? ['name' => $user->name] : ['name' => 'Admin'];
-
-        return response()->json($updatedAnnouncement, 200);
+        return response()->json($resp, 200);
     }
 
     public function updateForEvent(Request $request, $eventId, $announcementId)
@@ -252,49 +251,44 @@ class AnnouncementsController extends Controller
             return back()->with('error', $errorMessage)->withInput();
         }
 
-        $announcements = collect($this->jsonData['announcements'] ?? []);
-        $announcementIndex = $announcements->search(fn($ann) => $ann['id'] === $announcementId && ($ann['event_id'] ?? null) == $eventId);
-
-        if ($announcementIndex === false) {
+        $a = Announcement::where('id', $announcementId)->where('event_id', $eventId)->first();
+        if (!$a) {
             return response()->json(['message' => 'Announcement not found.'], 404);
         }
 
-        $updatedAnnouncement = $announcements[$announcementIndex];
-        $oldImage = $updatedAnnouncement['image'] ?? null;
-        $updatedAnnouncement['message'] = $validated['message'];
-        $updatedAnnouncement['image'] = $this->saveImage($validated['image'] ?? null, $oldImage);
+        $a->message = $validated['message'];
+        $a->image = $this->saveImage($validated['image'] ?? null, $a->image);
+        $a->save();
+        $a->load(['user:id,name', 'event:id,title']);
 
-        $this->jsonData['announcements'][$announcementIndex] = $updatedAnnouncement;
-        $this->writeJson($this->jsonData);
+        $resp = [
+            'id' => (string) $a->id,
+            'event_id' => $a->event_id,
+            'message' => $a->message,
+            'image' => $a->image,
+            'timestamp' => optional($a->timestamp)->toIso8601String(),
+            'userId' => $a->user_id,
+            'employee' => ['name' => optional($a->user)->name ?? 'Admin'],
+            'event' => ['id' => $a->event_id, 'title' => optional($a->event)->title],
+        ];
 
-        $user = User::find($updatedAnnouncement['userId']);
-        $updatedAnnouncement['employee'] = $user ? ['name' => $user->name] : ['name' => 'Admin'];
-
-        return response()->json($updatedAnnouncement, 200);
+        return response()->json($resp, 200);
     }
 
     public function destroy(Request $request, $announcementId)
     {
-        $announcements = collect($this->jsonData['announcements'] ?? []);
-        $originalCount = $announcements->count();
-        $announcementToDelete = $announcements->firstWhere('id', $announcementId);
-
-        // Delete the image file if it exists
-        if ($announcementToDelete && !empty($announcementToDelete['image'])) {
-            $this->deleteImage($announcementToDelete['image']);
-        }
-
-        $filteredAnnouncements = $announcements->filter(fn($ann) => $ann['id'] !== $announcementId);
-
-        if ($filteredAnnouncements->count() === $originalCount) {
+        $a = Announcement::find($announcementId);
+        if (!$a) {
             if ($request->wantsJson()) {
                 return response()->json(['message' => 'Announcement not found.'], 404);
             }
             return back()->with('error', 'Announcement not found.');
         }
 
-        $this->jsonData['announcements'] = $filteredAnnouncements->values()->toArray();
-        $this->writeJson($this->jsonData);
+        if (!empty($a->image)) {
+            $this->deleteImage($a->image);
+        }
+        $a->delete();
 
         if ($request->wantsJson()) {
             return response()->json(['deleted' => true], 200);
@@ -304,24 +298,21 @@ class AnnouncementsController extends Controller
 
     public function destroyForEvent(Request $request, $eventId, $announcementId)
     {
-        $before = count($this->jsonData['announcements'] ?? []);
-
-        $announcementToDelete = collect($this->jsonData['announcements'] ?? [])
-            ->firstWhere('id', $announcementId);
-
-        if ($announcementToDelete && !empty($announcementToDelete['image'])) {
-            $this->deleteImage($announcementToDelete['image']);
+        $a = Announcement::where('id', $announcementId)->where('event_id', $eventId)->first();
+        if (!$a) {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Announcement not found.'], 404);
+            }
+            return back()->with('error', 'Announcement not found.');
         }
-        $this->jsonData['announcements'] = collect($this->jsonData['announcements'] ?? [])
-            ->filter(fn($a) => !($a['id'] === $announcementId && ($a['event_id'] ?? null) == $eventId))
-            ->values()
-            ->toArray();
-        $after = count($this->jsonData['announcements']);
 
-        $this->writeJson($this->jsonData);
+        if (!empty($a->image)) {
+            $this->deleteImage($a->image);
+        }
+        $a->delete();
 
         if ($request->wantsJson()) {
-            return response()->json(['deleted' => $before - $after]);
+            return response()->json(['deleted' => 1]);
         }
         return back()->with('success', 'Announcement removed.');
     }
