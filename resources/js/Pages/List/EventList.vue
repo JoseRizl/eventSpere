@@ -1169,11 +1169,11 @@
           try {
             const paddedTime = time.padStart(5, '0');
             const base = parsedDate || new Date(0);
-            const parsedTime = parse(paddedTime, 'HH:mm', base);
+            const parsedTime = parse(paddedTime, 'HH:mm:ss', base);
             if (!isValidDate(parsedTime)) {
               formattedTime = paddedTime;
             } else {
-              formattedTime = format(parsedTime, 'hh:mm a');
+              formattedTime = format(parsedTime, 'p');
             }
           } catch (e) {
             console.error('Error formatting time:', e);
@@ -1197,31 +1197,24 @@
         // Extract tag IDs from event.tags (which contains tag objects)
         const eventTagIds = (event.tags || []).map(tag => typeof tag === 'object' ? tag.id : tag);
 
-        console.log('EventList - Event ID:', event.id);
-        console.log('EventList - Event tags:', event.tags);
-        console.log('EventList - Event tag IDs:', eventTagIds);
-
+        console.log('[EventList] editEvent - raw event data from table:', JSON.parse(JSON.stringify(event)));
         Object.assign(selectedEvent.value, {
           ...event,
           venue: event.venue || "",
           startDate: event.startDate ? formatDateForPicker(event.startDate) : null,
           endDate: event.endDate ? formatDateForPicker(event.endDate) : null,
           isAllDay: event.isAllDay ?? false,
-          startTime: event.startTime ?? (event.isAllDay ? "00:00" : ""),
-          endTime: event.endTime ?? (event.isAllDay ? "23:59" : ""),
+          startTime: event.startTime ? event.startTime.substring(0, 5) : (event.isAllDay ? "00:00" : ""),
+          endTime: event.endTime ? event.endTime.substring(0, 5) : (event.isAllDay ? "23:59" : ""),
           image: event.image || defaultImage.value,
           memorandum: event.memorandum || null,
         });
-
-        console.log('EventList - After Object.assign, tags:', selectedEvent.value.tags);
 
         // Set tags after nextTick to allow the category_id watcher to complete
         await nextTick();
         selectedEvent.value.tags = eventTagIds;
 
-        console.log('EventList - After nextTick, tags:', selectedEvent.value.tags);
-        console.log('EventList - Filtered tags:', filteredSelectedEventTags.value);
-
+        console.log('[EventList] editEvent - selectedEvent.value after processing for modal:', JSON.parse(JSON.stringify(selectedEvent.value)));
         isEditModalVisible.value = true;
       };
 
@@ -1306,10 +1299,12 @@
           tags: selectedEvent.value.tags || [],
           startDate: (() => { const d = formatDateForPicker(selectedEvent.value.startDate); return d ? format(d, 'MMM-dd-yyyy') : null; })(),
           endDate: (() => { const d = formatDateForPicker(selectedEvent.value.endDate); return d ? format(d, 'MMM-dd-yyyy') : null; })(),
-          startTime: selectedEvent.value.startTime?.padStart(5, "0") || "00:00",
-          endTime: selectedEvent.value.endTime?.padStart(5, "0") || "00:00",
+          startTime: selectedEvent.value.startTime ? selectedEvent.value.startTime.padStart(5, "0") : null,
+          endTime: selectedEvent.value.endTime ? selectedEvent.value.endTime.padStart(5, "0") : null,
           memorandum: selectedEvent.value.memorandum,
         };
+
+        console.log('[EventList] confirmSaveChanges - payload being sent to server:', payload);
 
         router.put(route('events.updateFromList', {id: selectedEvent.value.id}), payload, {
           onSuccess: () => {

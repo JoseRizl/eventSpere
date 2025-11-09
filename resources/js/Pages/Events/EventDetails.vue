@@ -216,13 +216,11 @@ const eventDetails = ref({
       ...a,
       __uid: a.__uid || `${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 8)}`
     })),
+    startTime: props.event.startTime ? props.event.startTime.substring(0, 5) : '',
+    endTime: props.event.endTime ? props.event.endTime.substring(0, 5) : '',
     // event.tags is now an array of tag objects from backend, convert to IDs for editing
     tags: (props.event.tags || []).map(tag => typeof tag === 'object' ? tag.id : tag)
 });
-
-console.log('EventDetails - Initial tags:', eventDetails.value.tags);
-console.log('EventDetails - Props event tags:', props.event.tags);
-console.log('EventDetails - Tags map:', tagsMap.value);
 
 const filteredTags = computed(() => {
   if (!eventDetails.value.category_id) {
@@ -293,8 +291,7 @@ const toggleEdit = () => {
   } else {
     // Entering edit mode: store a copy of the current data
     originalEventDetails.value = JSON.parse(JSON.stringify(eventDetails.value));
-    console.log('EventDetails - Entering edit mode, tags:', eventDetails.value.tags);
-    console.log('EventDetails - Filtered tags:', filteredTags.value);
+    console.log('[EventDetails] toggleEdit - eventDetails.value on entering edit mode:', JSON.parse(JSON.stringify(eventDetails.value)));
   }
   editMode.value = !editMode.value;
 };
@@ -458,12 +455,14 @@ const saveChanges = () => {
     category_id: eventDetails.value.category_id,
     startDate: (() => { const d = formatDateForPicker(eventDetails.value.startDate); return d ? format(d, 'MMM-dd-yyyy') : ''; })(),
     endDate: (() => { const d = formatDateForPicker(eventDetails.value.endDate); return d ? format(d, 'MMM-dd-yyyy') : ''; })(),
-    startTime: (eventDetails.value.startTime || '').padStart(5, '0'),
-    endTime: (eventDetails.value.endTime || '').padStart(5, '0'),
+    startTime: eventDetails.value.startTime ? eventDetails.value.startTime.padStart(5, '0') : null,
+    endTime: eventDetails.value.endTime ? eventDetails.value.endTime.padStart(5, '0') : null,
     tags: eventDetails.value.tags || [], // Only IDs
     memorandum: eventDetails.value.memorandum,
     activities: (eventDetails.value.activities || []).map(({ __uid, ...activity }) => activity),
   };
+
+  console.log('[EventDetails] saveChanges - payload being sent to server:', eventPayload);
 
   // First, save the main event details
   router.put(route('event.update', { id: eventDetails.value.id }), eventPayload, {
@@ -518,8 +517,7 @@ const formatDisplayTime = (timeString) => {
 
 const startDateModel = computed({
   get() {
-    const date = parse(eventDetails.value.startDate, 'MMM-dd-yyyy', new Date());
-    return isValid(date) ? date : null;
+    return formatDateForPicker(eventDetails.value.startDate);
   },
   set(value) {
     eventDetails.value.startDate = value ? format(value, 'MMM-dd-yyyy') : '';
@@ -528,8 +526,7 @@ const startDateModel = computed({
 
 const endDateModel = computed({
   get() {
-    const date = parse(eventDetails.value.endDate, 'MMM-dd-yyyy', new Date());
-    return isValid(date) ? date : null;
+    return formatDateForPicker(eventDetails.value.endDate);
   },
   set(value) {
     eventDetails.value.endDate = value ? format(value, 'MMM-dd-yyyy') : '';

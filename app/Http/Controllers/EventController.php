@@ -70,7 +70,7 @@ class EventController extends JsonController
         $categories = Category::query()->get();
 
         // Temporary settings fallback; migrate to a Settings model if available
-        $settings = ['defaultEventImage' => 'https://primefaces.org/cdn/primeng/images/demo/product/bamboo-watch.jpg'];
+        $settings = ['defaultEventImage' => '/images/NCSlogo.png'];
 
         return Inertia::render('List/EventList', [
             'events_prop' => $events,
@@ -361,7 +361,7 @@ class EventController extends JsonController
                 }
             }],
             'endDate' => 'required|date_format:M-d-Y|after_or_equal:startDate',
-            'isAllDay' => 'nullable|boolean',
+            'isAllDay' => 'sometimes|boolean',
             'startTime' => 'nullable|date_format:H:i',
             'endTime' => ['nullable', 'date_format:H:i', function ($attribute, $value, $fail) use ($request) {
                 $isAllDay = $request->boolean('isAllDay', false);
