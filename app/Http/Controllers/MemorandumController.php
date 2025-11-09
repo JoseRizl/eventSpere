@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Memorandum;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
-class MemorandumController extends JsonController
+class MemorandumController extends Controller
 {
     private function saveFile($base64File, $filename, $type, $oldFilePath = null)
     {
         if (!$base64File || !str_contains($base64File, 'base64')) {
-            return $base64File; // Not a new upload, return path as is.
+            // Not a new upload; keep existing path or the provided string as-is
+            return $base64File;
         }
 
         // A new file is being uploaded, so delete the old one if it exists.
@@ -24,7 +24,8 @@ class MemorandumController extends JsonController
         $decodedData = base64_decode($data);
 
         $path = ($type === 'image') ? 'memorandums/images/' . date('Y/m') : 'memorandums/files/' . date('Y/m');
-        $uniqueFilename = uniqid() . '_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $filename);
+        $safeFilename = preg_replace('/[^A-Za-z0-9\._-]/', '', (string) $filename);
+        $uniqueFilename = uniqid() . '_' . $safeFilename;
 
         Storage::disk('public')->put($path . '/' . $uniqueFilename, $decodedData);
 
@@ -49,66 +50,48 @@ class MemorandumController extends JsonController
             'filename' => 'nullable|string',
         ]);
 
-        // Check if a memorandum for this event already exists
-        $existingMemoIndex = -1;
-        foreach ($this->jsonData['memorandums'] ?? [] as $index => $memo) {
-            if ($memo['event_id'] === $eventId) {
-                $existingMemoIndex = $index;
-                break;
-            }
-        }
+        $existingMemo = Memorandum::where('event_id', $eventId)->first();
 
-        if ($existingMemoIndex !== -1) {
-            $oldMemo = $this->jsonData['memorandums'][$existingMemoIndex];
-            $oldContentPath = ($oldMemo['type'] !== 'text') ? ($oldMemo['content'] ?? null) : null;
+        if ($existingMemo) {
+            $oldContentPath = ($existingMemo->type !== 'text') ? ($existingMemo->content ?? null) : null;
+            $newContentPath = $this->saveFile($validated['content'], $validated['filename'] ?? '', $validated['type'], $oldContentPath);
 
-            // Save the new file and get its path, passing the old path for deletion.
-            $validated['content'] = $this->saveFile($validated['content'], $validated['filename'], $validated['type'], $oldContentPath);
+            $existingMemo->update([
+                'type' => $validated['type'],
+                'content' => $newContentPath,
+                'filename' => $validated['filename'] ?? $existingMemo->filename,
+            ]);
 
-            // Update existing memorandum
-            $this->jsonData['memorandums'][$existingMemoIndex] = array_merge(
-                $this->jsonData['memorandums'][$existingMemoIndex],
-                $validated
-            );
             $message = 'Memorandum updated successfully.';
         } else {
-            $newMemo = $validated;
-            // Save the new file and get its path. No old path on create.
-            $newMemo['content'] = $this->saveFile($newMemo['content'], $newMemo['filename'], $newMemo['type']);
-            $newMemo['id'] = (string) Str::uuid();
-            $newMemo['created_at'] = now()->toISOString();
-            $newMemo['event_id'] = $eventId;
-            $this->jsonData['memorandums'][] = $newMemo;
+            $newContentPath = $this->saveFile($validated['content'], $validated['filename'] ?? '', $validated['type']);
+
+            Memorandum::create([
+                'event_id' => $eventId,
+                'type' => $validated['type'],
+                'content' => $newContentPath,
+                'filename' => $validated['filename'] ?? null,
+            ]);
+
             $message = 'Memorandum saved successfully.';
         }
-
-        $this->writeJson($this->jsonData);
 
         return response()->json(['success' => true, 'message' => $message]);
     }
 
     public function destroy($eventId)
     {
-        $memoIndex = -1;
-        foreach ($this->jsonData['memorandums'] ?? [] as $index => $memo) {
-            if ($memo['event_id'] === $eventId) {
-                $memoIndex = $index;
-                break;
-            }
+        $memo = Memorandum::where('event_id', $eventId)->first();
+        if (!$memo) {
+            return response()->json(['success' => false, 'message' => 'Memorandum not found.'], 404);
         }
 
-        if ($memoIndex !== -1) {
-            // Before removing the record, delete the associated file from storage.
-            $memoToDelete = $this->jsonData['memorandums'][$memoIndex];
-            if (isset($memoToDelete['content']) && $memoToDelete['type'] !== 'text') {
-                $this->deleteFile($memoToDelete['content']);
-            }
-
-            array_splice($this->jsonData['memorandums'], $memoIndex, 1);
-            $this->writeJson($this->jsonData);
-            return response()->json(['success' => true, 'message' => 'Memorandum removed successfully.']);
+        if (!empty($memo->content) && ($memo->type !== 'text')) {
+            $this->deleteFile($memo->content);
         }
 
-        return response()->json(['success' => false, 'message' => 'Memorandum not found.'], 404);
+        $memo->delete();
+
+        return response()->json(['success' => true, 'message' => 'Memorandum removed successfully.']);
     }
 }

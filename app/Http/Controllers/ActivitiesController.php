@@ -21,13 +21,38 @@ class ActivitiesController extends Controller
         if (!$date || !$time) return null;
         $dt = \DateTime::createFromFormat('Y-m-d H:i', $date.' '.$time);
         if ($dt) return $dt;
-        return \DateTime::createFromFormat('M-d-Y H:i', $date.' '.$time) ?: null;
+        $dt = \DateTime::createFromFormat('M-d-Y H:i', $date.' '.$time);
+        if ($dt) return $dt;
+        // Try with seconds
+        $dt = \DateTime::createFromFormat('Y-m-d H:i:s', $date.' '.$time);
+        if ($dt) return $dt;
+        return \DateTime::createFromFormat('M-d-Y H:i:s', $date.' '.$time) ?: null;
     }
 
     private function normalizeDateToYmd($value): ?string
     {
         $dt = $this->parseDate($value);
         return $dt ? $dt->format('Y-m-d') : null;
+    }
+
+    private function normalizeTimeToHi($value): ?string
+    {
+        if ($value === null || $value === '') return null;
+        $value = trim($value);
+        if (preg_match('/^\d{2}:\d{2}:\d{2}$/', $value)) {
+            return substr($value, 0, 5);
+        }
+        if (preg_match('/^\d{1}:\d{2}$/', $value)) {
+            return '0'.$value;
+        }
+        if (preg_match('/^\d{2}:\d{2}$/', $value)) {
+            return $value;
+        }
+        $dt = \DateTime::createFromFormat('H:i:s', $value)
+            ?: \DateTime::createFromFormat('G:i:s', $value)
+            ?: \DateTime::createFromFormat('H:i', $value)
+            ?: \DateTime::createFromFormat('G:i', $value);
+        return $dt ? $dt->format('H:i') : null;
     }
 
     public function indexForEvent($eventId)
@@ -49,8 +74,8 @@ class ActivitiesController extends Controller
                     'event_id' => $a->event_id,
                     'title' => $a->title,
                     'date' => $a->date,
-                    'startTime' => $a->startTime,
-                    'endTime' => $a->endTime,
+                    'startTime' => $this->normalizeTimeToHi($a->startTime),
+                    'endTime' => $this->normalizeTimeToHi($a->endTime),
                     'location' => $a->location,
                 ];
             })
@@ -65,6 +90,21 @@ class ActivitiesController extends Controller
         $event = Event::find($eventId);
         if (!$event) {
             return response()->json(['error' => 'Event not found.'], 404);
+        }
+
+        // Normalize empty string times to null to satisfy nullable|date_format rules
+        $incomingActivities = $request->input('activities');
+        if (is_array($incomingActivities)) {
+            $normalized = [];
+            foreach ($incomingActivities as $a) {
+                $a = is_array($a) ? $a : [];
+                $a['startTime'] = $this->normalizeTimeToHi($a['startTime'] ?? null);
+                $a['endTime'] = $this->normalizeTimeToHi($a['endTime'] ?? null);
+                $a['location'] = (isset($a['location']) && $a['location'] !== '') ? $a['location'] : null;
+                $a['title'] = $a['title'] ?? '';
+                $normalized[] = $a;
+            }
+            $request->merge(['activities' => $normalized]);
         }
 
         $validated = $request->validate([

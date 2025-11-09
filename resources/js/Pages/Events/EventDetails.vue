@@ -502,13 +502,16 @@ const saveChanges = () => {
 const formatDisplayTime = (timeString) => {
   if (!timeString) return '';
   try {
-    const base = formatDateForPicker(eventDetails.value.startDate) || new Date(0);
-    const padded = timeString.padStart(5, '0');
-    const parsed = parse(padded, 'HH:mm', base);
-    if (!isValid(parsed)) return padded;
+    // The time string is expected to be in 'HH:mm' format.
+    // We don't need a base date, just parse the time part.
+    const [hours, minutes] = timeString.split(':').map(Number);
+    if (isNaN(hours) || isNaN(minutes)) return timeString;
+    const date = new Date();
+    date.setHours(hours, minutes, 0);
+    const parsed = date;
     return format(parsed, 'hh:mm a');
   } catch (e) {
-    return (timeString || '').padStart(5, '0');
+    return timeString || '';
   }
 };
 
