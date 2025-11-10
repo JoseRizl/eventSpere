@@ -32,6 +32,8 @@ const props = defineProps({
     generatePlayerColor: { type: Function, default: () => null }
 });
 
+const emit = defineEmits(['repopulate-colors']);
+
 const bracketContentRef = ref(null);
 let resizeObserver = null;
 
@@ -1310,8 +1312,7 @@ onUnmounted(() => {
 });
 
 watch(() => props.bracket, () => {
-    playerColors.value = {}; // Clear old colors before populating new ones
-    populateInitialColors();
+    emit('repopulate-colors'); // Ask parent to clear and repopulate colors
     nextTick(updateBracketLines);
     alignConsolationWithFinals();
 }, { deep: true });
@@ -1331,7 +1332,7 @@ watch(() => props.bracket, () => {
             <button @click="zoomIn" :disabled="zoomLevel >= maxZoom" class="zoom-btn" title="Zoom In">
                 <i class="pi pi-plus"></i>
             </button>
-            <button @click="printBracket" class="zoom-btn" title="Print Bracket">
+            <button v-if="user && (user.role === 'Admin' || user.role === 'TournamentManager')" @click="printBracket" class="zoom-btn" title="Print Bracket">
                 <i class="pi pi-print"></i>
             </button>
         </div>
@@ -1558,8 +1559,8 @@ watch(() => props.bracket, () => {
         <div class="round-robin-grid-container" >
             <div class="round-robin-header">
                 <h3 class="text-xl font-bold mb-4">Round Robin Tournament</h3>
-                <div class="flex items-center gap-2">
-                    <button @click="printBracket" class="zoom-btn" title="Print Bracket">
+                <div v-if="user && (user.role === 'Admin' || user.role === 'TournamentManager')" class="flex items-center gap-2">
+                    <button v-if="user && (user.role === 'Admin' || user.role === 'TournamentManager')" @click="printBracket" class="zoom-btn" title="Print Bracket">
                         <i class="pi pi-print"></i>
                     </button>
                 <!-- Persistent Tiebreaker Button -->

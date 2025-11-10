@@ -26,7 +26,8 @@ export default defineConfig({
     server: {
         host: true,
         hmr: {
-            host: '10.145.76.4'
+            host: '10.212.67.4'//ipv4 na makita sa ipconfig
+            //ipa run dayun php artisan serve --host=10.212.67.4 (ipv4 ni)
         }
     }
 });

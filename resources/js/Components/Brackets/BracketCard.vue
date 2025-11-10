@@ -244,6 +244,11 @@ const proceedWithSave = async () => {
 
 onMounted(populateInitialColors);
 
+const handleRepopulateColors = () => {
+    playerColors.value = {};
+    populateInitialColors();
+};
+
 </script>
 
 <template>
@@ -358,6 +363,7 @@ onMounted(populateInitialColors);
                     :dismissedTiebreakerNotices="dismissedTiebreakerNotices"
                     :playerColors="playerColors"
                     :generatePlayerColor="generatePlayerColor"
+                    @repopulate-colors="handleRepopulateColors"
                 />
                 <MatchesView
                     v-if="viewMode === 'matches'"
