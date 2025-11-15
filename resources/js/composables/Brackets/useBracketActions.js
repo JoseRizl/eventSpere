@@ -288,12 +288,9 @@ export function useBracketActions(dataState) {
               const nextMatch = bracket.matches[roundIdx + 1][nextRoundMatchIdx];
               const nextPlayerSlot = matchIdx % 2;
 
-              if (nextMatch) {
-                nextMatch.players[nextPlayerSlot] = {
-                  ...winner,
-                  score: 0,
-                  completed: false
-                };
+              // FIX: Sanitize the winner object to prevent passing complex objects.
+              if (nextMatch && winner) {
+                nextMatch.players[nextPlayerSlot] = { id: winner.id, name: winner.name, score: 0, completed: false };
               }
             }
           }
@@ -322,12 +319,9 @@ export function useBracketActions(dataState) {
               const nextMatch = bracket.matches.winners[roundIdx + 1][nextRoundMatchIdx];
               const nextPlayerSlot = matchIdx % 2;
 
-              if (nextMatch) {
-                nextMatch.players[nextPlayerSlot] = {
-                  ...winner,
-                  score: 0,
-                  completed: false
-                };
+              // FIX: Sanitize the winner object to prevent passing complex objects.
+              if (nextMatch && winner) {
+                nextMatch.players[nextPlayerSlot] = { id: winner.id, name: winner.name, score: 0, completed: false };
               }
             }
           }
@@ -1908,25 +1902,30 @@ const updateLines = (bracketIdx) => {
             if (finalsMatch) {
               const finalsMatchIdx = nextRound.indexOf(finalsMatch);
               const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
-              setPlayerWithLog(bracket, 'single', nextRoundIdx, finalsMatchIdx, nextPlayerPos, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
+             const winnerPayload = { id: winner.id, name: winner.name, score: 0, completed: false };
+              setPlayerWithLog(bracket, 'single', nextRoundIdx, finalsMatchIdx, nextPlayerPos, winnerPayload, performedActions);
 
               // Send loser to consolation match
               const consolationMatchIdx = nextRound.indexOf(consolationMatch);
               const consolationPlayerPos = matchIdx % 2 === 0 ? 0 : 1; // SF1 loser to pos 0, SF2 loser to pos 1
-              setPlayerWithLog(bracket, 'single', nextRoundIdx, consolationMatchIdx, consolationPlayerPos, { ...loser, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
+              const loserPayload = { id: loser.id, name: loser.name, score: 0, completed: false };
+              setPlayerWithLog(bracket, 'single', nextRoundIdx, consolationMatchIdx, consolationPlayerPos, loserPayload, performedActions)
             }
           } else {
             // Normal progression
             const nextMatchIdx = Math.floor(matchIdx / 2);
             const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
-            setPlayerWithLog(bracket, 'single', nextRoundIdx, nextMatchIdx, nextPlayerPos, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
+            const winnerPayload = { id: winner.id, name: winner.name, score: 0, completed: false };
+            setPlayerWithLog(bracket, 'single', nextRoundIdx, nextMatchIdx, nextPlayerPos, winnerPayload, performedActions);
           }
         } else {
           // Final match completed (could be finals or consolation)
           if (match.bracket_type === 'consolation') {
             winnerMessage.value = `Third Place: ${winner.name}`;
           } else {
-            winnerMessage.value = `Winner: ${winner.name}`;
+            // FIX: Ensure winner name is not undefined if winner object is incomplete
+            const winnerName = winner ? winner.name : 'Unknown';
+            winnerMessage.value = `Winner: ${winnerName}`;
           }
           showWinnerDialog.value = true;
         }
@@ -1936,21 +1935,22 @@ const updateLines = (bracketIdx) => {
             const nextRoundIdx = roundIdx + 1;
             const nextMatchIdx = Math.floor(matchIdx / 2);
             const nextPlayerPos = matchIdx % 2 === 0 ? 0 : 1;
-            setPlayerWithLog(bracket, 'winners', nextRoundIdx, nextMatchIdx, nextPlayerPos, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
+            const winnerPayload = { id: winner.id, name: winner.name, score: 0, completed: false };
+            setPlayerWithLog(bracket, 'winners', nextRoundIdx, nextMatchIdx, nextPlayerPos, winnerPayload, performedActions);
           } else {
             // Winners bracket final - advance to grand finals
             const grandFinalsMatch = bracket.matches.grand_finals[0]?.[0];
             if (grandFinalsMatch) {
               // The winner of the upper bracket always goes to the top slot (position 0) of the Grand Finals.
-              setPlayerWithLog(bracket, 'grand_finals', 0, 0, 0, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
+              const winnerPayload = { id: winner.id, name: winner.name, score: 0, completed: false };
+              setPlayerWithLog(bracket, 'grand_finals', 0, 0, 0, winnerPayload, performedActions);
             }
           }
           // Send loser to losers bracket.
           // The loser of the Winners' Bracket final goes to the Losers' Bracket final.
-          const newLoserPayload = loser.name === 'BYE'
-            ? { ...loser } // Keep BYE as is, it should be completed
-            : { ...loser, score: 0, completed: false, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() };
-
+          const newLoserPayload = loser.name === 'BYE' // If the loser is a BYE, create a clean BYE object.
+            ? { id: loser.id ?? generateId(), name: 'BYE', score: 0, completed: true }
+            : { id: loser.id, name: loser.name, score: 0, completed: false };
           // This logic was incorrect for the final round. The loser of the final winners match goes to the final losers match.
           if (roundIdx === 0) { // Losers from Winners Round 1
             const losersRoundIdx = 0; // LR1
@@ -2008,9 +2008,9 @@ const updateLines = (bracketIdx) => {
             if (roundIdx === 0) { // After Winners Round 1 is complete
               const losersRound = bracket.matches.losers[0];
               if (losersRound) {
-                losersRound.forEach((match, matchIndex) => {
-                  if (match.players[0].name === 'TBD') { setPlayerWithLog(bracket, 'losers', 0, matchIndex, 0, { id: generateId(), name: 'BYE', score: 0, completed: true, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() }, performedActions); }
-                  if (match.players[1].name === 'TBD') { setPlayerWithLog(bracket, 'losers', 0, matchIndex, 1, { id: generateId(), name: 'BYE', score: 0, completed: true, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() }, performedActions); }
+                losersRound.forEach((match, matchIndex) => { // Create clean BYE objects without timestamps
+                  if (match.players[0].name === 'TBD') { setPlayerWithLog(bracket, 'losers', 0, matchIndex, 0, { id: generateId(), name: 'BYE', score: 0, completed: true }, performedActions); }
+                  if (match.players[1].name === 'TBD') { setPlayerWithLog(bracket, 'losers', 0, matchIndex, 1, { id: generateId(), name: 'BYE', score: 0, completed: true }, performedActions); }
                 });
               }
             } else { // After subsequent Winners Rounds (R2, R3, etc.) are complete
@@ -2052,14 +2052,16 @@ const updateLines = (bracketIdx) => {
             }
 
             if (bracket.matches.losers[nextRoundIdx] && bracket.matches.losers[nextRoundIdx][nextMatchIdx]) {
-              setPlayerWithLog(bracket, 'losers', nextRoundIdx, nextMatchIdx, nextPlayerPos, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() }, performedActions);
+              const winnerPayload = { id: winner.id, name: winner.name, score: 0, completed: false };
+              setPlayerWithLog(bracket, 'losers', nextRoundIdx, nextMatchIdx, nextPlayerPos, winnerPayload, performedActions);
             }
           } else {
             // Losers bracket final - advance to grand finals
             const grandFinalsMatch = bracket.matches.grand_finals[0]?.[0];
             if (grandFinalsMatch) {
               // The winner of the lower bracket always goes to the bottom slot (position 1) of the Grand Finals.
-              setPlayerWithLog(bracket, 'grand_finals', 0, 0, 1, { ...winner, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, performedActions);
+              const winnerPayload = { id: winner.id, name: winner.name, score: 0, completed: false };
+              setPlayerWithLog(bracket, 'grand_finals', 0, 0, 1, winnerPayload, performedActions);
             }
           }
 
@@ -2079,16 +2081,16 @@ const updateLines = (bracketIdx) => {
                 // we should NOT convert the second player slot (players[1]) to a BYE here.
                 // That conversion is handled only when the corresponding WINNERS round is complete.
                 // We only handle players[0] here, which is fed by the current, completed losers round.
-                if (nextRoundIdx % 2 !== 0) { // e.g., advancing to LR2, LR4 (indices 1, 3, ...)
+                if (nextRoundIdx % 2 !== 0) { // e.g., advancing to LR2, LR4 (indices 1, 3, ...) - Create clean BYE objects
                   if (match.players[0].name === 'TBD') {
-                    setPlayerWithLog(bracket, 'losers', nextRoundIdx, matchIndex, 0, { id: generateId(), name: 'BYE', score: 0, completed: true, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() }, performedActions);
+                    setPlayerWithLog(bracket, 'losers', nextRoundIdx, matchIndex, 0, { id: generateId(), name: 'BYE', score: 0, completed: true }, performedActions);
                   }
                 } else { // For "minor" consolidation rounds (even index, e.g., LR3, LR5, ...), both slots are fed from the previous losers round.
                   if (match.players[0].name === 'TBD') {
-                    setPlayerWithLog(bracket, 'losers', nextRoundIdx, matchIndex, 0, { id: generateId(), name: 'BYE', score: 0, completed: true, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() }, performedActions);
+                    setPlayerWithLog(bracket, 'losers', nextRoundIdx, matchIndex, 0, { id: generateId(), name: 'BYE', score: 0, completed: true }, performedActions);
                   }
                   if (match.players[1].name === 'TBD') {
-                    setPlayerWithLog(bracket, 'losers', nextRoundIdx, matchIndex, 1, { id: generateId(), name: 'BYE', score: 0, completed: true, created_at: new Date().toISOString(), updatedAt: new Date().toISOString() }, performedActions);
+                    setPlayerWithLog(bracket, 'losers', nextRoundIdx, matchIndex, 1, { id: generateId(), name: 'BYE', score: 0, completed: true }, performedActions);
                   }
                 }
               });
@@ -2130,7 +2132,8 @@ const updateLines = (bracketIdx) => {
       showMatchEditorDialog.value = false;
       showSuccess('Match updated successfully!');
     } catch (error) {
-      console.error('Error updating Round Robin match:', error);
+      // FIX: Use a more generic error message.
+      console.error('Error updating match:', error);
     } finally {
       isUpdatingMatch.value = false;
     }

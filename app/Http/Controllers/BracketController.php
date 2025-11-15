@@ -6,41 +6,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Arr;
+use App\Models\Bracket;
+use App\Models\Matches;
+use App\Models\MatchPlayer;
+use App\Models\Event;
+use App\Models\Category;
+use Illuminate\Support\Facades\DB;
 
 class BracketController extends Controller
 {
-    private $dbPath;
-
-    public function __construct()
-    {
-        $this->dbPath = base_path('db.json');
-    }
-
-    private function readJson()
-    {
-        if (!File::exists($this->dbPath)) {
-            // initialize normalized shape if file missing
-            return [
-                'brackets' => [],
-                'matches' => [],
-                'matchPlayers' => [],
-            ];
-        }
-
-        $data = json_decode(File::get($this->dbPath), true) ?? [];
-
-        // Ensure all top-level keys for normalized data exist
-        $data['brackets'] = $data['brackets'] ?? [];
-        $data['matches'] = $data['matches'] ?? [];
-        $data['matchPlayers'] = $data['matchPlayers'] ?? [];
-
-        return $data;
-    }
-
-    private function writeJson(array $data)
-    {
-        File::put($this->dbPath, json_encode($data, JSON_PRETTY_PRINT));
-    }
 
     /**
      * Flatten different match node shapes into a single flat array of match objects.
@@ -119,20 +93,18 @@ class BracketController extends Controller
     /**
      * Normalize and process incoming bracket data, separating it into tables.
      */
-    private function processAndNormalizeBracketData(array &$jsonData, array $validatedData, $bracketId)
-{
-    // 2. Flatten matches from input (handles both array-of-rounds and double-elim object)
-    $incomingMatchesNode = $validatedData['matches'] ?? [];
-    $flatMatches = $this->flattenMatchesNode($incomingMatchesNode);
+    private function processAndNormalizeBracketData(array $validatedData, $bracketId)
+    {
+        // Flatten matches from input (handles both array-of-rounds and double-elim object)
+        $incomingMatchesNode = $validatedData['matches'] ?? [];
+        $flatMatches = $this->flattenMatchesNode($incomingMatchesNode);
 
-    // 3. Remove old matches and matchPlayers for this bracket before adding new ones
-    $existingMatchIds = collect($jsonData['matches'])->where('bracket_id', $bracketId)->pluck('id');
-    $jsonData['matches'] = collect($jsonData['matches'])->reject(fn ($m) => ($m['bracket_id'] ?? null) == $bracketId)->values()->all();
-    $jsonData['matchPlayers'] = collect($jsonData['matchPlayers'])->reject(fn ($mp) => $existingMatchIds->contains($mp['match_id'] ?? null))->values()->all();
+        // Remove old matches and matchPlayers for this bracket before adding new ones
+        Matches::where('bracket_id', $bracketId)->delete(); // Deletes associated match_players due to cascade
 
-    // 4. Add new matches and matchPlayers (build matches list and matchPlayers rows)
-    foreach ($flatMatches as $match) {
-        // copy match fields except players
+        // Add new matches and matchPlayers
+        foreach ($flatMatches as $match) {
+            // copy match fields except players
         $matchData = collect($match)->except('players')->all();
         $matchData['bracket_id'] = $bracketId;
         // ensure match id exists
@@ -147,43 +119,96 @@ class BracketController extends Controller
                 // Keep original if parsing fails
             }
         }
-        $jsonData['matches'][] = $matchData;
+            $newMatch = Matches::create($matchData);
 
-        // players array: can be missing or be an array of player objects
-        if (!empty($match['players']) && is_array($match['players'])) {
-            foreach ($match['players'] as $slotIndex => $player) {
-                $jsonData['matchPlayers'][] = [
-                    'match_id' => $matchData['id'],
-                    'player_id' => $player['id'] ?? null,
-                    'name' => $player['name'] ?? ($player['id'] ? null : 'TBD'),
-                    'slot' => $slotIndex + 1,
-                    'score' => isset($player['score']) ? (int)$player['score'] : 0,
-                    'completed' => !empty($player['completed']),
-                ];
+            // players array: can be missing or be an array of player objects
+            if (!empty($match['players']) && is_array($match['players'])) {
+                foreach ($match['players'] as $slotIndex => $player) {
+                    // Defensive normalisation
+                    if (is_object($player)) {
+                        $player = (array) $player;
+                    }
+
+                    $rawId = $player['id'] ?? null;
+
+                    // If id is array/object, log and return a 422 with diagnostic payload
+                    if (is_array($rawId) || is_object($rawId)) {
+                        \Log::error('Invalid player id type in incoming bracket payload', [
+                            'bracket_id' => $bracketId,
+                            'match_payload' => $match,
+                            'slot_index' => $slotIndex,
+                            'raw_player' => $player,
+                        ]);
+                        throw new \Illuminate\Validation\ValidationException(
+                            Validator::make([],[]),
+                            response()->json([
+                                'message' => 'Invalid player id type in payload',
+                                'bracket_id' => $bracketId,
+                                'match' => $match,
+                                'slot' => $slotIndex,
+                                'raw_player' => $player
+                            ], 422)
+                        );
+                    }
+
+                    // Since player_id is a string, we don't need an is_numeric check.
+                    // An empty string should be treated as null.
+                    $playerIdForInsert = ($rawId === '' || $rawId === null) ? null : $rawId;
+
+                    $playerName = $player['name'] ?? ($playerIdForInsert ? null : 'TBD');
+
+                    try {
+                        MatchPlayer::create([
+                            'match_id' => $newMatch->id,
+                            'player_id' => $playerIdForInsert,
+                            'name' => $playerName,
+                            'slot' => $slotIndex + 1,
+                            'score' => isset($player['score']) ? (int)$player['score'] : 0,
+                            'completed' => !empty($player['completed']),
+                            'color' => $player['color'] ?? null,
+                        ]);
+                    } catch (\Exception $e) {
+                        \Log::error('Failed inserting MatchPlayer', [
+                            'exception' => $e->getMessage(),
+                            'bracket_id' => $bracketId,
+                            'match_payload' => $match,
+                            'player_payload' => $player,
+                            'slot' => $slotIndex
+                        ]);
+                        throw $e; // keep transaction semantics
+                    }
+                }
             }
         }
-    }
 
-}
+    }
 
     /**
      * Display a listing of the resource (entire normalized database).
      */
     public function index()
     {
-        $jsonData = $this->readJson();
-        $categories = collect($jsonData['category'] ?? [])->keyBy('id');
-        $events = collect($jsonData['events'] ?? [])->map(function ($event) use ($categories) {
-            $event['category'] = $categories->get($event['category_id']);
-            return $event;
+        // The `readJson()` method appears to be a remnant of a previous implementation and is not used.
+        // It has been removed to avoid confusion.
+
+        // FIX: Load `event` and then eager load `category` on the event model.
+        $brackets = Bracket::with('event')->orderBy('created_at', 'desc')->get()->each(function ($bracket) {
+            // Eager load category only if the event exists to prevent errors.
+            if ($bracket->event) {
+                $bracket->event->load('category');
+            }
         });
+        $matches = Matches::whereIn('bracket_id', $brackets->pluck('id'))->get();
+        $matchPlayers = MatchPlayer::whereIn('match_id', $matches->pluck('id'))->get();
+        $events = Event::with('category')->get();
+        $categories = Category::all();
 
         return response()->json([
-            'brackets' => $jsonData['brackets'] ?? [],
-            'matches' => $jsonData['matches'] ?? [],
-            'matchPlayers' => $jsonData['matchPlayers'] ?? [],
-            'events' => $events->values()->all(), // Return modified events
-            'categories' => $jsonData['category'] ?? [],
+            'brackets' => $brackets,
+            'matches' => $matches,
+            'matchPlayers' => $matchPlayers,
+            'events' => $events,
+            'categories' => $categories,
         ]);
     }
 
@@ -192,39 +217,16 @@ class BracketController extends Controller
      */
     public function indexForEvent($eventId)
     {
-        $jsonData = $this->readJson();
-        $brackets = $jsonData['brackets'] ?? [];
+        $brackets = Bracket::where('event_id', $eventId)->orderBy('created_at', 'desc')->get();
+        $bracketIds = $brackets->pluck('id');
 
-        // filter brackets by event_id
-        $filteredBrackets = array_values(array_filter($brackets, function ($b) use ($eventId) {
-            return ($b['event_id'] ?? null) == $eventId;
-        }));
+        $matches = Matches::whereIn('bracket_id', $bracketIds)->get();
+        $matchIds = $matches->pluck('id');
 
-        $bracketIds = array_map(fn($b) => $b['id'], $filteredBrackets);
-
-        // filter matches and matchPlayers
-        $matches = array_values(array_filter($jsonData['matches'] ?? [], fn($m) => in_array($m['bracket_id'], $bracketIds)));
-        $matchIds = array_map(fn($m) => $m['id'], $matches);
-
-        $matchPlayers = array_values(array_filter($jsonData['matchPlayers'] ?? [], fn($mp) => in_array($mp['match_id'], $matchIds)));
-
-        // gather players referenced by matchPlayers
-        $playerIds = array_values(array_unique(array_values(array_filter(array_map(fn($mp) => $mp['player_id'] ?? null, $matchPlayers)))));
-        $players = [];
-        if (!empty($jsonData['players'])) {
-            foreach ($playerIds as $pid) {
-                $found = array_values(array_filter($jsonData['players'], fn($p) => ($p['id'] ?? null) == $pid));
-                if (!empty($found)) $players[] = $found[0];
-                else $players[] = ['id' => $pid, 'name' => null];
-            }
-        } else {
-            foreach ($playerIds as $pid) {
-                $players[] = ['id' => $pid, 'name' => null];
-            }
-        }
+        $matchPlayers = MatchPlayer::whereIn('match_id', $matchIds)->get();
 
         return response()->json([
-            'brackets' => $filteredBrackets,
+            'brackets' => $brackets,
             'matches' => $matches,
             'matchPlayers' => $matchPlayers,
         ]);
@@ -238,31 +240,27 @@ class BracketController extends Controller
         $validated = $request->validate([
             'name' => 'required|string',
             'type' => 'required|string',
-            'event_id' => 'required',
+            'event_id' => 'required|exists:events,id',
             'matches' => 'required',
             'players' => 'sometimes|array',
             'allow_draws' => 'sometimes|boolean',
             'tiebreaker_data' => 'sometimes|array',
+            'id' => 'required|string|unique:brackets,id' // Ensure client-side ID is provided and unique
         ]);
 
-        $jsonData = $this->readJson();
-        $bracketId = substr(md5(uniqid()), 0, 8);
+        $newBracket = DB::transaction(function () use ($validated) {
+            $bracket = Bracket::create([
+                'id' => $validated['id'],
+                'name' => $validated['name'],
+                'type' => $validated['type'],
+                'event_id' => $validated['event_id'],
+                'allow_draws' => $validated['allow_draws'] ?? false,
+                'tiebreaker_data' => $validated['tiebreaker_data'] ?? null,
+            ]);
 
-        $newBracket = [
-            'id' => $bracketId,
-            'name' => $validated['name'],
-            'type' => $validated['type'],
-            'event_id' => $validated['event_id'],
-            'allow_draws' => $validated['allow_draws'] ?? null,
-            'tiebreaker_data' => $validated['tiebreaker_data'] ?? null,
-            'created_at' => now()->toISOString(),
-            'updated_at' => now()->toISOString(),
-        ];
-
-        $this->processAndNormalizeBracketData($jsonData, $validated, $bracketId);
-
-        array_unshift($jsonData['brackets'], $newBracket);
-        $this->writeJson($jsonData);
+            $this->processAndNormalizeBracketData($validated, $bracket->id);
+            return $bracket;
+        });
 
         return response()->json($newBracket, 201);
     }
@@ -272,35 +270,33 @@ class BracketController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $jsonData = $this->readJson();
-        $bracketIndex = collect($jsonData['brackets'])->search(fn($b) => ($b['id'] ?? null) == $id);
+        $bracket = Bracket::find($id);
 
-        if ($bracketIndex === false || $bracketIndex === null) {
+        if (!$bracket) {
             return response()->json(['message' => 'Bracket not found'], 404);
         }
 
         $validated = $request->validate([
             'name' => 'sometimes|string',
             'type' => 'sometimes|string',
-            'event_id' => 'sometimes',
+            'event_id' => 'sometimes|exists:events,id',
             'matches' => 'sometimes',
             'players' => 'sometimes|array',
             'allow_draws' => 'sometimes|boolean',
             'tiebreaker_data' => 'sometimes|array',
         ]);
 
-        // Update bracket details
-        $jsonData['brackets'][$bracketIndex] = array_merge($jsonData['brackets'][$bracketIndex], Arr::only($validated, ['name','type','event_id','allow_draws','tiebreaker_data']));
-        $jsonData['brackets'][$bracketIndex]['updated_at'] = now()->toISOString();
+        DB::transaction(function () use ($bracket, $validated, $id) {
+            // Update bracket details
+            $bracket->update(Arr::only($validated, ['name', 'type', 'event_id', 'allow_draws', 'tiebreaker_data']));
 
-        // The `matches` node is optional on update. If it's present, re-process.
-        // This logic replaces all matches for the bracket, which is simpler than diffing.
-        $this->processAndNormalizeBracketData($jsonData, $validated, $id);
+            // The `matches` node is optional on update. If it's present, re-process.
+            if (isset($validated['matches'])) {
+                $this->processAndNormalizeBracketData($validated, $id);
+            }
+        });
 
-        $this->writeJson($jsonData);
-
-        // return normalized bracket (without event object)
-        return response()->json(collect($jsonData['brackets'][$bracketIndex])->except('event')->all());
+        return response()->json($bracket->fresh());
     }
 
     /**
@@ -308,15 +304,11 @@ class BracketController extends Controller
      */
     public function destroy($id)
     {
-        $jsonData = $this->readJson();
-        $matchIds = collect($jsonData['matches'])->where('bracket_id', $id)->pluck('id');
-
-        $jsonData['brackets'] = collect($jsonData['brackets'])->reject(fn ($b) => ($b['id'] ?? null) == $id)->values()->all();
-        $jsonData['matches'] = collect($jsonData['matches'])->reject(fn ($m) => ($m['bracket_id'] ?? null) == $id)->values()->all();
-        $jsonData['matchPlayers'] = collect($jsonData['matchPlayers'])->reject(fn ($mp) => $matchIds->contains($mp['match_id'] ?? null))->values()->all();
-        // Note: Players are not deleted as they might be in other brackets.
-
-        $this->writeJson($jsonData);
+        $bracket = Bracket::find($id);
+        if (!$bracket) {
+            return response()->json(['message' => 'Bracket not found'], 404);
+        }
+        $bracket->delete(); // This will cascade delete matches and match_players
 
         return response()->json(null, 204);
     }
@@ -336,35 +328,23 @@ class BracketController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $jsonData = $this->readJson();
         $updates = $request->input('updates');
 
-        // Find the bracket
-        $bracketIndex = collect($jsonData['brackets'])->search(fn($b) => ($b['id'] ?? null) == $id);
-
-        if ($bracketIndex === false) {
+        if (!Bracket::where('id', $id)->exists()) {
             return response()->json(['error' => 'Bracket not found'], 404);
         }
 
-        // Get all match IDs for the specified bracket
-        $matchIdsForBracket = collect($jsonData['matches'])
-            ->where('bracket_id', $id)
-            ->pluck('id')
-            ->all();
+        // Get all match IDs for the bracket
+        $matchIds = Matches::where('bracket_id', $id)->pluck('id');
 
-        // Update names in the normalized matchPlayers table
-        foreach ($jsonData['matchPlayers'] as &$matchPlayer) {
-            if (in_array($matchPlayer['match_id'], $matchIdsForBracket)) {
-                foreach ($updates as $update) {
-                    if ($matchPlayer['name'] === $update['oldName']) {
-                        $matchPlayer['name'] = $update['newName'];
-                    }
-                }
+        // Update names in the matchPlayers table
+        DB::transaction(function () use ($matchIds, $updates) {
+            foreach ($updates as $update) {
+                MatchPlayer::whereIn('match_id', $matchIds)
+                    ->where('name', $update['oldName'])
+                    ->update(['name' => $update['newName']]);
             }
-        }
-
-        // Save back
-        $this->writeJson($jsonData);
+        });
 
         return response()->json(['message' => 'Player names updated successfully']);
     }
@@ -379,23 +359,19 @@ class BracketController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $jsonData = $this->readJson();
         $colors = $request->input('colors');
 
         // Get all match IDs for the specified bracket
-        $matchIdsForBracket = collect($jsonData['matches'])
-            ->where('bracket_id', $id)
-            ->pluck('id')
-            ->all();
+        $matchIds = Matches::where('bracket_id', $id)->pluck('id');
 
-        // Update colors in the normalized matchPlayers table
-        foreach ($jsonData['matchPlayers'] as &$matchPlayer) {
-            if (in_array($matchPlayer['match_id'], $matchIdsForBracket) && isset($colors[$matchPlayer['name']])) {
-                $matchPlayer['color'] = $colors[$matchPlayer['name']];
+        DB::transaction(function () use ($matchIds, $colors) {
+            foreach ($colors as $name => $color) {
+                MatchPlayer::whereIn('match_id', $matchIds)
+                    ->where('name', $name)
+                    ->update(['color' => $color]);
             }
-        }
+        });
 
-        $this->writeJson($jsonData);
         return response()->json(['message' => 'Player colors updated successfully']);
     }
 
@@ -403,25 +379,6 @@ class BracketController extends Controller
      * Recursively update player names in matches
      */
     private function updatePlayerNamesInMatches(&$matches, $updates)
-    {
-        if (is_array($matches)) {
-            foreach ($matches as &$item) {
-                if (isset($item['players']) && is_array($item['players'])) {
-                    // This is a match with players
-                    foreach ($item['players'] as &$player) {
-                        if (isset($player['name'])) {
-                            foreach ($updates as $update) {
-                                if ($player['name'] === $update['oldName']) {
-                                    $player['name'] = $update['newName'];
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    // Recurse into nested structure (rounds, etc.)
-                    $this->updatePlayerNamesInMatches($item, $updates);
-                }
-            }
-        }
+    { // This function was for the old JSON structure and is no longer needed with the new updatePlayerNames method.
     }
 }

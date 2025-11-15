@@ -18,7 +18,8 @@ class Bracket extends Model
         'name',
         'type',
         'event_id',
-        'tiebreaker_data'
+        'tiebreaker_data',
+        'allow_draws'
     ];
 
     protected $casts = [
@@ -29,5 +30,10 @@ class Bracket extends Model
     public function matches(): HasMany
     {
         return $this->hasMany(\App\Models\Matches::class, 'bracket_id', 'id');
+    }
+
+    public function event()
+    {
+        return $this->belongsTo(\App\Models\Event::class, 'event_id', 'id');
     }
 }

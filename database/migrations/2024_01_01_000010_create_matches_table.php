@@ -12,16 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('matches', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignId('bracket_id')->constrained()->onDelete('cascade');
+            $table->string('id')->primary();
+            $table->string('bracket_id');
+            $table->foreign('bracket_id')->references('id')->on('brackets')->onDelete('cascade');
             $table->integer('round');
             $table->integer('match_number');
-            $table->uuid('winner_id')->nullable();
-            $table->uuid('loser_id')->nullable();
+            $table->string('winner_id')->nullable();
+            $table->string('loser_id')->nullable();
             $table->string('status')->default('pending'); // pending, completed
             $table->date('date')->nullable();
             $table->time('time')->nullable();
             $table->string('venue')->nullable();
+            $table->string('bracket_type')->nullable(); // For double-elim: winners, losers, grand_finals
             $table->boolean('is_tie')->default(false);
             $table->timestamps();
         });

@@ -1,0 +1,218 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+
+class EventSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $events = [
+            [
+                'title' => '😔😔',
+                'description' => '😭',
+                'image' => '/images/NCSlogo.png',
+                'category_id' => null, // "68d63045a4b4a" → Replace if needed
+                'venue' => null,
+                'startDate' => $this->convertDate('Nov-06-2025'),
+                'endDate' => $this->convertDate('Nov-06-2025'),
+                'startTime' => '00:00',
+                'endTime' => '23:59',
+                'isAllDay' => true,
+                'archived' => false,
+            ],
+            [
+                'title' => 'Mental Health Break',
+                'description' => 'Ngano way inani 😔',
+                'image' => '/images/NCSlogo.png',
+                'category_id' => 5, // Replace "5e80" with your real category ID
+                'venue' => 'Naawan',
+                'startDate' => $this->convertDate('Nov-03-2025'),
+                'endDate' => $this->convertDate('Nov-07-2025'),
+                'startTime' => '00:00',
+                'endTime' => '23:59',
+                'isAllDay' => true,
+                'archived' => false,
+            ],
+            [
+                'title' => 'Jolens',
+                'description' => null,
+                'image' => '/images/NCSlogo.png',
+                'category_id' => null, // "69007bb233925"
+                'venue' => null,
+                'startDate' => $this->convertDate('Oct-30-2025'),
+                'endDate' => $this->convertDate('Oct-31-2025'),
+                'startTime' => '15:00',
+                'endTime' => '18:00',
+                'isAllDay' => false,
+                'archived' => false,
+            ],
+            [
+                'title' => 'Christmas Eventzzz',
+                'description' => "Let's celebrae christmas",
+                'image' => '/images/NCSlogo.png',
+                'category_id' => 5, // Replace
+                'venue' => 'Ground',
+                'startDate' => $this->convertDate('Dec-25-2025'),
+                'endDate' => $this->convertDate('Jan-01-2026'),
+                'startTime' => '00:00',
+                'endTime' => '23:59',
+                'isAllDay' => true,
+                'archived' => false,
+            ],
+            [
+                'title' => 'Day worming',
+                'description' => null,
+                'image' => '/images/NCSlogo.png',
+                'category_id' => null,
+                'venue' => null,
+                'startDate' => $this->convertDate('Oct-18-2025'),
+                'endDate' => $this->convertDate('Oct-18-2025'),
+                'startTime' => '07:00',
+                'endTime' => '09:00',
+                'isAllDay' => false,
+                'archived' => false,
+            ],
+            [
+                'title' => 'All Saints Day',
+                'description' => '🕯️🕯️🕯️',
+                'image' => '/images/NCSlogo.png',
+                'category_id' => 5,
+                'venue' => null,
+                'startDate' => $this->convertDate('Nov-01-2025'),
+                'endDate' => $this->convertDate('Nov-01-2025'),
+                'startTime' => '00:00',
+                'endTime' => '23:59',
+                'isAllDay' => false,
+                'archived' => false,
+            ],
+            [
+                'title' => "Teacher's Day",
+                'description' => 'Day of Teachers',
+                'image' => '/images/NCSlogo.png',
+                'category_id' => 2,
+                'venue' => null,
+                'startDate' => $this->convertDate('Oct-05-2025'),
+                'endDate' => $this->convertDate('Oct-05-2025'),
+                'startTime' => '00:00',
+                'endTime' => '23:59',
+                'isAllDay' => true,
+                'archived' => false,
+            ],
+            [
+                'title' => 'International Literacy Day',
+                'description' => 'Di ko kabalo mo basa',
+                'image' => '/images/NCSlogo.png',
+                'category_id' => 1,
+                'venue' => 'Library',
+                'startDate' => $this->convertDate('Sep-08-2025'),
+                'endDate' => $this->convertDate('Sep-08-2025'),
+                'startTime' => '08:30',
+                'endTime' => '12:00',
+                'isAllDay' => false,
+                'archived' => false,
+            ],
+            [
+                'title' => 'Buwan ng Wika',
+                'description' => 'Wika ng Buwan',
+                'image' => '/images/NCSlogo.png',
+                'category_id' => 1,
+                'venue' => null,
+                'startDate' => $this->convertDate('Aug-29-2025'),
+                'endDate' => $this->convertDate('Aug-29-2025'),
+                'startTime' => '08:30',
+                'endTime' => '16:00',
+                'isAllDay' => false,
+                'archived' => false,
+            ],
+            [
+                'title' => 'Nutrition Month',
+                'description' => null,
+                'image' => '/images/NCSlogo.png',
+                'category_id' => 1,
+                'venue' => null,
+                'startDate' => $this->convertDate('Oct-15-2025'),
+                'endDate' => $this->convertDate('Oct-15-2025'),
+                'startTime' => '08:00',
+                'endTime' => '17:00',
+                'isAllDay' => false,
+                'archived' => true,
+            ],
+            [
+                'title' => 'October',
+                'description' => null,
+                'image' => '/images/NCSlogo.png',
+                'category_id' => 5,
+                'venue' => null,
+                'startDate' => $this->convertDate('Oct-01-2025'),
+                'endDate' => $this->convertDate('Oct-31-2025'),
+                'startTime' => '08:00',
+                'endTime' => '16:00',
+                'isAllDay' => false,
+                'archived' => true,
+            ],
+            [
+                'title' => 'Palakasan 2025',
+                'description' => null,
+                'image' => '/images/NCSlogo.png',
+                'category_id' => 3,
+                'venue' => 'Court',
+                'startDate' => $this->convertDate('Nov-26-2025'),
+                'endDate' => $this->convertDate('Nov-28-2025'),
+                'startTime' => '00:00',
+                'endTime' => '23:59',
+                'isAllDay' => true,
+                'archived' => false,
+            ],
+            [
+                'title' => 'Suicide Prevention Month',
+                'description' => "We care because you matter\nMis. Or. Care\n#SuicidePrevention2025\n#NCSrocks",
+                'image' => '/images/NCSlogo.png',
+                'category_id' => null,
+                'venue' => 'Court',
+                'startDate' => $this->convertDate('Sep-30-2025'),
+                'endDate' => $this->convertDate('Sep-30-2025'),
+                'startTime' => '00:00',
+                'endTime' => '23:59',
+                'isAllDay' => true,
+                'archived' => false,
+            ],
+            [
+                'title' => 'Tennis',
+                'description' => null,
+                'image' => '/images/NCSlogo.png',
+                'category_id' => 3,
+                'venue' => 'Court',
+                'startDate' => $this->convertDate('Nov-28-2025'),
+                'endDate' => $this->convertDate('Nov-28-2025'),
+                'startTime' => '15:00',
+                'endTime' => '16:30',
+                'isAllDay' => false,
+                'archived' => false,
+            ],
+            [
+                'title' => 'Graduation',
+                'description' => '🤣',
+                'image' => '/images/NCSlogo.png',
+                'category_id' => 1,
+                'venue' => 'bukid 1',
+                'startDate' => $this->convertDate('May-08-2026'),
+                'endDate' => $this->convertDate('May-08-2026'),
+                'startTime' => '07:30',
+                'endTime' => '11:00',
+                'isAllDay' => false,
+                'archived' => false,
+            ],
+        ];
+
+        DB::table('events')->insert($events);
+    }
+
+    private function convertDate($date)
+    {
+        return Carbon::createFromFormat('M-d-Y', $date)->format('Y-m-d');
+    }
+}

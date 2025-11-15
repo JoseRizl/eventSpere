@@ -12,12 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('brackets', function (Blueprint $table) {
-            $table->id();
+            $table->string('id')->primary();
             $table->foreignId('event_id')->constrained()->onDelete('cascade');
             $table->string('name');
             $table->string('type'); // e.g., 'Single Elimination', 'Round Robin'
-            $table->json('scoring')->nullable(); // For Round Robin points
-            $table->boolean('allow_draw')->default(false); // For Round Robin
+            $table->boolean('allow_draws')->default(false); // For Round Robin
             $table->json('tiebreaker_data')->nullable(); // For storing tiebreaker data
             $table->timestamps();
         });
