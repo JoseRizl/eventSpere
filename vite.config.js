@@ -23,11 +23,11 @@ export default defineConfig({
     optimizeDeps: {
         include: ['primevue/card'],
     },
-    server: {
-        host: true,
-        hmr: {
-            host: '10.212.67.4'//ipv4 na makita sa ipconfig
-            //ipa run dayun php artisan serve --host=10.212.67.4 (ipv4 ni)
-        }
-    }
+    // server: {
+    //     host: true,
+    //     hmr: {
+    //         host: '10.212.67.4'//ipv4 na makita sa ipconfig
+    //         //ipa run dayun php artisan serve --host=10.212.67.4 (ipv4 ni)
+    //     }
+    // }
 });

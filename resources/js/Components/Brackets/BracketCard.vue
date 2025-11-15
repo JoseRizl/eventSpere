@@ -82,6 +82,7 @@ const playerColors = ref({});
 const isSavingPlayers = ref(false);
 const showDuplicatePlayerError = ref(false);
 const showSaveConfirm = ref(false);
+let originalPlayerColors = {};
 
 const generatePlayerColor = (playerName) => {
     if (!playerName || playerName === 'TBD' || playerName === 'BYE' || playerName.includes('Winner') || playerName.includes('Loser')) {
@@ -155,6 +156,9 @@ const openPlayerEditModal = () => {
         newName: name
     }));
 
+    // Store a snapshot of the colors when the modal opens
+    originalPlayerColors = { ...playerColors.value };
+
     showPlayerEditModal.value = true;
 };
 
@@ -225,8 +229,9 @@ const proceedWithSave = async () => {
 
     // Only save colors for Double Elimination brackets
     if (props.bracket.type === 'Double Elimination') {
-        const colorUpdates = editablePlayers.value
-            .filter(p => bracketViewRef.value?.playerColors[p.oldName] !== playerColors.value[p.oldName]);
+        const colorUpdates = Object.keys(playerColors.value).filter(
+            playerName => originalPlayerColors[playerName] !== playerColors.value[playerName]
+        );
 
         try {
             await axios.put(route('api.brackets.updatePlayerColors', props.bracket.id), { colors: playerColors.value });
