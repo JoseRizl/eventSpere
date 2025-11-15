@@ -10,7 +10,17 @@ export function useEventValidation() {
             }
             let date;
             if (typeof dateInput === 'string') {
+                // Handle time-only strings like "HH:mm"
+                if (/^\d{2}:\d{2}$/.test(dateInput)) {
+                    return dateInput; // Return as is, let other functions handle it
+                }
+
                 date = parseISO(dateInput);
+                if (!isValid(date)) {
+                    // Handle YYYY-MM-DD format from database
+                    date = parse(dateInput, 'yyyy-MM-dd', new Date());
+                }
+                // Handle MMM-dd-yyyy format from other parts of the app
                 if (!isValid(date)) {
                     date = parse(dateInput, 'MMM-dd-yyyy', new Date());
                 }
@@ -49,10 +59,9 @@ export function useEventValidation() {
                 if (!startDate || !endDate) {
                     return "Both start and end dates are required.";
                 }
-            }
-
-            if (startDate && endDate && endDate < startDate) {
-                return "End date cannot be earlier than start date.";
+                if (startDate && endDate && endDate < startDate) {
+                    return "End date cannot be earlier than start date.";
+                }
             }
 
             const isAllDay = eventData.isAllDay;
@@ -63,17 +72,15 @@ export function useEventValidation() {
                 }
                 const startDateTime = getFullDateTime(startDate, eventData.startTime);
                 const endDateTime = getFullDateTime(endDate, eventData.endTime);
-                if (!startDateTime || !endDateTime || endDateTime <= startDateTime) {
+                if (endDateTime <= startDateTime) {
                     return "End date/time must be after start date/time.";
                 }
             }
 
             // Activity validation (if activities exist on the event data)
             if (Array.isArray(eventData.activities)) {
-                // FIX: Correctly determine the event's time window for validation.
-                // For all-day events, the window is the full day. For non-all-day, it's the specified start/end times.
-                const eventStartDT = startDate ? getFullDateTime(startDate, isAllDay ? '00:00' : eventData.startTime) : null;
-                const eventEndDT = endDate ? getFullDateTime(endDate, isAllDay ? '23:59' : eventData.endTime) : null;
+                const eventStartDT = !isAllDay && startDate && eventData.startTime ? getFullDateTime(startDate, eventData.startTime) : null;
+                const eventEndDT = !isAllDay && endDate && eventData.endTime ? getFullDateTime(endDate, eventData.endTime) : null;
 
                 for (let i = 0; i < eventData.activities.length; i++) {
                     const act = eventData.activities[i];

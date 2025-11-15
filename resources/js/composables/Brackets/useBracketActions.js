@@ -29,24 +29,58 @@ const robustParseDate = (dateString) => {
 };
 
 // Helpers for validating match date/time within event window
+// Helpers for validating match date/time within event window
 const getFullDateTime = (dateInput, timeStr) => {
-    if (!dateInput) return null;
-    let d = dateInput instanceof Date ? dateInput : robustParseDate(dateInput);
-    if (!isValid(d)) return null;
-    if (typeof timeStr === 'string' && timeStr.length >= 4) {
-        const parsedTime = parse(timeStr.padStart(5, '0'), 'HH:mm', new Date());
-        if (isValid(parsedTime)) {
-            d = new Date(d.getFullYear(), d.getMonth(), d.getDate(), parsedTime.getHours(), parsedTime.getMinutes(), 0, 0);
-        }
+  if (!dateInput) return null;
+
+  // Ensure the date part is a valid Date object
+  const d = dateInput instanceof Date ? dateInput : robustParseDate(dateInput);
+  if (!isValid(d)) return null;
+
+  // Create a new Date object at local midnight for that date (avoid mutating original)
+  const newDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
+  // If a time string is provided, parse it and apply it to the date
+  if (typeof timeStr === 'string') {
+    // Accept "H:MM", "HH:MM", "HH:MM:SS" (seconds optional)
+    const m = timeStr.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+    if (!m) return null; // invalid format
+
+    const hours = Number(m[1]);
+    const minutes = Number(m[2]);
+    const seconds = Number(m[3] ?? 0);
+
+    // Validate ranges (defensive)
+    if (
+      Number.isFinite(hours) && Number.isFinite(minutes) && Number.isFinite(seconds) &&
+      hours >= 0 && hours <= 23 &&
+      minutes >= 0 && minutes <= 59 &&
+      seconds >= 0 && seconds <= 59
+    ) {
+      newDate.setHours(hours, minutes, seconds, 0);
     } else {
-        d = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+      return null; // invalid time values
     }
-    return d;
+  }
+
+  return newDate;
 };
+
 
 const dateOnlyStr = (d) => (d && isValid(d)) ? format(d, 'yyyy-MM-dd') : null;
 
 const validateMatchDateTime = (event, dateInput, timeStr) => {
+    // // --- START: Diagnostic Logging ---
+    // console.log('[Validator] Inputs:', {
+    //     eventStartDate: event?.startDate,
+    //     eventStartTime: event?.startTime,
+    //     eventEndDate: event?.endDate,
+    //     eventEndTime: event?.endTime,
+    //     matchDateInput: dateInput,
+    //     matchTimeInput: timeStr,
+    // });
+    // // --- END: Diagnostic Logging ---
+
     if (!event) return null;
     const evStart = robustParseDate(event.startDate);
     const evEnd = robustParseDate(event.endDate || event.startDate);
@@ -66,6 +100,13 @@ const validateMatchDateTime = (event, dateInput, timeStr) => {
     const evEndDT = getFullDateTime(event.endDate || event.startDate, event.endTime || event.startTime);
     if (timeStr) {
         const matchDT = getFullDateTime(matchDate, timeStr);
+        // --- START: Diagnostic Logging ---
+        console.log('[Validator] Comparing Date Objects:', {
+            matchDT,
+            evStartDT,
+            evEndDT,
+        });
+        // --- END: Diagnostic Logging ---
         if (matchDT && evStartDT && matchDT < evStartDT) {
             return `Match time must be on/after event start (${format(evStart, 'MMM-dd-yyyy')} ${event.startTime || '00:00'}).`;
         }
