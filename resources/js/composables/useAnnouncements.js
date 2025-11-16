@@ -16,42 +16,20 @@ export function useAnnouncements({ searchQuery, startDateFilter, endDateFilter }
                 return map;
             }, {});
 
-            // 1) Try single aggregated endpoint if backend provides it
-            try {
-                const respAll = await axios.get(route('api.announcements.index'));
-                eventAnnouncements.value = (respAll.data || [])
-                    .map(ann => ({
-                        ...ann,
-                        event: events.find(e => e.id === ann.event_id) || null,
-                        employee: employeesMap[ann.userId] || { name: 'Admin' },
-                        formattedTimestamp: format(new Date(ann.timestamp), "MMMM dd, yyyy HH:mm"),
-                    }))
-                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                return;
-            } catch (_) {
-                // Fallback to per-event requests below
-            }
+            // Fetch all announcements from the single, consolidated endpoint.
+            const response = await axios.get(route('api.announcements.index'));
 
-            // 2) Fallback: fetch per event but stream results incrementally
-            eventAnnouncements.value = [];
-            await Promise.allSettled(
-                events.map(async (ev) => {
-                    try {
-                        const resp = await axios.get(route('api.events.announcements.indexForEvent', { eventId: ev.id }));
-                        const items = (resp.data || []).map(ann => ({
-                            ...ann,
-                            event: ev,
-                            employee: employeesMap[ann.userId] || { name: 'Admin' },
-                            formattedTimestamp: format(new Date(ann.timestamp), "MMMM dd, yyyy HH:mm"),
-                        }));
-                        // Push and keep sorted so UI updates progressively
-                        eventAnnouncements.value = [...eventAnnouncements.value, ...items]
-                            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                    } catch (e) {
-                        console.error('Error fetching announcements for event', ev.id, e);
-                    }
-                })
-            );
+            // The response from an API Resource collection already includes the data wrapper.
+            const allAnnouncements = response.data.data || [];
+
+            eventAnnouncements.value = allAnnouncements
+                .map(ann => ({
+                    ...ann,
+                    // The 'event' and 'employee' data are now directly included by the API resource.
+                    // We just need to format the timestamp for display.
+                    formattedTimestamp: format(new Date(ann.timestamp), "MMMM dd, yyyy HH:mm"),
+                }))
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         } catch (error) {
             console.error("Error fetching announcements:", error);
         }

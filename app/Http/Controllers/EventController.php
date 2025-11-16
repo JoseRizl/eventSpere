@@ -123,7 +123,7 @@ class EventController extends JsonController
                 return [
                     'id' => (string)$a->id,
                     'event_id' => (string)$a->event_id,
-                    'content' => $a->content,
+                    'message' => $a->message,
                     'image' => $a->image,
                     'timestamp' => optional($a->created_at)->toISOString(),
                     'employee' => ['name' => $user?->name ?? 'Admin'],

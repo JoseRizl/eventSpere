@@ -143,16 +143,16 @@ const confirmAdd = async () => {
         const payload = {
             message: newAnnouncementData.value.message,
             image: newAnnouncementData.value.image,
-            userId: user.value.id,
         };
         let response;
         if (props.context === 'home') {
-            payload.event_id = newAnnouncementData.value.event_id;
+            payload.event_id = newAnnouncementData.value.event_id || null;
             response = await axios.post(route('announcements.store'), payload);
         } else {
-            response = await axios.post(route('events.announcements.storeForEvent', { id: props.eventId }), payload);
+            response = await axios.post(route('events.announcements.store', { event: props.eventId }), payload);
         }
-        emit('announcement-added', response.data);
+        // Use the data from the server's response, which is wrapped in a 'data' key by the API Resource.
+        emit('announcement-added', response.data.data);
         successMessage.value = 'Announcement posted successfully.';
         showSuccessDialog.value = true;
     } catch (error) {
@@ -180,12 +180,13 @@ const confirmUpdate = async () => {
         let response;
 
         if (eventId) {
-            response = await axios.put(route('events.announcements.updateForEvent', { id: eventId, announcementId: announcementToEdit.value.id }), payload);
+            response = await axios.put(route('events.announcements.update', { event: eventId, announcement: announcementToEdit.value.id }), payload);
         } else {
-            response = await axios.put(route('announcements.update', { announcementId: announcementToEdit.value.id }), payload);
+            response = await axios.put(route('announcements.update', { announcement: announcementToEdit.value.id }), payload);
         }
 
-        emit('announcement-updated', response.data);
+        // Use the data from the server's response.
+        emit('announcement-updated', response.data.data);
         successMessage.value = 'Announcement updated successfully.';
         showSuccessDialog.value = true;
     } catch (error) {
@@ -203,9 +204,9 @@ const confirmDelete = async () => {
     try {
         const eventId = announcementToDelete.value.event?.id || announcementToDelete.value.event_id;
         if (eventId) {
-            await axios.delete(route('events.announcements.destroyForEvent', { id: eventId, announcementId: announcementToDelete.value.id }));
+            await axios.delete(route('events.announcements.destroy', { event: eventId, announcement: announcementToDelete.value.id }));
         } else {
-            await axios.delete(route('announcements.destroy', { announcementId: announcementToDelete.value.id }));
+            await axios.delete(route('announcements.destroy', { announcement: announcementToDelete.value.id }));
         }
         emit('announcement-deleted', announcementToDelete.value.id);
         successMessage.value = 'Announcement deleted successfully.';
@@ -237,7 +238,7 @@ const formatTimestamp = (timestamp) => {
 
         <!-- Announcements List -->
         <div v-if="filteredAnnouncements.length > 0" class="space-y-6">
-            <div v-for="announcement in filteredAnnouncements" :key="announcement.id" :id="`announcement-${announcement.id}`" @click="context === 'home' && announcement.event && router.visit(route('event.details', { id: announcement.event.id, view: 'announcements' }))" :class="['relative p-6 bg-gray-50 rounded-lg shadow-sm border-l-4 border-blue-500', context === 'home' && announcement.event ? 'cursor-pointer hover:bg-gray-100 transition-colors' : '']">
+            <div v-for="announcement in filteredAnnouncements" :key="announcement.id" :id="`announcement-${announcement.id}`" @click="context === 'home' && announcement.event?.id && router.visit(route('event.details', { id: announcement.event.id, view: 'announcements' }))" :class="['relative p-6 bg-gray-50 rounded-lg shadow-sm border-l-4 border-blue-500', context === 'home' && announcement.event?.id ? 'cursor-pointer hover:bg-gray-100 transition-colors' : '']">
                 <div v-if="user?.role === 'Admin' || user?.role === 'Principal'" class="absolute top-1 right-1 z-10 flex">
                     <Button icon="pi pi-pencil" class="p-button-rounded p-button-text action-btn-info" @click.stop="openEditModal(announcement)" v-tooltip.top="'Edit Announcement'" />
                     <Button icon="pi pi-trash" class="p-button-rounded p-button-text action-btn-danger" @click.stop="promptDelete(announcement)" v-tooltip.top="'Delete Announcement'" />
@@ -247,7 +248,7 @@ const formatTimestamp = (timestamp) => {
                     <span class="text-gray-600 text-sm font-semibold">{{ announcement.employee?.name || 'Admin' }}</span>
                 </div>
                 <div v-if="context === 'home'" class="mb-3">
-                    <template v-if="announcement.event">
+                    <template v-if="announcement.event?.id">
                         <span class="text-sm text-gray-600">For event:</span>
                         <Link :href="route('event.details', { id: announcement.event.id, view: 'announcements' })" @click.stop class="font-semibold text-blue-700 hover:underline ml-1 text-base">{{ announcement.event.title }}</Link>
                     </template>

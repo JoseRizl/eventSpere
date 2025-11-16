@@ -69,12 +69,12 @@ export function useNotifications(popoverRef) {
                 timestamp: new Date(ann.timestamp),
                 data: {
                     ...ann,
-                    event: eventMap[ann.eventId],
-                    employee: employeesMap[ann.userId] || { name: 'Admin' }
+                    event: eventMap[ann.event_id],
+                    employee: employeesMap[ann.user_id] || { name: 'Admin' }
                 },
                 message: ann.message,
-                title: eventMap[ann.eventId] ? `Announcement: ${eventMap[ann.eventId]?.title}` : 'General Announcement',
-                link: eventMap[ann.eventId] ? route('event.details', { id: eventMap[ann.eventId].id, view: 'announcements' }) : null,
+                title: eventMap[ann.event_id] ? `Announcement: ${eventMap[ann.event_id]?.title}` : 'General Announcement',
+                link: eventMap[ann.event_id] ? route('event.details', { id: eventMap[ann.event_id].id, view: 'announcements' }) : null,
                 formattedTimestamp: format(new Date(ann.timestamp), "MMMM dd, yyyy HH:mm"),
             }));
 

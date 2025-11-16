@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreAnnouncementRequest;
+use App\Http\Requests\UpdateAnnouncementRequest;
+use App\Http\Resources\AnnouncementResource;
 use Illuminate\Http\Request;
-use App\Models\User;
 use App\Models\Announcement;
 use App\Models\Event;
 use Illuminate\Support\Facades\Storage;
@@ -45,275 +47,70 @@ class AnnouncementsController extends Controller
         }
     }
 
-    public function index()
+    public function index(Request $request, Event $event = null)
     {
-        $ann = Announcement::with(['user:id,name', 'event:id,title'])
-            ->orderByDesc('timestamp')
-            ->get()
-            ->map(function ($a) {
-                return [
-                    'id' => (string) $a->id,
-                    'event_id' => $a->event_id,
-                    'message' => $a->message,
-                    'image' => $a->image,
-                    'timestamp' => optional($a->timestamp)->toIso8601String(),
-                    'userId' => $a->user_id,
-                    'employee' => ['name' => optional($a->user)->name ?? 'Admin'],
-                    'event' => $a->event_id ? ['id' => $a->event_id, 'title' => optional($a->event)->title] : null,
-                ];
-            });
+        $query = Announcement::with(['user:id,name', 'event:id,title'])
+            ->orderByDesc('timestamp');
 
-        return response()->json($ann->values());
-    }
-
-    public function indexForEvent($eventId)
-    {
-        $ann = Announcement::with(['user:id,name', 'event:id,title'])
-            ->where('event_id', $eventId)
-            ->orderByDesc('timestamp')
-            ->get()
-            ->map(function ($a) {
-                return [
-                    'id' => (string) $a->id,
-                    'event_id' => $a->event_id,
-                    'message' => $a->message,
-                    'image' => $a->image,
-                    'timestamp' => optional($a->timestamp)->toIso8601String(),
-                    'userId' => $a->user_id,
-                    'employee' => ['name' => optional($a->user)->name ?? 'Admin'],
-                    'event' => $a->event_id ? ['id' => $a->event_id, 'title' => optional($a->event)->title] : null,
-                ];
-            });
-
-        return response()->json($ann->values());
-    }
-
-    public function store(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'message' => ['required', 'string', function ($attribute, $value, $fail) {
-                    if (trim($value) === '') {
-                        $fail('The announcement message cannot be empty.');
-                    }
-                }],
-                'image' => 'nullable|string',
-                'timestamp' => 'nullable|string',
-                'userId' => 'required|exists:users,id',
-                'event_id' => 'nullable|exists:events,id',
-            ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['message' => $e->validator->errors()->first(), 'errors' => $e->errors()], 422);
+        if ($event) {
+            $query->where('event_id', $event->id);
         }
+
+        $announcements = $query->get();
+
+        return AnnouncementResource::collection($announcements);
+    }
+
+    public function store(StoreAnnouncementRequest $request, Event $event = null)
+    {
+        $validated = $request->validated();
 
         $imagePath = $this->saveImage($validated['image'] ?? null);
 
-        $a = Announcement::create([
-            'event_id' => $validated['event_id'] ?? null,
-            'user_id' => $validated['userId'],
+        $announcement = Announcement::create([
+            'event_id' => $event?->id ?? ($validated['event_id'] ?? null),
+            'user_id' => auth()->id(),
             'message' => $validated['message'],
             'image' => $imagePath,
-            'timestamp' => isset($validated['timestamp']) ? now()->parse($validated['timestamp']) : now(),
+            'timestamp' => now(),
         ]);
 
-        $a->load(['user:id,name', 'event:id,title']);
+        $announcement->load(['user:id,name', 'event:id,title']);
 
-        $resp = [
-            'id' => (string) $a->id,
-            'event_id' => $a->event_id,
-            'message' => $a->message,
-            'image' => $a->image,
-            'timestamp' => optional($a->timestamp)->toIso8601String(),
-            'userId' => $a->user_id,
-            'employee' => ['name' => optional($a->user)->name ?? 'Admin'],
-            'event' => $a->event_id ? ['id' => $a->event_id, 'title' => optional($a->event)->title] : null,
-        ];
-
-        return response()->json($resp, 201);
+        return new AnnouncementResource($announcement);
     }
 
-    public function storeForEvent(Request $request, $eventId)
+    public function update(UpdateAnnouncementRequest $request, Event $event = null, Announcement $announcement)
     {
-        $event = Event::find($eventId);
-        if (!$event) {
-            return $request->wantsJson()
-                ? response()->json(['message' => 'Event not found.'], 404)
-                : back()->with('error', 'Event not found.');
+        // If an event is part of the route, ensure the announcement belongs to it.
+        // This is a manual check that complements scoped bindings.
+        if ($event && $announcement->event_id !== $event->id) {
+            return response()->json(['message' => 'Announcement not found for this event.'], 404);
         }
 
-        try {
-            $validated = $request->validate([
-                'message' => ['required', 'string', function ($attribute, $value, $fail) {
-                    if (trim($value) === '') {
-                        $fail('The announcement message cannot be empty.');
-                    }
-                }],
-                'image' => 'nullable|string',
-                'timestamp' => 'nullable|string',
-                'userId' => 'required|exists:users,id',
-            ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            $errorMessage = $e->validator->errors()->first('message') ?? 'The given data was invalid.';
-            if ($request->wantsJson()) {
-                return response()->json(['message' => $errorMessage, 'errors' => $e->errors()], 422);
-            }
-            return back()->with('error', $errorMessage)->withInput();
-        }
+        $validated = $request->validated();
 
-        $imagePath = $this->saveImage($validated['image'] ?? null);
+        $announcement->message = $validated['message'];
+        $announcement->image = $this->saveImage($validated['image'] ?? null, $announcement->image);
+        $announcement->save();
 
-        $a = Announcement::create([
-            'event_id' => $event->id,
-            'user_id' => $validated['userId'],
-            'message' => $validated['message'],
-            'image' => $imagePath,
-            'timestamp' => isset($validated['timestamp']) ? now()->parse($validated['timestamp']) : now(),
-        ]);
+        $announcement->load(['user:id,name', 'event:id,title'])->refresh();
 
-        $a->load(['user:id,name', 'event:id,title']);
-
-        $resp = [
-            'id' => (string) $a->id,
-            'event_id' => $a->event_id,
-            'message' => $a->message,
-            'image' => $a->image,
-            'timestamp' => optional($a->timestamp)->toIso8601String(),
-            'userId' => $a->user_id,
-            'employee' => ['name' => optional($a->user)->name ?? 'Admin'],
-            'event' => ['id' => $a->event_id, 'title' => optional($a->event)->title],
-        ];
-
-        if ($request->wantsJson()) {
-            return response()->json($resp, 201);
-        }
-        return back()->with('success', 'Announcement posted.');
+        return new AnnouncementResource($announcement);
     }
 
-    public function update(Request $request, $announcementId)
+    public function destroy(Request $request, Event $event = null, Announcement $announcement)
     {
-        try {
-            $validated = $request->validate([
-                'message' => ['required', 'string', function ($attribute, $value, $fail) {
-                    if (trim($value) === '') {
-                        $fail('The announcement message cannot be empty.');
-                    }
-                }],
-                'image' => 'nullable|string',
-            ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            $errorMessage = $e->validator->errors()->first('message') ?? 'The given data was invalid.';
-            if ($request->wantsJson()) {
-                return response()->json(['message' => $errorMessage, 'errors' => $e->errors()], 422);
-            }
-            return back()->with('error', $errorMessage)->withInput();
+        // If an event is part of the route, ensure the announcement belongs to it.
+        if ($event && $announcement->event_id !== $event->id) {
+            return response()->json(['message' => 'Announcement not found for this event.'], 404);
         }
 
-        $a = Announcement::find($announcementId);
-        if (!$a) {
-            return response()->json(['message' => 'Announcement not found.'], 404);
+        if (!empty($announcement->image)) {
+            $this->deleteImage($announcement->image);
         }
+        $announcement->delete();
 
-        $a->message = $validated['message'];
-        $a->image = $this->saveImage($validated['image'] ?? null, $a->image);
-        $a->save();
-        $a->load(['user:id,name', 'event:id,title']);
-
-        $resp = [
-            'id' => (string) $a->id,
-            'event_id' => $a->event_id,
-            'message' => $a->message,
-            'image' => $a->image,
-            'timestamp' => optional($a->timestamp)->toIso8601String(),
-            'userId' => $a->user_id,
-            'employee' => ['name' => optional($a->user)->name ?? 'Admin'],
-            'event' => $a->event_id ? ['id' => $a->event_id, 'title' => optional($a->event)->title] : null,
-        ];
-
-        return response()->json($resp, 200);
-    }
-
-    public function updateForEvent(Request $request, $eventId, $announcementId)
-    {
-        try {
-            $validated = $request->validate([
-                'message' => ['required', 'string', function ($attribute, $value, $fail) {
-                    if (trim($value) === '') {
-                        $fail('The announcement message cannot be empty.');
-                    }
-                }],
-                'image' => 'nullable|string',
-            ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            $errorMessage = $e->validator->errors()->first('message') ?? 'The given data was invalid.';
-            if ($request->wantsJson()) {
-                return response()->json(['message' => $errorMessage, 'errors' => $e->errors()], 422);
-            }
-            return back()->with('error', $errorMessage)->withInput();
-        }
-
-        $a = Announcement::where('id', $announcementId)->where('event_id', $eventId)->first();
-        if (!$a) {
-            return response()->json(['message' => 'Announcement not found.'], 404);
-        }
-
-        $a->message = $validated['message'];
-        $a->image = $this->saveImage($validated['image'] ?? null, $a->image);
-        $a->save();
-        $a->load(['user:id,name', 'event:id,title']);
-
-        $resp = [
-            'id' => (string) $a->id,
-            'event_id' => $a->event_id,
-            'message' => $a->message,
-            'image' => $a->image,
-            'timestamp' => optional($a->timestamp)->toIso8601String(),
-            'userId' => $a->user_id,
-            'employee' => ['name' => optional($a->user)->name ?? 'Admin'],
-            'event' => ['id' => $a->event_id, 'title' => optional($a->event)->title],
-        ];
-
-        return response()->json($resp, 200);
-    }
-
-    public function destroy(Request $request, $announcementId)
-    {
-        $a = Announcement::find($announcementId);
-        if (!$a) {
-            if ($request->wantsJson()) {
-                return response()->json(['message' => 'Announcement not found.'], 404);
-            }
-            return back()->with('error', 'Announcement not found.');
-        }
-
-        if (!empty($a->image)) {
-            $this->deleteImage($a->image);
-        }
-        $a->delete();
-
-        if ($request->wantsJson()) {
-            return response()->json(['deleted' => true], 200);
-        }
-        return back()->with('success', 'Announcement removed.');
-    }
-
-    public function destroyForEvent(Request $request, $eventId, $announcementId)
-    {
-        $a = Announcement::where('id', $announcementId)->where('event_id', $eventId)->first();
-        if (!$a) {
-            if ($request->wantsJson()) {
-                return response()->json(['message' => 'Announcement not found.'], 404);
-            }
-            return back()->with('error', 'Announcement not found.');
-        }
-
-        if (!empty($a->image)) {
-            $this->deleteImage($a->image);
-        }
-        $a->delete();
-
-        if ($request->wantsJson()) {
-            return response()->json(['deleted' => 1]);
-        }
-        return back()->with('success', 'Announcement removed.');
+        return response()->json(['deleted' => true], 200);
     }
 }

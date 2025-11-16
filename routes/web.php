@@ -21,7 +21,8 @@ Route::inertia('/test', 'Test')->name('test');
 Route::prefix('api')->name('api.')->group(function () {
     Route::get('/events/{event}/brackets', [BracketController::class, 'indexForEvent'])->name('events.brackets');
     Route::get('/brackets', [BracketController::class, 'index'])->name('brackets.index');
-    Route::get('/events/{eventId}/announcements', [AnnouncementsController::class, 'indexForEvent'])->name('events.announcements.indexForEvent');
+    // Point event-specific and general announcement index routes to the same controller method.
+    Route::get('/events/{event}/announcements', [AnnouncementsController::class, 'index'])->name('events.announcements.index');
     Route::get('/announcements', [AnnouncementsController::class, 'index'])->name('announcements.index');
     Route::get('/events', [EventController::class, 'index'])->name('events.index'); // For fetching all events as JSON for guests
 });
@@ -44,11 +45,12 @@ Route::middleware('auth')->group(function () {
     Route::put('/events/{id}/update', [EventController::class, 'update'])->name('event.update');
     Route::put('/events/{id}/activities', [ActivitiesController::class, 'updateForEvent'])->name('events.activities.updateForEvent');
     Route::post('/announcements', [AnnouncementsController::class, 'store'])->name('announcements.store');
-    Route::put('/announcements/{announcementId}', [AnnouncementsController::class, 'update'])->name('announcements.update');
-    Route::delete('/announcements/{announcementId}', [AnnouncementsController::class, 'destroy'])->name('announcements.destroy');
-    Route::post('/events/{id}/announcements', [AnnouncementsController::class, 'storeForEvent'])->name('events.announcements.storeForEvent');
-    Route::put('/events/{id}/announcements/{announcementId}', [AnnouncementsController::class, 'updateForEvent'])->name('events.announcements.updateForEvent');
-    Route::delete('/events/{id}/announcements/{announcementId}', [AnnouncementsController::class, 'destroyForEvent'])->name('events.announcements.destroyForEvent');
+    Route::put('/announcements/{announcement}', [AnnouncementsController::class, 'update'])->name('announcements.update');
+    Route::delete('/announcements/{announcement}', [AnnouncementsController::class, 'destroy'])->name('announcements.destroy');
+    Route::post('/events/{event}/announcements', [AnnouncementsController::class, 'store'])->name('events.announcements.store');
+    // Use scoped bindings to ensure the announcement belongs to the event.
+    Route::put('/events/{event}/announcements/{announcement:id}', [AnnouncementsController::class, 'update'])->name('events.announcements.update');
+    Route::delete('/events/{event}/announcements/{announcement:id}', [AnnouncementsController::class, 'destroy'])->name('events.announcements.destroy');
 
     // Category and Tag routes
     Route::post('/categories', [CategoryController::class, 'store'])->name('category.store');
