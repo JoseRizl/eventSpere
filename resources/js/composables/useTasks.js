@@ -47,28 +47,29 @@ export function useTasks() {
 
   // Save logic
   // in useTasks.js
-  const saveTaskAssignments = async (onSuccessCallback) => {
+  const saveTaskAssignments = (tasksToSave, onSuccessCallback) => {
     if (!selectedEventForTasks.value) {
       throw new Error('No event selected');
     }
 
     const payload = {
-      tasks: taskAssignments.value.map(task => ({
-        committee_id: task.committee ? task.committee.id : null,
-        employees: (task.employees || []).map(emp => (emp && emp.id) ? emp.id : emp),
-        description: task.task || ''
-      })),
+      tasks: tasksToSave,
     };
 
-    try {
-      const response = await axios.put(route('tasks.updateForEvent', { id: selectedEventForTasks.value.id }), payload);
-      // Manually trigger an Inertia visit to refresh props after a successful axios call
-      router.reload({ onSuccess: onSuccessCallback });
-      return response.data;
-    } catch (error) {
-      // Re-throw the error to be caught by the component
-      throw error;
-    }
+    // Use Inertia's router for PUT requests. It handles everything automatically.
+    router.put(route('tasks.updateForEvent', { id: selectedEventForTasks.value.id }), payload, {
+      preserveScroll: true,
+      onSuccess: (page) => {
+        if (onSuccessCallback) {
+          onSuccessCallback(page);
+        }
+      },
+      onError: (errors) => {
+        // The component's catch block will not be hit, so we handle errors here if needed,
+        // but Inertia's form helper automatically makes errors available to the page.
+        console.error("Inertia PUT error:", errors);
+      },
+    });
   };
 
 

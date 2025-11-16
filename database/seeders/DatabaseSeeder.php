@@ -25,6 +25,8 @@ class DatabaseSeeder extends Seeder
         TagSeeder::class,
         EventSeeder::class,
         UserSeeder::class,
+        CommitteeSeeder::class,
+        EmployeeSeeder::class,
     ]);
     }
 }

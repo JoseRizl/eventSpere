@@ -239,7 +239,7 @@ watch(() => props.employees, (newVal) => {
 const isCommitteeInUse = computed(() => {
     return (committeeId) => {
         const usedInTasks = props.tasksManager.taskAssignments.value.some(t => t.committee?.id === committeeId);
-        const usedByEmployees = localEmployees.value.some(e => e.committeeId === committeeId);
+        const usedByEmployees = localEmployees.value.some(e => e.committee_id === committeeId);
         return usedInTasks || usedByEmployees;
     };
 });
@@ -320,7 +320,7 @@ const showUsageDetails = (committee) => {
         .filter(t => t.committee?.id === committee.id)
         .map(t => t.task || `Task ${props.tasksManager.taskAssignments.value.indexOf(t) + 1}`);
     committeeInUseDetails.value.employees = localEmployees.value
-        .filter(e => e.committeeId === committee.id)
+        .filter(e => e.committee_id === committee.id)
         .map(e => e.name);
     committeeUsageDialog.value.visible = true;
 };
@@ -345,39 +345,45 @@ const confirmDeleteCommittee = async () => {
     }
 };
 
-const handleSave = async () => {
+const handleSave = () => {
   isSaving.value = true;
   taskErrorMessage.value = null;
+
+  // Pre-process the payload to match backend expectations
   try {
-    // Frontend validation
-    for (const task of props.tasksManager.taskAssignments.value) {
+    const tasksToSave = props.tasksManager.taskAssignments.value.map(task => {
+      // Frontend validation
       if (!task.task || task.task.trim() === '') {
         throw new Error('Please provide a description for all tasks.');
       }
       if (!task.employees || task.employees.length === 0) {
         throw new Error('Please assign at least one employee to all tasks.');
       }
-    }
 
+      return {
+        description: task.task,
+        committee_id: task.committee ? task.committee.id : null,
+        employees: task.employees.map(e => e.id),
+      };
+    });
+
+    console.log('Saving tasks with payload:', tasksToSave);
     const onSuccess = (page) => {
       const newTasks = page.props.flash?.tasks || [];
       emit('save-success', { message: 'Tasks updated successfully!', tasks: newTasks });
     };
 
-    await props.tasksManager.saveTaskAssignments(onSuccess); // This will now throw on validation error
+    // Pass the correctly formatted payload to the save function
+    props.tasksManager.saveTaskAssignments(tasksToSave, onSuccess);
+
+    // Since router.put is not awaitable in the same way, we can't use a finally block
+    // based on its completion here. We'll rely on Inertia's events.
+    // A simple timeout can work for UI feedback if needed, or listen to Inertia's 'finish' event.
+    setTimeout(() => { isSaving.value = false; }, 2000); // Reset saving state after a delay
+
   } catch (err) {
-    let message = 'Failed to save tasks.';
-    if (err.response && err.response.data && err.response.data.errors) {
-        // Handle structured validation errors from Laravel
-        const errors = err.response.data.errors;
-        const firstErrorKey = Object.keys(errors)[0];
-        if (firstErrorKey && Array.isArray(errors[firstErrorKey])) {
-            message = errors[firstErrorKey][0];
-        }
-    }
-    else if (err?.message) message = err.message;
-    taskErrorMessage.value = message;
-  } finally {
+    // This will now only catch client-side errors, like the validation `throw`.
+    taskErrorMessage.value = err.message;
     isSaving.value = false;
   }
 };

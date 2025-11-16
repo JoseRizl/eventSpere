@@ -11,6 +11,8 @@ class Employee extends Model
 {
     use HasFactory;
 
+    protected $table = 'emport.employees';
+
     protected $fillable = ['name', 'committee_id'];
 
     public function committee(): BelongsTo
@@ -20,6 +22,6 @@ class Employee extends Model
 
     public function tasks(): BelongsToMany
     {
-        return $this->belongsToMany(Task::class, 'task_employee')->using(TaskEmployee::class);
+        return $this->belongsToMany(Task::class, 'emport.task_employee')->using(TaskEmployee::class);
     }
 }

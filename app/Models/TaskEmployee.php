@@ -11,7 +11,7 @@ class TaskEmployee extends Pivot
      *
      * @var string
      */
-    protected $table = 'task_employee';
+    protected $table = 'emport.task_employee';
 
     /**
      * Indicates if the model should be timestamped.

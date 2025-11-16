@@ -8,10 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('employees', function (Blueprint $table) {
+        Schema::create('emport.employees', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('committee_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('committee_id')->nullable()->constrained(table: 'committees')->onDelete('set null');
             $table->timestamps();
         });
     }
