@@ -18,7 +18,7 @@ class CategorySeeder extends Seeder
         ['title' => 'Academics & Educational Events', 'description' => 'Academic Events', 'allow_brackets' => false],
         ['title' => 'Commemorative', 'description' => 'Honoring special Events', 'allow_brackets' => false],
         ['title' => 'Sports & Physical Activities', 'description' => 'Sporting Events and competitions', 'allow_brackets' => true],
-        ['title' => 'Leisure', 'description' => 'Leisure, relaxation, and enjoyment', 'allow_brackets' => true],
+        ['title' => 'Leisure', 'description' => 'Leisure, relaxation, and enjoyment', 'allow_brackets' => false],
         ['title' => 'Seasonal & Community Events', 'description' => 'Seasonal Events', 'allow_brackets' => false],
         ['title' => 'Awareness Campaign', 'description' => 'Public Awareness', 'allow_brackets' => false],
         ['title' => 'Cultural & Arts Events', 'description' => 'Hfosanfmb sid sad asasf sdgsdf sadkljcxnjuoj rcbnbmn etyretuyioyt dgag w eqwfs qw cwvh vscqw sfvv cdfs v ngfd bjd ascdsb...', 'allow_brackets' => false],
