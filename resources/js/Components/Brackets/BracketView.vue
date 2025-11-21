@@ -28,8 +28,7 @@ const props = defineProps({
     openTiebreakerDialog: { type: Function, default: null },
     dismissTiebreakerNotice: { type: Function, default: null },
     dismissedTiebreakerNotices: { type: Set, default: () => new Set() },
-    playerColors: { type: Object, default: () => ({}) },
-    generatePlayerColor: { type: Function, default: () => null }
+    playerColors: { type: Object, required: true }
 });
 
 const emit = defineEmits(['repopulate-colors']);
@@ -383,6 +382,13 @@ const getPlayerStyling = (player, otherPlayer, match, part) => {
     return styling;
 };
 
+const generatePlayerColor = (playerName) => {
+    if (!playerName || playerName === 'TBD' || playerName === 'BYE' || playerName.includes('Winner') || playerName.includes('Loser')) {
+        return null;
+    }
+    return props.playerColors[playerName] || null;
+};
+
 const getMatchResultIndicator = (player, match) => {
     if (match.status !== 'completed' || !player || !player.id || player.name === 'BYE' || player.name === 'TBD') {
         return '';
@@ -537,6 +543,23 @@ const getLineStrokeWidth = (line) => {
     return line.isWinnerPath ? 3 : 2; // Thicker for winner
 };
 
+// Calculate cumulative winner match number across all rounds
+const getWinnerMatchNumber = (roundIdx, matchIdx) => {
+    if (!props.bracket.matches?.winners) return matchIdx + 1;
+
+    let cumulativeCount = 0;
+
+    // Add all matches from previous rounds
+    for (let i = 0; i < roundIdx; i++) {
+        cumulativeCount += props.bracket.matches.winners[i].length;
+    }
+
+    // Add current match index
+    cumulativeCount += matchIdx + 1;
+
+    return cumulativeCount;
+};
+
 // Get 3rd place (loser of lower bracket final)
 const getThirdPlaceWinner = () => {
     // Get 3rd place (loser of lower bracket final)
@@ -556,39 +579,21 @@ const getThirdPlaceWinner = () => {
     return loser ? loser.name : 'TBD';
 };
 
-// Calculate cumulative loser match number across all rounds
-const getLoserMatchNumber = (roundIdx, matchIdx) => {
-    if (!props.bracket.matches?.losers) return matchIdx + 1;
+const lowerBracketFinalMatchNumber = computed(() => {
+    if (!props.bracket.matches?.losers || props.bracket.matches.losers.length === 0) return 'X';
+    const lastLoserRound = props.bracket.matches.losers[props.bracket.matches.losers.length - 1];
+    if (!lastLoserRound || lastLoserRound.length === 0) return 'X';
+    const finalMatch = lastLoserRound[0];
+    return finalMatch?.match_number || 'X';
+});
 
-    let cumulativeCount = 0;
-
-    // Add all matches from previous rounds
-    for (let i = 0; i < roundIdx; i++) {
-        cumulativeCount += props.bracket.matches.losers[i].length;
-    }
-
-    // Add current match index
-    cumulativeCount += matchIdx + 1;
-
-    return cumulativeCount;
-};
-
-// Calculate cumulative winner match number across all rounds
-const getWinnerMatchNumber = (roundIdx, matchIdx) => {
-    if (!props.bracket.matches?.winners) return matchIdx + 1;
-
-    let cumulativeCount = 0;
-
-    // Add all matches from previous rounds
-    for (let i = 0; i < roundIdx; i++) {
-        cumulativeCount += props.bracket.matches.winners[i].length;
-    }
-
-    // Add current match index
-    cumulativeCount += matchIdx + 1;
-
-    return cumulativeCount;
-};
+const upperBracketFinalMatchNumber = computed(() => {
+    if (!props.bracket.matches?.winners || props.bracket.matches.winners.length === 0) return 'X';
+    const lastWinnerRound = props.bracket.matches.winners[props.bracket.matches.winners.length - 1];
+    if (!lastWinnerRound || lastWinnerRound.length === 0) return 'X';
+    const finalMatch = lastWinnerRound[0];
+    return finalMatch?.match_number || 'X';
+});
 
 const hasTiedRank1Players = computed(() => {
     if (!props.bracket.matches || props.bracket.type !== 'Round Robin') return false;
@@ -1742,7 +1747,7 @@ watch(() => props.bracket, () => {
                                             :class="['player-cell', getPlayerStyling(match.players[0], match.players[1], match, 'losers')]"
                                             @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'losers')"
                                         >
-                                            <span v-if="props.generatePlayerColor(match.players[0].name)" class="player-color-chip" :style="{ backgroundColor: props.generatePlayerColor(match.players[0].name) }"></span>
+                                            <span v-if="generatePlayerColor(match.players[0].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[0].name) }"></span>
                                             {{ truncate(match.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
                                         </div>
                                         <div
@@ -1750,7 +1755,7 @@ watch(() => props.bracket, () => {
                                             :class="['player-cell', getPlayerStyling(match.players[1], match.players[0], match, 'losers')]"
                                             @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'losers')"
                                         >
-                                            <span v-if="props.generatePlayerColor(match.players[1].name)" class="player-color-chip" :style="{ backgroundColor: props.generatePlayerColor(match.players[1].name) }"></span>
+                                            <span v-if="generatePlayerColor(match.players[1].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[1].name) }"></span>
                                             {{ truncate(match.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
                                         </div>
                                     </div>
@@ -1764,11 +1769,11 @@ watch(() => props.bracket, () => {
                                         </svg>
                                         <!-- Game Number in Circle -->
                                         <div class="match-label loser-label">
-                                            G{{ getLoserMatchNumber(roundIdx, matchIdx) }}
+                                            G{{ match.match_number }}
                                         </div>
                                         <!-- LG-x Label on Line -->
                                         <div class="line-label loser-line">
-                                            LG{{ getLoserMatchNumber(roundIdx, matchIdx) }}
+                                            LG{{ match.match_number }}
                                         </div>
                                     </div>
                                 </div>
@@ -1780,7 +1785,7 @@ watch(() => props.bracket, () => {
                                         </div>
                                     </div>
                                     <div class="third-place-note">
-                                        <span class="bracket-note">(Lower Bracket Final Loser)</span>
+                                        <span class="bracket-note">(Loser of G{{ lowerBracketFinalMatchNumber }} is 3rd place)</span>
                                     </div>
                                 </div>
                             </div>
@@ -1810,7 +1815,7 @@ watch(() => props.bracket, () => {
                                             :class="['player-cell', getPlayerStyling(match.players[0], match.players[1], match, 'winners')]"
                                             @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, 0, matchIdx, match, 'winners')"
                                         >
-                                            <span v-if="props.generatePlayerColor(match.players[0].name)" class="player-color-chip" :style="{ backgroundColor: props.generatePlayerColor(match.players[0].name) }"></span>
+                                            <span v-if="generatePlayerColor(match.players[0].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[0].name) }"></span>
                                             {{ truncate(match.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
                                         </div>
                                         <div
@@ -1818,7 +1823,7 @@ watch(() => props.bracket, () => {
                                             :class="['player-cell', getPlayerStyling(match.players[1], match.players[0], match, 'winners')]"
                                             @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, 0, matchIdx, match, 'winners')"
                                         >
-                                            <span v-if="props.generatePlayerColor(match.players[1].name)" class="player-color-chip" :style="{ backgroundColor: props.generatePlayerColor(match.players[1].name) }"></span>
+                                            <span v-if="generatePlayerColor(match.players[1].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[1].name) }"></span>
                                             {{ truncate(match.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
                                         </div>
                                     </div>
@@ -1832,11 +1837,11 @@ watch(() => props.bracket, () => {
                                         </svg>
                                         <!-- Game Number in Circle -->
                                         <div class="match-label winner-label">
-                                            G{{ getWinnerMatchNumber(0, matchIdx) }}
+                                            G{{ match.match_number }}
                                         </div>
                                         <!-- W-x Label on Line -->
                                         <div class="line-label winner-line">
-                                            W-{{ getWinnerMatchNumber(0, matchIdx) }}
+                                            W-{{ match.match_number }}
                                         </div>
                                     </div>
                                 </div>
@@ -1869,7 +1874,7 @@ watch(() => props.bracket, () => {
                                             :class="['player-cell', getPlayerStyling(match.players[0], match.players[1], match, 'winners')]"
                                             @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx + 1, matchIdx, match, 'winners')"
                                         >
-                                            <span v-if="props.generatePlayerColor(match.players[0].name)" class="player-color-chip" :style="{ backgroundColor: props.generatePlayerColor(match.players[0].name) }"></span>
+                                            <span v-if="generatePlayerColor(match.players[0].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[0].name) }"></span>
                                             {{ truncate(match.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
                                         </div>
                                         <div
@@ -1877,7 +1882,7 @@ watch(() => props.bracket, () => {
                                             :class="['player-cell', getPlayerStyling(match.players[1], match.players[0], match, 'winners')]"
                                             @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx + 1, matchIdx, match, 'winners')"
                                         >
-                                            <span v-if="props.generatePlayerColor(match.players[1].name)" class="player-color-chip" :style="{ backgroundColor: props.generatePlayerColor(match.players[1].name) }"></span>
+                                            <span v-if="generatePlayerColor(match.players[1].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[1].name) }"></span>
                                             {{ truncate(match.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
                                         </div>
                                     </div>
@@ -1891,11 +1896,11 @@ watch(() => props.bracket, () => {
                                         </svg>
                                         <!-- Game Number in Circle -->
                                         <div class="match-label winner-label">
-                                            G{{ getWinnerMatchNumber(roundIdx + 1, matchIdx) }}
+                                            G{{ match.match_number }}
                                         </div>
                                         <!-- W-x Label on Line -->
                                         <div class="line-label winner-line">
-                                            W-{{ getWinnerMatchNumber(roundIdx + 1, matchIdx) }}
+                                            W-{{ match.match_number }}
                                         </div>
                                     </div>
                                 </div>
@@ -1906,15 +1911,15 @@ watch(() => props.bracket, () => {
                     <!-- Bottom: Finals Section (spans all columns) -->
                     <div class="finals-bottom-row">
                         <div class="section-label finals-label">
-                            <span>GRAND FINALS</span>
+                            <span>FINALS</span>
                             <div class="finals-rules-notice">
                                 <div class="rule-item">
-                                    <span class="rule-icon">🏆</span>
-                                    <span>Upper Bracket Winner wins → <strong>Champion</strong></span>
+                                    <span class="rule-icon">👑</span>
+                                    <span>The winner {{ upperBracketFinalMatchNumber }} is undefeated. If they win this match, they are the <strong>Champion</strong>.</span>
                                 </div>
                                 <div class="rule-item">
                                     <span class="rule-icon">🔄</span>
-                                    <span>Lower Bracket Winner wins → <strong>Replay Match</strong></span>
+                                    <span>If the winner {{ lowerBracketFinalMatchNumber }} wins, this triggers a <strong>Replay</strong> for one final match.</span>
                                 </div>
                             </div>
                         </div>
@@ -1932,14 +1937,14 @@ watch(() => props.bracket, () => {
                                                 :class="['player-cell', getPlayerStyling(match.players[0], match.players[1], match, 'grand_finals')]"
                                                 @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'grand_finals')"
                                             >
-                                                <span v-if="props.generatePlayerColor(match.players[0].name)" class="player-color-chip" :style="{ backgroundColor: props.generatePlayerColor(match.players[0].name) }"></span>
+                                                <span v-if="generatePlayerColor(match.players[0].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[0].name) }"></span>
                                                 {{ truncate(match.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
                                             </div>
                                             <div
                                                 :class="['player-cell', getPlayerStyling(match.players[1], match.players[0], match, 'grand_finals')]"
                                                 @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'grand_finals')"
                                             >
-                                                <span v-if="props.generatePlayerColor(match.players[1].name)" class="player-color-chip" :style="{ backgroundColor: props.generatePlayerColor(match.players[1].name) }"></span>
+                                                <span v-if="generatePlayerColor(match.players[1].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[1].name) }"></span>
                                                 {{ truncate(match.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
                                             </div>
                                         </div>

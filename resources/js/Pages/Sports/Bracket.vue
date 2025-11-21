@@ -373,6 +373,13 @@ onMounted(async () => {
   }
 });
 
+// When navigating back to this page, the global `brackets` state might only contain
+// brackets from a specific event. We watch the user prop (which changes on navigation)
+// to detect this and refetch all brackets.
+watch(() => user.value, () => {
+    fetchBrackets();
+}, { immediate: false }); // `immediate: false` prevents it from running on initial load
+
 </script>
 
 <template>
@@ -490,7 +497,7 @@ onMounted(async () => {
             :onOpenTiebreakerDialog="openTiebreakerDialog"
             :onDismissTiebreakerNotice="dismissTiebreakerNotice"
             :dismissedTiebreakerNotices="dismissedTiebreakerNotices"
-            @toggle-bracket="toggleBracket"
+            @toggle-bracket="() => toggleBracket(bracket)"
             :isDeletingBracket="isDeletingBracket"
             @remove-bracket="removeBracket"
             @set-view-mode="({ index, mode }) => setBracketViewMode(index, mode)"

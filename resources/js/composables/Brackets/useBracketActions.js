@@ -296,9 +296,10 @@ export function useBracketActions(dataState) {
     bracketMatchFilters.value[bracketIdx] = filter;
   };
 
-  const handleByeRounds = (bracketIdx) => {
-    const bracket = brackets.value[bracketIdx];
+  const handleByeRounds = (bracket) => {
+    if (!bracket) return;
 
+    const bracketIdx = brackets.value.findIndex(b => b.id === bracket.id);
     // Round Robin handles BYE matches during generation, so skip here
     if (bracket.type === 'Round Robin') {
       return;
@@ -371,18 +372,31 @@ export function useBracketActions(dataState) {
     }
   };
 
-  const toggleBracket = (bracketIdx) => {
-    if (expandedBrackets.value[bracketIdx]) {
-      expandedBrackets.value[bracketIdx] = false;
-    } else {
-      expandedBrackets.value = expandedBrackets.value.map((_, idx) => idx === bracketIdx);
-      handleByeRounds(bracketIdx);
-      nextTick(() => updateLines(bracketIdx));
+  const toggleBracket = (bracket, localIndex = null) => {
+    let bracketIdx = brackets.value.findIndex(b => b.id === bracket.id);
 
-      const bracket = brackets.value[bracketIdx];
-      if (bracket.type === 'Single Elimination') {
+    // If the bracket is not in the global state (e.g., on EventDetails page),
+    // add it to ensure its UI state can be managed.
+    if (bracketIdx === -1) {
+        brackets.value.push(bracket);
+        // Use the local index if provided, otherwise use the new global index.
+        // This is crucial for EventDetails page where local and global indices differ.
+        bracketIdx = localIndex !== null ? localIndex : brackets.value.length - 1;
+    }
+
+    const finalIndex = localIndex !== null ? localIndex : bracketIdx;
+
+    if (expandedBrackets.value[finalIndex]) {
+      expandedBrackets.value[finalIndex] = false;
+    } else {
+      expandedBrackets.value = expandedBrackets.value.map((_, idx) => idx === finalIndex);
+      handleByeRounds(bracket);
+      nextTick(() => updateLines(finalIndex));
+
+      const bracketData = brackets.value[finalIndex];
+      if (bracketData.type === 'Single Elimination') {
         if (bracket.matches && bracket.matches.length > 0) {
-            const lastRound = bracket.matches[bracket.matches.length - 1];
+            const lastRound = bracketData.matches[bracketData.matches.length - 1];
             if (lastRound && lastRound.length > 0) {
                 const finalMatch = lastRound[0];
                 if (finalMatch.players[0].completed && finalMatch.players[1].completed) {
@@ -393,7 +407,7 @@ export function useBracketActions(dataState) {
             }
         }
       } else if (bracket.type === 'Double Elimination') {
-        const grandFinals = bracket.matches?.grand_finals;
+        const grandFinals = bracketData.matches?.grand_finals;
         if (!grandFinals || grandFinals.length === 0 || !grandFinals[0] || grandFinals[0].length === 0) return;
 
         const lastMatch = grandFinals[grandFinals.length - 1][0];
@@ -557,12 +571,9 @@ export function useBracketActions(dataState) {
     try {
       let response;
       if (eventId) {
-        // This route is not yet updated for normalized data, so we'll use the main one for now.
-        // We can filter client-side.
-        response = await axios.get(route('api.brackets.index'));
+        response = await axios.get(route('api.events.brackets.index', { event: eventId }), { headers: { 'Accept': 'application/json' } });
       } else {
-        // Fetch all brackets (requires auth)
-        response = await axios.get(route('api.brackets.index'));
+        response = await axios.get(route('api.brackets.index'), { headers: { 'Accept': 'application/json' } });
       }
 
       if (response.data && response.data.brackets) {
@@ -571,11 +582,7 @@ export function useBracketActions(dataState) {
         const allMatches = db.matches || [];
         const allMatchPlayers = db.matchPlayers || [];
 
-        // Filter brackets if an eventId is provided
-        const sourceBrackets = eventId
-            ? db.brackets.filter(b => b.event_id === eventId)
-            : db.brackets;
-
+        const sourceBrackets = db.brackets;
         const composedBrackets = await Promise.all(
           sourceBrackets.map(async (bracket) => {
             const eventDetails = await fetchEventDetails(bracket.event_id);
@@ -674,6 +681,8 @@ export function useBracketActions(dataState) {
         );
 
         brackets.value = composedBrackets;
+
+        // Ensure UI state arrays are long enough for any new brackets.
         uiState.initializeBracketUIState(brackets.value.length);
       }
     } catch (error) {
@@ -820,27 +829,27 @@ export function useBracketActions(dataState) {
     return rounds;
   };
 
-  const generateDoubleEliminationBracket = () => {
+const generateDoubleEliminationBracket = () => {
     const numPlayers = parseInt(numberOfPlayers.value, 10);
     const totalSlots = Math.pow(2, Math.ceil(Math.log2(numPlayers)));
     const totalByes = totalSlots - numPlayers;
 
     // --- Create players & BYEs ---
     const players = Array.from({ length: numPlayers }, (_, i) => ({
-      id: generateId(),
-      name: `Player ${i + 1}`,
-      score: 0,
-      completed: false,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+        id: generateId(),
+        name: `Player ${i + 1}`,
+        score: 0,
+        completed: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
     }));
     const byes = Array.from({ length: totalByes }, () => ({
-      id: generateId(),
-      name: 'BYE',
-      score: 0,
-      completed: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+        id: generateId(),
+        name: 'BYE',
+        score: 0,
+        completed: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
     }));
 
     // Seeding order
@@ -850,221 +859,159 @@ export function useBracketActions(dataState) {
 
     const winnersSlots = Array(totalSlots).fill(null);
     const seedingOrder = getSeedingOrder(totalSlots);
-    for (let i = 0; i < totalSlots; i++) {
-      winnersSlots[i] = seedToParticipant.get(seedingOrder[i]);
-    }
+    for (let i = 0; i < totalSlots; i++) winnersSlots[i] = seedToParticipant.get(seedingOrder[i]);
 
     // --- Winners Bracket Generation ---
     const winnersRounds = [];
     let currentRound = [];
     for (let i = 0; i < totalSlots; i += 2) {
-      currentRound.push({
-        id: generateId(),
-        round: 1,
-        match_number: i / 2 + 1,
-        bracket_type: 'winners',
-        players: [winnersSlots[i], winnersSlots[i + 1]],
-        winner_id: null,
-        loser_id: null,
-        status: 'pending',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        date: selectedEvent.value.startDate, // Date defaults to event start date
-        time: null, // Time is unset by default
-        venue: selectedEvent.value.venue,
-      });
+        currentRound.push({
+            id: generateId(),
+            round: 1,
+            bracket_type: 'winners',
+            players: [winnersSlots[i], winnersSlots[i + 1]],
+            winner_id: null, loser_id: null, status: 'pending',
+            created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+            date: selectedEvent.value.startDate, time: null, venue: selectedEvent.value.venue,
+        });
     }
     winnersRounds.push(currentRound);
 
     while (currentRound.length > 1) {
-      const nextRound = Array.from({ length: Math.ceil(currentRound.length / 2) }, (_, i) => {
-        // Calculate source game numbers
-        const match1Idx = i * 2;
-        const match2Idx = i * 2 + 1;
-
-        // For R1 (first round), use match numbers directly (1, 2, 3, 4)
-        // For later rounds, calculate cumulative game numbers
-        let match1GameNum, match2GameNum;
-
-        // Calculate cumulative game number (total matches before the *previous* round)
-        let gamesBeforePrevRound = 0;
-        for (let r = 0; r < winnersRounds.length - 1; r++) {
-            gamesBeforePrevRound += winnersRounds[r].length;
-        }
-
-        if (winnersRounds.length === 1) {
-          // R1 -> WR2: The game numbers are simply the match numbers from R1.
-          match1GameNum = currentRound[match1Idx].match_number;
-          match2GameNum = currentRound[match2Idx].match_number;
-        } else {
-          // WR2+ -> WR3+: The game numbers are cumulative from all previous rounds.
-          match1GameNum = gamesBeforePrevRound + currentRound[match1Idx].match_number;
-          match2GameNum = gamesBeforePrevRound + currentRound[match2Idx].match_number;
-        }
-
-        return {
-          id: generateId(),
-          round: winnersRounds.length + 1,
-          match_number: i + 1,
-          bracket_type: 'winners',
-          players: [
-            { id: null, name: `G${match1GameNum} Winner`, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-            { id: null, name: `G${match2GameNum} Winner`, score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-          ],
-          winner_id: null,
-          loser_id: null,
-          status: 'pending',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          date: selectedEvent.value.startDate,
-          time: null,
-          venue: selectedEvent.value.venue,
-        };
-      });
-      winnersRounds.push(nextRound);
-      currentRound = nextRound;
+        const nextRound = Array.from({ length: Math.ceil(currentRound.length / 2) }, () => ({
+            id: generateId(),
+            round: winnersRounds.length + 1,
+            bracket_type: 'winners',
+            players: [
+                { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+                { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+            ],
+            winner_id: null, loser_id: null, status: 'pending',
+            created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+            date: selectedEvent.value.startDate, time: null, venue: selectedEvent.value.venue,
+        }));
+        winnersRounds.push(nextRound);
+        currentRound = nextRound;
     }
 
     // --- Losers Bracket Generation ---
     const losersRounds = [];
     const numWinnerRounds = winnersRounds.length;
     const totalLoserRounds = 2 * (numWinnerRounds - 1);
-
-    // Step 1: Generate the full, empty structure of the losers bracket based on total slots.
-    // This ensures the structure is correct regardless of the number of players or byes.
     for (let i = 0; i < totalLoserRounds; i++) {
-      // The number of matches halves for every "minor" consolidation round (LR3, LR5, etc.)
-      // which are at even-numbered indices (i=2, 4, ...).
-      const matchCount = totalSlots / Math.pow(2, Math.floor(i / 2) + 2);
-
-      if (matchCount < 1) continue;
-
-      const round = Array.from({ length: matchCount }, (_, j) => ({
-        id: generateId(),
-        round: i + 1,
-        match_number: j + 1,
-        bracket_type: 'losers',
-        players: [
-          { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-          { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-        ],
-        winner_id: null, loser_id: null, status: 'pending',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        date: selectedEvent.value.startDate, // Date defaults to event start date
-        time: null, // Time is unset by default
-        venue: selectedEvent.value.venue,
-      }));
-      losersRounds.push(round);
-    }
-
-    // Step 2: Populate Losers Bracket with placeholders for players dropping from Winners Bracket
-    // Mapping rules (0-based indices):
-    // - WR1 (wrRoundIdx=0) losers drop into LR1 (lrRoundIdx=0), pairing sequential non-BYE WR1 matches: [0&1] -> LR1-0, [2&3] -> LR1-1, ...
-    //   We compress indices by skipping WR1 matches that are BYE vs someone (they produce no loser).
-    // - WRr (wrRoundIdx>=1) losers drop into LR(2r-1) with same match index and in the second player slot (index 1).
-    for (let wrRoundIdx = 0; wrRoundIdx < winnersRounds.length - 1; wrRoundIdx++) {
-        const winnersRound = winnersRounds[wrRoundIdx];
-
-        if (wrRoundIdx === 0) {
-          // Handle WR1 -> LR1 with the 1v3, 2v4, 5v7, 6v8 pairing
-          const lrRoundIdx = 0; // LR1
-          const numLoserMatches = losersRounds[lrRoundIdx].length;
-
-          // Iterate through all WR1 matches to assign their losers to the correct LR1 slot
-          winnersRound.forEach((wrMatch, wrMatchIdx) => {
-              // These formulas implement the cross-pairing pattern:
-              // Loser of WR1-M0 (G1) -> LR1-M0, P0
-              // Loser of WR1-M1 (G2) -> LR1-M1, P0
-              // Loser of WR1-M2 (G3) -> LR1-M0, P1
-              // Loser of WR1-M3 (G4) -> LR1-M1, P1
-              // ...and so on
-              const lrMatchIdx = Math.floor(wrMatchIdx / 4) * 2 + (wrMatchIdx % 2);
-              const lrPlayerPos = Math.floor((wrMatchIdx % 4) / 2);
-
-              if (lrMatchIdx < numLoserMatches) {
-                  const lrMatch = losersRounds[lrRoundIdx][lrMatchIdx];
-                  if (lrMatch) lrMatch.players[lrPlayerPos].name = `G${wrMatch.match_number} Loser`;
-              }
-          });
-        } else {
-            // WR2+ -> LR(2r-1), ALTERNATING STRAIGHT/CROSSED PATTERN
-            const lrRoundIdx = (wrRoundIdx * 2) - 1;
-            const numMatches = winnersRound.length;
-
-            // Calculate cumulative game number (total matches before this round)
-            let gamesBeforeThisRound = 0;
-            for (let r = 0; r < wrRoundIdx; r++) {
-                gamesBeforeThisRound += winnersRounds[r].length;
-            }
-
-            winnersRound.forEach((wrMatch, wrMatchIdx) => {
-                // SPLIT-CROSS PATTERN: Pairs cross within themselves
-                // For 4 matches: 0→1, 1→0, 2→3, 3→2
-                // For 2 matches: 0→1, 1→0
-                let lrMatchIdx;
-                if (numMatches === 1) {
-                    lrMatchIdx = 0;
-                } else {
-                    // Cross within pairs
-                    const pairIdx = Math.floor(wrMatchIdx / 2);
-                    const posInPair = wrMatchIdx % 2;
-                    const pairStart = pairIdx * 2;
-
-                    if (posInPair === 0) {
-                        lrMatchIdx = pairStart + 1;
-                    } else {
-                        lrMatchIdx = pairStart;
-                    }
-                }
-                const lrPlayerPos = 1;
-
-                // Calculate actual game number (cumulative)
-                const actualGameNumber = gamesBeforeThisRound + wrMatchIdx + 1;
-
-                const loserPlaceholder = {
-                    id: null,
-                    name: `G${actualGameNumber} Loser`,
-                    score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
-                };
-                if (losersRounds[lrRoundIdx] && losersRounds[lrRoundIdx][lrMatchIdx]) {
-                    losersRounds[lrRoundIdx][lrMatchIdx].players[lrPlayerPos] = loserPlaceholder;
-                }
-            });
-        }
+        const matchCount = totalSlots / Math.pow(2, Math.floor(i / 2) + 2);
+        if (matchCount < 1) continue;
+        const round = Array.from({ length: matchCount }, () => ({
+            id: generateId(),
+            round: i + 1,
+            bracket_type: 'losers',
+            players: [
+                { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+                { id: null, name: 'TBD', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+            ],
+            winner_id: null, loser_id: null, status: 'pending',
+            created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+            date: selectedEvent.value.startDate, time: null, venue: selectedEvent.value.venue,
+        }));
+        losersRounds.push(round);
     }
 
     // --- Grand Finals ---
-    const grandFinals = [ // grandFinals is an array of rounds
+    const grandFinals = [
         [{
             id: generateId(),
             round: 1,
-            match_number: 1,
             bracket_type: 'grand_finals',
             players: [
-            { id: null, name: 'UB Winner', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-            { id: null, name: 'LB Winner', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+                { id: null, name: 'UB Winner', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+                { id: null, name: 'LB Winner', score: 0, completed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
             ],
             winner_id: null, loser_id: null, status: 'pending',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-            date: selectedEvent.value.startDate, // Date defaults to event start date
-            time: null, // Time is unset by default
-            venue: selectedEvent.value.venue,
+            date: selectedEvent.value.startDate, time: null, venue: selectedEvent.value.venue,
         }]
     ];
 
-    // Step 3: Keep TBD for losers bracket position 0 (no winner indicators shown)
-    // Winner indicators are only shown in Grand Finals
-    // Position 0 in losers bracket will remain as TBD until match is completed
+    // --- Assign continuous match numbers in an alternating order ---
+    let matchNumberCounter = 1;
+    const maxRounds = Math.max(winnersRounds.length, losersRounds.length);
+    for (let i = 0; i < maxRounds; i++) {
+        if (winnersRounds[i]) winnersRounds[i].forEach(match => match.match_number = matchNumberCounter++);
+        if (losersRounds[i]) losersRounds[i].forEach(match => match.match_number = matchNumberCounter++);
+    }
+    grandFinals[0][0].match_number = matchNumberCounter++;
+
+    // --- Populate all placeholders now that match numbers are assigned ---
+    // Winners Bracket placeholders
+    for (let r = 1; r < winnersRounds.length; r++) {
+        const round = winnersRounds[r];
+        const prevRound = winnersRounds[r - 1];
+        round.forEach((match, i) => {
+            const parentMatch1 = prevRound[i * 2];
+            const parentMatch2 = prevRound[i * 2 + 1];
+            if (parentMatch1) match.players[0].name = `Winner of G${parentMatch1.match_number}`;
+            if (parentMatch2) match.players[1].name = `Winner of G${parentMatch2.match_number}`;
+        });
+    }
+
+    // Losers Bracket placeholders
+    for (let r = 0; r < losersRounds.length; r++) {
+        const round = losersRounds[r];
+        round.forEach((match, i) => {
+            // Player 1 comes from previous losers round (except for some rounds)
+            if (r > 0 && r % 2 === 0) { // LR3, LR5, etc. (consolidation rounds)
+                const prevLRound = losersRounds[r - 1];
+                const parentMatch1 = prevLRound[i * 2];
+                const parentMatch2 = prevLRound[i * 2 + 1];
+                if (parentMatch1) match.players[0].name = `Winner of G${parentMatch1.match_number}`;
+                if (parentMatch2) match.players[1].name = `Winner of G${parentMatch2.match_number}`;
+            } else if (r > 0) { // LR2, LR4, etc. (dropout rounds)
+                const prevLRound = losersRounds[r - 1];
+                const parentMatch = prevLRound[i];
+                if (parentMatch) match.players[0].name = `Winner of G${parentMatch.match_number}`;
+            }
+
+            // Player 2 comes from winners bracket (for some rounds)
+            if (r === 0) { // LR1
+                const wr1MatchIdx1 = Math.floor(i / 2) * 4 + (i % 2);
+                const wr1MatchIdx2 = wr1MatchIdx1 + 2;
+                const parentMatch1 = winnersRounds[0][wr1MatchIdx1];
+                const parentMatch2 = winnersRounds[0][wr1MatchIdx2];
+                if (parentMatch1) match.players[0].name = `Loser of G${parentMatch1.match_number}`;
+                if (parentMatch2) match.players[1].name = `Loser of G${parentMatch2.match_number}`;
+            } else if (r % 2 !== 0) { // LR2, LR4, etc.
+                const wrRoundIdx = (r + 1) / 2;
+                const wrRound = winnersRounds[wrRoundIdx];
+                const pairIdx = Math.floor(i / 2);
+                const posInPair = i % 2;
+                const parentMatchIdx = (posInPair === 0) ? (pairIdx * 2) + 1 : (pairIdx * 2);
+                const parentMatch = wrRound[parentMatchIdx];
+                if (parentMatch) match.players[1].name = `Loser of G${parentMatch.match_number}`;
+            }
+        });
+    }
+
+    // Special case for the final losers bracket match, which receives the loser from the winners bracket final
+    const finalLosersRound = losersRounds[losersRounds.length - 1];
+    const finalWinnersMatch = winnersRounds[winnersRounds.length - 1][0];
+    if (finalLosersRound && finalLosersRound[0] && finalWinnersMatch) {
+        // The loser of the winners final drops into the second player slot of the losers final
+        finalLosersRound[0].players[1].name = `Loser of G${finalWinnersMatch.match_number}`;
+    }
+
+    // Grand Finals placeholders
+    grandFinals[0][0].players[0].name = `Winner of G${winnersRounds[winnersRounds.length - 1][0].match_number}`;
+    grandFinals[0][0].players[1].name = `Winner of G${losersRounds[losersRounds.length - 1][0].match_number}`;
 
     return { winners: winnersRounds, losers: losersRounds, grand_finals: grandFinals };
-  };
+};
 
   const getBracketStats = (bracket) => {
   const allMatches = getAllMatches(bracket);
+  const totalGames = allMatches.length;
   if (!allMatches || allMatches.length === 0) {
-    return { status: { text: 'Upcoming', class: 'status-upcoming' }, participants: 0, rounds: 0, winnerName: null };
+    return { status: { text: 'Upcoming', class: 'status-upcoming' }, participants: 0, rounds: 0, winnerName: null, totalGames: 0 };
   }
 
   const hasScores = allMatches.some(m => m.players.some(p => p.score > 0));
@@ -1152,7 +1099,8 @@ export function useBracketActions(dataState) {
     status,
     participants,
     rounds,
-    winnerName
+    winnerName,
+    totalGames
   };
 };
 

@@ -19,7 +19,7 @@ Route::inertia('/test', 'Test')->name('test');
 
 // Public API routes (accessible without authentication)
 Route::prefix('api')->name('api.')->group(function () {
-    Route::get('/events/{event}/brackets', [BracketController::class, 'indexForEvent'])->name('events.brackets');
+    Route::get('/events/{event}/brackets', [BracketController::class, 'indexForEvent'])->name('events.brackets.index');
     Route::get('/brackets', [BracketController::class, 'index'])->name('brackets.index');
     // Point event-specific and general announcement index routes to the same controller method.
     Route::get('/events/{event}/announcements', [AnnouncementsController::class, 'index'])->name('events.announcements.index');

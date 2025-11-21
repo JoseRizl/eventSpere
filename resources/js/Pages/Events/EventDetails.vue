@@ -57,6 +57,7 @@ const showDeleteScheduleConfirm = ref(false);
 const originalEventDetails = ref(null);
 const searchQuery = ref('');
 const scheduleToDelete = ref(null);
+const isLoadingBrackets = ref(true);
 
 // Announcement search
 const announcementSearchQuery = ref('');
@@ -141,7 +142,7 @@ const {
   // Actions
   fetchBrackets,
   handleByeRounds,
-  updateLines,
+  // updateLines, // We will call this from a modified toggleBracket
   isFinalRound,
   getRoundRobinStandings,
   isRoundRobinConcluded,
@@ -149,7 +150,7 @@ const {
   proceedWithMatchUpdate,
   openScoringConfigDialog,
   closeScoringConfigDialog,
-  saveScoringConfig,
+  // saveScoringConfig,
   toggleBracket,
   setBracketViewMode,
   setBracketMatchFilter,
@@ -169,14 +170,6 @@ const {
   standingsRevision,
 } = useBracketActions(bracketState);
 
-const relatedBrackets = computed(() => {
-  if (!brackets.value || !props.event) {
-    return [];
-  }
-  return brackets.value.filter(bracket => bracket.event_id === props.event.id);
-});
-
-
 const selectedBracketForDialog = computed(() => {
   if (selectedMatch.value) {
     const bracket = brackets.value[selectedMatch.value.bracketIdx];
@@ -186,12 +179,12 @@ const selectedBracketForDialog = computed(() => {
   }
 });
 
-const filteredRelatedBrackets = computed(() => {
+const filteredBrackets = computed(() => {
   if (!searchQuery.value) {
-    return relatedBrackets.value;
+    return brackets.value;
   }
   const query = searchQuery.value.toLowerCase().trim();
-  return relatedBrackets.value.filter(bracket => {
+  return brackets.value.filter(bracket => {
     const bracketNameMatch = bracket.name?.toLowerCase().includes(query);
     const bracketTypeMatch = bracket.type?.toLowerCase().includes(query);
     return bracketNameMatch || bracketTypeMatch;
@@ -328,22 +321,10 @@ onMounted(() => {
     eventAnnouncements.value = [...props.preloadedAnnouncements];
   }
 
-  //fetch brackets
-  fetchBrackets(props.event.id);
-});
-
-watch(relatedBrackets, (newBrackets) => {
-  newBrackets.forEach(bracket => {
-    const originalIndex = brackets.value.findIndex(b => b.id === bracket.id);
-    if (originalIndex !== -1) {
-      if (expandedBrackets.value[originalIndex] === undefined) {
-        expandedBrackets.value[originalIndex] = true; // Expand by default
-      }
-      handleByeRounds(originalIndex);
-      nextTick(() => {
-        updateLines(originalIndex);
-      });
-    }
+  isLoadingBrackets.value = true;
+  // Fetch and populate local brackets for this event
+  fetchBrackets(props.event.id).finally(() => {
+    isLoadingBrackets.value = false;
   });
 });
 
@@ -1043,9 +1024,30 @@ const getBracketIndex = (bracketId) => {
         </div>
 
       <!-- Brackets Section -->
-      <div v-if="relatedBrackets.length > 0" class="mx-auto mt-6">
+      <div v-if="isLoadingBrackets" class="mx-auto mt-6">
+          <h2 class="section-title mb-0">Games</h2>
+          <div class="bracket-section mt-4">
+              <div class="bracket-wrapper">
+                  <div class="bracket-header compact-v2">
+                      <div class="flex justify-between items-start w-full">
+                          <div class="flex-grow">
+                              <Skeleton width="12rem" height="1.6rem" />
+                              <div class="info-tags flex gap-2 mt-2">
+                                  <Skeleton width="7rem" height="1.25rem" borderRadius="1rem" />
+                                  <Skeleton width="5rem" height="1.25rem" borderRadius="1rem" />
+                              </div>
+                          </div>
+                          <div class="bracket-controls flex gap-2">
+                              <Skeleton shape="circle" size="2.5rem" />
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <div v-else-if="brackets.length > 0" class="mx-auto mt-6">
         <h2 class="section-title mb-0">Games</h2>
-        <div v-if="relatedBrackets.length > 1" class="my-4">
+        <div v-if="brackets.length > 1" class="my-4">
             <SearchFilterBar
                 v-model:searchQuery="searchQuery"
                 placeholder="Search games..."
@@ -1053,7 +1055,7 @@ const getBracketIndex = (bracketId) => {
                 :show-clear-button="!!searchQuery"
                 @clear-filters="searchQuery = ''" />
         </div>
-        <div v-if="filteredRelatedBrackets.length === 0" class="no-brackets-message">
+        <div v-if="filteredBrackets.length === 0" class="no-brackets-message">
             <div class="icon-and-title">
                 <i class="pi pi-search" style="font-size: 1.5rem; color: #007bff; margin-right: 10px;"></i>
                 <h2 class="no-brackets-title">No Games Found</h2>
@@ -1062,14 +1064,14 @@ const getBracketIndex = (bracketId) => {
         </div>
         <div v-else>
             <BracketCard
-                v-for="bracket in filteredRelatedBrackets"
+                v-for="(bracket, index) in filteredBrackets"
                 :key="bracket.id"
                 :bracket="bracket"
-                :bracketIndex="getBracketIndex(bracket.id)"
+                :bracketIndex="index"
                 :user="user"
-                :isExpanded="expandedBrackets[getBracketIndex(bracket.id)]"
-                :viewMode="bracketViewModes[getBracketIndex(bracket.id)]"
-                :matchFilter="bracketMatchFilters[getBracketIndex(bracket.id)]"
+                :isExpanded="expandedBrackets[index] || false"
+                :viewMode="bracketViewModes[index]"
+                :matchFilter="bracketMatchFilters[index]"
                 :standingsRevision="standingsRevision"
                 :getBracketStats="getBracketStats"
                 :getBracketTypeClass="getBracketTypeClass"
@@ -1080,7 +1082,7 @@ const getBracketIndex = (bracketId) => {
                 :onOpenMatchDialog="user ? openMatchDialog : null"
                 :onOpenScoringConfigDialog="user ? openScoringConfigDialog : null"
                 :onOpenMatchEditorFromCard="user ? openMatchEditorFromCard : null"
-                @toggle-bracket="toggleBracket"
+                @toggle-bracket="() => toggleBracket(bracket, index)"
                 @set-view-mode="({ index, mode }) => setBracketViewMode(index, mode)"
                 @set-match-filter="({ index, filter }) => setBracketMatchFilter(index, filter)"
                 :showEventLink="false"

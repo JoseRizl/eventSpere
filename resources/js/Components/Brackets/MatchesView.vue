@@ -86,6 +86,9 @@ const groupedMatches = computed(() => {
             ...(bracket.matches.losers || []).flat(),
             ...(bracket.matches.grand_finals || []).flat()
         ];
+        // For Double Elimination, sort all matches globally by their match_number first
+        // to get the alternating order (WR1, LR1, WR2, LR2, etc.).
+        allMatchesUnsorted.sort((a, b) => a.match_number - b.match_number);
     }
 
     const roundGroups = new Map();
@@ -106,8 +109,10 @@ const groupedMatches = computed(() => {
         }
 
         if (filteredMatches.length > 0) {
-            // Sort matches by match_number only (natural order)
-            filteredMatches.sort((a, b) => a.match_number - b.match_number);
+            // For Single Elim/Round Robin, sort within the group.
+            if (bracket.type !== 'Double Elimination') {
+                filteredMatches.sort((a, b) => a.match_number - b.match_number);
+            }
             result.push({ title, matches: filteredMatches });
         }
     });
@@ -119,7 +124,7 @@ const getMatchIdentifier = (match) => {
     if (!match || typeof match.match_number === 'undefined') {
         return '';
     }
-    return `Match ${match.match_number}`;
+    return `Game ${match.match_number}`;
 };
 
 </script>

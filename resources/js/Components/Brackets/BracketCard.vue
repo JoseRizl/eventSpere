@@ -83,6 +83,7 @@ const isSavingPlayers = ref(false);
 const showDuplicatePlayerError = ref(false);
 const showSaveConfirm = ref(false);
 let originalPlayerColors = {};
+const bracketViewKey = ref(0);
 
 const generatePlayerColor = (playerName) => {
     if (!playerName || playerName === 'TBD' || playerName === 'BYE' || playerName.includes('Winner') || playerName.includes('Loser')) {
@@ -106,26 +107,37 @@ const generatePlayerColor = (playerName) => {
 };
 
 const populateInitialColors = () => {
+    // Clear existing colors to prevent stale data on bracket change
+    playerColors.value = {};
+
     const processMatches = (matches) => {
         if (!matches) return;
         matches.flat().forEach(match => {
             if (match && match.players) {
                 match.players.forEach(player => {
+                    // If player has a color from the DB, use it
                     if (player && player.name && player.color && !playerColors.value[player.name]) {
                         playerColors.value[player.name] = player.color;
+                    } else {
+                        // Otherwise, generate a color for them
+                        generatePlayerColor(player.name);
                     }
                 });
             }
         });
     };
+
+    // Process all parts of the bracket
     processMatches(props.bracket.matches?.winners);
     processMatches(props.bracket.matches?.losers);
     processMatches(props.bracket.matches?.grand_finals);
+    // Also handle Single Elim and Round Robin
+    if (Array.isArray(props.bracket.matches)) {
+        processMatches(props.bracket.matches);
+    }
 };
 
 const openPlayerEditModal = () => {
-    populateInitialColors(); // Ensure colors are populated before opening
-
     const players = new Set();
 
     const addPlayersFromMatches = (matches) => {
@@ -245,9 +257,17 @@ const proceedWithSave = async () => {
     isSavingPlayers.value = false;
     showPlayerEditModal.value = false;
     showSaveConfirm.value = false; // Ensure confirm dialog is closed
+
+    // Force BracketView to re-render with updated colors
+    bracketViewKey.value++;
 };
 
-onMounted(populateInitialColors);
+onMounted(() => {
+    populateInitialColors();
+});
+
+// Watch for bracket changes to re-populate colors
+watch(() => props.bracket, populateInitialColors, { deep: true, immediate: true });
 
 const handleRepopulateColors = () => {
     playerColors.value = {};
@@ -328,6 +348,10 @@ const handleRepopulateColors = () => {
                         <i class="pi pi-sitemap"></i>
                         <span>{{ getBracketStats(bracket).rounds }} Rounds</span>
                     </div>
+                    <div class="stat-item">
+                        <i class="pi pi-server"></i>
+                        <span>{{ getBracketStats(bracket).totalGames }} Matches</span>
+                    </div>
                 </div>
             </div>
 
@@ -353,6 +377,7 @@ const handleRepopulateColors = () => {
 
                <BracketView
                     ref="bracketViewRef"
+                    :key="bracketViewKey"
                     v-show="viewMode !== 'matches'"
                     :bracket="bracket"
                     :bracketIndex="bracketIndex"
