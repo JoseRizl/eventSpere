@@ -1822,7 +1822,6 @@
 
 @media (max-width: 768px) {
     .double-elimination-bracket {
-        flex-direction: column;
     }
 
     .bracket-section.winners,
@@ -1908,32 +1907,25 @@
         padding: 0.15rem 0.5rem;
     }
 
-    /* Ensure bracket has a min-width to allow scrolling */
+    /* Let the zoom handle the width, remove min-width to prevent scrolling */
     .bracket {
-        min-width: 768px; /* Adjust as needed for better viewing */
+        /* min-width is removed to allow zoom to work */
     }
 
-    /* Ensure split bracket layout is scrollable on mobile */
     .split-bracket-container-horizontal {
-        min-width: 1400px; /* Adjust as needed */
+        /* min-width is removed to allow zoom to work */
     }
 
     /* Hide dotted dropout lines on mobile for a cleaner look */
     .dropout-lines-layer {
         display: none;
     }
-}
 
-@media (max-width: 768px) {
     .double-elimination-bracket {
-        flex-direction: column;
+        /* flex-direction: column; */ /* Removed to let zoom handle layout */
         flex-wrap: nowrap;
-        /* Ensure it doesn't take full width on mobile to allow scrolling */
         width: auto;
         align-items: flex-start;
-    }
-    .bracket {
-        min-width: 768px;
     }
 }
 
