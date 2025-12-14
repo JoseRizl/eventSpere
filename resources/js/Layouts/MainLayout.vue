@@ -18,6 +18,13 @@ const hideHeader = ref(false);
 
 const sidebarWidth = 'w-64';
 
+const sidebarBackgroundStyle = computed(() => {
+    const patternUrl = "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")";
+    return {
+      backgroundImage: patternUrl,
+    };
+});
+
 const page = usePage();
 const user = computed(() => page.props.auth.user);
 
@@ -331,7 +338,7 @@ onUnmounted(() => {
             <div v-if="isMobileSidebarOpen" @click="closeMobileSidebar" class="fixed inset-0 bg-black/30 z-50 lg:hidden"></div>
 
             <!-- Sidebar -->
-            <div v-if="user && !hideHeader" :class="[ 'bg-white/95 backdrop-blur-sm border-r border-gray-200 flex flex-col transition-transform lg:transition-all duration-300 overflow-y-auto z-[60] lg:z-50',
+            <div v-if="user && !hideHeader" :style="sidebarBackgroundStyle" :class="[ 'bg-white/95 backdrop-blur-sm border-r border-gray-200 flex flex-col transition-transform lg:transition-all duration-300 overflow-y-auto z-[60] lg:z-50 rounded-r-xl shadow-lg',
                 'fixed top-16 h-[calc(100vh-4rem)]', isMobile ? (isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full') : (isDesktopCollapsed ? 'w-20' : sidebarWidth) ]" >
                 <!-- Navigation -->
                 <nav class="px-3 pt-4 flex-grow">
@@ -340,29 +347,29 @@ onUnmounted(() => {
                         <div v-if="item.items">
                             <button @click="toggleDropdown(item.label)"
                                 v-tooltip.right="{ value: item.label, disabled: !isDesktopCollapsed }"
-                                class="flex items-center justify-between w-full p-3 rounded-lg transition-colors duration-200 relative"
+                                class="group flex items-center justify-between w-full p-3 rounded-lg transition-all duration-200 relative"
                                 :class="{
-                                    'bg-blue-500 text-white font-semibold shadow-md': isSubmenuActive(item) && !isDesktopCollapsed,
-                                    'bg-blue-100 text-blue-800': isSubmenuActive(item) && isDesktopCollapsed,
-                                    'bg-blue-100 text-blue-700': !isSubmenuActive(item) && openDropdown === item.label,
-                                    'text-gray-600 hover:bg-gray-100': !isSubmenuActive(item) && openDropdown !== item.label
+                                    'bg-indigo-700 text-white font-semibold shadow-inner border-l-4 border-indigo-400': isSubmenuActive(item) && !isDesktopCollapsed,
+                                    'bg-indigo-700 text-white': isSubmenuActive(item) && isDesktopCollapsed,
+                                    'bg-indigo-100 text-indigo-700': !isSubmenuActive(item) && openDropdown === item.label,
+                                    'text-gray-600 hover:bg-indigo-50': !isSubmenuActive(item) && openDropdown !== item.label
                                 }">
                                 <div class="flex items-center">
-                                    <div class="flex-shrink-0">
+                                    <div class="flex-shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" :class="{'scale-110': isSubmenuActive(item)}">
                                         <i :class="item.icon" class="text-xl w-6 text-center"></i>
                                     </div>
-                                    <span v-show="!isDesktopCollapsed" class="ml-3 text-sm font-medium">{{ item.label }}</span>
+                                    <span v-show="!isDesktopCollapsed" class="ml-3 text-sm font-medium whitespace-nowrap">{{ item.label }}</span>
                                 </div>
-                                <i v-show="!isDesktopCollapsed" :class="['pi', openDropdown === item.label ? 'pi-chevron-down' : 'pi-chevron-right', 'transition-transform duration-200 text-xs']"></i>
+                                <i v-show="!isDesktopCollapsed" :class="['pi pi-chevron-right transition-transform duration-300 text-xs', { 'rotate-90': openDropdown === item.label }]"></i>
                                 <!-- Active indicator for collapsed state -->
-                                <div v-if="isSubmenuActive(item) && isDesktopCollapsed" class="absolute left-0 top-0 h-full w-1 bg-blue-600 rounded-r-full"></div>
+                                <div v-if="isSubmenuActive(item) && isDesktopCollapsed" class="absolute left-0 top-0 h-full w-1 bg-indigo-400 rounded-r-full"></div>
                             </button>
                             <div v-if="openDropdown === item.label && !isDesktopCollapsed" class="mt-1 pl-6 space-y-1 py-1 transition-all duration-300 ease-in-out">
                                 <Link v-for="subItem in item.items" :key="subItem.label" :href="route(subItem.routeName, subItem.routeParams)"
-                                    class="flex items-center p-2 rounded-md transition-colors text-sm"
-                                    :class="route().current(subItem.routeName, subItem.routeParams) ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-500 hover:bg-gray-100'">
+                                    class="flex items-center p-2 rounded-md transition-colors text-xs"
+                                    :class="route().current(subItem.routeName, subItem.routeParams) ? 'bg-blue-100 text-blue-700 font-semibold active-submenu' : 'text-gray-500 hover:bg-gray-100'">
                                     <i :class="subItem.icon" class="mr-3"></i>
-                                    <span>{{ subItem.label }}</span>
+                                    <span class="whitespace-nowrap">{{ subItem.label }}</span>
                                 </Link>
                             </div>
                         </div>
@@ -370,17 +377,17 @@ onUnmounted(() => {
                         <Link v-else-if="item.routeName"
                             v-tooltip.right="{ value: item.label, disabled: !isDesktopCollapsed }"
                             :href="route(item.routeName)"
-                            class="flex items-center p-3 rounded-lg transition-colors duration-200 relative"
+                            class="group flex items-center p-3 rounded-lg transition-all duration-200 relative"
                             :class="{
-                                'bg-blue-500 text-white font-semibold shadow-md': isActive(item.routeName) && !isDesktopCollapsed,
-                                'bg-blue-100 text-blue-800': isActive(item.routeName) && isDesktopCollapsed,
-                                'text-gray-600 hover:bg-gray-100': !isActive(item.routeName)
+                                'bg-indigo-700 text-white font-semibold shadow-inner border-l-4 border-indigo-400': isActive(item.routeName) && !isDesktopCollapsed,
+                                'bg-indigo-700 text-white': isActive(item.routeName) && isDesktopCollapsed,
+                                'text-gray-600 hover:bg-indigo-50': !isActive(item.routeName)
                             }">
-                            <div class="flex-shrink-0">
+                            <div class="flex-shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" :class="{'scale-110': isActive(item.routeName)}">
                                 <i :class="item.icon" class="text-xl w-6 text-center"></i>
                             </div>
-                            <div v-if="isActive(item.routeName) && isDesktopCollapsed" class="absolute left-0 top-0 h-full w-1 bg-blue-600 rounded-r-full"></div>
-                            <span v-show="!isDesktopCollapsed" class="ml-3 text-sm font-medium">{{ item.label }}</span>
+                            <div v-if="isActive(item.routeName) && isDesktopCollapsed" class="absolute left-0 top-0 h-full w-1 bg-indigo-400 rounded-r-full"></div>
+                            <span v-show="!isDesktopCollapsed" class="ml-3 text-sm font-medium whitespace-nowrap">{{ item.label }}</span>
                         </Link>
                     </div>
                 </nav>
@@ -471,5 +478,17 @@ onUnmounted(() => {
 :deep(.p-toast-message-info .p-toast-message-content) {
     background: #4f46e5; /* indigo-600 */
     color: #ffffff;
+}
+
+.submenu-item.active-submenu::before {
+    content: '';
+    position: absolute;
+    left: 0.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background-color: #3B82F6; /* bg-blue-500 */
 }
 </style>

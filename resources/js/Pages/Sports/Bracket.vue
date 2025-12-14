@@ -419,39 +419,67 @@ watch(() => user.value, () => {
         </div>
 
       <!-- Loading Skeleton -->
-      <div v-if="initialLoading" key="loading-skeleton">
-        <div v-for="i in 2" :key="i" class="bracket-section">
-            <div class="bracket-wrapper">
-                <div class="bracket-header responsive-skeleton-header">
-                    <div class="flex justify-between items-start w-full">
-                        <div class="flex-grow">
-                            <Skeleton width="12rem" height="1.6rem" />
-                            <div class="info-tags flex gap-2 mt-2">
-                                <Skeleton width="7rem" height="1.25rem" borderRadius="1rem" />
-                                <Skeleton width="5rem" height="1.25rem" borderRadius="1rem" />
-                            </div>
-                        </div>
-                        <div class="bracket-controls flex gap-2">
-                            <Skeleton shape="circle" size="2.5rem" />
-                            <Skeleton shape="circle" size="2.5rem" />
-                        </div>
-                    </div>
+      <div v-if="initialLoading" key="loading-skeleton" class="space-y-6">
+          <div v-for="i in 3" :key="`skel-${i}`" class="bg-white rounded-lg shadow-md border-l-4 border-gray-200">
+              <!-- Card Header Skeleton -->
+              <div class="p-4">
+                  <div class="flex justify-between items-start">
+                      <!-- Left: Title and Tags Skeleton -->
+                      <div class="flex-grow pr-4">
+                          <Skeleton width="60%" height="1.75rem" class="mb-3" />
+                          <div class="flex items-center gap-2 mt-1 mb-4">
+                              <Skeleton shape="circle" size="1rem" />
+                              <Skeleton width="40%" height="1rem" />
+                          </div>
+                          <div class="flex items-center gap-2">
+                              <Skeleton width="7rem" height="1.75rem" borderRadius="9999px" />
+                              <Skeleton width="6rem" height="1.75rem" borderRadius="9999px" />
+                          </div>
+                      </div>
+                      <!-- Right: Action Buttons Skeleton -->
+                      <div class="flex-shrink-0 flex items-center gap-1">
+                          <Skeleton shape="circle" size="2.5rem" />
+                      </div>
+                  </div>
+              </div>
 
-                    <div class="event-link-container group mt-3">
-                        <Skeleton shape="circle" size="2.5rem" />
-                        <div class="event-link-info">
-                            <Skeleton width="10rem" height="1.2rem" />
-                            <Skeleton width="6rem" height="0.8rem" class="mt-1" />
-                        </div>
-                    </div>
+              <!-- Progress Bar and Stats Skeleton -->
+              <div class="px-4 pb-4">
+                  <!-- Progress section -->
+                  <div class="progress-section mb-4">
+                      <div class="flex justify-between text-sm mb-1">
+                          <Skeleton width="5rem" height="1rem" />
+                          <Skeleton width="8rem" height="1rem" />
+                      </div>
+                      <Skeleton height=".75rem" borderRadius="9999px" />
+                  </div>
 
-                    <div class="bracket-stats">
-                        <Skeleton width="10rem" height="1rem" />
-                        <Skeleton width="8rem" height="1rem" />
-                    </div>
-                </div>
-            </div>
-        </div>
+                  <!-- Stats section -->
+                  <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-gray-200">
+                      <div class="stat-item flex items-center gap-2">
+                          <Skeleton shape="circle" size="2rem" />
+                          <div>
+                              <Skeleton width="4rem" height="1rem" class="mb-1" />
+                              <Skeleton width="6rem" height="0.75rem" />
+                          </div>
+                      </div>
+                      <div class="stat-item flex items-center gap-2">
+                          <Skeleton shape="circle" size="2rem" />
+                          <div>
+                              <Skeleton width="3rem" height="1rem" class="mb-1" />
+                              <Skeleton width="4rem" height="0.75rem" />
+                          </div>
+                      </div>
+                      <div class="stat-item flex items-center gap-2">
+                          <Skeleton shape="circle" size="2rem" />
+                          <div>
+                              <Skeleton width="6rem" height="1rem" class="mb-1" />
+                              <Skeleton width="3rem" height="0.75rem" />
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
       </div>
 
       <!-- Display message when no brackets are created -->
