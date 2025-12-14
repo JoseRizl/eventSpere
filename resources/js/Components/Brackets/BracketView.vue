@@ -356,18 +356,6 @@ const getPlayerStyling = (player, otherPlayer, match, part) => {
         'facing-bye': otherPlayer.name === 'BYE'
     };
 
-    // For consolation matches, styling is based on its own result, not elimination status.
-    if (match.bracket_type === 'consolation') {
-        if (match.status === 'completed') {
-            if (match.winner_id === player.id) {
-                styling['winner-name'] = true;
-            } else if (match.loser_id === player.id) {
-                styling['loser-name'] = true;
-            }
-        }
-        return styling;
-    }
-
     let isEliminatedOrDemoted = false;
     if (bracket.type === 'Single Elimination') {
         isEliminatedOrDemoted = analysis.eliminatedPlayerIds.has(player.id);
@@ -656,13 +644,13 @@ const getPlayerStats = (playerId) => {
 
     let wins = 0, losses = 0, draws = 0;
 
-    // Count wins, losses, draws for the given playerId
+    // Count wins, losses, draws
     props.bracket.matches.forEach(round => {
         round.forEach(match => {
             if (match.status !== 'completed') return;
 
-            const playerInMatch = match.players.find(p => p.id === playerId);
-            if (!playerInMatch) return;
+            const player = match.players.find(p => p.id === playerId);
+            if (!player) return;
 
             if (match.is_tie) {
                 draws++;
@@ -673,6 +661,10 @@ const getPlayerStats = (playerId) => {
             }
         });
     });
+
+    // Calculate win ratio for ranking
+    const totalGames = wins + losses + draws;
+    const winRatio = totalGames > 0 ? wins / totalGames : 0;
 
     // Get all players' stats for ranking
     const allStats = roundRobinPlayers.value.map(player => {
@@ -693,10 +685,10 @@ const getPlayerStats = (playerId) => {
         });
         const pTotal = pWins + pLosses + pDraws;
         const pWinRatio = pTotal > 0 ? pWins / pTotal : 0;
-        return { id: player.id, wins: pWins, losses: pLosses, winRatio: pWinRatio };
+        return { id: player.id, wins: pWins, winRatio: pWinRatio };
     });
 
-    // Sort by win ratio (descending), then by wins (descending), then by quotient, then by fewer losses
+    // Sort by win ratio (descending), then by wins (descending), then by quotient if available
     allStats.sort((a, b) => {
         if (b.winRatio !== a.winRatio) return b.winRatio - a.winRatio;
         if (b.wins !== a.wins) return b.wins - a.wins;
@@ -723,11 +715,10 @@ const getPlayerStats = (playerId) => {
             const prevQuotient = props.bracket.tiebreaker_data?.[prev.id]?.quotient || 0;
             const currQuotient = props.bracket.tiebreaker_data?.[curr.id]?.quotient || 0;
 
-            // If stats are different, update rank. This now includes losses.
+            // If stats are different, increment rank
             if (prev.winRatio !== curr.winRatio ||
                 prev.wins !== curr.wins ||
-                prevQuotient !== currQuotient ||
-                prev.losses !== curr.losses) {
+                prevQuotient !== currQuotient) {
                 currentRank = i + 1;
             }
             // Otherwise, keep the same rank (tied)

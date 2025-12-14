@@ -1943,19 +1943,21 @@ const updateLines = (bracketIdx) => {
           // This logic was incorrect for the final round. The loser of the final winners match goes to the final losers match.
           if (roundIdx === 0) { // Losers from Winners Round 1
             const losersRoundIdx = 0; // LR1
+            const totalSlots = bracket.matches.winners[0].length * 2;
 
-            // Use the original matchIdx (which is 'i' in the generate function)
-            // These formulas implement the cross-pairing pattern:
-            // Loser of WR1-M0 (G1) -> LR1-M0, P0
-            // Loser of WR1-M1 (G2) -> LR1-M1, P0
-            // Loser of WR1-M2 (G3) -> LR1-M0, P1
-            // Loser of WR1-M3 (G4) -> LR1-M1, P1
-            // ...and so on
-            const lrMatchIdx = Math.floor(matchIdx / 4) * 2 + (matchIdx % 2);
-            const lrPlayerPos = Math.floor((matchIdx % 4) / 2);
+            if (totalSlots === 4) { // Special case for 4 players
+                const lrMatchIdx = 0; // There is only one match in LR1
+                const lrPlayerPos = matchIdx; // Loser of G1 -> pos 0, Loser of G2 -> pos 1
+                if (bracket.matches.losers[losersRoundIdx] && bracket.matches.losers[losersRoundIdx][lrMatchIdx]) {
+                    setPlayerWithLog(bracket, 'losers', losersRoundIdx, lrMatchIdx, lrPlayerPos, newLoserPayload, performedActions);
+                }
+            } else { // Original logic for 8+ players
+                const lrMatchIdx = Math.floor(matchIdx / 4) * 2 + (matchIdx % 2);
+                const lrPlayerPos = Math.floor((matchIdx % 4) / 2);
 
-            if (bracket.matches.losers[losersRoundIdx] && bracket.matches.losers[losersRoundIdx][lrMatchIdx]) {
-              setPlayerWithLog(bracket, 'losers', losersRoundIdx, lrMatchIdx, lrPlayerPos, newLoserPayload, performedActions);
+                if (bracket.matches.losers[losersRoundIdx] && bracket.matches.losers[losersRoundIdx][lrMatchIdx]) {
+                    setPlayerWithLog(bracket, 'losers', losersRoundIdx, lrMatchIdx, lrPlayerPos, newLoserPayload, performedActions);
+                }
             }
           } else { // Losers from subsequent Winners Rounds
             if (roundIdx === bracket.matches.winners.length - 1) {
