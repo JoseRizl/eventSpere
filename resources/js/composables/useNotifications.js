@@ -60,21 +60,19 @@ export function useNotifications(popoverRef) {
 
             const oneMonthAgo = subMonths(new Date(), 1);
 
-            // Ensure announcement data is always an array before mapping
-            const announcementsData = Array.isArray(eventAnnouncementsResponse.data) ? eventAnnouncementsResponse.data : [];
+            // The API response is wrapped in a 'data' object. Access it directly.
+            const announcementsData = eventAnnouncementsResponse.data.data || [];
 
             const announcementNotifications = announcementsData.map(ann => ({
                 id: `ann-${ann.id}`,
                 type: 'announcement',
                 timestamp: new Date(ann.timestamp),
-                data: {
-                    ...ann,
-                    event: eventMap[ann.event_id],
-                    employee: employeesMap[ann.user_id] || { name: 'Admin' }
-                },
+                data: ann, // The announcement data is already well-formed
                 message: ann.message,
-                title: eventMap[ann.event_id] ? `Announcement: ${eventMap[ann.event_id]?.title}` : 'General Announcement',
-                link: eventMap[ann.event_id] ? route('event.details', { id: eventMap[ann.event_id].id, view: 'announcements' }) : null,
+                // Use the event title directly from the announcement data if it exists
+                title: ann.event && ann.event.id ? `Announcement: ${ann.event.title}` : 'General Announcement',
+                // Use the event id directly from the announcement data for the link
+                link: ann.event && ann.event.id ? route('event.details', { id: ann.event.id, view: 'announcements' }) : null,
                 formattedTimestamp: format(new Date(ann.timestamp), "MMMM dd, yyyy HH:mm"),
             }));
 
@@ -99,12 +97,15 @@ export function useNotifications(popoverRef) {
                     isRead: readNotificationIds.value.includes(n.id)
                 }));
 
-            if (!isInitialLoad && allNotifications.length > 0 && notifications.value.length > 0 && allNotifications[0].id !== notifications.value[0].id) {
-                const newNotification = allNotifications[0];
+            const currentNotificationIds = new Set(notifications.value.map(n => n.id));
+            const newNotifications = allNotifications.filter(n => !currentNotificationIds.has(n.id));
+
+            if (!isInitialLoad && newNotifications.length > 0) {
+                const latestNewNotification = newNotifications[0];
                 toast.add({
                     severity: 'info',
-                    summary: newNotification.type === 'announcement' ? 'New Announcement' : 'New Event',
-                    detail: newNotification.message.substring(0, 100) + (newNotification.message.length > 100 ? '...' : ''),
+                    summary: latestNewNotification.type === 'announcement' ? 'New Announcement' : 'New Event',
+                    detail: latestNewNotification.message.substring(0, 100) + (latestNewNotification.message.length > 100 ? '...' : ''),
                     life: 6000
                 });
                 playNotificationSound();
