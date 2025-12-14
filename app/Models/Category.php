@@ -14,6 +14,7 @@ class Category extends Model
         'title',
         'description',
         'allow_brackets',
+        'archived',
     ];
 
     public function events(): HasMany

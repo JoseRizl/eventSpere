@@ -1337,9 +1337,9 @@ watch(() => props.bracket, () => {
             <button @click="zoomIn" :disabled="zoomLevel >= maxZoom" class="zoom-btn" title="Zoom In">
                 <i class="pi pi-plus"></i>
             </button>
-            <button v-if="user && (user.role === 'Admin' || user.role === 'TournamentManager')" @click="printBracket" class="zoom-btn" title="Print Bracket">
+            <!-- <button v-if="user && (user.role === 'Admin' || user.role === 'TournamentManager')" @click="printBracket" class="zoom-btn" title="Print Bracket">
                 <i class="pi pi-print"></i>
-            </button>
+            </button> -->
         </div>
 
     <!-- Single Elimination - Split Bracket Layout (with consolation) -->
@@ -1565,9 +1565,9 @@ watch(() => props.bracket, () => {
             <div class="round-robin-header">
                 <h3 class="text-xl font-bold mb-4">Round Robin Tournament</h3>
                 <div v-if="user && (user.role === 'Admin' || user.role === 'TournamentManager')" class="flex items-center gap-2">
-                    <button v-if="user && (user.role === 'Admin' || user.role === 'TournamentManager')" @click="printBracket" class="zoom-btn" title="Print Bracket">
+                    <!-- <button v-if="user && (user.role === 'Admin' || user.role === 'TournamentManager')" @click="printBracket" class="zoom-btn" title="Print Bracket">
                         <i class="pi pi-print"></i>
-                    </button>
+                    </button> -->
                 <!-- Persistent Tiebreaker Button -->
                 <button
                     v-if="isRoundRobinConcluded && isRoundRobinConcluded(bracketIndex) && (user && (user.role === 'Admin' || user.role === 'TournamentManager'))"
@@ -1915,11 +1915,11 @@ watch(() => props.bracket, () => {
                             <div class="finals-rules-notice">
                                 <div class="rule-item">
                                     <span class="rule-icon">👑</span>
-                                    <span>The winner {{ upperBracketFinalMatchNumber }} is undefeated. If they win this match, they are the <strong>Champion</strong>.</span>
+                                    <span>If winner {{ upperBracketFinalMatchNumber }} win this match, they are the <strong>Champion</strong>.</span>
                                 </div>
                                 <div class="rule-item">
                                     <span class="rule-icon">🔄</span>
-                                    <span>If the winner {{ lowerBracketFinalMatchNumber }} wins, this triggers a <strong>Replay</strong> for one final match.</span>
+                                    <span>If the winner {{ lowerBracketFinalMatchNumber }} wins,<strong>Replay</strong> for one final match.</span>
                                 </div>
                             </div>
                         </div>

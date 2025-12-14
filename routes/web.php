@@ -56,6 +56,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/categories', [CategoryController::class, 'store'])->name('category.store');
     Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('category.update');
     Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('category.destroy');
+    Route::put('/categories/{id}/archive', [CategoryController::class, 'archiveCategory'])->name('categories.archive');
+    Route::put('/categories/{id}/restore', [CategoryController::class, 'restoreCategory'])->name('categories.restore');
+    Route::delete('/categories/{id}/permanent', [CategoryController::class, 'permanentDeleteCategory'])->name('categories.permanent-delete');
+
     Route::put('/tags/{id}/archive', [CategoryController::class, 'archiveTag'])->name('tags.archive');
     Route::put('/tags/{id}/restore', [CategoryController::class, 'restoreTag'])->name('tags.restore');
     Route::delete('/tags/{id}/permanent', [CategoryController::class, 'permanentDeleteTag'])->name('tags.permanent-delete');

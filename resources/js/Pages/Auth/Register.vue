@@ -31,8 +31,13 @@ defineOptions({layout: AuthLayout});
             <TextInput name="Password" type="password" v-model="form.password" :message="form.errors.password"/>
             <TextInput name="Confirm Password" type="password" v-model="form.password_confirmation" :message="form.errors.password_confirmation"/>
             <div>
-                <p class="text-slate-600 mb-2">Already a user? <Link :href="route('login')" class="text-link">Login</Link></p>
-                <button class="primary-btn" :disabled="form.processing">Register</button>
+                <p class="text-slate-600 mb-2">Already a user? <Link :href="route('login')" class="text-link text-blue-600">Login</Link></p>
+<button
+                        type="submit"
+                        class="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
+                        :disabled="form.processing"
+                    >
+                    Register</button>
             </div>
         </form>
     </div>

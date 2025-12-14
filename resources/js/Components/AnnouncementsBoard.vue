@@ -303,7 +303,7 @@ const formatTimestamp = (timestamp) => {
             </div>
             <template #footer>
                 <div class="flex justify-end flex-wrap gap-2">
-                    <button @click="showCreateModal = false" class="modal-button-secondary sm:p-button-sm">Cancel</button>
+                    <button @click="showAddModal = false" class="modal-button-secondary sm:p-button-sm">Cancel</button>
                 <button @click="confirmAdd" :disabled="saving" class="modal-button-primary sm:p-button-sm">
                     <i v-if="saving" class="pi pi-spin pi-spinner mr-2"></i>
                     Post Announcement

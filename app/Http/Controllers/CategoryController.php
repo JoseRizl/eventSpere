@@ -13,8 +13,8 @@ class CategoryController extends Controller
 {
     public function index(Request $request)
     {
-        $categories = Category::query()->get();
-        $tags = Tag::query()->get();
+        $categories = Category::query()->where('archived', false)->get();
+        $tags = Tag::query()->where('archived', false)->get();
 
         // Build events array with tag IDs for CategoryList.vue usage checks
         $events = Event::with('tags')->get()->map(function ($e) {
@@ -145,11 +145,11 @@ class CategoryController extends Controller
                 return redirect()->route('category.list')->with('error', 'Item is in use and cannot be deleted');
             }
 
-            // Detach from pivot and delete
-            DB::table('event_tags')->where('tag_id', $id)->delete();
-            $tag->delete();
+            // Archive the tag instead of deleting
+            $tag->archived = true;
+            $tag->save();
 
-            return redirect()->route('category.list')->with('success', 'Tag deleted successfully!');
+            return redirect()->route('category.list')->with('success', 'Tag archived successfully!');
         }
 
         $category = Category::findOrFail($id);
@@ -163,17 +163,58 @@ class CategoryController extends Controller
             return redirect()->route('category.list')->with('error', 'Item is in use and cannot be deleted');
         }
 
-        $category->delete();
-        return redirect()->route('category.list')->with('success', 'Category deleted successfully!');
+        // Archive the category instead of deleting
+        $category->archived = true;
+        $category->save();
+
+        return redirect()->route('category.list')->with('success', 'Category archived successfully!');
     }
 
+    // New methods for categories
+    public function archiveCategory($id)
+    {
+        $category = Category::findOrFail($id);
+        $category->archived = true;
+        $category->save();
+
+        return redirect()->back()->with('success', 'Category archived successfully.');
+    }
+
+    public function restoreCategory($id)
+    {
+        $category = Category::findOrFail($id);
+        $category->archived = false;
+        $category->save();
+
+        return redirect()->back()->with('success', 'Category restored successfully.');
+    }
+
+    public function permanentDeleteCategory($id)
+    {
+        $category = Category::findOrFail($id);
+
+        // Optional: Add checks here if needed before permanent deletion
+        $eventUsingCategory = Event::where('category_id', $id)->exists();
+        $tagUsingCategory = Tag::where('category_id', $id)->exists();
+
+        if ($eventUsingCategory || $tagUsingCategory) {
+            return redirect()->back()->with('error', 'Category is still in use and cannot be permanently deleted.');
+        }
+
+        $category->delete();
+
+        return redirect()->back()->with('success', 'Category permanently deleted.');
+    }
+
+    // Existing methods for tags
     public function archiveTag($id)
     {
         $tag = Tag::findOrFail($id);
+
         $tag->archived = true;
         $tag->save();
 
-        return redirect()->route('category.list')->with('success', 'Tag archived successfully.');
+        return redirect()->back()->with('success', 'Tag archived successfully.');
     }
 
     public function restoreTag($id)
@@ -182,7 +223,7 @@ class CategoryController extends Controller
         $tag->archived = false;
         $tag->save();
 
-        return redirect()->route('category.list')->with('success', 'Tag restored successfully.');
+        return redirect()->back()->with('success', 'Tag restored successfully.');
     }
 
     public function permanentDeleteTag($id)
@@ -192,6 +233,6 @@ class CategoryController extends Controller
         DB::table('event_tags')->where('tag_id', $id)->delete();
         $tag->delete();
 
-        return redirect()->route('category.list')->with('success', 'Tag permanently deleted.');
+        return redirect()->back()->with('success', 'Tag permanently deleted.');
     }
 }

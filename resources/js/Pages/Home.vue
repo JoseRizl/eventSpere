@@ -88,12 +88,12 @@ const announcementEvents = computed(() => {
 
     <!-- Carousel Banner -->
     <div v-if="initialLoading" class="w-full relative">
-        <Skeleton height="400px" width="100%" />
+        <Skeleton height="380px" width="100%" />
     </div>
     <div v-else-if="carouselEvents.length > 0" class="w-full relative group/carousel">
         <Carousel :value="carouselEvents" :numVisible="1" :numScroll="1" circular :autoplayInterval="5000" :showIndicators="true" class="home-carousel">
             <template #item="slotProps">
-                <div class="relative w-full h-56 md:h-96 lg:h-[400px] bg-gray-700 overflow-hidden" @click.stop="router.visit(route('event.details', { id: slotProps.data.id }))">
+                <div class="relative w-full h-56 md:h-96 lg:h-[380px] bg-gray-700 overflow-hidden" @click.stop="router.visit(route('event.details', { id: slotProps.data.id }))">
                     <Link :href="route('event.details', { id: slotProps.data.id })" preserve-scroll>
                         <img v-if="slotProps.data.image" :src=" slotProps.data.image" :alt="slotProps.data.title" class="w-full h-full object-cover transition-transform duration-300 group-hover/carousel:scale-105" draggable="false">
                         <div v-else class="w-full h-full bg-gray-300 flex items-center justify-center">
@@ -178,8 +178,8 @@ const announcementEvents = computed(() => {
                 class="date-filter-calendar"
               />
             </div>
+                      <Button v-if="startDateFilter || endDateFilter" icon="pi pi-times" class="p-button-text p-button-rounded self-end text-red-500 hover:bg-red-500/10" @click="clearDateFilter" v-tooltip.top="'Clear date filter'" />
           </div>
-          <Button v-if="startDateFilter || endDateFilter" icon="pi pi-times" class="p-button-text p-button-rounded self-end text-red-500 hover:bg-red-500/10" @click="clearDateFilter" v-tooltip.top="'Clear date filter'" />
       </div>
     </div>
 

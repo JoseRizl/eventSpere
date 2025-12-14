@@ -334,17 +334,26 @@ export default defineComponent({
       if (!itemToArchive.value) return;
       saving.value = true;
 
+      const isTag = showTags.value;
+      const url = isTag
+        ? route('tags.archive', { id: itemToArchive.value.id })
+        : route('categories.archive', { id: itemToArchive.value.id });
+
       try {
-        await router.put(route('tags.archive', { id: itemToArchive.value.id }), {}, {
+        await router.put(url, {}, {
           onSuccess: (page) => {
-            // Manually update the tags list from props
-            tags.value = page.props.tags;
-            successMessage.value = 'Tag archived successfully!';
+            if (isTag) {
+                tags.value = page.props.tags;
+            } else {
+                categories.value = page.props.categories;
+            }
+            const successMsg = `${isTag ? 'Tag' : 'Category'} archived successfully!`;
+            successMessage.value = successMsg;
             showSuccessDialog.value = true;
-            showSuccess('Tag archived successfully!');
+            showSuccess(successMsg);
           },
           onError: (errors) => {
-            const message = errors.message || 'Failed to archive the tag.';
+            const message = errors.message || `Failed to archive the ${isTag ? 'tag' : 'category'}.`;
             showError(message);
             errorMessage.value = message;
             errorDialogMessage.value = JSON.stringify(errors, null, 2);
@@ -357,7 +366,7 @@ export default defineComponent({
           }
         });
       } catch (error) {
-        showError('An unexpected error occurred while archiving the tag.');
+        showError(`An unexpected error occurred while archiving the ${isTag ? 'tag' : 'category'}.`);
         saving.value = false;
       }
     };
@@ -516,10 +525,10 @@ export default defineComponent({
             <template v-if="!isItemInUse(data.id)">
                 <Button
                     v-if="!showTags"
-                    icon="pi pi-trash"
-                    class="p-button-rounded p-button-text action-btn-danger"
-                    @click="deleteItem(data.id)"
-                    v-tooltip.top="`Delete Category`" />
+                    icon="pi pi-folder"
+                    class="p-button-rounded p-button-text action-btn-warning"
+                    @click="archiveItem(data)"
+                    v-tooltip.top="'Archive Category'" />
                 <Button v-if="showTags" icon="pi pi-folder" class="p-button-rounded p-button-text action-btn-warning" @click="archiveItem(data)" v-tooltip.top="'Archive Tag'"/>
             </template>
             <Button v-else
@@ -699,10 +708,12 @@ export default defineComponent({
       @confirm="confirmDelete"
     />
 
-    <ConfirmationDialog v-model:show="showArchiveConfirm" title="Archive Tag?" :message="`Are you sure you want to archive this tag?`" confirmText="Yes, Archive" @confirm="confirmArchive"
-    />
-
-    <ConfirmationDialog v-model:show="showArchiveConfirm" title="Archive Tag?" :message="`Are you sure you want to archive this tag?`" confirmText="Yes, Archive" @confirm="confirmArchive"
+    <ConfirmationDialog
+        v-model:show="showArchiveConfirm"
+        :title="`Archive ${showTags ? 'Tag' : 'Category'}?`"
+        :message="`Are you sure you want to archive this ${showTags ? 'tag' : 'category'}?`"
+        confirmText="Yes, Archive"
+        @confirm="confirmArchive"
     />
 
     <!-- Usage Details Dialog -->

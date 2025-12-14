@@ -64,10 +64,10 @@ class EventController extends JsonController
         }
 
         // Compose props for Inertia view
-        $tags = \App\Models\Tag::query()->get();
+        $tags = \App\Models\Tag::where('archived', '!=', true)->get();
         $committees = \App\Models\Committee::query()->get();
         $employees = \App\Models\Employee::query()->get();
-        $categories = Category::query()->get();
+        $categories = Category::where('archived', '!=', true)->get();
 
         // Temporary settings fallback; migrate to a Settings model if available
         $settings = ['defaultEventImage' => '/images/NCSlogo.png'];
@@ -157,10 +157,10 @@ class EventController extends JsonController
 
         return Inertia::render('Events/EventDetails', [
             'event' => $eventPayload,
-            'tags' => \App\Models\Tag::all(),
+            'tags' => \App\Models\Tag::where('archived', '!=', true)->get(),
             'committees' => \App\Models\Committee::all(),
             'employees' => \App\Models\Employee::all(),
-            'categories' => Category::all(),
+            'categories' => Category::where('archived', '!=', true)->get(),
             'relatedEvents' => $related,
             'preloadedActivities' => $activities,
             'preloadedTasks' => $tasks,
@@ -255,7 +255,9 @@ class EventController extends JsonController
             'title' => ['required', 'string', 'max:255', 'unique:events,title'],
             'description' => 'nullable|string',
             'image' => 'nullable|string',
-            'category_id' => ['nullable', 'exists:categories,id'],
+            'category_id' => ['nullable', Rule::exists('categories', 'id')->where(function ($query) {
+                $query->where('archived', '!=', true);
+            })],
             'venue' => 'nullable|string|max:255',
             'startDate' => 'required|date_format:M-d-Y|after_or_equal:today',
             'endDate' => 'required|date_format:M-d-Y|after_or_equal:startDate',
@@ -271,7 +273,9 @@ class EventController extends JsonController
                 }
             }],
             'tags' => ['nullable', 'array'],
-            'tags.*' => ['exists:tags,id'],
+            'tags.*' => [Rule::exists('tags', 'id')->where(function ($query) {
+                $query->where('archived', '!=', true);
+            })],
             'archived' => 'boolean',
             'memorandum' => 'nullable|array',
         ]);
@@ -345,7 +349,9 @@ class EventController extends JsonController
             'title' => ['required', 'string', 'max:255', Rule::unique('events', 'title')->ignore($event->id)],
             'description' => 'nullable|string',
             'image' => 'nullable|string',
-            'category_id' => ['nullable', 'exists:categories,id'],
+            'category_id' => ['nullable', Rule::exists('categories', 'id')->where(function ($query) {
+                $query->where('archived', '!=', true);
+            })],
             'venue' => 'nullable|string|max:255',
             'startDate' => ['required', 'date_format:M-d-Y', function ($attribute, $value, $fail) use ($event) {
                 if (!$event->startDate) return;
@@ -373,7 +379,9 @@ class EventController extends JsonController
                 }
             }],
             'tags' => ['nullable', 'array'],
-            'tags.*' => ['exists:tags,id'],
+            'tags.*' => [Rule::exists('tags', 'id')->where(function ($query) {
+                $query->where('archived', '!=', true);
+            })],
             'memorandum' => 'nullable|array',
         ]);
 
@@ -430,7 +438,9 @@ class EventController extends JsonController
             'title' => ['sometimes', 'required', 'string', 'max:255', Rule::unique('events', 'title')->ignore($event->id)],
             'description' => 'nullable|string',
             'image' => 'nullable|string',
-            'category_id' => ['nullable', 'exists:categories,id'],
+            'category_id' => ['nullable', Rule::exists('categories', 'id')->where(function ($query) {
+                $query->where('archived', '!=', true);
+            })],
             'venue' => 'nullable|string|max:255',
             'startDate' => ['sometimes', 'nullable', 'date_format:M-d-Y', function ($attribute, $value, $fail) use ($event) {
                 if (!$value) return;
@@ -458,7 +468,9 @@ class EventController extends JsonController
                 }
             }],
             'tags' => 'nullable|array',
-            'tags.*' => ['sometimes', 'exists:tags,id'],
+            'tags.*' => ['sometimes', Rule::exists('tags', 'id')->where(function ($query) {
+                $query->where('archived', '!=', true);
+            })],
             'archived' => 'sometimes|boolean',
             'memorandum' => 'nullable|array',
         ]);
@@ -536,6 +548,10 @@ class EventController extends JsonController
                         'archived' => (bool)$tag->archived,
                     ];
                 })->values()->toArray();
+        } elseif ($type === 'categories') {
+            $archivedItems = \App\Models\Category::where('archived', true)
+                ->get()
+                ->toArray();
         }
 
         return Inertia::render('List/Archive', [

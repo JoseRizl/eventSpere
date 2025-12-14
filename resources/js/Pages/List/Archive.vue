@@ -1,12 +1,12 @@
 <template>
   <div class="archive-list-container">
     <LoadingSpinner :show="saving" />
-    <h1 class="title">Archived {{ pageType === 'tags' ? 'Tags' : 'Events' }}</h1>
+    <h1 class="title">Archived {{ pageTitle.plural }}</h1>
 
     <div class="search-container mb-4">
       <SearchFilterBar
         v-model:searchQuery="searchQuery"
-        :placeholder="`Search archived ${pageType}...`"
+        :placeholder="`Search archived ${pageTitle.plural.toLowerCase()}...`"
         :show-date-filter="true"
         :is-date-filter-active="showDateFilter"
         :show-clear-button="false"
@@ -25,8 +25,8 @@
           <label>To:</label>
           <DatePicker v-model="dateRange.to" dateFormat="MM-dd-yy" :showIcon="true" placeholder="End date" class="date-filter-calendar" />
         </div>
+              <Button icon="pi pi-times" class="p-button-text p-button-rounded clear-date-btn" @click="clearDateFilter" v-tooltip.top="'Clear date filter'" />
       </div>
-      <Button icon="pi pi-times" class="p-button-text p-button-rounded clear-date-btn" @click="clearDateFilter" v-tooltip.top="'Clear date filter'" />
     </div>
 
     <!-- Skeleton for Events -->
@@ -43,16 +43,16 @@
       <div v-if="searchQuery" class="no-results-message">
         <div class="icon-and-title">
           <i class="pi pi-search" style="font-size: 1.5rem; color: #007bff; margin-right: 10px;"></i>
-          <h2 class="no-results-title">No Archived {{ pageType === 'tags' ? 'Tags' : 'Events' }} Found</h2>
+          <h2 class="no-results-title">No Archived {{ pageTitle.plural }} Found</h2>
         </div>
-        <p class="no-results-text">No archived {{ pageType }} match your search criteria. Try adjusting your search terms.</p>
+        <p class="no-results-text">No archived {{ pageTitle.plural.toLowerCase() }} match your search criteria. Try adjusting your search terms.</p>
       </div>
       <div v-else class="no-results-message">
         <div class="icon-and-title">
           <i class="pi pi-inbox" style="font-size: 1.5rem; color: #6c757d; margin-right: 10px;"></i>
-          <h2 class="no-results-title">No Archived {{ pageType === 'tags' ? 'Tags' : 'Events' }}</h2>
+          <h2 class="no-results-title">No Archived {{ pageTitle.plural }}</h2>
         </div>
-        <p class="no-results-text">There are currently no {{ pageType }} in the archive.</p>
+        <p class="no-results-text">There are currently no {{ pageTitle.plural.toLowerCase() }} in the archive.</p>
       </div>
     </div>
 
@@ -164,6 +164,38 @@
       </Column>
     </DataTable>
 
+    <!-- Categories Table -->
+    <DataTable
+      v-else-if="pageType === 'categories'"
+      :value="filteredItems"
+      class="p-datatable-striped" showGridlines
+      paginator :rows="10" :rowsPerPageOptions="[10, 20, 50]"
+      paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} archived categories"
+      :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
+
+      <Column field="title" header="Title" style="width:35%;" sortable :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
+        <template #body="{ data }">
+          <div class="datatable-content">{{ data.title }}</div>
+        </template>
+      </Column>
+
+      <Column field="description" header="Description" style="width:30%;" :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
+        <template #body="{ data }">
+          <div class="datatable-content">{{ data.description }}</div>
+        </template>
+      </Column>
+
+      <Column header="Actions" style="width:10%;" body-class="text-center" :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
+        <template #body="{ data }">
+          <div class="action-buttons">
+            <Button icon="pi pi-undo" class="p-button-rounded p-button-text action-btn-success" @click="restoreItem(data)" v-tooltip.top="'Restore Category'"/>
+            <Button icon="pi pi-trash" class="p-button-rounded p-button-text action-btn-danger" @click="deleteItemPermanently(data)" v-tooltip.top="'Delete Category Permanently'"/>
+          </div>
+        </template>
+      </Column>
+    </DataTable>
+
 
     <!-- Success Dialog -->
     <SuccessDialog
@@ -180,7 +212,7 @@
     <!-- Restore Confirmation Dialog -->
     <ConfirmationDialog
       v-model:show="showRestoreConfirm"
-      :title="`Restore ${pageType === 'tags' ? 'Tag' : 'Event'}?`"
+      :title="`Restore ${pageType === 'tags' ? 'Tag' : pageType === 'categories' ? 'Category' : 'Event'}?`"
       :message="itemToProcess ? `Are you sure you want to restore '${itemToProcess.title || itemToProcess.name}'?` : ''"
       confirmText="Yes, Restore"
       @confirm="confirmRestore"
@@ -189,7 +221,7 @@
     <!-- Delete Confirmation Dialog -->
     <ConfirmationDialog
       v-model:show="showDeleteConfirm"
-      :title="`Delete ${pageType === 'tags' ? 'Tag' : 'Event'} Permanently?`"
+      :title="`Delete ${pageType === 'tags' ? 'Tag' : pageType === 'categories' ? 'Category' : 'Event'} Permanently?`"
       :message="itemToProcess ? `Are you sure you want to permanently delete '${itemToProcess.title || itemToProcess.name}'? This action cannot be undone.` : ''"
       confirmText="Yes, Delete"
       confirmButtonClass="modal-button-danger"
@@ -211,6 +243,13 @@ export default defineComponent({
     const { props } = usePage(); // props are now fully utilized
     const pageType = computed(() => props.type || 'events');
     const archivedItems = ref(props.archivedItems || []);
+
+    const pageTitle = computed(() => {
+      const type = pageType.value;
+      if (type === 'tags') return { singular: 'Tag', plural: 'Tags' };
+      if (type === 'categories') return { singular: 'Category', plural: 'Categories' };
+      return { singular: 'Event', plural: 'Events' };
+    });
 
     const tags = ref(props.tags || []);
     const categories = ref(props.categories || []);
@@ -260,6 +299,10 @@ export default defineComponent({
                 const category = item.category?.title?.toLowerCase() || '';
 
                 return name.includes(query) || description.includes(query) || category.includes(query);
+            } else if (pageType.value === 'categories') {
+                const title = item.title?.toLowerCase() || '';
+                const description = item.description?.toLowerCase() || '';
+                return title.includes(query) || description.includes(query);
             }
             return false;
         });
@@ -363,19 +406,23 @@ export default defineComponent({
 
       const url = pageType.value === 'events'
         ? `/events/${itemToProcess.value.id}/restore`
-        : `/tags/${itemToProcess.value.id}/restore`;
+        : pageType.value === 'tags'
+        ? `/tags/${itemToProcess.value.id}/restore`
+        : `/categories/${itemToProcess.value.id}/restore`;
 
       try {
         await router.put(url, {}, {
+          preserveState: true,
+          preserveScroll: true,
           onSuccess: () => {
             archivedItems.value = archivedItems.value.filter(e => e.id !== itemToProcess.value.id);
-            successMessage.value = `${pageType.value === 'tags' ? 'Tag' : 'Event'} restored successfully!`;
+            successMessage.value = `${pageType.value.slice(0, -1)} restored successfully!`;
             showSuccessDialog.value = true;
             showSuccess(successMessage.value);
             // The success toast is now handled by the MainLayout from the flashed session message.
           },
           onError: (errors) => {
-            errorMessage.value = `Failed to restore the ${pageType.value === 'tags' ? 'tag' : 'event'}.`;
+            errorMessage.value = `Failed to restore the ${pageType.value.slice(0, -1)}.`;
             showErrorDialog.value = true;
             showError(errorMessage.value);
           },
@@ -408,19 +455,23 @@ export default defineComponent({
 
       const url = pageType.value === 'events'
         ? `/events/${itemToProcess.value.id}/permanent`
-        : `/tags/${itemToProcess.value.id}/permanent`;
+        : pageType.value === 'tags'
+        ? `/tags/${itemToProcess.value.id}/permanent`
+        : `/categories/${itemToProcess.value.id}/permanent`;
 
       try {
         await router.delete(url, {
+          preserveState: true,
+          preserveScroll: true,
           onSuccess: () => {
             archivedItems.value = archivedItems.value.filter(e => e.id !== itemToProcess.value.id);
-            successMessage.value = `${pageType.value === 'tags' ? 'Tag' : 'Event'} permanently deleted!`;
+            successMessage.value = `${pageType.value.slice(0, -1)} permanently deleted!`;
             showSuccessDialog.value = true;
             showSuccess(successMessage.value);
             // The success toast is now handled by the MainLayout from the flashed session message.
           },
           onError: (errors) => {
-            errorMessage.value = `Failed to delete the ${pageType.value === 'tags' ? 'tag' : 'event'}.`;
+            errorMessage.value = `Failed to delete the ${pageType.value.slice(0, -1)}.`;
             showErrorDialog.value = true;
             showError(errorMessage.value);
           },
@@ -481,6 +532,7 @@ export default defineComponent({
       formatDescription, // Expose formatDescription
       toggleDateFilter,
       clearDateFilter,
+      pageTitle,
     };
   },
 });

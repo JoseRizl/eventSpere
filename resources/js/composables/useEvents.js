@@ -31,10 +31,19 @@ export function useEvents({ searchQuery, startDateFilter, endDateFilter, allNews
 
     const isEventOngoing = (event) => {
         const now = new Date();
-        const start = getFullDateTime(event.startDate, event.startTime);
+        const start = getFullDateTime(event.startDate, event.startTime || '00:00');
         const end = getFullDateTime(event.endDate || event.startDate, event.endTime || '23:59');
         if (!start || !end) return false;
-        return isWithinInterval(now, { start, end });
+        
+        // Add debug logging
+        console.log('Checking if event is ongoing:', event.title);
+        console.log('Now:', now);
+        console.log('Event start:', start);
+        console.log('Event end:', end);
+        console.log('Is now >= start?', now >= start);
+        console.log('Is now <= end?', now <= end);
+        
+        return now >= start && now <= end;
     };
 
     const filteredNews = computed(() => {
@@ -142,13 +151,23 @@ export function useEvents({ searchQuery, startDateFilter, endDateFilter, allNews
         const { startDate, endDate, startTime, endTime } = event;
         const now = new Date();
 
-        const startDateTime = getFullDateTime(startDate, startTime);
-        const endDateTime = getFullDateTime(endDate || startDate, endTime || startTime);
+        console.log('Event:', event.title);
+        console.log('Now:', now);
+        console.log('Start Date:', startDate, 'Time:', startTime);
+        console.log('End Date:', endDate, 'Time:', endTime);
+
+        const startDateTime = getFullDateTime(startDate, startTime || '00:00');
+        const endDateTime = getFullDateTime(endDate || startDate, endTime || '23:59');
+
+        console.log('Parsed Start:', startDateTime);
+        console.log('Parsed End:', endDateTime);
+        console.log('Is ongoing:', isEventOngoing(event));
+        console.log('Is ended:', endDateTime < now);
 
         if (!startDateTime || !endDateTime) return 'Upcoming';
 
-        if (endDateTime < now) return 'Ended';
         if (isEventOngoing(event)) return 'Happening Now';
+        if (endDateTime < now) return 'Ended';
 
         const diffHours = differenceInHours(startDateTime, now);
         const diffDays = differenceInDays(startDateTime, now);

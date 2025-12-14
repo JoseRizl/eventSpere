@@ -14,7 +14,7 @@
           @toggle-date-filter="toggleDateFilter"
         />
         <div class="flex items-center gap-2">
-          <Button icon="pi pi-print" class="p-button-secondary" @click="printTable" v-tooltip.top="'Print Table'"
+          <Button v-if="user?.role === 'Admin'" icon="pi pi-print" class="p-button-secondary" @click="printTable" v-tooltip.top="'Print Table'"
             aria-label="Print Table"
           />
           <button v-if="user?.role === 'Admin' || user?.role === 'Principal'" class="create-button" @click="openCreateModal">
@@ -48,13 +48,13 @@
               class="date-filter-calendar"
             />
           </div>
+          <Button
+            icon="pi pi-times"
+            class="p-button-text p-button-rounded clear-date-btn"
+            @click="clearDateFilter"
+            v-tooltip.top="'Clear date filter'"
+          />
         </div>
-        <Button
-          icon="pi pi-times"
-          class="p-button-text p-button-rounded clear-date-btn"
-          @click="clearDateFilter"
-          v-tooltip.top="'Clear date filter'"
-        />
       </div>
 
       <!-- No Results Message -->

@@ -150,6 +150,12 @@ const sideBarItems = computed(() => {
                 routeName: 'archive',
                 routeParams: { type: 'tags' },
             },
+            {
+                label: 'Categories',
+                icon: 'pi pi-bookmark',
+                routeName: 'archive',
+                routeParams: { type: 'categories' },
+            },
         ],
     },
   ];

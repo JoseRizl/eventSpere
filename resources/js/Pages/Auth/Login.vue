@@ -52,11 +52,11 @@ defineOptions({ layout: AuthLayout });
 
                     <!-- Remember Me & Admin Link -->
                     <div class="flex items-center justify-between text-sm">
-                        <label class="flex items-center gap-2 text-gray-600">
+                        <label class="flex items-center gap-2 text-gray-600 whitespace-nowrap">
                             <input id="remember" type="checkbox" v-model="form.remember" class="rounded">
-                            Remember Me
+                            <span>Remember Me</span>
                         </label>
-                        <a href="/register" class="text-blue-600 hover:underline">Admin</a>
+                        <!-- <a href="/register" class="text-blue-600 hover:underline">Admin</a> -->
                     </div>
 
                     <!-- Login Button -->

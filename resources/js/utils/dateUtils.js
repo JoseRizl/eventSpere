@@ -12,28 +12,33 @@ export const getFullDateTime = (dateInput, timeStr) => {
 
   let date;
   if (dateInput instanceof Date && isValid(dateInput)) {
-    date = dateInput;
+    date = new Date(dateInput);
   } else if (typeof dateInput === 'string') {
-    // Attempt to parse multiple common formats
-    date = parseISO(dateInput); // Handles 'yyyy-MM-dd' and full ISO strings
-    if (!isValid(date)) {
-      date = parse(dateInput, 'MMM-dd-yyyy', new Date());
+    // If it's a date string with time, parse it directly
+    if (dateInput.includes('T') || dateInput.includes(' ')) {
+      date = parseISO(dateInput);
+    } else {
+      // For date-only strings, parse as local date
+      date = parse(dateInput, 'yyyy-MM-dd', new Date());
     }
   } else {
     date = new Date(dateInput);
   }
 
-  if (isNaN(date.getTime())) return null;
+  if (!isValid(date)) return null;
 
-  if (timeStr && /^\d{2}:\d{2}$/.test(timeStr)) {
+  // Handle time string
+  if (timeStr && /^\d{1,2}:\d{2}(?::\d{2})?$/.test(timeStr)) {
     const [hours, minutes] = timeStr.split(':').map(Number);
     if (!isNaN(hours) && !isNaN(minutes)) {
       date.setHours(hours, minutes, 0, 0);
     }
-  } else {
-    // If no time is provided, treat it as start of the day to avoid timezone issues with date-only strings
+  } else if (timeStr === null || timeStr === undefined) {
+    // If time is explicitly set to null/undefined, keep the original time
+    // Otherwise, default to start of day
     date.setHours(0, 0, 0, 0);
   }
+
   return date;
 };
 
