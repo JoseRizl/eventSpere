@@ -66,8 +66,24 @@ export const formatDisplayDate = (dateString) => {
 export const formatDisplayTime = (timeString) => {
   if (!timeString) return '';
   try {
-    const parsed = parse(timeString, 'HH:mm', new Date());
-    return format(parsed, 'hh:mm a');
+    // Try parsing with seconds first
+    let parsed = parse(timeString, 'HH:mm:ss', new Date());
+    if (!isValid(parsed)) {
+        // Fallback to parsing without seconds
+        parsed = parse(timeString, 'HH:mm', new Date());
+    }
+
+    if (isValid(parsed)) {
+        return format(parsed, 'hh:mm a');
+    }
+
+    // If it's still not valid, it might be a full ISO string
+    const isoParsed = parseISO(timeString);
+    if(isValid(isoParsed)) {
+        return format(isoParsed, 'hh:mm a');
+    }
+
+    return 'Invalid Time';
   } catch {
     return 'Invalid Time';
   }
