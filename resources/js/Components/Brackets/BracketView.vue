@@ -43,13 +43,34 @@ const { showSuccess, showError } = useToast();
 // Player name editing
 const showPlayerEditModal = ref(false);
 
+const playerCountForDE = computed(() => {
+    if (props.bracket.type !== 'Double Elimination' || !props.bracket.matches?.winners?.[0]) {
+        return 0;
+    }
+    const firstRound = props.bracket.matches.winners[0];
+    let playerCount = 0;
+    firstRound.forEach(match => {
+        match.players.forEach(player => {
+            if (player && player.name && player.name !== 'BYE' && player.name !== 'TBD') {
+                playerCount++;
+            }
+        });
+    });
+    return playerCount;
+});
+
 // Zoom functionality for elimination brackets
 const defaultDesktopZoom = 0.7;
-const defaultMobileZoom = 0.35; // Smaller zoom to fit bracket on mobile
+const defaultMobileZoom = computed(() => {
+    if (props.bracket.type === 'Double Elimination' && playerCountForDE.value >= 8) {
+        return 0.24;
+    }
+    return 0.35; // Default smaller zoom for mobile
+});
 const zoomLevel = ref(defaultDesktopZoom);
-const minZoom = computed(() => 0.5 * (window.innerWidth <= 768 ? defaultMobileZoom : defaultDesktopZoom));
-const maxZoom = computed(() => 1.5 * (window.innerWidth <= 768 ? defaultMobileZoom : defaultDesktopZoom));
-const zoomStep = computed(() => 0.1 * (window.innerWidth <= 768 ? defaultMobileZoom : defaultDesktopZoom));
+const minZoom = computed(() => 0.5 * (window.innerWidth <= 768 ? defaultMobileZoom.value : defaultDesktopZoom));
+const maxZoom = computed(() => 2.0 * (window.innerWidth <= 768 ? defaultMobileZoom.value : defaultDesktopZoom));
+const zoomStep = computed(() => 0.1 * (window.innerWidth <= 768 ? defaultMobileZoom.value : defaultDesktopZoom));
 
 const zoomIn = () => {
     if (zoomLevel.value < maxZoom.value) {
@@ -85,7 +106,7 @@ const resetZoom = () => {
 
 const adjustZoomForScreenSize = () => {
     if (window.innerWidth <= 768) {
-        zoomLevel.value = defaultMobileZoom;
+        zoomLevel.value = defaultMobileZoom.value;
     } else {
         zoomLevel.value = defaultDesktopZoom;
     }
@@ -126,7 +147,7 @@ const printBracket = () => {
 };
 
 const zoomPercentage = computed(() => {
-    const base = window.innerWidth <= 768 ? defaultMobileZoom : defaultDesktopZoom;
+    const base = window.innerWidth <= 768 ? defaultMobileZoom.value : defaultDesktopZoom;
     return Math.round((zoomLevel.value / base) * 100);
 });
 

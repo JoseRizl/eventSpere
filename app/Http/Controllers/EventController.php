@@ -21,6 +21,7 @@ class EventController extends JsonController
             'memorandum',
             'tasks.committee',
             'tasks.employees',
+            'tasks.managers',
         ])
             ->where(function ($q) {
                 $q->whereNull('archived')->orWhere('archived', '!=', true);
@@ -35,6 +36,7 @@ class EventController extends JsonController
                         'task' => $task->description,
                         'committee' => $task->committee,
                         'employees' => $task->employees,
+                        'managers' => $task->managers,
                     ];
                 })->values()->toArray();
 
@@ -85,7 +87,9 @@ class EventController extends JsonController
 
     public function show($id)
     {
-        $event = Event::with(['tags', 'category', 'memorandum', 'tasks.committee', 'tasks.employees'])
+        $event = Event::with(['tags', 'category', 'memorandum', 'tasks.committee', 'tasks.employees', 'tasks.managers.managedBrackets' => function ($query) use ($id) {
+            $query->where('event_id', $id);
+        }])
             ->findOrFail($id);
 
         // Build related events: share at least one tag
@@ -111,6 +115,7 @@ class EventController extends JsonController
                 'task' => $task->description,
                 'committee' => $task->committee,
                 'employees' => $task->employees,
+                'managers' => $task->managers,
             ];
         })->values()->toArray();
 

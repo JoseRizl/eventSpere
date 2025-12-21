@@ -75,6 +75,22 @@
                     </MultiSelect>
                 </div>
 
+                <!-- Bracket Assignment -->
+                <div v-if="taskHasManager(taskEntry)" class="p-field">
+                    <label>Assign Manager(s) to Bracket <span style="color: red;">*</span></label>
+                    <small class="p-text-secondary d-block mb-2">This assignment only applies to personnel with the 'Tournament Manager' role.</small>
+                    <MultiSelect
+                        v-model="taskEntry.assignedBrackets"
+                        :options="localBrackets"
+                        optionLabel="name"
+                        placeholder="Select brackets for manager"
+                        display="chip"
+                        class="w-full"
+                        filter
+                        :showToggleAll="false"
+                    />
+                </div>
+
                 <!-- Task Description -->
                 <div class="p-field">
                     <label>Task <span style="color: red;">*</span></label>
@@ -204,6 +220,7 @@ const props = defineProps({
     },
     committees: Array,
     employees: Array,
+    brackets: Array,
 });
 
 const emit = defineEmits(['save-success', 'save-error', 'committee-action-success']);
@@ -227,6 +244,7 @@ const committeeInUseDetails = ref({
 // Local mutable copies of props
 const localCommittees = ref([]);
 const localEmployees = ref([]);
+const localBrackets = ref([]);
 
 watch(() => props.committees, (newVal) => {
     localCommittees.value = [...(newVal || [])];
@@ -235,6 +253,19 @@ watch(() => props.committees, (newVal) => {
 watch(() => props.employees, (newVal) => {
     localEmployees.value = [...(newVal || [])];
 }, { immediate: true, deep: true });
+
+watch(() => props.brackets, (newVal) => {
+    localBrackets.value = [...(newVal || [])];
+}, { immediate: true, deep: true });
+
+const taskHasManager = computed(() => {
+    return (taskEntry) => {
+        if (!taskEntry || !Array.isArray(taskEntry.employees)) {
+            return false;
+        }
+        return taskEntry.employees.some(e => e.type === 'user');
+    };
+});
 
 const isCommitteeInUse = computed(() => {
     return (committeeId) => {
@@ -346,45 +377,52 @@ const confirmDeleteCommittee = async () => {
 };
 
 const handleSave = () => {
-  isSaving.value = true;
-  taskErrorMessage.value = null;
+    isSaving.value = true;
+    taskErrorMessage.value = null;
 
-  // Pre-process the payload to match backend expectations
-  try {
-    const tasksToSave = props.tasksManager.taskAssignments.value.map(task => {
-      // Frontend validation
-      if (!task.task || task.task.trim() === '') {
-        throw new Error('Please provide a description for all tasks.');
-      }
-      if (!task.employees || task.employees.length === 0) {
-        throw new Error('Please assign at least one employee to all tasks.');
-      }
+    try {
+        const tasksToSave = props.tasksManager.taskAssignments.value.map(task => {
+            const employees = task.employees?.filter(p => p.type === 'employee') || [];
+            const managers = task.employees?.filter(p => p.type === 'user') || [];
 
-      return {
-        description: task.task,
-        committee_id: task.committee ? task.committee.id : null,
-        employees: task.employees.map(e => e.id),
-      };
-    });
+            // --- Validation ---
+            if (employees.length === 0 && managers.length === 0) {
+                throw new Error('Please assign at least one employee or manager to all tasks.');
+            }
+            if (!task.task || task.task.trim() === '') {
+                throw new Error('Please provide a description for all tasks.');
+            }
+            if (managers.length > 0 && (!task.assignedBrackets || task.assignedBrackets.length === 0)) {
+                throw new Error('Please assign at least one bracket to every selected Tournament Manager.');
+            }
+            // --- End Validation ---
 
-    console.log('Saving tasks with payload:', tasksToSave);
-    const onSuccess = (page) => {
-      const newTasks = page.props.flash?.tasks || [];
-      emit('save-success', { message: 'Tasks updated successfully!', tasks: newTasks });
-    };
+            return {
+                description: task.task,
+                committee_id: task.committee ? task.committee.id : null,
+                employee_ids: employees.map(e => e.id),
+                manager_assignments: managers.map(m => ({
+                    user_id: m.id,
+                    // Ensure assignedBrackets is an array before mapping
+                    bracket_ids: Array.isArray(task.assignedBrackets) ? task.assignedBrackets.map(b => b.id) : [],
+                })),
+            };
+        });
 
-    // Pass the correctly formatted payload to the save function
-    props.tasksManager.saveTaskAssignments(tasksToSave, onSuccess);
+        console.log('Saving tasks with payload:', tasksToSave);
+        const onSuccess = (page) => {
+            const newTasks = page.props.flash?.tasks || [];
+            emit('save-success', { message: 'Tasks updated successfully!', tasks: newTasks });
+        };
 
-    // Since router.put is not awaitable in the same way, we can't use a finally block
-    // based on its completion here. We'll rely on Inertia's events.
-    // A simple timeout can work for UI feedback if needed, or listen to Inertia's 'finish' event.
-    setTimeout(() => { isSaving.value = false; }, 2000); // Reset saving state after a delay
+        props.tasksManager.saveTaskAssignments(tasksToSave, onSuccess);
 
-  } catch (err) {
-    // This will now only catch client-side errors, like the validation `throw`.
-    taskErrorMessage.value = err.message;
-    isSaving.value = false;
-  }
+        // Reset saving state after a delay to give Inertia time to finish.
+        setTimeout(() => { isSaving.value = false; }, 2000);
+
+    } catch (err) {
+        taskErrorMessage.value = err.message;
+        isSaving.value = false;
+    }
 };
 </script>

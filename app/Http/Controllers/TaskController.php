@@ -12,12 +12,17 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
+use App\Models\Bracket;
+use App\Models\User;
+
 class TaskController extends Controller
 {
     public function indexForEvent($eventId)
     {
         $tasks = Task::where('event_id', $eventId)
-            ->with(['committee', 'employees'])
+            ->with(['committee', 'employees', 'managers.managedBrackets' => function ($query) use ($eventId) {
+                $query->where('event_id', $eventId);
+            }])
             ->get();
 
         $formattedTasks = $tasks->map(function ($task) {
@@ -26,72 +31,85 @@ class TaskController extends Controller
                 'task' => $task->description, // Match frontend key 'task'
                 'committee' => $task->committee,
                 'employees' => $task->employees,
+                'managers' => $task->managers,
             ];
         });
 
         return response()->json($formattedTasks);
     }
 
-
     /**
      * Update all tasks for a specific event.
      */
     public function updateForEvent(Request $request, $eventId)
     {
-        // Log the incoming request payload for debugging
         Log::info("Updating tasks for event ID: {$eventId}", ['payload' => $request->all()]);
 
         $validator = Validator::make($request->all(), [
             'tasks' => ['nullable', 'array'],
+            'tasks.*.description' => ['required', 'string', 'max:255'],
             'tasks.*.committee_id' => ['nullable', 'integer', 'exists:pgsql.committees,id'],
-            'tasks.*.employees' => 'required|array|min:1',
-            'tasks.*.employees.*' => ['required', 'integer', 'exists:pgsql.emport.employees,id'],
-            'tasks.*.description' => 'required|string|max:255',
+            'tasks.*.employee_ids' => ['present', 'array'],
+            'tasks.*.employee_ids.*' => ['integer', 'exists:pgsql.emport.employees,id'],
+            'tasks.*.manager_assignments' => ['present', 'array'],
+            'tasks.*.manager_assignments.*.user_id' => ['required', 'integer', 'exists:users,id'],
+            'tasks.*.manager_assignments.*.bracket_ids' => ['required', 'array', 'min:1'],
+            'tasks.*.manager_assignments.*.bracket_ids.*' => ['required', 'string', 'exists:brackets,id'],
         ], [
-            'tasks.*.employees.required' => 'Please assign at least one employee to all tasks.',
+            'tasks.*.manager_assignments.*.bracket_ids.min' => 'Each manager must be assigned to at least one bracket.',
             'tasks.*.description.required' => 'Please provide a description for all tasks.',
         ]);
-
-        // Add our custom validation rule
-        $validator->after(function ($validator) use ($request, $eventId) {
-            $this->validateTaskAssignments($request->input('tasks', []), $validator, $eventId);
+        
+        $validator->after(function ($validator) use ($request) {
+            foreach ($request->input('tasks', []) as $index => $task) {
+                if (empty($task['employee_ids']) && empty($task['manager_assignments'])) {
+                    $validator->errors()->add("tasks.{$index}.employees", 'Please assign at least one employee or manager to each task.');
+                }
+            }
         });
 
         if ($validator->fails()) {
             Log::warning("Task update validation failed for event ID: {$eventId}", ['errors' => $validator->errors()->toArray()]);
-            return response()->json(['message' => 'The given data was invalid.', 'errors' => $validator->errors()], 422);
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
         $validated = $validator->validated();
 
         DB::transaction(function () use ($validated, $eventId) {
-            // Delete all existing tasks for this event.
-            Log::info("Deleting existing tasks for event ID: {$eventId}");
+            $eventBrackets = Bracket::where('event_id', $eventId)->pluck('id');
+            DB::table('bracket_manager')->whereIn('bracket_id', $eventBrackets)->delete();
             Task::where('event_id', $eventId)->delete();
 
-            // Re-create tasks and their assignments
             foreach ($validated['tasks'] ?? [] as $taskData) {
-                $taskPayload = [
+                $task = Task::create([
                     'description' => $taskData['description'],
                     'event_id' => $eventId,
-                ];
-                if (!empty($taskData['committee_id'])) {
-                    $taskPayload['committee_id'] = $taskData['committee_id'];
-                }
-                $task = Task::create($taskPayload);
-                Log::info("Created task ID: {$task->id} for event ID: {$eventId}");
+                    'committee_id' => $taskData['committee_id'] ?? null,
+                ]);
 
-                $task->employees()->sync($taskData['employees']);
-                Log::info("Synced employees for task ID: {$task->id}", ['employees' => $taskData['employees']]);
+                if (!empty($taskData['employee_ids'])) {
+                    $task->employees()->sync($taskData['employee_ids']);
+                }
+
+                if (!empty($taskData['manager_assignments'])) {
+                    $managerIds = array_column($taskData['manager_assignments'], 'user_id');
+                    $task->managers()->sync($managerIds);
+
+                    foreach ($taskData['manager_assignments'] as $assignment) {
+                        $user = User::find($assignment['user_id']);
+                        if ($user) {
+                            $validBrackets = array_intersect($assignment['bracket_ids'], $eventBrackets->toArray());
+                            $user->managedBrackets()->syncWithoutDetaching($validBrackets);
+                        }
+                    }
+                }
             }
         });
 
-        // Log success before returning the response
-        Log::info("Successfully updated tasks for event ID: {$eventId}");
-
-        // After saving, re-fetch and normalize the new tasks to send back to the frontend
         $newlyCreatedTasks = Task::where('event_id', $eventId)
-            ->with(['committee', 'employees'])
+            ->with(['committee', 'employees', 'managers.managedBrackets' => function ($query) use ($eventId) {
+                $query->where('event_id', $eventId);
+            }])
             ->get()
             ->map(function ($task) {
                 return [
@@ -99,6 +117,7 @@ class TaskController extends Controller
                     'task' => $task->description,
                     'committee' => $task->committee,
                     'employees' => $task->employees,
+                    'managers' => $task->managers,
                 ];
             });
 
@@ -108,100 +127,47 @@ class TaskController extends Controller
         ]);
     }
 
-    private function validateTaskAssignments(array $tasks, \Illuminate\Contracts\Validation\Validator $validator, $eventId): void
-    {
-        $currentEvent = Event::find($eventId);
-
-        if (!$currentEvent) {
-            $validator->errors()->add('event', "The event with ID {$eventId} was not found.");
-            return;
-        }
-
-        // --- Check for duplicates within the same event ---
-        $employeeCounts = collect($tasks)->flatMap(function ($task) {
-            return collect($task['employees'] ?? []);
-        })->filter()->countBy();
-
-        foreach ($employeeCounts as $employeeId => $count) {
-            if ($count > 1) {
-                $employeeName = Employee::find($employeeId)->name ?? 'Unknown Employee';
-                $validator->errors()->add("tasks", "Employee \"{$employeeName}\" cannot be assigned to multiple tasks within the same event.");
-                return;
-            }
-        }
-
-        // --- Check for conflicts with other events ---
-        // Get employee IDs, filter out any non-ID keys (like an empty string from countBy),
-        // and ensure we have a valid collection of IDs.
-        $currentEmployeeIds = $employeeCounts->keys()->filter(function ($id) {
-            return is_numeric($id) && $id > 0;
-        });
-
-        // If the current event doesn't have a valid start or end date,
-        // we cannot check for scheduling conflicts.
-        if (!$currentEvent->start || !$currentEvent->end) {
-            return;
-        }
-
-        if ($currentEmployeeIds->isEmpty()) return; // Now this guard is effective.
-
-        Log::debug("Checking for employee conflicts for event ID: {$eventId}", ['employee_ids' => $currentEmployeeIds->all()]);
-        $conflictingAssignments = DB::table('emport.task_employee as te')
-            ->join('emport.tasks as t', 'te.task_id', '=', 't.id')
-            ->join('events as e', 't.event_id', '=', 'e.id')
-            ->join('emport.employees as emp', 'te.employee_id', '=', 'emp.id')
-            ->whereIn('te.employee_id', $currentEmployeeIds)
-            ->where('e.id', '!=', $eventId)
-            ->where('e.archived', false)
-            ->where(function ($query) use ($currentEvent) {
-                $query->where('e.start', '<', $currentEvent->end)
-                      ->where('e.end', '>', $currentEvent->start);
-            })
-            ->select('emp.name as employee_name', 'e.title as event_title')
-            ->get();
-
-        if ($conflictingAssignments->isNotEmpty()) {
-            Log::warning("Found conflicting employee assignment for event ID: {$eventId}", ['conflicts' => $conflictingAssignments->all()]);
-            $conflict = $conflictingAssignments->first();
-            $validator->errors()->add(
-                "tasks",
-                "Employee \"{$conflict->employee_name}\" is already assigned to \"{$conflict->event_title}\" during this time period."
-            );
-        }
-    }
-
     /**
      * A dedicated route to save tasks for an event.
      * This handles PUT requests to /events/{eventId}/tasks
      */
     public function saveTasksForEvent(Request $request, $eventId)
     {
-        // Log the incoming request payload for debugging
         Log::info("Saving tasks for event ID: {$eventId}", ['payload' => $request->all()]);
 
         $validator = Validator::make($request->all(), [
             'tasks' => ['nullable', 'array'],
+            'tasks.*.description' => ['required', 'string', 'max:255'],
             'tasks.*.committee_id' => ['nullable', 'integer', 'exists:pgsql.committees,id'],
-            'tasks.*.employees' => 'required|array|min:1',
-            'tasks.*.employees.*' => ['required', 'integer', 'exists:pgsql.emport.employees,id'],
-            'tasks.*.description' => 'required|string|max:255',
+            'tasks.*.employee_ids' => ['present', 'array'],
+            'tasks.*.employee_ids.*' => ['integer', 'exists:pgsql.emport.employees,id'],
+            'tasks.*.manager_assignments' => ['present', 'array'],
+            'tasks.*.manager_assignments.*.user_id' => ['required', 'integer', 'exists:users,id'],
+            'tasks.*.manager_assignments.*.bracket_ids' => ['required', 'array', 'min:1'],
+            'tasks.*.manager_assignments.*.bracket_ids.*' => ['required', 'string', 'exists:brackets,id'],
         ], [
-            'tasks.*.employees.required' => 'Please assign at least one employee to all tasks.',
+            'tasks.*.manager_assignments.*.bracket_ids.min' => 'Each manager must be assigned to at least one bracket.',
             'tasks.*.description.required' => 'Please provide a description for all tasks.',
         ]);
 
-        $validator->after(function ($validator) use ($request, $eventId) {
-            $this->validateTaskAssignments($request->input('tasks', []), $validator, $eventId);
+        $validator->after(function ($validator) use ($request) {
+            foreach ($request->input('tasks', []) as $index => $task) {
+                if (empty($task['employee_ids']) && empty($task['manager_assignments'])) {
+                    $validator->errors()->add("tasks.{$index}.employees", 'Please assign at least one employee or manager to each task.');
+                }
+            }
         });
 
         if ($validator->fails()) {
             Log::warning("Task save validation failed for event ID: {$eventId}", ['errors' => $validator->errors()->toArray()]);
-            return response()->json(['message' => 'The given data was invalid.', 'errors' => $validator->errors()], 422);
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
         $validated = $validator->validated();
 
         DB::transaction(function () use ($validated, $eventId) {
+            $eventBrackets = Bracket::where('event_id', $eventId)->pluck('id');
+            DB::table('bracket_manager')->whereIn('bracket_id', $eventBrackets)->delete();
             Task::where('event_id', $eventId)->delete();
 
             foreach ($validated['tasks'] ?? [] as $taskData) {
@@ -210,14 +176,39 @@ class TaskController extends Controller
                     'event_id' => $eventId,
                     'committee_id' => $taskData['committee_id'] ?? null,
                 ]);
-                $task->employees()->sync($taskData['employees']);
+
+                if (!empty($taskData['employee_ids'])) {
+                    $task->employees()->sync($taskData['employee_ids']);
+                }
+
+                if (!empty($taskData['manager_assignments'])) {
+                    $managerIds = array_column($taskData['manager_assignments'], 'user_id');
+                    $task->managers()->sync($managerIds);
+
+                    foreach ($taskData['manager_assignments'] as $assignment) {
+                        $user = User::find($assignment['user_id']);
+                        if ($user) {
+                            $validBrackets = array_intersect($assignment['bracket_ids'], $eventBrackets->toArray());
+                            $user->managedBrackets()->syncWithoutDetaching($validBrackets);
+                        }
+                    }
+                }
             }
         });
 
-        $newlyCreatedTasks = Task::with(['committee', 'employees'])->where('event_id', $eventId)->get()->map(function ($task) {
-            return ['id' => $task->id, 'task' => $task->description, 'committee' => $task->committee, 'employees' => $task->employees];
+        $newlyCreatedTasks = Task::with(['committee', 'employees', 'managers.managedBrackets' => function ($query) use ($eventId) {
+                $query->where('event_id', $eventId);
+            }])->where('event_id', $eventId)->get()->map(function ($task) {
+            return [
+                'id' => $task->id, 
+                'task' => $task->description, 
+                'committee' => $task->committee, 
+                'employees' => $task->employees,
+                'managers' => $task->managers,
+            ];
         });
 
         return back()->with(['success' => 'Tasks updated successfully.', 'tasks' => $newlyCreatedTasks->values()->all()]);
     }
 }
+

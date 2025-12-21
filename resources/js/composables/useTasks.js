@@ -9,32 +9,50 @@ export function useTasks() {
   const taskAssignments = ref([]);
 
   // Method to open the modal and prepare data
-  const openTaskModal = (event, allCommittees, allEmployees) => {
+  const openTaskModal = (event, allCommittees, allPersonnel, eventBrackets) => {
     selectedEventForTasks.value = event;
 
-    // Deep copy and normalize tasks to avoid modifying original data until save
     const committeesMap = allCommittees.reduce((map, committee) => {
       map[committee.id] = committee;
       return map;
     }, {});
 
-    const employeesMap = allEmployees.reduce((map, employee) => {
-      map[employee.id] = employee;
-      return map;
-    }, {});
+    taskAssignments.value = (event.tasks || []).map(task => {
+        const assignedEmployees = (task.employees || []).map(emp => {
+            return allPersonnel.find(p => p.id === emp.id && p.type === 'employee');
+        }).filter(Boolean);
 
-    taskAssignments.value = (event.tasks || []).map(task => ({
-      ...task,
-      committee: task.committee ? committeesMap[task.committee.id] || task.committee : null,
-      employees: (task.employees || []).map(emp => employeesMap[emp.id] || emp)
-    }));
+        const assignedManagers = (task.managers || []).map(mgr => {
+            return allPersonnel.find(p => p.id === mgr.id && p.type === 'user');
+        }).filter(Boolean);
+
+        const combinedPersonnel = [...assignedEmployees, ...assignedManagers];
+
+        let assignedBrackets = [];
+        if (assignedManagers.length > 0 && task.managers) {
+            const managerBracketIds = new Set();
+            task.managers.forEach(m => {
+                // The relationship is loaded as managed_brackets
+                (m.managed_brackets || []).forEach(b => managerBracketIds.add(b.id));
+            });
+            
+            assignedBrackets = (eventBrackets || []).filter(b => managerBracketIds.has(b.id));
+        }
+
+        return {
+            ...task,
+            committee: task.committee ? committeesMap[task.committee.id] || task.committee : null,
+            employees: combinedPersonnel, // v-model for the personnel MultiSelect
+            assignedBrackets: assignedBrackets, // v-model for the brackets MultiSelect
+        };
+    });
 
     isTaskModalVisible.value = true;
   };
 
   // Modal Actions
   const addTask = () => {
-    taskAssignments.value.push({ committee: null, employees: [], task: '' });
+    taskAssignments.value.push({ committee: null, employees: [], task: '', assignedBrackets: [] });
   };
 
   const deleteTask = (index) => {
@@ -46,7 +64,6 @@ export function useTasks() {
   };
 
   // Save logic
-  // in useTasks.js
   const saveTaskAssignments = (tasksToSave, onSuccessCallback) => {
     if (!selectedEventForTasks.value) {
       throw new Error('No event selected');
@@ -56,7 +73,6 @@ export function useTasks() {
       tasks: tasksToSave,
     };
 
-    // Use Inertia's router for PUT requests. It handles everything automatically.
     router.put(route('tasks.updateForEvent', { id: selectedEventForTasks.value.id }), payload, {
       preserveScroll: true,
       onSuccess: (page) => {
@@ -65,8 +81,6 @@ export function useTasks() {
         }
       },
       onError: (errors) => {
-        // The component's catch block will not be hit, so we handle errors here if needed,
-        // but Inertia's form helper automatically makes errors available to the page.
         console.error("Inertia PUT error:", errors);
       },
     });
@@ -75,3 +89,4 @@ export function useTasks() {
 
   return { isTaskModalVisible, selectedEventForTasks, taskAssignments, openTaskModal, addTask, deleteTask, clearAllTasks, saveTaskAssignments };
 }
+

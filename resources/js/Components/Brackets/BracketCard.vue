@@ -35,6 +35,10 @@ const props = defineProps({
     onOpenTiebreakerDialog: Function,
     onDismissTiebreakerNotice: Function,
     dismissedTiebreakerNotices: Set,
+    canManage: {
+        type: Boolean,
+        default: false
+    },
     // Configuration
     showEventLink: {
         type: Boolean,
@@ -60,7 +64,7 @@ const menu = ref();
 const adminMenuItems = computed(() => {
     const items = [];
 
-    if (props.showAdminControls && (props.user?.role === 'Admin' || props.user.role == 'TournamentManager') && !props.isArchived) {
+    if (props.showAdminControls && props.canManage && !props.isArchived) {
         items.push({
             label: 'Edit Player Names',
             icon: 'pi pi-pen-to-square',
@@ -392,6 +396,11 @@ const handleRepopulateColors = () => {
                             <span>{{ bracket.event.title }}</span>
                         </Link>
 
+                        <div v-if="bracket.managers && bracket.managers.length > 0" class="text-sm text-gray-500 flex items-center gap-2 mt-1">
+                            <i class="pi pi-user"></i>
+                            <span>Manager: {{ bracket.managers.map(m => m.name).join(', ') }}</span>
+                        </div>
+
                         <div class="flex items-center gap-2 mt-3">
                             <span :class="['tag', typeInfo.class]">
                                 <i :class="typeInfo.icon"></i>
@@ -409,14 +418,14 @@ const handleRepopulateColors = () => {
                         <!-- Desktop Admin controls: visible on hover on desktop -->
                         <div class="hidden lg:flex items-center gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300">
                             <Button
-                                v-if="showAdminControls && (user?.role === 'Admin' || user.role == 'TournamentManager') && !isArchived"
+                                v-if="showAdminControls && canManage && !isArchived"
                                 icon="pi pi-pen-to-square"
                                 @click="openPlayerEditModal"
                                 class="p-button-rounded p-button-text action-btn-info"
                                 v-tooltip.top="'Edit Player Names'"
                             />
                             <Button
-                                v-if="showAdminControls && (user?.role === 'Admin' || user.role == 'TournamentManager') && !isArchived && bracket.type === 'Single Elimination' && bracket.matches?.length >= 2"
+                                v-if="showAdminControls && canManage && !isArchived && bracket.type === 'Single Elimination' && bracket.matches?.length >= 2"
                                 :icon="hasConsolationMatch ? 'pi pi-minus-circle' : 'pi pi-plus-circle'"
                                 @click="() => onToggleConsolationMatch(bracketIndex)"
                                 class="p-button-rounded p-button-text"
@@ -424,7 +433,7 @@ const handleRepopulateColors = () => {
                                 v-tooltip.top="hasConsolationMatch ? 'Remove 3rd Place Match' : 'Add 3rd Place Match'"
                             />
                             <Button
-                                v-if="showAdminControls && (user?.role === 'Admin' || user.role == 'TournamentManager') && !isArchived && bracket.type === 'Round Robin'"
+                                v-if="showAdminControls && canManage && !isArchived && bracket.type === 'Round Robin'"
                                 :icon="bracket.allow_draws ? 'pi pi-check-circle' : 'pi pi-times-circle'"
                                 @click="onToggleAllowDraws(bracketIndex)"
                                 class="p-button-rounded p-button-text"

@@ -33,6 +33,43 @@ const props = defineProps({
   preloadedAnnouncements: Array,
 });
 
+const isUserManagerOfBracket = (bracketId) => {
+    if (!user.value) return false;
+    if (['Admin', 'Principal'].includes(user.value.role)) {
+        return true;
+    }
+    if (user.value.role !== 'TournamentManager') {
+        return false;
+    }
+
+    const tasks = props.preloadedTasks || [];
+    // Check if the user is a manager of this specific bracket
+    return tasks.some(task =>
+        (task.managers || []).some(manager => {
+            if (manager.id !== user.value.id) return false;
+            // The manager object from tasks should have the managed_brackets relation loaded
+            return (manager.managed_brackets || []).some(b => b.id === bracketId);
+        })
+    );
+};
+
+const assignablePersonnel = computed(() => {
+  const employeePersonnel = (props.employees || []).map(e => ({
+    ...e,
+    type: 'employee'
+  }));
+
+  const tournamentManagers = (props.all_users || [])
+    .filter(u => u.role === 'TournamentManager')
+    .map(u => ({
+      ...u,
+      name: `${u.name} (Tournament Manager)`, // To distinguish them in the UI
+      type: 'user'
+    }));
+
+  return [...employeePersonnel, ...tournamentManagers];
+});
+
 // Inertia props (now using defineProps)
 const user = computed(() => props.auth.user);
 const currentView = ref('details'); // 'details' or 'announcements'
@@ -640,7 +677,7 @@ const getBracketIndex = (bracketId) => {
                     <h1 v-else class="text-xl font-bold">{{ eventDetails.title }}</h1>
 
                         <button
-                            v-if="(user?.role === 'Admin' || user?.role === 'Principal') && !eventDetails.archived"
+                            v-if="(user?.role === 'Admin' || user?.role === 'Principal' ) && !eventDetails.archived"
                             @click="toggleEdit"
                             :class="editMode ? 'modal-button-danger' : 'create-button'"
                             class="ml-4"
@@ -889,7 +926,7 @@ const getBracketIndex = (bracketId) => {
                     </button>
 
                     <!-- Committee -->
-                    <div v-if="props.preloadedTasks && props.preloadedTasks.length > 0 || (user?.role === 'Admin' || user?.role === 'Principal')">
+                    <div v-if="props.preloadedTasks && props.preloadedTasks.length > 0 || (user?.role && ['Admin', 'Principal', 'TournamentManager'].includes(user.role))">
                         <div class="flex justify-between items-center mb-2">
                             <h2 class="font-semibold">Tasks & Committees:</h2>
                             <Button
@@ -899,7 +936,9 @@ const getBracketIndex = (bracketId) => {
                                 @click="tasksManager.openTaskModal(
                                     { ...props.event, tasks: props.preloadedTasks },
                                     props.committees,
-                                    props.employees)"
+                                    assignablePersonnel,
+                                    brackets
+                                )"
                                 v-tooltip.top="'Manage Tasks'"
                             />
                         </div>
@@ -912,10 +951,18 @@ const getBracketIndex = (bracketId) => {
                                     </div>
                                 </div>
                                 <div class="mt-3 flex items-center gap-2 flex-wrap">
-                                    <span v-if="!taskItem.employees || taskItem.employees.length === 0" class="text-gray-500 italic text-xs">No employees assigned</span>
-                                    <div v-else v-for="employee in taskItem.employees" :key="employee.id" class="flex items-center gap-2 bg-white rounded-full px-2 py-1 border shadow-sm" v-tooltip.top="employee.name">
+                                    <span v-if="(!taskItem.employees || taskItem.employees.length === 0) && (!taskItem.managers || taskItem.managers.length === 0)" class="text-gray-500 italic text-xs">No personnel assigned</span>
+
+                                    <!-- Display employees -->
+                                    <div v-for="employee in taskItem.employees" :key="`emp-${employee.id}`" class="flex items-center gap-2 bg-white rounded-full px-2 py-1 border shadow-sm" v-tooltip.top="employee.name">
                                         <Avatar :label="employee.name ? employee.name.split(' ').map(n => n[0]).join('').toUpperCase() : '?'" shape="circle" size="small" />
                                         <span class="text-xs font-medium text-gray-800">{{ employee.name }}</span>
+                                    </div>
+
+                                    <!-- Display managers -->
+                                    <div v-for="manager in taskItem.managers" :key="`mgr-${manager.id}`" class="flex items-center gap-2 bg-blue-100 rounded-full px-2 py-1 border border-blue-200 shadow-sm" v-tooltip.top="`${manager.name} (Tournament Manager)`">
+                                        <Avatar :label="manager.name ? manager.name.split(' ').map(n => n[0]).join('').toUpperCase() : '?'" shape="circle" size="small" class="bg-blue-500 text-white" />
+                                        <span class="text-xs font-medium text-blue-800">{{ manager.name }} (Tournament Manager)</span>
                                     </div>
                                 </div>
                             </div>
@@ -1123,14 +1170,15 @@ const getBracketIndex = (bracketId) => {
                 :getRoundRobinStandings="getRoundRobinStandings"
                 :isArchived="eventDetails.archived"
                 :isRoundRobinConcluded="isRoundRobinConcluded"
-                :onOpenMatchDialog="user ? openMatchDialog : null"
-                :onOpenScoringConfigDialog="user ? openScoringConfigDialog : null"
-                :onOpenMatchEditorFromCard="user ? openMatchEditorFromCard : null"
+                :can-manage="isUserManagerOfBracket(bracket.id)"
+                :onOpenMatchDialog="isUserManagerOfBracket(bracket.id) ? openMatchDialog : null"
+                :onOpenScoringConfigDialog="isUserManagerOfBracket(bracket.id) ? openScoringConfigDialog : null"
+                :onOpenMatchEditorFromCard="isUserManagerOfBracket(bracket.id) ? openMatchEditorFromCard : null"
                 @toggle-bracket="() => toggleBracket(bracket, index)"
                 @set-view-mode="({ index, mode }) => setBracketViewMode(index, mode)"
                 @set-match-filter="({ index, filter }) => setBracketMatchFilter(index, filter)"
                 :showEventLink="false"
-                :showAdminControls="false"
+                :showAdminControls="true"
             />
         </div>
       </div>
@@ -1243,7 +1291,9 @@ const getBracketIndex = (bracketId) => {
     <TaskEditor
         :tasks-manager="tasksManager"
         :committees="committees"
-        :employees="employees"
+        :employees="assignablePersonnel"
+        :brackets="brackets"
+        :is-editable="isAssignedManager"
         @save-success="handleTaskSaveSuccess"
         @save-error="handleTaskSaveError"
         @committee-action-success="handleCommitteeActionSuccess"

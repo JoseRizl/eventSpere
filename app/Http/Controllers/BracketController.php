@@ -12,9 +12,28 @@ use App\Models\MatchPlayer;
 use App\Models\Event;
 use App\Models\Category;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class BracketController extends Controller
 {
+    private function authorizeBracketAction(Bracket $bracket)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return false;
+        }
+
+        if (in_array($user->role, ['Admin', 'Principal'])) {
+            return true;
+        }
+
+        if ($user->role === 'TournamentManager') {
+            return $user->managedBrackets()->where('bracket_id', $bracket->id)->exists();
+        }
+
+        return false;
+    }
 
     /**
      * Flatten different match node shapes into a single flat array of match objects.
@@ -192,12 +211,7 @@ class BracketController extends Controller
         // It has been removed to avoid confusion.
 
         // FIX: Load `event` and then eager load `category` on the event model.
-        $brackets = Bracket::with('event')->orderBy('created_at', 'desc')->get()->each(function ($bracket) {
-            // Eager load category only if the event exists to prevent errors.
-            if ($bracket->event) {
-                $bracket->event->load('category');
-            }
-        });
+        $brackets = Bracket::with(['event.category', 'managers'])->orderBy('created_at', 'desc')->get();
         $matches = Matches::whereIn('bracket_id', $brackets->pluck('id'))->get();
         $matchPlayers = MatchPlayer::whereIn('match_id', $matches->pluck('id'))->get();
         $events = Event::with('category')->get();
@@ -217,7 +231,10 @@ class BracketController extends Controller
      */
     public function indexForEvent($eventId)
     {
-        $brackets = Bracket::where('event_id', $eventId)->orderBy('created_at', 'desc')->get();
+        $brackets = Bracket::where('event_id', $eventId)
+            ->with('managers')
+            ->orderBy('created_at', 'desc')
+            ->get();
         $bracketIds = $brackets->pluck('id');
 
         $matches = Matches::whereIn('bracket_id', $bracketIds)->get();
@@ -237,6 +254,11 @@ class BracketController extends Controller
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
+        if (!$user || !in_array($user->role, ['Admin', 'Principal'])) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string',
             'type' => 'required|string',
@@ -270,10 +292,9 @@ class BracketController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $bracket = Bracket::find($id);
-
-        if (!$bracket) {
-            return response()->json(['message' => 'Bracket not found'], 404);
+        $bracket = Bracket::findOrFail($id);
+        if (!$this->authorizeBracketAction($bracket)) {
+            abort(403, 'Unauthorized action.');
         }
 
         $validated = $request->validate([
@@ -304,9 +325,9 @@ class BracketController extends Controller
      */
     public function destroy($id)
     {
-        $bracket = Bracket::find($id);
-        if (!$bracket) {
-            return response()->json(['message' => 'Bracket not found'], 404);
+        $bracket = Bracket::findOrFail($id);
+        if (!$this->authorizeBracketAction($bracket)) {
+            abort(403, 'Unauthorized action.');
         }
         $bracket->delete(); // This will cascade delete matches and match_players
 
@@ -318,6 +339,11 @@ class BracketController extends Controller
      */
     public function updatePlayerNames(Request $request, $id)
     {
+        $bracket = Bracket::findOrFail($id);
+        if (!$this->authorizeBracketAction($bracket)) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $validator = Validator::make($request->all(), [
             'updates' => 'required|array',
             'updates.*.oldName' => 'required|string',
@@ -329,10 +355,6 @@ class BracketController extends Controller
         }
 
         $updates = $request->input('updates');
-
-        if (!Bracket::where('id', $id)->exists()) {
-            return response()->json(['error' => 'Bracket not found'], 404);
-        }
 
         // Get all match IDs for the bracket
         $matchIds = Matches::where('bracket_id', $id)->pluck('id');
@@ -351,6 +373,11 @@ class BracketController extends Controller
 
     public function updatePlayerColors(Request $request, $id)
     {
+        $bracket = Bracket::findOrFail($id);
+        if (!$this->authorizeBracketAction($bracket)) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $validator = Validator::make($request->all(), [
             'colors' => 'required|array',
         ]);

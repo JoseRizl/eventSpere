@@ -56,7 +56,7 @@ defineOptions({ layout: AuthLayout });
                             <input id="remember" type="checkbox" v-model="form.remember" class="rounded">
                             <span>Remember Me</span>
                         </label>
-                        <!-- <a href="/register" class="text-blue-600 hover:underline">Admin</a> -->
+                        <a href="/register" class="text-blue-600 hover:underline">Admin</a>
                     </div>
 
                     <!-- Login Button -->

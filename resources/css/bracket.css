@@ -1821,30 +1821,8 @@
   }
 
 @media (max-width: 768px) {
-    .double-elimination-bracket {
-    }
-
-    .bracket-section.winners,
-    .bracket-section.losers {
-        border: none;
-        padding: 0;
-    }
-
     .round-robin-bracket {
-        flex-direction: column;
-    }
-
-    .round-robin-bracket .bracket {
-        flex-direction: row;
-        flex-wrap: nowrap;
-    }
-
-    /* Make the scroll container full-width on mobile */
-    .round-robin-bracket {
-        width: calc(100% + 2rem); /* 100% + (padding * 2) */
-        margin-left: -1rem;
-        margin-right: -1rem;
-        border-radius: 0; /* Remove border-radius for full-width */
+        border-radius: 8px; /* keep a bit of radius */
     }
 }
 .event-link-container {

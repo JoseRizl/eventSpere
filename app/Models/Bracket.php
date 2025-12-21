@@ -4,7 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Bracket extends Model
 {
@@ -32,8 +33,14 @@ class Bracket extends Model
         return $this->hasMany(\App\Models\Matches::class, 'bracket_id', 'id');
     }
 
-    public function event()
+    public function event(): BelongsTo
     {
         return $this->belongsTo(\App\Models\Event::class, 'event_id', 'id');
+    }
+
+    public function managers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'bracket_manager', 'bracket_id', 'user_id')
+                    ->using(BracketManager::class);
     }
 }
