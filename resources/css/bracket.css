@@ -84,6 +84,11 @@
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+.match.match-finished {
+  border-color: #adb5bd; /* gray-400 */
+}
+
+
 .match-content {
   display: flex;
   justify-content: space-between;
@@ -111,6 +116,12 @@
   display: flex;
   gap: 5px;
   align-items: center;
+}
+
+.round-robin-match-dialog .score-controls .p-button:disabled {
+    background: #adb5bd !important;
+    border-color: #adb5bd !important;
+    color: #fff !important;
 }
 
 .vs {

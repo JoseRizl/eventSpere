@@ -11,6 +11,19 @@ import { useBracketActions } from '@/composables/Brackets/useBracketActions.js';
 const page = usePage();
 const user = computed(() => page.props.auth.user);
 
+// Determine if current user can manage a specific bracket
+// Admins and Principals can manage all; TournamentManagers can manage assigned brackets via bracket.managers
+const canManageBracket = (bracket) => {
+  const u = user.value;
+  if (!u) return false;
+  if (u.role === 'Admin' || u.role === 'Principal') return true;
+  if (u.role === 'TournamentManager') {
+    const managers = bracket?.managers || [];
+    return managers.some(m => m.id === u.id);
+  }
+  return false;
+};
+
 const searchQuery = ref('');
 const showFilters = ref(false);
 
@@ -517,14 +530,17 @@ watch(() => user.value, () => {
             :isFinalRound="isFinalRound"
             :getRoundRobinStandings="getRoundRobinStandings"
             :isRoundRobinConcluded="isRoundRobinConcluded"
-            :onOpenMatchDialog="openMatchDialog"
-            :onOpenScoringConfigDialog="openScoringConfigDialog"
-            :onOpenMatchEditorFromCard="openMatchEditorFromCard"
+            :onOpenMatchDialog="canManageBracket(bracket) ? openMatchDialog : null"
+            :onOpenScoringConfigDialog="canManageBracket(bracket) ? openScoringConfigDialog : null"
+            :onOpenMatchEditorFromCard="canManageBracket(bracket) ? openMatchEditorFromCard : null"
             :onToggleConsolationMatch="toggleConsolationMatch"
             :onToggleAllowDraws="toggleAllowDraws"
             :onOpenTiebreakerDialog="openTiebreakerDialog"
             :onDismissTiebreakerNotice="dismissTiebreakerNotice"
             :dismissedTiebreakerNotices="dismissedTiebreakerNotices"
+            :can-manage="canManageBracket(bracket)"
+            :isArchived="!!bracket.event?.archived"
+            :showAdminControls="true"
             @toggle-bracket="() => toggleBracket(bracket)"
             :isDeletingBracket="isDeletingBracket"
             @remove-bracket="removeBracket"

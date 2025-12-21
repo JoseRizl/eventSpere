@@ -221,6 +221,10 @@ const props = defineProps({
     committees: Array,
     employees: Array,
     brackets: Array,
+    isEditable: {
+        type: Boolean,
+        default: true,
+    },
 });
 
 const emit = defineEmits(['save-success', 'save-error', 'committee-action-success']);

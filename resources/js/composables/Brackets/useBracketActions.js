@@ -1008,100 +1008,91 @@ const generateDoubleEliminationBracket = () => {
 };
 
   const getBracketStats = (bracket) => {
-  const allMatches = getAllMatches(bracket);
-  const totalGames = allMatches.length;
-  if (!allMatches || allMatches.length === 0) {
-    return { status: { text: 'Upcoming', class: 'status-upcoming' }, participants: 0, rounds: 0, winnerName: null, totalGames: 0 };
-  }
+    const allMatches = getAllMatches(bracket);
+    const playableMatches = allMatches.filter(match => match && match.players.every(p => p.name !== 'BYE'));
+    const totalGames = playableMatches.length;
 
-  const hasScores = allMatches.some(m => m.players.some(p => p.score > 0));
-  const completedMatches = allMatches.filter(m => m.status === 'completed').length;
-  let status;
-  let winnerName = null;
-
-  if (completedMatches === allMatches.length) {
-    status = { text: 'Completed', class: 'status-completed' };
-    // Determine winner based on bracket type
-    if (bracket.type === 'Single Elimination') {
-      const finalMatch = bracket.matches[bracket.matches.length - 1][0];
-      if (finalMatch && finalMatch.winner_id) {
-        winnerName = finalMatch.players.find(p => p.id === finalMatch.winner_id)?.name;
-      }
-    } else if (bracket.type === 'Double Elimination') {
-      const grandFinalsMatch = bracket.matches.grand_finals[0];
-      if (grandFinalsMatch && grandFinalsMatch.winner_id) {
-        winnerName = grandFinalsMatch.players.find(p => p.id === grandFinalsMatch.winner_id)?.name;
-      }
-    } else if (bracket.type === 'Round Robin') {
-      const bracketIdx = brackets.value.findIndex(b => b.id === bracket.id);
-      if (bracketIdx !== -1) {
-        const standings = getRoundRobinStandings(bracketIdx);
-        if (standings.length > 0) {
-          winnerName = standings[0].name; // Top of the standings
-        }
-      }
+    if (!allMatches || allMatches.length === 0) {
+        return { status: { text: 'Upcoming', class: 'status-upcoming' }, participants: 0, rounds: 0, winnerName: null, totalGames: 0 };
     }
-  } else if (completedMatches > 0 || hasScores) {
-    status = { text: 'Ongoing', class: 'status-ongoing' };
-  } else {
-    status = { text: 'Upcoming', class: 'status-upcoming' };
-  }
 
-  // Count unique participants from the first round only (initial matches)
-  // This avoids counting the same player multiple times and excludes consolation match players
-  const players = new Set();
+    const completedMatches = playableMatches.filter(m => m.status === 'completed').length;
+    let status;
+    let winnerName = null;
 
-  if (bracket.type === 'Single Elimination') {
-    // Get first round matches only, excluding consolation matches
-    const firstRound = bracket.matches[0] || [];
-    firstRound.forEach(match => {
-      match.players.forEach(player => {
-        if (player && player.id && player.name &&
-            player.name !== 'TBD' && player.name !== 'BYE') {
-          players.add(player.id);
+    if (totalGames > 0 && completedMatches === totalGames) {
+        status = { text: 'Completed', class: 'status-completed' };
+        // Winner determination logic...
+        if (bracket.type === 'Single Elimination') {
+            const finalMatch = bracket.matches[bracket.matches.length - 1][0];
+            if (finalMatch && finalMatch.winner_id) {
+                winnerName = finalMatch.players.find(p => p.id === finalMatch.winner_id)?.name;
+            }
+        } else if (bracket.type === 'Double Elimination') {
+            const grandFinalsMatch = bracket.matches.grand_finals?.[0]?.[0];
+            if (grandFinalsMatch && grandFinalsMatch.winner_id) {
+                winnerName = grandFinalsMatch.players.find(p => p.id === grandFinalsMatch.winner_id)?.name;
+            }
+        } else if (bracket.type === 'Round Robin') {
+            const bracketIdx = brackets.value.findIndex(b => b.id === bracket.id);
+            if (bracketIdx !== -1) {
+                const standings = getRoundRobinStandings(bracketIdx);
+                if (standings.length > 0) {
+                    winnerName = standings[0].name;
+                }
+            }
         }
-      });
-    });
-  } else if (bracket.type === 'Double Elimination') {
-    // Get first round of winners bracket only
-    const firstRound = bracket.matches.winners[0] || [];
-    firstRound.forEach(match => {
-      match.players.forEach(player => {
-        if (player && player.id && player.name &&
-            player.name !== 'TBD' && player.name !== 'BYE') {
-          players.add(player.id);
-        }
-      });
-    });
-  } else if (bracket.type === 'Round Robin') {
-    // For Round Robin, count all unique players across all matches
-    allMatches.forEach(match => {
-      match.players.forEach(player => {
-        if (player && player.id && player.name &&
-            player.name !== 'TBD' && player.name !== 'BYE') {
-          players.add(player.id);
-        }
-      });
-    });
-  }
+    } else if (completedMatches > 0) {
+        status = { text: 'Ongoing', class: 'status-ongoing' };
+    } else {
+        status = { text: 'Upcoming', class: 'status-upcoming' };
+    }
 
-  // compute rounds
-  let rounds = 0;
-  if (bracket.type === 'Single Elimination' || bracket.type === 'Round Robin') {
-    rounds = bracket.matches.length;
-  } else if (bracket.type === 'Double Elimination') {
-    rounds = bracket.matches.winners.length + bracket.matches.losers.length;
-  }
+    const players = new Set();
+    if (bracket.type === 'Single Elimination') {
+        const firstRound = bracket.matches[0] || [];
+        firstRound.forEach(match => {
+            match.players.forEach(player => {
+                if (player && player.id && player.name && player.name !== 'TBD' && player.name !== 'BYE') {
+                    players.add(player.id);
+                }
+            });
+        });
+    } else if (bracket.type === 'Double Elimination') {
+        const firstRound = bracket.matches.winners[0] || [];
+        firstRound.forEach(match => {
+            match.players.forEach(player => {
+                if (player && player.id && player.name && player.name !== 'TBD' && player.name !== 'BYE') {
+                    players.add(player.id);
+                }
+            });
+        });
+    } else if (bracket.type === 'Round Robin') {
+        allMatches.forEach(match => {
+            match.players.forEach(player => {
+                if (player && player.id && player.name && player.name !== 'TBD' && player.name !== 'BYE') {
+                    players.add(player.id);
+                }
+            });
+        });
+    }
 
-  const participants = players.size;
+    let rounds = 0;
+    if (bracket.type === 'Single Elimination' || bracket.type === 'Round Robin') {
+        rounds = bracket.matches.length;
+    } else if (bracket.type === 'Double Elimination') {
+        rounds = (bracket.matches.winners?.length || 0) + (bracket.matches.losers?.length || 0);
+    }
 
-  return {
-    status,
-    participants,
-    rounds,
-    winnerName,
-    totalGames
-  };
+    const participants = players.size;
+
+    return {
+        status,
+        participants,
+        rounds,
+        winnerName,
+        totalGames
+    };
 };
 
 

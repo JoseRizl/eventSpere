@@ -65,7 +65,7 @@ const defaultMobileZoom = computed(() => {
     if (props.bracket.type === 'Double Elimination' && playerCountForDE.value >= 8) {
         return 0.24;
     }
-    return 0.35; // Default smaller zoom for mobile
+    return 0.30; // Default smaller zoom for mobile
 });
 const zoomLevel = ref(defaultDesktopZoom);
 const minZoom = computed(() => 0.5 * (window.innerWidth <= 768 ? defaultMobileZoom.value : defaultDesktopZoom));
@@ -1399,7 +1399,7 @@ watch(() => props.bracket, () => {
                                 :id="`match-${bracketIndex}-${roundIdx}-${matchIdx}`"
                                 :data-match-id="match.id"
                                 :style="getMatchStyle(roundIdx)"
-                                :class="['match', (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
+                                :class="['match', { 'match-finished': match.status === 'completed' }, (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
                                 @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'single')"
                             >
                                 <div class="player-box">
@@ -1426,7 +1426,7 @@ watch(() => props.bracket, () => {
                                 <div
                                     :id="`match-${bracketIndex}-${splitBracketData.finalRoundIdx}-0`"
                                     :data-match-id="splitBracketData.finals.id"
-                                    :class="['match', 'finals-match', (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
+                                    :class="['match', 'finals-match', { 'match-finished': splitBracketData.finals.status === 'completed' }, (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
                                     @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, splitBracketData.finalRoundIdx, 0, splitBracketData.finals, 'single')"
                                 >
                                     <div class="player-box">
@@ -1455,7 +1455,7 @@ watch(() => props.bracket, () => {
                                 <div
                                     :id="`match-${bracketIndex}-${splitBracketData.finalRoundIdx}-${bracket.matches[splitBracketData.finalRoundIdx].indexOf(splitBracketData.consolation)}`"
                                     :data-match-id="splitBracketData.consolation.id"
-                                    :class="['match', 'consolation-match', (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
+                                    :class="['match', 'consolation-match', { 'match-finished': splitBracketData.consolation.status === 'completed' }, (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
                                     @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, splitBracketData.finalRoundIdx, bracket.matches[splitBracketData.finalRoundIdx].indexOf(splitBracketData.consolation), splitBracketData.consolation, 'single')"
                                 >
                                     <div class="player-box">
@@ -1487,7 +1487,7 @@ watch(() => props.bracket, () => {
                                 :id="`match-${bracketIndex}-${roundIdx}-${Math.ceil(bracket.matches[roundIdx].length / 2) + matchIdx}`"
                                 :data-match-id="match.id"
                                 :style="getMatchStyle(roundIdx)"
-                                :class="['match', (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
+                                :class="['match', { 'match-finished': match.status === 'completed' }, (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
                                 @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, Math.ceil(bracket.matches[roundIdx].length / 2) + matchIdx, match, 'single')"
                             >
                                 <div class="player-box">
@@ -1538,7 +1538,7 @@ watch(() => props.bracket, () => {
                 :id="`match-${bracketIndex}-${roundIdx}-${matchIdx}`"
                 :data-match-id="match.id"
                 :style="getMatchStyle(roundIdx)"
-                :class="['match', (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
+                :class="['match', { 'match-finished': match.status === 'completed' }, (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
                 @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'single')"
             >
                 <div class="player-box">
@@ -1562,7 +1562,7 @@ watch(() => props.bracket, () => {
                     :id="`match-${bracketIndex}-${bracket.matches.length - 1}-${bracket.matches[bracket.matches.length - 1].indexOf(match)}`"
                     :data-match-id="match.id"
                     :style="{ marginTop: playerCount > 8 && playerCount < 12 ? '50px' : '10px' }"
-                    :class="['match', 'consolation-match-standard', (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
+                    :class="['match', 'consolation-match-standard', { 'match-finished': match.status === 'completed' }, (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
                     @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, bracket.matches.length - 1, bracket.matches[bracket.matches.length - 1].indexOf(match), match, 'single')"
                 >
                     <div class="player-box">

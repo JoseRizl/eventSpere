@@ -147,7 +147,7 @@ const matchesPlayed = computed(() => {
             ...(props.bracket.matches.grand_finals?.flat() || [])
           ].flat();
 
-    return allMatches.filter(m => m && m.status === 'completed').length;
+    return allMatches.filter(m => m && m.status === 'completed' && !m.players.some(p => p.name === 'BYE')).length;
 });
 
 const progressPercent = computed(() => {

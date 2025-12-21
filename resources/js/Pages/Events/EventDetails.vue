@@ -70,6 +70,23 @@ const assignablePersonnel = computed(() => {
   return [...employeePersonnel, ...tournamentManagers];
 });
 
+const isAssignedManager = computed(() => {
+    if (!user.value) return false;
+    if (user.value.role === 'Admin' || user.value.role === 'Principal') {
+        return true;
+    }
+
+    if (user.value.role === 'TournamentManager') {
+        const tasks = props.preloadedTasks || [];
+        return tasks.some(task =>
+            (task.managers || []).some(manager => manager.id === user.value.id)
+        );
+    }
+
+    return false;
+});
+
+
 // Inertia props (now using defineProps)
 const user = computed(() => props.auth.user);
 const currentView = ref('details'); // 'details' or 'announcements'
@@ -194,6 +211,13 @@ const {
   openMatchEditorFromCard,
   getBracketTypeClass,
   getBracketStats,
+  // Added actions for admin toggles
+  toggleConsolationMatch,
+  toggleAllowDraws,
+  confirmToggleDraws,
+  cancelToggleDraws,
+  confirmToggleConsolation,
+  cancelToggleConsolation,
 
   // UI State (automatically included from useBracketActions)
   expandedBrackets,
@@ -205,6 +229,10 @@ const {
   bracketViewModes,
   showScoringConfigDialog,
   standingsRevision,
+  // Added UI state for dialogs
+  showToggleDrawsDialog,
+  showToggleConsolationDialog,
+  pendingBracketIdx,
 } = useBracketActions(bracketState);
 
 const selectedBracketForDialog = computed(() => {
@@ -1174,6 +1202,8 @@ const getBracketIndex = (bracketId) => {
                 :onOpenMatchDialog="isUserManagerOfBracket(bracket.id) ? openMatchDialog : null"
                 :onOpenScoringConfigDialog="isUserManagerOfBracket(bracket.id) ? openScoringConfigDialog : null"
                 :onOpenMatchEditorFromCard="isUserManagerOfBracket(bracket.id) ? openMatchEditorFromCard : null"
+                :onToggleConsolationMatch="toggleConsolationMatch"
+                :onToggleAllowDraws="toggleAllowDraws"
                 @toggle-bracket="() => toggleBracket(bracket, index)"
                 @set-view-mode="({ index, mode }) => setBracketViewMode(index, mode)"
                 @set-match-filter="({ index, filter }) => setBracketMatchFilter(index, filter)"
@@ -1208,6 +1238,31 @@ const getBracketIndex = (bracketId) => {
         message="Are you sure you want to save your changes?"
         confirmText="Yes, Save"
         @confirm="saveChanges"
+      />
+
+      <!-- Toggle Draws Confirmation Dialog -->
+      <ConfirmationDialog
+        v-model:show="showToggleDrawsDialog"
+        title="Toggle Draws"
+        :message="brackets[pendingBracketIdx]?.allow_draws ? 'Disable draws for this Round Robin tournament?' : 'Enable draws for this Round Robin tournament?'"
+        :confirmText="brackets[pendingBracketIdx]?.allow_draws ? 'Disable Draws' : 'Enable Draws'"
+        cancelText="Cancel"
+        @confirm="confirmToggleDraws"
+        @cancel="cancelToggleDraws"
+      />
+
+      <!-- Toggle Consolation Match Confirmation Dialog -->
+      <ConfirmationDialog
+        v-model:show="showToggleConsolationDialog"
+        title="Toggle 3rd Place Match"
+        :message="pendingBracketIdx !== null && brackets[pendingBracketIdx]?.matches.flat().some(m => m.bracket_type === 'consolation')
+            ? 'Are you sure you want to remove the 3rd place match?'
+            : 'Are you sure you want to add a 3rd place match?'"
+        :confirmText="pendingBracketIdx !== null && brackets[pendingBracketIdx]?.matches.flat().some(m => m.bracket_type === 'consolation') ? 'Yes, Remove' : 'Yes, Add'"
+        cancelText="Cancel"
+        :confirmButtonClass="pendingBracketIdx !== null && brackets[pendingBracketIdx]?.matches.flat().some(m => m.bracket_type === 'consolation') ? 'modal-button-danger' : 'modal-button-primary'"
+        @confirm="confirmToggleConsolation"
+        @cancel="cancelToggleConsolation"
       />
     </div>
 
