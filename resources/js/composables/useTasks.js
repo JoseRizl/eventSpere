@@ -10,6 +10,10 @@ export function useTasks() {
 
   // Method to open the modal and prepare data
   const openTaskModal = (event, allCommittees = [], allPersonnel = [], eventBrackets = []) => {
+    console.log('[useTasks] openTaskModal received event tasks:', event.tasks);
+    console.log('[useTasks] openTaskModal received personnel list:', allPersonnel);
+    console.log('[useTasks] openTaskModal received brackets:', eventBrackets);
+
     selectedEventForTasks.value = event;
 
     // Normalize inputs to arrays to prevent runtime errors
@@ -23,12 +27,18 @@ export function useTasks() {
     }, {});
 
     taskAssignments.value = (event.tasks || []).map(task => {
+        console.log(`[useTasks] Processing task: "${task.task || task.description}"`);
+
         const assignedEmployees = (task.employees || []).map(emp => {
-            return personnelArr.find(p => p.id === emp.id && p.type === 'employee');
+            const match = personnelArr.find(p => Number(p.id) === Number(emp.id) && p.type === 'employee');
+            if (!match) console.warn(`[useTasks] Mismatch: Could not find employee ID ${emp.id} in personnel list.`);
+            return match;
         }).filter(Boolean);
 
         const assignedManagers = (task.managers || []).map(mgr => {
-            return personnelArr.find(p => p.id === mgr.id && p.type === 'user');
+            const match = personnelArr.find(p => Number(p.id) === Number(mgr.id) && p.type === 'user');
+            if (!match) console.warn(`[useTasks] Mismatch: Could not find manager ID ${mgr.id} in personnel list.`);
+            return match;
         }).filter(Boolean);
 
         const combinedPersonnel = [...assignedEmployees, ...assignedManagers];
@@ -40,7 +50,7 @@ export function useTasks() {
                 // The relationship is loaded as managed_brackets
                 (m.managed_brackets || []).forEach(b => managerBracketIds.add(b.id));
             });
-            
+
             assignedBrackets = bracketsArr.filter(b => managerBracketIds.has(b.id));
         }
 
@@ -94,4 +104,3 @@ export function useTasks() {
 
   return { isTaskModalVisible, selectedEventForTasks, taskAssignments, openTaskModal, addTask, deleteTask, clearAllTasks, saveTaskAssignments };
 }
-

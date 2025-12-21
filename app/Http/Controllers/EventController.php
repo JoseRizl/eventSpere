@@ -21,7 +21,7 @@ class EventController extends JsonController
             'memorandum',
             'tasks.committee',
             'tasks.employees',
-            'tasks.managers',
+            'tasks.managers.managedBrackets',
         ])
             ->where(function ($q) {
                 $q->whereNull('archived')->orWhere('archived', '!=', true);

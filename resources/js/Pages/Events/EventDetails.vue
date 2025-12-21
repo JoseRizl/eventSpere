@@ -54,9 +54,10 @@ const isUserManagerOfBracket = (bracketId) => {
 };
 
 const assignablePersonnel = computed(() => {
-  const employeePersonnel = (props.employees || []).map(e => ({
+  const employeePersonnel = (employees.value || []).map(e => ({
     ...e,
-    type: 'employee'
+    type: 'employee',
+    id: Number(e.id) // Ensure ID is a number for consistent comparison
   }));
 
   const tournamentManagers = (props.all_users || [])
@@ -64,7 +65,8 @@ const assignablePersonnel = computed(() => {
     .map(u => ({
       ...u,
       name: `${u.name} (Tournament Manager)`, // To distinguish them in the UI
-      type: 'user'
+      type: 'user',
+      id: Number(u.id) // Ensure ID is a number for consistent comparison
     }));
 
   return [...employeePersonnel, ...tournamentManagers];
@@ -108,7 +110,7 @@ const showMemoDocDialog = ref(false);
 const memoDocUrl = ref('');
 const memoDocTitle = ref('');
 
-const employees = ref(props.employees || []);
+const employees = computed(() => props.employees || []);
 const relatedEvents = ref(props.relatedEvents || []);
 const showDeleteScheduleConfirm = ref(false);
 const originalEventDetails = ref(null);
@@ -422,12 +424,7 @@ onMounted(async () => {
 
   // Auto-open TaskEditor when coming from EventList with openTasks=1
   if (shouldOpenTasks) {
-    tasksManager.openTaskModal(
-      { ...props.event, tasks: props.preloadedTasks },
-      committees.value,
-      assignablePersonnel.value,
-      brackets.value
-    );
+    handleOpenTaskEditor();
   }
 });
 
@@ -717,6 +714,18 @@ const normalizedRelatedEvents = computed(() => {
 
 const getBracketIndex = (bracketId) => {
     return brackets.value.findIndex(b => b.id === bracketId);
+};
+
+const handleOpenTaskEditor = () => {
+    console.log('[EventDetails] Opening Task Editor');
+    console.log('[EventDetails] Preloaded Tasks Data:', props.preloadedTasks);
+    console.log('[EventDetails] Assignable Personnel List:', assignablePersonnel.value);
+    tasksManager.openTaskModal(
+        { ...props.event, tasks: props.preloadedTasks },
+        committees.value,
+        assignablePersonnel.value,
+        brackets.value
+    );
 };
 
 </script>
@@ -1057,13 +1066,9 @@ const getBracketIndex = (bracketId) => {
                             <Button
                                 v-if="user?.role === 'Admin' || user?.role === 'Principal'"
                                 icon="pi pi-list"
-                                class="p-button-rounded p-button-text action-btn-warning"
-                                @click="tasksManager.openTaskModal(
-                                    { ...props.event, tasks: props.preloadedTasks },
-                                    committees.value,
-                                    assignablePersonnel.value,
-                                    brackets.value
-                                )"
+                                label="Manage Tasks"
+                                class="p-button-sm manage-tasks-btn"
+                                        @click="handleOpenTaskEditor"
                                 v-tooltip.top="'Manage Tasks'"
                             />
                         </div>
@@ -1094,7 +1099,7 @@ const getBracketIndex = (bracketId) => {
                         </div>
                         <div v-else class="text-center text-gray-500 py-4 border-2 border-dashed rounded-lg">
                             <p class="text-sm">No tasks or committees have been assigned to this event yet.</p>
-                            <p v-if="user?.role === 'Admin' || user?.role === 'Principal'" class="text-xs mt-1">Click the  <i class="pi pi-list"></i>  button to start assigning tasks.</p>
+                            <p v-if="user?.role === 'Admin' || user?.role === 'Principal'" class="text-xs mt-1">Click the <strong>Manage Tasks</strong> button to start assigning tasks.</p>
                         </div>
                     </div>
                 </div>
@@ -1472,6 +1477,17 @@ const getBracketIndex = (bracketId) => {
     margin-top: 1rem;
 }
 
+.manage-tasks-btn {
+    background: linear-gradient(135deg, #0872a3 0%, #2121c8 100%) !important;
+    border: none !important;
+    color: white !important;
+}
+
+.manage-tasks-btn:hover {
+    background: linear-gradient(135deg, #2121c8 0%, #073b53 100%) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 119, 179, 0.3);
+}
 
 .bracket-toggle-button {
     width: 2.5rem;

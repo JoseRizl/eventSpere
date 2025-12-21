@@ -84,7 +84,7 @@
                     <MultiSelect
                         appendTo="self"
                         v-model="taskEntry.assignedBrackets"
-                        :options="localBrackets"
+                        :options="getAvailableBrackets(index)"
                         optionLabel="name"
                         placeholder="Select brackets for manager"
                         display="chip"
@@ -264,6 +264,18 @@ watch(() => props.employees, (newVal) => {
 watch(() => props.brackets, (newVal) => {
     localBrackets.value = [...(newVal || [])];
 }, { immediate: true, deep: true });
+
+const getAvailableBrackets = (currentIndex) => {
+    const assignedInOtherTasks = props.tasksManager.taskAssignments.value
+        .reduce((acc, task, index) => {
+            if (index !== currentIndex && Array.isArray(task.assignedBrackets)) {
+                task.assignedBrackets.forEach(b => acc.add(b.id));
+            }
+            return acc;
+        }, new Set());
+
+    return localBrackets.value.filter(bracket => !assignedInOtherTasks.has(bracket.id));
+};
 
 const taskHasManager = computed(() => {
     return (taskEntry) => {

@@ -171,7 +171,7 @@
 
         <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Tasks" style="width:15%;" body-class="text-center print-hide" header-class="print-hide" :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
         <template #body="{ data }">
-            <Button icon="pi pi-list" class="p-button-rounded p-button-text action-btn-warning" @click="openTasksInEventDetails(data)" v-tooltip.top="'Manage Tasks'"/>
+            <Button icon="pi pi-list" class="p-button-rounded p-button-text manage-tasks-btn" @click="openTaskEditor(data)" v-tooltip.top="'Manage Tasks'"/>
         </template>
         </Column>
 
@@ -180,7 +180,8 @@
       <TaskEditor
         :tasks-manager="tasksManager"
         :committees="committees"
-        :employees="employees"
+        :employees="assignablePersonnel"
+        :brackets="brackets"
         @save-success="handleTaskSaveSuccess"
         @save-error="handleTaskSaveError"
         @committee-action-success="handleCommitteeActionSuccess"
@@ -677,6 +678,8 @@
   import SearchFilterBar from '@/Components/SearchFilterBar.vue';
   import { useEventValidation } from '@/composables/useEventValidation.js';
   import TaskEditor from '@/Components/TaskEditor.vue';
+  import { useBracketState } from '@/composables/Brackets/useBracketState.js';
+  import { useBracketActions } from '@/composables/Brackets/useBracketActions.js';
 
   export default defineComponent({
     name: "EventList",
@@ -752,6 +755,28 @@
 
       // Memorandum composable
       const { saveMemorandum, clearMemorandum } = useMemorandum();
+
+      // Bracket Logic
+      const bracketState = useBracketState();
+      const { brackets } = bracketState;
+      const { fetchBrackets } = useBracketActions(bracketState);
+
+      const assignablePersonnel = computed(() => {
+        const employeePersonnel = (employees.value || []).map(e => ({
+            ...e,
+            type: 'employee'
+        }));
+
+        const tournamentManagers = (page.props.all_users || [])
+            .filter(u => u.role === 'TournamentManager')
+            .map(u => ({
+            ...u,
+            name: `${u.name} (Tournament Manager)`,
+            type: 'user'
+            }));
+
+        return [...employeePersonnel, ...tournamentManagers];
+      });
 
       const filteredNewEventTags = computed(() => {
         if (!newEvent.value.category_id) {
@@ -1544,9 +1569,23 @@
     const tagCreationContext = ref('create');
     const showCreateConfirm = ref(false);
 
-    const openTasksInEventDetails = (event) => {
-      const eid = Number(event.id) || event.id;
-      router.visit(route('event.details', { id: eid, openTasks: 1 }));
+    const openTaskEditor = async (event) => {
+        saving.value = true;
+        try {
+            await fetchBrackets(event.id);
+            tasksManager.openTaskModal(
+                event,
+                committees.value,
+                assignablePersonnel.value,
+                brackets.value
+            );
+        } catch (error) {
+            console.error("Error opening task editor:", error);
+            errorMessage.value = "Failed to load task data.";
+            showErrorDialog.value = true;
+        } finally {
+            saving.value = false;
+        }
     };
 
     const printTable = async () => {
@@ -1791,7 +1830,9 @@
     rowsPerPage,
     printTable,
     tasksManager,
-    openTasksInEventDetails,
+    openTaskEditor,
+    assignablePersonnel,
+    brackets,
     handleTaskSaveSuccess,
     handleTaskSaveError,
     handleCommitteeActionSuccess,
@@ -1919,6 +1960,20 @@
 :deep(.p-checkbox) {
   display: flex;
   align-items: center;
+}
+
+.manage-tasks-btn {
+    background: transparent !important;
+    border: none !important;
+    color: black !important;
+}
+
+.manage-tasks-btn:hover {
+    background: linear-gradient(135deg, #0872a3 0%, #2121c8 100%) !important;
+    color: white !important;
+    border-color: transparent !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 119, 179, 0.3);
 }
 
 </style>
