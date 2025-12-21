@@ -175,7 +175,7 @@ const proceedWithUpdate = () => {
             <div class="grid grid-cols-2 gap-4">
                 <div class="p-field">
                     <label>Date:</label>
-                    <DatePicker v-model="localMatchData.date" dateFormat="yy-mm-dd" showIcon :minDate="eventMinDate" :maxDate="eventMaxDate" :disabled="!isMultiDayEvent" class="w-full" />
+                    <DatePicker appendTo="self" v-model="localMatchData.date" dateFormat="yy-mm-dd" showIcon :minDate="eventMinDate" :maxDate="eventMaxDate" :disabled="!isMultiDayEvent" class="w-full" />
                 </div>
                 <div class="p-field">
                     <label>Time:</label>

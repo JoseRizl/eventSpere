@@ -171,7 +171,7 @@
 
         <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Tasks" style="width:15%;" body-class="text-center print-hide" header-class="print-hide" :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
         <template #body="{ data }">
-            <Button icon="pi pi-list" class="p-button-rounded p-button-text action-btn-warning" @click="tasksManager.openTaskModal(data, committees, employees)" v-tooltip.top="'Manage Tasks'"/>
+            <Button icon="pi pi-list" class="p-button-rounded p-button-text action-btn-warning" @click="openTasksInEventDetails(data)" v-tooltip.top="'Manage Tasks'"/>
         </template>
         </Column>
 
@@ -213,6 +213,7 @@
                 optionValue="id"
                 placeholder="Select a category"
                 class="w-full"
+                appendTo="self"
               />
             </div>
           </div>
@@ -231,6 +232,7 @@
                   display="chip"
                   :showToggleAll="false"
                   class="w-full"
+                  appendTo="self"
                 >
                     <!-- Selected Chip Template -->
                     <template #chip="{ value }">
@@ -436,6 +438,7 @@
                 optionValue="id"
                 placeholder="Select a category"
                 class="w-full"
+                appendTo="self"
               />
             </div>
           </div>
@@ -454,6 +457,7 @@
             display="chip"
             :showToggleAll="false"
             class="w-full"
+            appendTo="self"
             >
             <!-- Option Template -->
             <template #option="{ option }">
@@ -1540,6 +1544,11 @@
     const tagCreationContext = ref('create');
     const showCreateConfirm = ref(false);
 
+    const openTasksInEventDetails = (event) => {
+      const eid = Number(event.id) || event.id;
+      router.visit(route('event.details', { id: eid, openTasks: 1 }));
+    };
+
     const printTable = async () => {
     const originalRows = rowsPerPage.value;
     rowsPerPage.value = filteredEvents.value.length;
@@ -1782,6 +1791,7 @@
     rowsPerPage,
     printTable,
     tasksManager,
+    openTasksInEventDetails,
     handleTaskSaveSuccess,
     handleTaskSaveError,
     handleCommitteeActionSuccess,

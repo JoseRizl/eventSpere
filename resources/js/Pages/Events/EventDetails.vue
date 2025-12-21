@@ -371,9 +371,10 @@ const handleMemoUpload = (event) => {
 };
 
 // Add this near your other initialization code
-onMounted(() => {
+onMounted(async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const viewParam = urlParams.get('view');
+  const shouldOpenTasks = urlParams.get('openTasks') === '1';
   if (viewParam === 'announcements') {
     currentView.value = 'announcements';
   }
@@ -388,9 +389,21 @@ onMounted(() => {
 
   isLoadingBrackets.value = true;
   // Fetch and populate local brackets for this event
-  fetchBrackets(props.event.id).finally(() => {
+  try {
+    await fetchBrackets(props.event.id);
+  } finally {
     isLoadingBrackets.value = false;
-  });
+  }
+
+  // Auto-open TaskEditor when coming from EventList with openTasks=1
+  if (shouldOpenTasks) {
+    tasksManager.openTaskModal(
+      { ...props.event, tasks: props.preloadedTasks },
+      committees.value,
+      assignablePersonnel.value,
+      brackets.value
+    );
+  }
 });
 
 const goBack = () => {
@@ -963,9 +976,9 @@ const getBracketIndex = (bracketId) => {
                                 class="p-button-rounded p-button-text action-btn-warning"
                                 @click="tasksManager.openTaskModal(
                                     { ...props.event, tasks: props.preloadedTasks },
-                                    props.committees,
-                                    assignablePersonnel,
-                                    brackets
+                                    committees.value,
+                                    assignablePersonnel.value,
+                                    brackets.value
                                 )"
                                 v-tooltip.top="'Manage Tasks'"
                             />

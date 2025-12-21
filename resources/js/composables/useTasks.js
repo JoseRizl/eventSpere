@@ -9,21 +9,26 @@ export function useTasks() {
   const taskAssignments = ref([]);
 
   // Method to open the modal and prepare data
-  const openTaskModal = (event, allCommittees, allPersonnel, eventBrackets) => {
+  const openTaskModal = (event, allCommittees = [], allPersonnel = [], eventBrackets = []) => {
     selectedEventForTasks.value = event;
 
-    const committeesMap = allCommittees.reduce((map, committee) => {
+    // Normalize inputs to arrays to prevent runtime errors
+    const committeesArr = Array.isArray(allCommittees) ? allCommittees : [];
+    const personnelArr = Array.isArray(allPersonnel) ? allPersonnel : [];
+    const bracketsArr = Array.isArray(eventBrackets) ? eventBrackets : [];
+
+    const committeesMap = committeesArr.reduce((map, committee) => {
       map[committee.id] = committee;
       return map;
     }, {});
 
     taskAssignments.value = (event.tasks || []).map(task => {
         const assignedEmployees = (task.employees || []).map(emp => {
-            return allPersonnel.find(p => p.id === emp.id && p.type === 'employee');
+            return personnelArr.find(p => p.id === emp.id && p.type === 'employee');
         }).filter(Boolean);
 
         const assignedManagers = (task.managers || []).map(mgr => {
-            return allPersonnel.find(p => p.id === mgr.id && p.type === 'user');
+            return personnelArr.find(p => p.id === mgr.id && p.type === 'user');
         }).filter(Boolean);
 
         const combinedPersonnel = [...assignedEmployees, ...assignedManagers];
@@ -36,7 +41,7 @@ export function useTasks() {
                 (m.managed_brackets || []).forEach(b => managerBracketIds.add(b.id));
             });
             
-            assignedBrackets = (eventBrackets || []).filter(b => managerBracketIds.has(b.id));
+            assignedBrackets = bracketsArr.filter(b => managerBracketIds.has(b.id));
         }
 
         return {

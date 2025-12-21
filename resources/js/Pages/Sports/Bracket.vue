@@ -161,12 +161,6 @@ const {
     validateEvent: validateBracket,
 } = useEventValidation();
 
-const confirmMatchUpdate = () => {
-    // This now just triggers the confirmation inside MatchEditorDialog
-    // The logic is handled there and it emits 'confirm' which is handled by proceedWithMatchUpdate
-    // This function is passed as a prop to MatchEditorDialog
-};
-
 // Tiebreaker helpers
 const tiedPlayersData = ref([]);
 
@@ -561,6 +555,7 @@ watch(() => user.value, () => {
           <div class="p-field">
             <label for="event">Select Event <span style="color: red;">*</span></label>
             <Select
+              appendTo="self"
               v-model="selectedEvent"
               :options="events"
               optionLabel="title"

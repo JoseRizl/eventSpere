@@ -18,6 +18,7 @@
                     <label for="committee">Committee <span style="color: #6c757d; font-weight: normal;">(Optional)</span></label>
                     <div class="flex items-center gap-2">
                         <Select
+                            appendTo="self"
                             v-model="taskEntry.committee"
                             :options="localCommittees"
                             optionLabel="name"
@@ -50,6 +51,7 @@
                 <div class="p-field">
                     <label>Employees <span style="color: red;">*</span></label>
                     <MultiSelect
+                        appendTo="self"
                         v-model="taskEntry.employees"
                         :options="localEmployees"
                         optionLabel="name"
@@ -80,6 +82,7 @@
                     <label>Assign Manager(s) to Bracket <span style="color: red;">*</span></label>
                     <small class="p-text-secondary d-block mb-2">This assignment only applies to personnel with the 'Tournament Manager' role.</small>
                     <MultiSelect
+                        appendTo="self"
                         v-model="taskEntry.assignedBrackets"
                         :options="localBrackets"
                         optionLabel="name"
