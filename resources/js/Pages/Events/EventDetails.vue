@@ -104,6 +104,9 @@ const committees = ref(props.committees || []);
 
 const showMemoImageDialog = ref(false);
 const memoImageUrl = ref('');
+const showMemoDocDialog = ref(false);
+const memoDocUrl = ref('');
+const memoDocTitle = ref('');
 
 const employees = ref(props.employees || []);
 const relatedEvents = ref(props.relatedEvents || []);
@@ -354,18 +357,40 @@ const toggleEdit = () => {
   editMode.value = !editMode.value;
 };
 
+const ALLOWED_MIME_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+];
+
 const handleMemoUpload = (event) => {
   const file = event.target.files[0];
   if (!file) return;
 
+  const isImage = file.type?.startsWith('image/');
+  const isAllowedDoc = ALLOWED_MIME_TYPES.includes(file.type) || /\.(pdf|doc|docx)$/i.test(file.name || '');
+
+  if (!isImage && !isAllowedDoc) {
+    errorMessage.value = 'Unsupported file type. Only images, PDFs, and Word documents (.doc, .docx) are allowed.';
+    errorDialogMessage.value = errorMessage.value;
+    showErrorDialog.value = true;
+    event.target.value = '';
+    return;
+  }
+
   const reader = new FileReader();
   reader.onload = (e) => {
     eventDetails.value.memorandum = {
-      type: file.type.startsWith('image/') ? 'image' : 'file',
+      type: isImage ? 'image' : 'file',
       content: e.target.result,
       filename: file.name,
       isNew: true, // Flag to indicate it's a new upload
     };
+  };
+  reader.onerror = () => {
+    errorMessage.value = 'Failed to read the memorandum file.';
+    errorDialogMessage.value = errorMessage.value;
+    showErrorDialog.value = true;
   };
   reader.readAsDataURL(file);
 };
@@ -419,20 +444,67 @@ const goBack = () => {
 
 // Initial announcements are preloaded via props; no GET here to achieve zero client GETs.
 
+const getAbsoluteContentUrl = (content) => {
+    if (!content) return '';
+    if (typeof content === 'string' && content.startsWith('data:')) return content;
+    if (typeof content === 'string' && /^https?:\/\//i.test(content)) return content;
+    return `${window.location.origin}${content && content.startsWith('/') ? '' : '/'}${content || ''}`;
+};
+
+const guessFileExt = (filename) => {
+    if (!filename || typeof filename !== 'string') return '';
+    const idx = filename.lastIndexOf('.');
+    return idx !== -1 ? filename.slice(idx + 1).toLowerCase() : '';
+};
+
+const canInlinePreview = (memo) => {
+    if (!memo) return false;
+    if (memo.type === 'image') return true;
+    const ext = guessFileExt(memo.filename);
+    if (ext === 'pdf') return true;
+    if (typeof memo.content === 'string' && memo.content.startsWith('data:application/pdf')) return true;
+    return false;
+};
+
+const downloadMemorandum = () => {
+    const memo = eventDetails.value.memorandum;
+    if (!memo || !memo.content) return;
+    const link = document.createElement('a');
+    link.href = getAbsoluteContentUrl(memo.content);
+    link.download = memo.filename || 'document';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
+const openInNewTab = (url) => {
+    const href = typeof url === 'string' ? url : '';
+    if (!href) return;
+    window.open(href, '_blank', 'noopener');
+};
+
 const viewMemorandum = () => {
-    if (eventDetails.value.memorandum && eventDetails.value.memorandum.content) {
-    if (eventDetails.value.memorandum.type === 'image') {
-        memoImageUrl.value = eventDetails.value.memorandum.content;
+    const memo = eventDetails.value.memorandum;
+    if (!memo || !memo.content) return;
+    const url = getAbsoluteContentUrl(memo.content);
+    if (memo.type === 'image') {
+        memoImageUrl.value = url;
         showMemoImageDialog.value = true;
     } else {
-        const link = document.createElement('a');
-        link.href = eventDetails.value.memorandum.content;
-        link.download = eventDetails.value.memorandum.filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        memoDocUrl.value = url;
+        memoDocTitle.value = memo.filename || 'Document';
+        showMemoDocDialog.value = true;
     }
-    }
+};
+
+const truncateFilename = (name, max = 40) => {
+    if (!name || typeof name !== 'string') return '';
+    if (name.length <= max) return name;
+    const dotIdx = name.lastIndexOf('.');
+    const ext = dotIdx > 0 ? name.slice(dotIdx) : '';
+    const base = dotIdx > 0 ? name.slice(0, dotIdx) : name;
+    const keep = Math.max(10, max - ext.length - 3);
+    return base.slice(0, keep) + '…' + ext;
 };
 
 const toBase64 = file => new Promise((resolve, reject) => {
@@ -870,9 +942,15 @@ const getBracketIndex = (bracketId) => {
                         <!-- If memorandum exists -->
                         <div v-if="eventDetails.memorandum" class="flex items-center gap-2 p-2 border rounded-md bg-gray-100">
                         <i class="pi pi-file flex-shrink-0"></i>
-                        <span class="flex-1 cursor-pointer text-blue-600 hover:underline truncate min-w-0" @click="viewMemorandum" v-tooltip.top="eventDetails.memorandum.filename">
-                            {{ eventDetails.memorandum.filename }}
+                        <span class="flex-1 cursor-pointer text-blue-600 hover:underline truncate min-w-0 max-w-full" @click="viewMemorandum" :title="eventDetails.memorandum.filename">
+                            {{ truncateFilename(eventDetails.memorandum.filename) }}
                         </span>
+                        <Button
+                            icon="pi pi-download"
+                            class="p-button-rounded p-button-text"
+                            @click="downloadMemorandum"
+                            v-tooltip.top="'Download Memorandum'"
+                        />
                         <Button
                             icon="pi pi-times"
                             class="p-button-rounded p-button-danger p-button-text"
@@ -883,7 +961,7 @@ const getBracketIndex = (bracketId) => {
 
                         <!-- If no memorandum uploaded -->
                         <div v-else class="flex justify-center items-center border-2 border-dashed rounded-md p-4">
-                        <input type="file" ref="memoFileInput" @change="handleMemoUpload($event)" class="hidden" />
+                        <input type="file" ref="memoFileInput" @change="handleMemoUpload($event)" accept="image/*,.pdf,.doc,.docx" class="hidden" />
                         <Button
                             label="Upload Memorandum"
                             icon="pi pi-upload"
@@ -895,16 +973,22 @@ const getBracketIndex = (bracketId) => {
 
                     <!-- View Mode -->
                     <div v-else>
-                        <div v-if="eventDetails.memorandum">
-                            <Button @click="viewMemorandum" class="p-button-secondary w-full sm:w-auto">
-                                <div class="flex items-center gap-2 overflow-hidden">
-                                    <i class="pi pi-eye"></i>
-                                    <span class="truncate">
-                                        View {{ eventDetails.memorandum.filename }}
-                                    </span>
-                                </div>
-                            </Button>
-                        </div>
+                    <div v-if="eventDetails.memorandum">
+                    <div class="flex flex-col sm:flex-row gap-2">
+                    <Button @click="viewMemorandum" class="p-button-secondary w-full sm:w-auto" :title="eventDetails.memorandum.filename">
+                    <div class="flex items-center gap-2 overflow-hidden">
+                    <i class="pi pi-eye"></i>
+                    <span class="truncate">View {{ truncateFilename(eventDetails.memorandum.filename) }}</span>
+                    </div>
+                    </Button>
+                    <Button @click="downloadMemorandum" class="p-button-outlined w-full sm:w-auto">
+                    <div class="flex items-center gap-2 overflow-hidden">
+                    <i class="pi pi-download"></i>
+                    <span class="truncate">Download</span>
+                    </div>
+                    </Button>
+                    </div>
+                    </div>
                     </div>
                     </div>
 
@@ -1348,6 +1432,20 @@ const getBracketIndex = (bracketId) => {
 
     <Dialog v-model:visible="showMemoImageDialog" modal :dismissableMask="true" :header="eventDetails.memorandum?.filename" :style="{ width: '90vw', maxWidth: '1200px' }">
         <img :src="memoImageUrl" alt="Memorandum Image" class="w-full h-auto max-h-[80vh] object-contain" />
+    </Dialog>
+
+    <Dialog v-model:visible="showMemoDocDialog" modal :dismissableMask="true" :header="memoDocTitle" :style="{ width: '90vw', maxWidth: '1200px' }">
+        <template v-if="canInlinePreview(eventDetails.memorandum)">
+            <object :data="memoDocUrl" type="application/pdf" style="width: 100%; height: 80vh;">
+                <iframe :src="memoDocUrl" style="width: 100%; height: 80vh;" frameborder="0"></iframe>
+            </object>
+        </template>
+        <template v-else>
+            <p class="text-sm text-gray-600 mb-3">Preview not available. Only images and PDFs can be viewed inline.</p>
+            <div class="flex gap-2">
+                <Button label="Download" icon="pi pi-download" class="p-button-secondary" @click="downloadMemorandum" />
+            </div>
+        </template>
     </Dialog>
 
     <!-- Image Viewer Dialog -->
