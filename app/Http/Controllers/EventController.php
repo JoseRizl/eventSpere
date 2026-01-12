@@ -26,7 +26,7 @@ class EventController extends JsonController
             ->where(function ($q) {
                 $q->whereNull('archived')->orWhere('archived', '!=', true);
             })
-            ->orderByDesc('startDate')
+            ->orderByDesc('created_at')
             ->get()
             ->map(function ($event) {
                 // Shape tasks for UI

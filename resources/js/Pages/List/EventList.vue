@@ -129,7 +129,7 @@
         <Column field="venue" header="Venue" style="width:15%;" sortable :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
         <template #body="{ data }">
             <div class="datatable-content">
-            {{ data.venue || "" }}
+            {{ data.venue || "Naawan Central School" }}
             </div>
         </template>
         </Column>
@@ -813,8 +813,8 @@
         const allEvents = (events.value || []).map(processItem);
 
         return allEvents.sort((a, b) => {
-            const dateA = a.startDateTime ? new Date(a.startDateTime) : new Date("1970-01-01");
-            const dateB = b.startDateTime ? new Date(b.startDateTime) : new Date("1970-01-01");
+            const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+            const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
             return dateB - dateA;
         });
       });
@@ -993,6 +993,7 @@
         try {
           const payload = {
             ...newEvent.value,
+            venue: newEvent.value.venue || "Naawan Central School",
             image: finalImage || defaultImage.value,
             tags: newEvent.value.tags || [],
             startDate: (() => { const d = formatDateForPicker(newEvent.value.startDate); return d ? format(d, 'MMM-dd-yyyy') : null; })(),
@@ -1324,6 +1325,7 @@
         }
         const payload = {
           ...selectedEvent.value,
+          venue: selectedEvent.value.venue || "Naawan Central School",
           image: finalImage || defaultImage.value,
           tags: selectedEvent.value.tags || [],
           startDate: (() => { const d = formatDateForPicker(selectedEvent.value.startDate); return d ? format(d, 'MMM-dd-yyyy') : null; })(),
