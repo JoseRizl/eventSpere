@@ -9,6 +9,7 @@ use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\File;
 use App\Models\Category;
+use App\Models\Notification;
 use Illuminate\Support\Facades\Storage;
 class EventController extends JsonController
 {
@@ -314,6 +315,15 @@ class EventController extends JsonController
         // Attach tags
         if (!empty($validated['tags'])) {
             $event->tags()->sync($validated['tags']);
+        }
+
+        // Create a notification for all users
+        $users = User::all();
+        foreach ($users as $user) {
+            Notification::create([
+                'user_id' => $user->id,
+                'message' => 'New event created: ' . $event->title,
+            ]);
         }
 
         // Memorandum create if provided

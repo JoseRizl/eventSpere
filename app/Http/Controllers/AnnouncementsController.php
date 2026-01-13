@@ -8,6 +8,8 @@ use App\Http\Resources\AnnouncementResource;
 use Illuminate\Http\Request;
 use App\Models\Announcement;
 use App\Models\Event;
+use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 
 class AnnouncementsController extends Controller
@@ -76,6 +78,15 @@ class AnnouncementsController extends Controller
         ]);
 
         $announcement->load(['user:id,name', 'event:id,title']);
+
+        // Create a notification for all users
+        $users = User::all();
+        foreach ($users as $user) {
+            Notification::create([
+                'user_id' => $user->id,
+                'message' => 'New announcement: ' . $announcement->message,
+            ]);
+        }
 
         return new AnnouncementResource($announcement);
     }

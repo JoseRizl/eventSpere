@@ -9,6 +9,7 @@ use App\Http\Controllers\BracketController;
 use App\Http\Controllers\ActivitiesController;
 use App\Http\Controllers\AnnouncementsController;
 use App\Http\Controllers\CommitteeController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -90,6 +91,9 @@ Route::middleware('auth')->group(function () {
         // Memorandum API routes, note the parameter name change to 'event'
         Route::post('/events/{event}/memorandum', [MemorandumController::class, 'storeOrUpdate'])->name('memorandum.storeOrUpdate');
         Route::delete('/events/{event}/memorandum', [MemorandumController::class, 'destroy'])->name('memorandum.destroy');
+
+        Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+        Route::put('/notifications/{notification}', [NotificationController::class, 'update'])->name('notifications.update');
     });
 });
 

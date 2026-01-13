@@ -269,7 +269,7 @@ onUnmounted(() => {
                     <i class="pi pi-bell text-xl" />
                     <Badge v-if="hasUnreadNotifications" severity="danger" class="absolute top-1 right-1 !p-0 !w-2 !h-2"></Badge>
                 </button>
-                <Popover ref="op" appendTo="self">
+                <Popover ref="op" appendTo="body" placement="bottom-end">
                     <div class="w-80">
                         <div class="flex justify-between items-center mb-2">
                             <h3 class="font-bold text-center flex-1">Notifications</h3>
