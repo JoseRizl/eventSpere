@@ -38,10 +38,28 @@ class HandleInertiaRequests extends Middleware
     {
         return array_merge(parent::share($request), [
              // Lazily...
-             'auth.user' => fn () => $request->user()
-             ? $request->user()->only('id', 'name', 'email', 'role')
-             : null,
-            'all_users' => User::all(['id', 'name', 'role']),
+             'auth.user' => function () use ($request) {
+                if (!$request->user()) {
+                    return null;
+                }
+                $user = $request->user();
+                $user->load('roles');
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'roles' => $user->roles->pluck('name')->toArray(),
+                ];
+            },
+            'all_users' => function () {
+                return User::with('roles')->get()->map(function ($user) {
+                    return [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'roles' => $user->roles->pluck('name')->toArray(),
+                    ];
+                });
+            },
         ]);
     }
 }

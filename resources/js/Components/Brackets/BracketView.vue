@@ -40,6 +40,11 @@ const dynamicLines = ref({ single: [], winners: [], losers: [], finals: [], drop
 
 const { showSuccess, showError } = useToast();
 
+const hasAnyRole = (roles) => {
+  if (!props.user || !props.user.roles) return false;
+  return props.user.roles.some(role => roles.includes(role));
+};
+
 // Player name editing
 const showPlayerEditModal = ref(false);
 
@@ -1399,7 +1404,7 @@ watch(() => props.bracket, () => {
                                 :id="`match-${bracketIndex}-${roundIdx}-${matchIdx}`"
                                 :data-match-id="match.id"
                                 :style="getMatchStyle(roundIdx)"
-                                :class="['match', { 'match-finished': match.status === 'completed' }, (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
+                                :class="['match', { 'match-finished': match.status === 'completed' }, (user && hasAnyRole(['Admin', 'TournamentManager'])) ? 'cursor-pointer' : '']"
                                 @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'single')"
                             >
                                 <div class="player-box">
@@ -1426,7 +1431,7 @@ watch(() => props.bracket, () => {
                                 <div
                                     :id="`match-${bracketIndex}-${splitBracketData.finalRoundIdx}-0`"
                                     :data-match-id="splitBracketData.finals.id"
-                                    :class="['match', 'finals-match', { 'match-finished': splitBracketData.finals.status === 'completed' }, (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
+                                    :class="['match', 'finals-match', { 'match-finished': splitBracketData.finals.status === 'completed' }, (user && hasAnyRole(['Admin', 'TournamentManager'])) ? 'cursor-pointer' : '']"
                                     @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, splitBracketData.finalRoundIdx, 0, splitBracketData.finals, 'single')"
                                 >
                                     <div class="player-box">
@@ -1455,7 +1460,7 @@ watch(() => props.bracket, () => {
                                 <div
                                     :id="`match-${bracketIndex}-${splitBracketData.finalRoundIdx}-${bracket.matches[splitBracketData.finalRoundIdx].indexOf(splitBracketData.consolation)}`"
                                     :data-match-id="splitBracketData.consolation.id"
-                                    :class="['match', 'consolation-match', { 'match-finished': splitBracketData.consolation.status === 'completed' }, (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
+                                    :class="['match', 'consolation-match', { 'match-finished': splitBracketData.consolation.status === 'completed' }, (user && hasAnyRole(['Admin', 'TournamentManager'])) ? 'cursor-pointer' : '']"
                                     @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, splitBracketData.finalRoundIdx, bracket.matches[splitBracketData.finalRoundIdx].indexOf(splitBracketData.consolation), splitBracketData.consolation, 'single')"
                                 >
                                     <div class="player-box">
@@ -1487,7 +1492,7 @@ watch(() => props.bracket, () => {
                                 :id="`match-${bracketIndex}-${roundIdx}-${Math.ceil(bracket.matches[roundIdx].length / 2) + matchIdx}`"
                                 :data-match-id="match.id"
                                 :style="getMatchStyle(roundIdx)"
-                                :class="['match', { 'match-finished': match.status === 'completed' }, (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
+                                :class="['match', { 'match-finished': match.status === 'completed' }, (user && hasAnyRole(['Admin', 'TournamentManager'])) ? 'cursor-pointer' : '']"
                                 @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, Math.ceil(bracket.matches[roundIdx].length / 2) + matchIdx, match, 'single')"
                             >
                                 <div class="player-box">
@@ -1538,7 +1543,7 @@ watch(() => props.bracket, () => {
                 :id="`match-${bracketIndex}-${roundIdx}-${matchIdx}`"
                 :data-match-id="match.id"
                 :style="getMatchStyle(roundIdx)"
-                :class="['match', { 'match-finished': match.status === 'completed' }, (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
+                :class="['match', { 'match-finished': match.status === 'completed' }, (user && hasAnyRole(['Admin', 'TournamentManager'])) ? 'cursor-pointer' : '']"
                 @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'single')"
             >
                 <div class="player-box">
@@ -1562,7 +1567,7 @@ watch(() => props.bracket, () => {
                     :id="`match-${bracketIndex}-${bracket.matches.length - 1}-${bracket.matches[bracket.matches.length - 1].indexOf(match)}`"
                     :data-match-id="match.id"
                     :style="{ marginTop: playerCount > 8 && playerCount < 12 ? '50px' : '10px' }"
-                    :class="['match', 'consolation-match-standard', { 'match-finished': match.status === 'completed' }, (user && (user.role === 'Admin' || user.role === 'TournamentManager')) ? 'cursor-pointer' : '']"
+                    :class="['match', 'consolation-match-standard', { 'match-finished': match.status === 'completed' }, (user && hasAnyRole(['Admin', 'TournamentManager'])) ? 'cursor-pointer' : '']"
                     @click="props.openMatchDialog && props.openMatchDialog(bracketIndex, bracket.matches.length - 1, bracket.matches[bracket.matches.length - 1].indexOf(match), match, 'single')"
                 >
                     <div class="player-box">
@@ -1591,7 +1596,7 @@ watch(() => props.bracket, () => {
                     </button> -->
                 <!-- Persistent Tiebreaker Button -->
                 <button
-                    v-if="isRoundRobinConcluded && isRoundRobinConcluded(bracketIndex) && (user && (user.role === 'Admin' || user.role === 'TournamentManager'))"
+                    v-if="isRoundRobinConcluded && isRoundRobinConcluded(bracketIndex) && (user && hasAnyRole(['Admin', 'TournamentManager']))"
                     @click="openTiebreakerDialog && openTiebreakerDialog(bracketIndex)"
                     class="tiebreaker-settings-button"
                     :title="bracket.tiebreaker_data && Object.keys(bracket.tiebreaker_data).length > 0 ? 'Edit Tiebreakers' : 'Set Tiebreakers'"
@@ -1603,7 +1608,7 @@ watch(() => props.bracket, () => {
         </div>
 
             <!-- Tiebreaker Notice -->
-            <div v-if="hasTiedRank1Players && !dismissedTiebreakerNotices.has(bracket.id) && (user && (user.role === 'Admin' || user.role === 'TournamentManager'))" class="tiebreaker-notice">
+            <div v-if="hasTiedRank1Players && !dismissedTiebreakerNotices.has(bracket.id) && (user && hasAnyRole(['Admin', 'TournamentManager']))" class="tiebreaker-notice">
                 <div class="tiebreaker-notice-content">
                     <i class="pi pi-exclamation-circle"></i>
                     <span>Multiple players are tied for 1st place. Set tiebreakers to determine final rankings.</span>
@@ -1766,7 +1771,7 @@ watch(() => props.bracket, () => {
                                         <div
                                             :id="`losers-match-${bracketIndex}-${roundIdx}-${matchIdx}-p0`"
                                             :class="['player-cell', getPlayerStyling(match.players[0], match.players[1], match, 'losers')]"
-                                            @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'losers')"
+                                            @click="(user && hasAnyRole(['Admin', 'TournamentManager'])) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'losers')"
                                         >
                                             <span v-if="generatePlayerColor(match.players[0].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[0].name) }"></span>
                                             {{ truncate(match.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
@@ -1774,7 +1779,7 @@ watch(() => props.bracket, () => {
                                         <div
                                             :id="`losers-match-${bracketIndex}-${roundIdx}-${matchIdx}-p1`"
                                             :class="['player-cell', getPlayerStyling(match.players[1], match.players[0], match, 'losers')]"
-                                            @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'losers')"
+                                            @click="(user && hasAnyRole(['Admin', 'TournamentManager'])) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'losers')"
                                         >
                                             <span v-if="generatePlayerColor(match.players[1].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[1].name) }"></span>
                                             {{ truncate(match.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
@@ -1834,7 +1839,7 @@ watch(() => props.bracket, () => {
                                         <div
                                             :id="`winners-match-${bracketIndex}-0-${matchIdx}-p0`"
                                             :class="['player-cell', getPlayerStyling(match.players[0], match.players[1], match, 'winners')]"
-                                            @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, 0, matchIdx, match, 'winners')"
+                                            @click="(user && hasAnyRole(['Admin', 'TournamentManager'])) && props.openMatchDialog && props.openMatchDialog(bracketIndex, 0, matchIdx, match, 'winners')"
                                         >
                                             <span v-if="generatePlayerColor(match.players[0].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[0].name) }"></span>
                                             {{ truncate(match.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
@@ -1842,7 +1847,7 @@ watch(() => props.bracket, () => {
                                         <div
                                             :id="`winners-match-${bracketIndex}-0-${matchIdx}-p1`"
                                             :class="['player-cell', getPlayerStyling(match.players[1], match.players[0], match, 'winners')]"
-                                            @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, 0, matchIdx, match, 'winners')"
+                                            @click="(user && hasAnyRole(['Admin', 'TournamentManager'])) && props.openMatchDialog && props.openMatchDialog(bracketIndex, 0, matchIdx, match, 'winners')"
                                         >
                                             <span v-if="generatePlayerColor(match.players[1].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[1].name) }"></span>
                                             {{ truncate(match.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
@@ -1893,7 +1898,7 @@ watch(() => props.bracket, () => {
                                         <div
                                             :id="`winners-match-${bracketIndex}-${roundIdx + 1}-${matchIdx}-p0`"
                                             :class="['player-cell', getPlayerStyling(match.players[0], match.players[1], match, 'winners')]"
-                                            @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx + 1, matchIdx, match, 'winners')"
+                                            @click="(user && hasAnyRole(['Admin', 'TournamentManager'])) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx + 1, matchIdx, match, 'winners')"
                                         >
                                             <span v-if="generatePlayerColor(match.players[0].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[0].name) }"></span>
                                             {{ truncate(match.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
@@ -1901,7 +1906,7 @@ watch(() => props.bracket, () => {
                                         <div
                                             :id="`winners-match-${bracketIndex}-${roundIdx + 1}-${matchIdx}-p1`"
                                             :class="['player-cell', getPlayerStyling(match.players[1], match.players[0], match, 'winners')]"
-                                            @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx + 1, matchIdx, match, 'winners')"
+                                            @click="(user && hasAnyRole(['Admin', 'TournamentManager'])) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx + 1, matchIdx, match, 'winners')"
                                         >
                                             <span v-if="generatePlayerColor(match.players[1].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[1].name) }"></span>
                                             {{ truncate(match.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[1], match) }}
@@ -1956,14 +1961,14 @@ watch(() => props.bracket, () => {
                                         <div class="player-cells">
                                             <div
                                                 :class="['player-cell', getPlayerStyling(match.players[0], match.players[1], match, 'grand_finals')]"
-                                                @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'grand_finals')"
+                                                @click="(user && hasAnyRole(['Admin', 'TournamentManager'])) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'grand_finals')"
                                             >
                                                 <span v-if="generatePlayerColor(match.players[0].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[0].name) }"></span>
                                                 {{ truncate(match.players[0].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[0], match) }}
                                             </div>
                                             <div
                                                 :class="['player-cell', getPlayerStyling(match.players[1], match.players[0], match, 'grand_finals')]"
-                                                @click="(user && (user.role === 'Admin' || user.role === 'TournamentManager')) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'grand_finals')"
+                                                @click="(user && hasAnyRole(['Admin', 'TournamentManager'])) && props.openMatchDialog && props.openMatchDialog(bracketIndex, roundIdx, matchIdx, match, 'grand_finals')"
                                             >
                                                 <span v-if="generatePlayerColor(match.players[1].name)" class="player-color-chip" :style="{ backgroundColor: generatePlayerColor(match.players[1].name) }"></span>
                                                 {{ truncate(match.players[1].name, { length: 13 }) }}{{ getMatchResultIndicator(match.players[1], match) }}

@@ -23,8 +23,32 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
     ];
+
+    /**
+     * The roles that belong to the user.
+     */
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'role_user');
+    }
+
+    /**
+     * Check if the user has a specific role.
+     *
+     * @param string $roleName
+     * @return bool
+     */
+    public function hasRole(string $roleName): bool
+    {
+        foreach ($this->roles as $role) {
+            if ($role->name === $roleName) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     /**
      * The attributes that should be hidden for serialization.

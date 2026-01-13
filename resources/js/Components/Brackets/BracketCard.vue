@@ -59,6 +59,11 @@ const emit = defineEmits([
     'toggle-bracket', 'remove-bracket', 'set-view-mode', 'set-match-filter'
 ]);
 
+const hasAnyRole = (roles) => {
+  if (!props.user || !props.user.roles) return false;
+  return props.user.roles.some(role => roles.includes(role));
+};
+
 const menu = ref();
 
 const adminMenuItems = computed(() => {
@@ -88,7 +93,7 @@ const adminMenuItems = computed(() => {
         }
     }
 
-    if (props.showAdminControls && props.user?.role === 'Admin' && !props.isArchived) {
+    if (props.showAdminControls && hasAnyRole(['Admin']) && !props.isArchived) {
         if (items.length > 0) {
             items.push({ separator: true });
         }
@@ -441,7 +446,7 @@ const handleRepopulateColors = () => {
                                 v-tooltip.top="bracket.allow_draws ? 'Draws Enabled' : 'Draws Disabled'"
                             />
                             <Button
-                                v-if="showAdminControls && user?.role === 'Admin' && !isArchived"
+                                v-if="showAdminControls && hasAnyRole(['Admin']) && !isArchived"
                                 :icon="isDeletingBracket ? 'pi pi-spin pi-spinner' : 'pi pi-trash'"
                                 @click="handleRemoveBracket"
                                 :disabled="isDeletingBracket"

@@ -14,10 +14,10 @@
           @toggle-date-filter="toggleDateFilter"
         />
         <div class="flex items-center gap-2">
-          <Button v-if="user?.role === 'Admin'" icon="pi pi-print" class="p-button-secondary" @click="printTable" v-tooltip.top="'Print Table'"
+          <Button v-if="hasAnyRole(['Admin'])" icon="pi pi-print" class="p-button-secondary" @click="printTable" v-tooltip.top="'Print Table'"
             aria-label="Print Table"
           />
-          <button v-if="user?.role === 'Admin' || user?.role === 'Principal'" class="create-button" @click="openCreateModal">
+          <button v-if="hasAnyRole(['Admin', 'Principal'])" class="create-button" @click="openCreateModal">
               Create<span class="hidden sm:inline"> Event</span>
           </button>
         </div>
@@ -82,8 +82,8 @@
         <Column header="Category" style="width:15%;" :headerStyle="{ 'background-color': '#0077B3', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><Skeleton /></template></Column>
         <Column header="Start Date & Time" style="width:20%;" :headerStyle="{ 'background-color': '#0077B3', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><Skeleton /></template></Column>
         <Column header="End Date & Time" style="width:20%;" :headerStyle="{ 'background-color': '#0077B3', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><Skeleton /></template></Column>
-        <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Actions" style="width:10%;" body-class="text-center" :headerStyle="{ 'background-color': '#0077B3', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><div class="flex justify-center gap-2"><Skeleton shape="circle" size="2rem" /><Skeleton shape="circle" size="2rem" /></div></template></Column>
-        <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Tasks" style="width:15%;" body-class="text-center" :headerStyle="{ 'background-color': '#0077B3', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><div class="flex justify-center gap-2"><Skeleton shape="circle" size="2rem" /></div></template></Column>
+        <Column v-if="hasAnyRole(['Admin', 'Principal'])" header="Actions" style="width:10%;" body-class="text-center" :headerStyle="{ 'background-color': '#0077B3', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><div class="flex justify-center gap-2"><Skeleton shape="circle" size="2rem" /><Skeleton shape="circle" size="2rem" /></div></template></Column>
+        <Column v-if="hasAnyRole(['Admin', 'Principal'])" header="Tasks" style="width:15%;" body-class="text-center" :headerStyle="{ 'background-color': '#0077B3', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }"><template #body><div class="flex justify-center gap-2"><Skeleton shape="circle" size="2rem" /></div></template></Column>
       </DataTable>
 
       <DataTable
@@ -160,7 +160,7 @@
           </template>
         </Column>
 
-        <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Actions" style="width:10%;" body-class="text-center print-hide" header-class="print-hide" :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
+        <Column v-if="hasAnyRole(['Admin', 'Principal'])" header="Actions" style="width:10%;" body-class="text-center print-hide" header-class="print-hide" :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
           <template #body="{ data }">
             <div class="action-buttons">
               <Button icon="pi pi-pen-to-square" class="p-button-rounded p-button-text action-btn-info" @click="editEvent(data)" v-tooltip.top="'Edit Event'"/>
@@ -169,7 +169,7 @@
           </template>
         </Column>
 
-        <Column v-if="user?.role === 'Admin' || user?.role === 'Principal'" header="Tasks" style="width:15%;" body-class="text-center print-hide" header-class="print-hide" :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
+        <Column v-if="hasAnyRole(['Admin', 'Principal'])" header="Tasks" style="width:15%;" body-class="text-center print-hide" header-class="print-hide" :headerStyle="{ 'background-color': '#004A99', 'color': 'white', 'font-weight': 'bold', 'text-transform': 'uppercase' }">
         <template #body="{ data }">
             <Button icon="pi pi-list" class="p-button-rounded p-button-text manage-tasks-btn" @click="openTaskEditor(data)" v-tooltip.top="'Manage Tasks'"/>
         </template>
@@ -379,7 +379,7 @@
 
         <template #footer>
             <div class="flex justify-between w-full">
-                <Button v-if="user?.role === 'Admin' || user?.role === 'Principal'" icon="pi pi-image" class="p-button-secondary sm:p-button-sm" @click="$refs.defaultImageInput.click()" v-tooltip.top="'Change Default Image'" />
+                <Button v-if="hasAnyRole(['Admin', 'Principal'])" icon="pi pi-image" class="p-button-secondary sm:p-button-sm" @click="$refs.defaultImageInput.click()" v-tooltip.top="'Change Default Image'" />
                 <div class="flex gap-1 sm:gap-2">
                     <button class="modal-button-secondary sm:p-button-sm" @click="isCreateModalVisible = false" :disabled="saving">Cancel</button>
                     <button class="modal-button-primary sm:p-button-sm" @click="createEvent" :disabled="saving">
@@ -736,6 +736,11 @@
       const tasksManager = useTasks();
 
       // Validation Composable
+      const hasAnyRole = (roles) => {
+        if (!user.value || !user.value.roles) return false;
+        return user.value.roles.some(role => roles.includes(role));
+      };
+
       const { validateEvent, formatDateForPicker } = useEventValidation();
 
       const newEvent = ref({
@@ -768,7 +773,7 @@
         }));
 
         const tournamentManagers = (page.props.all_users || [])
-            .filter(u => u.role === 'TournamentManager')
+            .filter(u => u.roles && u.roles.includes('TournamentManager'))
             .map(u => ({
             ...u,
             name: `${u.name} (Tournament Manager)`,
@@ -1838,6 +1843,7 @@
     handleTaskSaveSuccess,
     handleTaskSaveError,
     handleCommitteeActionSuccess,
+    hasAnyRole,
     };
 
     },

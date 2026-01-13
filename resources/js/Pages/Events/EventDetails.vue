@@ -33,12 +33,17 @@ const props = defineProps({
   preloadedAnnouncements: Array,
 });
 
+const hasAnyRole = (roles) => {
+  if (!user.value || !user.value.roles) return false;
+  return user.value.roles.some(role => roles.includes(role));
+};
+
 const isUserManagerOfBracket = (bracketId) => {
     if (!user.value) return false;
-    if (['Admin', 'Principal'].includes(user.value.role)) {
+    if (hasAnyRole(['Admin', 'Principal'])) {
         return true;
     }
-    if (user.value.role !== 'TournamentManager') {
+    if (!hasAnyRole(['TournamentManager'])) {
         return false;
     }
 
@@ -61,7 +66,7 @@ const assignablePersonnel = computed(() => {
   }));
 
   const tournamentManagers = (props.all_users || [])
-    .filter(u => u.role === 'TournamentManager')
+    .filter(u => u.roles && u.roles.includes('TournamentManager'))
     .map(u => ({
       ...u,
       name: `${u.name} (Tournament Manager)`, // To distinguish them in the UI
@@ -74,11 +79,11 @@ const assignablePersonnel = computed(() => {
 
 const isAssignedManager = computed(() => {
     if (!user.value) return false;
-    if (user.value.role === 'Admin' || user.value.role === 'Principal') {
+    if (hasAnyRole(['Admin', 'Principal'])) {
         return true;
     }
 
-    if (user.value.role === 'TournamentManager') {
+    if (hasAnyRole(['TournamentManager'])) {
         const tasks = props.preloadedTasks || [];
         return tasks.some(task =>
             (task.managers || []).some(manager => manager.id === user.value.id)
@@ -734,7 +739,7 @@ const handleOpenTaskEditor = () => {
 <div>
     <div class="min-h-screen py-8 px-4 mx-auto">
         <!-- Back Button for non-management -->
-        <div v-if="!user || !['Admin', 'Principal', 'TournamentManager'].includes(user.role)" class="mb-4 -ml-2">
+        <div v-if="!user || !hasAnyRole(['Admin', 'Principal', 'TournamentManager'])" class="mb-4 -ml-2">
             <Button
                 icon="pi pi-arrow-left"
                 @click="goBack"
@@ -799,7 +804,7 @@ const handleOpenTaskEditor = () => {
                     <h1 v-else class="text-xl font-bold">{{ eventDetails.title }}</h1>
 
                         <button
-                            v-if="(user?.role === 'Admin' || user?.role === 'Principal' ) && !eventDetails.archived"
+                            v-if="hasAnyRole(['Admin', 'Principal']) && !eventDetails.archived"
                             @click="toggleEdit"
                             :class="editMode ? 'modal-button-danger' : 'create-button'"
                             class="ml-4"
@@ -1060,11 +1065,11 @@ const handleOpenTaskEditor = () => {
                     </button>
 
                     <!-- Committee -->
-                    <div v-if="props.preloadedTasks && props.preloadedTasks.length > 0 || (user?.role && ['Admin', 'Principal', 'TournamentManager'].includes(user.role))">
+                    <div v-if="props.preloadedTasks && props.preloadedTasks.length > 0 || hasAnyRole(['Admin', 'Principal', 'TournamentManager'])">
                         <div class="flex justify-between items-center mb-2">
                             <h2 class="font-semibold">Tasks & Committees:</h2>
                             <Button
-                                v-if="user?.role === 'Admin' || user?.role === 'Principal'"
+                                v-if="hasAnyRole(['Admin', 'Principal'])"
                                 icon="pi pi-list"
                                 label="Manage Tasks"
                                 class="p-button-sm manage-tasks-btn"
@@ -1099,7 +1104,7 @@ const handleOpenTaskEditor = () => {
                         </div>
                         <div v-else class="text-center text-gray-500 py-4 border-2 border-dashed rounded-lg">
                             <p class="text-sm">No tasks or committees have been assigned to this event yet.</p>
-                            <p v-if="user?.role === 'Admin' || user?.role === 'Principal'" class="text-xs mt-1">Click the <strong>Manage Tasks</strong> button to start assigning tasks.</p>
+                            <p v-if="hasAnyRole(['Admin', 'Principal'])" class="text-xs mt-1">Click the <strong>Manage Tasks</strong> button to start assigning tasks.</p>
                         </div>
                     </div>
                 </div>

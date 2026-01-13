@@ -24,11 +24,11 @@ class BracketController extends Controller
             return false;
         }
 
-        if (in_array($user->role, ['Admin', 'Principal'])) {
+        if ($user->hasRole('Admin') || $user->hasRole('Principal')) {
             return true;
         }
 
-        if ($user->role === 'TournamentManager') {
+        if ($user->hasRole('TournamentManager')) {
             return $user->managedBrackets()->where('bracket_id', $bracket->id)->exists();
         }
 
@@ -255,7 +255,7 @@ class BracketController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
-        if (!$user || !in_array($user->role, ['Admin', 'Principal'])) {
+        if (!$user || !($user->hasRole('Admin') || $user->hasRole('Principal'))) {
             abort(403, 'Unauthorized action.');
         }
 

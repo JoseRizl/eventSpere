@@ -79,6 +79,11 @@ const confirmDeleteAnnouncement = async () => {
   }
 };
 
+const hasAnyRole = (roles) => {
+  if (!user.value || !user.value.roles) return false;
+  return user.value.roles.some(role => roles.includes(role));
+};
+
 const now = new Date();
 const currentYear = getYear(now);
 
@@ -145,7 +150,7 @@ const stats = computed(() => [
     <div class="py-8 px-4">
 
     <!-- Stats Boxes -->
-    <div v-if="user && (user.role === 'Admin' || user.role === 'Principal')" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div v-if="hasAnyRole(['Admin', 'Principal'])" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card v-for="stat in stats" :key="stat.title" :class="[stat.color, 'text-white', 'rounded-lg', 'shadow-lg', 'overflow-hidden']">
             <template #content>
                 <div class="flex justify-between items-center p-4">
@@ -403,7 +408,7 @@ const stats = computed(() => [
           :class="['relative p-6 bg-white rounded-lg shadow-lg border-l-4 border-blue-500', announcement.event ? 'cursor-pointer hover:bg-gray-50 transition-colors' : '']"
         >
           <!-- User Avatar and Name -->
-          <div v-if="user?.role === 'Admin' || user?.role === 'Principal'" class="absolute top-2 right-2 z-10">
+          <div v-if="hasAnyRole(['Admin', 'Principal'])" class="absolute top-2 right-2 z-10">
             <Button
                 icon="pi pi-trash"
                 class="p-button-text p-button-danger p-button-rounded"

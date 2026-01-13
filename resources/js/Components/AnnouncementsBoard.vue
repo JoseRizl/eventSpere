@@ -44,6 +44,11 @@ const emit = defineEmits(['announcement-added', 'announcement-updated', 'announc
 const page = usePage();
 const user = computed(() => page.props.auth.user);
 
+const hasAnyRole = (roles) => {
+  if (!user.value || !user.value.roles) return false;
+  return user.value.roles.some(role => roles.includes(role));
+};
+
 // State Management
 const saving = ref(false);
 const showSuccessDialog = ref(false);
@@ -230,7 +235,7 @@ const formatTimestamp = (timestamp) => {
     <div class="w-full bg-white rounded-lg shadow-md p-6">
         <div class="flex justify-between items-center mb-4">
             <h2 class="section-title text-xl m-0">{{ context === 'home' ? 'Announcement Board' : 'Event Announcements' }}</h2>
-            <button v-if="user?.role === 'Admin' || user?.role === 'Principal'" class="create-button flex items-center gap-2" @click="openAddModal">
+            <button v-if="hasAnyRole(['Admin', 'Principal'])" class="create-button flex items-center gap-2" @click="openAddModal">
                 <i class="pi pi-plus"></i>
                 <span>Add<span class="hidden sm:inline"> Announcement</span></span>
             </button>
@@ -239,7 +244,7 @@ const formatTimestamp = (timestamp) => {
         <!-- Announcements List -->
         <div v-if="filteredAnnouncements.length > 0" class="space-y-6">
             <div v-for="announcement in filteredAnnouncements" :key="announcement.id" :id="`announcement-${announcement.id}`" @click="context === 'home' && announcement.event?.id && router.visit(route('event.details', { id: announcement.event.id, view: 'announcements' }))" :class="['relative p-6 bg-gray-50 rounded-lg shadow-sm border-l-4 border-blue-500', context === 'home' && announcement.event?.id ? 'cursor-pointer hover:bg-gray-100 transition-colors' : '']">
-                <div v-if="user?.role === 'Admin' || user?.role === 'Principal'" class="absolute top-1 right-1 z-10 flex">
+                <div v-if="hasAnyRole(['Admin', 'Principal'])" class="absolute top-1 right-1 z-10 flex">
                     <Button icon="pi pi-pencil" class="p-button-rounded p-button-text action-btn-info" @click.stop="openEditModal(announcement)" v-tooltip.top="'Edit Announcement'" />
                     <Button icon="pi pi-trash" class="p-button-rounded p-button-text action-btn-danger" @click.stop="promptDelete(announcement)" v-tooltip.top="'Delete Announcement'" />
                 </div>

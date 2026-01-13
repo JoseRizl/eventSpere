@@ -15,9 +15,9 @@ const user = computed(() => page.props.auth.user);
 // Admins and Principals can manage all; TournamentManagers can manage assigned brackets via bracket.managers
 const canManageBracket = (bracket) => {
   const u = user.value;
-  if (!u) return false;
-  if (u.role === 'Admin' || u.role === 'Principal') return true;
-  if (u.role === 'TournamentManager') {
+  if (!u || !u.roles) return false;
+  if (u.roles.includes('Admin') || u.roles.includes('Principal')) return true;
+  if (u.roles.includes('TournamentManager')) {
     const managers = bracket?.managers || [];
     return managers.some(m => m.id === u.id);
   }
@@ -407,7 +407,7 @@ watch(() => user.value, () => {
                 />
             </div>
             <div class="action-section">
-                <button v-if="user?.role === 'Admin' " class="create-button" @click="openDialog">Create Bracket</button>
+                <button v-if="user && user.roles && user.roles.includes('Admin')" class="create-button" @click="openDialog">Create Bracket</button>
             </div>
         </div>
         <div v-if="showFilters" class="filter-panel mb-5">

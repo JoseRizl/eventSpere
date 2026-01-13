@@ -168,7 +168,9 @@ const sideBarItems = computed(() => {
   ];
   return allItems.filter(item => {
     if (!item.roles) return true;
-    return user.value && item.roles.includes(user.value.role);
+    if (!user.value || !user.value.roles) return false;
+    // Check if any of the user's roles are included in the item's required roles
+    return item.roles.some(requiredRole => user.value.roles.includes(requiredRole));
   });
 });
 
@@ -313,7 +315,7 @@ onUnmounted(() => {
                         <div class="text-sm font-bold text-gray-800">{{ user.name }}</div>
                         <div class="text-sm font-semibold text-blue-600 capitalize flex items-center">
                             <span class="mr-1">🎓</span>
-                            {{ user.role }}
+                            {{ user.roles ? user.roles[0] : '' }}
                         </div>
                     </div>
                 </div>
