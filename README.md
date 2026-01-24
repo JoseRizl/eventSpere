@@ -1,3 +1,72 @@
+# EventSphere – Event Management System
+
+EventSphere is a web-based event management system developed as a capstone project for the Bachelor of Science in Information Technology program. The system is designed to streamline event creation, management, and coordination through a centralized web-based platform.
+
+## Key Features
+
+- Role-based access control (Admin, Tournament Manager, User)
+- Event creation, scheduling, and management
+- Dashboard for monitoring events and announcements
+- Sports tournament brackets
+- Responsive web interface
+
+## Technologies Used
+
+- **Backend:** Laravel, PHP
+- **Frontend:** Vue 3, Inertia.js, PrimeVue
+- **Styling:** Tailwind CSS
+- **Database:** PostgreSQL
+- **Version Control:** Git & GitHub
+
+## Installation Guide
+
+1. Clone the repository  
+2. Install backend dependencies:
+   ```bash
+   composer install
+   ```
+3. Install frontend dependencies:
+   ```bash
+   npm install
+   ```
+4. Copy the environment file and configure your database in `.env`:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+5. Run database migrations to create the tables:
+   ```bash
+   php artisan migrate
+   ```
+6. Seed the database with essential data (e.g., user roles):
+   ```bash
+   php artisan db:seed --class=RoleSeeder
+   ```
+7. Create your own administrator account. Run `php artisan tinker` and then execute the following code, replacing the placeholder values:
+   ```php
+   $role = App\Models\Role::where('name', 'Admin')->first();
+   $user = App\Models\User::create([
+       'name' => 'Your Name',
+       'email' => 'your-email@example.com',
+       'password' => Illuminate\Support\Facades\Hash::make('your-secure-password'),
+   ]);
+   $user->roles()->attach($role->id);
+   exit; // Type exit to leave tinker
+   ```
+8. Run the application:
+   ```bash
+   php artisan serve
+   npm run dev
+   ```
+
+### Note on Database Seeding
+
+The project includes seeders for creating dummy data for development purposes (e.g., `UserSeeder`, `EventSeeder`). The `UserSeeder` in particular creates default users with insecure passwords ('123'). 
+
+For a secure installation, it is strongly recommended to **only** run the `RoleSeeder` and create your own admin account as described above. 
+
+If you need to populate your development database with dummy data, you can run the main seeder with `php artisan db:seed`. If you do this, you **must** change the passwords for the default accounts immediately.
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">
@@ -21,56 +90,15 @@ Laravel is a web application framework with expressive, elegant syntax. We belie
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
-
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-
 
 ## Project Contributors
 **EventSphere – Event Management System**
 
 This system was collaboratively designed and developed by:
 
-- Nick Joey Cabahug
 - Melvin N. Amparado
 - Glene Miko A. Jaudian
+- Nick Joey A. Cabahug
