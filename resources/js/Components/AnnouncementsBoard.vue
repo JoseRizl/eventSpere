@@ -227,7 +227,17 @@ const confirmDelete = async () => {
 
 const formatTimestamp = (timestamp) => {
     if (!timestamp) return '';
-    return format(parseISO(timestamp), 'MMMM dd, yyyy HH:mm');
+    return format(parseISO(timestamp), 'MMMM dd, yyyy hh:mm a');
+};
+
+const wasEdited = (announcement) => {
+    if (!announcement.created_at || !announcement.updated_at) {
+        return false;
+    }
+    const createdAt = parseISO(announcement.created_at);
+    const updatedAt = parseISO(announcement.updated_at);
+    // Consider it edited if updated more than a minute after creation to avoid showing for new posts.
+    return updatedAt.getTime() - createdAt.getTime() > 60000;
 };
 </script>
 
@@ -263,7 +273,12 @@ const formatTimestamp = (timestamp) => {
                 </div>
                 <p class="text-gray-800 text-base whitespace-pre-line">{{ announcement.message }}</p>
                 <img v-if="announcement.image" :src="announcement.image" alt="Announcement image" class="mt-4 rounded-lg max-w-full w-full md:max-w-md mx-auto h-auto shadow-md cursor-pointer hover:opacity-90 transition-opacity" @click.stop="openImageDialog(announcement.image)" />
-                <p class="text-sm text-gray-500 mt-4 text-right">{{ formatTimestamp(announcement.timestamp) }}</p>
+                <p class="text-sm text-gray-500 mt-4 text-right">
+                    <span>{{ formatTimestamp(announcement.created_at || announcement.timestamp) }}</span>
+                    <span v-if="wasEdited(announcement)" class="text-gray-400 italic">
+                        (Edited {{ formatTimestamp(announcement.updated_at) }})
+                    </span>
+                </p>
             </div>
         </div>
         <div v-else class="text-center text-gray-500 py-8">

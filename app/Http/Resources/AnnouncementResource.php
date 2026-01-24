@@ -20,6 +20,8 @@ class AnnouncementResource extends JsonResource
             'message' => $this->message,
             'image' => $this->image,
             'timestamp' => optional($this->timestamp)->toIso8601String(),
+            'created_at' => optional($this->created_at)->toIso8601String(),
+            'updated_at' => optional($this->updated_at)->toIso8601String(),
             'userId' => $this->user_id,
             // Use optional() when accessing relationships that might not be loaded or might be null.
             'employee' => ['name' => optional($this->user)->name ?? 'Admin'],

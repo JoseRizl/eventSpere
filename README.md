@@ -64,3 +64,13 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+
+## Project Contributors
+**EventSphere – Event Management System**
+
+This system was collaboratively designed and developed by:
+
+- Nick Joey Cabahug
+- Melvin N. Amparado
+- Glene Miko A. Jaudian
