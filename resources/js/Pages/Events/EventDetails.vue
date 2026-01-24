@@ -122,6 +122,7 @@ const originalEventDetails = ref(null);
 const searchQuery = ref('');
 const scheduleToDelete = ref(null);
 const isLoadingBrackets = ref(true);
+const isTaskDataLoading = ref(false);
 
 // Announcement search
 const announcementSearchQuery = ref('');
@@ -721,16 +722,40 @@ const getBracketIndex = (bracketId) => {
     return brackets.value.findIndex(b => b.id === bracketId);
 };
 
-const handleOpenTaskEditor = () => {
-    console.log('[EventDetails] Opening Task Editor');
-    console.log('[EventDetails] Preloaded Tasks Data:', props.preloadedTasks);
-    console.log('[EventDetails] Assignable Personnel List:', assignablePersonnel.value);
-    tasksManager.openTaskModal(
-        { ...props.event, tasks: props.preloadedTasks },
-        committees.value,
-        assignablePersonnel.value,
-        brackets.value
-    );
+const handleOpenTaskEditor = async () => {
+    console.log('[EventDetails] Opening Task Editor...');
+    isTaskDataLoading.value = true;
+    try {
+        // Ensure brackets are loaded, as they are fetched client-side and might not be ready.
+        await fetchBrackets(props.event.id);
+
+        console.log('[EventDetails] Data for modal:', {
+            tasks: props.preloadedTasks,
+            committees: committees.value,
+            personnel: assignablePersonnel.value,
+            brackets: brackets.value
+        });
+
+        // Verify that all necessary data from props is available.
+        if (!props.preloadedTasks || !committees.value || !assignablePersonnel.value) {
+            console.error('Task editor opened with incomplete data props.');
+            throw new Error('Essential event data is missing. Please refresh the page and try again.');
+        }
+
+        tasksManager.openTaskModal(
+            { ...props.event, tasks: props.preloadedTasks },
+            committees.value,
+            assignablePersonnel.value,
+            brackets.value
+        );
+    } catch (error) {
+        console.error("Error preparing task editor:", error);
+        // Display a user-friendly error message.
+        errorMessage.value = error.message || "Failed to load task management data. Please try again.";
+        showErrorDialog.value = true;
+    } finally {
+        isTaskDataLoading.value = false;
+    }
 };
 
 </script>
@@ -1070,11 +1095,12 @@ const handleOpenTaskEditor = () => {
                             <h2 class="font-semibold">Tasks & Committees:</h2>
                             <Button
                                 v-if="hasAnyRole(['Admin', 'Principal'])"
-                                icon="pi pi-list"
+                                :icon="isTaskDataLoading ? 'pi pi-spin pi-spinner' : 'pi pi-list'"
                                 label="Manage Tasks"
                                 class="p-button-sm manage-tasks-btn"
-                                        @click="handleOpenTaskEditor"
+                                @click="handleOpenTaskEditor"
                                 v-tooltip.top="'Manage Tasks'"
+                                :disabled="isTaskDataLoading"
                             />
                         </div>
                         <div v-if="props.preloadedTasks && props.preloadedTasks.length > 0" class="space-y-3">
